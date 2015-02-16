@@ -3,28 +3,25 @@
 \alias{HighFreq}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+HighFreq R package
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Read, write, chain, join, scrub, and aggregate high frequency TAQ and OHLC data.
+Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency.
 }
 \details{
 \tabular{ll}{
 Package: \tab HighFreq\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2015-02-09\cr
-License: \tab What license is it under?\cr
+Version: \tab 0.1\cr
+Date: \tab 2015-02-08\cr
+License: \tab GPL (>= 2)\cr
 }
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Who wrote it
-
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Jerzy Pawlowski
+Maintainer: Jerzy Pawlowski <algoquant@algoquants.ch>
 }
 \references{
 ~~ Literature or other references for background information ~~
