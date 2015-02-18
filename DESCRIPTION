@@ -1,6 +1,6 @@
 Package: HighFreq
 Type: Package
-Title: Read, write, chain, join, scrub, and aggregate high frequency TAQ and OHLC data
+Title: High Frequency Data Management
 Version: 0.1
 Date: 2015-02-08
 Author: Jerzy Pawlowski

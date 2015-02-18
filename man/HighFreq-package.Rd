@@ -6,8 +6,19 @@
 HighFreq R package
 }
 \description{
-Read, write, chain, join, scrub, and aggregate high frequency TAQ and OHLC data.
-Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency.
+This package contains functions for managing high frequency TAQ and OHLC market data.
+The functions perform:
+\itemize{
+  \item reading and writing data, 
+  \item managing time zones and alligning time indices, 
+  \item chaining and joining time series, 
+  \item scrubbing bad data points, 
+  \item converting TAQ data to OHLC format, 
+  \item aggregating data to lower frequency.
+}
+This package is inspired by the package 'highfrequency', and follows many of its formats and standards.
+For example, the high frequency data is assumed to be stored in separate directories for each symbol, containing *.RData files, each file with one day of data.
+The functions are designed for speed and reduced memory usage.  Wherever possible they use vectorized functions from packages 'base', 'xts', 'quantmod', and 'caTools'.
 }
 \details{
 \tabular{ll}{
