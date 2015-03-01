@@ -4,12 +4,15 @@
 \alias{save_OHLC}
 \title{Load, scrub, rbind, and aggregate multiple days of xts time series data for a single symbol.}
 \usage{
-save_OHLC(sym_bol, data_dir = "E:/mktdata/sec/", period = "minutes")
+save_OHLC(sym_bol, data_dir = "E:/mktdata/sec/",
+  output_dir = "E:/output/data/", period = "minutes")
 }
 \arguments{
 \item{sym_bol}{\code{character string} representing symbol or ticker.}
 
-\item{data_dir}{\code{character string} representing directory containing *.RData files.}
+\item{data_dir}{\code{character string} directory containing input *.RData files.}
+
+\item{output_dir}{\code{character string} directory containing output *.RData files.}
 }
 \value{
 \code{OHLC xts} time series.
@@ -18,9 +21,13 @@ save_OHLC(sym_bol, data_dir = "E:/mktdata/sec/", period = "minutes")
 Load, scrub, rbind, and aggregate multiple days of xts time series data for a single symbol.
 }
 \details{
-The high frequency data is assumed to be stored in separate directories for each symbol, containing *.RData files, each file with one day of data.
+The high frequency data is assumed to be stored in separate
+  directories for each symbol, containing *.RData files, each file with one
+  day of data.
 }
 \examples{
+\dontrun{
 save_OHLC("SPY")
+}
 }
 

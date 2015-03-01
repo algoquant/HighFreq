@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{scrub_agg}
 \alias{scrub_agg}
-\title{Scrub and aggregate a single day of TAQ data in xts format.}
+\title{Scrub a single day of TAQ data and aggregate to OHLC format.}
 \usage{
 scrub_agg(taq_data, vol_window = 51, thresh_old = 2, period = "minutes")
 }
@@ -11,7 +11,7 @@ scrub_agg(taq_data, vol_window = 51, thresh_old = 2, period = "minutes")
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of change above which values are extreme.}
+\item{thresh_old}{level of prices above which values are considered extreme.}
 
 \item{period}{aggregation period.}
 }
@@ -19,10 +19,12 @@ scrub_agg(taq_data, vol_window = 51, thresh_old = 2, period = "minutes")
 \code{OHLC xts} time series.
 }
 \description{
-Calculate mid prices from TAQ data, scrub them and cbind with volume data, and aggregate to 'period' OHLC data.
+Calculate mid prices from bid and offer TAQ data, scrub them and cbind with
+volume data, and aggregate to 'period' OHLC data.
 }
 \details{
-Valid 'period' character strings include: "minutes", "3 min", "5 min", "10 min", "15 min", "30 min", and "hours".
+Valid 'period' character strings include: "minutes", "3 min", "5
+  min", "10 min", "15 min", "30 min", and "hours".
 }
 \examples{
 # create time index of one second intervals for a single day

@@ -19,7 +19,8 @@ options(max.print=80)
 
 # set data directories
 data_dir <- "E:/mktdata/sec/"
-scrub_dir <- "E:/scrubdata/"
+output_dir <- "E:/output/data/"
+
 
 
 ###########
@@ -32,21 +33,71 @@ sym_bols <- sym_bols[[1]]
 # define sym_bol
 sym_bol <- "SPY"
 
+# load a single day of TAQ data
+load(file.path(data_dir, paste0(sym_bol, "/2014.05.02.", sym_bol, ".RData")))
+ts_data <- scrub_agg(taq_data=get(sym_bol))
+# methods(as.quantmod.OHLC)
+# ts_data <- as.quantmod.OHLC(x=ts_data, col.names=c("Open", "High", "Low", "Close", "Volume"))
+# is.OHLC(ts_data)
+chartSeries(ts_data, name=sym_bol, theme=chartTheme("white"))
+
+
+###########
+# process TAQ data "by hand"
+
+# create path to directory with *.RData files
+file_dir <- file.path(data_dir, sym_bol)
+# get list of *.RData files
+file_list <- list.files(file_dir)
+# create paths to *.RData files
+file_names <- file.path(file_dir, file_list)
+
+# load data into list
+ts_data <- sapply(tail(file_names), function(file_name) {
+  cat("loading", file_name, "\n")
+  data_name <- load(file_name)
+  get(data_name)
+})
+length(ts_data)
+
+# scrub and aggregate the data
+ts_data <- lapply(ts_data, scrub_agg)
+
+# flatten list into xts - blows up or takes very long!!!
+# ts_data <- do.call(rbind, ts_data)
+# recursively "rbind" the list into a single xts
+ts_data <- do_call_rbind(ts_data)
+
+
+# rename the colnames
+# colnames(ts_data) <- lapply(strsplit(colnames(ts_data), split="[.]"), 
+#                               function(strng) paste(sym_bol, strng[-1], sep="."))
+ts_data <- quantmod.OHLC(ts_data)
+
+head(ts_data)
+chartSeries(ts_data, name=sym_bol, theme=chartTheme("white"))
+chartSeries(ts_data["2008-01-04/2008-01-06"], name=sym_bol, theme=chartTheme("white"))
+
 
 ###########
 # process TAQ data using package 'HighFreq': load TAQ data, aggregate to OHLC, and save to file
 
-# process data for a single symbol
-save_OHLC(sym_bol)
+# process TAQ data for a single symbol
+save_OHLC(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
 # process data for list of symbols
-sapply(head(sym_bols), save_OHLC)
+sapply(head(sym_bols), save_OHLC, data_dir=data_dir, period="15 min")
 
 # load processed OHLC data for a single symbol
-load(file=paste0(sym_bol, ".RData"))
+# load(file=paste0(sym_bol, ".RData"))
+load(file.path(output_dir, paste0(sym_bol, ".RData")))
 # load(file="SPY.RData")
 # plot OHLC data
-chartSeries(SPY["2013-05"], name=sym_bol, theme=chartTheme("white"))
+chartSeries(get(sym_bol), name=sym_bol, theme=chartTheme("white"))
+
+
+
+
 
 
 ########### ignore everything below ###########
@@ -69,15 +120,15 @@ file_list <- list.files(file_dir)
 file_names <- file.path(file_dir, file_list)
 
 # load last six days of data into list
-taq_data <- sapply(tail(file_names), function(file_name) {
+ts_data <- sapply(tail(file_names), function(file_name) {
   cat("loading", file_name, "\n")
   data_name <- load(file_name)
   get(data_name)
 })
-length(taq_data)
+length(ts_data)
 
 # convert timezone of index to New_York
-index(taq_data) <- with_tz(index(taq_data), "America/New_York")
+index(ts_data) <- with_tz(index(ts_data), "America/New_York")
 # subset data to NYSE trading hours
 daily_data <- daily_data['T09:30:00/T16:00:00', ]
 
@@ -90,7 +141,7 @@ colnames(mid_prices) <- "Mid.Price"
 chartSeries(daily_data, name=sym_bol, theme=chartTheme("white"))
 
 # scrub and aggregate the data
-OHLC_data <- lapply(taq_data, scrub_agg)
+OHLC_data <- lapply(ts_data, scrub_agg)
 
 # recursively "rbind" the list into a single xts
 OHLC_data <- do_call_rbind(OHLC_data)
@@ -122,14 +173,14 @@ x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 # create vector of random bid-offer prices
 bid_offer <- abs(rnorm(length(in_dex)))/10
 # create TAQ data using cbind
-taq_data <- cbind(x_ts-bid_offer, x_ts+bid_offer)
+ts_data <- cbind(x_ts-bid_offer, x_ts+bid_offer)
 # add Trade.Price
-taq_data <- cbind(taq_data, x_ts+rnorm(length(in_dex))/10)
+ts_data <- cbind(ts_data, x_ts+rnorm(length(in_dex))/10)
 # add Volume
-taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+ts_data <- cbind(ts_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+colnames(ts_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 # aggregate to one minute OHLC data
-ohlc_data <- scrub_agg(taq_data)
+ohlc_data <- scrub_agg(ts_data)
 chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 
 
