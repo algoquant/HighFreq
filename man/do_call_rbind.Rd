@@ -7,17 +7,21 @@
 do_call_rbind(list_var)
 }
 \arguments{
-\item{list_var}{A list of \code{vectors}, \code{matrices}, \code{data frames}, or \code{time series}.}
+\item{list_var}{A list of \code{vectors}, \code{matrices}, \code{data
+frames}, or \code{time series}.}
 }
 \value{
-a single \code{vector}, \code{matrix}, \code{data frame}, or \code{time series}.
+a single \code{vector}, \code{matrix}, \code{data frame}, or
+  \code{time series}.
 }
 \description{
-Performs the same operation as \code{do.call(rbind, list_var)}, but using recursion, which is much faster and uses less memory.
-This is the same function as '\code{do.call.rbind}' from package 'qmao'.
+Performs the same operation as \code{do.call(rbind, list_var)}, but using
+recursion, which is much faster and uses less memory. This is the same
+function as '\code{\link[qmao]{do.call.rbind}}' from package 'qmao'.
 }
 \details{
-Performing a \code{do.call(rbind, x_ts)} on a list of 'xts' time series is very slow, and often causes an "out of memory" error.
+Performing a \code{do.call(rbind, x_ts)} on a list of 'xts' time
+  series is very slow, and often causes an "out of memory" error.
 }
 \examples{
 # create xts time series

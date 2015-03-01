@@ -11,17 +11,21 @@ jump_values(time_series, vol_window = 51, thresh_old = 2)
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of change above which values are considered extreme.}
+\item{thresh_old}{level of prices above which values are considered extreme.}
 }
 \value{
 \code{logical vector}.
 }
 \description{
-Calculates the running volatility of simple returns, defined as a quantile over a sliding window.
-Identifies jump values as those returns that exceed the scaled running volatility, but their sum with the lagged returns doesn't exceed it.
+Calculates the running volatility of simple returns, defined as a quantile
+over a sliding window. Identifies jump values as those returns that exceed
+the scaled running volatility, but their sum with the lagged returns doesn't
+exceed it.
 }
 \details{
-Jump values are those where neighboring values both exceed the scaled running volatility (defined as a quantile), but their sum doesn't exceed it.
+Jump values are those where neighboring values both exceed the
+  scaled running volatility (defined as a quantile), but their sum doesn't
+  exceed it.
 }
 \examples{
 # create xts time series

@@ -21,7 +21,8 @@ Calculates running volatility defined as a quantile over a sliding window.
 Identifies extreme values as those that exceed the scaled running volatility.
 }
 \details{
-Extreme values are those that exceed a fixed multiple of the running volatility.
+Extreme values are those that exceed a fixed multiple of the running
+  volatility.
 }
 \examples{
 # create xts time series

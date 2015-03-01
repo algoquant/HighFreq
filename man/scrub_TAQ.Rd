@@ -11,7 +11,7 @@ scrub_TAQ(taq_data, vol_window = 51, thresh_old = 2)
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of change above which values are extreme.}
+\item{thresh_old}{level of prices above which values are considered extreme.}
 }
 \value{
 \code{TAQ xts} time series.
@@ -20,7 +20,9 @@ scrub_TAQ(taq_data, vol_window = 51, thresh_old = 2)
 Scrub a single day of TAQ data in xts format.
 }
 \details{
-Jump values are those where neighboring values both exceed the scaled running volatility (defined as a quantile), but their sum doesn't exceed it.
+Jump values are those where neighboring values both exceed the
+  scaled running volatility (defined as a quantile), but their sum doesn't
+  exceed it.
 }
 \examples{
 # create time index of one second intervals for a single day

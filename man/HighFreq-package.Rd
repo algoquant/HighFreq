@@ -6,19 +6,21 @@
 HighFreq R package
 }
 \description{
-This package contains functions for managing high frequency TAQ and OHLC market data.
+Package \sQuote{\code{HighFreq}} contains functions for managing high frequency \code{TAQ} and \code{OHLC} market data.
 The functions perform:
 \itemize{
   \item reading and writing data, 
   \item managing time zones and alligning time indices, 
   \item chaining and joining time series, 
   \item scrubbing bad data points, 
-  \item converting TAQ data to OHLC format, 
+  \item converting \code{TAQ} data to \code{OHLC} format, 
   \item aggregating data to lower frequency.
 }
-This package is inspired by the package 'highfrequency', and follows many of its formats and standards.
-For example, the high frequency data is assumed to be stored in separate directories for each symbol, containing *.RData files, each file with one day of data.
-The functions are designed for speed and reduced memory usage.  Wherever possible they use vectorized functions from packages 'base', 'xts', 'quantmod', and 'caTools'.
+Package \sQuote{\code{HighFreq}} is inspired by the package \sQuote{\href{http://cran.r-project.org/web/packages/highfrequency/index.html}{highfrequency}}, and follows many of its conventions.  For example, the high frequency data is assumed to be stored in separate directories for each symbol, containing \sQuote{\href{*.RData}} files, each file with one day of data.  
+
+Package \sQuote{\code{HighFreq}} also follows many of the conventions of package \sQuote{\href{http://cran.r-project.org/web/packages/quantmod/index.html}{quantmod}}, such column names \code{OHLC} objects.  
+
+The \sQuote{\code{HighFreq}} functions are designed for speed and reduced memory usage.  Wherever possible they use vectorized functions from packages \code{base}, \sQuote{\href{http://cran.r-project.org/web/packages/xts/index.html}{xts}}, \sQuote{\href{http://cran.r-project.org/web/packages/quantmod/index.html}{quantmod}}, and \sQuote{\href{http://cran.r-project.org/web/packages/caTools/index.html}{caTools}}.  
 }
 \details{
 \tabular{ll}{
