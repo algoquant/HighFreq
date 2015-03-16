@@ -2,26 +2,31 @@
 % Please edit documentation in R/HighFreq.R
 \name{do_call_rbind}
 \alias{do_call_rbind}
-\title{Recursively "rbind" a list of objects.}
+\title{Recursively \sQuote{\code{rbind}} a list of objects, such as \code{xts} time series.}
 \usage{
 do_call_rbind(list_var)
 }
 \arguments{
-\item{list_var}{A list of \code{vectors}, \code{matrices}, \code{data
+\item{list_var}{list of \code{vectors}, \code{matrices}, \code{data
 frames}, or \code{time series}.}
 }
 \value{
-a single \code{vector}, \code{matrix}, \code{data frame}, or
+single \code{vector}, \code{matrix}, \code{data frame}, or
   \code{time series}.
 }
 \description{
 Performs the same operation as \code{do.call(rbind, list_var)}, but using
 recursion, which is much faster and uses less memory. This is the same
-function as '\code{\link[qmao]{do.call.rbind}}' from package 'qmao'.
+function as \sQuote{\code{\link[qmao]{do.call.rbind}}} from package
+\sQuote{\href{https://r-forge.r-project.org/R/?group_id=1113}{qmao}}.
 }
 \details{
-Performing a \code{do.call(rbind, x_ts)} on a list of 'xts' time
-  series is very slow, and often causes an "out of memory" error.
+Calls lapply in a loop, each time binding neighboring elements and
+  dividing the length of \code{list_var} by half. Performing
+  \code{do_call_rbind(list_xts)} on a list of \code{xts} time series is
+  identical to performing \code{do.call(rbind, list_xts)}. But
+  \code{do.call(rbind, list_xts)} is very slow, and often causes an \sQuote{out of
+  memory} error.
 }
 \examples{
 # create xts time series

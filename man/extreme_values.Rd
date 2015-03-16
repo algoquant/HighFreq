@@ -2,32 +2,36 @@
 % Please edit documentation in R/HighFreq.R
 \name{extreme_values}
 \alias{extreme_values}
-\title{Identify extreme values in a univariate xts time series.}
+\title{Identify extreme values in a univariate \code{xts} time series.}
 \usage{
-extreme_values(time_series, vol_window = 51, thresh_old = 2)
+extreme_values(time_series, vol_window = 51, vol_mult = 2)
 }
 \arguments{
 \item{time_series}{univariate \code{xts} time series.}
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of prices above which values are considered extreme.}
+\item{vol_mult}{volatility multiplier.}
 }
 \value{
 \code{logical vector}.
 }
 \description{
-Calculates running volatility defined as a quantile over a sliding window.
-Identifies extreme values as those that exceed the scaled running volatility.
+Identifies extreme values as those that exceed a multiple of the running volatility.
 }
 \details{
-Extreme values are those that exceed a fixed multiple of the running
-  volatility.
+Calculates running volatility as a quantile of values over a sliding
+  window. Extreme values are those that exceed the product of the volatility
+  multiplier times the running volatility. Extreme values are the very tips
+  of the tails when the distribution of values becomes very fat-tailed. The
+  volatility multiplier \code{vol_mult} controls the threshold at which
+  values are identified as extreme. Smaller volatility multiplier values will
+  cause more values to be identified as extreme.
 }
 \examples{
 # create xts time series
 x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
 # scrub extreme values
-x_ts <- x_ts[!extreme_values(x_ts, thresh_old=1)]
+x_ts <- x_ts[!extreme_values(x_ts, vol_mult=1)]
 }
 
