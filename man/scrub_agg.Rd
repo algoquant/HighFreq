@@ -2,16 +2,16 @@
 % Please edit documentation in R/HighFreq.R
 \name{scrub_agg}
 \alias{scrub_agg}
-\title{Scrub a single day of TAQ data and aggregate to OHLC format.}
+\title{Scrub a single day of \code{TAQ} data, aggregate it, and convert to \code{OHLC} format.}
 \usage{
-scrub_agg(taq_data, vol_window = 51, thresh_old = 2, period = "minutes")
+scrub_agg(taq_data, vol_window = 51, vol_mult = 2, period = "minutes")
 }
 \arguments{
 \item{taq_data}{\code{TAQ xts} time series.}
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of prices above which values are considered extreme.}
+\item{vol_mult}{volatility multiplier.}
 
 \item{period}{aggregation period.}
 }
@@ -19,17 +19,27 @@ scrub_agg(taq_data, vol_window = 51, thresh_old = 2, period = "minutes")
 \code{OHLC xts} time series.
 }
 \description{
-Calculate mid prices from bid and offer TAQ data, scrub them and cbind with
-volume data, and aggregate to 'period' OHLC data.
+Scrub a single day of \code{TAQ} data, aggregate it, and convert to \code{OHLC} format.
 }
 \details{
-Valid 'period' character strings include: "minutes", "3 min", "5
-  min", "10 min", "15 min", "30 min", and "hours".
+The function \code{scrub_agg} performs:
+\itemize{
+  \item index timezone conversion,
+  \item data subset to trading hours,
+  \item removal of duplicate time stamps,
+  \item scrubbing of quotes with suspect bid-offer spreads,
+  \item scrubbing of quotes with suspect price jumps,
+  \item cbinding of mid prices with volume data,
+  \item aggregation to OHLC using \code{to.period} from \code{xts},
+}
+Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
+min", "15 min", "30 min", and "hours". The time index of the output time
+series is rounded up to the next integer multiple of 'period'.
 }
 \examples{
 # create time index of one second intervals for a single day
 in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create xts of random prices
+# create xts of random TAQ prices
 x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 # create vector of random bid-offer prices
 bid_offer <- abs(rnorm(length(in_dex)))/10

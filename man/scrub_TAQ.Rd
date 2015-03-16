@@ -2,32 +2,32 @@
 % Please edit documentation in R/HighFreq.R
 \name{scrub_TAQ}
 \alias{scrub_TAQ}
-\title{Scrub a single day of TAQ data in xts format.}
+\title{Scrub a single day of \code{TAQ} data in \code{xts} format, without aggregation.}
 \usage{
-scrub_TAQ(taq_data, vol_window = 51, thresh_old = 2)
+scrub_TAQ(taq_data, vol_window = 51, vol_mult = 2)
 }
 \arguments{
 \item{taq_data}{\code{TAQ xts} time series.}
 
 \item{vol_window}{number of data points for estimating running volatility.}
 
-\item{thresh_old}{level of prices above which values are considered extreme.}
+\item{vol_mult}{volatility multiplier.}
 }
 \value{
 \code{TAQ xts} time series.
 }
 \description{
-Scrub a single day of TAQ data in xts format.
+Scrub a single day of \code{TAQ} data in \code{xts} format, without aggregation.
 }
 \details{
-Jump values are those where neighboring values both exceed the
-  scaled running volatility (defined as a quantile), but their sum doesn't
-  exceed it.
+The function \code{scrub_TAQ} performs the same scrubbing operations
+  as \code{scrub_agg}, except it doesn't aggregate, and returns the
+  \code{TAQ} data in \code{xts} format.
 }
 \examples{
 # create time index of one second intervals for a single day
 in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create xts of random prices
+# create xts of random TAQ prices
 x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 # create vector of random bid-offer prices
 bid_offer <- abs(rnorm(length(in_dex)))/10
@@ -39,6 +39,6 @@ taq_data <- cbind(taq_data, x_ts+rnorm(length(in_dex))/10)
 taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
 colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 taq_data <- scrub_TAQ(taq_data)
-taq_data <- scrub_TAQ(taq_data, vol_window=11, thresh_old=1)
+taq_data <- scrub_TAQ(taq_data, vol_window=11, vol_mult=1)
 }
 
