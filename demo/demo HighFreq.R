@@ -50,13 +50,17 @@ chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 ###########
 # process TAQ data using package 'HighFreq': load TAQ data, aggregate to OHLC, and save to file
 
-# process TAQ data for a single symbol, and save to file
+# aggregate TAQ data for a single symbol, and save to file
 save_OHLC(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
+# calculate returns for a single symbol, and save to file
 save_rets(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
-# process data for list of symbols, and save to multiple files
-sapply(head(sym_bols), save_OHLC, data_dir=data_dir, period="15 min")
+# aggregate data for list of symbols, and save to multiple files
+sapply(head(sym_bols), save_OHLC, data_dir=data_dir, output_dir=output_dir, period="15 min")
+
+# calculate returns for list of symbols, and save to file
+sapply(head(sym_bols), save_rets, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
 # load processed OHLC data for a single symbol
 # load(file=paste0(sym_bol, ".RData"))

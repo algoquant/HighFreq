@@ -3,7 +3,7 @@
 \name{save_OHLC}
 \alias{save_OHLC}
 \title{Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-single symbol, and save the \code{OHLC} time series to a \code{*.RData} file.}
+single symbol, and save the \code{OHLC} time series to a single \sQuote{\code{*.RData}} file.}
 \usage{
 save_OHLC(sym_bol, data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/", period = "minutes")
@@ -11,21 +11,23 @@ save_OHLC(sym_bol, data_dir = "E:/mktdata/sec/",
 \arguments{
 \item{sym_bol}{\code{character} string representing symbol or ticker.}
 
-\item{data_dir}{\code{character} string representing directory containing input \code{*.RData} files.}
+\item{data_dir}{\code{character} string representing directory containing input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{\code{character} string representing directory containing output \code{*.RData} files.}
+\item{output_dir}{\code{character} string representing directory containing output \sQuote{\code{*.RData}} files.}
+
+\item{period}{aggregation period.}
 }
 \value{
 \code{OHLC} time series in \code{xts} format.
 }
 \description{
 Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-single symbol, and save the \code{OHLC} time series to a \code{*.RData} file.
+single symbol, and save the \code{OHLC} time series to a single \sQuote{\code{*.RData}} file.
 }
 \details{
 The function \code{save_OHLC} loads multiple days of \code{TAQ}
-  data, then scrubs, aggregates, and rbinds it into a \code{OHLC} time
-  series, and finally saves it in a single \code{*.RData} file. The
+  data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
+  series, and finally saves it to a single \sQuote{\code{*.RData}} file. The
   \code{OHLC} time series is stored in a variable named
   \sQuote{\code{symbol}}, and then it's saved to a file named
   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
@@ -33,7 +35,7 @@ The function \code{save_OHLC} loads multiple days of \code{TAQ}
   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-  \code{*.RData} files, each file containing one day of \code{TAQ} data.
+  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} data.
 }
 \examples{
 \dontrun{

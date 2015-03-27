@@ -139,12 +139,73 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
 
 
 
+#' Scrub a single day of \code{TAQ} data in \code{xts} format, without aggregation.
+#' 
+#' @inheritParams extreme_values
+#' @param taq_data \code{TAQ xts} time series.
+#' @param tzone timezone to convert.
+#' @return  \code{TAQ xts} time series.
+#' @details The function \code{scrub_TAQ} performs the same scrubbing operations
+#'   as \code{scrub_agg}, except it doesn't aggregate, and returns the
+#'   \code{TAQ} data in \code{xts} format.
+#' @examples
+#' # create time index of one second intervals for a single day
+#' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
+#' # create xts of random TAQ prices
+#' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
+#' # create vector of random bid-offer prices
+#' bid_offer <- abs(rnorm(length(in_dex)))/10
+#' # create TAQ data using cbind
+#' taq_data <- cbind(x_ts-bid_offer, x_ts+bid_offer)
+#' # add Trade.Price
+#' taq_data <- cbind(taq_data, x_ts+rnorm(length(in_dex))/10)
+#' # add Volume
+#' taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+#' colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+#' taq_data <- scrub_TAQ(taq_data)
+#' taq_data <- scrub_TAQ(taq_data, vol_window=11, vol_mult=1)
+scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2, tzone="America/New_York") {
+  
+  # convert timezone of index to New_York
+  index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
+  # subset data to NYSE trading hours
+  taq_data <- taq_data['T09:30:00/T16:00:00', ]
+  # return NULL if no data
+  if (nrow(taq_data)==0)  return(NULL)
+  #  to_day <- as.Date(index(first(taq_data)))
+  
+  # remove duplicate time stamps using 'duplicated'
+  taq_data <- taq_data[!duplicated(index(taq_data)), ]
+  
+  # scrub quotes with suspect bid-offer spreads
+  bid_offer <- taq_data[, "Ask.Price"] - taq_data[, "Bid.Price"]
+  #  bid_offer <- na.omit(bid_offer)
+  sus_pect <- extreme_values(bid_offer, vol_window=vol_window, vol_mult=vol_mult)
+  # remove suspect values
+  taq_data <- taq_data[!sus_pect]
+  # replace suspect values
+  # taq_data[sus_pect, "Bid.Price"] <- taq_data[sus_pect, "Trade.Price"]
+  # taq_data[sus_pect, "Ask.Price"] <- taq_data[sus_pect, "Trade.Price"]
+  
+  # scrub quotes with suspect price jumps
+  # calculate mid prices
+  mid_prices <- 0.5 * (taq_data[, "Bid.Price"] + taq_data[, "Ask.Price"])
+  #  mid_prices <- na.omit(mid_prices)
+  #  colnames(mid_prices) <- "Mid.Price"
+  # replace NA volumes with zero
+  taq_data[is.na(taq_data[, "Volume"]), "Volume"] <- 0
+  # replace suspect values with NA, and perform 'locf'
+  taq_data[price_jumps(mid_prices, vol_window=vol_window, vol_mult=vol_mult), ] <- NA
+  na.locf(taq_data)
+}  # end scrub_TAQ
+
+
+
 #' Scrub a single day of \code{TAQ} data, aggregate it, and convert to \code{OHLC} format.
 #' 
-#' @param taq_data \code{TAQ xts} time series.
-#' @inheritParams extreme_values
+#' @inheritParams scrub_TAQ
 #' @param period aggregation period.
-#' @return  \code{OHLC xts} time series.
+#' @return  \code{OHLC} time series in \code{xts} format.
 #' @details The function \code{scrub_agg} performs:
 #' \itemize{
 #'   \item index timezone conversion,
@@ -153,7 +214,7 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
 #'   \item scrubbing of quotes with suspect bid-offer spreads,
 #'   \item scrubbing of quotes with suspect price jumps,
 #'   \item cbinding of mid prices with volume data, 
-#'   \item aggregation to OHLC using \code{to.period} from \code{xts},
+#'   \item aggregation to OHLC using function \code{to.period} from package \code{xts},
 #' }
 #' Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
 #' min", "15 min", "30 min", and "hours". The time index of the output time
@@ -175,10 +236,14 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
 #' # aggregate to ten minutes OHLC data
 #' ohlc_data <- scrub_agg(taq_data, period="10 min")
 #' chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
-scrub_agg <- function(taq_data, vol_window=51, vol_mult=2, period="minutes") {
+scrub_agg <- function(taq_data, 
+                      vol_window=51, 
+                      vol_mult=2, 
+                      period="minutes", 
+                      tzone="America/New_York") {
 
 # convert timezone of index to New_York
-  index(taq_data) <- with_tz(time=index(taq_data), tzone="America/New_York")
+  index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
 # subset data to NYSE trading hours
   taq_data <- taq_data['T09:30:00/T16:00:00', ]
 # return NULL if no data
@@ -228,67 +293,6 @@ scrub_agg <- function(taq_data, vol_window=51, vol_mult=2, period="minutes") {
 
 
 
-#' Scrub a single day of \code{TAQ} data in \code{xts} format, without aggregation.
-#' 
-#' @param taq_data \code{TAQ xts} time series.
-#' @inheritParams extreme_values
-#' @return  \code{TAQ xts} time series.
-#' @details The function \code{scrub_TAQ} performs the same scrubbing operations
-#'   as \code{scrub_agg}, except it doesn't aggregate, and returns the
-#'   \code{TAQ} data in \code{xts} format.
-#' @examples
-#' # create time index of one second intervals for a single day
-#' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-#' # create xts of random TAQ prices
-#' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-#' # create vector of random bid-offer prices
-#' bid_offer <- abs(rnorm(length(in_dex)))/10
-#' # create TAQ data using cbind
-#' taq_data <- cbind(x_ts-bid_offer, x_ts+bid_offer)
-#' # add Trade.Price
-#' taq_data <- cbind(taq_data, x_ts+rnorm(length(in_dex))/10)
-#' # add Volume
-#' taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-#' colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-#' taq_data <- scrub_TAQ(taq_data)
-#' taq_data <- scrub_TAQ(taq_data, vol_window=11, vol_mult=1)
-scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2) {
-
-# convert timezone of index to New_York
-  index(taq_data) <- with_tz(time=index(taq_data), tzone="America/New_York")
-# subset data to NYSE trading hours
-  taq_data <- taq_data['T09:30:00/T16:00:00', ]
-# return NULL if no data
-  if (nrow(taq_data)==0)  return(NULL)
-#  to_day <- as.Date(index(first(taq_data)))
-
-# remove duplicate time stamps using 'duplicated'
-  taq_data <- taq_data[!duplicated(index(taq_data)), ]
-
-# scrub quotes with suspect bid-offer spreads
-  bid_offer <- taq_data[, "Ask.Price"] - taq_data[, "Bid.Price"]
-#  bid_offer <- na.omit(bid_offer)
-  sus_pect <- extreme_values(bid_offer, vol_window=vol_window, vol_mult=vol_mult)
-# remove suspect values
-  taq_data <- taq_data[!sus_pect]
-# replace suspect values
-# taq_data[sus_pect, "Bid.Price"] <- taq_data[sus_pect, "Trade.Price"]
-# taq_data[sus_pect, "Ask.Price"] <- taq_data[sus_pect, "Trade.Price"]
-
-# scrub quotes with suspect price jumps
-# calculate mid prices
-  mid_prices <- 0.5 * (taq_data[, "Bid.Price"] + taq_data[, "Ask.Price"])
-#  mid_prices <- na.omit(mid_prices)
-#  colnames(mid_prices) <- "Mid.Price"
-# replace NA volumes with zero
-  taq_data[is.na(taq_data[, "Volume"]), "Volume"] <- 0
-# replace suspect values with NA, and perform 'locf'
-  taq_data[price_jumps(mid_prices, vol_window=vol_window, vol_mult=vol_mult), ] <- NA
-  na.locf(taq_data)
-}  # end scrub_TAQ
-
-
-
 #' Calculate returns of \code{TAQ} or \code{OHLC} data in \code{xts} format.
 #' 
 #' @param xts_data \code{xts} time series of \code{TAQ} or \code{OHLC} data.
@@ -310,7 +314,6 @@ scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2) {
 #' xts_data <- cbind(xts_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
 #' colnames(xts_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 #' xts_data <- calc_rets(xts_data)
-#' xts_data <- calc_rets(xts_data, vol_window=11, vol_mult=1)
 calc_rets <- function(xts_data) {
 
 # return NULL if no data
@@ -335,15 +338,16 @@ calc_rets <- function(xts_data) {
 
 
 #' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-#' single symbol, and save the \code{OHLC} time series to a \code{*.RData} file.
+#' single symbol, and save the \code{OHLC} time series to a single \sQuote{\code{*.RData}} file.
 #' 
 #' @param sym_bol \code{character} string representing symbol or ticker.
-#' @param data_dir \code{character} string representing directory containing input \code{*.RData} files.
-#' @param output_dir \code{character} string representing directory containing output \code{*.RData} files.
+#' @param data_dir \code{character} string representing directory containing input \sQuote{\code{*.RData}} files.
+#' @param output_dir \code{character} string representing directory containing output \sQuote{\code{*.RData}} files.
+#' @inheritParams scrub_agg
 #' @return  \code{OHLC} time series in \code{xts} format.
 #' @details The function \code{save_OHLC} loads multiple days of \code{TAQ} 
-#'   data, then scrubs, aggregates, and rbinds it into a \code{OHLC} time 
-#'   series, and finally saves it in a single \code{*.RData} file. The 
+#'   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time 
+#'   series, and finally saves it to a single \sQuote{\code{*.RData}} file. The 
 #'   \code{OHLC} time series is stored in a variable named 
 #'   \sQuote{\code{symbol}}, and then it's saved to a file named 
 #'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory. 
@@ -351,7 +355,7 @@ calc_rets <- function(xts_data) {
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
 #'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-#'   \code{*.RData} files, each file containing one day of \code{TAQ} data.
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} data.
 #' @examples
 #' \dontrun{
 #' save_OHLC("SPY")
@@ -370,7 +374,7 @@ save_OHLC <- function(sym_bol,
 
 # load TAQ data into list
   data <- sapply(file_names, function(file_name) {
-    cat("loading", sym_bol, "frome file: ", file_name, "\n")
+    cat("loading", sym_bol, "from file: ", file_name, "\n")
     data_name <- load(file_name)
     get(data_name)
   })
@@ -396,24 +400,22 @@ save_OHLC <- function(sym_bol,
 
 
 
-#' Load and scrub multiple days of \code{TAQ} data for a single symbol,
-#' calculate returns, and save the time series to multiple \code{*.RData} files.
+#' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a 
+#' single symbol. Calculate returns and save them to a single \sQuote{\code{*.RData}}
+#' file.
 #' 
-#' @param sym_bol \code{character} string representing symbol or ticker.
-#' @param data_dir \code{character} string representing directory containing input \code{*.RData} files.
-#' @param output_dir \code{character} string representing directory containing output \code{*.RData} files.
-#' @return  \code{OHLC} time series in \code{xts} format.
+#' @inheritParams save_OHLC
+#' @return  time series of returns and volume in \code{xts} format.
 #' @details The function \code{save_rets} loads multiple days of \code{TAQ} 
-#'   data, then scrubs, aggregates, and rbinds it into a \code{OHLC} time 
-#'   series, and finally saves it in a single \code{*.RData} file. The 
-#'   \code{OHLC} time series is stored in a variable named 
-#'   \sQuote{\code{symbol}}, and then it's saved to a file named 
-#'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory. 
+#'   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time 
+#'   series.  It then calculates returns using function \code{calc_rets}, and
+#'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
+#'   to a file called \sQuote{\code{symbol.rets.RData}}.
 #'   The \code{TAQ} data files are assumed to be stored in separate directories 
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
 #'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-#'   \code{*.RData} files, each file containing one day of \code{TAQ} data.
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} data.
 #' @examples
 #' \dontrun{
 #' save_rets("SPY")
@@ -432,7 +434,7 @@ save_rets <- function(sym_bol,
 
 # load TAQ data into list
   data <- sapply(file_names, function(file_name) {
-    cat("loading", sym_bol, "frome file: ", file_name, "\n")
+    cat("loading", sym_bol, "from file: ", file_name, "\n")
     data_name <- load(file_name)
     get(data_name)
   })
@@ -445,7 +447,7 @@ save_rets <- function(sym_bol,
 
 # recursively "rbind" the list into a single xts
   data <- do_call_rbind(data)
-# assign column names, i.e. "symbol.High"
+# assign column names, i.e. "symbol.rets"
   colnames(data) <- c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
 
 # copy the xts data to a variable with the name 'sym_bol'
@@ -457,4 +459,49 @@ save_rets <- function(sym_bol,
   invisible(sym_bol_rets)
 
 }  # end save_rets
+
+
+
+
+#' Load \code{OHLC} time series data for a single symbol, calculate its returns,
+#' and save them to a single \sQuote{\code{*.RData}} file.
+#' 
+#' @inheritParams save_OHLC
+#' @return  time series of returns and volume in \code{xts} format.
+#' @details The function \code{save_rets_OHLC} loads \code{OHLC} time series
+#'   data.  It then calculates returns using function \code{calc_rets}, and
+#'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
+#'   to a file called \sQuote{\code{symbol.rets.RData}}.
+#'   The \code{TAQ} data files are assumed to be stored in separate directories 
+#'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
+#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
+#'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} data.
+#' @examples
+#' \dontrun{
+#' save_rets_OHLC("SPY")
+#' }
+save_rets_OHLC <- function(sym_bol, 
+                      data_dir="E:/output/data/", 
+                      output_dir="E:/output/data/") {
+
+# create path to directory containing sym_bol.RData file
+  file_name <- file.path(data_dir, paste0(sym_bol, ".RData"))
+# load OHLC data
+  cat("loading", sym_bol, "from file: ", file_name, "\n")
+  data_name <- load(file_name)
+
+# calculate returns
+  data <- calc_rets(get(data_name))
+
+# copy the xts data to a variable with the name 'sym_bol'
+  sym_bol_rets <- paste(sym_bol, "rets", sep=".")
+  assign(sym_bol_rets, data)
+
+# save the xts data to a file in the output_dir
+  cat("saving", sym_bol, "to file: ", paste0(sym_bol_rets, ".RData"), "\n")
+  save(list=eval(sym_bol_rets), file=file.path(output_dir, paste0(sym_bol_rets, ".RData")))
+  invisible(sym_bol_rets)
+
+}  # end save_rets_OHLC
 

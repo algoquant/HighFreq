@@ -4,7 +4,8 @@
 \alias{scrub_TAQ}
 \title{Scrub a single day of \code{TAQ} data in \code{xts} format, without aggregation.}
 \usage{
-scrub_TAQ(taq_data, vol_window = 51, vol_mult = 2)
+scrub_TAQ(taq_data, vol_window = 51, vol_mult = 2,
+  tzone = "America/New_York")
 }
 \arguments{
 \item{taq_data}{\code{TAQ xts} time series.}
@@ -12,6 +13,8 @@ scrub_TAQ(taq_data, vol_window = 51, vol_mult = 2)
 \item{vol_window}{number of data points for estimating running volatility.}
 
 \item{vol_mult}{volatility multiplier.}
+
+\item{tzone}{timezone to convert.}
 }
 \value{
 \code{TAQ xts} time series.

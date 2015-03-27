@@ -1,0 +1,116 @@
+############
+# high frequency data scrubbing
+
+
+### comments
+Calculating returns on 1 second bars makes no sense, 
+because the changes in price are very small, comparable to the precision of prices (number of significant digits).
+As a result, price changes on 1 second bars are either zero or low multiples of the precision.
+Therefore they carry almost no information.
+
+
+### tasks pending
+
+save scrubbed TAQ and OHLC data in daily files
+create function save_TAQ: 
+similar to save_OHLC, but doesn't aggregate and saves into multiple files
+
+calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
+
+create function to estimate beta from HFreq data
+
+create function to forecast skewness
+Show that variance is predictable over time 
+Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
+so variables other than lagged skewness are required to forecast skewness.
+Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
+
+study time dependence of mean, variance, skewness, and kurtosis
+show that skewness and kurtosis decay with time
+
+
+
+calculate tail shape of return frequency distribution and demonstrate power law
+
+
+analyze code in functions:
+	rmOutliers
+	loadInstruments
+	getSymbols.FI - done
+
+
+adopt .Rdata file and directory conventions
+
+analyze code in:
+	scripts_hist.R - done
+	Rhistory 07-12-14.txt - done
+	copy anything useful and then delete files - done
+
+
+### tasks finished
+
+add timezone to argument list
+
+created function calc_rets: 
+calculate returns of time series
+
+created function save_rets (similar to save_OHLC): 
+scrub and aggregate data, calculate returns, and save them
+
+created function save_rets_OHLC: 
+similar to save_rets, but assumes clean OHLC input data - no scrubbing or aggregation
+
+
+### commits
+
+# commit 03-16-15
+
+added functions: calc_rets, save_rets, save_TAQ
+updated functions: save_OHLC, scrub_TAQ
+added "data" folder
+updated roxygen documentation
+
+
+# commit 03-01-15
+added roxygen documentation
+
+created functions:
+save_OHLC
+scrub_TAQ
+
+scrub_agg:
+change time zone
+to trading hours
+merge duplicate time stamps using make.index.unique - no
+remove duplicate time stamps using duplicated
+calculate mid price?
+NA omit mid price
+convert NA volumes to zero
+replace NA trade prices with mid prices
+scrub on mid price:
+	bid-offer spread
+	if bid-offer spread too wide then use trade price?
+	hairlines
+
+
+in save_OHLC
+add save dir
+coerce using quantmod.OHLC? - no
+
+create function save_TAQ:
+save scrubbed daily TAQ data to daily files
+use quantmod standard headers - quantmod naming conventions
+
+create function similar to getSymbols (?):
+load and rbind TAQ data (without scrubbing or aggregating)
+
+
+# commit 02-17-15
+renamed many functions and variables
+added roxygen comments
+added demo folder and files
+edited README
+updated HighFreq-package.Rd
+
+
+

@@ -34,6 +34,5 @@ xts_data <- cbind(xts_data, x_ts+rnorm(length(in_dex))/10)
 xts_data <- cbind(xts_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
 colnames(xts_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 xts_data <- calc_rets(xts_data)
-xts_data <- calc_rets(xts_data, vol_window=11, vol_mult=1)
 }
 
