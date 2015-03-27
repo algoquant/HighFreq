@@ -4,7 +4,8 @@
 \alias{scrub_agg}
 \title{Scrub a single day of \code{TAQ} data, aggregate it, and convert to \code{OHLC} format.}
 \usage{
-scrub_agg(taq_data, vol_window = 51, vol_mult = 2, period = "minutes")
+scrub_agg(taq_data, vol_window = 51, vol_mult = 2, period = "minutes",
+  tzone = "America/New_York")
 }
 \arguments{
 \item{taq_data}{\code{TAQ xts} time series.}
@@ -14,9 +15,11 @@ scrub_agg(taq_data, vol_window = 51, vol_mult = 2, period = "minutes")
 \item{vol_mult}{volatility multiplier.}
 
 \item{period}{aggregation period.}
+
+\item{tzone}{timezone to convert.}
 }
 \value{
-\code{OHLC xts} time series.
+\code{OHLC} time series in \code{xts} format.
 }
 \description{
 Scrub a single day of \code{TAQ} data, aggregate it, and convert to \code{OHLC} format.
@@ -30,7 +33,7 @@ The function \code{scrub_agg} performs:
   \item scrubbing of quotes with suspect bid-offer spreads,
   \item scrubbing of quotes with suspect price jumps,
   \item cbinding of mid prices with volume data,
-  \item aggregation to OHLC using \code{to.period} from \code{xts},
+  \item aggregation to OHLC using function \code{to.period} from package \code{xts},
 }
 Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
 min", "15 min", "30 min", and "hours". The time index of the output time
