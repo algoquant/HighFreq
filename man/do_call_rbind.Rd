@@ -22,7 +22,7 @@ function as \sQuote{\code{\link[qmao]{do.call.rbind}}} from package
 }
 \details{
 Calls lapply in a loop, each time binding neighboring elements and
-  dividing the length of \code{list_var} by half. Performing
+  dividing the length of \code{list_var} by half. The result of performing
   \code{do_call_rbind(list_xts)} on a list of \code{xts} time series is
   identical to performing \code{do.call(rbind, list_xts)}. But
   \code{do.call(rbind, list_xts)} is very slow, and often causes an \sQuote{out of
