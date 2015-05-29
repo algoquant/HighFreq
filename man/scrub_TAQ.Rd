@@ -29,7 +29,8 @@ The function \code{scrub_TAQ} performs the same scrubbing operations
 }
 \examples{
 # create time index of one second intervals for a single day
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
+in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
+             to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 # create xts of random TAQ prices
 x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 # create vector of random bid-offer prices

@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{calc_rets}
 \alias{calc_rets}
-\title{Calculate returns of \code{TAQ} or \code{OHLC} data in \code{xts} format.}
+\title{Calculate returns of either \code{TAQ} or \code{OHLC} data in \code{xts} format.}
 \usage{
 calc_rets(xts_data)
 }
@@ -13,7 +13,7 @@ calc_rets(xts_data)
 \code{xts} time series of returns and volumes.
 }
 \description{
-Calculate returns of \code{TAQ} or \code{OHLC} data in \code{xts} format.
+Calculate returns of either \code{TAQ} or \code{OHLC} data in \code{xts} format.
 }
 \details{
 The function \code{calc_rets} calculates returns and binds them with

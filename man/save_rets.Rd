@@ -7,7 +7,8 @@ single symbol. Calculate returns and save them to a single \sQuote{\code{*.RData
 file.}
 \usage{
 save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", period = "minutes")
+  output_dir = "E:/output/data/", vol_window = 51, vol_mult = 2,
+  period = "minutes", tzone = "America/New_York")
 }
 \arguments{
 \item{sym_bol}{\code{character} string representing symbol or ticker.}
@@ -16,7 +17,13 @@ save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
 
 \item{output_dir}{\code{character} string representing directory containing output \sQuote{\code{*.RData}} files.}
 
+\item{vol_window}{number of data points for estimating running volatility.}
+
+\item{vol_mult}{volatility multiplier.}
+
 \item{period}{aggregation period.}
+
+\item{tzone}{timezone to convert.}
 }
 \value{
 time series of returns and volume in \code{xts} format.

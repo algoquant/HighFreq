@@ -1,6 +1,29 @@
 ############
 # high frequency data scrubbing
 
+### R/Finance 2015
+
+# packages xts, quantmod and TTR
+
+# OHLC aggregations are good
+
+# prudence and temperance
+
+# moment estimators
+	volume weighted
+	with O/N jumps or not?
+
+# bias/variance tradeoff
+      \vskip1ex
+      Using high frequency data for estimation bias/variance tradeoff
+
+# quote references:
+	Amaya, risk premiums
+	what are there risk premiums associated with skew?
+
+Amaya et al., Does Realized Skewness Predict the Cross-Section of Equity Returns?
+\hskip1em\url{papers.ssrn.com/sol3/papers.cfm?abstract_id=1898735}
+
 
 ### comments
 Calculating returns on 1 second bars makes no sense, 
@@ -11,9 +34,23 @@ Therefore they carry almost no information.
 
 ### tasks pending
 
-save scrubbed TAQ and OHLC data in daily files
-create function save_TAQ: 
-similar to save_OHLC, but doesn't aggregate and saves into multiple files
+investigate if normalized skew is a contrarian indicator (oscillator) for future returns
+	show that relationship is stronger in high volatility periods
+
+investigate relationship between skew and returns in high vol periods
+	show that relationship is stronger in high volatility periods
+
+investigate relationship between skew and ohlc skew
+	use Poisson?
+
+calculate volume-weighted moments and compare them to standard moments
+
+rename?
+	save_rets_OHLC to rets_OHLC
+
+add logical arg as option to aggregate data or not
+
+calculate rets from scrubbed data
 
 calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
 
@@ -49,16 +86,32 @@ analyze code in:
 
 ### tasks finished
 
-add timezone to argument list
+renamed save_OHLC() to save_scrub_agg()
 
-created function calc_rets: 
-calculate returns of time series
+in save_rets_OHLC()
+	updated documentation
 
-created function save_rets (similar to save_OHLC): 
-scrub and aggregate data, calculate returns, and save them
+in save_OHLC()
+	combined sapply loops into one
 
-created function save_rets_OHLC: 
-similar to save_rets, but assumes clean OHLC input data - no scrubbing or aggregation
+in save_OHLC() and save_rets()
+	passed scrub params to scrub_agg
+
+added timezone to argument list
+
+created function save_TAQ()
+	saves scrubbed TAQ and/or OHLC data in daily files
+	similar to save_OHLC, but doesn't aggregate and saves into multiple files
+
+created function calc_rets()
+	calculate returns of time series
+
+created function save_rets() (similar to save_OHLC): 
+	scrub and aggregate data, calculate returns, and save them
+
+created function save_rets_OHLC()
+	similar to save_rets, but assumes clean OHLC input data
+	- no scrubbing or aggregation
 
 
 ### commits

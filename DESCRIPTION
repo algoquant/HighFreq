@@ -2,11 +2,11 @@ Package: HighFreq
 Type: Package
 Title: High Frequency Data Management
 Version: 0.1
-Date: 2015-02-08
+Date: 2015-05-28
 Author: Jerzy Pawlowski
 Maintainer: Jerzy Pawlowski <algoquant@algoquants.ch>
-Description: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency.
+Description: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.
 License: GPL (>= 2)
-Depends: xts, quantmod, caTools, lubridate
+Depends: xts, quantmod, TTR, caTools, lubridate
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
