@@ -1,46 +1,3 @@
-#' Recursively \sQuote{\code{rbind}} a list of objects, such as \code{xts} time series.
-#' 
-#' Performs the same operation as \code{do.call(rbind, list_var)}, but using 
-#' recursion, which is much faster and uses less memory. This is the same 
-#' function as \sQuote{\code{\link[qmao]{do.call.rbind}}} from package
-#' \sQuote{\href{https://r-forge.r-project.org/R/?group_id=1113}{qmao}}.
-#' 
-#' @param list_var list of \code{vectors}, \code{matrices}, \code{data
-#'   frames}, or \code{time series}.
-#' @return  single \code{vector}, \code{matrix}, \code{data frame}, or
-#'   \code{time series}.
-#' @details Calls lapply in a loop, each time binding neighboring elements and
-#'   dividing the length of \code{list_var} by half. The result of performing
-#'   \code{do_call_rbind(list_xts)} on a list of \code{xts} time series is
-#'   identical to performing \code{do.call(rbind, list_xts)}. But
-#'   \code{do.call(rbind, list_xts)} is very slow, and often causes an \sQuote{out of
-#'   memory} error.
-#' @examples
-#' # create xts time series
-#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' # split time series into daily list
-#' list_xts <- split(x_ts, "days")
-#' # rbind the list back into a time series and compare with the original
-#' identical(x_ts, do_call_rbind(list_xts))
-do_call_rbind <- function(list_var) {
-  while (length(list_var) > 1) {
-# index of odd list elements
-    odd_index <- seq(from=1, to=length(list_var), by=2)
-# bind neighboring elements and divide list_var by half
-    list_var <- lapply(odd_index, function(in_dex) {
-      if (in_dex==length(list_var)) {
-        return(list_var[[in_dex]])
-      }
-      return(rbind(list_var[[in_dex]], list_var[[in_dex+1]]))
-    })  # end lapply
-  }  # end while
-# list_var has only one element - return it
-  list_var[[1]]
-}  # end do_call_rbind
-
-
-
-
 #' Identify extreme values in a univariate \code{xts} time series.
 #' 
 #' Identifies extreme values as those that exceed a multiple of the running volatility.
@@ -733,4 +690,109 @@ run_moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc="rogers.satchell", n=
     "Vol", sep=".")
   mo_ment
 }  # end run_moment_ohlc
+
+
+
+### Utility Functions
+
+#' Recursively \sQuote{\code{rbind}} a list of objects, such as \code{xts} time series.
+#' 
+#' Performs the same operation as \code{do.call(rbind, list_var)}, but using 
+#' recursion, which is much faster and uses less memory. This is the same 
+#' function as \sQuote{\code{\link[qmao]{do.call.rbind}}} from package
+#' \sQuote{\href{https://r-forge.r-project.org/R/?group_id=1113}{qmao}}.
+#' 
+#' @param list_var list of \code{vectors}, \code{matrices}, \code{data
+#'   frames}, or \code{time series}.
+#' @return  single \code{vector}, \code{matrix}, \code{data frame}, or
+#'   \code{time series}.
+#' @details Calls lapply in a loop, each time binding neighboring elements and
+#'   dividing the length of \code{list_var} by half. The result of performing
+#'   \code{do_call_rbind(list_xts)} on a list of \code{xts} time series is
+#'   identical to performing \code{do.call(rbind, list_xts)}. But
+#'   \code{do.call(rbind, list_xts)} is very slow, and often causes an \sQuote{out of
+#'   memory} error.
+#' @examples
+#' # create xts time series
+#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
+#' # split time series into daily list
+#' list_xts <- split(x_ts, "days")
+#' # rbind the list back into a time series and compare with the original
+#' identical(x_ts, do_call_rbind(list_xts))
+do_call_rbind <- function(list_var) {
+  while (length(list_var) > 1) {
+    # index of odd list elements
+    odd_index <- seq(from=1, to=length(list_var), by=2)
+    # bind neighboring elements and divide list_var by half
+    list_var <- lapply(odd_index, function(in_dex) {
+      if (in_dex==length(list_var)) {
+        return(list_var[[in_dex]])
+      }
+      return(rbind(list_var[[in_dex]], list_var[[in_dex+1]]))
+    })  # end lapply
+  }  # end while
+  # list_var has only one element - return it
+  list_var[[1]]
+}  # end do_call_rbind
+
+
+
+
+#' Calculate the running sum of an \code{xts} time series over a sliding window 
+#' (lookback period). 
+#' 
+#' Performs the same operation as \code{runSum()} from package, 
+#' \sQuote{\href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}}.
+#' but using vectorized functions, so it's a little faster.  
+#' 
+#' @param x_ts an \code{xts} time series containing one or more columns of data.
+#' @param win_dow an integer specifying the number of lookback periods. 
+#' @return \code{xts} time series with the same dimensions as the input series. 
+#' @details For example, if win_dow=3, then the running sum at any point is 
+#'   equal to the sum of \code{x_ts} values for that point plus two preceding 
+#'   points.
+#'   The initial values of run_sum() are equal to cumsum() values, so that
+#'   run_sum() doesn't return any NA values.
+#' @examples
+#' # create xts time series
+#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
+#' foo <- run_sum(x_ts=get("SPY"), win_dow=3)
+run_sum <- function(x_ts, win_dow) {
+  cum_sum <- cumsum(x_ts)
+  out_put <- cum_sum - lag(x=cum_sum, k=win_dow)
+  out_put[1:win_dow, ] <- cum_sum[1:win_dow, ]
+  out_put
+}  # end run_sum
+
+
+
+
+#' Calculate the volume-weighted average price of an \code{OHLC} time series
+#' over a sliding window (lookback period).
+#' 
+#' Performs the same operation as \code{VWAP()} from package, 
+#' \sQuote{\href{https://cran.r-project.org/web/packages/TTR/index.html}{VWAP}}.
+#' but using vectorized functions, so it's a little faster.  
+#' 
+#' @param x_ts an \code{xts} time series containing one or more columns of data.
+#' @param win_dow an integer specifying the number of lookback periods. 
+#' @return \code{xts} time series with a single column containing the VWAP of 
+#'   the close prices, with the same number of rows as the input \code{xts} series.
+#' @details The volume-weighted average price (VWAP) over a period is defined as
+#'   the sum of the prices multiplied by trading volumes, divided by the total
+#'   trading volume in that period.
+#' @examples
+#' # create xts time series
+#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
+#' foo <- v_wap(x_ts=get("SPY"), win_dow=11)
+v_wap <- function(x_ts, win_dow) {
+  v_wap <- run_sum(x_ts=Ad(x_ts)*Vo(x_ts), win_dow=win_dow)
+  vol_ume <- run_sum(x_ts=Vo(x_ts), win_dow=win_dow)
+  v_wap <- v_wap/vol_ume
+  v_wap[is.na(v_wap)] <- 0
+  v_wap
+}  # end v_wap
+
+
+
 
