@@ -786,7 +786,7 @@ run_sum <- function(x_ts, win_dow) {
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
 #' foo <- v_wap(x_ts=get("SPY"), win_dow=11)
 v_wap <- function(x_ts, win_dow) {
-  v_wap <- run_sum(x_ts=Ad(x_ts)*Vo(x_ts), win_dow=win_dow)
+  v_wap <- run_sum(x_ts=Cl(x_ts)*Vo(x_ts), win_dow=win_dow)
   vol_ume <- run_sum(x_ts=Vo(x_ts), win_dow=win_dow)
   v_wap <- v_wap/vol_ume
   v_wap[is.na(v_wap)] <- 0
