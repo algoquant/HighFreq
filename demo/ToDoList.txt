@@ -1,5 +1,5 @@
 ############
-# high frequency data scrubbing
+# ToDo list for package HighFreq: high frequency data scrubbing
 
 https://cran.r-project.org/doc/manuals/r-release/R-admin.html
 R CMD INSTALL HighFreq
@@ -10,21 +10,40 @@ install.packages("C:/Develop/R/HighFreq", repos=NULL, type="source")
 R CMD Rd2pdf HighFreq
 
 ### comments
-Calculating returns on 1 second bars doesn't make sense, 
-because the changes in price are very small, comparable to the precision of prices (number of significant digits).
-As a result, price changes on 1 second bars are either zero or low multiples of the precision.
-Therefore they carry almost no information.
+Calculating returns on 1 second bars doesn't make sense for two reasons: 
+First, because the changes in price are very small, comparable to the precision of prices (number of significant digits).
+As a result, price changes on 1 second bars are either zero or low multiples of the precision. 
+Second, the 1 second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
+Therefore 1-second bar returns carry almost no information.
 
 
 ### tasks pending
 
-calculate volume-weighted moments and compare them to standard moments
+- [ ] modify functions vol_ohlc() and skew_ohlc() to accomodate case when open price isn't equal to previous close price.
+	add argument "open_to_close" with default value TRUE
+
+- [ ] Replace caTools with TTR functions
+
+- [ ] fix .Rd documentation file building error
+use these Google searches:
+r package error namespace "not an exported object"
+r rd files "all text must be in a section"
+r roxygen "no man pages found in package"
+r roxygen Error in get(name, envir = env) : object not found
+# understanding common errors in R
+https://github.com/noamross/zero-dependency-problems/blob/master/misc/stack-overflow-common-r-errors.md
+http://roxygenready.github.io/
+
+- [ ] create "tests" directory
+
+- [ ] create data documention
+http://r-pkgs.had.co.nz/data.html
+http://kbroman.org/pkg_primer/pages/data.html
+
+- [ ] calculate volume-weighted moments and compare them to standard moments
 	add volume-weighting to vol_ohlc() and skew_ohlc()
 
-investigate relationship between skew and ohlc skew
-	use Poisson?
-
-rename?
+- [ ] rename?
 	save_rets_OHLC to rets_OHLC
 
 add logical arg as option to aggregate data or not
@@ -65,16 +84,15 @@ analyze code in:
 
 ### tasks finished
 
-renamed save_OHLC() to save_scrub_agg()
+- [x] rename functions run_*() to roll_*()
 
-in save_rets_OHLC()
-	updated documentation
+- [x] rename save_OHLC() to save_scrub_agg()
 
-in save_OHLC()
-	combined sapply loops into one
+- [x] in save_rets_OHLC() update documentation
 
-in save_OHLC() and save_rets()
-	passed scrub params to scrub_agg
+- [x] in save_OHLC() combine sapply loops into one
+
+- [x] in save_OHLC() and save_rets() pass scrub params to scrub_agg
 
 added timezone to argument list
 
