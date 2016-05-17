@@ -1,14 +1,14 @@
 #' Identify extreme values in a univariate \code{xts} time series.
 #' 
-#' Identifies extreme values as those that exceed a multiple of the running volatility.
+#' Identifies extreme values as those that exceed a multiple of the rolling volatility.
 #' 
 #' @param time_series univariate \code{xts} time series.
-#' @param vol_window number of data points for estimating running volatility.
+#' @param vol_window number of data points for estimating rolling volatility.
 #' @param vol_mult volatility multiplier.
 #' @return  \code{logical vector}.
-#' @details Calculates running volatility as a quantile of values over a sliding
+#' @details Calculates rolling volatility as a quantile of values over a sliding
 #'   window. Extreme values are those that exceed the product of the volatility 
-#'   multiplier times the running volatility. Extreme values are the very tips
+#'   multiplier times the rolling volatility. Extreme values are the very tips
 #'   of the tails when the distribution of values becomes very fat-tailed. The
 #'   volatility multiplier \code{vol_mult} controls the threshold at which
 #'   values are identified as extreme. Smaller volatility multiplier values will
@@ -20,7 +20,7 @@
 #' x_ts <- x_ts[!extreme_values(x_ts, vol_mult=1)]
 extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
 
-# calculate volatility as running quantile
+# calculate volatility as rolling quantile
   vo_lat <- runquantile(x=abs(as.vector(time_series)), k=vol_window, 
                         probs=0.9, endrule="constant", align="center")
   vo_lat <- xts(vo_lat, order.by=index(time_series))
@@ -52,9 +52,9 @@ extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
 #' @details Isolated price jumps are single prices that are very different from 
 #'   neighboring values.  Price jumps create pairs of large neighboring returns
 #'   of opposite sign. The function \code{price_jumps} first calculates simple
-#'   returns from prices. Then it calculates the running volatility of returns
+#'   returns from prices. Then it calculates the rolling volatility of returns
 #'   as a quantile of returns over a sliding window. Jump prices are identified
-#'   as those where neighboring returns both exceed a multiple of the running
+#'   as those where neighboring returns both exceed a multiple of the rolling
 #'   volatility, but the sum of those returns doesn't exceed it.
 #' @examples
 #' # create xts time series
@@ -71,7 +71,7 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
   diff_series_fut[nrow(diff_series_fut)] <- 0
   colnames(diff_series_fut) <- "diff_series_fut"
 
-# calculate vo_lat as running quantile
+# calculate vo_lat as rolling quantile
   vo_lat <- runquantile(x=abs(as.vector(diff_series)), k=vol_window, 
                         probs=0.9, endrule="constant", align="center")
   vo_lat <- xts(vo_lat, order.by=index(diff_series))
@@ -340,7 +340,7 @@ save_scrub_agg <- function(sym_bol,
   file_names <- file.path(file_dir, file_list)
 
 # load TAQ data one by one, scrub and aggregate it, return list of xts
-da_ta <- sapply(file_names, function(file_name) {
+da_ta <- lapply(file_names, function(file_name) {
   cat("loading", sym_bol, "from file: ", file_name, "\n")
   data_name <- load(file_name)
   scrub_agg(get(data_name),
@@ -352,7 +352,7 @@ da_ta <- sapply(file_names, function(file_name) {
 # recursively "rbind" the list into a single xts
   da_ta <- do_call_rbind(da_ta)
 # assign column names, i.e. "symbol.High"
-  colnames(da_ta) <- lapply(strsplit(colnames(da_ta), split="[.]"), 
+  colnames(da_ta) <- sapply(strsplit(colnames(da_ta), split="[.]"), 
                            function(strng) paste(sym_bol, strng[-1], sep="."))
 
 # copy the xts data to a variable with the name 'sym_bol'
@@ -457,26 +457,26 @@ save_rets <- function(sym_bol,
   file_names <- file.path(file_dir, file_list)
 
 # load TAQ data into list
-  data <- sapply(file_names, function(file_name) {
+  taq_data <- sapply(file_names, function(file_name) {
     cat("loading", sym_bol, "from file: ", file_name, "\n")
     data_name <- load(file_name)
     get(data_name)
   })
 
 # scrub and aggregate the TAQ data
-  data <- lapply(data, scrub_agg, vol_window=vol_window, vol_mult=vol_mult, period=period, tzone=tzone)
+  ohlc_data <- lapply(taq_data, scrub_agg, vol_window=vol_window, vol_mult=vol_mult, period=period, tzone=tzone)
 
 # calculate returns
-  data <- lapply(data, calc_rets)
+  ohlc_data <- lapply(ohlc_data, calc_rets)
 
 # recursively "rbind" the list into a single xts
-  data <- do_call_rbind(data)
+  ohlc_data <- do_call_rbind(ohlc_data)
 # assign column names, i.e. "symbol.rets"
-  colnames(data) <- c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
+  colnames(ohlc_data) <- c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
 
 # copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
-  assign(sym_bol_rets, data)
+  assign(sym_bol_rets, ohlc_data)
 
 # save the xts data to a file in the output_dir
   save(list=eval(sym_bol_rets), file=file.path(output_dir, paste0(sym_bol_rets, ".RData")))
@@ -639,7 +639,7 @@ moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc_method="rogers.satchell",
 
 
 
-#' Calculate the running estimates over time of the moment of a \code{OHLC} time
+#' Calculate the rolling estimates over time of the moment of a \code{OHLC} time
 #' series.
 #' 
 #' @param ohlc \code{OHLC} time series of prices.
@@ -651,7 +651,7 @@ moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc_method="rogers.satchell",
 #' @param N \code{numeric} number of periods in a year (to annualize the estimates).
 #' @param vo_lu \code{logical} should estimate be weighted by trade volume.
 #' @return  \code{numeric} time series of estimates of the moment.
-#' @details Calculates a time series of running estimates of the moment of a
+#' @details Calculates a time series of rolling estimates of the moment of a
 #'   \code{OHLC} time series of prices.  By default the estimates are trade 
 #'   volume weighted.
 #' @examples
@@ -666,30 +666,30 @@ moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc_method="rogers.satchell",
 #'             size=length(in_dex), replace=TRUE))
 #' # aggregate to hours OHLC data
 #' oh_lc <- to.period(x=x_ts, period="hours")
-#' # calculate time series of running volatility and skew estimates
-#' vol_at <- run_moment_ohlc(ohlc=oh_lc)
-#' sk_ew <- run_moment_ohlc(ohlc=oh_lc, mom_fun="skew_ohlc")
+#' # calculate time series of rolling volatility and skew estimates
+#' vol_at <- roll_moment_ohlc(ohlc=oh_lc)
+#' sk_ew <- roll_moment_ohlc(ohlc=oh_lc, mom_fun="skew_ohlc")
 #' sk_ew <- sk_ew/(vol_at)^(1.5)
 #' sk_ew[1, ] <- 0
 #' sk_ew <- na.locf(sk_ew)
-run_moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc="rogers.satchell", n=20, N=260, vo_lu=TRUE, ...) {
+roll_moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc="rogers.satchell", n=20, N=260, vo_lu=TRUE, ...) {
   log_ohlc <- log(ohlc[, 1:4])
-  # match "mom_fun" with moment function
+# match "mom_fun" with moment function
   mom_fun <- match.fun(mom_fun)
   mo_ment <- mom_fun(log_ohlc=log_ohlc, calc=calc)
-  # weight by volume
+# weight by volume
   if (vo_lu) {
     mo_ment <- ohlc[, 5]*mo_ment
-    run_volume <- runSum(ohlc[, 5], n=n)
-    mo_ment <- N*runSum(mo_ment, n=n)/(n*run_volume)
+    roll_volume <- roll_sum(ohlc[, 5], win_dow=n)
+    mo_ment <- N*roll_sum(mo_ment, win_dow=n)/roll_volume
   } else
-    mo_ment <- N*runSum(mo_ment, n=n)/n
+    mo_ment <- N*roll_sum(mo_ment, win_dow=n)/n
   mo_ment[1:(n-1)] <- 0
   colnames(mo_ment) <- paste(
     strsplit(colnames(ohlc)[1], split="[.]")[[1]][1], 
     "Vol", sep=".")
   mo_ment
-}  # end run_moment_ohlc
+}  # end roll_moment_ohlc
 
 
 
@@ -738,7 +738,7 @@ do_call_rbind <- function(list_var) {
 
 
 
-#' Calculate the running sum of an \code{xts} time series over a sliding window 
+#' Calculate the rolling sum of an \code{xts} time series over a sliding window 
 #' (lookback period). 
 #' 
 #' Performs the same operation as \code{runSum()} from package, 
@@ -748,21 +748,21 @@ do_call_rbind <- function(list_var) {
 #' @param x_ts an \code{xts} time series containing one or more columns of data.
 #' @param win_dow an integer specifying the number of lookback periods. 
 #' @return \code{xts} time series with the same dimensions as the input series. 
-#' @details For example, if win_dow=3, then the running sum at any point is 
+#' @details For example, if win_dow=3, then the rolling sum at any point is 
 #'   equal to the sum of \code{x_ts} values for that point plus two preceding 
 #'   points.
-#'   The initial values of run_sum() are equal to cumsum() values, so that
-#'   run_sum() doesn't return any NA values.
+#'   The initial values of roll_sum() are equal to cumsum() values, so that
+#'   roll_sum() doesn't return any NA values.
 #' @examples
 #' # create xts time series
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' foo <- run_sum(x_ts=get("SPY"), win_dow=3)
-run_sum <- function(x_ts, win_dow) {
+#' foo <- roll_sum(x_ts=get("SPY"), win_dow=3)
+roll_sum <- function(x_ts, win_dow) {
   cum_sum <- cumsum(x_ts)
   out_put <- cum_sum - lag(x=cum_sum, k=win_dow)
   out_put[1:win_dow, ] <- cum_sum[1:win_dow, ]
   out_put
-}  # end run_sum
+}  # end roll_sum
 
 
 
@@ -786,13 +786,51 @@ run_sum <- function(x_ts, win_dow) {
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
 #' foo <- v_wap(x_ts=get("SPY"), win_dow=11)
 v_wap <- function(x_ts, win_dow) {
-  v_wap <- run_sum(x_ts=Cl(x_ts)*Vo(x_ts), win_dow=win_dow)
-  vol_ume <- run_sum(x_ts=Vo(x_ts), win_dow=win_dow)
+  v_wap <- roll_sum(x_ts=Cl(x_ts)*Vo(x_ts), win_dow=win_dow)
+  vol_ume <- roll_sum(x_ts=Vo(x_ts), win_dow=win_dow)
   v_wap <- v_wap/vol_ume
   v_wap[is.na(v_wap)] <- 0
   v_wap
 }  # end v_wap
 
 
+
+
+#' @name hf_data
+#' 
+#' @title High frequency data sets
+#' 
+#' @description "hf_data" is a dataset containing high frequency data
+#' 
+#' "sym_bol" is a \code{string} containing the name "SPY".
+#' "SPY" is an \code{xts} time series containing \code{OHLC} minute bar data for
+#' the SPY etf, from 2008-01-02 to 2014-05-19.
+#' 
+#' an \code{xts} time series containing 625,425 rows of data, each row contains a single minute bar:
+#'
+#' @docType data
+#' @keywords datasets
+#' @usage data(hf_data)
+#'
+#' @format an \code{xts} time series 625425 rows of data, each row contains a single minute bar:
+#' \describe{
+#'   \item{Open}{Open price in the bar}
+#'   \item{High}{High price in the bar}
+#'   \item{Low}{Low price in the bar}
+#'   \item{Close}{Close price in the bar}
+#'   \item{Volume}{trading volume in the bar}
+#' }
+#' @source \url{http://www.diamondse.info/}
+#' 
+#' @references Moore et al. (2013) Genetics 195:1077-1086
+#' (\href{http://www.ncbi.nlm.nih.gov/pubmed/23979570}{PubMed})
+#'
+#' @source \href{http://qtlarchive.org/db/q?pg=projdetails&proj=moore_2013b}{QTL Archive}
+#'
+#' @examples
+#' data(hf_data)
+#' head(SPY)
+#' \donttest{chart_Series(x=SPY["2009"])}
+"hf_data"
 
 

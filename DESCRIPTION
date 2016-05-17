@@ -5,8 +5,19 @@ Version: 0.1
 Date: 2015-05-28
 Author: Jerzy Pawlowski
 Maintainer: Jerzy Pawlowski <algoquant@algoquants.ch>
-Description: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.
+Description: Functions for chaining and joining time series, scrubbing bad data,
+    managing time zones and alligning time indices, converting TAQ data to OHLC
+    format, aggregating data to lower frequency, estimating volatility, skew, and
+    higher moments.
 License: GPL (>= 2)
-Depends: xts, quantmod, TTR, caTools, lubridate
+Depends:
+    knitr,
+    xts,
+    quantmod,
+    TTR,
+    caTools,
+    lubridate
+LazyData: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
+RoxygenNote: 5.0.1
