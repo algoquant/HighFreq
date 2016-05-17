@@ -115,14 +115,14 @@ chart_xts(vol_at)
 # estimating rolling moments using package HighFreq
 library(HighFreq)
 
-# daily open to close variance and skew
-var_iance <- apply.daily(x=get(sym_bol), FUN=moment_ohlc)
-colnames(var_iance) <- paste(
+## daily open to close variance and skew
+daily_var <- apply.daily(x=get(sym_bol), FUN=moment_ohlc)
+colnames(daily_var) <- paste(
   strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
   "Var", sep=".")
-sk_ew <- apply.daily(x=get(sym_bol), FUN=moment_ohlc, mom_fun="skew_ohlc")
-sk_ew <- sk_ew/(var_iance)^(1.5)
-colnames(sk_ew) <- paste(
+daily_skew <- apply.daily(x=get(sym_bol), FUN=moment_ohlc, mom_fun="skew_ohlc")
+daily_skew <- daily_skew/(daily_var)^(1.5)
+colnames(daily_skew) <- paste(
   strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
   "Skew", sep=".")
 
@@ -131,57 +131,96 @@ daily_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
 colnames(daily_autocorr) <- paste0(sym_bol, ".autocorr")
 daily_autocorr[1, ] <- 0
 daily_autocorr <- apply.daily(x=daily_autocorr, FUN=sum)
-sum(daily_autocorr)
-
-
 
 x11()
 inter_val <- "2013-06-01/"
-chart_Series(var_iance[inter_val], name=paste(sym_bol, "variance"))
-
-
-chart_Series(da_ta[inter_val, 1]/(ran_ge[2]-ran_ge[1]), name=paste(sym_bol, "data"))
-
-# chart_xts_panels(cbind(10^5*var_iance, sk_ew))
-# chart_xts_panels(cbind(10^5*var_iance["2013-10"], sk_ew["2013-10"]), in_dex=(abs(sk_ew["2013-10"])>1))
-
-
-# daily close to close volatility
-
-
+chart_Series(daily_var[inter_val], name=paste(sym_bol, "variance"))
 
 # minutely variance and skew
 # minutely returns
 re_turns <- calc_rets(xts_data=get(sym_bol)[inter_val])
-# rolling volume-weighted returns
-roll_returns <- runSum(x=re_turns[, 1], n=20)/20
+
+## rolling over end_points
+n_row <- nrow(re_turns)
+num_agg <- n_row %/% 20
+end_points <- c(0, n_row-20*num_agg + 20*(0:num_agg))
+
+# rolling returns
+roll_returns <- roll_sum(re_turns[, 1], 20)/20
 colnames(roll_returns) <- paste0(sym_bol, ".Rets")
 roll_returns[1:20, ] <- 0
-foo <- roll_returns[end_points, ]
+roll_returns <- roll_returns[end_points, ]
 
 # rolling volume-weighted variance
-var_iance <- roll_moment_ohlc(ohlc=get(sym_bol)[inter_val])
-tail(var_iance, 11)
-roll_variance <- var_iance[end_points, ]
+roll_var <- roll_moment_ohlc(ohlc=get(sym_bol))
+roll_var <- roll_var[end_points, ]
 
-# rolling volume-weighted autocorrelation
+# rolling autocorrelation
 roll_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
 roll_autocorr[1, ] <- 0
-sum(roll_autocorr)
-roll_autocorr <- runSum(x=roll_autocorr[, 1], n=20)/20
+roll_autocorr <- roll_sum(roll_autocorr[, 1], 20)/20
 roll_autocorr[1:20, ] <- 0
 colnames(roll_autocorr) <- paste0(sym_bol, ".autocorr")
 roll_autocorr <- roll_autocorr[end_points, ]
 
-# find periods of high variance
+inter_val <- "2014-03-01/"
+chart_Series(roll_var[inter_val], name=colnames(roll_var))
 
 
-da_ta <- cbind(roll_autocorr, roll_variance)
 
-da_ta <- cbind(daily_autocorr, var_iance)
-da_ta <- cbind(daily_autocorr, sk_ew)
+## daily seasonality
 
-da_ta <- cbind(foo, roll_variance)
+library(HighFreq)
+season_volume <- season_ality(Vo(get(sym_bol)[inter_val]))
+colnames(season_volume) <- paste(
+  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
+  "season_volume", sep=".")
+plot_data <- season_volume
+
+season_var <- season_ality(vol_ohlc(log_ohlc=log(get(sym_bol)[inter_val, 1:4]), calc_method="rogers.satchell"))
+colnames(season_var) <- paste(
+  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
+  "season_var", sep=".")
+plot_data <- season_var
+
+plot_data <- season_ality(get(sym_bol)[inter_val, 4])
+
+season_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
+season_autocorr[1, ] <- 0
+season_autocorr <- re_turns[, 1]*lag(roll_sum(re_turns[, 1], 5)/5)
+season_autocorr[1:5, ] <- 0
+season_autocorr <- season_ality(season_autocorr)
+colnames(season_autocorr) <- paste(
+  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
+  "season_autocorr", sep=".")
+plot_data <- roll_sum(season_autocorr, 5)/5
+
+
+## aggregate SPY to 10-minute bars
+col_names <- colnames(get(sym_bol))
+SPY <- to.minutes10(get(sym_bol))
+colnames(SPY) <- col_names
+head(SPY)
+
+## plot
+x11()
+chart_Series(x=plot_data, name=colnames(plot_data))
+# or, adjust y-axis range
+plot_theme <- chart_theme()
+plot_theme$format.labels <- "%H:%M"
+ch_ob <- chart_Series(x=plot_data, name=colnames(plot_data), theme=plot_theme, plot=FALSE)
+y_lim <- ch_ob$get_ylim()
+y_lim[[2]] <- structure(c(y_lim[[2]][1], y_lim[[2]][2]), fixed=TRUE)
+ch_ob$set_ylim(y_lim)
+plot(ch_ob)
+
+
+## regressions
+da_ta <- cbind(roll_autocorr, roll_var)
+da_ta <- cbind(foo, roll_var)
+
+da_ta <- cbind(daily_autocorr, daily_var)
+da_ta <- cbind(daily_autocorr, daily_skew)
 
 for_mula <- as.formula(paste(colnames(da_ta)[1], 
                              paste(paste(colnames(da_ta)[-1], 
@@ -189,7 +228,6 @@ for_mula <- as.formula(paste(colnames(da_ta)[1],
 for_mula <- as.formula(paste(colnames(da_ta)[1], 
                              paste(paste(colnames(da_ta)[-1], 
                                          collapse=" + "), "- 1"), sep="~"))
-for_mula
 l_m <- lm(for_mula, data=da_ta)
 summary(l_m)
 # scatterplot of da_ta
@@ -204,10 +242,10 @@ ran_ge <- range(da_ta[inter_val, 2])
 add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 
 # rolling volume-weighted skewness
-sk_ew <- roll_moment_ohlc(ohlc=get(sym_bol)[inter_val], mom_fun="skew_ohlc")
-sk_ew <- sk_ew/(var_iance)^(1.5)
-sk_ew[1, ] <- 0
-sk_ew <- na.locf(sk_ew)
-tail(sk_ew, 11)
+roll_skew <- roll_moment_ohlc(ohlc=get(sym_bol)[inter_val], mom_fun="skew_ohlc")
+roll_skew <- roll_skew/(roll_var)^(1.5)
+roll_skew[1, ] <- 0
+roll_skew <- na.locf(roll_skew)
+tail(roll_skew, 11)
 
 
