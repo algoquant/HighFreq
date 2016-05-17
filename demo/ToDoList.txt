@@ -24,6 +24,8 @@ Therefore 1-second bar returns carry almost no information.
 
 - [ ] Replace caTools with TTR functions
 
+- [ ] include util package 
+
 - [ ] fix .Rd documentation file building error
 use these Google searches:
 r package error namespace "not an exported object"
@@ -83,6 +85,8 @@ analyze code in:
 
 
 ### tasks finished
+
+- [x] create function for performing daily, weekly, and monthly seasonality aggregations
 
 - [x] rename functions run_*() to roll_*()
 

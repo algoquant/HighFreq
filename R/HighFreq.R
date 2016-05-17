@@ -2,8 +2,8 @@
 #' 
 #' Identifies extreme values as those that exceed a multiple of the rolling volatility.
 #' 
-#' @param time_series univariate \code{xts} time series.
-#' @param vol_window number of data points for estimating rolling volatility.
+#' @param x_ts univariate \code{xts} time series.
+#' @param win_dow number of data points for estimating rolling volatility.
 #' @param vol_mult volatility multiplier.
 #' @return  \code{logical vector}.
 #' @details Calculates rolling volatility as a quantile of values over a sliding
@@ -18,12 +18,12 @@
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
 #' # scrub extreme values
 #' x_ts <- x_ts[!extreme_values(x_ts, vol_mult=1)]
-extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
+extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 
 # calculate volatility as rolling quantile
-  vo_lat <- runquantile(x=abs(as.vector(time_series)), k=vol_window, 
+  vo_lat <- runquantile(x=abs(as.vector(x_ts)), k=win_dow, 
                         probs=0.9, endrule="constant", align="center")
-  vo_lat <- xts(vo_lat, order.by=index(time_series))
+  vo_lat <- xts(vo_lat, order.by=index(x_ts))
   colnames(vo_lat) <- "volat"
 # carry forward non-zero volatility values
   vo_lat[vo_lat==0] <- NA
@@ -31,12 +31,12 @@ extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
   vo_lat <- na.locf(vo_lat)
 #  vo_lat <- na.locf(vo_lat, fromLast=TRUE)
 
-# extreme value if time_series greater than scaled volatility
-  ex_treme <- (abs(time_series) > 2*vol_mult*vo_lat)
+# extreme value if x_ts greater than scaled volatility
+  ex_treme <- (abs(x_ts) > 2*vol_mult*vo_lat)
   ex_treme[1] <- FALSE
   colnames(ex_treme) <- "suspect"
 
-  cat("date:", format(as.Date(index(first(time_series)))), "\tfound", sum(ex_treme), "extreme values\n")
+  cat("date:", format(as.Date(index(first(x_ts)))), "\tfound", sum(ex_treme), "extreme values\n")
   ex_treme
 }  # end extreme_values
 
@@ -46,7 +46,7 @@ extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
 #' Identify isolated price jumps in a univariate \code{xts} time series of prices,
 #' based on pairs of large neighboring returns of opposite sign.
 #' 
-#' @param time_series univariate \code{xts} time series of prices.
+#' @param x_ts univariate \code{xts} time series of prices.
 #' @inheritParams extreme_values
 #' @return  \code{logical vector}.
 #' @details Isolated price jumps are single prices that are very different from 
@@ -61,10 +61,10 @@ extreme_values <- function(time_series, vol_window=51, vol_mult=2) {
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
 #' # scrub jump prices
 #' x_ts <- x_ts[!price_jumps(x_ts, vol_mult=1.0)]
-price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
+price_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 
 # calculate simple returns
-  diff_series <- diff(time_series)
+  diff_series <- diff(x_ts)
   diff_series[1, ] <- 0
   colnames(diff_series) <- "diffs"
   diff_series_fut <- lag(diff_series, -1)
@@ -72,7 +72,7 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
   colnames(diff_series_fut) <- "diff_series_fut"
 
 # calculate vo_lat as rolling quantile
-  vo_lat <- runquantile(x=abs(as.vector(diff_series)), k=vol_window, 
+  vo_lat <- runquantile(x=abs(as.vector(diff_series)), k=win_dow, 
                         probs=0.9, endrule="constant", align="center")
   vo_lat <- xts(vo_lat, order.by=index(diff_series))
   colnames(vo_lat) <- "volat"
@@ -92,7 +92,7 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
   colnames(sus_pect) <- "suspect"
 # cat("Parsing", deparse(substitute(taq_data)), "\n")
 # cat("Parsing", strsplit(deparse(substitute(taq_data)), split="[.]")[[1]][4], "on date:", format(to_day), "\tfound", sum(sus_pect), "suspect prices\n")
-  cat("date:", format(as.Date(index(first(time_series)))), "\tfound", sum(sus_pect), "jump prices\n")
+  cat("date:", format(as.Date(index(first(x_ts)))), "\tfound", sum(sus_pect), "jump prices\n")
   sus_pect
 }  # end price_jumps
 
@@ -124,8 +124,8 @@ price_jumps <- function(time_series, vol_window=51, vol_mult=2) {
 #' taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
 #' colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 #' taq_data <- scrub_TAQ(taq_data)
-#' taq_data <- scrub_TAQ(taq_data, vol_window=11, vol_mult=1)
-scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2, tzone="America/New_York") {
+#' taq_data <- scrub_TAQ(taq_data, win_dow=11, vol_mult=1)
+scrub_TAQ <- function(taq_data, win_dow=51, vol_mult=2, tzone="America/New_York") {
 
 # convert timezone of index to New_York
   index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
@@ -141,7 +141,7 @@ scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2, tzone="America/New_Yo
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- taq_data[, "Ask.Price"] - taq_data[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
-  sus_pect <- extreme_values(bid_offer, vol_window=vol_window, vol_mult=vol_mult)
+  sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 # remove suspect values
   taq_data <- taq_data[!sus_pect]
 # replace suspect values
@@ -156,7 +156,7 @@ scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2, tzone="America/New_Yo
 # replace NA volumes with zero
   taq_data[is.na(taq_data[, "Volume"]), "Volume"] <- 0
 # replace suspect values with NA, and perform 'locf'
-  taq_data[price_jumps(mid_prices, vol_window=vol_window, vol_mult=vol_mult), ] <- NA
+  taq_data[price_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult), ] <- NA
   na.locf(taq_data)
 }  # end scrub_TAQ
 
@@ -199,7 +199,7 @@ scrub_TAQ <- function(taq_data, vol_window=51, vol_mult=2, tzone="America/New_Yo
 #' ohlc_data <- scrub_agg(taq_data, period="10 min")
 #' chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 scrub_agg <- function(taq_data, 
-                      vol_window=51, 
+                      win_dow=51, 
                       vol_mult=2, 
                       period="minutes", 
                       tzone="America/New_York") {
@@ -218,7 +218,7 @@ scrub_agg <- function(taq_data,
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- taq_data[, "Ask.Price"] - taq_data[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
-  sus_pect <- extreme_values(bid_offer, vol_window=vol_window, vol_mult=vol_mult)
+  sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 # remove suspect values
   taq_data <- taq_data[!sus_pect]
 # replace suspect values
@@ -231,7 +231,7 @@ scrub_agg <- function(taq_data,
 #  mid_prices <- na.omit(mid_prices)
   colnames(mid_prices) <- "Mid.Price"
 # replace suspect values with NA, and perform 'locf'
-  mid_prices[price_jumps(mid_prices, vol_window=vol_window, vol_mult=vol_mult)] <- NA
+  mid_prices[price_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult)] <- NA
   mid_prices <- na.locf(mid_prices)
 #  mid_prices <- na.locf(mid_prices, fromLast=TRUE)
 # cbind mid_prices with volume data, and replace NA volumes with zero
@@ -327,7 +327,7 @@ calc_rets <- function(xts_data) {
 save_scrub_agg <- function(sym_bol, 
                       data_dir="E:/mktdata/sec/", 
                       output_dir="E:/output/data/",
-                      vol_window=51, 
+                      win_dow=51, 
                       vol_mult=2, 
                       period="minutes", 
                       tzone="America/New_York") {
@@ -344,7 +344,7 @@ da_ta <- lapply(file_names, function(file_name) {
   cat("loading", sym_bol, "from file: ", file_name, "\n")
   data_name <- load(file_name)
   scrub_agg(get(data_name),
-            vol_window=vol_window, 
+            win_dow=win_dow, 
             vol_mult=vol_mult, 
             period=period, tzone=tzone)
 })  # end sapply
@@ -387,7 +387,7 @@ da_ta <- lapply(file_names, function(file_name) {
 save_TAQ <- function(sym_bol, 
                       data_dir="E:/mktdata/sec/", 
                       output_dir="E:/output/data/",
-                      vol_window=51, 
+                      win_dow=51, 
                       vol_mult=2, 
                       tzone="America/New_York") {
 
@@ -405,7 +405,7 @@ save_TAQ <- function(sym_bol,
     data_name <- load(file_name_in)
     file_name_out <- file.path(output_dir, file_name)
 # save the xts data to a file in the output_dir
-    taq_data <- scrub_TAQ(get(data_name), vol_window=vol_window, vol_mult=vol_mult, tzone=tzone)
+    taq_data <- scrub_TAQ(get(data_name), win_dow=win_dow, vol_mult=vol_mult, tzone=tzone)
     if (!is.null(taq_data)) {
       assign(data_name, taq_data)
       save(list=data_name, file=file_name_out)
@@ -444,7 +444,7 @@ save_TAQ <- function(sym_bol,
 save_rets <- function(sym_bol, 
                       data_dir="E:/mktdata/sec/", 
                       output_dir="E:/output/data/",
-                      vol_window=51, 
+                      win_dow=51, 
                       vol_mult=2, 
                       period="minutes", 
                       tzone="America/New_York") {
@@ -464,7 +464,7 @@ save_rets <- function(sym_bol,
   })
 
 # scrub and aggregate the TAQ data
-  ohlc_data <- lapply(taq_data, scrub_agg, vol_window=vol_window, vol_mult=vol_mult, period=period, tzone=tzone)
+  ohlc_data <- lapply(taq_data, scrub_agg, win_dow=win_dow, vol_mult=vol_mult, period=period, tzone=tzone)
 
 # calculate returns
   ohlc_data <- lapply(ohlc_data, calc_rets)
@@ -756,13 +756,36 @@ do_call_rbind <- function(list_var) {
 #' @examples
 #' # create xts time series
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' foo <- roll_sum(x_ts=get("SPY"), win_dow=3)
+#' roll_sum(x_ts=get("SPY"), win_dow=3)
 roll_sum <- function(x_ts, win_dow) {
   cum_sum <- cumsum(x_ts)
   out_put <- cum_sum - lag(x=cum_sum, k=win_dow)
   out_put[1:win_dow, ] <- cum_sum[1:win_dow, ]
   out_put
 }  # end roll_sum
+
+
+
+
+#' Perform daily, weekly, monthly, and yearly seasonality aggregations over a
+#' univariate \code{xts} time series.
+#' 
+#' @param x_ts univariate \code{xts} time series.
+#' @return \code{xts} time series with aggregations over the seasonality
+#'   interval.
+#' @details An example of a daily seasonality aggregation is the average price
+#'   of a stock between 9:30AM and 10:00AM every day, over many days.
+#' @examples
+#' season_ality(x_ts=get("SPY"))
+season_ality <- function(x_ts) {
+  in_dex <- format(index(x_ts), "%H:%M")
+  agg_regation <- tapply(X=x_ts, INDEX=in_dex, FUN=mean)
+  agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
+  agg_regation <- xts(x=agg_regation, 
+      order.by=as.POSIXct(paste(Sys.Date(), unique(in_dex))))
+  colnames(agg_regation) <- colnames(x_ts)
+  agg_regation
+}  # end season_ality
 
 
 
@@ -784,7 +807,7 @@ roll_sum <- function(x_ts, win_dow) {
 #' @examples
 #' # create xts time series
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' foo <- v_wap(x_ts=get("SPY"), win_dow=11)
+#' v_wap(x_ts=get("SPY"), win_dow=11)
 v_wap <- function(x_ts, win_dow) {
   v_wap <- roll_sum(x_ts=Cl(x_ts)*Vo(x_ts), win_dow=win_dow)
   vol_ume <- roll_sum(x_ts=Vo(x_ts), win_dow=win_dow)
