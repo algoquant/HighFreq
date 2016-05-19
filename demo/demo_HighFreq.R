@@ -116,25 +116,38 @@ chart_xts(vol_at)
 library(HighFreq)
 
 ## daily open to close variance and skew
-daily_var <- apply.daily(x=get(sym_bol), FUN=moment_ohlc)
-colnames(daily_var) <- paste(
-  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
-  "Var", sep=".")
-daily_skew <- apply.daily(x=get(sym_bol), FUN=moment_ohlc, mom_fun="skew_ohlc")
+daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
+colnames(daily_volume) <- paste0(col_name(get(sym_bol)), ".Volume")
+daily_var <- apply.daily(x=get(sym_bol), FUN=agg_ohlc, agg_fun="vol_ohlc")
+colnames(daily_var) <- paste0(col_name(get(sym_bol)), ".Var")
+daily_skew <- apply.daily(x=get(sym_bol), FUN=agg_ohlc, agg_fun="skew_ohlc")
 daily_skew <- daily_skew/(daily_var)^(1.5)
-colnames(daily_skew) <- paste(
-  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
-  "Skew", sep=".")
+colnames(daily_skew) <- paste0(col_name(get(sym_bol)), ".Skew")
+
+# daily autocorrelation or Hurst
+foo <- hurst_ohlc(get(sym_bol)["2013-11-11"])
+daily_hurst <- apply.daily(x=get(sym_bol), FUN=agg_ohlc, agg_fun="hurst_ohlc")
+colnames(daily_hurst) <- paste0(col_name(get(sym_bol)), ".Hurst")
+chart_Series(daily_hurst[inter_val], name=paste(sym_bol, "Hurst"))
 
 re_turns <- calc_rets(xts_data=get(sym_bol))
-daily_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
-colnames(daily_autocorr) <- paste0(sym_bol, ".autocorr")
-daily_autocorr[1, ] <- 0
-daily_autocorr <- apply.daily(x=daily_autocorr, FUN=sum)
+daily_hurst <- re_turns[, 1]*lag(re_turns[, 1])/re_turns[, 1]^2
+daily_hurst[1, ] <- 0
+daily_hurst[is.nan(daily_hurst), ] <- 0
+daily_hurst <- apply.daily(x=daily_hurst, FUN=sum)
 
-x11()
+library(PerformanceAnalytics)
+daily_hurst <- apply.daily(x=daily_hurst, FUN=HurstIndex)
+
+daily_hurst <- apply.daily(x=daily_hurst, FUN=sum)
+
+colnames(daily_hurst) <- paste0(sym_bol, ".autocorr")
+
+x11(width=6, height=4)
 inter_val <- "2013-06-01/"
 chart_Series(daily_var[inter_val], name=paste(sym_bol, "variance"))
+chart_Series(roll_sum(daily_hurst, 10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
+abline(h=0.5, col="blue", lwd=2)
 
 # minutely variance and skew
 # minutely returns
@@ -152,7 +165,7 @@ roll_returns[1:20, ] <- 0
 roll_returns <- roll_returns[end_points, ]
 
 # rolling volume-weighted variance
-roll_var <- roll_moment_ohlc(ohlc=get(sym_bol))
+roll_var <- roll_agg_ohlc(ohlc=get(sym_bol))
 roll_var <- roll_var[end_points, ]
 
 # rolling autocorrelation
@@ -172,28 +185,40 @@ chart_Series(roll_var[inter_val], name=colnames(roll_var))
 
 library(HighFreq)
 season_volume <- season_ality(Vo(get(sym_bol)[inter_val]))
-colnames(season_volume) <- paste(
-  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
-  "season_volume", sep=".")
-plot_data <- season_volume
+colnames(season_volume) <- paste0(col_name(get(sym_bol)), ".season_volume")
+season_data <- season_volume
 
-season_var <- season_ality(vol_ohlc(log_ohlc=log(get(sym_bol)[inter_val, 1:4]), calc_method="rogers.satchell"))
-colnames(season_var) <- paste(
-  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
-  "season_var", sep=".")
-plot_data <- season_var
+season_var <- season_ality(vol_ohlc(ohlc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+colnames(season_var) <- paste0(col_name(get(sym_bol)), ".season_var")
+season_data <- season_var
 
-plot_data <- season_ality(get(sym_bol)[inter_val, 4])
+season_illiquid <- 1e6*sqrt(season_var/season_volume)
+foo <- 1e6*ifelse(Vo(get(sym_bol))==0, 0, sqrt(vol_ohlc(ohlc=get(sym_bol))/Vo(get(sym_bol))))
+season_illiquid <- season_ality(foo)
+season_illiquid <- season_ality(sqrt(vol_ohlc(ohlc=get(sym_bol))/Vo(get(sym_bol))))
+colnames(season_illiquid) <- paste0(col_name(get(sym_bol)), ".season_illiquid")
+season_data <- season_illiquid
+
+season_skew <- season_ality(skew_ohlc(ohlc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+# season_skew <- season_skew/(season_var)^(1.5)
+colnames(season_skew) <- paste0(col_name(get(sym_bol)), ".season_skew")
+season_data <- season_skew
+
+season_hurst <- season_ality(hurst_ohlc(ohlc=get(sym_bol)[inter_val, 1:4]))
+colnames(season_hurst) <- paste0(col_name(get(sym_bol)), ".season_hurst")
+season_data <- season_hurst
+
+season_data <- season_ality(get(sym_bol)[inter_val, 4])
+
+
 
 season_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
 season_autocorr[1, ] <- 0
 season_autocorr <- re_turns[, 1]*lag(roll_sum(re_turns[, 1], 5)/5)
 season_autocorr[1:5, ] <- 0
 season_autocorr <- season_ality(season_autocorr)
-colnames(season_autocorr) <- paste(
-  strsplit(colnames(get(sym_bol))[1], split="[.]")[[1]][1], 
-  "season_autocorr", sep=".")
-plot_data <- roll_sum(season_autocorr, 5)/5
+colnames(season_autocorr) <- paste0(col_name(get(sym_bol)), ".season_autocorr")
+season_data <- roll_sum(season_autocorr, 5)/5
 
 
 ## aggregate SPY to 10-minute bars
@@ -203,14 +228,16 @@ colnames(SPY) <- col_names
 head(SPY)
 
 ## plot
-x11()
-chart_Series(x=plot_data, name=colnames(plot_data))
+season_data <- season_data[-(nrow(season_data))]
+x11(width=6, height=4)
+chart_Series(x=season_data, 
+             name=paste(colnames(season_data), "daily seasonality"))
 # or, adjust y-axis range
 plot_theme <- chart_theme()
 plot_theme$format.labels <- "%H:%M"
-ch_ob <- chart_Series(x=plot_data, name=colnames(plot_data), theme=plot_theme, plot=FALSE)
+ch_ob <- chart_Series(x=season_data, name=paste(colnames(season_data), "daily seasonality"), theme=plot_theme, plot=FALSE)
 y_lim <- ch_ob$get_ylim()
-y_lim[[2]] <- structure(c(y_lim[[2]][1], y_lim[[2]][2]), fixed=TRUE)
+y_lim[[2]] <- structure(c(y_lim[[2]][1], y_lim[[2]][2]/2), fixed=TRUE)
 ch_ob$set_ylim(y_lim)
 plot(ch_ob)
 
@@ -219,8 +246,8 @@ plot(ch_ob)
 da_ta <- cbind(roll_autocorr, roll_var)
 da_ta <- cbind(foo, roll_var)
 
-da_ta <- cbind(daily_autocorr, daily_var)
-da_ta <- cbind(daily_autocorr, daily_skew)
+da_ta <- cbind(daily_hurst, daily_var)
+da_ta <- cbind(daily_hurst, daily_skew)
 
 for_mula <- as.formula(paste(colnames(da_ta)[1], 
                              paste(paste(colnames(da_ta)[-1], 
@@ -242,7 +269,7 @@ ran_ge <- range(da_ta[inter_val, 2])
 add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 
 # rolling volume-weighted skewness
-roll_skew <- roll_moment_ohlc(ohlc=get(sym_bol)[inter_val], mom_fun="skew_ohlc")
+roll_skew <- roll_agg_ohlc(ohlc=get(sym_bol)[inter_val], agg_fun="skew_ohlc")
 roll_skew <- roll_skew/(roll_var)^(1.5)
 roll_skew[1, ] <- 0
 roll_skew <- na.locf(roll_skew)
