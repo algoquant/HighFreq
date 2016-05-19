@@ -301,8 +301,9 @@ calc_rets <- function(xts_data) {
 
 
 
-#' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-#' single symbol, and save the \code{OHLC} time series to a single \sQuote{\code{*.RData}} file.
+#' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a 
+#' single symbol, and save the \code{OHLC} time series to a single
+#' \sQuote{\code{*.RData}} file.
 #' 
 #' @param sym_bol \code{character} string representing symbol or ticker.
 #' @param data_dir \code{character} string representing directory containing input \sQuote{\code{*.RData}} files.
@@ -530,8 +531,9 @@ save_rets_ohlc <- function(sym_bol,
 
 #' Calculate time series of volatility estimates from a \code{OHLC} time series.
 #' 
-#' @param log_ohlc \code{OHLC} time series of log prices.
-#' @param calc_method \code{character} string representing method for estimating volatility.
+#' @param ohlc \code{OHLC} time series of prices.
+#' @param calc_method \code{character} string representing method for estimating
+#'   volatility.
 #' @return  time series of volatility estimates.
 #' @details Calculates volatility estimates from \code{OHLC} values at each
 #'   point in time (row).  The methods include Garman-Klass and Rogers-Satchell.
@@ -541,23 +543,21 @@ save_rets_ohlc <- function(sym_bol,
 #'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 #' # create xts of random prices
 #' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-#' # add Volume data
-#' x_ts <- merge(x_ts, 
-#'           volume=sample(x=10*(2:18), 
-#'             size=length(in_dex), replace=TRUE))
 #' # aggregate to minutes OHLC data
 #' oh_lc <- to.period(x=x_ts, period="minutes")
 #' # calculate volatility estimates
 #' vol_at <- vol_ohlc(oh_lc)
-vol_ohlc <- function(log_ohlc, calc_method="rogers.satchell") {
+vol_ohlc <- function(ohlc, calc_method="rogers.satchell") {
+  sym_bol <- deparse(substitute(ohlc))
+  ohlc <- log(ohlc[, 1:4])
   vol_at <- switch(calc_method,
-         "close"={(log_ohlc[, 4]-log_ohlc[, 1])^2},
-         "garman.klass"={0.5*(log_ohlc[, 2]-log_ohlc[, 3])^2 - 
-                           (2*log(2)-1)*(log_ohlc[, 4]-log_ohlc[, 1])^2},
-         "rogers.satchell"={(log_ohlc[, 2]-log_ohlc[, 4])*(log_ohlc[, 2]-log_ohlc[, 1]) + 
-                              (log_ohlc[, 3]-log_ohlc[, 4])*(log_ohlc[, 3]-log_ohlc[, 1])},
+         "close"={(ohlc[, 4]-ohlc[, 1])^2},
+         "garman.klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 - 
+                           (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
+         "rogers.satchell"={(ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) + 
+                              (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])}
   )  # end switch
-  colnames(vol_at) <- paste0(deparse(substitute(log_ohlc)), ".Volat")
+  colnames(vol_at) <- paste0(sym_bol, ".Volat")
   vol_at
 }  # end vol_ohlc
 
@@ -566,8 +566,9 @@ vol_ohlc <- function(log_ohlc, calc_method="rogers.satchell") {
 
 #' Calculate time series of skew estimates from a \code{OHLC} time series.
 #' 
-#' @param log_ohlc \code{OHLC} time series of log prices.
-#' @param calc_method \code{character} string representing method for estimating skew.
+#' @param ohlc \code{OHLC} time series of prices.
+#' @param calc_method \code{character} string representing method for estimating
+#'   skew.
 #' @return  time series of skew estimates.
 #' @details Calculates skew estimates from \code{OHLC} values at each
 #'   point in time (row).  The methods include Garman-Klass and Rogers-Satchell.
@@ -577,29 +578,61 @@ vol_ohlc <- function(log_ohlc, calc_method="rogers.satchell") {
 #'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 #' # create xts of random prices
 #' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-#' # add Volume data
-#' x_ts <- merge(x_ts, 
-#'           volume=sample(x=10*(2:18), 
-#'             size=length(in_dex), replace=TRUE))
 #' # aggregate to minutes OHLC data
 #' oh_lc <- to.period(x=x_ts, period="minutes")
 #' # calculate skew estimates
 #' sk_ew <- skew_ohlc(oh_lc)
-skew_ohlc <- function(log_ohlc, calc_method="rogers.satchell") {
+skew_ohlc <- function(ohlc, calc_method="rogers.satchell") {
+  sym_bol <- deparse(substitute(ohlc))
+  ohlc <- log(ohlc[, 1:4])
   sk_ew <- 
-    (log_ohlc[, 2]-log_ohlc[, 4])*(log_ohlc[, 2]-log_ohlc[, 1])*(log_ohlc[, 2]-0.5*(log_ohlc[, 4] + log_ohlc[, 1])) + 
-    (log_ohlc[, 3]-log_ohlc[, 4])*(log_ohlc[, 3]-log_ohlc[, 1])*(log_ohlc[, 3]-0.5*(log_ohlc[, 4] + log_ohlc[, 1]))
-  colnames(sk_ew) <- paste0(deparse(substitute(log_ohlc)), ".Skew")
+    (ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1])*(ohlc[, 2]-0.5*(ohlc[, 4] + ohlc[, 1])) + 
+    (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])*(ohlc[, 3]-0.5*(ohlc[, 4] + ohlc[, 1]))
+  colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
 }  # end skew_ohlc
 
 
 
 
-#' Calculate the moment of a \code{OHLC} time series.
+#' Calculate time series of Hurst exponent estimates for a \code{OHLC} time
+#' series.
 #' 
 #' @param ohlc \code{OHLC} time series of prices.
-#' @param mom_fun \code{character} string representing function for estimating
+#' @param calc_method \code{character} string representing method for estimating
+#'   Hurst exponent.
+#' @return  time series of Hurst exponent estimates.
+#' @details Calculates Hurst exponent estimates from \code{OHLC} values at each
+#'   point in time (row).  The methods include Garman-Klass and Rogers-Satchell.
+#' @examples
+#' # create time index of one second intervals for a single day
+#' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
+#'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
+#' # create xts of random prices
+#' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
+#' # aggregate to minutes OHLC data
+#' oh_lc <- to.period(x=x_ts, period="minutes")
+#' # calculate Hurst exponent
+#' hurst_exp <- hurst_ohlc(oh_lc)
+hurst_ohlc <- function(ohlc, calc_method="rogers.satchell") {
+  hurst_exp <- switch(calc_method,
+                   "close"={(ohlc[, 4]-ohlc[, 1])^2},
+                   "garman.klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 - 
+                       (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
+                   "rogers.satchell"={(ohlc[, 2]-ohlc[, 3])/abs(ohlc[, 4]-ohlc[, 1])}
+  )  # end switch
+  hurst_exp <- ifelse(ohlc[, 4]==ohlc[, 1], 0, log(hurst_exp))
+  colnames(hurst_exp) <- paste0(deparse(substitute(ohlc)), ".Hurst")
+  hurst_exp
+}  # end hurst_ohlc
+
+
+
+
+#' Calculate a statistical estimator over a \code{OHLC} time series.
+#' 
+#' @param ohlc \code{OHLC} time series of prices and trading volumes.
+#' @param agg_fun \code{character} string representing function for estimating
 #'   the moment.
 #' @param calc_method \code{character} string representing method for estimating
 #'   the moment.
@@ -621,29 +654,28 @@ skew_ohlc <- function(log_ohlc, calc_method="rogers.satchell") {
 #' # aggregate to hours OHLC data
 #' oh_lc <- to.period(x=x_ts, period="hours")
 #' # calculate time series of daily skew estimates
-#' sk_ew <- apply.daily(x=oh_lc, FUN=moment_ohlc, mom_fun="skew_ohlc")
-moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc_method="rogers.satchell", vo_lu=TRUE, ...) {
-  log_ohlc <- log(ohlc[, 1:4])
-# match "mom_fun" with moment function
-  mom_fun <- match.fun(mom_fun)
-  mo_ment <- mom_fun(log_ohlc=log_ohlc, calc_method=calc_method)
+#' sk_ew <- apply.daily(x=oh_lc, FUN=agg_ohlc, agg_fun="skew_ohlc")
+agg_ohlc <- function(ohlc, agg_fun="vol_ohlc", calc_method="rogers.satchell", vo_lu=TRUE, ...) {
+# match "agg_fun" with moment function
+  agg_fun <- match.fun(agg_fun)
+  agg_regations <- agg_fun(ohlc=ohlc, calc_method=calc_method)
 # weight the estimates by volume
   if (vo_lu) {
-    mo_ment <- ohlc[, 5]*mo_ment
-    mo_ment <- sum(mo_ment)/sum(ohlc[, 5])
+    agg_regations <- ohlc[, 5]*agg_regations
+    agg_regations <- sum(agg_regations)/sum(ohlc[, 5])
   } else
-    mo_ment <- sum(mo_ment)
-  mo_ment
-}  # end moment_ohlc
+    agg_regations <- sum(agg_regations)
+  agg_regations
+}  # end agg_ohlc
 
 
 
 
-#' Calculate the rolling estimates over time of the moment of a \code{OHLC} time
-#' series.
+#' Calculate the rolling aggregations of a statistical estimator over a
+#' \code{OHLC} time series.
 #' 
-#' @param ohlc \code{OHLC} time series of prices.
-#' @param mom_fun \code{character} string representing function for estimating
+#' @param ohlc \code{OHLC} time series of prices and trading volumes.
+#' @param agg_fun \code{character} string representing function for estimating
 #'   the moment.
 #' @param calc_method \code{character} string representing method for estimating
 #'   the moment.
@@ -667,76 +699,32 @@ moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc_method="rogers.satchell",
 #' # aggregate to hours OHLC data
 #' oh_lc <- to.period(x=x_ts, period="hours")
 #' # calculate time series of rolling volatility and skew estimates
-#' vol_at <- roll_moment_ohlc(ohlc=oh_lc)
-#' sk_ew <- roll_moment_ohlc(ohlc=oh_lc, mom_fun="skew_ohlc")
+#' vol_at <- roll_agg_ohlc(ohlc=oh_lc)
+#' sk_ew <- roll_agg_ohlc(ohlc=oh_lc, agg_fun="skew_ohlc")
 #' sk_ew <- sk_ew/(vol_at)^(1.5)
 #' sk_ew[1, ] <- 0
 #' sk_ew <- na.locf(sk_ew)
-roll_moment_ohlc <- function(ohlc, mom_fun="vol_ohlc", calc="rogers.satchell", n=20, N=260, vo_lu=TRUE, ...) {
-  log_ohlc <- log(ohlc[, 1:4])
-# match "mom_fun" with moment function
-  mom_fun <- match.fun(mom_fun)
-  mo_ment <- mom_fun(log_ohlc=log_ohlc, calc=calc)
+roll_agg_ohlc <- function(ohlc, agg_fun="vol_ohlc", calc="rogers.satchell", n=20, N=260, vo_lu=TRUE, ...) {
+# match "agg_fun" with moment function
+  agg_fun <- match.fun(agg_fun)
+  agg_regations <- agg_fun(ohlc=ohlc, calc=calc)
 # weight by volume
   if (vo_lu) {
-    mo_ment <- ohlc[, 5]*mo_ment
+    agg_regations <- ohlc[, 5]*agg_regations
     roll_volume <- roll_sum(ohlc[, 5], win_dow=n)
-    mo_ment <- N*roll_sum(mo_ment, win_dow=n)/roll_volume
+    agg_regations <- N*roll_sum(agg_regations, win_dow=n)/roll_volume
   } else
-    mo_ment <- N*roll_sum(mo_ment, win_dow=n)/n
-  mo_ment[1:(n-1)] <- 0
-  colnames(mo_ment) <- paste(
+    agg_regations <- N*roll_sum(agg_regations, win_dow=n)/n
+  agg_regations[1:(n-1)] <- 0
+  colnames(agg_regations) <- paste(
     strsplit(colnames(ohlc)[1], split="[.]")[[1]][1], 
     "Vol", sep=".")
-  mo_ment
-}  # end roll_moment_ohlc
+  agg_regations
+}  # end roll_agg_ohlc
 
 
 
 ### Utility Functions
-
-#' Recursively \sQuote{\code{rbind}} a list of objects, such as \code{xts} time series.
-#' 
-#' Performs the same operation as \code{do.call(rbind, list_var)}, but using 
-#' recursion, which is much faster and uses less memory. This is the same 
-#' function as \sQuote{\code{\link[qmao]{do.call.rbind}}} from package
-#' \sQuote{\href{https://r-forge.r-project.org/R/?group_id=1113}{qmao}}.
-#' 
-#' @param list_var list of \code{vectors}, \code{matrices}, \code{data
-#'   frames}, or \code{time series}.
-#' @return  single \code{vector}, \code{matrix}, \code{data frame}, or
-#'   \code{time series}.
-#' @details Calls lapply in a loop, each time binding neighboring elements and
-#'   dividing the length of \code{list_var} by half. The result of performing
-#'   \code{do_call_rbind(list_xts)} on a list of \code{xts} time series is
-#'   identical to performing \code{do.call(rbind, list_xts)}. But
-#'   \code{do.call(rbind, list_xts)} is very slow, and often causes an \sQuote{out of
-#'   memory} error.
-#' @examples
-#' # create xts time series
-#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' # split time series into daily list
-#' list_xts <- split(x_ts, "days")
-#' # rbind the list back into a time series and compare with the original
-#' identical(x_ts, do_call_rbind(list_xts))
-do_call_rbind <- function(list_var) {
-  while (length(list_var) > 1) {
-    # index of odd list elements
-    odd_index <- seq(from=1, to=length(list_var), by=2)
-    # bind neighboring elements and divide list_var by half
-    list_var <- lapply(odd_index, function(in_dex) {
-      if (in_dex==length(list_var)) {
-        return(list_var[[in_dex]])
-      }
-      return(rbind(list_var[[in_dex]], list_var[[in_dex+1]]))
-    })  # end lapply
-  }  # end while
-  # list_var has only one element - return it
-  list_var[[1]]
-}  # end do_call_rbind
-
-
-
 
 #' Calculate the rolling sum of an \code{xts} time series over a sliding window 
 #' (lookback period). 

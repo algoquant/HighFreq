@@ -19,12 +19,17 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks pending
 
+- [ ] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()
+use HurstIndex() from PerformanceAnalytics?
+HurstIndex() is wrong because it uses range of returns, instead of range of cumulative returns!
+apply log()
+https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis
+Detrended fluctuation analysis - is it like variance ratios?
+
 - [ ] modify functions vol_ohlc() and skew_ohlc() to accomodate case when open price isn't equal to previous close price.
 	add argument "open_to_close" with default value TRUE
 
 - [ ] Replace caTools with TTR functions
-
-- [ ] include util package 
 
 - [ ] fix .Rd documentation file building error
 use these Google searches:
@@ -86,6 +91,19 @@ analyze code in:
 
 ### tasks finished
 
+- [x] rename moment_ohlc() and roll_moment_ohlc() to agg_ohlc and roll_agg_ohlc()
+mom_fun to agg_fun
+
+- [x] create function hurst_ohlc() for calculating Hurst exponent from OHLC data
+OHLC data naturally lends itself to Hurst analysis: ratio of (H-L)/(C-O)
+
+- [x] in moment_ohlc() and roll_moment_ohlc() removed log of ohlc
+moment_ohlc() and roll_moment_ohlc() should pass ohlc to skew_ohlc() and vol_ohlc(), etc., not log ohlc
+
+- [x] modify skew_ohlc() and vol_ohlc() to accept ohlc, not log ohlc, and to apply log internally
+
+- [x] include util package 
+
 - [x] create function for performing daily, weekly, and monthly seasonality aggregations
 
 - [x] rename functions run_*() to roll_*()
@@ -98,13 +116,13 @@ analyze code in:
 
 - [x] in save_OHLC() and save_rets() pass scrub params to scrub_agg
 
-added timezone to argument list
+- [x] add timezone to argument list
 
-created function save_TAQ()
+- [x] create function save_TAQ()
 	saves scrubbed TAQ and/or OHLC data in daily files
 	similar to save_OHLC, but doesn't aggregate and saves into multiple files
 
-created function calc_rets()
+- [x] create function calc_rets()
 	calculate returns of time series
 
 created function save_rets() (similar to save_OHLC): 
@@ -117,8 +135,30 @@ created function save_rets_OHLC()
 
 ### commits
 
-# commit 03-16-15
+# commit 05-18-16
+added rutils to depends in DESCRIPTION
+moved do_call_rbind to rutils
 
+# commit 05-17-16 bis
+Added function season_ality()
+
+# commit 05-17-16
+Renamed functions from run_* to roll_*
+
+# commit 11-03-15
+fixed function v_wap() from Ad() to Cl()
+
+# commit 10-03-15
+added functions run_sum() and v_wap()
+
+# commit 05-29-15
+Finished R/Finance_2015 presentation
+
+# commit 03-27-15
+added timezone to argument list
+updated functions: calc_rets, save_rets
+
+# commit 03-16-15
 added functions: calc_rets, save_rets, save_TAQ
 updated functions: save_OHLC, scrub_TAQ
 added "data" folder

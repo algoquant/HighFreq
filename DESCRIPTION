@@ -12,11 +12,9 @@ Description: Functions for chaining and joining time series, scrubbing bad data,
 License: GPL (>= 2)
 Depends:
     knitr,
-    xts,
-    quantmod,
+    rutils,
     TTR,
     caTools,
-    lubridate
 LazyData: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
