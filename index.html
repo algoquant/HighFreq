@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Highfreq by algoquant</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Highfreq</h1>
+        <h2>R package for high frequency time series data management</h2>
+        <a href="https://github.com/algoquant/HighFreq" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h2>
+<a id="highfreq-package-for-high-frequency-time-series-data-management" class="anchor" href="#highfreq-package-for-high-frequency-time-series-data-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HighFreq package for high frequency time series data management</h2>
+
+<h1></h1>
+
+<p>The <strong>HighFreq</strong> package contains functions for:  </p>
+
+<ul>
+<li>chaining and joining time series, </li>
+<li>scrubbing bad data from time series, </li>
+<li>managing time zones and alligning time indices, </li>
+<li>converting TAQ data to OHLC format, </li>
+<li>aggregating data to lower frequency (periodicity), </li>
+<li>calculating rolling aggregations (sum, VWAP, etc.), </li>
+<li>calculating seasonality aggregations, </li>
+<li>calculating moments (variance, skew, etc.), </li>
+<li>calculating functionals (Hurst exponent, etc.), </li>
+</ul>
+
+<h1></h1>
+
+<h3>
+<a id="installation-and-loading" class="anchor" href="#installation-and-loading" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation and loading</h3>
+
+<p>Installing <strong>HighFreq</strong> package from github:  </p>
+
+<pre><code>install.packages("devtools")
+library(devtools)
+install_github(repo="algoquant/HighFreq")
+library(HighFreq)
+</code></pre>
+
+<h1></h1>
+
+<h3>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data</h3>
+
+<p>The <strong>HighFreq</strong> package contains an intraday $xts$ time series data set called "SPY", with 1-minute $OHLC$ bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy load.<br>
+The data source is the 
+<a href="https://wrds-web.wharton.upenn.edu/wrds/">Wharton Research Data Service</a>  </p>
+
+<h1></h1>
+
+<h3>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h3>
+
+<p>Calculate daily trading volume:  </p>
+
+<pre><code>daily_volume &lt;- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
+colnames(daily_volume) &lt;- paste0(na_me(get(sym_bol)), ".Volume")
+</code></pre>
+
+<p>Calculate daily variance:  </p>
+
+<pre><code>daily_var &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
+colnames(daily_var) &lt;- paste0(na_me(get(sym_bol)), ".Var")
+</code></pre>
+
+<p>Calculate daily skew:  </p>
+
+<pre><code>daily_skew &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
+daily_skew &lt;- daily_skew/(daily_var)^(1.5)
+colnames(daily_skew) &lt;- paste0(na_me(get(sym_bol)), ".Skew")
+</code></pre>
+
+<p>Calculate daily Hurst:  </p>
+
+<pre><code>daily_hurst &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
+colnames(daily_hurst) &lt;- paste0(na_me(get(sym_bol)), ".Hurst")
+chart_Series(daily_hurst, name=paste(sym_bol, "Hurst"))
+</code></pre>
+
+<p>Calculate rolling prices:  </p>
+
+<pre><code>roll_prices &lt;- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
+colnames(roll_prices) &lt;- paste0(sym_bol, ".Rets")
+chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
+add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
+</code></pre>
+
+<p>Calculate rolling volume-weighted variance:  </p>
+
+<pre><code>roll_var &lt;- roll_agg(ohlc=get(sym_bol), n=10)
+# plot without overnight jump
+chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste(sym_bol, "rolling volume-weighted variance"))
+</code></pre>
+
+<p>Calculate daily seasonality of Hurst exponent:  </p>
+
+<pre><code>season_hurst &lt;- season_ality(hurst_ohlc(ohlc=get(sym_bol)))
+colnames(season_hurst) &lt;- paste0(na_me(get(sym_bol)), ".season_hurst")
+season_hurst &lt;- season_hurst[-(NROW(season_hurst))]
+chart_Series(x=season_hurst, 
+             name=paste(colnames(season_hurst), "daily seasonality"))
+</code></pre>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/algoquant/HighFreq/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/algoquant/HighFreq/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/algoquant/HighFreq"></a> is maintained by <a href="https://github.com/algoquant">algoquant</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
