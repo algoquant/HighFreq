@@ -1,0 +1,88 @@
+## HighFreq package for high frequency time series data management
+
+========
+
+The **HighFreq** package contains functions for:  
+* chaining and joining time series, 
+* scrubbing bad data from time series, 
+* managing time zones and alligning time indices, 
+* converting TAQ data to OHLC format, 
+* aggregating data to lower frequency (periodicity), 
+* calculating rolling aggregations (sum, VWAP, etc.), 
+* calculating seasonality aggregations, 
+* calculating moments (variance, skew, etc.), 
+* calculating functionals (Hurst exponent, etc.), 
+
+========
+
+### Installation and loading  
+
+Installing **HighFreq** package from github:  
+```
+install.packages("devtools")
+library(devtools)
+install_github(repo="algoquant/HighFreq")
+library(HighFreq)
+```
+
+========
+
+### Data  
+
+The **HighFreq** package contains an intraday $xts$ time series data set called "SPY", with 1-minute $OHLC$ bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy load.  
+The data source is the 
+[Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
+
+========
+
+### Examples  
+
+Calculate daily trading volume:  
+```
+daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
+colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
+```
+
+Calculate daily variance:  
+```
+daily_var <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
+colnames(daily_var) <- paste0(na_me(get(sym_bol)), ".Var")
+```
+
+Calculate daily skew:  
+```
+daily_skew <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
+daily_skew <- daily_skew/(daily_var)^(1.5)
+colnames(daily_skew) <- paste0(na_me(get(sym_bol)), ".Skew")
+```
+
+Calculate daily Hurst:  
+```
+daily_hurst <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
+colnames(daily_hurst) <- paste0(na_me(get(sym_bol)), ".Hurst")
+chart_Series(daily_hurst, name=paste(sym_bol, "Hurst"))
+```
+
+Calculate rolling prices:  
+```
+roll_prices <- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
+colnames(roll_prices) <- paste0(sym_bol, ".Rets")
+chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
+add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
+```
+
+Calculate rolling volume-weighted variance:  
+```
+roll_var <- roll_agg(ohlc=get(sym_bol), n=10)
+# plot without overnight jump
+chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste(sym_bol, "rolling volume-weighted variance"))
+```
+
+Calculate daily seasonality of Hurst exponent:  
+```
+season_hurst <- season_ality(hurst_ohlc(ohlc=get(sym_bol)))
+colnames(season_hurst) <- paste0(na_me(get(sym_bol)), ".season_hurst")
+season_hurst <- season_hurst[-(NROW(season_hurst))]
+chart_Series(x=season_hurst, 
+             name=paste(colnames(season_hurst), "daily seasonality"))
+```
