@@ -10,48 +10,69 @@ install.packages("C:/Develop/R/HighFreq", repos=NULL, type="source")
 R CMD Rd2pdf HighFreq
 
 ### comments
-Calculating returns on 1 second bars doesn't make sense for two reasons: 
+Calculating returns on 1-second bars doesn't make sense for two reasons: 
 First, because the changes in price are very small, comparable to the precision of prices (number of significant digits).
-As a result, price changes on 1 second bars are either zero or low multiples of the precision. 
-Second, the 1 second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
+As a result, price changes on 1-second bars are either zero or low multiples of the precision. 
+Second, the 1-second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
 Therefore 1-second bar returns carry almost no information.
 
 
 ### tasks pending
 
-- [ ] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()
+- [ ] add wiki  
+
+- [ ] create project website for HighFreq on GitHub Pages using R Markdown  
+why not just expand README.md and convert it to .Rmd ?
+https://pages.github.com/
+https://help.github.com/categories/github-pages-basics/
+https://rmarkdown.rstudio.com/rmarkdown_websites.html
+https://help.github.com/articles/creating-project-pages-manually/
+http://algoquant.github.io/HighFreq/
+
+- [x] convert README.md to .Rmd and add more detailed description similar this to README.md:  
+add .Rmd files ?
+https://github.com/RcppCore/rcpp-gallery/tree/gh-pages/src
+https://github.com/RcppCore/rcpp-gallery/blob/gh-pages/src/2016-05-27-HRP.Rmd
+
+- [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
+add argument "open_to_close" with default value TRUE  
+
+- [ ] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()  
 use HurstIndex() from PerformanceAnalytics?
 HurstIndex() is wrong because it uses range of returns, instead of range of cumulative returns!
 apply log()
 https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis
 Detrended fluctuation analysis - is it like variance ratios?
 
-- [ ] modify functions vol_ohlc() and skew_ohlc() to accomodate case when open price isn't equal to previous close price.
-	add argument "open_to_close" with default value TRUE
+- [ ] create volume-weighted Hurst and density plots  
+https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
-- [ ] Replace caTools with TTR functions
+- [ ] prove that OHLC skew formula is an estimator of skew  
+Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
+perform simulation to find out  
+https://en.wikipedia.org/wiki/First-hitting-time_model  
+https://en.wikipedia.org/wiki/Wiener_process  
 
-- [ ] fix .Rd documentation file building error
-use these Google searches:
-r package error namespace "not an exported object"
-r rd files "all text must be in a section"
-r roxygen "no man pages found in package"
-r roxygen Error in get(name, envir = env) : object not found
-# understanding common errors in R
-https://github.com/noamross/zero-dependency-problems/blob/master/misc/stack-overflow-common-r-errors.md
-http://roxygenready.github.io/
+- [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
+
+- [ ] aggregate data to 10-second bars (?)  
+
+- [ ] convert function season_ality() to use split.xts() (?)  
+
+- [ ] create function open_close() to remove close-to-open jumps from OHLC (?)  
+
+- [ ] replace caTools with TTR functions (?)  
+only runquantile() is called from caTools  
+but not easy to replace runquantile(), because no equivalent TTR function  
+would require rewriting extreme_values() and price_jumps(), and then benchmarking  
+
+- [ ] move roll_sum() to rutils (?)
+
+- [ ] use .subset_xts() (?)
 
 - [ ] create "tests" directory
 
-- [ ] create data documention
-http://r-pkgs.had.co.nz/data.html
-http://kbroman.org/pkg_primer/pages/data.html
-
-- [ ] calculate volume-weighted moments and compare them to standard moments
-	add volume-weighting to vol_ohlc() and skew_ohlc()
-
-- [ ] rename?
-	save_rets_OHLC to rets_OHLC
+- [ ] rename save_rets_OHLC to rets_OHLC (?)  
 
 add logical arg as option to aggregate data or not
 
@@ -91,6 +112,35 @@ analyze code in:
 
 ### tasks finished
 
+- [x] perform bootstrap estimation of standard errors for all the methods in function vari_ance()  
+benchmark to random OHLC
+
+- [x] add to function vari_ance() the methods "garman.klass_yz" and "yang.zhang"  
+
+- [x] modify functions vari_ance() to accomodate case when open price isn't equal to previous close price - methods "garman.klass_yz" and "yang.zhang"  
+
+- [x] rename function vol_ohlc() to vari_ance()
+
+- [x] create function to_period()  
+
+- [x] rename argument agg_fun to esti_mator, in functions agg_regate() and roll_agg()  
+
+- [x] remove calc_method argument from agg_regate() and roll_agg() - instead use "..." argument
+
+- [x] rename agg_ohlc and roll_agg_ohlc() to agg_regate() and roll_agg()  
+
+- [x] dereference all external functions using "::", i.e. rutils::na_me()
+
+- [x] add @export to roxygen code  
+
+- [x] convert all code from nrow() and ncol() to NROW() and NCOL()  
+
+- [x] replace strsplit(colnames(ohlc)[1], split="[.]")[[1]][1] with rutils::na_me(ohlc)  
+
+- [x] fix roxygen .Rd documentation file building error - name at end of hf_data.R file was wrong - should be the names of objects, i.e. "SPY", "sym_bol", not the file name  
+
+- [x] create data documention  
+
 - [x] rename moment_ohlc() and roll_moment_ohlc() to agg_ohlc and roll_agg_ohlc()
 mom_fun to agg_fun
 
@@ -102,7 +152,7 @@ moment_ohlc() and roll_moment_ohlc() should pass ohlc to skew_ohlc() and vol_ohl
 
 - [x] modify skew_ohlc() and vol_ohlc() to accept ohlc, not log ohlc, and to apply log internally
 
-- [x] include util package 
+- [x] include rutil package 
 
 - [x] create function for performing daily, weekly, and monthly seasonality aggregations
 
@@ -131,6 +181,12 @@ created function save_rets() (similar to save_OHLC):
 created function save_rets_OHLC()
 	similar to save_rets, but assumes clean OHLC input data
 	- no scrubbing or aggregation
+
+
+### tasks deprecated
+
+- [ ] calculate volume-weighted moments and compare them to standard moments
+add volume-weighting to vol_ohlc() and skew_ohlc()
 
 
 ### commits
