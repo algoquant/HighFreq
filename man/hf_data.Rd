@@ -25,9 +25,9 @@ hf_data.RData is a file containing the datasets:
 
 \describe{
   \item{sym_bol}{a \code{string} containing the name "SPY".}
-  \item{SPY}{an \code{xts} time series containing \code{OHLC} minute bar data
-  for the SPY etf, from 2008-01-02 to 2014-05-19.  SPY contains 625,425 rows
-  of data, each row contains a single minute bar.}
+  \item{SPY}{an \code{xts} time series containing 1-minute \code{OHLC} bar
+  data for the SPY etf, from 2008-01-02 to 2014-05-19.  SPY contains 625,425
+  rows of data, each row contains a single minute bar.}
 }
 }
 \examples{

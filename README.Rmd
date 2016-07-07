@@ -1,8 +1,19 @@
+---
+title: Package for high frequency time series data management
+author: Jerzy Pawlowski (algoquant)
+abstract: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.
+tags: high frequency, time series, volatility"
+---
+
+[![Build Status](https://travis-ci.org/algoquant/HighFreq.svg?branch=master)](https://travis-ci.org/algoquant/HighFreq)
+
+
 ## HighFreq package for high frequency time series data management
 
 ========
 
-The **HighFreq** package contains functions for:  
+The *HighFreq* package contains functions for:
+
 * chaining and joining time series, 
 * scrubbing bad data from time series, 
 * managing time zones and alligning time indices, 
@@ -13,11 +24,12 @@ The **HighFreq** package contains functions for:
 * calculating moments (variance, skew, etc.), 
 * calculating functionals (Hurst exponent, etc.), 
 
+
 ========
 
-### Installation and loading  
+### Installation and loading
 
-Installing **HighFreq** package from github:  
+Installing *HighFreq* package from github:  
 ```
 install.packages("devtools")
 library(devtools)
@@ -27,15 +39,16 @@ library(HighFreq)
 
 ========
 
-### Data  
+### Data
 
-The **HighFreq** package contains an intraday $xts$ time series data set called "SPY", with 1-minute $OHLC$ bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy load.  
+The *HighFreq* package contains an intraday *xts* time series data set called "SPY", with 1-minute *OHLC* bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.  
 The data source is the 
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
 
+
 ========
 
-### Examples  
+### Examples
 
 Calculate daily trading volume:  
 ```
@@ -43,7 +56,7 @@ daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
 colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
 ```
 
-Calculate daily variance:  
+Calculate daily variance (volatility):  
 ```
 daily_var <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
 colnames(daily_var) <- paste0(na_me(get(sym_bol)), ".Var")
