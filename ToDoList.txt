@@ -21,18 +21,22 @@ Therefore 1-second bar returns carry almost no information.
 
 - [ ] add wiki  
 
-- [ ] create project website for HighFreq on GitHub Pages using R Markdown  
-why not just expand README.md and convert it to .Rmd ?
-https://pages.github.com/
-https://help.github.com/categories/github-pages-basics/
-https://rmarkdown.rstudio.com/rmarkdown_websites.html
-https://help.github.com/articles/creating-project-pages-manually/
-http://algoquant.github.io/HighFreq/
+- [ ] apply Hampel Filter to scrub data
 
-- [x] convert README.md to .Rmd and add more detailed description similar this to README.md:  
-add .Rmd files ?
-https://github.com/RcppCore/rcpp-gallery/tree/gh-pages/src
+- [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
+
+- [ ] add vignette and automatically build vignette  
+
+- [ ] create /tests directory and use testthat
+
+- [x] create project website for HighFreq on GitHub Pages using R Markdown  
+
+- [x] rename README.md to .Rmd and add more detailed description similar this to README.md:  
 https://github.com/RcppCore/rcpp-gallery/blob/gh-pages/src/2016-05-27-HRP.Rmd
+use rmarkdown templates
+https://rud.is/b/2016/02/04/alternate-r-markdown-templates/
+https://github.com/hrbrmstr/markdowntemplates
+http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 - [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
 add argument "open_to_close" with default value TRUE  
@@ -69,8 +73,6 @@ would require rewriting extreme_values() and price_jumps(), and then benchmarkin
 - [ ] move roll_sum() to rutils (?)
 
 - [ ] use .subset_xts() (?)
-
-- [ ] create "tests" directory
 
 - [ ] rename save_rets_OHLC to rets_OHLC (?)  
 

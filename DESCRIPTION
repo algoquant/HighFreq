@@ -16,6 +16,7 @@ Depends:
 Imports:
     TTR, 
 	caTools, 
+Remotes: github::algoquant/rutils,
 LazyData: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq

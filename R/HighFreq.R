@@ -69,7 +69,7 @@ extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 
 price_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 # calculate simple returns
-  diff_series <- rutils:::diff.xts(x_ts)
+  diff_series <- rutils::diff_xts(x_ts)
   diff_series[1, ] <- 0
   colnames(diff_series) <- "diffs"
   diff_series_fut <- lag(diff_series, -1)
@@ -298,7 +298,7 @@ calc_rets <- function(x_ts) {
     diff_series <- x_ts[, 4]  # OHLC data
   colnames(diff_series) <- "Mid.Rets"
 # calculate returns
-  diff_series <- rutils:::diff.xts(diff_series)/c(1, diff(.index(diff_series)))
+  diff_series <- rutils::diff_xts(diff_series)/c(1, diff(.index(diff_series)))
   diff_series[1, ] <- 0
 # cbind diff_series with volume data
   if(NCOL(x_ts)==6)  # TAQ data has 6 columns
@@ -581,23 +581,23 @@ open_close <- function(x_ts) {
 #' Calculates variance estimates for each bar of \code{OHLC} prices at each
 #' point in time (row), using the squared differences of \code{OHLC} prices at
 #' each point in time.
-#' 
+#'
 #' @export
 #' @param ohlc \code{OHLC} time series of prices.
 #' @param calc_method \code{character} string representing method for estimating
-#'   variance.  The methods include: 
+#'   variance.  The methods include:
 #' \itemize{
-#'   \item "close" close to close, 
-#'   \item "garman.klass" Garman-Klass, 
-#'   \item "garman.klass_yz" Garman-Klass with account for close-to-open jumps, 
-#'   \item "rogers.satchell" Rogers-Satchell, 
-#'   \item "yang.zhang" Yang-Zhang, 
+#'   \item "close" close to close,
+#'   \item "garman.klass" Garman-Klass,
+#'   \item "garman.klass_yz" Garman-Klass with account for close-to-open jumps,
+#'   \item "rogers.satchell" Rogers-Satchell,
+#'   \item "yang.zhang" Yang-Zhang,
 #' }
 #' @return  A single-column \code{xts} time series of variance estimates, with
 #'   the same number of rows as the input time series.
 #' @details Performs a similar operation as function \code{volatility()} from
 #'   package \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
-#'   but without calculating a running sum using \code{runSum()}.  It's also a 
+#'   but without calculating a running sum using \code{runSum()}.  It's also a
 #'   little faster because it performs less data validation.
 #' @examples
 #' # create time index of one second intervals for a single day
@@ -621,14 +621,14 @@ vari_ance <- function(ohlc, calc_method="garman.klass_yz") {
                            (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
          "rogers.satchell"={(ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
                               (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])},
-         "garman.klass_yz"={(ohlc[, 1]-rutils:::lag.xts(ohlc[, 4]))^2 +
+         "garman.klass_yz"={(ohlc[, 1]-rutils::lag_xts(ohlc[, 4]))^2 +
                             0.5*(ohlc[, 2]-ohlc[, 3])^2 -
                             (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-         "yang.zhang"={c_o <- ohlc[, 1]-rutils:::lag.xts(ohlc[, 4]); 
-                       o_c <- ohlc[, 1]-ohlc[, 4]; 
-                       (c_o-sum(c_o)/NROW(c_o))^2 + 
-                       0.67*(o_c-sum(o_c)/NROW(o_c))^2 + 
-                       0.33*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) + 
+         "yang.zhang"={c_o <- ohlc[, 1]-rutils::lag_xts(ohlc[, 4]);
+                       o_c <- ohlc[, 1]-ohlc[, 4];
+                       (c_o-sum(c_o)/NROW(c_o))^2 +
+                       0.67*(o_c-sum(o_c)/NROW(o_c))^2 +
+                       0.33*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
                                (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
   )  # end switch
   colnames(vari_ance) <- paste0(sym_bol, ".Variance")
@@ -714,7 +714,7 @@ hurst_ohlc <- function(ohlc, calc_method="rogers.satchell") {
 #' @param ohlc \code{OHLC} time series of prices and trading volumes.
 #' @param esti_mator \code{character} string representing function for
 #'   estimating the moment.
-#' @param weight_ed \code{Boolean} should estimate be weighted by trade volume 
+#' @param weight_ed \code{Boolean} should estimate be weighted by trade volume
 #'   (default is \code{TRUE})?
 #' @param ... additional parameters to esti_mator function.
 #' @return  Single \code{numeric} value equal to the weighted sum of an
@@ -900,7 +900,7 @@ v_wap <- function(x_ts, win_dow) {
 
 #' Aggregates an \code{OHLC} time series to lower periodicity.
 #'
-#' Given an \code{OHLC} time series at high periodicity (say seconds), 
+#' Given an \code{OHLC} time series at high periodicity (say seconds),
 #' calculates the \code{OHLC} prices at lower periodicity (say minutes).
 #'
 #' @export
@@ -913,13 +913,13 @@ v_wap <- function(x_ts, win_dow) {
 #' @return \code{xts} \code{OHLC} time series of lower periodicity defined by
 #'   end_points.
 #' @details #' Performs a similar aggregation as function \code{to.period()}
-#'   from package 
+#'   from package
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
 #'   the flexibility to aggregate to a user-specified vector of end points. The
-#'   function \code{to_period()} simply calls the compiled function 
-#'   \code{toPeriod()} (from package 
-#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to 
-#'   perform the actual aggregations.  If \code{end_points} are passed in 
+#'   function \code{to_period()} simply calls the compiled function
+#'   \code{toPeriod()} (from package
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to
+#'   perform the actual aggregations.  If \code{end_points} are passed in
 #'   explicitly, then the \code{period} argument is ignored.
 #' @examples
 #' # define end points at 10-minute intervals (SPY is minutely bars)
