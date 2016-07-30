@@ -1,21 +1,21 @@
-#' Identify extreme values in a univariate \code{xts} time series.
+#' Identify extreme values in a single-column \code{xts} time series.
 #'
 #' Identifies extreme values as those that exceed a multiple of the rolling
 #' volatility.
 #'
 #' @export
-#' @param x_ts univariate \code{xts} time series.
+#' @param x_ts single-column \code{xts} time series.
 #' @param win_dow number of data points for estimating rolling volatility.
 #' @param vol_mult volatility multiplier.
 #' @return  \code{Boolean} vector with the same number of rows as input time
 #'   series.
-#' @details Calculates rolling volatility as a quantile of values over a sliding
-#'   window. Extreme values are those that exceed the product of the volatility
-#'   multiplier times the rolling volatility. Extreme values are the very tips
-#'   of the tails when the distribution of values becomes very fat-tailed. The
-#'   volatility multiplier \code{vol_mult} controls the threshold at which
-#'   values are identified as extreme. Smaller volatility multiplier values will
-#'   cause more values to be identified as extreme.
+#' @details Calculates the rolling volatility as a quantile of values over a
+#'   rolling window. Extreme values are those that exceed the product of the
+#'   volatility multiplier times the rolling volatility. Extreme values are the
+#'   very tips of the tails when the distribution of values becomes very
+#'   fat-tailed. The volatility multiplier \code{vol_mult} controls the
+#'   threshold at which values are identified as extreme. Smaller volatility
+#'   multiplier values will cause more values to be identified as extreme.
 #' @examples
 #' # create xts time series
 #' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
@@ -46,11 +46,11 @@ extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 
 
 
-#' Identify isolated price jumps in a univariate \code{xts} time series of
+#' Identify isolated price jumps in a single-column \code{xts} time series of
 #' prices, based on pairs of large neighboring returns of opposite sign.
 #'
 #' @export
-#' @param x_ts univariate \code{xts} time series of prices.
+#' @param x_ts single-column \code{xts} time series of prices.
 #' @inheritParams extreme_values
 #' @return  \code{Boolean} vector with the same number of rows as input time
 #'   series.
@@ -58,7 +58,7 @@ extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 #'   neighboring values.  Price jumps create pairs of large neighboring returns
 #'   of opposite sign. The function \code{price_jumps} first calculates simple
 #'   returns from prices. Then it calculates the rolling volatility of returns
-#'   as a quantile of returns over a sliding window. Jump prices are identified
+#'   as a quantile of returns over a rolling window. Jump prices are identified
 #'   as those where neighboring returns both exceed a multiple of the rolling
 #'   volatility, but the sum of those returns doesn't exceed it.
 #' @examples
@@ -208,11 +208,8 @@ scrub_TAQ <- function(taq_data, win_dow=51, vol_mult=2, tzone="America/New_York"
 #' ohlc_data <- scrub_agg(taq_data, period="10 min")
 #' chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 
-scrub_agg <- function(taq_data,
-                      win_dow=51,
-                      vol_mult=2,
-                      period="minutes",
-                      tzone="America/New_York") {
+scrub_agg <- function(taq_data, win_dow=51, vol_mult=2,
+                      period="minutes", tzone="America/New_York") {
 # convert timezone of index to New_York
   index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
 # subset data to NYSE trading hours
@@ -265,48 +262,43 @@ scrub_agg <- function(taq_data,
 
 
 
-#' Calculate returns of either \code{TAQ} or \code{OHLC} data in \code{xts} format.
+#' Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
 #'
 #' @export
-#' @param x_ts \code{xts} time series of \code{TAQ} or \code{OHLC} data.
-#' @return  \code{xts} time series of returns and volumes.
-#' @details The function \code{calc_rets} calculates returns and binds them with
-#'   volume data.
+#' @param x_ts \code{xts} time series of either \code{TAQ} or \code{OHLC} data.
+#' @return  A single-column \code{xts} time series of returns.
+#' @details Calculates single period returns as the ratio of differenced mid
+#'   prices divided by the time index differences.
 #' @examples
 #' # create time index of one second intervals for a single day
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 #' # create xts of random TAQ prices
-#' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
+#' t_aq <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 #' # create vector of random bid-offer prices
 #' bid_offer <- abs(rnorm(length(in_dex)))/10
 #' # create TAQ data using cbind
-#' x_ts <- cbind(x_ts-bid_offer, x_ts+bid_offer)
+#' t_aq <- cbind(t_aq-bid_offer, t_aq+bid_offer)
 #' # add Trade.Price
-#' x_ts <- cbind(x_ts, x_ts+rnorm(length(in_dex))/10)
+#' t_aq <- cbind(t_aq, t_aq+rnorm(length(in_dex))/10)
 #' # add Volume
-#' x_ts <- cbind(x_ts, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-#' colnames(x_ts) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-#' x_ts <- calc_rets(x_ts)
+#' t_aq <- cbind(t_aq, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+#' colnames(t_aq) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+#' re_turns <- run_returns(t_aq)
 
-calc_rets <- function(x_ts) {
+run_returns <- function(x_ts) {
 # return NULL if no data
   if (is.null(x_ts))  return(NULL)
 # calculate mid prices
   if(NCOL(x_ts)==6)  # TAQ data has 6 columns
-    diff_series <- 0.5 * (x_ts[, "Bid.Price"] + x_ts[, "Ask.Price"])
+    re_turns <- 0.5 * (x_ts[, "Bid.Price"] + x_ts[, "Ask.Price"])
   else
-    diff_series <- x_ts[, 4]  # OHLC data
-  colnames(diff_series) <- "Mid.Rets"
-# calculate returns
-  diff_series <- rutils::diff_xts(diff_series)/c(1, diff(.index(diff_series)))
-  diff_series[1, ] <- 0
-# cbind diff_series with volume data
-  if(NCOL(x_ts)==6)  # TAQ data has 6 columns
-    diff_series <- cbind(diff_series, x_ts[, "Volume"])
-  else
-    diff_series <- cbind(diff_series, x_ts[, 5])
-  diff_series
-}  # end calc_rets
+    re_turns <- x_ts[, 4]  # OHLC data
+  # calculate returns
+  re_turns <- 86400*rutils::diff_xts(re_turns)/c(1, diff(.index(re_turns)))
+  re_turns[1, ] <- 0
+  colnames(re_turns) <- paste0(rutils::na_me(x_ts), ".returns")
+  re_turns
+}  # end run_returns
 
 
 
@@ -365,7 +357,7 @@ da_ta <- lapply(file_names, function(file_name) {
 })  # end sapply
 
 # recursively "rbind" the list into a single xts
-  da_ta <- caTools::do_call_rbind(da_ta)
+  da_ta <- rutils::do_call_rbind(da_ta)
 # assign column names, i.e. "symbol.High"
   colnames(da_ta) <- sapply(strsplit(colnames(da_ta), split="[.]"),
                            function(strng) paste(sym_bol, strng[-1], sep="."))
@@ -446,7 +438,7 @@ save_TAQ <- function(sym_bol,
 #' @return  Time series of returns and volume in \code{xts} format.
 #' @details The function \code{save_rets} loads multiple days of \code{TAQ}
 #'   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
-#'   series.  It then calculates returns using function \code{calc_rets}, and
+#'   series.  It then calculates returns using function \code{run_returns}, and
 #'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
 #'   to a file called \sQuote{\code{symbol.rets.RData}}.
 #'   The \code{TAQ} data files are assumed to be stored in separate directories
@@ -481,22 +473,28 @@ save_rets <- function(sym_bol,
   })
 
 # scrub and aggregate the TAQ data
-  ohlc_data <- lapply(taq_data, scrub_agg, win_dow=win_dow, vol_mult=vol_mult, period=period, tzone=tzone)
+  ohlc_data <- lapply(taq_data, scrub_agg, 
+                      win_dow=win_dow, 
+                      vol_mult=vol_mult, 
+                      period=period, 
+                      tzone=tzone)
 
 # calculate returns
-  ohlc_data <- lapply(ohlc_data, calc_rets)
+  ohlc_data <- lapply(ohlc_data, run_returns)
 
 # recursively "rbind" the list into a single xts
-  ohlc_data <- caTools::do_call_rbind(ohlc_data)
+  ohlc_data <- rutils::do_call_rbind(ohlc_data)
 # assign column names, i.e. "symbol.rets"
-  colnames(ohlc_data) <- c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
+  colnames(ohlc_data) <- 
+    c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
 
 # copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
   assign(sym_bol_rets, ohlc_data)
 
 # save the xts data to a file in the output_dir
-  save(list=eval(sym_bol_rets), file=file.path(output_dir, paste0(sym_bol_rets, ".RData")))
+  save(list=eval(sym_bol_rets), 
+       file=file.path(output_dir, paste0(sym_bol_rets, ".RData")))
   invisible(sym_bol_rets)
 
 }  # end save_rets
@@ -512,7 +510,7 @@ save_rets <- function(sym_bol,
 #' @return  Time series of returns and volume in \code{xts} format.
 #' @details The function \code{save_rets_ohlc} loads \code{OHLC} time series
 #'   data from a single file.  It then calculates returns using function
-#'   \code{calc_rets}, and stores them in a variable named
+#'   \code{run_returns}, and stores them in a variable named
 #'   \sQuote{\code{symbol.rets}}, and saves them to a file called
 #'   \sQuote{\code{symbol.rets.RData}}.
 #' @examples
@@ -530,7 +528,7 @@ save_rets_ohlc <- function(sym_bol,
   data_name <- load(file_name)
 
 # calculate returns
-  da_ta <- calc_rets(get(data_name))
+  da_ta <- run_returns(get(data_name))
 
 # copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
@@ -546,94 +544,72 @@ save_rets_ohlc <- function(sym_bol,
 
 
 
-#' Adjusts an \code{OHLC} time series to make open prices equal to the close
-#' prices from the previous period.
-#'
-#' @export
-#' @param x_ts an \code{xts} time series containing one or more columns of data.
-#' @return \code{xts} \code{OHLC} time series with open prices equal to the
-#'   close prices from the previous period.
-#' @details Adds or subtracts a price adjustment to make all open prices equal
-#'   to the close prices from the previous period.  The adjustment preserves the
-#'   price differences within each bar of \code{OHLC} prices, and so preserves
-#'   open to close returns, variance estimates, etc.
-#' @examples
-#' # define end points at 10-minute intervals (SPY is minutely bars)
-#' end_points <- rutils::end_points(SPY["2009"], inter_val=10)
-#' # aggregate over 10-minute end_points:
-#' open_close(x_ts=SPY["2009"], end_points=end_points)
-#' # aggregate over days:
-#' open_close(x_ts=SPY["2009"], period="days")
-#' # equivalent to:
-#' to.period(x=SPY["2009"], period="days", name=rutils::na_me(SPY))
-
-open_close <- function(x_ts) {
-  op_en <- Op(x_ts)
-  clo_se <- lag.xts(Cl(x_ts), k=-1)
-  which(!(op_en==clo_se))
-}  # end open_close
-
-
-
-
 #' Calculate a time series of variance estimates for an \code{OHLC} time series.
 #'
-#' Calculates variance estimates for each bar of \code{OHLC} prices at each
+#' Calculates the variance estimates for each bar of \code{OHLC} prices at each
 #' point in time (row), using the squared differences of \code{OHLC} prices at
 #' each point in time.
 #'
 #' @export
-#' @param ohlc \code{OHLC} time series of prices.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   variance.  The methods include:
 #' \itemize{
 #'   \item "close" close to close,
 #'   \item "garman.klass" Garman-Klass,
-#'   \item "garman.klass_yz" Garman-Klass with account for close-to-open jumps,
+#'   \item "garman.klass_yz" Garman-Klass with account for close-to-open price jumps,
 #'   \item "rogers.satchell" Rogers-Satchell,
 #'   \item "yang.zhang" Yang-Zhang,
 #' }
-#' @return  A single-column \code{xts} time series of variance estimates, with
-#'   the same number of rows as the input time series.
+#' @return An \code{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
 #' @details Performs a similar operation as function \code{volatility()} from
 #'   package \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
 #'   but without calculating a running sum using \code{runSum()}.  It's also a
-#'   little faster because it performs less data validation.
+#'   little faster because it performs less data validation. The variance
+#'   estimation methods "close", "garman.klass_yz", and "yang.zhang" do account
+#'   for close-to-open price jumps, while the methods "garman.klass" and
+#'   "rogers.satchell" do not account for close-to-open price jumps.
 #' @examples
 #' # create time index of one second intervals for a single day
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
 #'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-#' # create xts of random prices
+#' # create synthetic xts of random prices
 #' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 #' # aggregate to minutes OHLC data
 #' oh_lc <- to.period(x=x_ts, period="minutes")
-#' # calculate variance estimates
-#' vari_ance <- vari_ance(oh_lc)
+#' # calculate variance estimates for oh_lc
+#' var_running <- run_variance(oh_lc)
 #' # calculate variance estimates for SPY
-#' vari_ance <- vari_ance(SPY, calc_method="yang.zhang")
+#' var_running <- run_variance(SPY, calc_method="yang.zhang")
+#' # calculate SPY variance without overnight jumps
+#' var_running <- run_variance(SPY, calc_method="rogers.satchell")
 
-vari_ance <- function(ohlc, calc_method="garman.klass_yz") {
-  sym_bol <- deparse(substitute(ohlc))
-  ohlc <- log(ohlc[, 1:4])
+run_variance <- function(oh_lc, calc_method="garman.klass_yz") {
+  sym_bol <- rutils::na_me(oh_lc)
+  oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
-         "close"={(ohlc[, 4]-ohlc[, 1])^2},
-         "garman.klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 -
-                           (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-         "rogers.satchell"={(ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
-                              (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])},
-         "garman.klass_yz"={(ohlc[, 1]-rutils::lag_xts(ohlc[, 4]))^2 +
-                            0.5*(ohlc[, 2]-ohlc[, 3])^2 -
-                            (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-         "yang.zhang"={c_o <- ohlc[, 1]-rutils::lag_xts(ohlc[, 4]);
-                       o_c <- ohlc[, 1]-ohlc[, 4];
+         "close"={(oh_lc[, 4]-rutils::lag_xts(oh_lc[, 4]))^2},
+         "garman.klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                           (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
+         "rogers.satchell"={(oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                              (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])},
+         "garman.klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+                            0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                            (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
+         "yang.zhang"={c_o <- oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]);
+                       o_c <- oh_lc[, 1]-oh_lc[, 4];
                        (c_o-sum(c_o)/NROW(c_o))^2 +
                        0.67*(o_c-sum(o_c)/NROW(o_c))^2 +
-                       0.33*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
-                               (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
+                       0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                               (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
+  vari_ance <- 86400^2*vari_ance/c(1, diff(.index(oh_lc)))^2
+  vari_ance[1, ] <- 0
+  vari_ance <- na.locf(vari_ance)
   colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
-}  # end vari_ance
+}  # end run_variance
 
 
 
@@ -641,7 +617,7 @@ vari_ance <- function(ohlc, calc_method="garman.klass_yz") {
 #' Calculate time series of skew estimates from a \code{OHLC} time series.
 #'
 #' @export
-#' @param ohlc \code{OHLC} time series of prices.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   skew.
 #' @return  Time series of skew estimates.
@@ -651,58 +627,68 @@ vari_ance <- function(ohlc, calc_method="garman.klass_yz") {
 #' # create time index of one second intervals for a single day
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
 #'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-#' # create xts of random prices
+#' # create synthetic xts of random prices
 #' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 #' # aggregate to minutes OHLC data
 #' oh_lc <- to.period(x=x_ts, period="minutes")
 #' # calculate skew estimates
-#' sk_ew <- skew_ohlc(oh_lc)
+#' sk_ew <- run_skew(oh_lc)
 
-skew_ohlc <- function(ohlc, calc_method="rogers.satchell") {
-  sym_bol <- deparse(substitute(ohlc))
-  ohlc <- log(ohlc[, 1:4])
+run_skew <- function(oh_lc, calc_method="rogers.satchell") {
+  sym_bol <- rutils::na_me(oh_lc)
+  oh_lc <- log(oh_lc[, 1:4])
   sk_ew <-
-    (ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1])*(ohlc[, 2]-0.5*(ohlc[, 4] + ohlc[, 1])) +
-    (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])*(ohlc[, 3]-0.5*(ohlc[, 4] + ohlc[, 1]))
+    (oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1])*(oh_lc[, 2]-0.5*(oh_lc[, 4] + oh_lc[, 1])) +
+    (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])*(oh_lc[, 3]-0.5*(oh_lc[, 4] + oh_lc[, 1]))
+  sk_ew <- 86400^3*sk_ew/c(1, diff(.index(oh_lc)))^3
+  sk_ew[1, ] <- 0
+  sk_ew <- na.locf(sk_ew)
   colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
-}  # end skew_ohlc
+}  # end run_skew
 
 
 
 
-#' Calculate time series of Hurst exponent estimates for a \code{OHLC} time
-#' series.
+#' Calculate time series of Sharpe-like statistics for each bar of a \code{OHLC}
+#' time series.
 #'
 #' @export
-#' @param ohlc \code{OHLC} time series of prices.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
-#'   Hurst exponent.
-#' @return  Time series of Hurst exponent estimates.
-#' @details Calculates Hurst exponent estimates from \code{OHLC} prices at each
-#'   point in time (bar).  The methods include Garman-Klass and Rogers-Satchell.
+#'   the Sharpe-like exponent.
+#' @return  An \code{xts} time series with the same number of rows as the
+#'   argument \code{oh_lc}.
+#' @details Calculates Sharpe-like statistics for each bar of a \code{OHLC} time
+#'   series.  
+#'   The Sharpe-like statistic is defined as the ratio of the difference between
+#'   \code{Close} minus \code{Open} prices divided by the difference between
+#'   \code{High} minus \code{Low} prices.
+#'   This statistic may also be interpreted as something like a Hurst exponent
+#'   for a single bar of data.
+#'   The motivation for the Sharpe-like statistic is the notion that if prices 
+#'   are trending in the same direction inside a given time bar of data, then
+#'   this statistic is close to either 1 or -1.
 #' @examples
 #' # create time index of one second intervals for a single day
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
 #'               to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-#' # create xts of random prices
+#' # create synthetic xts of random prices
 #' x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 #' # aggregate to minutes OHLC data
 #' oh_lc <- to.period(x=x_ts, period="minutes")
-#' # calculate Hurst exponent
-#' hurst_exp <- hurst_ohlc(oh_lc)
+#' # calculate running Sharpe ratio
+#' sharpe_running <- run_sharpe(oh_lc)
 
-hurst_ohlc <- function(ohlc, calc_method="rogers.satchell") {
-  hurst_exp <- switch(calc_method,
-                   "close"={(ohlc[, 4]-ohlc[, 1])^2},
-                   "garman.klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 -
-                       (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-                   "rogers.satchell"={(ohlc[, 2]-ohlc[, 3])/abs(ohlc[, 4]-ohlc[, 1])}
+run_sharpe <- function(oh_lc, calc_method="close") {
+  sharpe_ratio <- switch(calc_method,
+                   "close"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])},
+                   "method2"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])}
   )  # end switch
-  hurst_exp <- ifelse(ohlc[, 4]==ohlc[, 1], 0, log(hurst_exp))
-  colnames(hurst_exp) <- paste0(deparse(substitute(ohlc)), ".Hurst")
-  hurst_exp
-}  # end hurst_ohlc
+  sharpe_ratio <- ifelse(oh_lc[, 2]==oh_lc[, 3], 0, sharpe_ratio)
+  colnames(sharpe_ratio) <- paste0(rutils::na_me(oh_lc), ".Sharpe")
+  sharpe_ratio
+}  # end run_sharpe
 
 
 
@@ -711,22 +697,23 @@ hurst_ohlc <- function(ohlc, calc_method="rogers.satchell") {
 #' \code{OHLC} time series.
 #'
 #' @export
-#' @param ohlc \code{OHLC} time series of prices and trading volumes.
-#' @param esti_mator \code{character} string representing function for
+#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
+#'   \code{xts} format.
+#' @param mo_ment \code{character} string representing function for
 #'   estimating the moment.
-#' @param weight_ed \code{Boolean} should estimate be weighted by trade volume
-#'   (default is \code{TRUE})?
-#' @param ... additional parameters to esti_mator function.
-#' @return  Single \code{numeric} value equal to the weighted sum of an
+#' @param weight_ed \code{Boolean} should estimate be weighted by the trading 
+#'   volume? (default is \code{TRUE})
+#' @param ... additional parameters to the mo_ment function.
+#' @return  Single \code{numeric} value equal to the volume weighted sum of an 
 #'   estimator over the time series.
-#' @details Calculates a single number representing the weighted sum of an
-#'   estimator over the \code{OHLC} time series of prices.  By default the sum
-#'   is trade volume weighted.
+#' @details Calculates a single number representing the volume weighted sum of
+#'   an estimator over the \code{OHLC} time series of prices.  By default the
+#'   sum is trade volume weighted.
 #' @examples
 #' # create time index of one minute intervals over several days
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
 #'               to=as.POSIXct("2015-02-28 16:00:00"), by="1 min")
-#' # create xts of random prices
+#' # create synthetic xts of random prices
 #' x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
 #' # add trade Volume data
 #' x_ts <- merge(x_ts,
@@ -735,16 +722,16 @@ hurst_ohlc <- function(ohlc, calc_method="rogers.satchell") {
 #' # aggregate to hours OHLC data
 #' oh_lc <- to.period(x=x_ts, period="hours")
 #' # calculate time series of daily skew estimates
-#' sk_ew <- apply.daily(x=oh_lc, FUN=agg_regate, esti_mator="skew_ohlc")
+#' skew_daily <- apply.daily(x=oh_lc, FUN=agg_regate, mo_ment="run_skew")
 
-agg_regate <- function(ohlc, esti_mator="vari_ance", weight_ed=TRUE, ...) {
-# match "esti_mator" with moment function
-  esti_mator <- match.fun(esti_mator)
-  agg_regations <- esti_mator(ohlc=ohlc, ...)
+agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
+# match "mo_ment" with moment function
+  mo_ment <- match.fun(mo_ment)
+  agg_regations <- mo_ment(oh_lc, ...)
 # weight the estimates by volume
   if (weight_ed) {
-    agg_regations <- ohlc[, 5]*agg_regations
-    agg_regations <- sum(agg_regations)/sum(ohlc[, 5])
+    agg_regations <- oh_lc[, 5]*agg_regations
+    agg_regations <- sum(agg_regations)/sum(oh_lc[, 5])
   } else
     agg_regations <- sum(agg_regations)
   agg_regations
@@ -753,29 +740,34 @@ agg_regate <- function(ohlc, esti_mator="vari_ance", weight_ed=TRUE, ...) {
 
 
 
-#' Calculate the rolling aggregations of a statistical estimator over a
-#' \code{OHLC} time series.
+#' Calculate a vector of statistics over an \code{OHLC} time series, and
+#' calculate a rolling mean over the statistics.
 #'
 #' @export
-#' @param ohlc \code{OHLC} time series of prices and trading volumes.
-#' @param esti_mator \code{character} string representing function for
-#'   estimating the moment.
-#' @param n \code{numeric} number of periods for averaging of estimates.
-#' @param N \code{numeric} number of periods in a year (to annualize the
-#'   estimates).
-#' @param weight_ed \code{Boolean} should estimate be weighted by trade volume
-#'   (default \code{TRUE})?
-#' @param ... additional parameters to esti_mator function.
-#' @return  \code{numeric} time series of rolling aggregations, with the same
-#'   number of rows as the input \code{xts} series.
-#' @details Calculates a time series of rolling aggregations of an estimator
-#'   over a \code{OHLC} time series of prices or returns, etc.  By default the
-#'   estimates are trade volume weighted.
+#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
+#'   \code{xts} format.
+#' @param mo_ment \code{character} string representing a function for 
+#'   estimating statistics of a single bar of \code{OHLC} data, such as
+#'   volatility, skew, and higher moments.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for calculating the rolling mean.
+#' @param weight_ed \code{Boolean} should statistic be weighted by trade volume?
+#'   (default \code{TRUE})
+#' @param ... additional parameters to the mo_ment function.
+#' @return An \code{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
+#' @details Calculates a vector of statistics over an \code{OHLC} time series, 
+#'   such as volatility, skew, and higher moments.  The statistics could also be
+#'   any other aggregation of a single bar of \code{OHLC} data, for example the
+#'   \code{High} price minus the \code{Low} price squared.  The length of the 
+#'   vector of statistics is equal to the number of rows of the argument 
+#'   \code{oh_lc}. Then it calculates a trade volume weighted rolling mean over
+#'   the vector of statistics over and calculate statistics.
 #' @examples
 #' # create time index of one minute intervals over several days
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
 #'               to=as.POSIXct("2015-02-28 16:00:00"), by="1 min")
-#' # create xts of random prices
+#' # create synthetic xts of random prices
 #' x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
 #' # add trade Volume data
 #' x_ts <- merge(x_ts,
@@ -784,82 +776,274 @@ agg_regate <- function(ohlc, esti_mator="vari_ance", weight_ed=TRUE, ...) {
 #' # aggregate to hours OHLC data
 #' oh_lc <- to.period(x=x_ts, period="hours")
 #' # calculate time series of rolling variance and skew estimates
-#' vari_ance <- roll_agg(ohlc=oh_lc)
-#' sk_ew <- roll_agg(ohlc=oh_lc, esti_mator="skew_ohlc")
-#' sk_ew <- sk_ew/(vari_ance)^(1.5)
-#' sk_ew[1, ] <- 0
-#' sk_ew <- na.locf(sk_ew)
+#' var_rolling <- roll_moment(oh_lc=oh_lc)
+#' skew_rolling <- roll_moment(oh_lc=oh_lc, mo_ment="run_skew")
+#' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
+#' skew_rolling[1, ] <- 0
+#' skew_rolling <- na.locf(skew_rolling)
 
-roll_agg <- function(ohlc, esti_mator="vari_ance",
-                          n=20, N=260, weight_ed=TRUE, ...) {
-# match "esti_mator" with moment function
-  esti_mator <- match.fun(esti_mator)
-  agg_regations <- esti_mator(ohlc=ohlc, ...)
+roll_moment <- function(oh_lc, mo_ment="run_variance", win_dow=11, weight_ed=TRUE, ...) {
+# match "mo_ment" with moment function
+  mo_ment <- match.fun(mo_ment)
+  agg_regations <- mo_ment(oh_lc, ...)
 # weight by volume
   if (weight_ed) {
-    agg_regations <- ohlc[, 5]*agg_regations
-    roll_volume <- roll_sum(ohlc[, 5], win_dow=n)
-    agg_regations <- N*roll_sum(agg_regations, win_dow=n)/roll_volume
+    agg_regations <- oh_lc[, 5]*agg_regations
+    volume_rolling <- rutils::roll_sum(oh_lc[, 5], win_dow=win_dow)
+    agg_regations <- rutils::roll_sum(agg_regations, win_dow=win_dow)/volume_rolling
   } else
-    agg_regations <- N*roll_sum(agg_regations, win_dow=n)/n
-  agg_regations[1:(n-1)] <- 0
-  colnames(agg_regations) <- paste(rutils::na_me(ohlc), "Vol", sep=".")
+    agg_regations <- rutils::roll_sum(agg_regations, win_dow=win_dow)/win_dow
+  colnames(agg_regations) <- paste(rutils::na_me(oh_lc), "Vol", sep=".")
   agg_regations
-}  # end roll_agg
+}  # end roll_moment
 
 
 
-### Utility Functions
 
-#' Calculate the rolling sum of an \code{xts} time series over a sliding window
-#' (lookback period).
-#'
-#' Performs the same operation as function \code{runSum()} from package
-#' \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
-#' but using vectorized functions, so it's a little faster.
+#' Calculate the rolling Sharpe ratio over a rolling lookback window for an
+#' \code{OHLC} time series.
 #'
 #' @export
-#' @param x_ts an \code{xts} time series containing one or more columns of data.
-#' @param win_dow an integer specifying the number of lookback periods.
-#' @return \code{xts} time series with the same dimensions as the input series.
-#' @details For example, if win_dow=3, then the rolling sum at any point is
-#'   equal to the sum of \code{x_ts} values for that point plus two preceding
-#'   points.
-#'   The initial values of roll_sum() are equal to cumsum() values, so that
-#'   roll_sum() doesn't return any NA values.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for aggregating the \code{OHLC} prices.
+#' @return An \code{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
+#' @details Calculates the rolling Sharpe ratio as the ratio
+#'   of two rolling variance estimators.
+#'   The Sharpe ratio is defined as the logarithm of the ratio of the
+#'   variance of aggregated returns, divided by the average variance of returns.
+#'   The aggregated returns are calculated over non-overlapping windows using
+#'   the function \code{to_period()}.
+#'   The non-overlapping aggregation windows can be shifted by using the
+#'   argument \code{off_set}, which produces a slightly different series of
+#'   rolling Sharpe ratio values.
 #' @examples
-#' # create xts time series
-#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' roll_sum(x_ts=get("SPY"), win_dow=3)
+#' # apply roll_sharpe() to SPY
+#' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10, off_set=0)
+#' # calculate a series of rolling hurst values using argument off_set
+#' sharpe_rolling <- lapply(0:9, roll_sharpe, oh_lc=SPY, win_dow=10)
+#' sharpe_rolling <- rutils::do_call_rbind(sharpe_rolling)
+#' # remove daily warmup periods
+#' sharpe_rolling <- sharpe_rolling["T09:41:00/T16:00:00"]
+#' chart_Series(x=sharpe_rolling["2012-02-13"], 
+#'   name=paste(colnames(sharpe_rolling), "10-minute aggregations"))
 
-roll_sum <- function(x_ts, win_dow) {
-  cum_sum <- cumsum(x_ts)
-  out_put <- cum_sum - lag(x=cum_sum, k=win_dow)
-  out_put[1:win_dow, ] <- cum_sum[1:win_dow, ]
-  out_put
-}  # end roll_sum
+roll_sharpe <- function(oh_lc, win_dow=11) {
+  var_ohlc_agg <- (Cl(oh_lc) - rutils::lag_xts(Op(oh_lc), k=(win_dow-1)))/win_dow
+  var_ohlc <- sqrt(rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)/win_dow)
+  sharpe_rolling <- ifelse(var_ohlc==0, 
+                       1.0, 
+                       var_ohlc_agg/var_ohlc)
+  colnames(sharpe_rolling) <- paste0(rutils::na_me(oh_lc), ".Sharpe")
+  na.locf(sharpe_rolling)
+}  # end roll_sharpe
 
 
 
 
-#' Perform daily, weekly, monthly, and yearly seasonality aggregations over a
-#' univariate \code{xts} time series.
+#' Calculate the rolling Hurst exponent over a rolling lookback window or the
+#' end points of an \code{OHLC} time series.
+#' 
+#' @export
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for aggregating the \code{OHLC} prices.
+#' @param off_set the number of bars of data in the first, stub window.
+#' @param roll_end_points \code{Boolean} should the Hurst exponent be calculated 
+#'   using aggregations over the end points, or by rolling over a lookback 
+#'   window? (default is \code{FALSE})
+#' @return An \code{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
+#' @details Calculates the rolling Hurst exponent in two different ways, 
+#'   depending on the argument \code{roll_end_points}.
+#'   
+#'   If \code{roll_end_points} is \code{TRUE}, then the rolling Hurst exponent is
+#'   calculated as the logarithm of the ratios of two rolling variance 
+#'   estimates. The Hurst exponent is defined as the logarithm of the ratio of 
+#'   the variance of aggregated returns, divided by the variance of simple 
+#'   returns. The aggregated returns are calculated over non-overlapping windows
+#'   spanned by the end points, using the function \code{to_period()}. The Hurst
+#'   exponent values are calculated only at the end points. The non-overlapping
+#'   aggregation windows can be shifted by using the argument \code{off_set},
+#'   which produces a slightly different series of rolling hurst exponent
+#'   values.
+#'   
+#'   If \code{roll_end_points} is \code{FALSE}, then the rolling Hurst exponent 
+#'   is calculated as the logarithm of the ratios of two rolling price range 
+#'   estimates. The Hurst exponent is defined as the logarithm of the ratio of 
+#'   the range of aggregated prices, divided by the average range of prices in 
+#'   each bar. The aggregated prices are calculated over overlapping windows,
+#'   and the Hurst exponent values are calculated at each point in time.
+#' 
+#' @examples
+#' # calculate Hurst over rolling win_dow over SPY
+#' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10)
+#' # calculate Hurst over end points of SPY
+#' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10, off_set=0, roll_end_points=TRUE)
+#' # calculate a series of rolling hurst values using argument off_set
+#' hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, win_dow=10, roll_end_points=TRUE)
+#' hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
+#' # remove daily warmup periods
+#' hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
+#' chart_Series(x=hurst_rolling["2012-02-13"], 
+#'   name=paste(colnames(hurst_rolling), "10-minute aggregations"))
+
+roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
+  if(roll_end_points) {  # roll over end points
+    # aggregate oh_lc to a lower periodicity specified by end_points
+    ohlc_agg <- HighFreq::to_period(oh_lc=oh_lc, 
+                                    end_points=rutils::end_points(oh_lc, inter_val=win_dow, off_set=off_set))
+    var_ohlc_agg <- run_variance(ohlc_agg)
+    in_dex <- index(ohlc_agg)
+    var_ohlc <- rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)[in_dex]/win_dow
+  }
+  else {  # roll over overlapping windows
+    max_hi <- TTR::runMax(x=Hi(oh_lc), n=win_dow)
+    min_lo <- -TTR::runMax(x=-Lo(oh_lc), n=win_dow)
+    var_ohlc_agg <- max_hi - min_lo
+    var_ohlc_agg[1:(win_dow-1), ] <- 0
+    var_ohlc <- rutils::roll_sum((Hi(oh_lc) - Lo(oh_lc)), win_dow=win_dow)/win_dow
+  }  # end if
+  hurst_rolling <- ifelse((var_ohlc==0) | (var_ohlc_agg==0), 
+                       1.0, 
+                       log(var_ohlc_agg/var_ohlc)/log(win_dow))
+  colnames(hurst_rolling) <- paste0(rutils::na_me(oh_lc), ".Hurst")
+  na.locf(hurst_rolling)
+}  # end roll_hurst
+
+
+
+
+#' Apply an aggregation function over a rolling lookback window and the end
+#' points of an \code{OHLC} time series.
 #'
 #' @export
-#' @param x_ts univariate \code{xts} time series.
-#' @return \code{xts} time series with aggregations over the seasonality
+#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
+#'   \code{xts} format.
+#' @param agg_fun \code{character} string representing an aggregation function
+#'   to be applied over a rolling lookback window.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for applying the aggregation function.
+#' @param by_columns \code{Boolean} should the function \code{agg_fun} be 
+#'   applied column-wise, or should it be applied to all the columns combined?
+#'   (default is \code{FALSE})
+#' @param end_points an integer vector of end points.
+#' @param ... additional parameters to the agg_fun function.
+#' @return An \code{xts} time series with the same number of rows as the
+#'   argument \code{oh_lc}.
+#' @details Applies an aggregation function over a rolling lookback window and
+#'   the end points of an \code{OHLC} time series.
+#'   
+#'   Performs similar operations to the functions \code{rollapply()} and 
+#'   \code{period.apply()} from package 
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and
+#'   also the function \code{apply.rolling()} from package 
+#'   \href{https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html}{PerformanceAnalytics}.
+#'   (The function \code{rollapply()} isn't exported from the package 
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.)
+#'   
+#'   But the function \code{roll_apply()} is faster because it performs less
+#'   type-checking and other overhead. Unlike the other functions, 
+#'   \code{roll_apply()} doesn't produce any leading \code{NA} values.
+#'   
+#'   The function \code{roll_apply()} can be called in two different ways, 
+#'   depending on the argument \code{end_points}. 
+#'   If the argument \code{end_points} isn't explicitly passed to
+#'   \code{roll_apply()}, then the default value is used, and
+#'   \code{roll_apply()} performs aggregations over overlapping windows at each
+#'   point in time.
+#'   If the argument \code{end_points} is explicitly passed to 
+#'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
+#'   windows spanned by the end_points.
+#'   
+#'   The aggregation function \code{agg_fun} can return either a single value or
+#'   a vector of values. If the aggregation function \code{agg_fun} returns a 
+#'   single value, then \code{roll_apply()} returns an \code{xts} time series
+#'   with a single column. If the aggregation function \code{agg_fun} returns a 
+#'   vector of values, then \code{roll_apply()} returns an \code{xts} time
+#'   series with multiple columns equal to the length of the vector returned by
+#'   the aggregation function \code{agg_fun}.
+#'   
+#' @examples
+#' # extract a single day of SPY data
+#' price_s <- SPY["2012-02-13"]
+#' win_dow <- 11
+#' # Calculate the rolling sums of the columns of price_s
+#' agg_regations <- roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+#' # Apply a vector-valued aggregation function over a rolling window
+#' agg_function <- function(x_ts)  c(max(x_ts[, 1]), min(x_ts[, 4]))
+#' agg_regations <- roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow)
+#' # define end points at 11-minute intervals (SPY is minutely bars)
+#' end_points <- rutils::end_points(price_s, inter_val=win_dow)
+#' # Calculate the rolling sums of the columns of price_s over end_points
+#' agg_regations <- roll_apply(price_s, agg_fun=sum, win_dow=2, end_points=end_points, by_columns=TRUE)
+#' # Apply a vector-valued aggregation function over the end_points of price_s
+#' agg_regations <- roll_apply(price_s, agg_fun=agg_function, win_dow=2, end_points=end_points)
+
+roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11, 
+                       end_points=(0:NROW(oh_lc)), by_columns=FALSE, ...) {
+  # match "agg_fun" with moment function
+  agg_fun <- match.fun(agg_fun)
+  len_gth <- length(end_points)
+  # define start_points as lag of end_points
+  start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + 
+    (NROW(oh_lc) > (len_gth+1))
+  # perform aggregations over length of end_points
+  agg_regations <- if(by_columns)
+    sapply(oh_lc, function(col_umn)
+      sapply(2:len_gth, function(in_dex)
+        agg_fun(.subset_xts(col_umn, 
+                            start_points[in_dex]:end_points[in_dex]), ...)
+      ))  # end sapply
+  else {  # not by_columns
+    agg_regations <- sapply(2:len_gth, function(in_dex)
+      agg_fun(.subset_xts(oh_lc, 
+                          start_points[in_dex]:end_points[in_dex]), ...)
+    )  # end sapply
+    # coerce agg_regations into matrix and transpose it
+    if (is.vector(agg_regations))
+      agg_regations <- t(agg_regations)
+    agg_regations <- t(agg_regations)
+  }  # end if
+  # coerce agg_regations into xts series
+  xts(agg_regations, order.by=index(oh_lc[end_points]))
+}  # end roll_apply
+
+
+
+
+#' Perform seasonality aggregations over a single-column \code{xts} time series.
+#' 
+#' @export
+#' @param x_ts single-column \code{xts} time series.
+#' @param in_dex vector of \code{character} strings representing points in time,
+#'   of the same length as the argument \code{x_ts}.
+#' @return An \code{xts} time series with mean aggregations over the seasonality 
 #'   interval.
-#' @details An example of a daily seasonality aggregation is the average price
-#'   of a stock between 9:30AM and 10:00AM every day, over many days.
+#' @details Calculates the mean of values observed at the same points in time 
+#'   specified by the argument \code{in_dex}.
+#'   An example of a daily seasonality aggregation is the average
+#'   price of a stock between 9:30AM and 10:00AM every day, over many days.
+#'   The argument \code{in_dex} is passed into function \code{tapply()}, and
+#'   must be the same length as the argument \code{x_ts}.
 #' @examples
-#' season_ality(x_ts=get("SPY"))
+#' # calculate variance of each minutely OHLC bar of data
+#' x_ts <- run_variance(get("SPY"))
+#' # remove overnight variance spikes at "09:31"
+#' in_dex <- format(index(x_ts), "%H:%M")
+#' x_ts <- x_ts[!in_dex=="09:31", ]
+#' # calculate daily seasonality of variance
+#' season_ality(x_ts=x_ts)
 
-season_ality <- function(x_ts) {
-  in_dex <- format(index(x_ts), "%H:%M")
+season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
+# aggregate the mean
   agg_regation <- tapply(X=x_ts, INDEX=in_dex, FUN=mean)
+# coerce from array to named vector
   agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
+# coerce to xts
   agg_regation <- xts(x=agg_regation,
-      order.by=as.POSIXct(paste(Sys.Date(), unique(in_dex))))
+      order.by=as.POSIXct(paste(Sys.Date(), names(agg_regation))))
   colnames(agg_regation) <- colnames(x_ts)
   agg_regation
 }  # end season_ality
@@ -868,50 +1052,56 @@ season_ality <- function(x_ts) {
 
 
 #' Calculate the volume-weighted average price of an \code{OHLC} time series
-#' over a sliding window (lookback period).
+#' over a rolling window (lookback period).
 #'
 #' Performs the same operation as function \code{VWAP()} from package
 #' \href{https://cran.r-project.org/web/packages/TTR/index.html}{VWAP},
 #' but using vectorized functions, so it's a little faster.
 #'
 #' @export
-#' @param x_ts an \code{xts} time series containing one or more columns of data.
-#' @param win_dow an integer specifying the number of lookback periods.
-#' @return \code{xts} time series with a single column containing the VWAP of
-#'   the close prices, with the same number of rows as the input \code{xts} series.
-#' @details The volume-weighted average price (VWAP) over a period is defined as
-#'   the sum of the prices multiplied by trading volumes, divided by the total
-#'   trading volume in that period.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @param x_ts single-column \code{xts} time series.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for calculating the average price.
+#' @return An \code{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
+#' @details Calculates the volume-weighted average closing price, defined as the
+#'   sum of the prices multiplied by trading volumes in the lookback window,
+#'   divided by the sum of trading volumes in the window.
+#'   If the argument \code{x_ts} is passed in explicitly, then its
+#'   volume-weighted average value over time is calculated.
 #' @examples
-#' # create xts time series
-#' x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-#' v_wap(x_ts=get("SPY"), win_dow=11)
+#' # calculate the volume-weighted average closing price (VWAP)
+#' roll_vwap(oh_lc=get("SPY"), win_dow=11)
+#' # calculate the volume-weighted average returns
+#' roll_vwap(oh_lc=get("SPY"), x_ts=re_turns, win_dow=11)
 
-v_wap <- function(x_ts, win_dow) {
-  v_wap <- roll_sum(x_ts=Cl(x_ts)*Vo(x_ts), win_dow=win_dow)
-  vol_ume <- roll_sum(x_ts=Vo(x_ts), win_dow=win_dow)
-  v_wap <- v_wap/vol_ume
-  v_wap[is.na(v_wap)] <- 0
-  v_wap
-}  # end v_wap
+roll_vwap <- function(oh_lc, x_ts=Cl(oh_lc), win_dow) {
+  roll_vwap <- rutils::roll_sum(x_ts=x_ts*Vo(oh_lc), win_dow=win_dow)
+  volume_rolling <- rutils::roll_sum(x_ts=Vo(oh_lc), win_dow=win_dow)
+  roll_vwap <- roll_vwap/volume_rolling
+  roll_vwap[is.na(roll_vwap)] <- 0
+  colnames(roll_vwap) <- paste0(rutils::na_me(oh_lc), ".VWAP")
+  roll_vwap
+}  # end roll_vwap
 
 
 
 
-#' Aggregates an \code{OHLC} time series to lower periodicity.
+#' Aggregate an \code{OHLC} time series to a lower periodicity.
 #'
 #' Given an \code{OHLC} time series at high periodicity (say seconds),
 #' calculates the \code{OHLC} prices at lower periodicity (say minutes).
 #'
 #' @export
-#' @param x_ts an \code{xts} time series containing one or more columns of data.
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param period aggregation interval ("seconds", "minutes", "hours", "days",
 #'   "weeks", "months", "quarters", and "years").
 #' @param k number of periods to aggregate over (for example if period="minutes"
 #'   and k=2, then aggregate over two minute intervals.)
 #' @param end_points an integer vector of end points.
-#' @return \code{xts} \code{OHLC} time series of lower periodicity defined by
-#'   end_points.
+#' @return \code{OHLC} time series of prices in \code{xts} format, with a lower
+#'   periodicity defined by the end_points.
 #' @details #' Performs a similar aggregation as function \code{to.period()}
 #'   from package
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
@@ -931,12 +1121,10 @@ v_wap <- function(x_ts, win_dow) {
 #' # equivalent to:
 #' to.period(x=SPY["2009"], period="days", name=rutils::na_me(SPY))
 
-to_period <- function(x_ts,
+to_period <- function(oh_lc,
                       period="minutes", k=1,
-                      end_points=xts::endpoints(x_ts, period, k)) {
-  .Call("toPeriod", x_ts, as.integer(end_points), TRUE, NCOL(x_ts),
-        FALSE, FALSE, colnames(x_ts), PACKAGE="xts")
+                      end_points=xts::endpoints(oh_lc, period, k)) {
+  .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc),
+        FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 }  # end to_period
-
-
 

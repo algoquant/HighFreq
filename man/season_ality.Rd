@@ -2,27 +2,38 @@
 % Please edit documentation in R/HighFreq.R
 \name{season_ality}
 \alias{season_ality}
-\title{Perform daily, weekly, monthly, and yearly seasonality aggregations over a
-univariate \code{xts} time series.}
+\title{Perform seasonality aggregations over a single-column \code{xts} time series.}
 \usage{
-season_ality(x_ts)
+season_ality(x_ts, in_dex = format(index(x_ts), "\%H:\%M"))
 }
 \arguments{
-\item{x_ts}{univariate \code{xts} time series.}
+\item{x_ts}{single-column \code{xts} time series.}
+
+\item{in_dex}{vector of \code{character} strings representing points in time,
+of the same length as the argument \code{x_ts}.}
 }
 \value{
-\code{xts} time series with aggregations over the seasonality
+An \code{xts} time series with mean aggregations over the seasonality 
   interval.
 }
 \description{
-Perform daily, weekly, monthly, and yearly seasonality aggregations over a
-univariate \code{xts} time series.
+Perform seasonality aggregations over a single-column \code{xts} time series.
 }
 \details{
-An example of a daily seasonality aggregation is the average price
-  of a stock between 9:30AM and 10:00AM every day, over many days.
+Calculates the mean of values observed at the same points in time 
+  specified by the argument \code{in_dex}.
+  An example of a daily seasonality aggregation is the average
+  price of a stock between 9:30AM and 10:00AM every day, over many days.
+  The argument \code{in_dex} is passed into function \code{tapply()}, and
+  must be the same length as the argument \code{x_ts}.
 }
 \examples{
-season_ality(x_ts=get("SPY"))
+# calculate variance of each minutely OHLC bar of data
+x_ts <- run_variance(get("SPY"))
+# remove overnight variance spikes at "09:31"
+in_dex <- format(index(x_ts), "\%H:\%M")
+x_ts <- x_ts[!in_dex=="09:31", ]
+# calculate daily seasonality of variance
+season_ality(x_ts=x_ts)
 }
 

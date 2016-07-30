@@ -5,21 +5,22 @@
 \title{Calculate the aggregation (weighted sum) of a statistical estimator over a
 \code{OHLC} time series.}
 \usage{
-agg_regate(ohlc, esti_mator = "vari_ance", weight_ed = TRUE, ...)
+agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 }
 \arguments{
-\item{ohlc}{\code{OHLC} time series of prices and trading volumes.}
+\item{oh_lc}{\code{OHLC} time series of prices and trading volumes, in
+\code{xts} format.}
 
-\item{esti_mator}{\code{character} string representing function for
+\item{mo_ment}{\code{character} string representing function for
 estimating the moment.}
 
-\item{weight_ed}{\code{Boolean} should estimate be weighted by trade volume 
-(default is \code{TRUE})?}
+\item{weight_ed}{\code{Boolean} should estimate be weighted by the trading 
+volume? (default is \code{TRUE})}
 
-\item{...}{additional parameters to esti_mator function.}
+\item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-Single \code{numeric} value equal to the weighted sum of an
+Single \code{numeric} value equal to the volume weighted sum of an 
   estimator over the time series.
 }
 \description{
@@ -27,15 +28,15 @@ Calculate the aggregation (weighted sum) of a statistical estimator over a
 \code{OHLC} time series.
 }
 \details{
-Calculates a single number representing the weighted sum of an
-  estimator over the \code{OHLC} time series of prices.  By default the sum
-  is trade volume weighted.
+Calculates a single number representing the volume weighted sum of
+  an estimator over the \code{OHLC} time series of prices.  By default the
+  sum is trade volume weighted.
 }
 \examples{
 # create time index of one minute intervals over several days
 in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
               to=as.POSIXct("2015-02-28 16:00:00"), by="1 min")
-# create xts of random prices
+# create synthetic xts of random prices
 x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
 # add trade Volume data
 x_ts <- merge(x_ts,
@@ -44,6 +45,6 @@ x_ts <- merge(x_ts,
 # aggregate to hours OHLC data
 oh_lc <- to.period(x=x_ts, period="hours")
 # calculate time series of daily skew estimates
-sk_ew <- apply.daily(x=oh_lc, FUN=agg_regate, esti_mator="skew_ohlc")
+skew_daily <- apply.daily(x=oh_lc, FUN=agg_regate, mo_ment="run_skew")
 }
 

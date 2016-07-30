@@ -38,7 +38,7 @@ file.
 \details{
 The function \code{save_rets} loads multiple days of \code{TAQ}
   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
-  series.  It then calculates returns using function \code{calc_rets}, and
+  series.  It then calculates returns using function \code{run_returns}, and
   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
   to a file called \sQuote{\code{symbol.rets.RData}}.
   The \code{TAQ} data files are assumed to be stored in separate directories

@@ -1,43 +1,80 @@
 ---
-title: Package for high frequency time series data management
+title: HighFreq Package for High Frequency Time Series Data Management
 author: Jerzy Pawlowski (algoquant)
 abstract: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.
-tags: high frequency, time series, volatility"
+tags: high frequency, time series, volatility
 ---
 
 [![Build Status](https://travis-ci.org/algoquant/HighFreq.svg?branch=master)](https://travis-ci.org/algoquant/HighFreq)
 
 
-## HighFreq package for high frequency time series data management
+### Overview
 
-========
+The motivation for the *HighFreq* package is to create a library of functions designed for managing trade and quote (*TAQ*) and *OHLC* data, and for efficiently estimating various statistics, like volatility, skew, Hurst exponent, and Sharpe ratio, from that data.  
+
+The are several other packages which offer much of this functionality, like for example:
+
++ package [xts](https://cran.r-project.org/web/packages/xts/index.html)  
+
++ package [TTR](https://cran.r-project.org/web/packages/TTR/index.html)  
+
++ package [PerformanceAnalytics](https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html)  
+
++ package [highfrequency](https://cran.r-project.org/web/packages/highfrequency/index.html)  
+
+Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats.  The *HighFreq* package aims to create a unified framework, with consistent data formats and naming conventions. 
+
+The *OHLC* data format provides a way of efficiently compressing *TAQ* data, while preserving information about price levels, volatility (range), and trading volumes. 
+Therefore the *HighFreq* package relies on *OHLC* data formatted as *xts* time series. 
+
+
+### Functions for data scrubbing, formatting, and aggregation
 
 The *HighFreq* package contains functions for:
 
-* chaining and joining time series, 
-* scrubbing bad data from time series, 
-* managing time zones and alligning time indices, 
-* converting TAQ data to OHLC format, 
-* aggregating data to lower frequency (periodicity), 
-* calculating rolling aggregations (sum, VWAP, etc.), 
-* calculating seasonality aggregations, 
-* calculating moments (variance, skew, etc.), 
-* calculating functionals (Hurst exponent, etc.), 
++ chaining and joining time series, 
 
++ scrubbing bad data from time series, 
 
-========
++ managing time zones and alligning time indices, 
+
++ converting *TAQ* data to *OHLC* format, 
+
++ aggregating data to lower frequency (periodicity), 
+
++ estimating running statistics from *OHLC* data, such as volatility, skew, and higher moments, 
+
++ calculating rolling aggregations (VWAP, Hurst exponent, Sharpe ratio, etc.), 
+
++ calculating seasonality aggregations, 
+
 
 ### Installation and loading
 
-Installing *HighFreq* package from github:  
-```
+Install package *HighFreq* from github:  
+```{r eval=FALSE}
 install.packages("devtools")
-library(devtools)
-install_github(repo="algoquant/HighFreq")
+devtools::install_github(repo="algoquant/HighFreq")
 library(HighFreq)
 ```
+<br>
 
-========
+Install package *HighFreq* from source on local drive:  
+```{r eval=FALSE}
+install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
+# Install package from source on local drive using R CMD
+R CMD INSTALL C:\Develop\R\HighFreq
+library(HighFreq)
+```
+<br>
+
+Build reference manual for package *HighFreq* from *.Rd* files:  
+```{r eval=FALSE}
+system("R CMD Rd2pdf C:/Develop/R/HighFreq")
+R CMD Rd2pdf C:\Develop\R\HighFreq
+```
+<br>
+
 
 ### Data
 
@@ -46,53 +83,57 @@ The data source is the
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
 
 
-========
-
 ### Examples
 
 Calculate daily trading volume:  
-```
+```{r eval=FALSE}
 daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
 colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
 ```
+<br>
 
 Calculate daily variance (volatility):  
-```
+```{r eval=FALSE}
 daily_var <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
 colnames(daily_var) <- paste0(na_me(get(sym_bol)), ".Var")
 ```
+<br>
 
 Calculate daily skew:  
-```
+```{r eval=FALSE}
 daily_skew <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
 daily_skew <- daily_skew/(daily_var)^(1.5)
 colnames(daily_skew) <- paste0(na_me(get(sym_bol)), ".Skew")
 ```
+<br>
 
 Calculate daily Hurst:  
-```
+```{r eval=FALSE}
 daily_hurst <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
 colnames(daily_hurst) <- paste0(na_me(get(sym_bol)), ".Hurst")
 chart_Series(daily_hurst, name=paste(sym_bol, "Hurst"))
 ```
+<br>
 
 Calculate rolling prices:  
-```
+```{r eval=FALSE}
 roll_prices <- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
 colnames(roll_prices) <- paste0(sym_bol, ".Rets")
 chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
 add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
 ```
+<br>
 
 Calculate rolling volume-weighted variance:  
-```
+```{r eval=FALSE}
 roll_var <- roll_agg(ohlc=get(sym_bol), n=10)
 # plot without overnight jump
 chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste(sym_bol, "rolling volume-weighted variance"))
 ```
+<br>
 
 Calculate daily seasonality of Hurst exponent:  
-```
+```{r eval=FALSE}
 season_hurst <- season_ality(hurst_ohlc(ohlc=get(sym_bol)))
 colnames(season_hurst) <- paste0(na_me(get(sym_bol)), ".season_hurst")
 season_hurst <- season_hurst[-(NROW(season_hurst))]

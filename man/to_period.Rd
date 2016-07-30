@@ -2,13 +2,13 @@
 % Please edit documentation in R/HighFreq.R
 \name{to_period}
 \alias{to_period}
-\title{Aggregates an \code{OHLC} time series to lower periodicity.}
+\title{Aggregate an \code{OHLC} time series to a lower periodicity.}
 \usage{
-to_period(x_ts, period = "minutes", k = 1,
-  end_points = xts::endpoints(x_ts, period, k))
+to_period(oh_lc, period = "minutes", k = 1,
+  end_points = xts::endpoints(oh_lc, period, k))
 }
 \arguments{
-\item{x_ts}{an \code{xts} time series containing one or more columns of data.}
+\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
 
 \item{period}{aggregation interval ("seconds", "minutes", "hours", "days",
 "weeks", "months", "quarters", and "years").}
@@ -19,22 +19,22 @@ and k=2, then aggregate over two minute intervals.)}
 \item{end_points}{an integer vector of end points.}
 }
 \value{
-\code{xts} \code{OHLC} time series of lower periodicity defined by
-  end_points.
+\code{OHLC} time series of prices in \code{xts} format, with a lower
+  periodicity defined by the end_points.
 }
 \description{
-Given an \code{OHLC} time series at high periodicity (say seconds), 
+Given an \code{OHLC} time series at high periodicity (say seconds),
 calculates the \code{OHLC} prices at lower periodicity (say minutes).
 }
 \details{
 #' Performs a similar aggregation as function \code{to.period()}
-  from package 
+  from package
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
   the flexibility to aggregate to a user-specified vector of end points. The
-  function \code{to_period()} simply calls the compiled function 
-  \code{toPeriod()} (from package 
-  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to 
-  perform the actual aggregations.  If \code{end_points} are passed in 
+  function \code{to_period()} simply calls the compiled function
+  \code{toPeriod()} (from package
+  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to
+  perform the actual aggregations.  If \code{end_points} are passed in
   explicitly, then the \code{period} argument is ignored.
 }
 \examples{

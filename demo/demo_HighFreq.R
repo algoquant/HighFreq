@@ -1,6 +1,6 @@
 ################################################
 ###
-### Demos for managing high frequency data using package 'HighFreq'
+### Demos for managing high frequency data using package HighFreq
 ###
 ################################################
 
@@ -61,7 +61,7 @@ sym_bol <- load(
 taq_data <- scrub_TAQ(taq_data=get(sym_bol))
 
 # calculate returns
-xts_rets <- calc_rets(x_ts=taq_data)
+returns_running <- run_returns(x_ts=taq_data)
 
 ### scrub and aggregate a single day of TAQ data to OHLC
 ohlc_data <- scrub_agg(taq_data=get(sym_bol))
@@ -69,7 +69,7 @@ chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 
 
 ###########
-# process TAQ data using package 'HighFreq': load TAQ data, aggregate to OHLC, and save to file
+# process TAQ data using package HighFreq: load TAQ data, aggregate to OHLC, and save to file
 
 # aggregate TAQ data for a single symbol, and save to file
 save_scrub_agg(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
@@ -115,153 +115,249 @@ chart_xts(vol_at)
 # estimating rolling moments using package HighFreq
 library(HighFreq)
 
-## daily open to close variance and skew
-daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
+win_dow <- 10
+
+### daily open to close variance and skew
+daily_volume <- xts::apply.daily(x=get(sym_bol)[, 5], FUN=sum)
 colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
-daily_var <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
-colnames(daily_var) <- paste0(na_me(get(sym_bol)), ".Var")
-daily_skew <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
-daily_skew <- daily_skew/(daily_var)^(1.5)
-colnames(daily_skew) <- paste0(na_me(get(sym_bol)), ".Skew")
+var_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_variance", calc_method="rogers.satchell")
+colnames(var_daily) <- paste0(na_me(get(sym_bol)), ".Var")
+skew_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_skew")
+skew_daily <- skew_daily/(var_daily)^(1.5)
+colnames(skew_daily) <- paste0(na_me(get(sym_bol)), ".Skew")
 
-# daily autocorrelation or Hurst
-foo <- hurst_ohlc(get(sym_bol)["2013-11-12"])
-daily_hurst <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
-colnames(daily_hurst) <- paste0(na_me(get(sym_bol)), ".Hurst")
-chart_Series(daily_hurst[inter_val], name=paste(sym_bol, "Hurst"))
+# daily Sharpe
+sharpe_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_sharpe")
+colnames(sharpe_daily) <- paste0(na_me(get(sym_bol)), ".Sharpe")
+chart_Series(sharpe_daily[inter_val], name=paste(sym_bol, "Sharpe"))
 
-re_turns <- calc_rets(x_ts=get(sym_bol))
-daily_hurst <- re_turns[, 1]*lag(re_turns[, 1])/re_turns[, 1]^2
-daily_hurst[1, ] <- 0
-daily_hurst[is.nan(daily_hurst), ] <- 0
-daily_hurst <- apply.daily(x=daily_hurst, FUN=sum)
+# simple autocorrelation
+returns_running <- run_returns(x_ts=get(sym_bol))
+hurst_daily <- returns_running*lag(returns_running)/returns_running^2
+hurst_daily[1, ] <- 0
+hurst_daily[is.nan(hurst_daily), ] <- 0
+hurst_daily <- xts::apply.daily(x=hurst_daily, FUN=sum)
 
 library(PerformanceAnalytics)
-daily_hurst <- apply.daily(x=daily_hurst, FUN=HurstIndex)
+hurst_daily <- xts::apply.daily(x=hurst_daily, FUN=HurstIndex)
 
-daily_hurst <- apply.daily(x=daily_hurst, FUN=sum)
+hurst_daily <- xts::apply.daily(x=hurst_daily, FUN=sum)
 
-colnames(daily_hurst) <- paste0(sym_bol, ".autocorr")
+colnames(hurst_daily) <- paste0(sym_bol, ".autocorr")
 
 x11(width=6, height=4)
 inter_val <- "2013-06-01/"
-chart_Series(daily_var[inter_val], name=paste(sym_bol, "variance"))
-chart_Series(roll_sum(daily_hurst, win_dow=10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
+chart_Series(var_daily[inter_val], name=paste(sym_bol, "variance"))
+chart_Series(rutils::roll_sum(hurst_daily, win_dow=10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
 abline(h=0.5, col="blue", lwd=2)
 
-# minutely variance and skew
 # minutely returns
-re_turns <- calc_rets(x_ts=get(sym_bol)[inter_val])
+returns_running <- run_returns(x_ts=get(sym_bol)[inter_val])
 
-## rolling over end_points
-n_row <- NROW(re_turns)
+# rolling over end_points
+n_row <- NROW(returns_running)
 num_agg <- n_row %/% 10
 end_points <- c(0, n_row-10*num_agg + 10*(0:num_agg))
 
 # rolling prices
-roll_prices <- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
-colnames(roll_prices) <- paste0(sym_bol, ".Rets")
+prices_rolling <- rutils::roll_sum(get(sym_bol)[, 1], win_dow=win_dow)/win_dow
+colnames(prices_rolling) <- paste0(sym_bol, ".Rets")
 chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
-add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
+add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
 
-# rolling returns
-roll_returns <- roll_sum(re_turns[, 1], win_dow=10)/10
-colnames(roll_returns) <- paste0(sym_bol, ".Rets")
-roll_returns[1:10, ] <- 0
-roll_returns <- roll_returns[end_points, ]
+### rolling volume-weighted returns
+returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
+returns_rolling <- returns_rolling[end_points, ]
 
-# rolling volume-weighted variance
-roll_var <- roll_agg(ohlc=get(sym_bol), n=10)
-roll_var <- roll_var[end_points, ]
+### calculate SPY variance without overnight jumps
+var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+# calculate rolling SPY variance
+var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
+var_rolling <- var_rolling[end_points, ]
 
-# rolling autocorrelation
-roll_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
+### calculate running and rolling SPY skew
+skew_running <- run_skew(oh_lc=SPY)
+skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
+
+# calculate daily seasonality of skew
+skew_seasonal <- season_ality(skew_running)
+
+inter_val <- "2014-03-01/"
+chart_Series(var_rolling[inter_val], name=colnames(var_rolling))
+
+
+### calculate running and rolling Sharpe ratio
+sharpe_running <- run_sharpe(oh_lc=SPY)
+sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
+
+
+### calculate rolling Sharpe Hurst exponent using ratio of range variance estimators
+
+hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=win_dow)
+# calculate hurst_rolling by applying roll_hurst() over argument off_set
+hurst_rolling <- lapply(0:(win_dow-1), roll_hurst, oh_lc=SPY, win_dow=win_dow)
+hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
+# merge and remove duplicate trailing values
+dupli_cated <- hurst_rolling[duplicated(index(hurst_rolling)), ]
+dupli_cates <- rutils::do_call_rbind(lapply(unique(index(dupli_cated)), 
+                                            function(dupli_cate) 
+                                              xts(mean(hurst_rolling[dupli_cate, ]), 
+                                                  order.by=dupli_cate)))
+dupli_cated <- index(hurst_rolling) == unique(index(dupli_cated))
+hurst_rolling <- hurst_rolling[!dupli_cated, ]
+hurst_rolling <- rbind(hurst_rolling, dupli_cates)
+tail(hurst_rolling, 12)
+dim(hurst_rolling)
+
+# remove daily warmup periods
+hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
+
+# remove stub periods with low frequency of observations
+# calculate frequency of time periods
+period_freq <- table(in_dex)
+period_freq <- structure(as.vector(period_freq), names=names(period_freq))
+# remove stub periods
+period_freq <- period_freq[period_freq > mean(period_freq)]
+period_freq <- period_freq[-length(period_freq)]
+hurst_rolling <- hurst_rolling[in_dex %in% names(period_freq), ]
+chart_Series(x=hurst_rolling["2012-02-13"], 
+             name=paste(colnames(hurst_rolling), "10-minute aggregations"))
+
+### rolling autocorrelation
+roll_autocorr <- returns_running*lag(returns_running)
 roll_autocorr[1, ] <- 0
-roll_autocorr <- roll_sum(roll_autocorr[, 1], win_dow=10)/10
+roll_autocorr <- rutils::roll_sum(roll_autocorr[, 1], win_dow=10)/10
 roll_autocorr[1:10, ] <- 0
 colnames(roll_autocorr) <- paste0(sym_bol, ".autocorr")
 roll_autocorr <- roll_autocorr[end_points, ]
 
-inter_val <- "2014-03-01/"
-chart_Series(roll_var[inter_val], name=colnames(roll_var))
 
-# define end points at 10-minute intervals
-inter_val <- 10
-# rolling Hurst exponent using ratio of range variance estimators
-foo <- lapply(0:(inter_val-1), function(off_set) {
-  end_points <- rutils::end_points(SPY, inter_val=inter_val, off_set=off_set)
-# aggregate over 10-minute end_points:
-  SPY10 <- to_period(x_ts=SPY, end_points=end_points)
-  vari_ance10 <- vari_ance(SPY10)
-# vari_ance <- vari_ance(SPY)
-  vari_ance <- diff(cumsum(vari_ance(SPY))[index(vari_ance10)])/inter_val
-  roll_hurst <- ifelse((vari_ance==0) | (vari_ance10==0), 
-                       NA, 
-                       log(vari_ance10/vari_ance)/log(inter_val))
-  roll_hurst[1] <- roll_hurst[2]
-  roll_hurst <- na.locf(roll_hurst)
-#  log((x_ts10[, 2]-x_ts10[, 3])/vol_xts)/log(10))
-  colnames(roll_hurst) <- paste0(sym_bol, ".Hurst")
-  roll_hurst
-})  # end lapply
+### design matrix called SPY_design containing columns of aggregations
 
-bar <- do_call_rbind(foo)
-which(.index(bar)==(.index(bar)[-1]))
-bar[625424] <- mean(bar[625424:625434])
-bar <- bar[-(625424:625434)]
-bar[625421:625434]
-season_hurst <- season_ality(bar)
+win_dow <- 5
+returns_running <- run_returns(x_ts=SPY)
+returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
+colnames(returns_running) <- "returns"
+colnames(returns_rolling) <- "returns.WA5"
+SPY_design <- cbind(returns_running, returns_rolling)
 
-season_hurst <- season_ality(roll_hurst)
-colnames(season_hurst) <- paste0(sym_bol, ".season_hurst")
+var_running <- run_variance(oh_lc=SPY)
+var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
+colnames(var_running) <- "variance"
+colnames(var_rolling) <- "variance.WA5"
+SPY_design <- cbind(SPY_design, var_running, var_rolling)
+
+skew_running <- run_skew(oh_lc=SPY)
+skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
+colnames(skew_running) <- "skew"
+colnames(skew_rolling) <- "skew.WA5"
+SPY_design <- cbind(SPY_design, skew_running, skew_rolling)
+
+sharpe_running <- run_sharpe(oh_lc=SPY)
+sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
+colnames(sharpe_running) <- "sharpe_running"
+colnames(sharpe_rolling) <- "sharpe_running.WA5"
+SPY_design <- cbind(SPY_design, sharpe_running, sharpe_rolling)
+
+sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=win_dow)
+colnames(sharpe_rolling) <- "sharpe_rolling"
 x11()
-chart_Series(x=season_hurst, 
-             name=paste(colnames(season_hurst), "daily seasonality"))
+chart_Series(sharpe_rolling["2013-11-12", ], name=paste(sym_bol, "sharpe_rolling"))
+SPY_design <- cbind(SPY_design, sharpe_rolling)
+
+hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=win_dow)
+colnames(hurst_rolling) <- "hurst_rolling"
+chart_Series(hurst_rolling["2013-11-12", ], name=paste(sym_bol, "hurst_rolling"))
+SPY_design <- cbind(SPY_design, hurst_rolling)
+
+SPY_design <- cbind(SPY_design, Vo(SPY))
+
+colnames(SPY_design)
+# SPY_design <- cbind(SPY_design[, -1], SPY_design[, "SPY.Volume"])
+
+head(SPY_design["2013-11-12", ], 7)
+save(SPY_design, file="C:/Develop/data/SPY_design.RData")
+load(file="C:/Develop/data/SPY_design.RData")
 
 
-agg_regate
-season_var <- season_ality(vari_ance(ohlc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
-colnames(season_var) <- paste0(na_me(get(sym_bol)), ".season_var")
+### rolling lm using package roll
+
+library(roll)
+
+returns_running <- rutils::lag_xts(SPY_design[, "returns"], k=-1)
+tail(cbind(returns_running, SPY_design[, "returns"]))
+
+lm_coef <- function(x, y) {
+  lm(x ~ y)$coef
+}  # end lm_coef
+
+roll_lm <- rollapply(data = returns, width = 252,
+                       FUN = lm_coef, by.column = FALSE,
+                       align = "right")
 
 
-## daily seasonality
+### daily seasonality
 
-library(HighFreq)
-season_volume <- season_ality(Vo(get(sym_bol)[inter_val]))
-colnames(season_volume) <- paste0(na_me(get(sym_bol)), ".season_volume")
-season_data <- season_volume
+# calculate daily seasonality of volume
+volume_seasonal <- season_ality(Vo(get(sym_bol)[inter_val]))
+colnames(volume_seasonal) <- paste0(na_me(get(sym_bol)), ".volume_seasonal")
+season_data <- volume_seasonal
 
-season_var <- season_ality(vari_ance(ohlc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
-colnames(season_var) <- paste0(na_me(get(sym_bol)), ".season_var")
-season_data <- season_var
+# calculate daily seasonality of variance
+var_seasonal <- season_ality(run_variance(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+colnames(var_seasonal) <- paste0(na_me(get(sym_bol)), ".var_seasonal")
+season_data <- var_seasonal
 
-season_illiquid <- 1e6*sqrt(season_var/season_volume)
-foo <- 1e6*ifelse(Vo(get(sym_bol))==0, 0, sqrt(vari_ance(ohlc=get(sym_bol))/Vo(get(sym_bol))))
+# calculate daily seasonality of variance
+# calculate variance of each minutely OHLC bar of data
+x_ts <- run_variance(get("SPY"))
+# remove overnight variance spikes at "09:31"
+x_ts <- x_ts["T09:32:00/T16:00:00"]
+# calculate daily seasonality of variance
+var_seasonal <- season_ality(x_ts=x_ts)
+chart_Series(x=var_seasonal, 
+             name=paste(colnames(var_seasonal), "daily seasonality"))
+
+season_illiquid <- 1e6*sqrt(var_seasonal/volume_seasonal)
+foo <- 1e6*ifelse(Vo(get(sym_bol))==0, 0, sqrt(run_variance(oh_lc=get(sym_bol))/Vo(get(sym_bol))))
 season_illiquid <- season_ality(foo)
-season_illiquid <- season_ality(sqrt(vari_ance(ohlc=get(sym_bol))/Vo(get(sym_bol))))
+season_illiquid <- season_ality(sqrt(run_variance(oh_lc=get(sym_bol))/Vo(get(sym_bol))))
 colnames(season_illiquid) <- paste0(na_me(get(sym_bol)), ".season_illiquid")
 season_data <- season_illiquid
 
-season_skew <- season_ality(skew_ohlc(ohlc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
-# season_skew <- season_skew/(season_var)^(1.5)
-colnames(season_skew) <- paste0(na_me(get(sym_bol)), ".season_skew")
-season_data <- season_skew
+# calculate daily seasonality of skew
+skew_seasonal <- season_ality(run_skew(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+# skew_seasonal <- skew_seasonal/(var_seasonal)^(1.5)
+colnames(skew_seasonal) <- paste0(na_me(get(sym_bol)), ".skew_seasonal")
+season_data <- skew_seasonal
 
-season_hurst <- season_ality(hurst_ohlc(ohlc=get(sym_bol)[inter_val, 1:4]))
-colnames(season_hurst) <- paste0(na_me(get(sym_bol)), ".season_hurst")
-season_data <- season_hurst
+# calculate daily seasonality of Hurst exponent
+hurst_seasonal <- season_ality(hurst_rolling)
+colnames(hurst_seasonal) <- paste0(colnames(hurst_rolling), ".seasonal")
+# plot without daily warmup period
+chart_Series(x=hurst_seasonal[-(1:10), ], 
+             name=paste(colnames(hurst_seasonal), "daily seasonality"))
+# below is for run_sharpe() which isn't really true Hurst
+hurst_seasonal <- season_ality(run_sharpe(oh_lc=get(sym_bol)[inter_val, 1:4]))
+hurst_seasonal <- hurst_seasonal[-NROW(hurst_seasonal)]
+colnames(hurst_seasonal) <- paste0(rutils::na_me(get(sym_bol)), ".seasonal")
+season_data <- hurst_seasonal
 
-season_data <- season_ality(get(sym_bol)[inter_val, 4])
-
-
-
-season_autocorr <- re_turns[, 1]*lag(re_turns[, 1])
+season_autocorr <- returns_running*lag(returns_running)
 season_autocorr[1, ] <- 0
-season_autocorr <- re_turns[, 1]*lag(roll_sum(re_turns[, 1], win_dow=5)/5)
+season_autocorr <- returns_running*lag(rutils::roll_sum(returns_running, win_dow=5)/5)
 season_autocorr[1:5, ] <- 0
 season_autocorr <- season_ality(season_autocorr)
 colnames(season_autocorr) <- paste0(na_me(get(sym_bol)), ".season_autocorr")
-season_data <- roll_sum(season_autocorr, win_dow=5)/5
+season_data <- rutils::roll_sum(season_autocorr, win_dow=5)/5
+
+# daily Hurst exponents
+hurst_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_sharpe")
+hurst_daily <- xts::apply.daily(x=SPY, FUN=function(x, ...) abs(agg_regate(oh_lc=x, ...)), mo_ment="run_sharpe")
+colnames(hurst_daily) <- paste0(rutils::na_me(get(sym_bol)), ".Hurst.daily")
+chart_Series(roll_sum(hurst_daily, 10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
+abline(h=0.5, col="blue", lwd=2)
 
 
 ## aggregate SPY to 10-minute bars
@@ -292,12 +388,12 @@ plot(ch_ob)
 
 
 ## regressions
-da_ta <- cbind(roll_autocorr, roll_var)
-da_ta <- cbind(foo, roll_var)
+da_ta <- cbind(roll_autocorr, var_rolling)
+da_ta <- cbind(foo, var_rolling)
 
-da_ta <- cbind(daily_hurst, daily_var)
-da_ta <- cbind(season_hurst, season_var)
-da_ta <- cbind(daily_hurst, daily_skew)
+da_ta <- cbind(hurst_daily, var_daily)
+da_ta <- cbind(hurst_seasonal, var_seasonal)
+da_ta <- cbind(hurst_daily, skew_daily)
 
 for_mula <- as.formula(paste(colnames(da_ta)[1], 
                              paste(paste(colnames(da_ta)[-1], 
@@ -319,14 +415,14 @@ ran_ge <- range(da_ta[inter_val, 2])
 add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 
 # rolling volume-weighted skewness
-roll_skew <- roll_agg(ohlc=get(sym_bol)[inter_val], esti_mator="skew_ohlc", n=10)
-roll_skew <- roll_skew/(roll_var)^(1.5)
-roll_skew[1, ] <- 0
-roll_skew <- na.locf(roll_skew)
-tail(roll_skew, 11)
+skew_rolling <- roll_moment(oh_lc=get(sym_bol)[inter_val], mo_ment="run_skew", win_dow=10)
+skew_rolling <- skew_rolling/(var_rolling)^(1.5)
+skew_rolling[1, ] <- 0
+skew_rolling <- na.locf(skew_rolling)
+tail(skew_rolling, 11)
 
 
-## Bootstrap of standard errors of all the methods in function vari_ance()
+## Bootstrap of standard errors of all the methods in function run_variance()
 
 set.seed(1121)  # reset random number generator
 
@@ -334,42 +430,42 @@ set.seed(1121)  # reset random number generator
 in_dex <- seq(from=as.POSIXct("2016-01-01 00:00:00"),
               to=as.POSIXct("2016-01-30 00:00:00"), by="1 sec")
 # create xts of random prices
-re_turns <- rnorm(length(in_dex), sd=0.001)
-x_ts <- xts(exp(cumsum(re_turns)), order.by=in_dex)
+returns_running <- rnorm(length(in_dex), sd=0.001)
+x_ts <- xts(exp(cumsum(returns_running)), order.by=in_dex)
 x_ts <- xts(exp(cumsum(rnorm(length(in_dex), sd=0.001))), order.by=in_dex)
 # aggregate to minutes OHLC data
 oh_lc <- xts::to.period(x=x_ts, period="minutes")
 # calculate variance estimates
-vari_ance <- vari_ance(oh_lc)
+vari_ance <- run_variance(oh_lc)
 sum(vari_ance)
 
-# calculate variance using all the different estimators in vari_ance()
+# calculate variance using all the different estimators in run_variance()
 meth_ods <- c("close", "garman.klass", "rogers.satchell", "garman.klass_yz", "yang.zhang")
 sapply(meth_ods, function(meth_od) {
-  sum(vari_ance(oh_lc, calc_method=meth_od))
+  sum(run_variance(oh_lc, calc_method=meth_od))
 })
 
 # calculate standard errors of variance estimators using bootstrap
 boot_strap <- sapply(1:100, function(x) {
-  boot_sample <- sample(re_turns, replace=TRUE)
+  boot_sample <- sample(returns_running, replace=TRUE)
   x_ts <- xts(exp(cumsum(boot_sample)), order.by=in_dex)
 # aggregate to minutes OHLC data
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
 # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(vari_ance(oh_lc, calc_method=meth_od))
+    sum(run_variance(oh_lc, calc_method=meth_od))
   })  # end sapply
 })  # end sapply
 
 # calculate standard errors of variance estimators using bootstrap - parallel version
 boot_strap <- sapply(1:100, function(x) {
-  boot_sample <- sample(re_turns, replace=TRUE)
+  boot_sample <- sample(returns_running, replace=TRUE)
   x_ts <- xts(exp(cumsum(boot_sample)), order.by=in_dex)
   # aggregate to minutes OHLC data
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
   # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(vari_ance(oh_lc, calc_method=meth_od))
+    sum(run_variance(oh_lc, calc_method=meth_od))
   })  # end sapply
 })  # end sapply
 
@@ -380,8 +476,50 @@ boot_errors <- apply(boot_strap, MARGIN=1, sd)
 save(boot_strap, file="C:/Develop/data/boot_strap.RData")
 
 # calculate variance estimates for SPY
-vari_ance <- vari_ance(SPY)
+vari_ance <- run_variance(SPY)
 
 
+###########
+### benchmark HighFreq::roll_apply() to functions xts:::rollapply.xts(), 
+# xts::period.apply(), and PerformanceAnalytics::apply.rolling()
+
+# extract a single day of SPY data
+price_s <- SPY["2012-02-13"]
+win_dow <- 11
+library(PerformanceAnalytics)  # load package PerformanceAnalytics
+# define aggregation function that returns a vector of values
+agg_function <- function(x_ts)  c(max(x_ts[, 1]), min(x_ts[, 4]))
+agg_function <- function(x_ts)  sapply(x_ts, mean)
+agg_function(price_s)
+# perform aggregations for vector-valued aggregation function
+foo <- xts:::rollapply.xts(price_s, FUN=agg_function, width=win_dow, align="right", by.column=FALSE)
+bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow)
+# perform aggregations for scalar-valued aggregation function
+foo <- xts:::rollapply.xts(price_s, FUN=sum, width=win_dow, align="right")
+bar <- HighFreq::roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+
+# define end points at 10-minute intervals (SPY is minutely bars)
+end_points <- rutils::end_points(price_s, inter_val=win_dow)
+foo <- xts::period.apply(price_s[, 1], FUN=sum, INDEX=end_points)
+bar <- HighFreq::roll_apply(price_s[, 1], agg_fun=sum, win_dow=2, end_points=end_points)
+foo <- xts::period.apply(price_s, FUN=agg_function, INDEX=end_points)
+bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=2, end_points=end_points)
+
+# perform aggregations over length of end_points
+foo_bar <- PerformanceAnalytics::apply.rolling(price_s, FUN=agg_function, width=win_dow)
+head(cbind(foo, bar, foo_bar), 14)
+
+# benchmark the speed of the functionals
+library(microbenchmark)
+summary(microbenchmark(
+  roll_apply=HighFreq::roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE),
+  rollapply=xts:::rollapply.xts(price_s, FUN=sum, width=win_dow, align="right"), 
+  apply.rolling=apply.rolling(price_s, FUN=sum, width=win_dow), 
+  times=10))[, c(1, 4, 5)]
+
+summary(microbenchmark(
+  roll_apply=HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow),
+  rollapply=xts:::rollapply.xts(price_s, FUN=agg_function, width=win_dow, align="right", by.column=FALSE), 
+  times=10))[, c(1, 4, 5)]
 
 

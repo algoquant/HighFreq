@@ -1,33 +1,113 @@
 ############
 # ToDo list for package HighFreq: high frequency data scrubbing
 
-https://cran.r-project.org/doc/manuals/r-release/R-admin.html
-R CMD INSTALL HighFreq
-or
-install.packages("C:/Develop/R/HighFreq", repos=NULL, type="source")
-
-# create package vignette from *.Rd files
-R CMD Rd2pdf HighFreq
+### scripts for package building
+# Install package from source on local drive
+install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
+# Install package from source on local drive using R CMD
+R CMD INSTALL C:\Develop\R\HighFreq
+# Install package from github
+devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
+# build package reference manual from *.Rd files
+system("R CMD Rd2pdf C:/Develop/R/HighFreq")
+R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### comments
-Calculating returns on 1-second bars doesn't make sense for two reasons: 
+
+# High frequency data has three tenor horizons: daily (daily or lower frequency of data), intraday (secondly to daily frequency of data), and sub-second tenor horizons (sub-secondly or higher frequency of data).
+At the sub-second tenor horizon, returns are dominated by noise and the bid-ask bounce.
+Returns are dominated in their scale by the volatility, and they have no discernable trend.
+At the sub-second horizon technical indicators are meaningless, and instead traders analyze the order book for clues about future returns.
+At the intraday tenor horizon volatility, skew, and kurtosis are high, and mean-reversion dominates trending.
+Technical indicators based on past returns and trading volumes can offer clues about future returns.
+At the daily tenor horizon skew and kurtosis are small, and trending dominates mean-reversion.
+
+# Calculating returns on 1-second bars doesn't make sense for two reasons: 
 First, because the changes in price are very small, comparable to the precision of prices (number of significant digits).
 As a result, price changes on 1-second bars are either zero or low multiples of the precision. 
 Second, the 1-second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
 Therefore 1-second bar returns carry almost no information.
 
 
-### tasks pending
+### tasks to-do
 
-- [ ] add wiki  
+- [ ] update README and web page  
+
+- [x] create function roll_sharpe()
+
+- [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
+
+- [x] modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
+
+- [ ] create function sea_son() for calculating time of day (year) as fraction
+The time of day can be used as an input into a seasonal model
+
+- [ ] create volume-weighted Hurst and density plots  
+https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
+
+- [ ] create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
+
+- [ ] modify function season_ality() to discard elements corresponding to infrequent observations ?
+
+- [ ] create Rcpp function for fast rolling aggregations over endpoints
 
 - [ ] apply Hampel Filter to scrub data
+
+- [ ] aggregate data to 10-second bars (?)  
+
+- [ ] add wiki  
 
 - [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
 
 - [ ] add vignette and automatically build vignette  
 
-- [ ] create /tests directory and use testthat
+- [ ] introduce unit testing using testthat and devtools: create /tests directory
+
+- [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
+add argument "open_to_close" with default value TRUE  
+
+- [ ] prove that OHLC skew formula is an estimator of skew  
+Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
+perform simulation to find out  
+https://en.wikipedia.org/wiki/First-hitting-time_model  
+https://en.wikipedia.org/wiki/Wiener_process  
+
+- [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
+
+- [ ] add logical arg as option to aggregate data or not
+
+- [ ] calculate rets from scrubbed data
+
+- [ ] calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
+
+- [ ] create function to estimate beta from HFreq data
+
+- [ ] create function to forecast skewness
+Show that variance is predictable over time 
+Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
+so variables other than lagged skewness are required to forecast skewness.
+Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
+
+- [x] rename functions calc_returns(), vari_ance(), skew_ohlc(), sharpe_ohlc() to run_returns(), run_variance(), run_skew(), run_sharpe()  
+
+- [x] rename function v_wap() to roll_vwap()  
+
+- [x] modify function roll_hurst() using TTR::runMax()  
+
+- [x] rename function hurst_ohlc() to sharpe_ohlc()  
+
+- [x] rename and modify function calc_rets() to calc_returns(): 
+return single column with name "SPY.returns"
+will break save_rets() and save_rets_ohlc()
+
+- [x] modify function v_wap() to accept argument x_ts  
+
+- [x] remove .Rproj.user directory from GitHub repository
+steps:
+- open Windows PowerShell from GitHub Desktop
+- run: git filter-branch --tree-filter 'rm -f -R .Rproj.user' HEAD
+- run: git push origin master -f
+http://stackoverflow.com/questions/32228841/github-gitignore-adds-folder-previously-not-on-gitignore
 
 - [x] create project website for HighFreq on GitHub Pages using R Markdown  
 
@@ -38,81 +118,27 @@ https://rud.is/b/2016/02/04/alternate-r-markdown-templates/
 https://github.com/hrbrmstr/markdowntemplates
 http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
-- [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
-add argument "open_to_close" with default value TRUE  
-
-- [ ] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()  
-use HurstIndex() from PerformanceAnalytics?
-HurstIndex() is wrong because it uses range of returns, instead of range of cumulative returns!
-apply log()
-https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis
-Detrended fluctuation analysis - is it like variance ratios?
-
-- [ ] create volume-weighted Hurst and density plots  
-https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
-
-- [ ] prove that OHLC skew formula is an estimator of skew  
-Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
-perform simulation to find out  
-https://en.wikipedia.org/wiki/First-hitting-time_model  
-https://en.wikipedia.org/wiki/Wiener_process  
-
-- [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
-
-- [ ] aggregate data to 10-second bars (?)  
-
-- [ ] convert function season_ality() to use split.xts() (?)  
-
-- [ ] create function open_close() to remove close-to-open jumps from OHLC (?)  
-
-- [ ] replace caTools with TTR functions (?)  
-only runquantile() is called from caTools  
-but not easy to replace runquantile(), because no equivalent TTR function  
-would require rewriting extreme_values() and price_jumps(), and then benchmarking  
-
-- [ ] move roll_sum() to rutils (?)
-
-- [ ] use .subset_xts() (?)
-
-- [ ] rename save_rets_OHLC to rets_OHLC (?)  
-
-add logical arg as option to aggregate data or not
-
-calculate rets from scrubbed data
-
-calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
-
-create function to estimate beta from HFreq data
-
-create function to forecast skewness
-Show that variance is predictable over time 
-Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
-so variables other than lagged skewness are required to forecast skewness.
-Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
-
-study time dependence of mean, variance, skewness, and kurtosis
-show that skewness and kurtosis decay with time
-
-
-
-calculate tail shape of return frequency distribution and demonstrate power law
-
-
-analyze code in functions:
-	rmOutliers
-	loadInstruments
-	getSymbols.FI - done
-
-
-adopt .Rdata file and directory conventions
-
-analyze code in:
-	scripts_hist.R - done
-	Rhistory 07-12-14.txt - done
-	copy anything useful and then delete files - done
-
 
 ### tasks finished
+
+- [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
+use apply_rolling() from utilLib
+
+- [x] rename function roll_agg() to roll_moment(), and its argument esti_mator to mo_ment  
+
+- [x] modify function hurst_ohlc() to calculate (C-O)/(H-L)
+
+- [x] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()  
+Detrended fluctuation analysis - is it like variance ratios?
+Hurst analysis is related to Detrended fluctuation analysis:
+https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis
+HurstIndex() from PerformanceAnalytics is wrong because it uses range of returns, instead of range of cumulative returns!
+variance ratio test
+http://quant.stackexchange.com/questions/7666/using-variance-ratios-to-test-for-mean-reversion
+
+- [x] move function roll_sum() from HighFreq to rutils
+
+- [x] add to function season_ality() in_dex argument
 
 - [x] perform bootstrap estimation of standard errors for all the methods in function vari_ance()  
 benchmark to random OHLC
@@ -186,6 +212,19 @@ created function save_rets_OHLC()
 
 
 ### tasks deprecated
+
+- [ ] convert function season_ality() to use split.xts() (?)  
+
+- [ ] create function open_close() to remove close-to-open jumps from OHLC (?)  
+
+- [ ] replace caTools with TTR functions (?)  
+only runquantile() is called from caTools  
+but not easy to replace runquantile(), because no equivalent TTR function  
+would require rewriting extreme_values() and price_jumps(), and then benchmarking  
+
+- [ ] use .subset_xts() (?)
+
+- [ ] rename save_rets_OHLC to rets_OHLC (?)  
 
 - [ ] calculate volume-weighted moments and compare them to standard moments
 add volume-weighting to vol_ohlc() and skew_ohlc()

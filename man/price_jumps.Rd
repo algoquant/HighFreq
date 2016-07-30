@@ -2,13 +2,13 @@
 % Please edit documentation in R/HighFreq.R
 \name{price_jumps}
 \alias{price_jumps}
-\title{Identify isolated price jumps in a univariate \code{xts} time series of
+\title{Identify isolated price jumps in a single-column \code{xts} time series of
 prices, based on pairs of large neighboring returns of opposite sign.}
 \usage{
 price_jumps(x_ts, win_dow = 51, vol_mult = 2)
 }
 \arguments{
-\item{x_ts}{univariate \code{xts} time series of prices.}
+\item{x_ts}{single-column \code{xts} time series of prices.}
 
 \item{win_dow}{number of data points for estimating rolling volatility.}
 
@@ -19,7 +19,7 @@ price_jumps(x_ts, win_dow = 51, vol_mult = 2)
   series.
 }
 \description{
-Identify isolated price jumps in a univariate \code{xts} time series of
+Identify isolated price jumps in a single-column \code{xts} time series of
 prices, based on pairs of large neighboring returns of opposite sign.
 }
 \details{
@@ -27,7 +27,7 @@ Isolated price jumps are single prices that are very different from
   neighboring values.  Price jumps create pairs of large neighboring returns
   of opposite sign. The function \code{price_jumps} first calculates simple
   returns from prices. Then it calculates the rolling volatility of returns
-  as a quantile of returns over a sliding window. Jump prices are identified
+  as a quantile of returns over a rolling window. Jump prices are identified
   as those where neighboring returns both exceed a multiple of the rolling
   volatility, but the sum of those returns doesn't exceed it.
 }
