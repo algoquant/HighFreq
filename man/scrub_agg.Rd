@@ -57,6 +57,6 @@ taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRU
 colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 # aggregate to ten minutes OHLC data
 ohlc_data <- scrub_agg(taq_data, period="10 min")
-chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
+chartSeries(ohlc_data, name=SPY, theme=chartTheme("white"))
 }
 

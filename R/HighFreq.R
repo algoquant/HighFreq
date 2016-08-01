@@ -135,7 +135,7 @@ price_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 
 scrub_TAQ <- function(taq_data, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # convert timezone of index to New_York
-  index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
+  index(taq_data) <- lubridate::with_tz(time=index(taq_data), tzone=tzone)
 # subset data to NYSE trading hours
   taq_data <- taq_data['T09:30:00/T16:00:00', ]
 # return NULL if no data
@@ -206,12 +206,12 @@ scrub_TAQ <- function(taq_data, win_dow=51, vol_mult=2, tzone="America/New_York"
 #' colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
 #' # aggregate to ten minutes OHLC data
 #' ohlc_data <- scrub_agg(taq_data, period="10 min")
-#' chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
+#' chartSeries(ohlc_data, name=SPY, theme=chartTheme("white"))
 
 scrub_agg <- function(taq_data, win_dow=51, vol_mult=2,
                       period="minutes", tzone="America/New_York") {
 # convert timezone of index to New_York
-  index(taq_data) <- with_tz(time=index(taq_data), tzone=tzone)
+  index(taq_data) <- lubridate::with_tz(time=index(taq_data), tzone=tzone)
 # subset data to NYSE trading hours
   taq_data <- taq_data['T09:30:00/T16:00:00', ]
 # return NULL if no data
@@ -273,17 +273,17 @@ scrub_agg <- function(taq_data, win_dow=51, vol_mult=2,
 #' # create time index of one second intervals for a single day
 #' in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 #' # create xts of random TAQ prices
-#' t_aq <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
+#' taq_data <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 #' # create vector of random bid-offer prices
 #' bid_offer <- abs(rnorm(length(in_dex)))/10
 #' # create TAQ data using cbind
-#' t_aq <- cbind(t_aq-bid_offer, t_aq+bid_offer)
+#' taq_data <- cbind(taq_data-bid_offer, taq_data+bid_offer)
 #' # add Trade.Price
-#' t_aq <- cbind(t_aq, t_aq+rnorm(length(in_dex))/10)
+#' taq_data <- cbind(taq_data, taq_data+rnorm(length(in_dex))/10)
 #' # add Volume
-#' t_aq <- cbind(t_aq, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-#' colnames(t_aq) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-#' re_turns <- run_returns(t_aq)
+#' taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+#' colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+#' re_turns <- run_returns(taq_data)
 
 run_returns <- function(x_ts) {
 # return NULL if no data
@@ -809,25 +809,12 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", win_dow=11, weight_ed=TRU
 #'   of data used for aggregating the \code{OHLC} prices.
 #' @return An \code{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details Calculates the rolling Sharpe ratio as the ratio
-#'   of two rolling variance estimators.
-#'   The Sharpe ratio is defined as the logarithm of the ratio of the
-#'   variance of aggregated returns, divided by the average variance of returns.
-#'   The aggregated returns are calculated over non-overlapping windows using
-#'   the function \code{to_period()}.
-#'   The non-overlapping aggregation windows can be shifted by using the
-#'   argument \code{off_set}, which produces a slightly different series of
-#'   rolling Sharpe ratio values.
+#' @details Calculates the rolling Sharpe ratio as the ratio of absolute returns
+#'   over the lookback window (not percentage returns), divided by the average 
+#'   volatility of returns.
 #' @examples
-#' # apply roll_sharpe() to SPY
-#' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10, off_set=0)
-#' # calculate a series of rolling hurst values using argument off_set
-#' sharpe_rolling <- lapply(0:9, roll_sharpe, oh_lc=SPY, win_dow=10)
-#' sharpe_rolling <- rutils::do_call_rbind(sharpe_rolling)
-#' # remove daily warmup periods
-#' sharpe_rolling <- sharpe_rolling["T09:41:00/T16:00:00"]
-#' chart_Series(x=sharpe_rolling["2012-02-13"], 
-#'   name=paste(colnames(sharpe_rolling), "10-minute aggregations"))
+#' # calculate rolling Sharpe ratio over SPY
+#' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10)
 
 roll_sharpe <- function(oh_lc, win_dow=11) {
   var_ohlc_agg <- (Cl(oh_lc) - rutils::lag_xts(Op(oh_lc), k=(win_dow-1)))/win_dow
@@ -877,7 +864,7 @@ roll_sharpe <- function(oh_lc, win_dow=11) {
 #'   and the Hurst exponent values are calculated at each point in time.
 #' 
 #' @examples
-#' # calculate Hurst over rolling win_dow over SPY
+#' # calculate rolling Hurst over SPY
 #' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10)
 #' # calculate Hurst over end points of SPY
 #' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10, off_set=0, roll_end_points=TRUE)

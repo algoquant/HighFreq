@@ -22,25 +22,12 @@ Calculate the rolling Sharpe ratio over a rolling lookback window for an
 \code{OHLC} time series.
 }
 \details{
-Calculates the rolling Sharpe ratio as the ratio
-  of two rolling variance estimators.
-  The Sharpe ratio is defined as the logarithm of the ratio of the
-  variance of aggregated returns, divided by the average variance of returns.
-  The aggregated returns are calculated over non-overlapping windows using
-  the function \code{to_period()}.
-  The non-overlapping aggregation windows can be shifted by using the
-  argument \code{off_set}, which produces a slightly different series of
-  rolling Sharpe ratio values.
+Calculates the rolling Sharpe ratio as the ratio of absolute returns
+  over the lookback window (not percentage returns), divided by the average 
+  volatility of returns.
 }
 \examples{
-# apply roll_sharpe() to SPY
-sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10, off_set=0)
-# calculate a series of rolling hurst values using argument off_set
-sharpe_rolling <- lapply(0:9, roll_sharpe, oh_lc=SPY, win_dow=10)
-sharpe_rolling <- rutils::do_call_rbind(sharpe_rolling)
-# remove daily warmup periods
-sharpe_rolling <- sharpe_rolling["T09:41:00/T16:00:00"]
-chart_Series(x=sharpe_rolling["2012-02-13"], 
-  name=paste(colnames(sharpe_rolling), "10-minute aggregations"))
+# calculate rolling Sharpe ratio over SPY
+sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10)
 }
 

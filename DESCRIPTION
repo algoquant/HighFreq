@@ -16,6 +16,7 @@ Depends:
 Imports:
     TTR, 
 	caTools, 
+	lubridate, 
 Remotes: github::algoquant/rutils,
 LazyData: true
 Repository: GitHub

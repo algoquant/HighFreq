@@ -135,7 +135,6 @@ Functions for chaining and joining time series, scrubbing bad data, managing tim
 </div>
 
 
-<p><a href="https://travis-ci.org/algoquant/HighFreq"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MSIgaGVpZ2h0PSIyMCI+PGxpbmVhckdyYWRpZW50IGlkPSJhIiB4Mj0iMCIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2JiYiIgc3RvcC1vcGFjaXR5PSIuMSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1vcGFjaXR5PSIuMSIvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3Qgcng9IjMiIHdpZHRoPSI4MSIgaGVpZ2h0PSIyMCIgZmlsbD0iIzU1NSIvPjxyZWN0IHJ4PSIzIiB4PSIzNyIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjIwIiBmaWxsPSIjZTA1ZDQ0Ii8+PHBhdGggZmlsbD0iI2UwNWQ0NCIgZD0iTTM3IDBoNHYyMGgtNHoiLz48cmVjdCByeD0iMyIgd2lkdGg9IjgxIiBoZWlnaHQ9IjIwIiBmaWxsPSJ1cmwoI2EpIi8+PGcgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkRlamFWdSBTYW5zLFZlcmRhbmEsR2VuZXZhLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiPjx0ZXh0IHg9IjE5LjUiIHk9IjE1IiBmaWxsPSIjMDEwMTAxIiBmaWxsLW9wYWNpdHk9Ii4zIj5idWlsZDwvdGV4dD48dGV4dCB4PSIxOS41IiB5PSIxNCI+YnVpbGQ8L3RleHQ+PHRleHQgeD0iNTgiIHk9IjE1IiBmaWxsPSIjMDEwMTAxIiBmaWxsLW9wYWNpdHk9Ii4zIj5mYWlsaW5nPC90ZXh0Pjx0ZXh0IHg9IjU4IiB5PSIxNCI+ZmFpbGluZzwvdGV4dD48L2c+PC9zdmc+" alt="Build Status" /></a></p>
 <div id="overview" class="section level3">
 <h3>Overview</h3>
 <p>The motivation for the <em>HighFreq</em> package is to create a library of functions designed for managing trade and quote (<em>TAQ</em>) and <em>OHLC</em> data, and for efficiently estimating various statistics, like volatility, skew, Hurst exponent, and Sharpe ratio, from that data.</p>
@@ -146,11 +145,18 @@ Functions for chaining and joining time series, scrubbing bad data, managing tim
 <li><p>package <a href="https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html">PerformanceAnalytics</a></p></li>
 <li><p>package <a href="https://cran.r-project.org/web/packages/highfrequency/index.html">highfrequency</a></p></li>
 </ul>
-<p>Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats. The <em>HighFreq</em> package aims to create a unified framework, with consistent data formats and naming conventions.</p>
-<p>The <em>OHLC</em> data format provides a way of efficiently compressing <em>TAQ</em> data, while preserving information about price levels, volatility (range), and trading volumes. Therefore the <em>HighFreq</em> package relies on <em>OHLC</em> data formatted as <em>xts</em> time series.</p>
+<p>Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats (with <em>NA</em> values, etc.) The <em>HighFreq</em> package aims to create a unified framework, with consistent data formats and naming conventions.</p>
+<p>The <em>HighFreq</em> package relies on <em>OHLC</em> data formatted as <em>xts</em> time series, because the <em>OHLC</em> data format provides an efficient way of compressing <em>TAQ</em> data, while preserving information about price levels, volatility (range), and trading volumes. Most existing packages don’t rely on <em>OHLC</em> data, so their statistical estimators are much less efficient than those in package <em>HighFreq</em>.</p>
 </div>
 <div id="functions-for-data-scrubbing-formatting-and-aggregation" class="section level3">
 <h3>Functions for data scrubbing, formatting, and aggregation</h3>
+<p>Some definitions are in order:</p>
+<ul>
+<li><p>A statistic is some function of <em>OHLC</em> data, for example the difference between <em>high</em> minus <em>low</em> prices is a simple statistic. Estimators of volatility, skew, and higher moments are also statistics.</p></li>
+<li><p>So-called running statistics are based on individual bars of <em>OHLC</em> data, while rolling statistics are based on multiple bars of <em>OHLC</em> data taken from a lookback window. Rolling statistics can be calculated from running statistics by calculating weighted averages.</p></li>
+<li><p>The functions called <em>run_*</em> estimate running statistics based on each bar of <em>OHLC</em> data, and produce a single-column <em>xts</em> time series with the same number of rows as the <em>OHLC</em> time series.</p></li>
+<li><p>The functions called <em>roll_*</em> estimate rolling statistics based on multiple bars of <em>OHLC</em> data taken from a lookback window, and often produce a single-column <em>xts</em> time series with the same number of rows as the <em>OHLC</em> time series. <br></p></li>
+</ul>
 <p>The <em>HighFreq</em> package contains functions for:</p>
 <ul>
 <li><p>chaining and joining time series,</p></li>
@@ -158,7 +164,7 @@ Functions for chaining and joining time series, scrubbing bad data, managing tim
 <li><p>managing time zones and alligning time indices,</p></li>
 <li><p>converting <em>TAQ</em> data to <em>OHLC</em> format,</p></li>
 <li><p>aggregating data to lower frequency (periodicity),</p></li>
-<li><p>estimating running statistics from <em>OHLC</em> data, such as volatility, skew, and higher moments,</p></li>
+<li><p>estimating running statistics from <em>OHLC</em> data, such as volatility, skew, and higher moments (functions called <em>run_*</em>),</p></li>
 <li><p>calculating rolling aggregations (VWAP, Hurst exponent, Sharpe ratio, etc.),</p></li>
 <li><p>calculating seasonality aggregations,</p></li>
 </ul>

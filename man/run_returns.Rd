@@ -23,16 +23,16 @@ Calculates single period returns as the ratio of differenced mid
 # create time index of one second intervals for a single day
 in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
 # create xts of random TAQ prices
-t_aq <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
+taq_data <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
 # create vector of random bid-offer prices
 bid_offer <- abs(rnorm(length(in_dex)))/10
 # create TAQ data using cbind
-t_aq <- cbind(t_aq-bid_offer, t_aq+bid_offer)
+taq_data <- cbind(taq_data-bid_offer, taq_data+bid_offer)
 # add Trade.Price
-t_aq <- cbind(t_aq, t_aq+rnorm(length(in_dex))/10)
+taq_data <- cbind(taq_data, taq_data+rnorm(length(in_dex))/10)
 # add Volume
-t_aq <- cbind(t_aq, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-colnames(t_aq) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-re_turns <- run_returns(t_aq)
+taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+re_turns <- run_returns(taq_data)
 }
 

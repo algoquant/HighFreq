@@ -71,7 +71,7 @@ chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
 ###########
 # process TAQ data using package HighFreq: load TAQ data, aggregate to OHLC, and save to file
 
-# aggregate TAQ data for a single symbol, and save to file
+# aggregate TAQ data to 15-min OHLC bar data, for a single symbol, and save to file
 save_scrub_agg(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
 save_TAQ(sym_bol, data_dir=data_dir, output_dir=output_dir)
@@ -239,62 +239,58 @@ returns_running <- run_returns(x_ts=SPY)
 returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
 colnames(returns_running) <- "returns"
 colnames(returns_rolling) <- "returns.WA5"
-SPY_design <- cbind(returns_running, returns_rolling)
 
 var_running <- run_variance(oh_lc=SPY)
-var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+# var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+# var_diff <- rutils::diff_xts(x_ts=var_running)
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
 colnames(var_running) <- "variance"
+# colnames(var_diff) <- "variance.diff"
 colnames(var_rolling) <- "variance.WA5"
-SPY_design <- cbind(SPY_design, var_running, var_rolling)
 
 skew_running <- run_skew(oh_lc=SPY)
+# skew_diff <- rutils::diff_xts(x_ts=skew_running)
 skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
 colnames(skew_running) <- "skew"
+# colnames(skew_diff) <- "skew.diff"
 colnames(skew_rolling) <- "skew.WA5"
-SPY_design <- cbind(SPY_design, skew_running, skew_rolling)
 
 sharpe_running <- run_sharpe(oh_lc=SPY)
 sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
 colnames(sharpe_running) <- "sharpe_running"
 colnames(sharpe_rolling) <- "sharpe_running.WA5"
-SPY_design <- cbind(SPY_design, sharpe_running, sharpe_rolling)
 
 sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=win_dow)
+# sharpe_diff <- rutils::diff_xts(x_ts=sharpe_rolling)
 colnames(sharpe_rolling) <- "sharpe_rolling"
+# colnames(sharpe_diff) <- "sharpe.diff"
 x11()
-chart_Series(sharpe_rolling["2013-11-12", ], name=paste(sym_bol, "sharpe_rolling"))
-SPY_design <- cbind(SPY_design, sharpe_rolling)
+chart_Series(sharpe_rolling["2013-11-12", ], name=paste("SPY", "sharpe_rolling"))
 
 hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=win_dow)
+# hurst_diff <- rutils::diff_xts(x_ts=hurst_rolling)
 colnames(hurst_rolling) <- "hurst_rolling"
+# colnames(hurst_diff) <- "hurst.diff"
 chart_Series(hurst_rolling["2013-11-12", ], name=paste(sym_bol, "hurst_rolling"))
-SPY_design <- cbind(SPY_design, hurst_rolling)
 
-SPY_design <- cbind(SPY_design, Vo(SPY))
+# vol_diff <- rutils::diff_xts(x_ts=Vo(SPY))
+# colnames(vol_diff) <- "volume.diff"
+# SPY_design <- cbind(SPY_design, Vo(SPY), vol_diff)
 
+SPY_design <- cbind(returns_running, returns_rolling, var_running, 
+                    var_rolling, skew_running, sharpe_running, 
+                    sharpe_rolling, hurst_rolling)
 colnames(SPY_design)
 # SPY_design <- cbind(SPY_design[, -1], SPY_design[, "SPY.Volume"])
 
-head(SPY_design["2013-11-12", ], 7)
+# select only most significant factors plus interaction terms
+SPY_design <- cbind(returns_running, returns_rolling, var_running, skew_running, 
+                    hurst_rolling, returns_running*var_running, returns_running*skew_running)
+colnames(SPY_design) <- c(colnames(SPY_design)[1:4], "hurst", "rets_var", "rets_skew")
+
+head(SPY_design["2013-11-12", ])
 save(SPY_design, file="C:/Develop/data/SPY_design.RData")
-load(file="C:/Develop/data/SPY_design.RData")
-
-
-### rolling lm using package roll
-
-library(roll)
-
-returns_running <- rutils::lag_xts(SPY_design[, "returns"], k=-1)
-tail(cbind(returns_running, SPY_design[, "returns"]))
-
-lm_coef <- function(x, y) {
-  lm(x ~ y)$coef
-}  # end lm_coef
-
-roll_lm <- rollapply(data = returns, width = 252,
-                       FUN = lm_coef, by.column = FALSE,
-                       align = "right")
+load("C:/Develop/data/SPY_design.RData")
 
 
 ### daily seasonality
@@ -426,18 +422,24 @@ tail(skew_rolling, 11)
 
 set.seed(1121)  # reset random number generator
 
-# create time index of one second intervals for a single day
+# create time index of one second intervals
 in_dex <- seq(from=as.POSIXct("2016-01-01 00:00:00"),
               to=as.POSIXct("2016-01-30 00:00:00"), by="1 sec")
 # create xts of random prices
-returns_running <- rnorm(length(in_dex), sd=0.001)
-x_ts <- xts(exp(cumsum(returns_running)), order.by=in_dex)
 x_ts <- xts(exp(cumsum(rnorm(length(in_dex), sd=0.001))), order.by=in_dex)
+colnames(x_ts) <- "random"
+chart_Series(x=x_ts["2016-01-10 09/2016-01-10 10"], name="random prices")
 # aggregate to minutes OHLC data
-oh_lc <- xts::to.period(x=x_ts, period="minutes")
+oh_lc <- xts::to.period(x=x_ts, period="minutes", name="random")
+chart_Series(x=oh_lc["2016-01-10"], name="random OHLC prices")
+# add volume
+oh_lc <- cbind(oh_lc, sample(x=10*(2:18), size=NROW(oh_lc), replace=TRUE))
+colnames(oh_lc)[ 5] <- "random.volume"
+tail(oh_lc)
+
 # calculate variance estimates
-vari_ance <- run_variance(oh_lc)
-sum(vari_ance)
+var_running <- run_variance(oh_lc)
+sum(var_running)
 
 # calculate variance using all the different estimators in run_variance()
 meth_ods <- c("close", "garman.klass", "rogers.satchell", "garman.klass_yz", "yang.zhang")
@@ -476,7 +478,7 @@ boot_errors <- apply(boot_strap, MARGIN=1, sd)
 save(boot_strap, file="C:/Develop/data/boot_strap.RData")
 
 # calculate variance estimates for SPY
-vari_ance <- run_variance(SPY)
+var_running <- run_variance(SPY)
 
 
 ###########

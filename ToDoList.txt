@@ -33,6 +33,10 @@ Therefore 1-second bar returns carry almost no information.
 
 - [ ] update README and web page  
 
+- [x] add TLT, VXX, and SPY to hf_data.RData file  
+
+- [x] add lubridate to Imports in DESCRIPTION file  
+
 - [x] create function roll_sharpe()
 
 - [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 

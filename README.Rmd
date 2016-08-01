@@ -22,13 +22,26 @@ The are several other packages which offer much of this functionality, like for 
 
 + package [highfrequency](https://cran.r-project.org/web/packages/highfrequency/index.html)  
 
-Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats.  The *HighFreq* package aims to create a unified framework, with consistent data formats and naming conventions. 
+Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats (with *NA* values, etc.)  The *HighFreq* package aims to create a unified framework, with consistent data formats and naming conventions. 
 
-The *OHLC* data format provides a way of efficiently compressing *TAQ* data, while preserving information about price levels, volatility (range), and trading volumes. 
-Therefore the *HighFreq* package relies on *OHLC* data formatted as *xts* time series. 
+The *HighFreq* package relies on *OHLC* data formatted as *xts* time series, because the *OHLC* data format provides an efficient way of compressing *TAQ* data, while preserving information about price levels, volatility (range), and trading volumes.  Most existing packages don't rely on *OHLC* data, so their statistical estimators are much less efficient than those in package *HighFreq*. 
 
 
 ### Functions for data scrubbing, formatting, and aggregation
+
+Some definitions are in order:
+
++ A statistic is some function of *OHLC* data, for example the difference between
+*high* minus *low* prices is a simple statistic.  Estimators of volatility, skew, and higher moments are also statistics.
+
++ So-called running statistics are based on individual bars of *OHLC* data, while rolling statistics are based on multiple bars of *OHLC* data taken from a lookback window.
+Rolling statistics can be calculated from running statistics by calculating weighted averages.
+
++ The functions called *run_\** estimate running statistics based on each bar of *OHLC* data, and produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
+
++ The functions called *roll_\** estimate rolling statistics based on multiple bars of *OHLC* data taken from a lookback window, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
+<br>
+
 
 The *HighFreq* package contains functions for:
 
@@ -42,7 +55,7 @@ The *HighFreq* package contains functions for:
 
 + aggregating data to lower frequency (periodicity), 
 
-+ estimating running statistics from *OHLC* data, such as volatility, skew, and higher moments, 
++ estimating running statistics from *OHLC* data, such as volatility, skew, and higher moments (functions called *run_\**), 
 
 + calculating rolling aggregations (VWAP, Hurst exponent, Sharpe ratio, etc.), 
 
@@ -78,7 +91,8 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### Data
 
-The *HighFreq* package contains an intraday *xts* time series data set called "SPY", with 1-minute *OHLC* bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.  
+The *HighFreq* package contains three *xts* time series with intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
+
 The data source is the 
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
 
@@ -87,55 +101,55 @@ The data source is the
 
 Calculate daily trading volume:  
 ```{r eval=FALSE}
-daily_volume <- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
-colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
+daily_volume <- apply.daily(x=SPY[, 5], FUN=sum)
+colnames(daily_volume) <- paste0(na_me(SPY), ".Volume")
 ```
 <br>
 
 Calculate daily variance (volatility):  
 ```{r eval=FALSE}
-daily_var <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
-colnames(daily_var) <- paste0(na_me(get(sym_bol)), ".Var")
+daily_var <- apply.daily(x=SPY, FUN=agg_regate, esti_mator="vari_ance")
+colnames(daily_var) <- paste0(na_me(SPY), ".Var")
 ```
 <br>
 
 Calculate daily skew:  
 ```{r eval=FALSE}
-daily_skew <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
+daily_skew <- apply.daily(x=SPY, FUN=agg_regate, esti_mator="skew_ohlc")
 daily_skew <- daily_skew/(daily_var)^(1.5)
-colnames(daily_skew) <- paste0(na_me(get(sym_bol)), ".Skew")
+colnames(daily_skew) <- paste0(na_me(SPY), ".Skew")
 ```
 <br>
 
 Calculate daily Hurst:  
 ```{r eval=FALSE}
-daily_hurst <- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
-colnames(daily_hurst) <- paste0(na_me(get(sym_bol)), ".Hurst")
-chart_Series(daily_hurst, name=paste(sym_bol, "Hurst"))
+daily_hurst <- apply.daily(x=SPY, FUN=agg_regate, esti_mator="hurst_ohlc")
+colnames(daily_hurst) <- paste0(na_me(SPY), ".Hurst")
+chart_Series(daily_hurst, name=paste("SPY", "Hurst"))
 ```
 <br>
 
 Calculate rolling prices:  
 ```{r eval=FALSE}
-roll_prices <- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
-colnames(roll_prices) <- paste0(sym_bol, ".Rets")
-chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
+roll_prices <- roll_sum(SPY[, 1], win_dow=10)/10
+colnames(roll_prices) <- paste0("SPY", ".Rets")
+chart_Series(SPY["2013-11-12", ], name=paste("SPY", "Prices"))
 add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
 ```
 <br>
 
 Calculate rolling volume-weighted variance:  
 ```{r eval=FALSE}
-roll_var <- roll_agg(ohlc=get(sym_bol), n=10)
+roll_var <- roll_agg(ohlc=SPY, n=10)
 # plot without overnight jump
-chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste(sym_bol, "rolling volume-weighted variance"))
+chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste("SPY", "rolling volume-weighted variance"))
 ```
 <br>
 
 Calculate daily seasonality of Hurst exponent:  
 ```{r eval=FALSE}
-season_hurst <- season_ality(hurst_ohlc(ohlc=get(sym_bol)))
-colnames(season_hurst) <- paste0(na_me(get(sym_bol)), ".season_hurst")
+season_hurst <- season_ality(hurst_ohlc(ohlc=SPY))
+colnames(season_hurst) <- paste0(na_me(SPY), ".season_hurst")
 season_hurst <- season_hurst[-(NROW(season_hurst))]
 chart_Series(x=season_hurst, 
              name=paste(colnames(season_hurst), "daily seasonality"))

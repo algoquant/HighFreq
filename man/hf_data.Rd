@@ -5,7 +5,7 @@
 \alias{SPY}
 \alias{hf_data}
 \title{High frequency data sets}
-\format{an \code{xts} time series with 625425 rows of data, with each row
+\format{Each \code{xts} time series contains \code{OHLC} data, with each row 
   containing a single minute bar:
 \describe{
   \item{Open}{Open price in the bar}
@@ -24,10 +24,13 @@ data(hf_data)  # not required - data is lazy load
 hf_data.RData is a file containing the datasets:
 
 \describe{
-  \item{sym_bol}{a \code{string} containing the name "SPY".}
   \item{SPY}{an \code{xts} time series containing 1-minute \code{OHLC} bar
-  data for the SPY etf, from 2008-01-02 to 2014-05-19.  SPY contains 625,425
+  data for the \code{SPY} etf, from 2008-01-02 to 2014-05-19.  SPY contains 625,425 
   rows of data, each row contains a single minute bar.}
+  \item{TLT}{an \code{xts} time series containing 1-minute \code{OHLC} bar
+  data for the \code{TLT} etf, up to 2014-05-19.}
+  \item{VXX}{an \code{xts} time series containing 1-minute \code{OHLC} bar
+  data for the \code{VXX} etf, up to 2014-05-19.}
 }
 }
 \examples{

@@ -50,7 +50,7 @@ Calculates the rolling Hurst exponent in two different ways,
   and the Hurst exponent values are calculated at each point in time.
 }
 \examples{
-# calculate Hurst over rolling win_dow over SPY
+# calculate rolling Hurst over SPY
 hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10)
 # calculate Hurst over end points of SPY
 hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10, off_set=0, roll_end_points=TRUE)
