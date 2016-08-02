@@ -1016,7 +1016,7 @@ roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11,
 #'   must be the same length as the argument \code{x_ts}.
 #' @examples
 #' # calculate variance of each minutely OHLC bar of data
-#' x_ts <- run_variance(get("SPY"))
+#' x_ts <- run_variance(SPY)
 #' # remove overnight variance spikes at "09:31"
 #' in_dex <- format(index(x_ts), "%H:%M")
 #' x_ts <- x_ts[!in_dex=="09:31", ]
@@ -1059,9 +1059,9 @@ season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
 #'   volume-weighted average value over time is calculated.
 #' @examples
 #' # calculate the volume-weighted average closing price (VWAP)
-#' roll_vwap(oh_lc=get("SPY"), win_dow=11)
+#' roll_vwap(oh_lc=SPY, win_dow=11)
 #' # calculate the volume-weighted average returns
-#' roll_vwap(oh_lc=get("SPY"), x_ts=re_turns, win_dow=11)
+#' roll_vwap(oh_lc=SPY, x_ts=re_turns, win_dow=11)
 
 roll_vwap <- function(oh_lc, x_ts=Cl(oh_lc), win_dow) {
   roll_vwap <- rutils::roll_sum(x_ts=x_ts*Vo(oh_lc), win_dow=win_dow)

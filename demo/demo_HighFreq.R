@@ -264,14 +264,14 @@ sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=win_dow)
 # sharpe_diff <- rutils::diff_xts(x_ts=sharpe_rolling)
 colnames(sharpe_rolling) <- "sharpe_rolling"
 # colnames(sharpe_diff) <- "sharpe.diff"
-x11()
-chart_Series(sharpe_rolling["2013-11-12", ], name=paste("SPY", "sharpe_rolling"))
+# x11()
+# chart_Series(sharpe_rolling["2013-11-12", ], name=paste("SPY", "sharpe_rolling"))
 
 hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=win_dow)
 # hurst_diff <- rutils::diff_xts(x_ts=hurst_rolling)
 colnames(hurst_rolling) <- "hurst_rolling"
 # colnames(hurst_diff) <- "hurst.diff"
-chart_Series(hurst_rolling["2013-11-12", ], name=paste(sym_bol, "hurst_rolling"))
+# chart_Series(hurst_rolling["2013-11-12", ], name=paste("SPY", "hurst_rolling"))
 
 # vol_diff <- rutils::diff_xts(x_ts=Vo(SPY))
 # colnames(vol_diff) <- "volume.diff"
@@ -283,7 +283,7 @@ SPY_design <- cbind(returns_running, returns_rolling, var_running,
 colnames(SPY_design)
 # SPY_design <- cbind(SPY_design[, -1], SPY_design[, "SPY.Volume"])
 
-# select only most significant factors plus interaction terms
+# select most significant factors plus interaction terms
 SPY_design <- cbind(returns_running, returns_rolling, var_running, skew_running, 
                     hurst_rolling, returns_running*var_running, returns_running*skew_running)
 colnames(SPY_design) <- c(colnames(SPY_design)[1:4], "hurst", "rets_var", "rets_skew")
@@ -307,7 +307,7 @@ season_data <- var_seasonal
 
 # calculate daily seasonality of variance
 # calculate variance of each minutely OHLC bar of data
-x_ts <- run_variance(get("SPY"))
+x_ts <- run_variance(SPY)
 # remove overnight variance spikes at "09:31"
 x_ts <- x_ts["T09:32:00/T16:00:00"]
 # calculate daily seasonality of variance
