@@ -32,14 +32,16 @@ Load and scrub multiple days of \code{TAQ} data for a single symbol, and save
 it to multiple \sQuote{\code{*.RData}} files.
 }
 \details{
-The function \code{save_TAQ} loads multiple days of \code{TAQ} data,
-  scrubs it, and saves it to \sQuote{\code{*.RData}} files. It uses the same
-  file names for output as the input file names.
-  The \code{TAQ} data files are assumed to be stored in separate directories
-  for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
-  directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} data.
+The function \code{save_TAQ()} loads multiple days of \code{TAQ} 
+  data, scrubs it, and saves the scrubbed TAQ data to individual
+  \sQuote{\code{*.RData}} files. It uses the same file names for output as
+  the input file names. The \code{TAQ} data files are assumed to be stored in
+  separate directories for each \sQuote{\code{symbol}}. Each
+  \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
+  in the \sQuote{\code{data_dir}} directory.
+  Each \sQuote{\code{symbol}} directory contains multiple daily 
+  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+  data.
 }
 \examples{
 \dontrun{

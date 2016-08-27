@@ -22,26 +22,19 @@ Calculate time series of Sharpe-like statistics for each bar of a \code{OHLC}
 time series.
 }
 \details{
-Calculates Sharpe-like statistics for each bar of a \code{OHLC} time
-  series.  
+The function \code{run_sharpe()} calculates Sharpe-like statistics
+  for each bar of a \code{OHLC} time series.
   The Sharpe-like statistic is defined as the ratio of the difference between
   \code{Close} minus \code{Open} prices divided by the difference between
   \code{High} minus \code{Low} prices.
   This statistic may also be interpreted as something like a Hurst exponent
   for a single bar of data.
-  The motivation for the Sharpe-like statistic is the notion that if prices 
+  The motivation for the Sharpe-like statistic is the notion that if prices
   are trending in the same direction inside a given time bar of data, then
   this statistic is close to either 1 or -1.
 }
 \examples{
-# create time index of one second intervals for a single day
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
-              to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create synthetic xts of random prices
-x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-# aggregate to minutes OHLC data
-oh_lc <- to.period(x=x_ts, period="minutes")
-# calculate running Sharpe ratio
-sharpe_running <- run_sharpe(oh_lc)
+# calculate time series of running Sharpe ratios for SPY
+sharpe_running <- run_sharpe(SPY)
 }
 

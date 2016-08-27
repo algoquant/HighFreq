@@ -15,8 +15,8 @@ of data used for aggregating the \code{OHLC} prices.}
 
 \item{off_set}{the number of bars of data in the first, stub window.}
 
-\item{roll_end_points}{\code{Boolean} should the Hurst exponent be calculated 
-using aggregations over the end points, or by rolling over a lookback 
+\item{roll_end_points}{\code{Boolean} should the Hurst exponent be calculated
+using aggregations over the end points, or by rolling over a lookback
 window? (default is \code{FALSE})}
 }
 \value{
@@ -28,26 +28,28 @@ Calculate the rolling Hurst exponent over a rolling lookback window or the
 end points of an \code{OHLC} time series.
 }
 \details{
-Calculates the rolling Hurst exponent in two different ways, 
-  depending on the argument \code{roll_end_points}.
-  
+The function \code{roll_hurst()} calculates the rolling Hurst
+  exponent in two different ways, depending on the argument
+  \code{roll_end_points}.
+
+  If \code{roll_end_points} is \code{FALSE} (the default), then the rolling
+  Hurst exponent is calculated as the logarithm of the ratios of two rolling
+  price range estimates. The Hurst exponent is defined as the logarithm of
+  the ratio of the range of aggregated prices, divided by the average range
+  of prices in each bar. The aggregated prices are calculated over
+  overlapping windows, and the Hurst exponent values are calculated at each
+  point in time.
+
   If \code{roll_end_points} is \code{TRUE}, then the rolling Hurst exponent is
-  calculated as the logarithm of the ratios of two rolling variance 
-  estimates. The Hurst exponent is defined as the logarithm of the ratio of 
-  the variance of aggregated returns, divided by the variance of simple 
+  calculated as the logarithm of the ratios of two rolling variance
+  estimates. The Hurst exponent is defined as the logarithm of the ratio of
+  the variance of aggregated returns, divided by the variance of simple
   returns. The aggregated returns are calculated over non-overlapping windows
   spanned by the end points, using the function \code{to_period()}. The Hurst
   exponent values are calculated only at the end points. The non-overlapping
   aggregation windows can be shifted by using the argument \code{off_set},
   which produces a slightly different series of rolling hurst exponent
   values.
-  
-  If \code{roll_end_points} is \code{FALSE}, then the rolling Hurst exponent 
-  is calculated as the logarithm of the ratios of two rolling price range 
-  estimates. The Hurst exponent is defined as the logarithm of the ratio of 
-  the range of aggregated prices, divided by the average range of prices in 
-  each bar. The aggregated prices are calculated over overlapping windows,
-  and the Hurst exponent values are calculated at each point in time.
 }
 \examples{
 # calculate rolling Hurst over SPY
@@ -59,7 +61,7 @@ hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, win_dow=10, roll_end_points=
 hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
 # remove daily warmup periods
 hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
-chart_Series(x=hurst_rolling["2012-02-13"], 
+chart_Series(x=hurst_rolling["2012-02-13"],
   name=paste(colnames(hurst_rolling), "10-minute aggregations"))
 }
 

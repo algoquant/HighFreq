@@ -22,9 +22,9 @@ Calculate the rolling Sharpe ratio over a rolling lookback window for an
 \code{OHLC} time series.
 }
 \details{
-Calculates the rolling Sharpe ratio as the ratio of absolute returns
-  over the lookback window (not percentage returns), divided by the average 
-  volatility of returns.
+The function \code{roll_sharpe()} calculates the rolling Sharpe
+  ratio as the ratio of absolute returns over the lookback window (not
+  percentage returns), divided by the average volatility of returns.
 }
 \examples{
 # calculate rolling Sharpe ratio over SPY

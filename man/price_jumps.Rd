@@ -23,18 +23,21 @@ Identify isolated price jumps in a single-column \code{xts} time series of
 prices, based on pairs of large neighboring returns of opposite sign.
 }
 \details{
-Isolated price jumps are single prices that are very different from
-  neighboring values.  Price jumps create pairs of large neighboring returns
-  of opposite sign. The function \code{price_jumps} first calculates simple
-  returns from prices. Then it calculates the rolling volatility of returns
-  as a quantile of returns over a rolling window. Jump prices are identified
-  as those where neighboring returns both exceed a multiple of the rolling
+Isolated price jumps are single prices that are very different from 
+  neighboring values.  Price jumps create pairs of large neighboring returns 
+  of opposite sign. The function \code{price_jumps()} first calculates simple
+  returns from prices. Then it calculates the rolling volatility of returns 
+  as a quantile of returns over a rolling window. Jump prices are identified 
+  as those where neighboring returns both exceed a multiple of the rolling 
   volatility, but the sum of those returns doesn't exceed it.
 }
 \examples{
-# create xts time series
-x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-# scrub jump prices
-x_ts <- x_ts[!price_jumps(x_ts, vol_mult=1.0)]
+# create local copy of SPY TAQ data
+ta_q <- SPY_TAQ
+# calculate mid prices
+mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
+# replace whole rows containing suspect price jumps with NA, and perform locf()
+ta_q[price_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
+ta_q <- na.locf(ta_q)
 }
 

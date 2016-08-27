@@ -12,7 +12,7 @@ roll_moment(oh_lc, mo_ment = "run_variance", win_dow = 11,
 \item{oh_lc}{\code{OHLC} time series of prices and trading volumes, in
 \code{xts} format.}
 
-\item{mo_ment}{\code{character} string representing a function for 
+\item{mo_ment}{\code{character} string representing a function for
 estimating statistics of a single bar of \code{OHLC} data, such as
 volatility, skew, and higher moments.}
 
@@ -33,29 +33,19 @@ Calculate a vector of statistics over an \code{OHLC} time series, and
 calculate a rolling mean over the statistics.
 }
 \details{
-Calculates a vector of statistics over an \code{OHLC} time series, 
-  such as volatility, skew, and higher moments.  The statistics could also be
-  any other aggregation of a single bar of \code{OHLC} data, for example the
-  \code{High} price minus the \code{Low} price squared.  The length of the 
-  vector of statistics is equal to the number of rows of the argument 
-  \code{oh_lc}. Then it calculates a trade volume weighted rolling mean over
-  the vector of statistics over and calculate statistics.
+The function \code{roll_moment()} calculates a vector of statistics
+  over an \code{OHLC} time series, such as volatility, skew, and higher
+  moments.  The statistics could also be any other aggregation of a single
+  bar of \code{OHLC} data, for example the \code{High} price minus the
+  \code{Low} price squared.  The length of the vector of statistics is equal
+  to the number of rows of the argument \code{oh_lc}. Then it calculates a
+  trade volume weighted rolling mean over the vector of statistics over and
+  calculate statistics.
 }
 \examples{
-# create time index of one minute intervals over several days
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
-              to=as.POSIXct("2015-02-28 16:00:00"), by="1 min")
-# create synthetic xts of random prices
-x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
-# add trade Volume data
-x_ts <- merge(x_ts,
-          volume=sample(x=10*(2:18),
-            size=length(in_dex), replace=TRUE))
-# aggregate to hours OHLC data
-oh_lc <- to.period(x=x_ts, period="hours")
 # calculate time series of rolling variance and skew estimates
-var_rolling <- roll_moment(oh_lc=oh_lc)
-skew_rolling <- roll_moment(oh_lc=oh_lc, mo_ment="run_skew")
+var_rolling <- roll_moment(oh_lc=SPY, win_dow=21)
+skew_rolling <- roll_moment(oh_lc=SPY, mo_ment="run_skew", win_dow=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- na.locf(skew_rolling)

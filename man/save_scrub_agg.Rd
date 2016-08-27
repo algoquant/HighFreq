@@ -36,22 +36,27 @@ single symbol, and save the \code{OHLC} time series to a single
 \sQuote{\code{*.RData}} file.
 }
 \details{
-The function \code{save_scrub_agg} loads multiple days of \code{TAQ}
-  data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
-  series, and finally saves it to a single \sQuote{\code{*.RData}} file. The
-  \code{OHLC} time series is stored in a variable named
-  \sQuote{\code{symbol}}, and then it's saved to a file named
-  \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
-  The \code{TAQ} data files are assumed to be stored in separate directories
-  for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
-  directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+The function \code{save_scrub_agg()} loads multiple days of
+  \code{TAQ} data, then scrubs, aggregates, and rbinds them into a
+  \code{OHLC} time series, and finally saves it to a single
+  \sQuote{\code{*.RData}} file. The \code{OHLC} time series is stored in a
+  variable named \sQuote{\code{symbol}}, and then it's saved to a file named 
+  \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory. 
+  The \code{TAQ} data files are assumed to be stored in separate directories 
+  for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
+  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
+  directory. Each \sQuote{\code{symbol}} directory contains multiple daily 
+  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} 
   data.
 }
 \examples{
 \dontrun{
-save_scrub_agg("SPY")
+# set data directories
+data_dir <- "C:/Develop/data/hfreq/src/"
+output_dir <- "C:/Develop/data/hfreq/scrub/"
+sym_bol <- "SPY"
+# aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
+save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 }
 }
 

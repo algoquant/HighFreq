@@ -2,8 +2,8 @@
 % Please edit documentation in R/HighFreq.R
 \name{agg_regate}
 \alias{agg_regate}
-\title{Calculate the aggregation (weighted sum) of a statistical estimator over a
-\code{OHLC} time series.}
+\title{Calculate the aggregation (weighted average) of a statistical estimator over
+a \code{OHLC} time series.}
 \usage{
 agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 }
@@ -14,37 +14,29 @@ agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 \item{mo_ment}{\code{character} string representing function for
 estimating the moment.}
 
-\item{weight_ed}{\code{Boolean} should estimate be weighted by the trading 
+\item{weight_ed}{\code{Boolean} should estimate be weighted by the trading
 volume? (default is \code{TRUE})}
 
 \item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-Single \code{numeric} value equal to the volume weighted sum of an 
-  estimator over the time series.
+Single \code{numeric} value equal to the volume weighted average of
+  an estimator over the time series.
 }
 \description{
-Calculate the aggregation (weighted sum) of a statistical estimator over a
-\code{OHLC} time series.
+Calculate the aggregation (weighted average) of a statistical estimator over
+a \code{OHLC} time series.
 }
 \details{
-Calculates a single number representing the volume weighted sum of
-  an estimator over the \code{OHLC} time series of prices.  By default the
-  sum is trade volume weighted.
+The function \code{agg_regate()} calculates a single number
+  representing the volume weighted average of an estimator over the
+  \code{OHLC} time series of prices.  By default the sum is trade volume
+  weighted.
 }
 \examples{
-# create time index of one minute intervals over several days
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
-              to=as.POSIXct("2015-02-28 16:00:00"), by="1 min")
-# create synthetic xts of random prices
-x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
-# add trade Volume data
-x_ts <- merge(x_ts,
-          volume=sample(x=10*(2:18),
-            size=length(in_dex), replace=TRUE))
-# aggregate to hours OHLC data
-oh_lc <- to.period(x=x_ts, period="hours")
-# calculate time series of daily skew estimates
-skew_daily <- apply.daily(x=oh_lc, FUN=agg_regate, mo_ment="run_skew")
+# calculate weighted average variance for SPY (single number)
+vari_ance <- agg_regate(oh_lc=SPY, mo_ment="run_variance")
+# calculate time series of daily skew estimates for SPY
+skew_daily <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_skew")
 }
 

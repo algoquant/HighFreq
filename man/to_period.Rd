@@ -27,14 +27,14 @@ Given an \code{OHLC} time series at high periodicity (say seconds),
 calculates the \code{OHLC} prices at lower periodicity (say minutes).
 }
 \details{
-#' Performs a similar aggregation as function \code{to.period()}
-  from package
+The function \code{to_period()} performs a similar aggregation as
+  function \code{to.period()} from package 
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
-  the flexibility to aggregate to a user-specified vector of end points. The
-  function \code{to_period()} simply calls the compiled function
-  \code{toPeriod()} (from package
-  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to
-  perform the actual aggregations.  If \code{end_points} are passed in
+  the flexibility to aggregate to a user-specified vector of end points. The 
+  function \code{to_period()} simply calls the compiled function 
+  \code{toPeriod()} (from package 
+  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to 
+  perform the actual aggregations.  If \code{end_points} are passed in 
   explicitly, then the \code{period} argument is ignored.
 }
 \examples{

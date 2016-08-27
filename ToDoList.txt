@@ -12,6 +12,7 @@ devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
 system("R CMD Rd2pdf C:/Develop/R/HighFreq")
 R CMD Rd2pdf C:\Develop\R\HighFreq
 
+
 ### comments
 
 # High frequency data has three tenor horizons: daily (daily or lower frequency of data), intraday (secondly to daily frequency of data), and sub-second tenor horizons (sub-secondly or higher frequency of data).
@@ -31,7 +32,18 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-- [ ] update README and web page  
+- [x] update README and web page  
+
+- [x] add vignettes directory and create multiple vignettes using files README and demo_HighFreq.R  
+
+- [x] create function random_TAQ() that returns random TAQ data
+
+- [x] create function random_OHLC()
+returns random OHLC data used for testing for data snooping (look ahead bias) and benchmarking
+Either create synthetic data or sample from real data.  
+Run random data through model to test if there is data snooping.  
+
+- [x] add a single day of TAQ data for SPY to hf_data.RData file  
 
 - [x] add TLT, VXX, and SPY to hf_data.RData file  
 

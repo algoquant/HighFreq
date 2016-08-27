@@ -5,11 +5,11 @@
 \title{Scrub a single day of \code{TAQ} data, aggregate it, and convert to
 \code{OHLC} format.}
 \usage{
-scrub_agg(taq_data, win_dow = 51, vol_mult = 2, period = "minutes",
+scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
   tzone = "America/New_York")
 }
 \arguments{
-\item{taq_data}{\code{TAQ xts} time series.}
+\item{ta_q}{\code{TAQ xts} time series.}
 
 \item{win_dow}{number of data points for estimating rolling volatility.}
 
@@ -27,7 +27,7 @@ Scrub a single day of \code{TAQ} data, aggregate it, and convert to
 \code{OHLC} format.
 }
 \details{
-The function \code{scrub_agg} performs:
+The function \code{scrub_agg()} performs:
 \itemize{
   \item index timezone conversion,
   \item data subset to trading hours,
@@ -42,21 +42,13 @@ min", "15 min", "30 min", and "hours". The time index of the output time
 series is rounded up to the next integer multiple of 'period'.
 }
 \examples{
-# create time index of one second intervals for a single day
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"), to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create xts of random TAQ prices
-x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-# create vector of random bid-offer prices
-bid_offer <- abs(rnorm(length(in_dex)))/10
-# create TAQ data using cbind
-taq_data <- cbind(x_ts-bid_offer, x_ts+bid_offer)
-# add Trade.Price
-taq_data <- cbind(taq_data, x_ts+rnorm(length(in_dex))/10)
-# add Volume
-taq_data <- cbind(taq_data, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-colnames(taq_data) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+# create random TAQ prices
+ta_q <- HighFreq::random_TAQ()
 # aggregate to ten minutes OHLC data
-ohlc_data <- scrub_agg(taq_data, period="10 min")
-chartSeries(ohlc_data, name=SPY, theme=chartTheme("white"))
+oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
+chart_Series(oh_lc, name="random prices")
+# scrub and aggregate a single day of SPY TAQ data to OHLC
+oh_lc <- HighFreq::scrub_agg(ta_q=SPY_TAQ)
+chart_Series(oh_lc, name=sym_bol)
 }
 

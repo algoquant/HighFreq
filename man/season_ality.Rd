@@ -13,27 +13,29 @@ season_ality(x_ts, in_dex = format(index(x_ts), "\%H:\%M"))
 of the same length as the argument \code{x_ts}.}
 }
 \value{
-An \code{xts} time series with mean aggregations over the seasonality 
+An \code{xts} time series with mean aggregations over the seasonality
   interval.
 }
 \description{
 Perform seasonality aggregations over a single-column \code{xts} time series.
 }
 \details{
-Calculates the mean of values observed at the same points in time 
-  specified by the argument \code{in_dex}.
-  An example of a daily seasonality aggregation is the average
-  price of a stock between 9:30AM and 10:00AM every day, over many days.
-  The argument \code{in_dex} is passed into function \code{tapply()}, and
-  must be the same length as the argument \code{x_ts}.
+The function \code{season_ality()} calculates the mean of values
+  observed at the same points in time specified by the argument
+  \code{in_dex}. An example of a daily seasonality aggregation is the average
+  price of a stock between 9:30AM and 10:00AM every day, over many days. The
+  argument \code{in_dex} is passed into function \code{tapply()}, and must be
+  the same length as the argument \code{x_ts}.
 }
 \examples{
-# calculate variance of each minutely OHLC bar of data
-x_ts <- run_variance(get("SPY"))
+# calculate running variance of each minutely OHLC bar of data
+x_ts <- run_variance(SPY)
 # remove overnight variance spikes at "09:31"
 in_dex <- format(index(x_ts), "\%H:\%M")
 x_ts <- x_ts[!in_dex=="09:31", ]
 # calculate daily seasonality of variance
-season_ality(x_ts=x_ts)
+var_seasonal <- season_ality(x_ts=x_ts)
+chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal), 
+  "daily seasonality of variance"))
 }
 

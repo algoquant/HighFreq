@@ -1,0 +1,92 @@
+---
+title: Managing *TAQ* and *OHLC* Time Series
+author: Jerzy Pawlowski (algoquant)
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"HighFreq Package"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+### Below are examples of applying functions from the package *HighFreq* for managing *TAQ* and *OHLC* time series
+
+
+Scrub a single day of *TAQ* data contained in *SPY_TAQ* "by hand", without aggregating it to *OHLC*:
+```{r eval=FALSE}
+# load HighFreq
+library(HighFreq)
+# create local copy of SPY TAQ data
+ta_q <- SPY_TAQ
+# convert timezone of index to New_York
+index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
+# subset data to NYSE trading hours
+ta_q <- ta_q['T09:30:00/T16:00:00', ]
+# remove duplicate time stamps using duplicated()
+ta_q <- ta_q[!duplicated(index(ta_q)), ]
+# scrub quotes with suspect bid-offer spreads
+bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
+sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+# remove suspect values
+ta_q <- ta_q[!sus_pect]
+# calculate mid prices
+mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
+# replace whole rows containing suspect price jumps with NA, and perform locf()
+ta_q[price_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
+ta_q <- na.locf(ta_q)
+```
+<br>
+
+
+Scrub and aggregate a single day of *TAQ* data to *OHLC* format using function scrub_agg():
+```{r eval=FALSE}
+# scrub and aggregate a single day of SPY TAQ data to OHLC
+oh_lc <- HighFreq::scrub_agg(ta_q=SPY_TAQ)
+chart_Series(oh_lc, name=sym_bol)
+```
+<br>
+
+
+*TAQ* data is organized in individual daily files. The function *save_scrub_agg()* reads all the *TAQ* files for a single symbol, and converts them into a single *OHLC* file. 
+For a single symbol, aggregate all the daily *TAQ* data to 15-min *OHLC* bar data, and save the data to a single file:
+```{r eval=FALSE}
+# load HighFreq
+library(HighFreq)
+# set data directories
+data_dir <- "C:/Develop/data/hfreq/src/"
+output_dir <- "C:/Develop/data/hfreq/scrub/"
+sym_bol <- "SPY"
+# aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
+save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
+```
+<br>
+
+
+For a list of symbols, aggregate all the daily *TAQ* data to 15-min *OHLC* bar data (one symbol at a time), and save the data to a individual files:
+```{r eval=FALSE}
+# load HighFreq
+library(HighFreq)
+sym_bols <- c("SPY", "TLT", "VXX")
+# aggregate TAQ data to 15-min OHLC bar data, and save the data to a file
+sapply(sym_bols, save_scrub_agg, 
+       data_dir=data_dir, output_dir=output_dir, period="15 min")
+```
+<br>
+
+
+For a single symbol, load a single day of *TAQ* data, scrub it using function scrub_TAQ(), and save the scrubbed TAQ data to a single *.RData* file:
+```{r eval=FALSE}
+# load HighFreq
+library(HighFreq)
+# set data directories
+data_dir <- "C:/Develop/data/hfreq/src/"
+output_dir <- "C:/Develop/data/hfreq/scrub/"
+sym_bol <- "SPY"
+# load a single day of TAQ data
+file_name <- paste0(sym_bol, "/2014.05.02.", sym_bol, ".RData")
+sym_bol <- load(file.path(data_dir, paste0(sym_bol, "/2014.05.02.", sym_bol, ".RData")))
+# scrub a single day of TAQ data, without aggregating it to OHLC
+ta_q <- scrub_TAQ(ta_q=get(sym_bol))
+save(list=sym_bol, file=file.path(output_dir, file_name))
+```
+<br>

@@ -25,16 +25,23 @@ Performs the same operation as function \code{VWAP()} from package
 but using vectorized functions, so it's a little faster.
 }
 \details{
-Calculates the volume-weighted average closing price, defined as the
-  sum of the prices multiplied by trading volumes in the lookback window,
-  divided by the sum of trading volumes in the window.
-  If the argument \code{x_ts} is passed in explicitly, then its
-  volume-weighted average value over time is calculated.
+The function \code{roll_vwap()} calculates the volume-weighted
+  average closing price, defined as the sum of the prices multiplied by
+  trading volumes in the lookback window, divided by the sum of trading
+  volumes in the window. If the argument \code{x_ts} is passed in explicitly,
+  then its volume-weighted average value over time is calculated.
 }
 \examples{
-# calculate the volume-weighted average closing price (VWAP)
-roll_vwap(oh_lc=get("SPY"), win_dow=11)
-# calculate the volume-weighted average returns
-roll_vwap(oh_lc=get("SPY"), x_ts=re_turns, win_dow=11)
+# calculate and plot rolling volume-weighted average closing prices (VWAP)
+prices_rolling <- roll_vwap(oh_lc=SPY["2013-11"], win_dow=11)
+chart_Series(SPY["2013-11-12"], name="SPY prices")
+add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
+legend("top", legend=c("SPY prices", "VWAP prices"), 
+bg="white", lty=c(1, 1), lwd=c(2, 2), 
+col=c("black", "red"), bty="n")
+# calculate running returns
+returns_running <- run_returns(x_ts=SPY)
+# calculate the rolling volume-weighted average returns
+roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=11)
 }
 

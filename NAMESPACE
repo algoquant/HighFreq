@@ -3,6 +3,8 @@
 export(agg_regate)
 export(extreme_values)
 export(price_jumps)
+export(random_OHLC)
+export(random_TAQ)
 export(roll_apply)
 export(roll_hurst)
 export(roll_moment)

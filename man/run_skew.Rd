@@ -19,18 +19,12 @@ Time series of skew estimates.
 Calculate time series of skew estimates from a \code{OHLC} time series.
 }
 \details{
-Calculates skew estimates from \code{OHLC} prices at each
-  point in time (row).  The methods include Garman-Klass and Rogers-Satchell.
+The function \code{run_skew()} calculates skew estimates from
+  \code{OHLC} prices at each point in time (row).  The methods include
+  Garman-Klass and Rogers-Satchell.
 }
 \examples{
-# create time index of one second intervals for a single day
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
-              to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create synthetic xts of random prices
-x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-# aggregate to minutes OHLC data
-oh_lc <- to.period(x=x_ts, period="minutes")
-# calculate skew estimates
-sk_ew <- run_skew(oh_lc)
+# calculate time series of skew estimates for SPY
+sk_ew <- HighFreq::run_skew(SPY)
 }
 

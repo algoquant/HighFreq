@@ -53,19 +53,18 @@ sym_bol <- "SPY"
 inter_val <- "2013-11-11/2013-11-15"
 
 # load a single day of TAQ data
-sym_bol <- load(
-  file.path(data_dir, 
+sym_bol <- load(file.path(data_dir, 
             paste0(sym_bol, "/2014.05.02.", sym_bol, ".RData")))
 
 ### scrub a single day of TAQ data (don't aggregate)
-taq_data <- scrub_TAQ(taq_data=get(sym_bol))
+ta_q <- scrub_TAQ(ta_q=get(sym_bol))
 
-# calculate returns
-returns_running <- run_returns(x_ts=taq_data)
+# calculate returns from the TAQ data
+returns_running <- run_returns(x_ts=ta_q)
 
 ### scrub and aggregate a single day of TAQ data to OHLC
-ohlc_data <- scrub_agg(taq_data=get(sym_bol))
-chartSeries(ohlc_data, name=sym_bol, theme=chartTheme("white"))
+oh_lc <- scrub_agg(ta_q=ta_q)
+chart_Series(oh_lc, name=sym_bol)
 
 
 ###########
@@ -90,7 +89,7 @@ sapply(head(sym_bols), save_rets, data_dir=data_dir, output_dir=output_dir, peri
 load(file.path(output_dir, paste0(sym_bol, ".RData")))
 # load(file="SPY.RData")
 # plot OHLC data
-chartSeries(get(sym_bol), name=sym_bol, theme=chartTheme("white"))
+chart_Series(get(sym_bol), name=sym_bol)
 
 
 ###########
@@ -118,17 +117,17 @@ library(HighFreq)
 win_dow <- 10
 
 ### daily open to close variance and skew
-daily_volume <- xts::apply.daily(x=get(sym_bol)[, 5], FUN=sum)
-colnames(daily_volume) <- paste0(na_me(get(sym_bol)), ".Volume")
+volume_daily <- xts::apply.daily(x=Vo(get(sym_bol)), FUN=sum)
+colnames(volume_daily) <- paste0(sym_bol, ".Volume")
 var_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_variance", calc_method="rogers.satchell")
-colnames(var_daily) <- paste0(na_me(get(sym_bol)), ".Var")
+colnames(var_daily) <- paste0(sym_bol, ".Var")
 skew_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
-colnames(skew_daily) <- paste0(na_me(get(sym_bol)), ".Skew")
+colnames(skew_daily) <- paste0(sym_bol, ".Skew")
 
 # daily Sharpe
 sharpe_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_sharpe")
-colnames(sharpe_daily) <- paste0(na_me(get(sym_bol)), ".Sharpe")
+colnames(sharpe_daily) <- paste0(sym_bol, ".Sharpe")
 chart_Series(sharpe_daily[inter_val], name=paste(sym_bol, "Sharpe"))
 
 # simple autocorrelation
@@ -159,17 +158,22 @@ n_row <- NROW(returns_running)
 num_agg <- n_row %/% 10
 end_points <- c(0, n_row-10*num_agg + 10*(0:num_agg))
 
-# rolling prices
+# rolling average prices
+win_dow <- 10
 prices_rolling <- rutils::roll_sum(get(sym_bol)[, 1], win_dow=win_dow)/win_dow
-colnames(prices_rolling) <- paste0(sym_bol, ".Rets")
-chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
+colnames(prices_rolling) <- paste0(sym_bol, ".Prices")
+chart_Series(get(sym_bol)["2013-11-12"], name=paste(sym_bol, "Prices"))
 add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
+legend("top", legend=c("SPY prices", "average prices"), 
+       bg="white", lty=c(1, 1), lwd=c(2, 2), 
+       col=c("black", "red"), bty="n")
+
 
 ### rolling volume-weighted returns
 returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
 returns_rolling <- returns_rolling[end_points, ]
 
-### calculate SPY variance without overnight jumps
+### calculate running SPY variance without overnight jumps
 var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
 # calculate rolling SPY variance
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
@@ -179,7 +183,7 @@ var_rolling <- var_rolling[end_points, ]
 skew_running <- run_skew(oh_lc=SPY)
 skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
 
-# calculate daily seasonality of skew
+# calculate intraday seasonality of skew
 skew_seasonal <- season_ality(skew_running)
 
 inter_val <- "2014-03-01/"
@@ -293,51 +297,51 @@ save(SPY_design, file="C:/Develop/data/SPY_design.RData")
 load("C:/Develop/data/SPY_design.RData")
 
 
-### daily seasonality
+### intraday seasonality
 
-# calculate daily seasonality of volume
+# calculate intraday seasonality of volume
 volume_seasonal <- season_ality(Vo(get(sym_bol)[inter_val]))
-colnames(volume_seasonal) <- paste0(na_me(get(sym_bol)), ".volume_seasonal")
+colnames(volume_seasonal) <- paste0(sym_bol, ".volume_seasonal")
 season_data <- volume_seasonal
 
-# calculate daily seasonality of variance
+# calculate intraday seasonality of variance
 var_seasonal <- season_ality(run_variance(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
-colnames(var_seasonal) <- paste0(na_me(get(sym_bol)), ".var_seasonal")
+colnames(var_seasonal) <- paste0(sym_bol, ".var_seasonal")
 season_data <- var_seasonal
 
-# calculate daily seasonality of variance
+# calculate intraday seasonality of variance
 # calculate variance of each minutely OHLC bar of data
 x_ts <- run_variance(SPY)
 # remove overnight variance spikes at "09:31"
 x_ts <- x_ts["T09:32:00/T16:00:00"]
-# calculate daily seasonality of variance
+# calculate intraday seasonality of variance
 var_seasonal <- season_ality(x_ts=x_ts)
 chart_Series(x=var_seasonal, 
-             name=paste(colnames(var_seasonal), "daily seasonality"))
+             name=paste(colnames(var_seasonal), "intraday seasonality"))
 
 season_illiquid <- 1e6*sqrt(var_seasonal/volume_seasonal)
 foo <- 1e6*ifelse(Vo(get(sym_bol))==0, 0, sqrt(run_variance(oh_lc=get(sym_bol))/Vo(get(sym_bol))))
 season_illiquid <- season_ality(foo)
 season_illiquid <- season_ality(sqrt(run_variance(oh_lc=get(sym_bol))/Vo(get(sym_bol))))
-colnames(season_illiquid) <- paste0(na_me(get(sym_bol)), ".season_illiquid")
+colnames(season_illiquid) <- paste0(sym_bol, ".season_illiquid")
 season_data <- season_illiquid
 
-# calculate daily seasonality of skew
+# calculate intraday seasonality of skew
 skew_seasonal <- season_ality(run_skew(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
 # skew_seasonal <- skew_seasonal/(var_seasonal)^(1.5)
-colnames(skew_seasonal) <- paste0(na_me(get(sym_bol)), ".skew_seasonal")
+colnames(skew_seasonal) <- paste0(sym_bol, ".skew_seasonal")
 season_data <- skew_seasonal
 
-# calculate daily seasonality of Hurst exponent
+# calculate intraday seasonality of Hurst exponent
 hurst_seasonal <- season_ality(hurst_rolling)
 colnames(hurst_seasonal) <- paste0(colnames(hurst_rolling), ".seasonal")
 # plot without daily warmup period
 chart_Series(x=hurst_seasonal[-(1:10), ], 
-             name=paste(colnames(hurst_seasonal), "daily seasonality"))
+             name=paste(colnames(hurst_seasonal), "intraday seasonality"))
 # below is for run_sharpe() which isn't really true Hurst
 hurst_seasonal <- season_ality(run_sharpe(oh_lc=get(sym_bol)[inter_val, 1:4]))
 hurst_seasonal <- hurst_seasonal[-NROW(hurst_seasonal)]
-colnames(hurst_seasonal) <- paste0(rutils::na_me(get(sym_bol)), ".seasonal")
+colnames(hurst_seasonal) <- paste0(rutils::sym_bol, ".seasonal")
 season_data <- hurst_seasonal
 
 season_autocorr <- returns_running*lag(returns_running)
@@ -345,13 +349,13 @@ season_autocorr[1, ] <- 0
 season_autocorr <- returns_running*lag(rutils::roll_sum(returns_running, win_dow=5)/5)
 season_autocorr[1:5, ] <- 0
 season_autocorr <- season_ality(season_autocorr)
-colnames(season_autocorr) <- paste0(na_me(get(sym_bol)), ".season_autocorr")
+colnames(season_autocorr) <- paste0(sym_bol, ".season_autocorr")
 season_data <- rutils::roll_sum(season_autocorr, win_dow=5)/5
 
 # daily Hurst exponents
 hurst_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_sharpe")
 hurst_daily <- xts::apply.daily(x=SPY, FUN=function(x, ...) abs(agg_regate(oh_lc=x, ...)), mo_ment="run_sharpe")
-colnames(hurst_daily) <- paste0(rutils::na_me(get(sym_bol)), ".Hurst.daily")
+colnames(hurst_daily) <- paste0(rutils::sym_bol, ".Hurst.daily")
 chart_Series(roll_sum(hurst_daily, 10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
 abline(h=0.5, col="blue", lwd=2)
 
@@ -366,16 +370,16 @@ head(SPY)
 season_data <- season_data[-(NROW(season_data))]
 x11(width=6, height=4)
 chart_Series(x=season_data, 
-             name=paste(colnames(season_data), "daily seasonality"))
+             name=paste(colnames(season_data), "intraday seasonality"))
 # or, adjust y-axis range
 rutils::chart_xts(season_data,
-          name=paste(colnames(season_data), "daily seasonality"), 
+          name=paste(colnames(season_data), "intraday seasonality"), 
           ylim=c(min(season_data), max(season_data)/2))
 # or, adjust y-axis range by hand
 plot_theme <- chart_theme()
 plot_theme$format.labels <- "%H:%M"
 ch_ob <- chart_Series(x=season_data, 
-                      name=paste(colnames(season_data), "daily seasonality"), 
+                      name=paste(colnames(season_data), "intraday seasonality"), 
                       theme=plot_theme, plot=FALSE)
 y_lim <- ch_ob$get_ylim()
 y_lim[[2]] <- structure(c(y_lim[[2]][1], y_lim[[2]][2]/2), fixed=TRUE)

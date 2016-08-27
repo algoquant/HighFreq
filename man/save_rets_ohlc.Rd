@@ -25,10 +25,10 @@ Load \code{OHLC} time series data for a single symbol, calculate its returns,
 and save them to a single \sQuote{\code{*.RData}} file, without aggregation.
 }
 \details{
-The function \code{save_rets_ohlc} loads \code{OHLC} time series
-  data from a single file.  It then calculates returns using function
-  \code{run_returns}, and stores them in a variable named
-  \sQuote{\code{symbol.rets}}, and saves them to a file called
+The function \code{save_rets_ohlc()} loads \code{OHLC} time series 
+  data from a single file.  It then calculates returns using function 
+  \code{run_returns}, and stores them in a variable named 
+  \sQuote{\code{symbol.rets}}, and saves them to a file called 
   \sQuote{\code{symbol.rets.RData}}.
 }
 \examples{

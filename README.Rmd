@@ -22,14 +22,14 @@ The are several other packages which offer much of this functionality, like for 
 
 + package [highfrequency](https://cran.r-project.org/web/packages/highfrequency/index.html)  
 
-Unfortunately many of the functions in these packages are either too slow, lack some critical functionality, or produce data in inconsistent formats (with *NA* values, etc.)  The *HighFreq* package aims to create a unified framework, with consistent data formats and naming conventions. 
+Unfortunately many of the functions in these packages are either too slow, or lack some critical functionality, or produce data in inconsistent formats (with *NA* values, etc.)  The *HighFreq* package aims to create a unified framework, with consistent data formats and naming conventions. 
 
-The *HighFreq* package relies on *OHLC* data formatted as *xts* time series, because the *OHLC* data format provides an efficient way of compressing *TAQ* data, while preserving information about price levels, volatility (range), and trading volumes.  Most existing packages don't rely on *OHLC* data, so their statistical estimators are much less efficient than those in package *HighFreq*. 
+The *HighFreq* package relies on *OHLC* price and volume data formatted as *xts* time series, because the *OHLC* data format provides an efficient way of compressing *TAQ* data, while preserving information about price levels, volatility (range), and trading volumes.  Most existing packages don't rely on *OHLC* data, so their statistical estimators are much less efficient than those in package *HighFreq*. 
 
 
-### Functions for data scrubbing, formatting, and aggregation
+### Running and Rolling Statistics Over Time Series Data
 
-Some definitions are in order:
+Definitions of running and rolling statistics (aggregations):
 
 + A statistic is some function of *OHLC* data, for example the difference between
 *high* minus *low* prices is a simple statistic.  Estimators of volatility, skew, and higher moments are also statistics.
@@ -40,7 +40,19 @@ Rolling statistics can be calculated from running statistics by calculating weig
 + The functions called *run_\** estimate running statistics based on each bar of *OHLC* data, and produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
 
 + The functions called *roll_\** estimate rolling statistics based on multiple bars of *OHLC* data taken from a lookback window, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
+
++ Running and rolling statistics also represent a form of data aggregations, and can include many standard technical indicators, like *VWAP*, *Bollinger Bands*, etc.
+
 <br>
+
+
+### Functions for data scrubbing, formatting, and aggregation
+
+The *HighFreq* package contains several categories of functions designed for:
+
++ managing *TAQ* and *OHLC* time series, 
+
++ estimating running and rolling statistics over time series, 
 
 
 The *HighFreq* package contains functions for:
@@ -60,6 +72,8 @@ The *HighFreq* package contains functions for:
 + calculating rolling aggregations (VWAP, Hurst exponent, Sharpe ratio, etc.), 
 
 + calculating seasonality aggregations, 
+
++ creating random *TAQ* and *OHLC* time series, 
 
 
 ### Installation and loading
@@ -91,7 +105,7 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### Data
 
-The *HighFreq* package contains three *xts* time series with intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
+The *HighFreq* package includes three *xts* time series called *SPY*, *TLT*, and *VXX*, containing intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The *HighFreq* package also includes an *xts* time series called *SPY_TAQ* with a single day of *TAQ* data for the *SPY*ETF.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
 
 The data source is the 
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  

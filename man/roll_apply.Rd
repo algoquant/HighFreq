@@ -20,9 +20,9 @@ of data used for applying the aggregation function.}
 
 \item{end_points}{an integer vector of end points.}
 
-\item{by_columns}{\code{Boolean} should the function \code{agg_fun} be 
-applied column-wise, or should it be applied to all the columns combined?
-(default is \code{FALSE})}
+\item{by_columns}{\code{Boolean} should the function \code{agg_fun()} be 
+applied column-wise (individually), or should it be applied to all the
+columns combined? (default is \code{FALSE})}
 
 \item{...}{additional parameters to the agg_fun function.}
 }
@@ -35,53 +35,54 @@ Apply an aggregation function over a rolling lookback window and the end
 points of an \code{OHLC} time series.
 }
 \details{
-Applies an aggregation function over a rolling lookback window and
-  the end points of an \code{OHLC} time series.
-  
-  Performs similar operations to the functions \code{rollapply()} and 
-  \code{period.apply()} from package 
+The function \code{roll_apply()} applies an aggregation function
+  over a rolling lookback window and the end points of an \code{OHLC} time
+  series.
+
+  Performs similar operations to the functions \code{rollapply()} and
+  \code{period.apply()} from package
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and
-  also the function \code{apply.rolling()} from package 
+  also the function \code{apply.rolling()} from package
   \href{https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html}{PerformanceAnalytics}.
-  (The function \code{rollapply()} isn't exported from the package 
+  (The function \code{rollapply()} isn't exported from the package
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.)
-  
+
   But the function \code{roll_apply()} is faster because it performs less
-  type-checking and other overhead. Unlike the other functions, 
+  type-checking and other overhead. Unlike the other functions,
   \code{roll_apply()} doesn't produce any leading \code{NA} values.
-  
-  The function \code{roll_apply()} can be called in two different ways, 
-  depending on the argument \code{end_points}. 
+
+  The function \code{roll_apply()} can be called in two different ways,
+  depending on the argument \code{end_points}.
   If the argument \code{end_points} isn't explicitly passed to
   \code{roll_apply()}, then the default value is used, and
   \code{roll_apply()} performs aggregations over overlapping windows at each
   point in time.
-  If the argument \code{end_points} is explicitly passed to 
+  If the argument \code{end_points} is explicitly passed to
   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-  windows spanned by the end_points.
-  
+  overlapping windows spanned by the end_points.
+
   The aggregation function \code{agg_fun} can return either a single value or
-  a vector of values. If the aggregation function \code{agg_fun} returns a 
+  a vector of values. If the aggregation function \code{agg_fun} returns a
   single value, then \code{roll_apply()} returns an \code{xts} time series
-  with a single column. If the aggregation function \code{agg_fun} returns a 
+  with a single column. If the aggregation function \code{agg_fun} returns a
   vector of values, then \code{roll_apply()} returns an \code{xts} time
   series with multiple columns equal to the length of the vector returned by
   the aggregation function \code{agg_fun}.
 }
 \examples{
 # extract a single day of SPY data
-price_s <- SPY["2012-02-13"]
+x_ts <- SPY["2012-02-13"]
 win_dow <- 11
-# Calculate the rolling sums of the columns of price_s
-agg_regations <- roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
-# Apply a vector-valued aggregation function over a rolling window
-agg_function <- function(x_ts)  c(max(x_ts[, 1]), min(x_ts[, 4]))
-agg_regations <- roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow)
+# calculate the rolling sums of the columns of x_ts
+agg_regations <- roll_apply(x_ts, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+# apply a vector-valued aggregation function over a rolling window
+agg_function <- function(x_ts)  c(max(x_ts[, 2]), min(x_ts[, 3]))
+agg_regations <- roll_apply(x_ts, agg_fun=agg_function, win_dow=win_dow)
 # define end points at 11-minute intervals (SPY is minutely bars)
-end_points <- rutils::end_points(price_s, inter_val=win_dow)
-# Calculate the rolling sums of the columns of price_s over end_points
-agg_regations <- roll_apply(price_s, agg_fun=sum, win_dow=2, end_points=end_points, by_columns=TRUE)
-# Apply a vector-valued aggregation function over the end_points of price_s
-agg_regations <- roll_apply(price_s, agg_fun=agg_function, win_dow=2, end_points=end_points)
+end_points <- rutils::end_points(x_ts, inter_val=win_dow)
+# calculate the rolling sums of the columns of x_ts over end_points
+agg_regations <- roll_apply(x_ts, agg_fun=sum, win_dow=2, end_points=end_points, by_columns=TRUE)
+# apply a vector-valued aggregation function over the end_points of x_ts
+agg_regations <- roll_apply(x_ts, agg_fun=agg_function, win_dow=2, end_points=end_points)
 }
 

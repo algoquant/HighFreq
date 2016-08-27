@@ -29,27 +29,23 @@ point in time (row), using the squared differences of \code{OHLC} prices at
 each point in time.
 }
 \details{
-Performs a similar operation as function \code{volatility()} from
-  package \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
-  but without calculating a running sum using \code{runSum()}.  It's also a
-  little faster because it performs less data validation. The variance
-  estimation methods "close", "garman.klass_yz", and "yang.zhang" do account
-  for close-to-open price jumps, while the methods "garman.klass" and
+The function \code{run_variance()} performs a similar operation to
+  function \code{volatility()} from package
+  \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
+  without calculating a running sum using \code{runSum()}.  It's also a 
+  little faster because it performs less data validation. The variance 
+  estimation methods "close", "garman.klass_yz", and "yang.zhang" do account 
+  for close-to-open price jumps, while the methods "garman.klass" and 
   "rogers.satchell" do not account for close-to-open price jumps.
 }
 \examples{
-# create time index of one second intervals for a single day
-in_dex <- seq(from=as.POSIXct("2015-02-09 09:30:00"),
-              to=as.POSIXct("2015-02-09 16:00:00"), by="1 sec")
-# create synthetic xts of random prices
-x_ts <- xts(cumsum(rnorm(length(in_dex))), order.by=in_dex)
-# aggregate to minutes OHLC data
-oh_lc <- to.period(x=x_ts, period="minutes")
+# create minutely OHLC time series of random prices
+oh_lc <- HighFreq::random_OHLC()
 # calculate variance estimates for oh_lc
-var_running <- run_variance(oh_lc)
+var_running <- HighFreq::run_variance(oh_lc)
 # calculate variance estimates for SPY
-var_running <- run_variance(SPY, calc_method="yang.zhang")
+var_running <- HighFreq::run_variance(SPY, calc_method="yang.zhang")
 # calculate SPY variance without overnight jumps
-var_running <- run_variance(SPY, calc_method="rogers.satchell")
+var_running <- HighFreq::run_variance(SPY, calc_method="rogers.satchell")
 }
 

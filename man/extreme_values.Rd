@@ -31,9 +31,12 @@ Calculates the rolling volatility as a quantile of values over a
   multiplier values will cause more values to be identified as extreme.
 }
 \examples{
-# create xts time series
-x_ts <- xts(x=rnorm(1000), order.by=(Sys.time()-3600*(1:1000)))
-# scrub extreme values
-x_ts <- x_ts[!extreme_values(x_ts, vol_mult=1)]
+# create local copy of SPY TAQ data
+ta_q <- SPY_TAQ
+# scrub quotes with suspect bid-offer spreads
+bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
+sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+# remove suspect values
+ta_q <- ta_q[!sus_pect]
 }
 
