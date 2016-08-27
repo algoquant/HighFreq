@@ -28,101 +28,172 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h2>
-<a id="highfreq-package-for-high-frequency-time-series-data-management" class="anchor" href="#highfreq-package-for-high-frequency-time-series-data-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HighFreq package for high frequency time series data management</h2>
+          <hr>
 
-<h1></h1>
+<p>title: HighFreq Package for High Frequency Time Series Data Management
+author: Jerzy Pawlowski (algoquant)
+abstract: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.</p>
 
-<p>The <strong>HighFreq</strong> package contains functions for:  </p>
+<h2>
+<a id="tags-high-frequency-time-series-volatility" class="anchor" href="#tags-high-frequency-time-series-volatility" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>tags: high frequency, time series, volatility</h2>
+
+<p><a href="https://travis-ci.org/algoquant/HighFreq"><img src="https://travis-ci.org/algoquant/HighFreq.svg?branch=master" alt="Build Status"></a></p>
+
+<h3>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h3>
+
+<p>The motivation for the <em>HighFreq</em> package is to create a library of functions designed for managing trade and quote (<em>TAQ</em>) and <em>OHLC</em> data, and for efficiently estimating various statistics, like volatility, skew, Hurst exponent, and Sharpe ratio, from that data.  </p>
+
+<p>The are several other packages which offer much of this functionality, like for example:</p>
 
 <ul>
-<li>chaining and joining time series, </li>
-<li>scrubbing bad data from time series, </li>
-<li>managing time zones and alligning time indices, </li>
-<li>converting TAQ data to OHLC format, </li>
-<li>aggregating data to lower frequency (periodicity), </li>
-<li>calculating rolling aggregations (sum, VWAP, etc.), </li>
-<li>calculating seasonality aggregations, </li>
-<li>calculating moments (variance, skew, etc.), </li>
-<li>calculating functionals (Hurst exponent, etc.), </li>
+<li><p>package <a href="https://cran.r-project.org/web/packages/xts/index.html">xts</a>  </p></li>
+<li><p>package <a href="https://cran.r-project.org/web/packages/TTR/index.html">TTR</a>  </p></li>
+<li><p>package <a href="https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html">PerformanceAnalytics</a>  </p></li>
+<li><p>package <a href="https://cran.r-project.org/web/packages/highfrequency/index.html">highfrequency</a>  </p></li>
 </ul>
 
-<h1></h1>
+<p>Unfortunately many of the functions in these packages are either too slow, or lack some critical functionality, or produce data in inconsistent formats (with <em>NA</em> values, etc.)  The <em>HighFreq</em> package aims to create a unified framework, with consistent data formats and naming conventions. </p>
+
+<p>The <em>HighFreq</em> package relies on <em>OHLC</em> price and volume data formatted as <em>xts</em> time series, because the <em>OHLC</em> data format provides an efficient way of compressing <em>TAQ</em> data, while preserving information about price levels, volatility (range), and trading volumes.  Most existing packages don't rely on <em>OHLC</em> data, so their statistical estimators are much less efficient than those in package <em>HighFreq</em>. </p>
+
+<h3>
+<a id="running-and-rolling-statistics-over-time-series-data" class="anchor" href="#running-and-rolling-statistics-over-time-series-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running and Rolling Statistics Over Time Series Data</h3>
+
+<p>Definitions of running and rolling statistics (aggregations):</p>
+
+<ul>
+<li><p>A statistic is some function of <em>OHLC</em> data, for example the difference between
+<em>high</em> minus <em>low</em> prices is a simple statistic.  Estimators of volatility, skew, and higher moments are also statistics.</p></li>
+<li><p>So-called running statistics are based on individual bars of <em>OHLC</em> data, while rolling statistics are based on multiple bars of <em>OHLC</em> data taken from a lookback window.
+Rolling statistics can be calculated from running statistics by calculating weighted averages.</p></li>
+<li><p>The functions called <em>run_\</em>* estimate running statistics based on each bar of <em>OHLC</em> data, and produce a single-column <em>xts</em> time series with the same number of rows as the <em>OHLC</em> time series.</p></li>
+<li><p>The functions called <em>roll_\</em>* estimate rolling statistics based on multiple bars of <em>OHLC</em> data taken from a lookback window, and often produce a single-column <em>xts</em> time series with the same number of rows as the <em>OHLC</em> time series.</p></li>
+<li><p>Running and rolling statistics also represent a form of data aggregations, and can include many standard technical indicators, like <em>VWAP</em>, <em>Bollinger Bands</em>, etc.</p></li>
+</ul>
+
+<p><br></p>
+
+<h3>
+<a id="functions-for-data-scrubbing-formatting-and-aggregation" class="anchor" href="#functions-for-data-scrubbing-formatting-and-aggregation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Functions for data scrubbing, formatting, and aggregation</h3>
+
+<p>The <em>HighFreq</em> package contains several categories of functions designed for:</p>
+
+<ul>
+<li><p>managing <em>TAQ</em> and <em>OHLC</em> time series, </p></li>
+<li><p>estimating running and rolling statistics over time series, </p></li>
+</ul>
+
+<p>The <em>HighFreq</em> package contains functions for:</p>
+
+<ul>
+<li><p>chaining and joining time series, </p></li>
+<li><p>scrubbing bad data from time series, </p></li>
+<li><p>managing time zones and alligning time indices, </p></li>
+<li><p>converting <em>TAQ</em> data to <em>OHLC</em> format, </p></li>
+<li><p>aggregating data to lower frequency (periodicity), </p></li>
+<li><p>estimating running statistics from <em>OHLC</em> data, such as volatility, skew, and higher moments (functions called <em>run_\</em>*), </p></li>
+<li><p>calculating rolling aggregations (VWAP, Hurst exponent, Sharpe ratio, etc.), </p></li>
+<li><p>calculating seasonality aggregations, </p></li>
+<li><p>creating random <em>TAQ</em> and <em>OHLC</em> time series, </p></li>
+</ul>
 
 <h3>
 <a id="installation-and-loading" class="anchor" href="#installation-and-loading" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation and loading</h3>
 
-<p>Installing <strong>HighFreq</strong> package from github:  </p>
+<p>Install package <em>HighFreq</em> from github:  </p>
 
-<pre><code>install.packages("devtools")
-library(devtools)
-install_github(repo="algoquant/HighFreq")
-library(HighFreq)
-</code></pre>
+<div class="highlight highlight-source-r"><pre>install.packages(<span class="pl-s"><span class="pl-pds">"</span>devtools<span class="pl-pds">"</span></span>)
+<span class="pl-e">devtools</span><span class="pl-k">::</span>install_github(<span class="pl-v">repo</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>algoquant/HighFreq<span class="pl-pds">"</span></span>)
+library(<span class="pl-smi">HighFreq</span>)</pre></div>
 
-<h1></h1>
+<p><br></p>
+
+<p>Install package <em>HighFreq</em> from source on local drive:  </p>
+
+<div class="highlight highlight-source-r"><pre>install.packages(<span class="pl-v">pkgs</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>C:/Develop/R/HighFreq<span class="pl-pds">"</span></span>, <span class="pl-v">repos</span><span class="pl-k">=</span><span class="pl-c1">NULL</span>, <span class="pl-v">type</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>source<span class="pl-pds">"</span></span>)
+<span class="pl-c"># Install package from source on local drive using R CMD</span>
+<span class="pl-smi">R</span> <span class="pl-smi">CMD</span> <span class="pl-smi">INSTALL</span> <span class="pl-smi">C</span><span class="pl-k">:</span>\<span class="pl-smi">Develop</span>\<span class="pl-smi">R</span>\<span class="pl-smi">HighFreq</span>
+library(<span class="pl-smi">HighFreq</span>)</pre></div>
+
+<p><br></p>
+
+<p>Build reference manual for package <em>HighFreq</em> from <em>.Rd</em> files:  </p>
+
+<div class="highlight highlight-source-r"><pre>system(<span class="pl-s"><span class="pl-pds">"</span>R CMD Rd2pdf C:/Develop/R/HighFreq<span class="pl-pds">"</span></span>)
+<span class="pl-smi">R</span> <span class="pl-smi">CMD</span> <span class="pl-smi">Rd2pdf</span> <span class="pl-smi">C</span><span class="pl-k">:</span>\<span class="pl-smi">Develop</span>\<span class="pl-smi">R</span>\<span class="pl-smi">HighFreq</span></pre></div>
+
+<p><br></p>
 
 <h3>
 <a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data</h3>
 
-<p>The <strong>HighFreq</strong> package contains an intraday $xts$ time series data set called "SPY", with 1-minute $OHLC$ bar data for the SPY etf.  It also contains a string variable called "sym_bol" with the name "SPY".  The data is set up for lazy load.<br>
-The data source is the 
-<a href="https://wrds-web.wharton.upenn.edu/wrds/">Wharton Research Data Service</a>  </p>
+<p>The <em>HighFreq</em> package includes three <em>xts</em> time series called <em>SPY</em>, <em>TLT</em>, and <em>VXX</em>, containing intraday 1-minute <em>OHLC</em> data for the <em>SPY</em>, <em>TLT</em>, and <em>VXX</em> ETFs.  The <em>HighFreq</em> package also includes an <em>xts</em> time series called <em>SPY_TAQ</em> with a single day of <em>TAQ</em> data for the <em>SPY</em>ETF.  The data is set up for lazy loading, so it doesn't require calling <code>data(hf_data)</code> to load it before being able to call it.</p>
 
-<h1></h1>
+<p>The data source is the 
+<a href="https://wrds-web.wharton.upenn.edu/wrds/">Wharton Research Data Service</a>  </p>
 
 <h3>
 <a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h3>
 
+<p>Aggregate <em>TAQ</em> data into a 1-minute bar <em>OHLC</em> time series:  </p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># aggregate TAQ data to 1-min OHLC bar data, for a single symbol, and save to file</span>
+<span class="pl-smi">sym_bol</span> <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>SPY<span class="pl-pds">"</span></span>
+save_scrub_agg(<span class="pl-smi">sym_bol</span>, 
+               <span class="pl-v">data_dir</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>E:/mktdata/sec/<span class="pl-pds">"</span></span>, 
+               <span class="pl-v">output_dir</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>E:/output/data/<span class="pl-pds">"</span></span>)</pre></div>
+
+<p><br></p>
+
 <p>Calculate daily trading volume:  </p>
 
-<pre><code>daily_volume &lt;- apply.daily(x=get(sym_bol)[, 5], FUN=sum)
-colnames(daily_volume) &lt;- paste0(na_me(get(sym_bol)), ".Volume")
-</code></pre>
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">daily_volume</span> <span class="pl-k">&lt;-</span> apply.daily(<span class="pl-v">x</span><span class="pl-k">=</span>Vo(<span class="pl-smi">SPY</span>), <span class="pl-v">FUN</span><span class="pl-k">=</span><span class="pl-smi">sum</span>)
+colnames(<span class="pl-smi">daily_volume</span>) <span class="pl-k">&lt;-</span> paste0(na_me(<span class="pl-smi">SPY</span>), <span class="pl-s"><span class="pl-pds">"</span>.Volume<span class="pl-pds">"</span></span>)
+chart_Series(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">daily_volume</span>, <span class="pl-v">name</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily trading volumes for SPY<span class="pl-pds">"</span></span>)</pre></div>
 
-<p>Calculate daily variance:  </p>
+<p><br></p>
 
-<pre><code>daily_var &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="vari_ance")
-colnames(daily_var) &lt;- paste0(na_me(get(sym_bol)), ".Var")
-</code></pre>
+<p>Calculate daily volume-weighted variance (volatility):  </p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">daily_var</span> <span class="pl-k">&lt;-</span> apply.daily(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">SPY</span>, <span class="pl-v">FUN</span><span class="pl-k">=</span><span class="pl-smi">agg_regate</span>, <span class="pl-v">mo_ment</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>run_variance<span class="pl-pds">"</span></span>)
+colnames(<span class="pl-smi">daily_var</span>) <span class="pl-k">&lt;-</span> paste0(na_me(<span class="pl-smi">SPY</span>), <span class="pl-s"><span class="pl-pds">"</span>.Var<span class="pl-pds">"</span></span>)
+chart_Series(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">daily_var</span>, <span class="pl-v">name</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily variance for SPY<span class="pl-pds">"</span></span>)</pre></div>
+
+<p><br></p>
 
 <p>Calculate daily skew:  </p>
 
-<pre><code>daily_skew &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="skew_ohlc")
-daily_skew &lt;- daily_skew/(daily_var)^(1.5)
-colnames(daily_skew) &lt;- paste0(na_me(get(sym_bol)), ".Skew")
-</code></pre>
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">daily_skew</span> <span class="pl-k">&lt;-</span> apply.daily(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">SPY</span>, <span class="pl-v">FUN</span><span class="pl-k">=</span><span class="pl-smi">agg_regate</span>, <span class="pl-v">mo_ment</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>run_skew<span class="pl-pds">"</span></span>)
+<span class="pl-smi">daily_skew</span> <span class="pl-k">&lt;-</span> <span class="pl-smi">daily_skew</span><span class="pl-k">/</span>(<span class="pl-smi">daily_var</span>)<span class="pl-k">^</span>(<span class="pl-c1">1.5</span>)
+colnames(<span class="pl-smi">daily_skew</span>) <span class="pl-k">&lt;-</span> paste0(na_me(<span class="pl-smi">SPY</span>), <span class="pl-s"><span class="pl-pds">"</span>.Skew<span class="pl-pds">"</span></span>)
+chart_Series(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">daily_skew</span>, <span class="pl-v">name</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>daily skew for SPY<span class="pl-pds">"</span></span>)</pre></div>
 
-<p>Calculate daily Hurst:  </p>
-
-<pre><code>daily_hurst &lt;- apply.daily(x=get(sym_bol), FUN=agg_regate, esti_mator="hurst_ohlc")
-colnames(daily_hurst) &lt;- paste0(na_me(get(sym_bol)), ".Hurst")
-chart_Series(daily_hurst, name=paste(sym_bol, "Hurst"))
-</code></pre>
+<p><br></p>
 
 <p>Calculate rolling prices:  </p>
 
-<pre><code>roll_prices &lt;- roll_sum(get(sym_bol)[, 1], win_dow=10)/10
-colnames(roll_prices) &lt;- paste0(sym_bol, ".Rets")
-chart_Series(get(sym_bol)["2013-11-12", ], name=paste(sym_bol, "Prices"))
-add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
-</code></pre>
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">roll_prices</span> <span class="pl-k">&lt;-</span> <span class="pl-e">rutils</span><span class="pl-k">::</span>roll_sum(Op(<span class="pl-smi">SPY</span>), <span class="pl-v">win_dow</span><span class="pl-k">=</span><span class="pl-c1">10</span>)<span class="pl-k">/</span><span class="pl-c1">10</span>
+colnames(<span class="pl-smi">roll_prices</span>) <span class="pl-k">&lt;-</span> paste0(<span class="pl-s"><span class="pl-pds">"</span>SPY<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>.Rets<span class="pl-pds">"</span></span>)
+<span class="pl-c"># plot candle chart</span>
+chart_Series(<span class="pl-smi">SPY</span>[<span class="pl-s"><span class="pl-pds">"</span>2013-11-12<span class="pl-pds">"</span></span>, ], <span class="pl-v">name</span><span class="pl-k">=</span>paste(<span class="pl-s"><span class="pl-pds">"</span>SPY<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Prices<span class="pl-pds">"</span></span>))
+add_TA(<span class="pl-smi">roll_prices</span>[<span class="pl-s"><span class="pl-pds">"</span>2013-11-12<span class="pl-pds">"</span></span>], <span class="pl-v">on</span><span class="pl-k">=</span><span class="pl-c1">1</span>, <span class="pl-v">col</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>red<span class="pl-pds">"</span></span>, <span class="pl-v">lwd</span><span class="pl-k">=</span><span class="pl-c1">2</span>)</pre></div>
+
+<p><br></p>
 
 <p>Calculate rolling volume-weighted variance:  </p>
 
-<pre><code>roll_var &lt;- roll_agg(ohlc=get(sym_bol), n=10)
-# plot without overnight jump
-chart_Series(roll_var["2013-11-12", ][-(1:11)], name=paste(sym_bol, "rolling volume-weighted variance"))
-</code></pre>
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">roll_var</span> <span class="pl-k">&lt;-</span> roll_moment(<span class="pl-v">oh_lc</span><span class="pl-k">=</span><span class="pl-smi">SPY</span>[<span class="pl-s"><span class="pl-pds">"</span>2012<span class="pl-pds">"</span></span>], <span class="pl-v">mo_ment</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>run_variance<span class="pl-pds">"</span></span>, <span class="pl-v">win_dow</span> <span class="pl-k">=</span> <span class="pl-c1">10</span>)
+<span class="pl-c"># plot without overnight jump</span>
+chart_Series(<span class="pl-smi">roll_var</span>[<span class="pl-s"><span class="pl-pds">"</span>2012-11-12<span class="pl-pds">"</span></span>, ][<span class="pl-k">-</span>(<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">11</span>)], <span class="pl-v">name</span><span class="pl-k">=</span>paste(<span class="pl-s"><span class="pl-pds">"</span>SPY<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>rolling volume-weighted variance<span class="pl-pds">"</span></span>))</pre></div>
 
-<p>Calculate daily seasonality of Hurst exponent:  </p>
+<p><br></p>
 
-<pre><code>season_hurst &lt;- season_ality(hurst_ohlc(ohlc=get(sym_bol)))
-colnames(season_hurst) &lt;- paste0(na_me(get(sym_bol)), ".season_hurst")
-season_hurst &lt;- season_hurst[-(NROW(season_hurst))]
-chart_Series(x=season_hurst, 
-             name=paste(colnames(season_hurst), "daily seasonality"))
-</code></pre>
+<p>Calculate daily seasonality of variance:  </p>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">var_seasonal</span> <span class="pl-k">&lt;-</span> season_ality(run_variance(<span class="pl-v">oh_lc</span><span class="pl-k">=</span><span class="pl-smi">SPY</span>))
+colnames(<span class="pl-smi">var_seasonal</span>) <span class="pl-k">&lt;-</span> <span class="pl-s"><span class="pl-pds">"</span>SPY.var_seasonal<span class="pl-pds">"</span></span>
+chart_Series(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">var_seasonal</span>, <span class="pl-v">name</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>SPY variance daily seasonality<span class="pl-pds">"</span></span>)</pre></div>
         </section>
 
         <aside id="sidebar">
