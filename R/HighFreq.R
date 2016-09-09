@@ -1,4 +1,4 @@
-#' Calculate a random \code{TAQ} time series of prices and trading volumes, in 
+#' Calculate a random \code{TAQ} time series of prices and trading volumes, in
 #' \code{xts} format.
 #'
 #' Calculate a \code{TAQ} time series of prices and trading volumes, using
@@ -6,9 +6,9 @@
 #'
 #' @export
 #' @param in_dex time index for the \code{TAQ} time series.
-#' @param bid_offer the bid-offer spread expressed as a fraction of the prices. 
+#' @param bid_offer the bid-offer spread expressed as a fraction of the prices.
 #'   The default value is equal to 0.001 (10bps).
-#' @return An \code{xts} time series, with time index equal to the input 
+#' @return An \code{xts} time series, with time index equal to the input
 #'   \code{in_dex} time index, and with four columns containing the bid, ask,
 #'   and trade prices, and the trade volume.
 #' @details The function \code{random_taq()} calculates an \code{xts} time
@@ -23,8 +23,8 @@
 #' ta_q <- HighFreq::random_taq(in_dex=SPY["2012-02-13/2012-02-15"])
 
 random_taq <- function(
-  in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")), 
-             to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), 
+  in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
+             to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"),
   bid_offer=0.001, ...) {
   # create synthetic xts of random log-normal prices
   ta_q <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
@@ -44,10 +44,10 @@ random_taq <- function(
 
 
 
-#' Calculate a random \code{OHLC} time series of prices and trading volumes, in 
+#' Calculate a random \code{OHLC} time series of prices and trading volumes, in
 #' \code{xts} format.
 #'
-#' Calculate a random \code{OHLC} time series of prices and trading volumes, 
+#' Calculate a random \code{OHLC} time series of prices and trading volumes,
 #' either by generating random log-normal prices, or by randomly sampling from
 #' an input time series.
 #'
@@ -56,18 +56,18 @@ random_taq <- function(
 #'   \code{xts} format.
 #' @param re_duce \code{Boolean} should \code{oh_lc} time series be transformed
 #'   to reduced form? (default is \code{TRUE})
-#' @return An \code{xts} time series with the same dimensions and the same time 
+#' @return An \code{xts} time series with the same dimensions and the same time
 #'   index as the input \code{oh_lc} time series.
-#' @details If the input \code{oh_lc} time series is \code{NULL} (the default), 
-#'   then a synthetic minutely \code{OHLC} time series of random log-normal 
+#' @details If the input \code{oh_lc} time series is \code{NULL} (the default),
+#'   then a synthetic minutely \code{OHLC} time series of random log-normal
 #'   prices is calculated, over the two previous calendar days.
 #'   If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
 #'   \code{oh_lc} are randomly sampled, to produce a random time series.
-#'   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time 
+#'   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
 #'   series is first transformed to reduced form, then randomly sampled, and
 #'   finally converted to standard form.
-#'   Note: randomly sampling from an intraday time series over multiple days 
-#'   will cause the overnight price jumps to be re-arranged into intraday price 
+#'   Note: randomly sampling from an intraday time series over multiple days
+#'   will cause the overnight price jumps to be re-arranged into intraday price
 #'   jumps.  This will cause moment estimates to become inflated compared to the
 #'   original time series.
 #' @examples
@@ -100,7 +100,7 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
 
 
 
-#' Adjust the first four columns of \code{OHLC} data using the "adjusted" price 
+#' Adjust the first four columns of \code{OHLC} data using the "adjusted" price
 #' column.
 #'
 #' @export
@@ -131,24 +131,24 @@ adjust_ohlc <- function(oh_lc) {
 #' @param env_out environment for saving the data.
 #' @param start_date start date of time series data.  (default is "2007-01-01")
 #' @param end_date end date of time series data.  (default is \code{Sys.Date()})
-#' @return A vector of \code{sym_bols} returned invisibly. 
-#' @details The function \code{get_symbols} downloads \code{OHLC} prices from 
-#'   \code{YAHOO} into an environment, adjusts the prices, and saves them back 
-#'   to that environment. The function \code{get_symbols()} calls the function 
-#'   \code{getSymbols.yahoo()} to download the \code{OHLC} prices, and performs 
-#'   a similar operation to the function \code{getSymbols()} from package 
+#' @return A vector of \code{sym_bols} returned invisibly.
+#' @details The function \code{get_symbols} downloads \code{OHLC} prices from
+#'   \code{YAHOO} into an environment, adjusts the prices, and saves them back
+#'   to that environment. The function \code{get_symbols()} calls the function
+#'   \code{getSymbols.yahoo()} to download the \code{OHLC} prices, and performs
+#'   a similar operation to the function \code{getSymbols()} from package
 #'   \href{https://cran.r-project.org/web/packages/quantmod/index.html}{quantmod}.
-#'    But \code{get_symbols()} is faster (because it's more specialized), and is
-#'   able to handle symbols like "LOW", which \code{getSymbols()} can't handle
-#'   because the function \code{Lo()} can't handle them. The \code{start_date}
-#'   and \code{end_date} must be either of class \code{Date}, or a string in the
-#'   format "YYYY-mm-dd".
-#'   \code{get_symbols()} returns invisibly the vector of \code{sym_bols}. 
+#'   But \code{get_symbols()} is faster (because it's more specialized), and is
+#'   able to handle symbols like \code{"LOW"}, which \code{getSymbols()} can't
+#'   handle because the function \code{Lo()} can't handle them. The
+#'   \code{start_date} and \code{end_date} must be either of class \code{Date},
+#'   or a string in the format "YYYY-mm-dd".
+#'   \code{get_symbols()} returns invisibly the vector of \code{sym_bols}.
 #' @examples
 #' \dontrun{
 #' new_env <- new.env()
 #' get_symbols(sym_bols=c("MSFT", "XOM"),
-#'             env_out=new_env, 
+#'             env_out=new_env,
 #'             start_date="2012-12-01",
 #'             end_date="2015-12-01")
 #' }
@@ -163,10 +163,10 @@ get_symbols <- function(sym_bols,
                    from=start_date,
                    to=end_date)
   # adjust the OHLC prices and save back to env_out
-  out_put <- lapply(sym_bols, 
+  out_put <- lapply(sym_bols,
                   function(sym_bol) {
-                    assign(sym_bol, 
-                           value=adjust_ohlc(get(sym_bol, envir=env_out)), 
+                    assign(sym_bol,
+                           value=adjust_ohlc(get(sym_bol, envir=env_out)),
                            envir=env_out)
                     sym_bol
                   }
@@ -184,12 +184,12 @@ get_symbols <- function(sym_bols,
 #' @param col_umn the column number to extract from the \code{OHLC} data.
 #'   (default is \code{4}, or the \code{close} prices column)
 #' @return A single-column \code{xts} time series of returns.
-#' @details Calculates single period returns for either \code{TAQ} or 
-#'   \code{OHLC} data, as the ratio of the differenced prices divided by the 
-#'   time index differences. 
+#' @details Calculates single period returns for either \code{TAQ} or
+#'   \code{OHLC} data, as the ratio of the differenced prices divided by the
+#'   time index differences.
 #'   Identifies the \code{x_ts} time series as \code{TAQ} data when it has six
 #'   columns, otherwise assumes it's \code{OHLC} data.
-#'   By default, for \code{OHLC} data, it differences the \code{close} prices, 
+#'   By default, for \code{OHLC} data, it differences the \code{close} prices,
 #'   but can also difference other prices depending on the value of
 #'   \code{col_umn}.
 #' @examples
@@ -225,7 +225,7 @@ run_returns <- function(x_ts, col_umn=4) {
 #' @param x_ts single-column \code{xts} time series.
 #' @param win_dow number of data points for estimating rolling volatility.
 #' @param vol_mult volatility multiplier.
-#' @return A \code{Boolean} vector with the same number of rows as input time 
+#' @return A \code{Boolean} vector with the same number of rows as input time
 #'   series.
 #' @details Calculates the rolling volatility as a quantile of values over a
 #'   rolling window. Extreme values are those that exceed the product of the
@@ -273,14 +273,14 @@ extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 #' @export
 #' @param x_ts single-column \code{xts} time series of prices.
 #' @inheritParams extreme_values
-#' @return A \code{Boolean} vector with the same number of rows as input time 
+#' @return A \code{Boolean} vector with the same number of rows as input time
 #'   series.
-#' @details Isolated price jumps are single prices that are very different from 
-#'   neighboring values.  Price jumps create pairs of large neighboring returns 
+#' @details Isolated price jumps are single prices that are very different from
+#'   neighboring values.  Price jumps create pairs of large neighboring returns
 #'   of opposite sign. The function \code{price_jumps()} first calculates simple
-#'   returns from prices. Then it calculates the rolling volatility of returns 
-#'   as a quantile of returns over a rolling window. Jump prices are identified 
-#'   as those where neighboring returns both exceed a multiple of the rolling 
+#'   returns from prices. Then it calculates the rolling volatility of returns
+#'   as a quantile of returns over a rolling window. Jump prices are identified
+#'   as those where neighboring returns both exceed a multiple of the rolling
 #'   volatility, but the sum of those returns doesn't exceed it.
 #' @examples
 #' # create local copy of SPY TAQ data
@@ -484,13 +484,13 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 #'   \code{TAQ} data, then scrubs, aggregates, and rbinds them into a
 #'   \code{OHLC} time series, and finally saves it to a single
 #'   \sQuote{\code{*.RData}} file. The \code{OHLC} time series is stored in a
-#'   variable named \sQuote{\code{symbol}}, and then it's saved to a file named 
-#'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory. 
-#'   The \code{TAQ} data files are assumed to be stored in separate directories 
-#'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
-#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
-#'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily 
-#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ} 
+#'   variable named \sQuote{\code{symbol}}, and then it's saved to a file named
+#'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
+#'   The \code{TAQ} data files are assumed to be stored in separate directories
+#'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
+#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+#'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
 #'   data.
 #' @examples
 #' \dontrun{
@@ -550,14 +550,14 @@ da_ta <- lapply(file_names, function(file_name) {
 #' @export
 #' @inheritParams save_scrub_agg
 #' @return A \code{TAQ} time series in \code{xts} format.
-#' @details The function \code{save_taq()} loads multiple days of \code{TAQ} 
+#' @details The function \code{save_taq()} loads multiple days of \code{TAQ}
 #'   data, scrubs it, and saves the scrubbed TAQ data to individual
 #'   \sQuote{\code{*.RData}} files. It uses the same file names for output as
 #'   the input file names. The \code{TAQ} data files are assumed to be stored in
 #'   separate directories for each \sQuote{\code{symbol}}. Each
 #'   \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
 #'   in the \sQuote{\code{data_dir}} directory.
-#'   Each \sQuote{\code{symbol}} directory contains multiple daily 
+#'   Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
 #'   data.
 #' @examples
@@ -613,10 +613,10 @@ save_taq <- function(sym_bol,
 #'   series.  It then calculates returns using function \code{run_returns}, and
 #'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
 #'   to a file called \sQuote{\code{symbol.rets.RData}}.
-#'   The \code{TAQ} data files are assumed to be stored in separate directories 
-#'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
-#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
-#'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily 
+#'   The \code{TAQ} data files are assumed to be stored in separate directories
+#'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
+#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+#'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
 #'   data.
 #' @examples
@@ -681,10 +681,10 @@ save_rets <- function(sym_bol,
 #' @export
 #' @inheritParams save_scrub_agg
 #' @return A time series of returns and volume in \code{xts} format.
-#' @details The function \code{save_rets_ohlc()} loads \code{OHLC} time series 
-#'   data from a single file.  It then calculates returns using function 
-#'   \code{run_returns}, and stores them in a variable named 
-#'   \sQuote{\code{symbol.rets}}, and saves them to a file called 
+#' @details The function \code{save_rets_ohlc()} loads \code{OHLC} time series
+#'   data from a single file.  It then calculates returns using function
+#'   \code{run_returns}, and stores them in a variable named
+#'   \sQuote{\code{symbol.rets}}, and saves them to a file called
 #'   \sQuote{\code{symbol.rets.RData}}.
 #' @examples
 #' \dontrun{
@@ -739,10 +739,10 @@ save_rets_ohlc <- function(sym_bol,
 #' @details The function \code{run_variance()} performs a similar operation to
 #'   function \code{volatility()} from package
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-#'   without calculating a running sum using \code{runSum()}.  It's also a 
-#'   little faster because it performs less data validation. The variance 
-#'   estimation methods "close", "garman.klass_yz", and "yang.zhang" do account 
-#'   for close-to-open price jumps, while the methods "garman.klass" and 
+#'   without calculating a running sum using \code{runSum()}.  It's also a
+#'   little faster because it performs less data validation. The variance
+#'   estimation methods "close", "garman.klass_yz", and "yang.zhang" do account
+#'   for close-to-open price jumps, while the methods "garman.klass" and
 #'   "rogers.satchell" do not account for close-to-open price jumps.
 #' @examples
 #' # create minutely OHLC time series of random prices
@@ -912,8 +912,8 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' prices_rolling <- roll_vwap(oh_lc=SPY["2013-11"], win_dow=11)
 #' chart_Series(SPY["2013-11-12"], name="SPY prices")
 #' add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
-#' legend("top", legend=c("SPY prices", "VWAP prices"), 
-#' bg="white", lty=c(1, 1), lwd=c(2, 2), 
+#' legend("top", legend=c("SPY prices", "VWAP prices"),
+#' bg="white", lty=c(1, 1), lwd=c(2, 2),
 #' col=c("black", "red"), bty="n")
 #' # calculate running returns
 #' returns_running <- run_returns(x_ts=SPY)
@@ -1097,7 +1097,7 @@ roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
 #'   to be applied over a rolling lookback window.
 #' @param win_dow the size of the lookback window, equal to the number of bars
 #'   of data used for applying the aggregation function.
-#' @param by_columns \code{Boolean} should the function \code{agg_fun()} be 
+#' @param by_columns \code{Boolean} should the function \code{agg_fun()} be
 #'   applied column-wise (individually), or should it be applied to all the
 #'   columns combined? (default is \code{FALSE})
 #' @param end_points an integer vector of end points.
@@ -1208,7 +1208,7 @@ roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11,
 #' x_ts <- x_ts[!in_dex=="09:31", ]
 #' # calculate daily seasonality of variance
 #' var_seasonal <- season_ality(x_ts=x_ts)
-#' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal), 
+#' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
 
 season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
@@ -1241,13 +1241,13 @@ season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
 #' @return A \code{OHLC} time series of prices in \code{xts} format, with a
 #'   lower periodicity defined by the end_points.
 #' @details The function \code{to_period()} performs a similar aggregation as
-#'   function \code{to.period()} from package 
+#'   function \code{to.period()} from package
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
-#'   the flexibility to aggregate to a user-specified vector of end points. The 
-#'   function \code{to_period()} simply calls the compiled function 
-#'   \code{toPeriod()} (from package 
-#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to 
-#'   perform the actual aggregations.  If \code{end_points} are passed in 
+#'   the flexibility to aggregate to a user-specified vector of end points. The
+#'   function \code{to_period()} simply calls the compiled function
+#'   \code{toPeriod()} (from package
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to
+#'   perform the actual aggregations.  If \code{end_points} are passed in
 #'   explicitly, then the \code{period} argument is ignored.
 #' @examples
 #' # define end points at 10-minute intervals (SPY is minutely bars)
