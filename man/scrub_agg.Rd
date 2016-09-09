@@ -9,7 +9,7 @@ scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
   tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\code{TAQ xts} time series.}
+\item{ta_q}{\code{TAQ} time series in \code{xts} format.}
 
 \item{win_dow}{number of data points for estimating rolling volatility.}
 
@@ -20,7 +20,7 @@ scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
 \item{tzone}{timezone to convert.}
 }
 \value{
-\code{OHLC} time series in \code{xts} format.
+A \code{OHLC} time series in \code{xts} format.
 }
 \description{
 Scrub a single day of \code{TAQ} data, aggregate it, and convert to
@@ -43,7 +43,7 @@ series is rounded up to the next integer multiple of 'period'.
 }
 \examples{
 # create random TAQ prices
-ta_q <- HighFreq::random_TAQ()
+ta_q <- HighFreq::random_taq()
 # aggregate to ten minutes OHLC data
 oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
 chart_Series(oh_lc, name="random prices")

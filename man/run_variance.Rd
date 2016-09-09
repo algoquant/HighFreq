@@ -40,7 +40,7 @@ The function \code{run_variance()} performs a similar operation to
 }
 \examples{
 # create minutely OHLC time series of random prices
-oh_lc <- HighFreq::random_OHLC()
+oh_lc <- HighFreq::random_ohlc()
 # calculate variance estimates for oh_lc
 var_running <- HighFreq::run_variance(oh_lc)
 # calculate variance estimates for SPY

@@ -13,7 +13,7 @@ run_skew(oh_lc, calc_method = "rogers.satchell")
 skew.}
 }
 \value{
-Time series of skew estimates.
+A time series of skew estimates.
 }
 \description{
 Calculate time series of skew estimates from a \code{OHLC} time series.

@@ -5,7 +5,7 @@
 \title{Calculate the volume-weighted average price of an \code{OHLC} time series
 over a rolling window (lookback period).}
 \usage{
-roll_vwap(oh_lc, x_ts = Cl(oh_lc), win_dow)
+roll_vwap(oh_lc, x_ts = oh_lc[, 4], win_dow)
 }
 \arguments{
 \item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}

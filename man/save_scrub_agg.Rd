@@ -28,7 +28,7 @@ output \sQuote{\code{*.RData}} files.}
 \item{tzone}{timezone to convert.}
 }
 \value{
-\code{OHLC} time series in \code{xts} format.
+An \code{OHLC} time series in \code{xts} format.
 }
 \description{
 Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a

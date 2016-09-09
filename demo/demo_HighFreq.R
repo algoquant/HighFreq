@@ -57,7 +57,7 @@ sym_bol <- load(file.path(data_dir,
             paste0(sym_bol, "/2014.05.02.", sym_bol, ".RData")))
 
 ### scrub a single day of TAQ data (don't aggregate)
-ta_q <- scrub_TAQ(ta_q=get(sym_bol))
+ta_q <- scrub_taq(ta_q=get(sym_bol))
 
 # calculate returns from the TAQ data
 returns_running <- run_returns(x_ts=ta_q)
@@ -73,7 +73,7 @@ chart_Series(oh_lc, name=sym_bol)
 # aggregate TAQ data to 15-min OHLC bar data, for a single symbol, and save to file
 save_scrub_agg(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 
-save_TAQ(sym_bol, data_dir=data_dir, output_dir=output_dir)
+save_taq(sym_bol, data_dir=data_dir, output_dir=output_dir)
 
 # calculate returns for a single symbol, and save to file
 save_rets(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")

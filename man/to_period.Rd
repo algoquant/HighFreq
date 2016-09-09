@@ -19,8 +19,8 @@ and k=2, then aggregate over two minute intervals.)}
 \item{end_points}{an integer vector of end points.}
 }
 \value{
-\code{OHLC} time series of prices in \code{xts} format, with a lower
-  periodicity defined by the end_points.
+A \code{OHLC} time series of prices in \code{xts} format, with a
+  lower periodicity defined by the end_points.
 }
 \description{
 Given an \code{OHLC} time series at high periodicity (say seconds),

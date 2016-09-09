@@ -15,7 +15,7 @@ price_jumps(x_ts, win_dow = 51, vol_mult = 2)
 \item{vol_mult}{volatility multiplier.}
 }
 \value{
-\code{Boolean} vector with the same number of rows as input time
+A \code{Boolean} vector with the same number of rows as input time 
   series.
 }
 \description{

@@ -28,7 +28,7 @@ output \sQuote{\code{*.RData}} files.}
 \item{tzone}{timezone to convert.}
 }
 \value{
-Time series of returns and volume in \code{xts} format.
+A time series of returns and volume in \code{xts} format.
 }
 \description{
 Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a

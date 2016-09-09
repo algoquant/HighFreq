@@ -18,7 +18,7 @@ input \sQuote{\code{*.RData}} files.}
 output \sQuote{\code{*.RData}} files.}
 }
 \value{
-Time series of returns and volume in \code{xts} format.
+A time series of returns and volume in \code{xts} format.
 }
 \description{
 Load \code{OHLC} time series data for a single symbol, calculate its returns,

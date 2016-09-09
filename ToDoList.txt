@@ -32,6 +32,16 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
+- [x] rename functions *_OHLC and *_TAQ to *_ohlc and *_taq
+
+- [x] create function adjust_ohlc() that adjusts OHLC data, similar to quantmod::adjustOHLC()  
+
+- [x] create function get_symbols() that downloads time series data, similar to quantmod::getSymbols()  
+
+- [x] replace quantmod extractor functions Op(), Hi(), Lo(), Cl(), Vo() with direct subsetting: oh_lc[, 3] instead of Lo(oh_lc)
+
+- [x] modify function run_returns(): add argument  
+
 - [x] update README and web page  
 
 - [x] add vignettes directory and create multiple vignettes using files README and demo_HighFreq.R  

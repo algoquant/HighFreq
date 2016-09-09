@@ -1,23 +1,211 @@
+#' Calculate a random \code{TAQ} time series of prices and trading volumes, in 
+#' \code{xts} format.
+#'
+#' Calculate a \code{TAQ} time series of prices and trading volumes, using
+#' random log-normal prices and a time index.
+#'
+#' @export
+#' @param in_dex time index for the \code{TAQ} time series.
+#' @param bid_offer the bid-offer spread expressed as a fraction of the prices. 
+#'   The default value is equal to 0.001 (10bps).
+#' @return An \code{xts} time series, with time index equal to the input 
+#'   \code{in_dex} time index, and with four columns containing the bid, ask,
+#'   and trade prices, and the trade volume.
+#' @details The function \code{random_taq()} calculates an \code{xts} time
+#'   series with four columns containing random log-normal prices: the bid, ask,
+#'   and trade prices, and the trade volume.
+#'   If \code{in_dex} isn't supplied as an argument, then by default it's
+#'   equal to the secondly index over the two previous calendar days.
+#' @examples
+#' # create secondly TAQ time series of random prices
+#' ta_q <- HighFreq::random_taq()
+#' # create random TAQ time series from SPY index
+#' ta_q <- HighFreq::random_taq(in_dex=SPY["2012-02-13/2012-02-15"])
+
+random_taq <- function(
+  in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")), 
+             to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), 
+  bid_offer=0.001, ...) {
+  # create synthetic xts of random log-normal prices
+  ta_q <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
+  # create vector of random bid-offer spreads
+  bid_offer <- bid_offer*(1 + runif(length(in_dex)))/2
+  # create TAQ data from bid and offer prices
+  ta_q <- merge(ta_q*(1-bid_offer), ta_q*(1+bid_offer))
+  # add traded price to TAQ data
+  r_unif <- runif(length(in_dex))
+  ta_q <- merge(ta_q, r_unif*ta_q[, 1] + (1-r_unif)*ta_q[, 2])
+  # add trade volume column
+  ta_q <- merge(ta_q, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+  colnames(ta_q) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
+  ta_q
+}  # end random_taq
+
+
+
+
+#' Calculate a random \code{OHLC} time series of prices and trading volumes, in 
+#' \code{xts} format.
+#'
+#' Calculate a random \code{OHLC} time series of prices and trading volumes, 
+#' either by generating random log-normal prices, or by randomly sampling from
+#' an input time series.
+#'
+#' @export
+#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
+#'   \code{xts} format.
+#' @param re_duce \code{Boolean} should \code{oh_lc} time series be transformed
+#'   to reduced form? (default is \code{TRUE})
+#' @return An \code{xts} time series with the same dimensions and the same time 
+#'   index as the input \code{oh_lc} time series.
+#' @details If the input \code{oh_lc} time series is \code{NULL} (the default), 
+#'   then a synthetic minutely \code{OHLC} time series of random log-normal 
+#'   prices is calculated, over the two previous calendar days.
+#'   If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
+#'   \code{oh_lc} are randomly sampled, to produce a random time series.
+#'   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time 
+#'   series is first transformed to reduced form, then randomly sampled, and
+#'   finally converted to standard form.
+#'   Note: randomly sampling from an intraday time series over multiple days 
+#'   will cause the overnight price jumps to be re-arranged into intraday price 
+#'   jumps.  This will cause moment estimates to become inflated compared to the
+#'   original time series.
+#' @examples
+#' # create minutely synthetic OHLC time series of random prices
+#' oh_lc <- HighFreq::random_ohlc()
+#' # create random time series from SPY by randomly sampling it
+#' oh_lc <- HighFreq::random_ohlc(oh_lc=SPY["2012-02-13/2012-02-15"])
+
+random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
+  if (is.null(oh_lc)) {
+    # create time index of one second intervals over several days
+    in_dex <- seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
+                  to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec")
+    # create synthetic xts of random log-normal prices
+    x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
+    # add trade volume column
+    x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+    # aggregate to minutes OHLC data
+    to.period(x=x_ts, period="minutes")
+  } else {
+    if (re_duce)  # calculate reduced form of oh_lc
+      oh_lc <- rutils::diff_ohlc(oh_lc)
+    # randomly sample from the rows of oh_lc
+    oh_lc <- xts(coredata(oh_lc)[c(1, sample(x=2:NROW(oh_lc))), ], order.by=index(oh_lc))
+    # return standard form of randomized oh_lc
+    rutils::diff_ohlc(oh_lc, re_duce=FALSE)
+  }
+}  # end random_ohlc
+
+
+
+
+#' Adjust the first four columns of \code{OHLC} data using the "adjusted" price 
+#' column.
+#'
+#' @export
+#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @return An \code{OHLC} time series with the same dimensions as the input
+#'   series.
+#' @details Adjusts the first four \code{OHLC} price columns by multiplying them
+#'   by the ratio of the "adjusted" (sixth) price column, divided by the "close"
+#'   (fourth) price column.
+#' @examples
+#' # adjust VTI prices
+#' VTI <- adjust_ohlc(env_etf$VTI)
+
+adjust_ohlc <- function(oh_lc) {
+  # adjust OHLC prices
+  oh_lc[, 1:4] <- as.vector(oh_lc[, 6] / oh_lc[, 4]) * coredata(oh_lc[, 1:4])
+  oh_lc
+}  # end adjust_ohlc
+
+
+
+
+#' Download time series data from an external source (by default \code{OHLC}
+#' prices from \code{YAHOO}), and save it into an environment.
+#'
+#' @export
+#' @param sym_bols vector of strings representing instrument symbols (tickers).
+#' @param env_out environment for saving the data.
+#' @param start_date start date of time series data.  (default is "2007-01-01")
+#' @param end_date end date of time series data.  (default is \code{Sys.Date()})
+#' @return A vector of \code{sym_bols} returned invisibly. 
+#' @details The function \code{get_symbols} downloads \code{OHLC} prices from 
+#'   \code{YAHOO} into an environment, adjusts the prices, and saves them back 
+#'   to that environment. The function \code{get_symbols()} calls the function 
+#'   \code{getSymbols.yahoo()} to download the \code{OHLC} prices, and performs 
+#'   a similar operation to the function \code{getSymbols()} from package 
+#'   \href{https://cran.r-project.org/web/packages/quantmod/index.html}{quantmod}.
+#'    But \code{get_symbols()} is faster (because it's more specialized), and is
+#'   able to handle symbols like "LOW", which \code{getSymbols()} can't handle
+#'   because the function \code{Lo()} can't handle them. The \code{start_date}
+#'   and \code{end_date} must be either of class \code{Date}, or a string in the
+#'   format "YYYY-mm-dd".
+#'   \code{get_symbols()} returns invisibly the vector of \code{sym_bols}. 
+#' @examples
+#' \dontrun{
+#' new_env <- new.env()
+#' get_symbols(sym_bols=c("MSFT", "XOM"),
+#'             env_out=new_env, 
+#'             start_date="2012-12-01",
+#'             end_date="2015-12-01")
+#' }
+
+get_symbols <- function(sym_bols,
+                        env_out,
+                        start_date="2007-01-01",
+                        end_date=Sys.Date()) {
+  # download prices from YAHOO
+  quantmod::getSymbols.yahoo(sym_bols,
+                   env=env_out,
+                   from=start_date,
+                   to=end_date)
+  # adjust the OHLC prices and save back to env_out
+  out_put <- lapply(sym_bols, 
+                  function(sym_bol) {
+                    assign(sym_bol, 
+                           value=adjust_ohlc(get(sym_bol, envir=env_out)), 
+                           envir=env_out)
+                    sym_bol
+                  }
+                  )  # end lapply
+  invisible(out_put)
+}  # end get_symbols
+
+
+
+
 #' Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
 #'
 #' @export
 #' @param x_ts \code{xts} time series of either \code{TAQ} or \code{OHLC} data.
-#' @return  A single-column \code{xts} time series of returns.
-#' @details Calculates single period returns as the ratio of differenced mid
-#'   prices divided by the time index differences.
+#' @param col_umn the column number to extract from the \code{OHLC} data.
+#'   (default is \code{4}, or the \code{close} prices column)
+#' @return A single-column \code{xts} time series of returns.
+#' @details Calculates single period returns for either \code{TAQ} or 
+#'   \code{OHLC} data, as the ratio of the differenced prices divided by the 
+#'   time index differences. 
+#'   Identifies the \code{x_ts} time series as \code{TAQ} data when it has six
+#'   columns, otherwise assumes it's \code{OHLC} data.
+#'   By default, for \code{OHLC} data, it differences the \code{close} prices, 
+#'   but can also difference other prices depending on the value of
+#'   \code{col_umn}.
 #' @examples
-#' # create random TAQ prices
-#' ta_q <- HighFreq::random_TAQ()
-#' re_turns <- HighFreq::run_returns(ta_q)
+#' # calculate close to close returns
+#' re_turns <- HighFreq::run_returns(x_ts=SPY)
+#' # calculate open to open returns
+#' re_turns <- HighFreq::run_returns(x_ts=SPY, col_umn=1)
 
-run_returns <- function(x_ts) {
+run_returns <- function(x_ts, col_umn=4) {
   # return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # calculate mid prices
   if(NCOL(x_ts)==6)  # TAQ data has 6 columns
     re_turns <- 0.5 * (x_ts[, "Bid.Price"] + x_ts[, "Ask.Price"])
   else
-    re_turns <- x_ts[, 4]  # OHLC data
+    re_turns <- x_ts[, col_umn]  # OHLC data
   # calculate returns
   re_turns <- 86400*rutils::diff_xts(re_turns)/c(1, diff(.index(re_turns)))
   re_turns[1, ] <- 0
@@ -37,7 +225,7 @@ run_returns <- function(x_ts) {
 #' @param x_ts single-column \code{xts} time series.
 #' @param win_dow number of data points for estimating rolling volatility.
 #' @param vol_mult volatility multiplier.
-#' @return  \code{Boolean} vector with the same number of rows as input time
+#' @return A \code{Boolean} vector with the same number of rows as input time 
 #'   series.
 #' @details Calculates the rolling volatility as a quantile of values over a
 #'   rolling window. Extreme values are those that exceed the product of the
@@ -85,7 +273,7 @@ extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
 #' @export
 #' @param x_ts single-column \code{xts} time series of prices.
 #' @inheritParams extreme_values
-#' @return  \code{Boolean} vector with the same number of rows as input time
+#' @return A \code{Boolean} vector with the same number of rows as input time 
 #'   series.
 #' @details Isolated price jumps are single prices that are very different from 
 #'   neighboring values.  Price jumps create pairs of large neighboring returns 
@@ -145,21 +333,21 @@ price_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 #'
 #' @export
 #' @inheritParams extreme_values
-#' @param ta_q \code{TAQ xts} time series.
+#' @param ta_q \code{TAQ} time series in \code{xts} format.
 #' @param tzone timezone to convert.
-#' @return  \code{TAQ xts} time series.
-#' @details The function \code{scrub_TAQ()} performs the same scrubbing
+#' @return A \code{TAQ} time series in \code{xts} format.
+#' @details The function \code{scrub_taq()} performs the same scrubbing
 #'   operations as \code{scrub_agg}, except it doesn't aggregate, and returns
 #'   the \code{TAQ} data in \code{xts} format.
 #' @examples
 # scrub a single day of TAQ data without aggregating it
-#' ta_q <- HighFreq::scrub_TAQ(ta_q=SPY_TAQ, win_dow=11, vol_mult=1)
+#' ta_q <- HighFreq::scrub_taq(ta_q=SPY_TAQ, win_dow=11, vol_mult=1)
 #' # create random TAQ prices and scrub them
-#' ta_q <- HighFreq::random_TAQ()
-#' ta_q <- HighFreq::scrub_TAQ(ta_q=ta_q)
-#' ta_q <- HighFreq::scrub_TAQ(ta_q=ta_q, win_dow=11, vol_mult=1)
+#' ta_q <- HighFreq::random_taq()
+#' ta_q <- HighFreq::scrub_taq(ta_q=ta_q)
+#' ta_q <- HighFreq::scrub_taq(ta_q=ta_q, win_dow=11, vol_mult=1)
 
-scrub_TAQ <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
+scrub_taq <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # convert timezone of index to New_York
   index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 # subset data to NYSE trading hours
@@ -191,7 +379,7 @@ scrub_TAQ <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # replace whole rows containing suspect price jumps with NA, and perform locf()
   ta_q[price_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult), ] <- NA
   na.locf(ta_q)
-}  # end scrub_TAQ
+}  # end scrub_taq
 
 
 
@@ -200,9 +388,9 @@ scrub_TAQ <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 #' \code{OHLC} format.
 #'
 #' @export
-#' @inheritParams scrub_TAQ
+#' @inheritParams scrub_taq
 #' @param period aggregation period.
-#' @return  \code{OHLC} time series in \code{xts} format.
+#' @return A \code{OHLC} time series in \code{xts} format.
 #' @details The function \code{scrub_agg()} performs:
 #' \itemize{
 #'   \item index timezone conversion,
@@ -218,7 +406,7 @@ scrub_TAQ <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 #' series is rounded up to the next integer multiple of 'period'.
 #' @examples
 #' # create random TAQ prices
-#' ta_q <- HighFreq::random_TAQ()
+#' ta_q <- HighFreq::random_taq()
 #' # aggregate to ten minutes OHLC data
 #' oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
 #' chart_Series(oh_lc, name="random prices")
@@ -291,7 +479,7 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 #' @param output_dir \code{character} string representing directory containing
 #'   output \sQuote{\code{*.RData}} files.
 #' @inheritParams scrub_agg
-#' @return  \code{OHLC} time series in \code{xts} format.
+#' @return An \code{OHLC} time series in \code{xts} format.
 #' @details The function \code{save_scrub_agg()} loads multiple days of
 #'   \code{TAQ} data, then scrubs, aggregates, and rbinds them into a
 #'   \code{OHLC} time series, and finally saves it to a single
@@ -361,8 +549,8 @@ da_ta <- lapply(file_names, function(file_name) {
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return  \code{TAQ} time series in \code{xts} format.
-#' @details The function \code{save_TAQ()} loads multiple days of \code{TAQ} 
+#' @return A \code{TAQ} time series in \code{xts} format.
+#' @details The function \code{save_taq()} loads multiple days of \code{TAQ} 
 #'   data, scrubs it, and saves the scrubbed TAQ data to individual
 #'   \sQuote{\code{*.RData}} files. It uses the same file names for output as
 #'   the input file names. The \code{TAQ} data files are assumed to be stored in
@@ -374,10 +562,10 @@ da_ta <- lapply(file_names, function(file_name) {
 #'   data.
 #' @examples
 #' \dontrun{
-#' save_TAQ("SPY")
+#' save_taq("SPY")
 #' }
 
-save_TAQ <- function(sym_bol,
+save_taq <- function(sym_bol,
                       data_dir="E:/mktdata/sec/",
                       output_dir="E:/output/data/",
                       win_dow=51,
@@ -397,7 +585,7 @@ save_TAQ <- function(sym_bol,
     sym_bol <- load(file_name_in)
     file_name_out <- file.path(output_dir, file_name)
 # save the xts data to a file in the output_dir
-    ta_q <- scrub_TAQ(get(sym_bol), win_dow=win_dow, vol_mult=vol_mult, tzone=tzone)
+    ta_q <- scrub_taq(get(sym_bol), win_dow=win_dow, vol_mult=vol_mult, tzone=tzone)
     if (!is.null(ta_q)) {
       assign(sym_bol, ta_q)
       save(list=sym_bol, file=file_name_out)
@@ -408,7 +596,7 @@ save_TAQ <- function(sym_bol,
 
   invisible(sym_bol)
 
-}  # end save_TAQ
+}  # end save_taq
 
 
 
@@ -419,7 +607,7 @@ save_TAQ <- function(sym_bol,
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return  Time series of returns and volume in \code{xts} format.
+#' @return A time series of returns and volume in \code{xts} format.
 #' @details The function \code{save_rets} loads multiple days of \code{TAQ}
 #'   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
 #'   series.  It then calculates returns using function \code{run_returns}, and
@@ -492,7 +680,7 @@ save_rets <- function(sym_bol,
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return  Time series of returns and volume in \code{xts} format.
+#' @return A time series of returns and volume in \code{xts} format.
 #' @details The function \code{save_rets_ohlc()} loads \code{OHLC} time series 
 #'   data from a single file.  It then calculates returns using function 
 #'   \code{run_returns}, and stores them in a variable named 
@@ -558,7 +746,7 @@ save_rets_ohlc <- function(sym_bol,
 #'   "rogers.satchell" do not account for close-to-open price jumps.
 #' @examples
 #' # create minutely OHLC time series of random prices
-#' oh_lc <- HighFreq::random_OHLC()
+#' oh_lc <- HighFreq::random_ohlc()
 #' # calculate variance estimates for oh_lc
 #' var_running <- HighFreq::run_variance(oh_lc)
 #' # calculate variance estimates for SPY
@@ -601,7 +789,7 @@ run_variance <- function(oh_lc, calc_method="garman.klass_yz") {
 #' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   skew.
-#' @return  Time series of skew estimates.
+#' @return A time series of skew estimates.
 #' @details The function \code{run_skew()} calculates skew estimates from
 #'   \code{OHLC} prices at each point in time (row).  The methods include
 #'   Garman-Klass and Rogers-Satchell.
@@ -632,7 +820,7 @@ run_skew <- function(oh_lc, calc_method="rogers.satchell") {
 #' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   the Sharpe-like exponent.
-#' @return  An \code{xts} time series with the same number of rows as the
+#' @return An \code{xts} time series with the same number of rows as the
 #'   argument \code{oh_lc}.
 #' @details The function \code{run_sharpe()} calculates Sharpe-like statistics
 #'   for each bar of a \code{OHLC} time series.
@@ -672,7 +860,7 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 #' @param weight_ed \code{Boolean} should estimate be weighted by the trading
 #'   volume? (default is \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
-#' @return  Single \code{numeric} value equal to the volume weighted average of
+#' @return A single \code{numeric} value equal to the volume weighted average of
 #'   an estimator over the time series.
 #' @details The function \code{agg_regate()} calculates a single number
 #'   representing the volume weighted average of an estimator over the
@@ -732,9 +920,9 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' # calculate the rolling volume-weighted average returns
 #' roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=11)
 
-roll_vwap <- function(oh_lc, x_ts=Cl(oh_lc), win_dow) {
-  roll_vwap <- rutils::roll_sum(x_ts=x_ts*Vo(oh_lc), win_dow=win_dow)
-  volume_rolling <- rutils::roll_sum(x_ts=Vo(oh_lc), win_dow=win_dow)
+roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], win_dow) {
+  roll_vwap <- rutils::roll_sum(x_ts=x_ts*oh_lc[, 5], win_dow=win_dow)
+  volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5], win_dow=win_dow)
   roll_vwap <- roll_vwap/volume_rolling
   roll_vwap[is.na(roll_vwap)] <- 0
   colnames(roll_vwap) <- paste0(rutils::na_me(oh_lc), ".VWAP")
@@ -812,7 +1000,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", win_dow=11, weight_ed=TRU
 #' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10)
 
 roll_sharpe <- function(oh_lc, win_dow=11) {
-  var_ohlc_agg <- (Cl(oh_lc) - rutils::lag_xts(Op(oh_lc), k=(win_dow-1)))/win_dow
+  var_ohlc_agg <- (oh_lc[, 4] - rutils::lag_xts(oh_lc[, 1], k=(win_dow-1)))/win_dow
   var_ohlc <- sqrt(rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)/win_dow)
   sharpe_rolling <- ifelse(var_ohlc==0,
                        1.0,
@@ -883,11 +1071,11 @@ roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
     var_ohlc <- rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)[in_dex]/win_dow
   }
   else {  # roll over overlapping windows
-    max_hi <- TTR::runMax(x=Hi(oh_lc), n=win_dow)
-    min_lo <- -TTR::runMax(x=-Lo(oh_lc), n=win_dow)
+    max_hi <- TTR::runMax(x=oh_lc[, 2], n=win_dow)
+    min_lo <- -TTR::runMax(x=-oh_lc[, 3], n=win_dow)
     var_ohlc_agg <- max_hi - min_lo
     var_ohlc_agg[1:(win_dow-1), ] <- 0
-    var_ohlc <- rutils::roll_sum((Hi(oh_lc) - Lo(oh_lc)), win_dow=win_dow)/win_dow
+    var_ohlc <- rutils::roll_sum((oh_lc[, 2] - oh_lc[, 3]), win_dow=win_dow)/win_dow
   }  # end if
   hurst_rolling <- ifelse((var_ohlc==0) | (var_ohlc_agg==0),
                        1.0,
@@ -1050,8 +1238,8 @@ season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
 #' @param k number of periods to aggregate over (for example if period="minutes"
 #'   and k=2, then aggregate over two minute intervals.)
 #' @param end_points an integer vector of end points.
-#' @return \code{OHLC} time series of prices in \code{xts} format, with a lower
-#'   periodicity defined by the end_points.
+#' @return A \code{OHLC} time series of prices in \code{xts} format, with a
+#'   lower periodicity defined by the end_points.
 #' @details The function \code{to_period()} performs a similar aggregation as
 #'   function \code{to.period()} from package 
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
@@ -1077,106 +1265,4 @@ to_period <- function(oh_lc,
   .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc),
         FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 }  # end to_period
-
-
-
-
-#' Calculate a random \code{OHLC} time series of prices and trading volumes, in 
-#' \code{xts} format.
-#'
-#' Calculate a random \code{OHLC} time series of prices and trading volumes, 
-#' either by generating random log-normal prices, or by randomly sampling from
-#' an input time series.
-#'
-#' @export
-#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
-#'   \code{xts} format.
-#' @param re_duce \code{Boolean} should \code{oh_lc} time series be transformed
-#'   to reduced form? (default is \code{TRUE})
-#' @return an \code{xts} time series with the same dimensions and the same time 
-#'   index as the input \code{oh_lc} time series.
-#' @details If the input \code{oh_lc} time series is \code{NULL} (the default), 
-#'   then a synthetic minutely \code{OHLC} time series of random log-normal 
-#'   prices is calculated, over the two previous calendar days.
-#'   If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
-#'   \code{oh_lc} are randomly sampled, to produce a random time series.
-#'   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time 
-#'   series is first transformed to reduced form, then randomly sampled, and
-#'   finally converted to standard form.
-#'   Note: randomly sampling from an intraday time series over multiple days 
-#'   will cause the overnight price jumps to be re-arranged into intraday price 
-#'   jumps.  This will cause moment estimates to become inflated compared to the
-#'   original time series.
-#' @examples
-#' # create minutely synthetic OHLC time series of random prices
-#' oh_lc <- HighFreq::random_OHLC()
-#' # create random time series from SPY by randomly sampling it
-#' oh_lc <- HighFreq::random_OHLC(oh_lc=SPY["2012-02-13/2012-02-15"])
-
-random_OHLC <- function(oh_lc=NULL, re_duce=TRUE, ...) {
-  if (is.null(oh_lc)) {
-    # create time index of one second intervals over several days
-    in_dex <- seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
-                  to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec")
-    # create synthetic xts of random log-normal prices
-    x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
-    # add trade volume column
-    x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-    # aggregate to minutes OHLC data
-    to.period(x=x_ts, period="minutes")
-  } else {
-    if (re_duce)  # calculate reduced form of oh_lc
-      oh_lc <- rutils::diff_ohlc(oh_lc)
-    # randomly sample from the rows of oh_lc
-    oh_lc <- xts(coredata(oh_lc)[c(1, sample(x=2:NROW(oh_lc))), ], order.by=index(oh_lc))
-    # return standard form of randomized oh_lc
-    rutils::diff_ohlc(oh_lc, re_duce=FALSE)
-  }
-}  # end random_OHLC
-
-
-
-
-#' Calculate a random \code{TAQ} time series of prices and trading volumes, in 
-#' \code{xts} format.
-#'
-#' Calculate a \code{TAQ} time series of prices and trading volumes, using
-#' random log-normal prices and a time index.
-#'
-#' @export
-#' @param in_dex time index for the \code{TAQ} time series.
-#' @param bid_offer the bid-offer spread expressed as a fraction of the prices. 
-#'   The default value is equal to 0.001 (10bps).
-#' @return an \code{xts} time series, with time index equal to the input 
-#'   \code{in_dex} time index, and with four columns containing the bid, ask,
-#'   and trade prices, and the trade volume.
-#' @details The function \code{random_TAQ()} calculates an \code{xts} time
-#'   series with four columns containing random log-normal prices: the bid, ask,
-#'   and trade prices, and the trade volume.
-#'   If \code{in_dex} isn't supplied as an argument, then by default it's
-#'   equal to the secondly index over the two previous calendar days.
-#' @examples
-#' # create secondly TAQ time series of random prices
-#' ta_q <- HighFreq::random_TAQ()
-#' # create random TAQ time series from SPY index
-#' ta_q <- HighFreq::random_TAQ(in_dex=SPY["2012-02-13/2012-02-15"])
-
-random_TAQ <- function(
-  in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")), 
-             to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), 
-  bid_offer=0.001, ...) {
-  # create synthetic xts of random log-normal prices
-  ta_q <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
-  # create vector of random bid-offer spreads
-  bid_offer <- bid_offer*(1 + runif(length(in_dex)))/2
-  # create TAQ data from bid and offer prices
-  ta_q <- merge(ta_q*(1-bid_offer), ta_q*(1+bid_offer))
-  # add traded price to TAQ data
-  r_unif <- runif(length(in_dex))
-  ta_q <- merge(ta_q, r_unif*ta_q[, 1] + (1-r_unif)*ta_q[, 2])
-  # add trade volume column
-  ta_q <- merge(ta_q, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
-  colnames(ta_q) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-  ta_q
-}  # end random_TAQ
 

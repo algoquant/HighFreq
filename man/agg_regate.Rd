@@ -20,7 +20,7 @@ volume? (default is \code{TRUE})}
 \item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-Single \code{numeric} value equal to the volume weighted average of
+A single \code{numeric} value equal to the volume weighted average of
   an estimator over the time series.
 }
 \description{
