@@ -32,6 +32,12 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
+- [ ] fix remaining bug in random_ohlc() when sampling from rows of OHLC: bootstraped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big  
+
+- [x] fix bug in random_ohlc(): transform to normal distribution before sampling from rows of OHLC (otherwise it produces negative prices)  
+
+- [x] remove and/or adjust time scaling factors in run_variance(), run_skew(), and random_ohlc()
+
 - [x] rename functions *_OHLC and *_TAQ to *_ohlc and *_taq
 
 - [x] create function adjust_ohlc() that adjusts OHLC data, similar to quantmod::adjustOHLC()  
@@ -145,6 +151,8 @@ https://github.com/hrbrmstr/markdowntemplates
 http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 
+
+
 ### tasks finished
 
 - [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
@@ -238,6 +246,10 @@ created function save_rets_OHLC()
 
 
 ### tasks deprecated
+
+- [ ] modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
+
+- [ ] subtract mean in functions run_variance() and run_skew() - no  
 
 - [ ] convert function season_ality() to use split.xts() (?)  
 

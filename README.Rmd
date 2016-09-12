@@ -105,7 +105,7 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### Data
 
-The *HighFreq* package includes three *xts* time series called *SPY*, *TLT*, and *VXX*, containing intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The *HighFreq* package also includes an *xts* time series called *SPY_TAQ* with a single day of *TAQ* data for the *SPY*ETF.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
+The *HighFreq* package includes three *xts* time series called *SPY*, *TLT*, and *VXX*, containing intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The *HighFreq* package also includes an *xts* time series called *SPY_TAQ* with a single day of *TAQ* data for the *SPY* ETF.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
 
 The data source is the 
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
@@ -133,7 +133,7 @@ chart_Series(x=daily_volume, name="daily trading volumes for SPY")
 
 Calculate daily volume-weighted variance (volatility):  
 ```{r eval=FALSE}
-daily_var <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_variance")
+daily_var <- (24*60*60)*apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_variance")
 colnames(daily_var) <- paste0(na_me(SPY), ".Var")
 chart_Series(x=daily_var, name="daily variance for SPY")
 ```
@@ -168,7 +168,7 @@ chart_Series(roll_var["2012-11-12", ][-(1:11)], name=paste("SPY", "rolling volum
 
 Calculate daily seasonality of variance:  
 ```{r eval=FALSE}
-var_seasonal <- season_ality(run_variance(oh_lc=SPY))
+var_seasonal <- season_ality((24*60*60)*run_variance(oh_lc=SPY))
 colnames(var_seasonal) <- "SPY.var_seasonal"
 chart_Series(x=var_seasonal, name="SPY variance daily seasonality")
 ```

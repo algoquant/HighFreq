@@ -36,8 +36,8 @@ The function \code{roll_vwap()} calculates the volume-weighted
 prices_rolling <- roll_vwap(oh_lc=SPY["2013-11"], win_dow=11)
 chart_Series(SPY["2013-11-12"], name="SPY prices")
 add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
-legend("top", legend=c("SPY prices", "VWAP prices"), 
-bg="white", lty=c(1, 1), lwd=c(2, 2), 
+legend("top", legend=c("SPY prices", "VWAP prices"),
+bg="white", lty=c(1, 1), lwd=c(2, 2),
 col=c("black", "red"), bty="n")
 # calculate running returns
 returns_running <- run_returns(x_ts=SPY)

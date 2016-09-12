@@ -19,12 +19,12 @@ A single-column \code{xts} time series of returns.
 Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
 }
 \details{
-Calculates single period returns for either \code{TAQ} or 
-  \code{OHLC} data, as the ratio of the differenced prices divided by the 
-  time index differences. 
+Calculates single period returns for either \code{TAQ} or
+  \code{OHLC} data, as the ratio of the differenced prices divided by the
+  time index differences.
   Identifies the \code{x_ts} time series as \code{TAQ} data when it has six
   columns, otherwise assumes it's \code{OHLC} data.
-  By default, for \code{OHLC} data, it differences the \code{close} prices, 
+  By default, for \code{OHLC} data, it differences the \code{close} prices,
   but can also difference other prices depending on the value of
   \code{col_umn}.
 }

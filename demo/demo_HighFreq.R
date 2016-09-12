@@ -97,11 +97,11 @@ chart_Series(get(sym_bol), name=sym_bol)
 
 # function volatility() from package TTR
 vol_at <- volatility(OHLC=get(sym_bol)[inter_val], 
-                     calc="yang.zhang", n=10)
+                     calc="yang_zhang", n=10)
 vol_at <- volatility(OHLC=get(sym_bol)[inter_val], 
-                     calc="rogers.satchell", n=10)
+                     calc="rogers_satchell", n=10)
 vol_at <- volatility(OHLC=get(sym_bol)[inter_val], 
-                     calc="garman.klass", n=10)
+                     calc="garman_klass", n=10)
 
 
 # estimating rolling aggregations and moments using package TTR
@@ -119,7 +119,7 @@ win_dow <- 10
 ### daily open to close variance and skew
 volume_daily <- xts::apply.daily(x=Vo(get(sym_bol)), FUN=sum)
 colnames(volume_daily) <- paste0(sym_bol, ".Volume")
-var_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_variance", calc_method="rogers.satchell")
+var_daily <- (24*60*60)*xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_variance", calc_method="rogers_satchell")
 colnames(var_daily) <- paste0(sym_bol, ".Var")
 skew_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
@@ -174,7 +174,7 @@ returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
 returns_rolling <- returns_rolling[end_points, ]
 
 ### calculate running SPY variance without overnight jumps
-var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+var_running <- (24*60*60)*run_variance(oh_lc=SPY, calc_method="rogers_satchell")
 # calculate rolling SPY variance
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
 var_rolling <- var_rolling[end_points, ]
@@ -244,8 +244,8 @@ returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
 colnames(returns_running) <- "returns"
 colnames(returns_rolling) <- "returns.WA5"
 
-var_running <- run_variance(oh_lc=SPY)
-# var_running <- run_variance(oh_lc=SPY, calc_method="rogers.satchell")
+var_running <- (24*60*60)*run_variance(oh_lc=SPY)
+# var_running <- run_variance(oh_lc=SPY, calc_method="rogers_satchell")
 # var_diff <- rutils::diff_xts(x_ts=var_running)
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
 colnames(var_running) <- "variance"
@@ -305,13 +305,13 @@ colnames(volume_seasonal) <- paste0(sym_bol, ".volume_seasonal")
 season_data <- volume_seasonal
 
 # calculate intraday seasonality of variance
-var_seasonal <- season_ality(run_variance(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+var_seasonal <- season_ality((24*60*60)*run_variance(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers_satchell"))
 colnames(var_seasonal) <- paste0(sym_bol, ".var_seasonal")
 season_data <- var_seasonal
 
 # calculate intraday seasonality of variance
 # calculate variance of each minutely OHLC bar of data
-x_ts <- run_variance(SPY)
+x_ts <- (24*60*60)*run_variance(SPY)
 # remove overnight variance spikes at "09:31"
 x_ts <- x_ts["T09:32:00/T16:00:00"]
 # calculate intraday seasonality of variance
@@ -327,7 +327,7 @@ colnames(season_illiquid) <- paste0(sym_bol, ".season_illiquid")
 season_data <- season_illiquid
 
 # calculate intraday seasonality of skew
-skew_seasonal <- season_ality(run_skew(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers.satchell"))
+skew_seasonal <- season_ality(run_skew(oh_lc=get(sym_bol)[inter_val, 1:4], calc_method="rogers_satchell"))
 # skew_seasonal <- skew_seasonal/(var_seasonal)^(1.5)
 colnames(skew_seasonal) <- paste0(sym_bol, ".skew_seasonal")
 season_data <- skew_seasonal
@@ -442,13 +442,13 @@ colnames(oh_lc)[ 5] <- "random.volume"
 tail(oh_lc)
 
 # calculate variance estimates
-var_running <- run_variance(oh_lc)
+var_running <- (24*60*60)*run_variance(oh_lc)
 sum(var_running)
 
 # calculate variance using all the different estimators in run_variance()
-meth_ods <- c("close", "garman.klass", "rogers.satchell", "garman.klass_yz", "yang.zhang")
+meth_ods <- c("close", "garman_klass", "rogers_satchell", "garman_klass_yz", "yang_zhang")
 sapply(meth_ods, function(meth_od) {
-  sum(run_variance(oh_lc, calc_method=meth_od))
+  sum((24*60*60)*run_variance(oh_lc, calc_method=meth_od))
 })
 
 # calculate standard errors of variance estimators using bootstrap
@@ -459,7 +459,7 @@ boot_strap <- sapply(1:100, function(x) {
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
 # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(run_variance(oh_lc, calc_method=meth_od))
+    sum((24*60*60)*run_variance(oh_lc, calc_method=meth_od))
   })  # end sapply
 })  # end sapply
 
@@ -471,7 +471,7 @@ boot_strap <- sapply(1:100, function(x) {
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
   # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(run_variance(oh_lc, calc_method=meth_od))
+    sum((24*60*60)*run_variance(oh_lc, calc_method=meth_od))
   })  # end sapply
 })  # end sapply
 
@@ -482,7 +482,7 @@ boot_errors <- apply(boot_strap, MARGIN=1, sd)
 save(boot_strap, file="C:/Develop/data/boot_strap.RData")
 
 # calculate variance estimates for SPY
-var_running <- run_variance(SPY)
+var_running <- (24*60*60)*run_variance(SPY)
 
 
 ###########

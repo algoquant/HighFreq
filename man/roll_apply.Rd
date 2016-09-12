@@ -20,7 +20,7 @@ of data used for applying the aggregation function.}
 
 \item{end_points}{an integer vector of end points.}
 
-\item{by_columns}{\code{Boolean} should the function \code{agg_fun()} be 
+\item{by_columns}{\code{Boolean} should the function \code{agg_fun()} be
 applied column-wise (individually), or should it be applied to all the
 columns combined? (default is \code{FALSE})}
 

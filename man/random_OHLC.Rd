@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_ohlc}
 \alias{random_ohlc}
-\title{Calculate a random \code{OHLC} time series of prices and trading volumes, in 
+\title{Calculate a random \code{OHLC} time series of prices and trading volumes, in
 \code{xts} format.}
 \usage{
 random_ohlc(oh_lc = NULL, re_duce = TRUE, ...)
@@ -15,25 +15,25 @@ random_ohlc(oh_lc = NULL, re_duce = TRUE, ...)
 to reduced form? (default is \code{TRUE})}
 }
 \value{
-An \code{xts} time series with the same dimensions and the same time 
+An \code{xts} time series with the same dimensions and the same time
   index as the input \code{oh_lc} time series.
 }
 \description{
-Calculate a random \code{OHLC} time series of prices and trading volumes, 
+Calculate a random \code{OHLC} time series of prices and trading volumes,
 either by generating random log-normal prices, or by randomly sampling from
 an input time series.
 }
 \details{
-If the input \code{oh_lc} time series is \code{NULL} (the default), 
-  then a synthetic minutely \code{OHLC} time series of random log-normal 
+If the input \code{oh_lc} time series is \code{NULL} (the default),
+  then a synthetic minutely \code{OHLC} time series of random log-normal
   prices is calculated, over the two previous calendar days.
   If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
   \code{oh_lc} are randomly sampled, to produce a random time series.
-  If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time 
+  If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
   series is first transformed to reduced form, then randomly sampled, and
   finally converted to standard form.
-  Note: randomly sampling from an intraday time series over multiple days 
-  will cause the overnight price jumps to be re-arranged into intraday price 
+  Note: randomly sampling from an intraday time series over multiple days
+  will cause the overnight price jumps to be re-arranged into intraday price
   jumps.  This will cause moment estimates to become inflated compared to the
   original time series.
 }

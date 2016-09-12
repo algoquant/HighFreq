@@ -54,7 +54,7 @@ Calculate rolling variance and skew from minutely *OHLC* data:
 library(HighFreq)
 # calculate rolling volume-weighted average variance and skew
 win_dow <- 21
-var_running <- run_variance(oh_lc=SPY)
+var_running <- (24*60*60)*run_variance(oh_lc=SPY)
 # calculate rolling SPY variance
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
 colnames(var_rolling) <- paste0(sym_bol, ".Var")
@@ -87,8 +87,8 @@ Calculate daily average open to close variance and skew from minutely *OHLC* dat
 library(HighFreq)
 sym_bol <- SPY
 # calculate daily open to close variance and skew
-var_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, 
-                              mo_ment="run_variance", calc_method="rogers.satchell")
+var_daily <- (24*60*60)*xts::apply.daily(x=get(sym_bol), FUN=agg_regate, 
+                              mo_ment="run_variance", calc_method="rogers_satchell")
 colnames(var_daily) <- paste0(sym_bol, ".Var")
 skew_daily <- xts::apply.daily(x=get(sym_bol), FUN=agg_regate, mo_ment="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
@@ -107,7 +107,7 @@ sym_bol <- "SPY"
 volume_seasonal <- season_ality(Vo(get(sym_bol)))
 colnames(volume_seasonal) <- paste0(sym_bol, ".volume_seasonal")
 chart_Series(volume_seasonal, name=paste(sym_bol, "intraday seasonality of volume"))
-var_seasonal <- season_ality(run_variance(oh_lc=get(sym_bol)))
+var_seasonal <- season_ality((24*60*60)*run_variance(oh_lc=get(sym_bol)))
 colnames(var_seasonal) <- paste0(sym_bol, ".var_seasonal")
 chart_Series(var_seasonal, name=paste(sym_bol, "intraday seasonality of variance"))
 ```

@@ -2,9 +2,10 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_skew}
 \alias{run_skew}
-\title{Calculate time series of skew estimates from a \code{OHLC} time series.}
+\title{Calculate time series of skew estimates from a \code{OHLC} time series,
+assuming zero drift.}
 \usage{
-run_skew(oh_lc, calc_method = "rogers.satchell")
+run_skew(oh_lc, calc_method = "rogers_satchell")
 }
 \arguments{
 \item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
@@ -16,12 +17,19 @@ skew.}
 A time series of skew estimates.
 }
 \description{
-Calculate time series of skew estimates from a \code{OHLC} time series.
+Calculate time series of skew estimates from a \code{OHLC} time series,
+assuming zero drift.
 }
 \details{
-The function \code{run_skew()} calculates skew estimates from
-  \code{OHLC} prices at each point in time (row).  The methods include
-  Garman-Klass and Rogers-Satchell.
+The function \code{run_skew()} calculates a time series of skew 
+  estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data. 
+  The skew estimates are scaled to the time scale of the index of the
+  \code{OHLC} time series.  For example, if the time index is in seconds,
+  then the estimates are equal to the skew per second, if the time index is
+  in days, then the estimates are equal to the skew per day.
+  Currently only the \code{"close"} skew estimation method is correct, while 
+  the \code{"rogers_satchell"} method produces a skew-like indicator, 
+  proportional to the skew. The default method is \code{"rogers_satchell"}.
 }
 \examples{
 # calculate time series of skew estimates for SPY

@@ -2,22 +2,24 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_variance}
 \alias{run_variance}
-\title{Calculate a time series of variance estimates for an \code{OHLC} time series.}
+\title{Calculate a time series of variance estimates for an \code{OHLC} time series,
+assuming zero drift.}
 \usage{
-run_variance(oh_lc, calc_method = "garman.klass_yz")
+run_variance(oh_lc, calc_method = "garman_klass_yz")
 }
 \arguments{
 \item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
 
 \item{calc_method}{\code{character} string representing method for estimating
-  variance.  The methods include:
+variance.  The methods include:
 \itemize{
   \item "close" close to close,
-  \item "garman.klass" Garman-Klass,
-  \item "garman.klass_yz" Garman-Klass with account for close-to-open price jumps,
-  \item "rogers.satchell" Rogers-Satchell,
-  \item "yang.zhang" Yang-Zhang,
-}}
+  \item "garman_klass" Garman-Klass,
+  \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+  \item "rogers_satchell" Rogers-Satchell,
+  \item "yang_zhang" Yang-Zhang,
+ }
+ (default is \code{"yang_zhang"})}
 }
 \value{
 An \code{xts} time series with a single column and the same number of
@@ -29,14 +31,31 @@ point in time (row), using the squared differences of \code{OHLC} prices at
 each point in time.
 }
 \details{
-The function \code{run_variance()} performs a similar operation to
-  function \code{volatility()} from package
-  \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-  without calculating a running sum using \code{runSum()}.  It's also a 
-  little faster because it performs less data validation. The variance 
-  estimation methods "close", "garman.klass_yz", and "yang.zhang" do account 
-  for close-to-open price jumps, while the methods "garman.klass" and 
-  "rogers.satchell" do not account for close-to-open price jumps.
+The function \code{run_variance()} calculates a time series of 
+  variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
+  data.  
+  
+  The user can choose from several different variance estimation methods. The
+  methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"} 
+  do account for close-to-open price jumps, while the methods 
+  \code{"garman_klass"} and \code{"rogers_satchell"} do not account for 
+  close-to-open price jumps. The default method is \code{"yang_zhang"}, which
+  theoretically has the lowest standard error among unbiased estimators. All
+  the methods are implemented assuming zero drift, for two reasons. First,
+  the drift in daily or intraday data is insignificant compared to the 
+  volatility. Second, the purpose of the function \code{run_variance()} is to
+  produce technical indicators, rather than statistical estimates.
+  
+  The variance estimates are scaled to the time scale of the index of
+  the \code{OHLC} time series.  For example, if the time index is in seconds,
+  then the estimates are equal to the variance per second, if the time index
+  is in days, then the estimates are equal to the variance per day.
+  The function \code{run_variance()} performs a similar operation to the
+  function \code{volatility()} from package 
+  \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it
+  assumes zero drift, and doesn't calculate a running sum using
+  \code{runSum()}.  It's also a little faster because it performs less data
+  validation.
 }
 \examples{
 # create minutely OHLC time series of random prices
@@ -44,8 +63,8 @@ oh_lc <- HighFreq::random_ohlc()
 # calculate variance estimates for oh_lc
 var_running <- HighFreq::run_variance(oh_lc)
 # calculate variance estimates for SPY
-var_running <- HighFreq::run_variance(SPY, calc_method="yang.zhang")
+var_running <- HighFreq::run_variance(SPY, calc_method="yang_zhang")
 # calculate SPY variance without overnight jumps
-var_running <- HighFreq::run_variance(SPY, calc_method="rogers.satchell")
+var_running <- HighFreq::run_variance(SPY, calc_method="rogers_satchell")
 }
 

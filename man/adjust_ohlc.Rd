@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{adjust_ohlc}
 \alias{adjust_ohlc}
-\title{Adjust the first four columns of \code{OHLC} data using the "adjusted" price 
+\title{Adjust the first four columns of \code{OHLC} data using the "adjusted" price
 column.}
 \usage{
 adjust_ohlc(oh_lc)
@@ -15,7 +15,7 @@ An \code{OHLC} time series with the same dimensions as the input
   series.
 }
 \description{
-Adjust the first four columns of \code{OHLC} data using the "adjusted" price 
+Adjust the first four columns of \code{OHLC} data using the "adjusted" price
 column.
 }
 \details{

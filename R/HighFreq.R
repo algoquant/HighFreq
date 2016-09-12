@@ -82,18 +82,19 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
     in_dex <- seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
                   to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec")
     # create synthetic xts of random log-normal prices
-    x_ts <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
+    x_ts <- xts(exp(cumsum(0.01/sqrt(86400)*rnorm(length(in_dex)))), order.by=in_dex)
     # add trade volume column
     x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
     # aggregate to minutes OHLC data
     to.period(x=x_ts, period="minutes")
   } else {
+    oh_lc <- log(oh_lc)  # transform to normal
     if (re_duce)  # calculate reduced form of oh_lc
       oh_lc <- rutils::diff_ohlc(oh_lc)
     # randomly sample from the rows of oh_lc
-    oh_lc <- xts(coredata(oh_lc)[c(1, sample(x=2:NROW(oh_lc))), ], order.by=index(oh_lc))
+    oh_lc <- xts(coredata(oh_lc)[c(1, sample(x=2:NROW(oh_lc), replace=TRUE)), ], order.by=index(oh_lc))
     # return standard form of randomized oh_lc
-    rutils::diff_ohlc(oh_lc, re_duce=FALSE)
+    exp(rutils::diff_ohlc(oh_lc, re_duce=FALSE))
   }
 }  # end random_ohlc
 
@@ -717,7 +718,8 @@ save_rets_ohlc <- function(sym_bol,
 
 
 
-#' Calculate a time series of variance estimates for an \code{OHLC} time series.
+#' Calculate a time series of variance estimates for an \code{OHLC} time series,
+#' assuming zero drift.
 #'
 #' Calculates the variance estimates for each bar of \code{OHLC} prices at each
 #' point in time (row), using the squared differences of \code{OHLC} prices at
@@ -727,53 +729,69 @@ save_rets_ohlc <- function(sym_bol,
 #' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   variance.  The methods include:
-#' \itemize{
-#'   \item "close" close to close,
-#'   \item "garman.klass" Garman-Klass,
-#'   \item "garman.klass_yz" Garman-Klass with account for close-to-open price jumps,
-#'   \item "rogers.satchell" Rogers-Satchell,
-#'   \item "yang.zhang" Yang-Zhang,
-#' }
+#'   \itemize{
+#'     \item "close" close to close,
+#'     \item "garman_klass" Garman-Klass,
+#'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+#'     \item "rogers_satchell" Rogers-Satchell,
+#'     \item "yang_zhang" Yang-Zhang,
+#'    }
+#'    (default is \code{"yang_zhang"})
 #' @return An \code{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details The function \code{run_variance()} performs a similar operation to
-#'   function \code{volatility()} from package
-#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-#'   without calculating a running sum using \code{runSum()}.  It's also a
-#'   little faster because it performs less data validation. The variance
-#'   estimation methods "close", "garman.klass_yz", and "yang.zhang" do account
-#'   for close-to-open price jumps, while the methods "garman.klass" and
-#'   "rogers.satchell" do not account for close-to-open price jumps.
+#' @details The function \code{run_variance()} calculates a time series of 
+#'   variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
+#'   data.  
+#'   
+#'   The user can choose from several different variance estimation methods. The
+#'   methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"} 
+#'   do account for close-to-open price jumps, while the methods 
+#'   \code{"garman_klass"} and \code{"rogers_satchell"} do not account for 
+#'   close-to-open price jumps. The default method is \code{"yang_zhang"}, which
+#'   theoretically has the lowest standard error among unbiased estimators. All
+#'   the methods are implemented assuming zero drift, for two reasons. First,
+#'   the drift in daily or intraday data is insignificant compared to the 
+#'   volatility. Second, the purpose of the function \code{run_variance()} is to
+#'   produce technical indicators, rather than statistical estimates.
+#'   
+#'   The variance estimates are scaled to the time scale of the index of
+#'   the \code{OHLC} time series.  For example, if the time index is in seconds,
+#'   then the estimates are equal to the variance per second, if the time index
+#'   is in days, then the estimates are equal to the variance per day.
+#'   The function \code{run_variance()} performs a similar operation to the
+#'   function \code{volatility()} from package 
+#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it
+#'   assumes zero drift, and doesn't calculate a running sum using
+#'   \code{runSum()}.  It's also a little faster because it performs less data
+#'   validation.
 #' @examples
 #' # create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
 #' # calculate variance estimates for oh_lc
 #' var_running <- HighFreq::run_variance(oh_lc)
 #' # calculate variance estimates for SPY
-#' var_running <- HighFreq::run_variance(SPY, calc_method="yang.zhang")
+#' var_running <- HighFreq::run_variance(SPY, calc_method="yang_zhang")
 #' # calculate SPY variance without overnight jumps
-#' var_running <- HighFreq::run_variance(SPY, calc_method="rogers.satchell")
+#' var_running <- HighFreq::run_variance(SPY, calc_method="rogers_satchell")
 
-run_variance <- function(oh_lc, calc_method="garman.klass_yz") {
+run_variance <- function(oh_lc, calc_method="garman_klass_yz") {
   sym_bol <- rutils::na_me(oh_lc)
   oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
-         "close"={(oh_lc[, 4]-rutils::lag_xts(oh_lc[, 4]))^2},
-         "garman.klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
-                           (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
-         "rogers.satchell"={(oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
-                              (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])},
-         "garman.klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+         "close"={rutils::diff_xts(oh_lc[, 4])^2},
+         "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                         (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
+         "rogers_satchell"={(oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])},
+         "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
                             0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                             (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
-         "yang.zhang"={c_o <- oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]);
-                       o_c <- oh_lc[, 1]-oh_lc[, 4];
-                       (c_o-sum(c_o)/NROW(c_o))^2 +
-                       0.67*(o_c-sum(o_c)/NROW(o_c))^2 +
+         "yang_zhang"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+                       0.67*(oh_lc[, 1]-oh_lc[, 4])^2 +
                        0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  vari_ance <- 86400^2*vari_ance/c(1, diff(.index(oh_lc)))^2
+  vari_ance <- vari_ance/c(1, diff(.index(oh_lc)))
   vari_ance[1, ] <- 0
   vari_ance <- na.locf(vari_ance)
   colnames(vari_ance) <- paste0(sym_bol, ".Variance")
@@ -783,27 +801,48 @@ run_variance <- function(oh_lc, calc_method="garman.klass_yz") {
 
 
 
-#' Calculate time series of skew estimates from a \code{OHLC} time series.
+#' Calculate time series of skew estimates from a \code{OHLC} time series,
+#' assuming zero drift.
 #'
 #' @export
 #' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
 #' @param calc_method \code{character} string representing method for estimating
 #'   skew.
 #' @return A time series of skew estimates.
-#' @details The function \code{run_skew()} calculates skew estimates from
-#'   \code{OHLC} prices at each point in time (row).  The methods include
-#'   Garman-Klass and Rogers-Satchell.
+#' @details The function \code{run_skew()} calculates a time series of skew 
+#'   estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data. 
+#'   The skew estimates are scaled to the time scale of the index of the
+#'   \code{OHLC} time series.  For example, if the time index is in seconds,
+#'   then the estimates are equal to the skew per second, if the time index is
+#'   in days, then the estimates are equal to the skew per day.
+#'   Currently only the \code{"close"} skew estimation method is correct, while 
+#'   the \code{"rogers_satchell"} method produces a skew-like indicator, 
+#'   proportional to the skew. The default method is \code{"rogers_satchell"}.
 #' @examples
 #' # calculate time series of skew estimates for SPY
 #' sk_ew <- HighFreq::run_skew(SPY)
 
-run_skew <- function(oh_lc, calc_method="rogers.satchell") {
+run_skew <- function(oh_lc, calc_method="rogers_satchell") {
   sym_bol <- rutils::na_me(oh_lc)
   oh_lc <- log(oh_lc[, 1:4])
-  sk_ew <-
-    (oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1])*(oh_lc[, 2]-0.5*(oh_lc[, 4] + oh_lc[, 1])) +
-    (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])*(oh_lc[, 3]-0.5*(oh_lc[, 4] + oh_lc[, 1]))
-  sk_ew <- 86400^3*sk_ew/c(1, diff(.index(oh_lc)))^3
+  sk_ew <- switch(calc_method,
+                  "close"={rutils::diff_xts(oh_lc[, 4])^3},
+                  "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^3 -
+                      (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^3},
+                  "rogers_satchell"={
+                    (oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1])*(oh_lc[, 2]-0.5*(oh_lc[, 4] + oh_lc[, 1])) +
+                      (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])*(oh_lc[, 3]-0.5*(oh_lc[, 4] + oh_lc[, 1]))},
+                  "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^3 +
+                      0.5*(oh_lc[, 2]-oh_lc[, 3])^3 -
+                      (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^3},
+                  "yang_zhang"={c_o <- oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]);
+                  o_c <- oh_lc[, 1]-oh_lc[, 4];
+                  (c_o-sum(c_o)/NROW(c_o))^3 +
+                    0.67*(o_c-sum(o_c)/NROW(o_c))^3 +
+                    0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
+  )  # end switch
+  sk_ew <- sk_ew/c(1, diff(.index(oh_lc)))
   sk_ew[1, ] <- 0
   sk_ew <- na.locf(sk_ew)
   colnames(sk_ew) <- paste0(sym_bol, ".Skew")

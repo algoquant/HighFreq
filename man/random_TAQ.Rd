@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_taq}
 \alias{random_taq}
-\title{Calculate a random \code{TAQ} time series of prices and trading volumes, in 
+\title{Calculate a random \code{TAQ} time series of prices and trading volumes, in
 \code{xts} format.}
 \usage{
 random_taq(in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")),
@@ -12,11 +12,11 @@ random_taq(in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")),
 \arguments{
 \item{in_dex}{time index for the \code{TAQ} time series.}
 
-\item{bid_offer}{the bid-offer spread expressed as a fraction of the prices. 
+\item{bid_offer}{the bid-offer spread expressed as a fraction of the prices.
 The default value is equal to 0.001 (10bps).}
 }
 \value{
-An \code{xts} time series, with time index equal to the input 
+An \code{xts} time series, with time index equal to the input
   \code{in_dex} time index, and with four columns containing the bid, ask,
   and trade prices, and the trade volume.
 }

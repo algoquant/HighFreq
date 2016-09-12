@@ -41,10 +41,10 @@ The function \code{save_rets} loads multiple days of \code{TAQ}
   series.  It then calculates returns using function \code{run_returns}, and
   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
   to a file called \sQuote{\code{symbol.rets.RData}}.
-  The \code{TAQ} data files are assumed to be stored in separate directories 
-  for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own 
-  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}} 
-  directory. Each \sQuote{\code{symbol}} directory contains multiple daily 
+  The \code{TAQ} data files are assumed to be stored in separate directories
+  for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
+  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+  directory. Each \sQuote{\code{symbol}} directory contains multiple daily
   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
   data.
 }
