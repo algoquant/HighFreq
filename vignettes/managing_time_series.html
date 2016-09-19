@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-08-26" />
+<meta name="date" content="2016-09-14" />
 
 <title>Managing TAQ and OHLC Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Managing <em>TAQ</em> and <em>OHLC</em> Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-08-26</em></h4>
+<h4 class="date"><em>2016-09-14</em></h4>
 
 
 
@@ -121,7 +121,7 @@ sym_bols &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st
 <span class="kw">sapply</span>(sym_bols, save_scrub_agg, 
        <span class="dt">data_dir=</span>data_dir, <span class="dt">output_dir=</span>output_dir, <span class="dt">period=</span><span class="st">&quot;15 min&quot;</span>)</code></pre></div>
 <p><br></p>
-<p>For a single symbol, load a single day of <em>TAQ</em> data, scrub it using function scrub_TAQ(), and save the scrubbed TAQ data to a single <em>.RData</em> file:</p>
+<p>For a single symbol, load a single day of <em>TAQ</em> data, scrub it using function scrub_taq(), and save the scrubbed TAQ data to a single <em>.RData</em> file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
 <span class="co"># set data directories</span>
@@ -132,7 +132,7 @@ sym_bol &lt;-<span class="st"> &quot;SPY&quot;</span>
 file_name &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;/2014.05.02.&quot;</span>, sym_bol, <span class="st">&quot;.RData&quot;</span>)
 sym_bol &lt;-<span class="st"> </span><span class="kw">load</span>(<span class="kw">file.path</span>(data_dir, <span class="kw">paste0</span>(sym_bol, <span class="st">&quot;/2014.05.02.&quot;</span>, sym_bol, <span class="st">&quot;.RData&quot;</span>)))
 <span class="co"># scrub a single day of TAQ data, without aggregating it to OHLC</span>
-ta_q &lt;-<span class="st"> </span><span class="kw">scrub_TAQ</span>(<span class="dt">ta_q=</span><span class="kw">get</span>(sym_bol))
+ta_q &lt;-<span class="st"> </span><span class="kw">scrub_taq</span>(<span class="dt">ta_q=</span><span class="kw">get</span>(sym_bol))
 <span class="kw">save</span>(<span class="dt">list=</span>sym_bol, <span class="dt">file=</span><span class="kw">file.path</span>(output_dir, file_name))</code></pre></div>
 <p><br></p>
 </div>

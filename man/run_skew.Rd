@@ -21,15 +21,16 @@ Calculate time series of skew estimates from a \code{OHLC} time series,
 assuming zero drift.
 }
 \details{
-The function \code{run_skew()} calculates a time series of skew 
-  estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data. 
+The function \code{run_skew()} calculates a time series of skew
+  estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data.
   The skew estimates are scaled to the time scale of the index of the
   \code{OHLC} time series.  For example, if the time index is in seconds,
   then the estimates are equal to the skew per second, if the time index is
   in days, then the estimates are equal to the skew per day.
-  Currently only the \code{"close"} skew estimation method is correct, while 
-  the \code{"rogers_satchell"} method produces a skew-like indicator, 
-  proportional to the skew. The default method is \code{"rogers_satchell"}.
+  Currently only the \code{"close"} skew estimation method is correct
+  (assuming zero drift), while the \code{"rogers_satchell"} method produces a
+  skew-like indicator, proportional to the skew. The default method is
+  \code{"rogers_satchell"}.
 }
 \examples{
 # calculate time series of skew estimates for SPY

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-08-27" />
+<meta name="date" content="2016-09-14" />
 
 <title>Estimating Running and Rolling Statistics Over Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Estimating Running and Rolling Statistics Over Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-08-27</em></h4>
+<h4 class="date"><em>2016-09-14</em></h4>
 
 
 
@@ -109,7 +109,7 @@ prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<
 <span class="kw">library</span>(HighFreq)
 <span class="co"># calculate rolling volume-weighted average variance and skew</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">21</span>
-var_running &lt;-<span class="st"> </span><span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY)
+var_running &lt;-<span class="st"> </span>(<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY)
 <span class="co"># calculate rolling SPY variance</span>
 var_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">x_ts=</span>var_running, <span class="dt">win_dow=</span>win_dow)
 <span class="kw">colnames</span>(var_rolling) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Var&quot;</span>)
@@ -134,8 +134,8 @@ skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_ro
 <span class="kw">library</span>(HighFreq)
 sym_bol &lt;-<span class="st"> </span>SPY
 <span class="co"># calculate daily open to close variance and skew</span>
-var_daily &lt;-<span class="st"> </span>xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span><span class="kw">get</span>(sym_bol), <span class="dt">FUN=</span>agg_regate, 
-                              <span class="dt">mo_ment=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers.satchell&quot;</span>)
+var_daily &lt;-<span class="st"> </span>(<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span><span class="kw">get</span>(sym_bol), <span class="dt">FUN=</span>agg_regate, 
+                              <span class="dt">mo_ment=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
 <span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Var&quot;</span>)
 skew_daily &lt;-<span class="st"> </span>xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span><span class="kw">get</span>(sym_bol), <span class="dt">FUN=</span>agg_regate, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>)
 skew_daily &lt;-<span class="st"> </span>skew_daily/(var_daily)^(<span class="fl">1.5</span>)
@@ -150,7 +150,7 @@ sym_bol &lt;-<span class="st"> &quot;SPY&quot;</span>
 volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(<span class="kw">get</span>(sym_bol)))
 <span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.volume_seasonal&quot;</span>)
 <span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;intraday seasonality of volume&quot;</span>))
-var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span><span class="kw">get</span>(sym_bol)))
+var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span><span class="kw">get</span>(sym_bol)))
 <span class="kw">colnames</span>(var_seasonal) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.var_seasonal&quot;</span>)
 <span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;intraday seasonality of variance&quot;</span>))</code></pre></div>
 <p><br></p>

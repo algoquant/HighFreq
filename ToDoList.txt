@@ -15,6 +15,12 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### comments
 
+# volume weighted volatility is higher than simple average volatility because volumes are higher at higher volatility. 
+
+# Theoretically, the Yang-Zhang (YZ) and Garman-Klass-Yang-Zhang (GKYZ) range variance estimators are unbiased and have up to seven times smaller standard errors than the standard close-to-close estimator.  But in practice, prices are not observed continuously, so the price range is underestimated, and so is the variance when using the YZ and GKYZ range estimators.  Therefore in practice the YZ and GKYZ range estimators are biased (underestimate volatility).  In addition, the standard errors are reduced less than by the theoretical amount, for the same reason. 
+
+# Using the average of open and close prices in the standard variance estimator (instead of just the close prices) doesn't reduce the standard error.
+
 # High frequency data has three tenor horizons: daily (daily or lower frequency of data), intraday (secondly to daily frequency of data), and sub-second tenor horizons (sub-secondly or higher frequency of data).
 At the sub-second tenor horizon, returns are dominated by noise and the bid-ask bounce.
 Returns are dominated in their scale by the volatility, and they have no discernable trend.
@@ -35,6 +41,8 @@ Therefore 1-second bar returns carry almost no information.
 - [ ] fix remaining bug in random_ohlc() when sampling from rows of OHLC: bootstraped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big  
 
 - [x] fix bug in random_ohlc(): transform to normal distribution before sampling from rows of OHLC (otherwise it produces negative prices)  
+
+- [x] move functions adjust_ohlc(), to_period() and get_symbols() from HighFreq to rutils  
 
 - [x] remove and/or adjust time scaling factors in run_variance(), run_skew(), and random_ohlc()
 

@@ -5,7 +5,7 @@
 \title{Calculate a time series of variance estimates for an \code{OHLC} time series,
 assuming zero drift.}
 \usage{
-run_variance(oh_lc, calc_method = "garman_klass_yz")
+run_variance(oh_lc, calc_method = "yang_zhang")
 }
 \arguments{
 \item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
@@ -31,30 +31,30 @@ point in time (row), using the squared differences of \code{OHLC} prices at
 each point in time.
 }
 \details{
-The function \code{run_variance()} calculates a time series of 
+The function \code{run_variance()} calculates a time series of
   variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
-  data.  
-  
+  data.
+
   The user can choose from several different variance estimation methods. The
-  methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"} 
-  do account for close-to-open price jumps, while the methods 
-  \code{"garman_klass"} and \code{"rogers_satchell"} do not account for 
+  methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"}
+  do account for close-to-open price jumps, while the methods
+  \code{"garman_klass"} and \code{"rogers_satchell"} do not account for
   close-to-open price jumps. The default method is \code{"yang_zhang"}, which
   theoretically has the lowest standard error among unbiased estimators. All
   the methods are implemented assuming zero drift, for two reasons. First,
-  the drift in daily or intraday data is insignificant compared to the 
+  the drift in daily or intraday data is insignificant compared to the
   volatility. Second, the purpose of the function \code{run_variance()} is to
   produce technical indicators, rather than statistical estimates.
-  
-  The variance estimates are scaled to the time scale of the index of
-  the \code{OHLC} time series.  For example, if the time index is in seconds,
-  then the estimates are equal to the variance per second, if the time index
-  is in days, then the estimates are equal to the variance per day.
-  The function \code{run_variance()} performs a similar operation to the
+
+  The variance is scaled to the scale of the time index of the \code{OHLC} 
+  time series.  For example, if the time index is in seconds, then the 
+  variance is expressed in units equal to the variance per second, if the 
+  time index is in days, then the variance is equal to the variance per day.
+  The function \code{run_variance()} performs a similar operation to the 
   function \code{volatility()} from package 
-  \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it
-  assumes zero drift, and doesn't calculate a running sum using
-  \code{runSum()}.  It's also a little faster because it performs less data
+  \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it 
+  assumes zero drift, and doesn't calculate a running sum using 
+  \code{runSum()}.  It's also a little faster because it performs less data 
   validation.
 }
 \examples{

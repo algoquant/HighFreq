@@ -101,83 +101,6 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
 
 
 
-#' Adjust the first four columns of \code{OHLC} data using the "adjusted" price
-#' column.
-#'
-#' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @return An \code{OHLC} time series with the same dimensions as the input
-#'   series.
-#' @details Adjusts the first four \code{OHLC} price columns by multiplying them
-#'   by the ratio of the "adjusted" (sixth) price column, divided by the "close"
-#'   (fourth) price column.
-#' @examples
-#' # adjust VTI prices
-#' VTI <- adjust_ohlc(env_etf$VTI)
-
-adjust_ohlc <- function(oh_lc) {
-  # adjust OHLC prices
-  oh_lc[, 1:4] <- as.vector(oh_lc[, 6] / oh_lc[, 4]) * coredata(oh_lc[, 1:4])
-  oh_lc
-}  # end adjust_ohlc
-
-
-
-
-#' Download time series data from an external source (by default \code{OHLC}
-#' prices from \code{YAHOO}), and save it into an environment.
-#'
-#' @export
-#' @param sym_bols vector of strings representing instrument symbols (tickers).
-#' @param env_out environment for saving the data.
-#' @param start_date start date of time series data.  (default is "2007-01-01")
-#' @param end_date end date of time series data.  (default is \code{Sys.Date()})
-#' @return A vector of \code{sym_bols} returned invisibly.
-#' @details The function \code{get_symbols} downloads \code{OHLC} prices from
-#'   \code{YAHOO} into an environment, adjusts the prices, and saves them back
-#'   to that environment. The function \code{get_symbols()} calls the function
-#'   \code{getSymbols.yahoo()} to download the \code{OHLC} prices, and performs
-#'   a similar operation to the function \code{getSymbols()} from package
-#'   \href{https://cran.r-project.org/web/packages/quantmod/index.html}{quantmod}.
-#'   But \code{get_symbols()} is faster (because it's more specialized), and is
-#'   able to handle symbols like \code{"LOW"}, which \code{getSymbols()} can't
-#'   handle because the function \code{Lo()} can't handle them. The
-#'   \code{start_date} and \code{end_date} must be either of class \code{Date},
-#'   or a string in the format "YYYY-mm-dd".
-#'   \code{get_symbols()} returns invisibly the vector of \code{sym_bols}.
-#' @examples
-#' \dontrun{
-#' new_env <- new.env()
-#' get_symbols(sym_bols=c("MSFT", "XOM"),
-#'             env_out=new_env,
-#'             start_date="2012-12-01",
-#'             end_date="2015-12-01")
-#' }
-
-get_symbols <- function(sym_bols,
-                        env_out,
-                        start_date="2007-01-01",
-                        end_date=Sys.Date()) {
-  # download prices from YAHOO
-  quantmod::getSymbols.yahoo(sym_bols,
-                   env=env_out,
-                   from=start_date,
-                   to=end_date)
-  # adjust the OHLC prices and save back to env_out
-  out_put <- lapply(sym_bols,
-                  function(sym_bol) {
-                    assign(sym_bol,
-                           value=adjust_ohlc(get(sym_bol, envir=env_out)),
-                           envir=env_out)
-                    sym_bol
-                  }
-                  )  # end lapply
-  invisible(out_put)
-}  # end get_symbols
-
-
-
-
 #' Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
 #'
 #' @export
@@ -739,30 +662,30 @@ save_rets_ohlc <- function(sym_bol,
 #'    (default is \code{"yang_zhang"})
 #' @return An \code{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details The function \code{run_variance()} calculates a time series of 
+#' @details The function \code{run_variance()} calculates a time series of
 #'   variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
-#'   data.  
-#'   
+#'   data.
+#'
 #'   The user can choose from several different variance estimation methods. The
-#'   methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"} 
-#'   do account for close-to-open price jumps, while the methods 
-#'   \code{"garman_klass"} and \code{"rogers_satchell"} do not account for 
+#'   methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"}
+#'   do account for close-to-open price jumps, while the methods
+#'   \code{"garman_klass"} and \code{"rogers_satchell"} do not account for
 #'   close-to-open price jumps. The default method is \code{"yang_zhang"}, which
 #'   theoretically has the lowest standard error among unbiased estimators. All
 #'   the methods are implemented assuming zero drift, for two reasons. First,
-#'   the drift in daily or intraday data is insignificant compared to the 
+#'   the drift in daily or intraday data is insignificant compared to the
 #'   volatility. Second, the purpose of the function \code{run_variance()} is to
 #'   produce technical indicators, rather than statistical estimates.
-#'   
-#'   The variance estimates are scaled to the time scale of the index of
-#'   the \code{OHLC} time series.  For example, if the time index is in seconds,
-#'   then the estimates are equal to the variance per second, if the time index
-#'   is in days, then the estimates are equal to the variance per day.
-#'   The function \code{run_variance()} performs a similar operation to the
+#'
+#'   The variance is scaled to the scale of the time index of the \code{OHLC} 
+#'   time series.  For example, if the time index is in seconds, then the 
+#'   variance is expressed in units equal to the variance per second, if the 
+#'   time index is in days, then the variance is equal to the variance per day.
+#'   The function \code{run_variance()} performs a similar operation to the 
 #'   function \code{volatility()} from package 
-#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it
-#'   assumes zero drift, and doesn't calculate a running sum using
-#'   \code{runSum()}.  It's also a little faster because it performs less data
+#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it 
+#'   assumes zero drift, and doesn't calculate a running sum using 
+#'   \code{runSum()}.  It's also a little faster because it performs less data 
 #'   validation.
 #' @examples
 #' # create minutely OHLC time series of random prices
@@ -774,7 +697,7 @@ save_rets_ohlc <- function(sym_bol,
 #' # calculate SPY variance without overnight jumps
 #' var_running <- HighFreq::run_variance(SPY, calc_method="rogers_satchell")
 
-run_variance <- function(oh_lc, calc_method="garman_klass_yz") {
+run_variance <- function(oh_lc, calc_method="yang_zhang") {
   sym_bol <- rutils::na_me(oh_lc)
   oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
@@ -791,7 +714,7 @@ run_variance <- function(oh_lc, calc_method="garman_klass_yz") {
                        0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  vari_ance <- vari_ance/c(1, diff(.index(oh_lc)))
+  vari_ance <- vari_ance/c(1, diff(.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- na.locf(vari_ance)
   colnames(vari_ance) <- paste0(sym_bol, ".Variance")
@@ -809,15 +732,16 @@ run_variance <- function(oh_lc, calc_method="garman_klass_yz") {
 #' @param calc_method \code{character} string representing method for estimating
 #'   skew.
 #' @return A time series of skew estimates.
-#' @details The function \code{run_skew()} calculates a time series of skew 
-#'   estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data. 
+#' @details The function \code{run_skew()} calculates a time series of skew
+#'   estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data.
 #'   The skew estimates are scaled to the time scale of the index of the
 #'   \code{OHLC} time series.  For example, if the time index is in seconds,
 #'   then the estimates are equal to the skew per second, if the time index is
 #'   in days, then the estimates are equal to the skew per day.
-#'   Currently only the \code{"close"} skew estimation method is correct, while 
-#'   the \code{"rogers_satchell"} method produces a skew-like indicator, 
-#'   proportional to the skew. The default method is \code{"rogers_satchell"}.
+#'   Currently only the \code{"close"} skew estimation method is correct
+#'   (assuming zero drift), while the \code{"rogers_satchell"} method produces a
+#'   skew-like indicator, proportional to the skew. The default method is
+#'   \code{"rogers_satchell"}.
 #' @examples
 #' # calculate time series of skew estimates for SPY
 #' sk_ew <- HighFreq::run_skew(SPY)
@@ -842,7 +766,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
                     0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                             (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  sk_ew <- sk_ew/c(1, diff(.index(oh_lc)))
+  sk_ew <- sk_ew/c(1, diff(.index(oh_lc)))^3
   sk_ew[1, ] <- 0
   sk_ew <- na.locf(sk_ew)
   colnames(sk_ew) <- paste0(sym_bol, ".Skew")
@@ -1103,8 +1027,8 @@ roll_sharpe <- function(oh_lc, win_dow=11) {
 roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
   if(roll_end_points) {  # roll over end points
     # aggregate oh_lc to a lower periodicity specified by end_points
-    ohlc_agg <- HighFreq::to_period(oh_lc=oh_lc,
-                                    end_points=rutils::end_points(oh_lc, inter_val=win_dow, off_set=off_set))
+    ohlc_agg <- rutils::to_period(oh_lc=oh_lc,
+                                  end_points=rutils::end_points(oh_lc, inter_val=win_dow, off_set=off_set))
     var_ohlc_agg <- run_variance(ohlc_agg)
     in_dex <- index(ohlc_agg)
     var_ohlc <- rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)[in_dex]/win_dow
@@ -1262,46 +1186,4 @@ season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
   agg_regation
 }  # end season_ality
 
-
-
-
-#' Aggregate an \code{OHLC} time series to a lower periodicity.
-#'
-#' Given an \code{OHLC} time series at high periodicity (say seconds),
-#' calculates the \code{OHLC} prices at lower periodicity (say minutes).
-#'
-#' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @param period aggregation interval ("seconds", "minutes", "hours", "days",
-#'   "weeks", "months", "quarters", and "years").
-#' @param k number of periods to aggregate over (for example if period="minutes"
-#'   and k=2, then aggregate over two minute intervals.)
-#' @param end_points an integer vector of end points.
-#' @return A \code{OHLC} time series of prices in \code{xts} format, with a
-#'   lower periodicity defined by the end_points.
-#' @details The function \code{to_period()} performs a similar aggregation as
-#'   function \code{to.period()} from package
-#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, but has
-#'   the flexibility to aggregate to a user-specified vector of end points. The
-#'   function \code{to_period()} simply calls the compiled function
-#'   \code{toPeriod()} (from package
-#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}), to
-#'   perform the actual aggregations.  If \code{end_points} are passed in
-#'   explicitly, then the \code{period} argument is ignored.
-#' @examples
-#' # define end points at 10-minute intervals (SPY is minutely bars)
-#' end_points <- rutils::end_points(SPY["2009"], inter_val=10)
-#' # aggregate over 10-minute end_points:
-#' to_period(x_ts=SPY["2009"], end_points=end_points)
-#' # aggregate over days:
-#' to_period(x_ts=SPY["2009"], period="days")
-#' # equivalent to:
-#' to.period(x=SPY["2009"], period="days", name=rutils::na_me(SPY))
-
-to_period <- function(oh_lc,
-                      period="minutes", k=1,
-                      end_points=xts::endpoints(oh_lc, period, k)) {
-  .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc),
-        FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
-}  # end to_period
 
