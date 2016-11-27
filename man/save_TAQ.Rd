@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{save_taq}
 \alias{save_taq}
-\title{Load and scrub multiple days of \code{TAQ} data for a single symbol, and save
+\title{Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 it to multiple \sQuote{\code{*.RData}} files.}
 \usage{
 save_taq(sym_bol, data_dir = "E:/mktdata/sec/",
@@ -10,37 +10,37 @@ save_taq(sym_bol, data_dir = "E:/mktdata/sec/",
   tzone = "America/New_York")
 }
 \arguments{
-\item{sym_bol}{\code{character} string representing symbol or ticker.}
+\item{sym_bol}{\emph{character} string representing symbol or ticker.}
 
-\item{data_dir}{\code{character} string representing directory containing
+\item{data_dir}{\emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{\code{character} string representing directory containing
+\item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{win_dow}{number of data points for estimating rolling volatility.}
+\item{win_dow}{number of data points for estimating rolling quantile.}
 
-\item{vol_mult}{volatility multiplier.}
+\item{vol_mult}{quantile multiplier.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \code{TAQ} time series in \code{xts} format.
+A \emph{TAQ} time series in \emph{xts} format.
 }
 \description{
-Load and scrub multiple days of \code{TAQ} data for a single symbol, and save
+Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 it to multiple \sQuote{\code{*.RData}} files.
 }
 \details{
-The function \code{save_taq()} loads multiple days of \code{TAQ}
+The function \code{save_taq()} loads multiple days of \emph{TAQ}
   data, scrubs it, and saves the scrubbed TAQ data to individual
   \sQuote{\code{*.RData}} files. It uses the same file names for output as
-  the input file names. The \code{TAQ} data files are assumed to be stored in
+  the input file names. The \emph{TAQ} data files are assumed to be stored in
   separate directories for each \sQuote{\code{symbol}}. Each
   \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
   in the \sQuote{\code{data_dir}} directory.
   Each \sQuote{\code{symbol}} directory contains multiple daily
-  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+  \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
   data.
 }
 \examples{

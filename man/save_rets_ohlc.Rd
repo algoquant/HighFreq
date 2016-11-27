@@ -2,32 +2,32 @@
 % Please edit documentation in R/HighFreq.R
 \name{save_rets_ohlc}
 \alias{save_rets_ohlc}
-\title{Load \code{OHLC} time series data for a single symbol, calculate its returns,
+\title{Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 and save them to a single \sQuote{\code{*.RData}} file, without aggregation.}
 \usage{
 save_rets_ohlc(sym_bol, data_dir = "E:/output/data/",
   output_dir = "E:/output/data/")
 }
 \arguments{
-\item{sym_bol}{\code{character} string representing symbol or ticker.}
+\item{sym_bol}{\emph{character} string representing symbol or ticker.}
 
-\item{data_dir}{\code{character} string representing directory containing
+\item{data_dir}{\emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{\code{character} string representing directory containing
+\item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 }
 \value{
-A time series of returns and volume in \code{xts} format.
+A time series of returns and volume in \emph{xts} format.
 }
 \description{
-Load \code{OHLC} time series data for a single symbol, calculate its returns,
+Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 and save them to a single \sQuote{\code{*.RData}} file, without aggregation.
 }
 \details{
-The function \code{save_rets_ohlc()} loads \code{OHLC} time series
+The function \code{save_rets_ohlc()} loads \emph{OHLC} time series
   data from a single file.  It then calculates returns using function
-  \code{run_returns}, and stores them in a variable named
+  \code{run_returns()}, and stores them in a variable named
   \sQuote{\code{symbol.rets}}, and saves them to a file called
   \sQuote{\code{symbol.rets.RData}}.
 }

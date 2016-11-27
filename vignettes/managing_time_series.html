@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-09-14" />
+<meta name="date" content="2016-11-26" />
 
 <title>Managing TAQ and OHLC Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Managing <em>TAQ</em> and <em>OHLC</em> Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-09-14</em></h4>
+<h4 class="date"><em>2016-11-26</em></h4>
 
 
 
@@ -89,13 +89,13 @@ ta_q &lt;-<span class="st"> </span>ta_q[<span class="st">'T09:30:00/T16:00:00'</
 ta_q &lt;-<span class="st"> </span>ta_q[!<span class="kw">duplicated</span>(<span class="kw">index</span>(ta_q)), ]
 <span class="co"># scrub quotes with suspect bid-offer spreads</span>
 bid_offer &lt;-<span class="st"> </span>ta_q[, <span class="st">&quot;Ask.Price&quot;</span>] -<span class="st"> </span>ta_q[, <span class="st">&quot;Bid.Price&quot;</span>]
-sus_pect &lt;-<span class="st"> </span><span class="kw">extreme_values</span>(bid_offer, <span class="dt">win_dow=</span>win_dow, <span class="dt">vol_mult=</span>vol_mult)
+sus_pect &lt;-<span class="st"> </span><span class="kw">which_extreme</span>(bid_offer, <span class="dt">win_dow=</span>win_dow, <span class="dt">vol_mult=</span>vol_mult)
 <span class="co"># remove suspect values</span>
 ta_q &lt;-<span class="st"> </span>ta_q[!sus_pect]
 <span class="co"># calculate mid prices</span>
 mid_prices &lt;-<span class="st"> </span><span class="fl">0.5</span> *<span class="st"> </span>(ta_q[, <span class="st">&quot;Bid.Price&quot;</span>] +<span class="st"> </span>ta_q[, <span class="st">&quot;Ask.Price&quot;</span>])
 <span class="co"># replace whole rows containing suspect price jumps with NA, and perform locf()</span>
-ta_q[<span class="kw">price_jumps</span>(mid_prices, <span class="dt">win_dow=</span><span class="dv">31</span>, <span class="dt">vol_mult=</span><span class="fl">1.0</span>), ] &lt;-<span class="st"> </span><span class="ot">NA</span>
+ta_q[<span class="kw">which_jumps</span>(mid_prices, <span class="dt">win_dow=</span><span class="dv">31</span>, <span class="dt">vol_mult=</span><span class="fl">1.0</span>), ] &lt;-<span class="st"> </span><span class="ot">NA</span>
 ta_q &lt;-<span class="st"> </span><span class="kw">na.locf</span>(ta_q)</code></pre></div>
 <p><br></p>
 <p>Scrub and aggregate a single day of <em>TAQ</em> data to <em>OHLC</em> format using function scrub_agg():</p>

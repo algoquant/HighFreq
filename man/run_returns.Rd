@@ -2,33 +2,58 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_returns}
 \alias{run_returns}
-\title{Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.}
+\title{Calculate single period percentage returns from either \emph{TAQ} or
+\emph{OHLC} prices.}
 \usage{
-run_returns(x_ts, col_umn = 4)
+run_returns(x_ts, lag = 1, col_umn = 4, sca_le = TRUE)
 }
 \arguments{
-\item{x_ts}{\code{xts} time series of either \code{TAQ} or \code{OHLC} data.}
+\item{x_ts}{\emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
 
-\item{col_umn}{the column number to extract from the \code{OHLC} data.
-(default is \code{4}, or the \code{close} prices column)}
+\item{lag}{integer equal to the number of time periods of lag. (default is 1)}
+
+\item{col_umn}{the column number to extract from the \emph{OHLC} data.
+(default is \code{4}, or the \emph{Close} prices column)}
+
+\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the 
+number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
-A single-column \code{xts} time series of returns.
+A single-column \emph{xts} time series of returns.
 }
 \description{
-Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
+Calculate single period percentage returns from either \emph{TAQ} or
+\emph{OHLC} prices.
 }
 \details{
-Calculates single period returns for either \code{TAQ} or
-  \code{OHLC} data, as the ratio of the differenced prices divided by the
-  time index differences.
-  Identifies the \code{x_ts} time series as \code{TAQ} data when it has six
-  columns, otherwise assumes it's \code{OHLC} data.
-  By default, for \code{OHLC} data, it differences the \code{close} prices,
-  but can also difference other prices depending on the value of
+The function \code{run_returns()} calculates the percentage returns 
+  for either \emph{TAQ} or \emph{OHLC} data, defined as the difference of log
+  prices.  Multi-period returns can be calculated by setting the \code{lag} 
+  parameter to values greater than \code{1} (the default).
+  
+  If \code{sca_le} is \code{TRUE} (the default), then the returns are divided
+  by the differences of the time index (which scales the returns to units of
+  returns per second.)
+  
+  The time index of the \code{x_ts} time series is assumed to be in 
+  \emph{POSIXct} format, so that its internal value is equal to the number of
+  seconds that have elapsed since the \emph{epoch}.
+  
+  If \code{sca_le} is \code{TRUE} (the default), then the returns are
+  expressed in the scale of the time index of the \code{x_ts} time series. 
+  For example, if the time index is in seconds, then the returns are given in
+  units of returns per second.  If the time index is in days, then the
+  returns are equal to the returns per day.
+  
+  The function \code{run_returns()} identifies the \code{x_ts} time series as
+  \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
+  data. By default, for \emph{OHLC} data, it differences the \emph{Close}
+  prices, but can also difference other prices depending on the value of 
   \code{col_umn}.
 }
 \examples{
+# calculate secondly returns from TAQ data
+re_turns <- HighFreq::run_returns(x_ts=SPY_TAQ)
 # calculate close to close returns
 re_turns <- HighFreq::run_returns(x_ts=SPY)
 # calculate open to open returns

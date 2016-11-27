@@ -2,16 +2,16 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_variance}
 \alias{run_variance}
-\title{Calculate a time series of variance estimates for an \code{OHLC} time series,
-assuming zero drift.}
+\title{Calculate a time series of point estimates of variance for an \emph{OHLC}
+time series, using different range estimators for variance.}
 \usage{
-run_variance(oh_lc, calc_method = "yang_zhang")
+run_variance(oh_lc, calc_method = "yang_zhang", sca_le = TRUE)
 }
 \arguments{
-\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
+\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\code{character} string representing method for estimating
-variance.  The methods include:
+\item{calc_method}{\emph{character} string representing the method for
+estimating variance.  The methods include:
 \itemize{
   \item "close" close to close,
   \item "garman_klass" Garman-Klass,
@@ -20,37 +20,66 @@ variance.  The methods include:
   \item "yang_zhang" Yang-Zhang,
  }
  (default is \code{"yang_zhang"})}
+
+\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the 
+number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
-An \code{xts} time series with a single column and the same number of
+An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{
-Calculates the variance estimates for each bar of \code{OHLC} prices at each
-point in time (row), using the squared differences of \code{OHLC} prices at
-each point in time.
+Calculates the point variance estimates from individual bars of \emph{OHLC} 
+prices (rows of data), using the squared differences of \emph{OHLC} prices at
+each point in time, without averaging them over time.
 }
 \details{
-The function \code{run_variance()} calculates a time series of
-  variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
-  data.
-
+The function \code{run_variance()} calculates a time series of point
+  variance estimates of percentage returns, from \emph{OHLC} prices, without
+  averaging them over time. For example, the method \code{"close"} simply
+  calculates the squares of the differences of the log \emph{Close} prices.
+  
+  The other methods calculate the squares of other possible differences of 
+  the log \emph{OHLC} prices.  This way the point variance estimates only
+  depend on the price differences within individual bars of data (and
+  possibly from the neighboring bars.)
+  All the methods are implemented assuming zero drift, since the calculations
+  are performed only for a single bar of data, at a single point in time.
+  
   The user can choose from several different variance estimation methods. The
   methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"}
   do account for close-to-open price jumps, while the methods
   \code{"garman_klass"} and \code{"rogers_satchell"} do not account for
   close-to-open price jumps. The default method is \code{"yang_zhang"}, which
-  theoretically has the lowest standard error among unbiased estimators. All
-  the methods are implemented assuming zero drift, for two reasons. First,
-  the drift in daily or intraday data is insignificant compared to the
-  volatility. Second, the purpose of the function \code{run_variance()} is to
-  produce technical indicators, rather than statistical estimates.
+  theoretically has the lowest standard error among unbiased estimators. 
 
-  The variance is scaled to the scale of the time index of the \code{OHLC} 
-  time series.  For example, if the time index is in seconds, then the 
-  variance is expressed in units equal to the variance per second, if the 
-  time index is in days, then the variance is equal to the variance per day.
-  The function \code{run_variance()} performs a similar operation to the 
+  The point variance estimates can be passed into function \code{roll_vwap()}
+  to perform averaging, to calculate rolling variance estimates.  This is
+  appropriate only for the methods \code{"garman_klass"} and
+  \code{"rogers_satchell"}, since they don't require subtracting the rolling
+  mean from the point variance estimates.
+  
+  The point variance estimates can also be considered to be technical
+  indicators, and can be used as inputs into trading models.
+  
+  If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+  by the squared differences of the time index (which scales the variance to 
+  units of variance per second squared.) This is useful for example, when
+  calculating intra-day variance from minutely bar data, because dividing
+  returns by the number of seconds decreases the effect of overnight price 
+  jumps.
+  
+  If \code{sca_le} is \code{TRUE} (the default), then the variance is 
+  expressed in the scale of the time index of the \emph{OHLC} time series. 
+  For example, if the time index is in seconds, then the variance is given in
+  units of variance per second squared.  If the time index is in days, then
+  the variance is equal to the variance per day squared.
+  
+  The time index of the \code{oh_lc} time series is assumed to be in 
+  \emph{POSIXct} format, so that its internal value is equal to the number of
+  seconds that have elapsed since the \emph{epoch}.
+  
+  The function \code{run_variance()} performs similar calculations to the
   function \code{volatility()} from package 
   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it 
   assumes zero drift, and doesn't calculate a running sum using 

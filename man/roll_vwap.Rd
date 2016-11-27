@@ -2,21 +2,21 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_vwap}
 \alias{roll_vwap}
-\title{Calculate the volume-weighted average price of an \code{OHLC} time series
+\title{Calculate the volume-weighted average price of an \emph{OHLC} time series
 over a rolling window (lookback period).}
 \usage{
 roll_vwap(oh_lc, x_ts = oh_lc[, 4], win_dow)
 }
 \arguments{
-\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
+\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{x_ts}{single-column \code{xts} time series.}
+\item{x_ts}{single-column \emph{xts} time series.}
 
 \item{win_dow}{the size of the lookback window, equal to the number of bars
 of data used for calculating the average price.}
 }
 \value{
-An \code{xts} time series with a single column and the same number of
+An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{

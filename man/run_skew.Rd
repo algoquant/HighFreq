@@ -2,31 +2,33 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_skew}
 \alias{run_skew}
-\title{Calculate time series of skew estimates from a \code{OHLC} time series,
+\title{Calculate time series of skew estimates from a \emph{OHLC} time series,
 assuming zero drift.}
 \usage{
 run_skew(oh_lc, calc_method = "rogers_satchell")
 }
 \arguments{
-\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
+\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\code{character} string representing method for estimating
+\item{calc_method}{\emph{character} string representing method for estimating
 skew.}
 }
 \value{
 A time series of skew estimates.
 }
 \description{
-Calculate time series of skew estimates from a \code{OHLC} time series,
+Calculate time series of skew estimates from a \emph{OHLC} time series,
 assuming zero drift.
 }
 \details{
 The function \code{run_skew()} calculates a time series of skew
-  estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data.
-  The skew estimates are scaled to the time scale of the index of the
-  \code{OHLC} time series.  For example, if the time index is in seconds,
-  then the estimates are equal to the skew per second, if the time index is
-  in days, then the estimates are equal to the skew per day.
+  estimates from \emph{OHLC} prices, one for each bar of \emph{OHLC} data.
+  The skew estimates are expressed in the time scale of the index of the
+  \emph{OHLC} time series.  
+  For example, if the time index is in seconds, then the skew is given in 
+  units of skew per second.  If the time index is in days, then the skew is 
+  equal to the skew per day.
+  
   Currently only the \code{"close"} skew estimation method is correct
   (assuming zero drift), while the \code{"rogers_satchell"} method produces a
   skew-like indicator, proportional to the skew. The default method is

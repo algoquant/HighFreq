@@ -1,5 +1,5 @@
 ############
-# ToDo list for package HighFreq: high frequency data scrubbing
+### ToDo list for package HighFreq: high frequency data scrubbing
 
 ### scripts for package building
 # Install package from source on local drive
@@ -15,7 +15,11 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### comments
 
-# volume weighted volatility is higher than simple average volatility because volumes are higher at higher volatility. 
+# volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
+
+# The yang_zhang method has the lowest standard error assuming normal distribution, but not necessarily for fat-tailed distributions.
+In addition, the yang_zhang method has lower bias caused by finite sampling.
+The rogers_satchell method has the biggest bias caused by finite sampling and opening price jumps, and seriously underestimates the variance.
 
 # Theoretically, the Yang-Zhang (YZ) and Garman-Klass-Yang-Zhang (GKYZ) range variance estimators are unbiased and have up to seven times smaller standard errors than the standard close-to-close estimator.  But in practice, prices are not observed continuously, so the price range is underestimated, and so is the variance when using the YZ and GKYZ range estimators.  Therefore in practice the YZ and GKYZ range estimators are biased (underestimate volatility).  In addition, the standard errors are reduced less than by the theoretical amount, for the same reason. 
 
@@ -38,7 +42,21 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-- [ ] fix remaining bug in random_ohlc() when sampling from rows of OHLC: bootstraped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big  
+- [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
+
+- [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
+As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
+Possible fixes:
+modify random_ohlc() so that it samples from secondly return data and aggregates to minutely OHLC data (does this solve the problem?) - save random minutely OHLC prices to file for future use  
+modify random_ohlc() so that it samples from minutely return data scaled by time, and aggregates to minutely OHLC data
+
+- [ ] bootstrap range volatility estimators on random non-normal OHLC prices to check if indeed they have lowest standard error
+use package meboot for maximum entropy bootstrap of time series ?
+https://cran.r-project.org/web/packages/meboot/index.html
+
+- [ ] add function for calculating microprice  
+
+- [x] add volatility, drift rate, and convexity correction to functions random_taq() and random_ohlc()  
 
 - [x] fix bug in random_ohlc(): transform to normal distribution before sampling from rows of OHLC (otherwise it produces negative prices)  
 
@@ -90,8 +108,6 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 - [ ] modify function season_ality() to discard elements corresponding to infrequent observations ?
 
 - [ ] create Rcpp function for fast rolling aggregations over endpoints
-
-- [ ] apply Hampel Filter to scrub data
 
 - [ ] aggregate data to 10-second bars (?)  
 
@@ -162,6 +178,38 @@ http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 
 ### tasks finished
+
+- [x] create function remove_jumps() to remove overnight close-to-open jumps from OHLC (?)  
+
+- [x] replace na.locf() with rutils::na_locf()
+
+- [x] rename function extreme_values() to which_extreme()  
+
+- [x] rename function price_jumps() to which_jumps()  
+
+- [x] add arguments lag and sca_le to function run_returns()
+
+- [x] add argument sca_le to functions run_variance() and roll_variance()
+
+- [x] fix functions roll_hurst() and roll_sharpe() so they call roll_variance() instead of run_variance()  
+in roll_hurst() replace TTR::runMax() with RcppRoll::roll_max()
+
+- [x] remove arguments off_set and roll_end_points from function roll_hurst()
+
+- [x] create function calc_variance() which calculates a single variance number from the output of run_variance()
+
+- [x] create function roll_variance() that replicates TTR::volatility()  
+clone run_variance(), but modify it by subtracting the means
+use functions RcppRoll::roll_var() and rutils::roll_sum()
+add correct coefficient co_eff for yang_zhang method
+
+- [x] modify comments for function run_variance() to explain that it's only an indicator, not an estimator
+
+- [x] modify function run_returns(): remove time scaling, calculate percentage returns  
+
+- [x] apply Hampel median filter to scrub data: that's what HighFreq does already  
+http://dsp.stackexchange.com/questions/26552/what-is-a-hampel-filter-and-how-does-it-work
+update the documentation to reflect that HighFreq already uses Hampel median filter
 
 - [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
 use apply_rolling() from utilLib
@@ -255,13 +303,16 @@ created function save_rets_OHLC()
 
 ### tasks deprecated
 
+- [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
+start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]
+instead of:
+start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
+
 - [ ] modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
 
 - [ ] subtract mean in functions run_variance() and run_skew() - no  
 
 - [ ] convert function season_ality() to use split.xts() (?)  
-
-- [ ] create function open_close() to remove close-to-open jumps from OHLC (?)  
 
 - [ ] replace caTools with TTR functions (?)  
 only runquantile() is called from caTools  

@@ -2,50 +2,50 @@
 % Please edit documentation in R/HighFreq.R
 \name{save_rets}
 \alias{save_rets}
-\title{Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-single symbol. Calculate returns and save them to a single \sQuote{\code{*.RData}}
-file.}
+\title{Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a 
+single symbol. Calculate returns and save them to a single
+\sQuote{\code{*.RData}} file.}
 \usage{
 save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/", win_dow = 51, vol_mult = 2,
   period = "minutes", tzone = "America/New_York")
 }
 \arguments{
-\item{sym_bol}{\code{character} string representing symbol or ticker.}
+\item{sym_bol}{\emph{character} string representing symbol or ticker.}
 
-\item{data_dir}{\code{character} string representing directory containing
+\item{data_dir}{\emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{\code{character} string representing directory containing
+\item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{win_dow}{number of data points for estimating rolling volatility.}
+\item{win_dow}{number of data points for estimating rolling quantile.}
 
-\item{vol_mult}{volatility multiplier.}
+\item{vol_mult}{quantile multiplier.}
 
 \item{period}{aggregation period.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A time series of returns and volume in \code{xts} format.
+A time series of returns and volume in \emph{xts} format.
 }
 \description{
-Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-single symbol. Calculate returns and save them to a single \sQuote{\code{*.RData}}
-file.
+Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a 
+single symbol. Calculate returns and save them to a single
+\sQuote{\code{*.RData}} file.
 }
 \details{
-The function \code{save_rets} loads multiple days of \code{TAQ}
-  data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
-  series.  It then calculates returns using function \code{run_returns}, and
+The function \code{save_rets} loads multiple days of \emph{TAQ}
+  data, then scrubs, aggregates, and rbinds them into a \emph{OHLC} time
+  series.  It then calculates returns using function \code{run_returns()}, and
   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
   to a file called \sQuote{\code{symbol.rets.RData}}.
-  The \code{TAQ} data files are assumed to be stored in separate directories
+  The \emph{TAQ} data files are assumed to be stored in separate directories
   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-  \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+  \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
   data.
 }
 \examples{

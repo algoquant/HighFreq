@@ -2,36 +2,50 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_ohlc}
 \alias{random_ohlc}
-\title{Calculate a random \code{OHLC} time series of prices and trading volumes, in
-\code{xts} format.}
+\title{Calculate a random \emph{OHLC} time series of prices and trading volumes, in
+\emph{xts} format.}
 \usage{
-random_ohlc(oh_lc = NULL, re_duce = TRUE, ...)
+random_ohlc(oh_lc = NULL, re_duce = TRUE, vol_at = 6.5e-05, dri_ft = 0,
+  in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
+  as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"), ...)
 }
 \arguments{
-\item{oh_lc}{\code{OHLC} time series of prices and trading volumes, in
-\code{xts} format.}
+\item{oh_lc}{\emph{OHLC} time series of prices and trading volumes, in
+\emph{xts} format (default is \emph{NULL}).}
 
-\item{re_duce}{\code{Boolean} should \code{oh_lc} time series be transformed
-to reduced form? (default is \code{TRUE})}
+\item{re_duce}{\emph{Boolean} argument: should \code{oh_lc} time series be
+transformed to reduced form? (default is \code{TRUE})}
+
+\item{vol_at}{volatility per period of the \code{in_dex} time index (default
+is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
+
+\item{dri_ft}{drift per period of the \code{in_dex} time index (default is
+0.0).}
+
+\item{in_dex}{time index for the \emph{OHLC} time series.}
 }
 \value{
-An \code{xts} time series with the same dimensions and the same time
+An \emph{xts} time series with the same dimensions and the same time
   index as the input \code{oh_lc} time series.
 }
 \description{
-Calculate a random \code{OHLC} time series of prices and trading volumes,
-either by generating random log-normal prices, or by randomly sampling from
-an input time series.
+Calculate a random \emph{OHLC} time series either by simulating random prices
+following geometric Brownian motion, or by randomly sampling from an input 
+time series.
 }
 \details{
-If the input \code{oh_lc} time series is \code{NULL} (the default),
-  then a synthetic minutely \code{OHLC} time series of random log-normal
-  prices is calculated, over the two previous calendar days.
-  If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
+If the input \code{oh_lc} time series is \emph{NULL} (the default), 
+  then the function \code{random_ohlc()} simulates a minutely \emph{OHLC} 
+  time series of random prices following geometric Brownian motion, over the
+  two previous calendar days.
+  
+  If the input \code{oh_lc} time series is not \emph{NULL}, then the rows of
   \code{oh_lc} are randomly sampled, to produce a random time series.
+  
   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
   series is first transformed to reduced form, then randomly sampled, and
   finally converted to standard form.
+  
   Note: randomly sampling from an intraday time series over multiple days
   will cause the overnight price jumps to be re-arranged into intraday price
   jumps.  This will cause moment estimates to become inflated compared to the

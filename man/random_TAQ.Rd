@@ -2,32 +2,40 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_taq}
 \alias{random_taq}
-\title{Calculate a random \code{TAQ} time series of prices and trading volumes, in
-\code{xts} format.}
+\title{Calculate a random \emph{TAQ} time series of prices and trading volumes, in
+\emph{xts} format.}
 \usage{
-random_taq(in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")),
-  to = as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
+random_taq(vol_at = 6.5e-05, dri_ft = 0, in_dex = seq(from =
+  as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
+  as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
   bid_offer = 0.001, ...)
 }
 \arguments{
-\item{in_dex}{time index for the \code{TAQ} time series.}
+\item{vol_at}{volatility per period of the \code{in_dex} time index (default
+is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{bid_offer}{the bid-offer spread expressed as a fraction of the prices.
-The default value is equal to 0.001 (10bps).}
+\item{dri_ft}{drift per period of the \code{in_dex} time index (default is
+0.0).}
+
+\item{in_dex}{time index for the \emph{TAQ} time series.}
+
+\item{bid_offer}{the bid-offer spread expressed as a fraction of the prices
+(default is 0.001=10bps).}
 }
 \value{
-An \code{xts} time series, with time index equal to the input
+An \emph{xts} time series, with time index equal to the input
   \code{in_dex} time index, and with four columns containing the bid, ask,
   and trade prices, and the trade volume.
 }
 \description{
-Calculate a \code{TAQ} time series of prices and trading volumes, using
-random log-normal prices and a time index.
+Calculate a \emph{TAQ} time series of random prices following geometric
+Brownian motion, combined with random trading volumes.
 }
 \details{
-The function \code{random_taq()} calculates an \code{xts} time
-  series with four columns containing random log-normal prices: the bid, ask,
-  and trade prices, and the trade volume.
+The function \code{random_taq()} calculates an \emph{xts} time 
+  series with four columns containing random prices following geometric 
+  Brownian motion: the bid, ask, and trade prices, combined with random trade
+  volume data.
   If \code{in_dex} isn't supplied as an argument, then by default it's
   equal to the secondly index over the two previous calendar days.
 }
@@ -35,6 +43,6 @@ The function \code{random_taq()} calculates an \code{xts} time
 # create secondly TAQ time series of random prices
 ta_q <- HighFreq::random_taq()
 # create random TAQ time series from SPY index
-ta_q <- HighFreq::random_taq(in_dex=SPY["2012-02-13/2012-02-15"])
+ta_q <- HighFreq::random_taq(in_dex=index(SPY["2012-02-13/2012-02-15"]))
 }
 

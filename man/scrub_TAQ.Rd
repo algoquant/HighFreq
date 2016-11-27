@@ -2,31 +2,31 @@
 % Please edit documentation in R/HighFreq.R
 \name{scrub_taq}
 \alias{scrub_taq}
-\title{Scrub a single day of \code{TAQ} data in \code{xts} format, without
+\title{Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 aggregation.}
 \usage{
 scrub_taq(ta_q, win_dow = 51, vol_mult = 2, tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\code{TAQ} time series in \code{xts} format.}
+\item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
 
-\item{win_dow}{number of data points for estimating rolling volatility.}
+\item{win_dow}{number of data points for estimating rolling quantile.}
 
-\item{vol_mult}{volatility multiplier.}
+\item{vol_mult}{quantile multiplier.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \code{TAQ} time series in \code{xts} format.
+A \emph{TAQ} time series in \emph{xts} format.
 }
 \description{
-Scrub a single day of \code{TAQ} data in \code{xts} format, without
+Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 aggregation.
 }
 \details{
 The function \code{scrub_taq()} performs the same scrubbing
   operations as \code{scrub_agg}, except it doesn't aggregate, and returns
-  the \code{TAQ} data in \code{xts} format.
+  the \emph{TAQ} data in \emph{xts} format.
 }
 \examples{
 ta_q <- HighFreq::scrub_taq(ta_q=SPY_TAQ, win_dow=11, vol_mult=1)

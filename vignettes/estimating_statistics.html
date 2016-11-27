@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-09-14" />
+<meta name="date" content="2016-11-20" />
 
 <title>Estimating Running and Rolling Statistics Over Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Estimating Running and Rolling Statistics Over Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-09-14</em></h4>
+<h4 class="date"><em>2016-11-20</em></h4>
 
 
 
@@ -79,12 +79,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Calculate rolling average closing prices using package <em>rutils</em>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq to load SPY data</span>
 <span class="kw">library</span>(HighFreq)
-sym_bol &lt;-<span class="st"> &quot;SPY&quot;</span>
 <span class="co"># rolling average prices</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">10</span>
-prices_rolling &lt;-<span class="st"> </span>rutils::<span class="kw">roll_sum</span>(<span class="kw">Cl</span>(<span class="kw">get</span>(sym_bol)), <span class="dt">win_dow=</span>win_dow)/win_dow
-<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Prices&quot;</span>)
-<span class="kw">chart_Series</span>(<span class="kw">get</span>(sym_bol)[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;Prices&quot;</span>))
+prices_rolling &lt;-<span class="st"> </span>rutils::<span class="kw">roll_sum</span>(<span class="kw">Cl</span>(SPY), <span class="dt">win_dow=</span>win_dow)/win_dow
+<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span>
+<span class="kw">chart_Series</span>(SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Prices&quot;</span>)
 <span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)
 <span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;average prices&quot;</span>), 
        <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), 
@@ -93,31 +92,48 @@ prices_rolling &lt;-<span class="st"> </span>rutils::<span class="kw">roll_sum</
 <p>Calculate rolling volume-weighted average closing prices using package <em>HighFreq</em>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
-sym_bol &lt;-<span class="st"> &quot;SPY&quot;</span>
 <span class="co"># rolling volume-weighted average prices</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">10</span>
-prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span><span class="kw">get</span>(sym_bol)[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">win_dow=</span>win_dow)
-<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Prices&quot;</span>)
-<span class="kw">chart_Series</span>(<span class="kw">get</span>(sym_bol)[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;VWAP Prices&quot;</span>))
+prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">win_dow=</span>win_dow)
+<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span>
+<span class="kw">chart_Series</span>(SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY VWAP Prices&quot;</span>)
 <span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)
 <span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;VWAP prices&quot;</span>), 
        <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), 
        <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
 <p><br></p>
-<p>Calculate rolling variance and skew from minutely <em>OHLC</em> data:</p>
+<p>Calculate variance from <em>OHLC</em> prices using different range estimation methods:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
-<span class="co"># calculate rolling volume-weighted average variance and skew</span>
+<span class="co"># calculate variance of SPY using method yang_zhang</span>
+<span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
+vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*HighFreq::<span class="kw">calc_variance</span>(SPY, <span class="dt">calc_method=</span><span class="st">&quot;yang_zhang&quot;</span>)
+<span class="co"># calculate variance of SPY without accounting for overnight jumps</span>
+vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*HighFreq::<span class="kw">calc_variance</span>(SPY, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)</code></pre></div>
+<p><br></p>
+<p>Calculate rolling variance and skew from minutely <em>OHLC</em> prices:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
+<span class="kw">library</span>(HighFreq)
+<span class="co"># calculate running variance using method rogers_satchell</span>
+<span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
+var_running &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY, 
+                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
+<span class="co"># calculate rolling volume-weighted average daily variance</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">21</span>
-var_running &lt;-<span class="st"> </span>(<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY)
-<span class="co"># calculate rolling SPY variance</span>
 var_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">x_ts=</span>var_running, <span class="dt">win_dow=</span>win_dow)
-<span class="kw">colnames</span>(var_rolling) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Var&quot;</span>)
+<span class="kw">colnames</span>(var_rolling) &lt;-<span class="st"> &quot;SPY.Var&quot;</span>
+
+<span class="co"># calculate rolling daily variance using roll_variance()</span>
+var_rolling &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">roll_variance</span>(<span class="dt">oh_lc=</span>SPY, 
+                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>, 
+                                          <span class="dt">win_dow=</span>win_dow)
+
+<span class="co"># calculate rolling volume-weighted average skew indicator</span>
 skew_running &lt;-<span class="st"> </span><span class="kw">run_skew</span>(<span class="dt">oh_lc=</span>SPY)
 skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">x_ts=</span>skew_running, <span class="dt">win_dow=</span>win_dow)
 skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling&gt;<span class="dv">0</span>, skew_rolling/(var_rolling)^(<span class="fl">1.5</span>), <span class="dv">0</span>)
-<span class="kw">colnames</span>(skew_rolling) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Skew&quot;</span>)
-<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;Rolling Skew&quot;</span>))</code></pre></div>
+<span class="kw">colnames</span>(skew_rolling) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span>
+<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate rolling variance and skew using function <em>roll_moment()</em> (produces same result as above):</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
@@ -127,32 +143,33 @@ win_dow &lt;-<span class="st"> </span><span class="dv">21</span>
 var_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">win_dow=</span>win_dow)
 skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>, <span class="dt">win_dow=</span>win_dow)
 skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling&gt;<span class="dv">0</span>, skew_rolling/(var_rolling)^(<span class="fl">1.5</span>), <span class="dv">0</span>)
-<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;Rolling Skew&quot;</span>))</code></pre></div>
+<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
 <p><br></p>
-<p>Calculate daily average open to close variance and skew from minutely <em>OHLC</em> data:</p>
+<p>Calculate daily average open to close variance and skew from minutely <em>OHLC</em> prices:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
-sym_bol &lt;-<span class="st"> </span>SPY
-<span class="co"># calculate daily open to close variance and skew</span>
-var_daily &lt;-<span class="st"> </span>(<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span><span class="kw">get</span>(sym_bol), <span class="dt">FUN=</span>agg_regate, 
+<span class="co"># calculate daily average open to close variance</span>
+var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span>SPY, <span class="dt">FUN=</span>agg_regate, 
                               <span class="dt">mo_ment=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
-<span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Var&quot;</span>)
-skew_daily &lt;-<span class="st"> </span>xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span><span class="kw">get</span>(sym_bol), <span class="dt">FUN=</span>agg_regate, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>)
+<span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> &quot;SPY.Var&quot;</span>
+<span class="kw">chart_Series</span>(<span class="dv">100</span>*<span class="kw">sqrt</span>(var_daily[<span class="st">&quot;/2010&quot;</span>]), <span class="dt">name=</span><span class="st">&quot;SPY daily standard deviation&quot;</span>)
+
+<span class="co"># calculate daily average skew</span>
+skew_daily &lt;-<span class="st"> </span>xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span>SPY, <span class="dt">FUN=</span>agg_regate, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>)
 skew_daily &lt;-<span class="st"> </span>skew_daily/(var_daily)^(<span class="fl">1.5</span>)
-<span class="kw">colnames</span>(skew_daily) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.Skew&quot;</span>)
+<span class="kw">colnames</span>(skew_daily) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span>
 inter_val &lt;-<span class="st"> &quot;2013-10/2013-12&quot;</span>
-<span class="kw">chart_Series</span>(skew_daily[inter_val], <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;Skew&quot;</span>))</code></pre></div>
+<span class="kw">chart_Series</span>(skew_daily[inter_val], <span class="dt">name=</span><span class="st">&quot;SPY Skew&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate intraday seasonality of trading volumes and variance:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
-sym_bol &lt;-<span class="st"> &quot;SPY&quot;</span>
-volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(<span class="kw">get</span>(sym_bol)))
-<span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.volume_seasonal&quot;</span>)
-<span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;intraday seasonality of volume&quot;</span>))
-var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="dv">24</span>*<span class="dv">60</span>*<span class="dv">60</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span><span class="kw">get</span>(sym_bol)))
-<span class="kw">colnames</span>(var_seasonal) &lt;-<span class="st"> </span><span class="kw">paste0</span>(sym_bol, <span class="st">&quot;.var_seasonal&quot;</span>)
-<span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="kw">paste</span>(sym_bol, <span class="st">&quot;intraday seasonality of variance&quot;</span>))</code></pre></div>
+volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(SPY))
+<span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> &quot;SPY.volume_seasonal&quot;</span>
+<span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of volume&quot;</span>)
+var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY))
+<span class="kw">colnames</span>(var_seasonal) &lt;-<span class="st"> &quot;SPY.var_seasonal&quot;</span>
+<span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of variance&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Apply an aggregation function over a rolling lookback window and the end points of an <em>OHLC</em> time series:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>

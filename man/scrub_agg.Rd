@@ -2,29 +2,29 @@
 % Please edit documentation in R/HighFreq.R
 \name{scrub_agg}
 \alias{scrub_agg}
-\title{Scrub a single day of \code{TAQ} data, aggregate it, and convert to
-\code{OHLC} format.}
+\title{Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
+\emph{OHLC} format.}
 \usage{
 scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
   tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\code{TAQ} time series in \code{xts} format.}
+\item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
 
-\item{win_dow}{number of data points for estimating rolling volatility.}
+\item{win_dow}{number of data points for estimating rolling quantile.}
 
-\item{vol_mult}{volatility multiplier.}
+\item{vol_mult}{quantile multiplier.}
 
 \item{period}{aggregation period.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \code{OHLC} time series in \code{xts} format.
+A \emph{OHLC} time series in \emph{xts} format.
 }
 \description{
-Scrub a single day of \code{TAQ} data, aggregate it, and convert to
-\code{OHLC} format.
+Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
+\emph{OHLC} format.
 }
 \details{
 The function \code{scrub_agg()} performs:
@@ -35,7 +35,7 @@ The function \code{scrub_agg()} performs:
   \item scrubbing of quotes with suspect bid-offer spreads,
   \item scrubbing of quotes with suspect price jumps,
   \item cbinding of mid prices with volume data,
-  \item aggregation to OHLC using function \code{to.period} from package \code{xts},
+  \item aggregation to OHLC using function \code{to.period()} from package \emph{xts},
 }
 Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
 min", "15 min", "30 min", and "hours". The time index of the output time

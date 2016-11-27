@@ -26,13 +26,13 @@ ta_q <- ta_q['T09:30:00/T16:00:00', ]
 ta_q <- ta_q[!duplicated(index(ta_q)), ]
 # scrub quotes with suspect bid-offer spreads
 bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
-sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+sus_pect <- which_extreme(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 # remove suspect values
 ta_q <- ta_q[!sus_pect]
 # calculate mid prices
 mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 # replace whole rows containing suspect price jumps with NA, and perform locf()
-ta_q[price_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
+ta_q[which_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
 ta_q <- na.locf(ta_q)
 ```
 <br>

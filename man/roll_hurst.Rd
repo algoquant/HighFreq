@@ -2,66 +2,50 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_hurst}
 \alias{roll_hurst}
-\title{Calculate the rolling Hurst exponent over a rolling lookback window or the
-end points of an \code{OHLC} time series.}
+\title{Calculate a time series of \emph{Hurst} exponents over a rolling lookback
+window.}
 \usage{
-roll_hurst(oh_lc, win_dow = 11, off_set = 0, roll_end_points = FALSE)
+roll_hurst(oh_lc, win_dow = 11)
 }
 \arguments{
-\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
+\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{win_dow}{the size of the lookback window, equal to the number of bars
-of data used for aggregating the \code{OHLC} prices.}
-
-\item{off_set}{the number of bars of data in the first, stub window.}
-
-\item{roll_end_points}{\code{Boolean} should the Hurst exponent be calculated
-using aggregations over the end points, or by rolling over a lookback
-window? (default is \code{FALSE})}
+of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
-An \code{xts} time series with a single column and the same number of
+An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{
-Calculate the rolling Hurst exponent over a rolling lookback window or the
-end points of an \code{OHLC} time series.
+Calculate a time series of \emph{Hurst} exponents over a rolling lookback
+window.
 }
 \details{
-The function \code{roll_hurst()} calculates the rolling Hurst
-  exponent in two different ways, depending on the argument
-  \code{roll_end_points}.
-
-  If \code{roll_end_points} is \code{FALSE} (the default), then the rolling
-  Hurst exponent is calculated as the logarithm of the ratios of two rolling
-  price range estimates. The Hurst exponent is defined as the logarithm of
-  the ratio of the range of aggregated prices, divided by the average range
-  of prices in each bar. The aggregated prices are calculated over
-  overlapping windows, and the Hurst exponent values are calculated at each
-  point in time.
-
-  If \code{roll_end_points} is \code{TRUE}, then the rolling Hurst exponent is
-  calculated as the logarithm of the ratios of two rolling variance
-  estimates. The Hurst exponent is defined as the logarithm of the ratio of
-  the variance of aggregated returns, divided by the variance of simple
-  returns. The aggregated returns are calculated over non-overlapping windows
-  spanned by the end points, using the function \code{to_period()}. The Hurst
-  exponent values are calculated only at the end points. The non-overlapping
-  aggregation windows can be shifted by using the argument \code{off_set},
-  which produces a slightly different series of rolling hurst exponent
-  values.
+The function \code{roll_hurst()} calculates a time series of
+  \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling lookback
+  window.
+  
+  The \emph{Hurst} exponent is defined as the logarithm of the ratio of the
+  price range, divided by the standard deviation of returns, and divided by
+  the logarithm of the window length.
+  
+  The function \code{roll_hurst()} doesn't use the same definition as the 
+  rescaled range definition of the \emph{Hurst} exponent.
+  First, because the price range is calculated using \emph{High} and 
+  \emph{Low} prices, which produces bigger range values, and higher
+  \emph{Hurst} exponent estimates.
+  Second, because the \emph{Hurst} exponent is estimated using a single
+  aggregation window, instead of multiple windows in the rescaled range
+  definition.
+  
+  The rationale for using a different definition of the \emph{Hurst} exponent
+  is that it's designed to be a technical indicator for use as input into
+  trading models, rather than an estimator for statistical analysis.
 }
 \examples{
-# calculate rolling Hurst over SPY
-hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10)
-# calculate Hurst over end points of SPY
-hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10, off_set=0, roll_end_points=TRUE)
-# calculate a series of rolling hurst values using argument off_set
-hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, win_dow=10, roll_end_points=TRUE)
-hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
-# remove daily warmup periods
-hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
-chart_Series(x=hurst_rolling["2012-02-13"],
-  name=paste(colnames(hurst_rolling), "10-minute aggregations"))
+# calculate rolling Hurst for SPY in March 2009
+hurst_rolling <- roll_hurst(oh_lc=SPY["2009-03"], win_dow=11)
+chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 }
 

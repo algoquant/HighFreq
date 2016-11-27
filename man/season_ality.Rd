@@ -2,22 +2,22 @@
 % Please edit documentation in R/HighFreq.R
 \name{season_ality}
 \alias{season_ality}
-\title{Perform seasonality aggregations over a single-column \code{xts} time series.}
+\title{Perform seasonality aggregations over a single-column \emph{xts} time series.}
 \usage{
-season_ality(x_ts, in_dex = format(index(x_ts), "\%H:\%M"))
+season_ality(x_ts, in_dex = format(zoo::index(x_ts), "\%H:\%M"))
 }
 \arguments{
-\item{x_ts}{single-column \code{xts} time series.}
+\item{x_ts}{single-column \emph{xts} time series.}
 
-\item{in_dex}{vector of \code{character} strings representing points in time,
+\item{in_dex}{vector of \emph{character} strings representing points in time,
 of the same length as the argument \code{x_ts}.}
 }
 \value{
-An \code{xts} time series with mean aggregations over the seasonality
+An \emph{xts} time series with mean aggregations over the seasonality
   interval.
 }
 \description{
-Perform seasonality aggregations over a single-column \code{xts} time series.
+Perform seasonality aggregations over a single-column \emph{xts} time series.
 }
 \details{
 The function \code{season_ality()} calculates the mean of values

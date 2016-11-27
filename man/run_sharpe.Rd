@@ -2,31 +2,31 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_sharpe}
 \alias{run_sharpe}
-\title{Calculate time series of Sharpe-like statistics for each bar of a \code{OHLC}
+\title{Calculate time series of Sharpe-like statistics for each bar of a \emph{OHLC}
 time series.}
 \usage{
 run_sharpe(oh_lc, calc_method = "close")
 }
 \arguments{
-\item{oh_lc}{an \code{OHLC} time series of prices in \code{xts} format.}
+\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\code{character} string representing method for estimating
+\item{calc_method}{\emph{character} string representing method for estimating
 the Sharpe-like exponent.}
 }
 \value{
-An \code{xts} time series with the same number of rows as the
+An \emph{xts} time series with the same number of rows as the
   argument \code{oh_lc}.
 }
 \description{
-Calculate time series of Sharpe-like statistics for each bar of a \code{OHLC}
+Calculate time series of Sharpe-like statistics for each bar of a \emph{OHLC}
 time series.
 }
 \details{
 The function \code{run_sharpe()} calculates Sharpe-like statistics
-  for each bar of a \code{OHLC} time series.
+  for each bar of a \emph{OHLC} time series.
   The Sharpe-like statistic is defined as the ratio of the difference between
-  \code{Close} minus \code{Open} prices divided by the difference between
-  \code{High} minus \code{Low} prices.
+  \emph{Close} minus \emph{Open} prices divided by the difference between
+  \emph{High} minus \emph{Low} prices.
   This statistic may also be interpreted as something like a Hurst exponent
   for a single bar of data.
   The motivation for the Sharpe-like statistic is the notion that if prices

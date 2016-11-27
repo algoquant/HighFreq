@@ -79,8 +79,7 @@ The *HighFreq* package contains functions for:
 ### Installation and loading
 
 Install package *HighFreq* from github:  
-
-```r
+```{r eval=FALSE}
 install.packages("devtools")
 devtools::install_github(repo="algoquant/HighFreq")
 library(HighFreq)
@@ -88,8 +87,7 @@ library(HighFreq)
 <br>
 
 Install package *HighFreq* from source on local drive:  
-
-```r
+```{r eval=FALSE}
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
 # Install package from source on local drive using R CMD
 R CMD INSTALL C:\Develop\R\HighFreq
@@ -98,8 +96,7 @@ library(HighFreq)
 <br>
 
 Build reference manual for package *HighFreq* from *.Rd* files:  
-
-```r
+```{r eval=FALSE}
 system("R CMD Rd2pdf C:/Develop/R/HighFreq")
 R CMD Rd2pdf C:\Develop\R\HighFreq
 ```
@@ -108,17 +105,23 @@ R CMD Rd2pdf C:\Develop\R\HighFreq
 
 ### Data
 
-The *HighFreq* package includes three *xts* time series called *SPY*, *TLT*, and *VXX*, containing intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The *HighFreq* package also includes an *xts* time series called *SPY_TAQ* with a single day of *TAQ* data for the *SPY*ETF.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
+The *HighFreq* package includes three *xts* time series called *SPY*, *TLT*, and *VXX*, containing intraday 1-minute *OHLC* data for the *SPY*, *TLT*, and *VXX* ETFs.  The *HighFreq* package also includes an *xts* time series called *SPY_TAQ* with a single day of *TAQ* data for the *SPY* ETF.  The data is set up for lazy loading, so it doesn't require calling `data(hf_data)` to load it before being able to call it.
 
 The data source is the 
 [Wharton Research Data Service](https://wrds-web.wharton.upenn.edu/wrds/)  
+
+List all the data sets included in the *HighFreq* package:  
+```{r eval=FALSE}
+# list all datasets in package HighFreq
+data(package="HighFreq")
+```
+<br>
 
 
 ### Examples
 
 Aggregate *TAQ* data into a 1-minute bar *OHLC* time series:  
-
-```r
+```{r eval=FALSE}
 # aggregate TAQ data to 1-min OHLC bar data, for a single symbol, and save to file
 sym_bol <- "SPY"
 save_scrub_agg(sym_bol, 
@@ -128,8 +131,7 @@ save_scrub_agg(sym_bol,
 <br>
 
 Calculate daily trading volume:  
-
-```r
+```{r eval=FALSE}
 daily_volume <- apply.daily(x=Vo(SPY), FUN=sum)
 colnames(daily_volume) <- paste0(na_me(SPY), ".Volume")
 chart_Series(x=daily_volume, name="daily trading volumes for SPY")
@@ -137,17 +139,15 @@ chart_Series(x=daily_volume, name="daily trading volumes for SPY")
 <br>
 
 Calculate daily volume-weighted variance (volatility):  
-
-```r
-daily_var <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_variance")
+```{r eval=FALSE}
+daily_var <- (24*60*60)*apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_variance")
 colnames(daily_var) <- paste0(na_me(SPY), ".Var")
 chart_Series(x=daily_var, name="daily variance for SPY")
 ```
 <br>
 
 Calculate daily skew:  
-
-```r
+```{r eval=FALSE}
 daily_skew <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_skew")
 daily_skew <- daily_skew/(daily_var)^(1.5)
 colnames(daily_skew) <- paste0(na_me(SPY), ".Skew")
@@ -156,8 +156,7 @@ chart_Series(x=daily_skew, name="daily skew for SPY")
 <br>
 
 Calculate rolling prices:  
-
-```r
+```{r eval=FALSE}
 roll_prices <- rutils::roll_sum(Op(SPY), win_dow=10)/10
 colnames(roll_prices) <- paste0("SPY", ".Rets")
 # plot candle chart
@@ -167,8 +166,7 @@ add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
 <br>
 
 Calculate rolling volume-weighted variance:  
-
-```r
+```{r eval=FALSE}
 roll_var <- roll_moment(oh_lc=SPY["2012"], mo_ment="run_variance", win_dow = 10)
 # plot without overnight jump
 chart_Series(roll_var["2012-11-12", ][-(1:11)], name=paste("SPY", "rolling volume-weighted variance"))
@@ -176,9 +174,8 @@ chart_Series(roll_var["2012-11-12", ][-(1:11)], name=paste("SPY", "rolling volum
 <br>
 
 Calculate daily seasonality of variance:  
-
-```r
-var_seasonal <- season_ality(run_variance(oh_lc=SPY))
+```{r eval=FALSE}
+var_seasonal <- season_ality((24*60*60)*run_variance(oh_lc=SPY))
 colnames(var_seasonal) <- "SPY.var_seasonal"
 chart_Series(x=var_seasonal, name="SPY variance daily seasonality")
 ```

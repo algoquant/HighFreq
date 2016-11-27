@@ -3,34 +3,34 @@
 \name{agg_regate}
 \alias{agg_regate}
 \title{Calculate the aggregation (weighted average) of a statistical estimator over
-a \code{OHLC} time series.}
+a \emph{OHLC} time series.}
 \usage{
 agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 }
 \arguments{
-\item{oh_lc}{\code{OHLC} time series of prices and trading volumes, in
-\code{xts} format.}
+\item{oh_lc}{\emph{OHLC} time series of prices and trading volumes, in
+\emph{xts} format.}
 
-\item{mo_ment}{\code{character} string representing function for
+\item{mo_ment}{\emph{character} string representing function for
 estimating the moment.}
 
-\item{weight_ed}{\code{Boolean} should estimate be weighted by the trading
-volume? (default is \code{TRUE})}
+\item{weight_ed}{\emph{Boolean} argument: should estimate be weighted by
+the trading volume? (default is \code{TRUE})}
 
 \item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-A single \code{numeric} value equal to the volume weighted average of
+A single \emph{numeric} value equal to the volume weighted average of
   an estimator over the time series.
 }
 \description{
 Calculate the aggregation (weighted average) of a statistical estimator over
-a \code{OHLC} time series.
+a \emph{OHLC} time series.
 }
 \details{
 The function \code{agg_regate()} calculates a single number
   representing the volume weighted average of an estimator over the
-  \code{OHLC} time series of prices.  By default the sum is trade volume
+  \emph{OHLC} time series of prices.  By default the sum is trade volume
   weighted.
 }
 \examples{

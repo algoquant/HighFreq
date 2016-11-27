@@ -1,42 +1,49 @@
-#' Calculate a random \code{TAQ} time series of prices and trading volumes, in
-#' \code{xts} format.
+#' Calculate a random \emph{TAQ} time series of prices and trading volumes, in
+#' \emph{xts} format.
 #'
-#' Calculate a \code{TAQ} time series of prices and trading volumes, using
-#' random log-normal prices and a time index.
+#' Calculate a \emph{TAQ} time series of random prices following geometric
+#' Brownian motion, combined with random trading volumes.
 #'
 #' @export
-#' @param in_dex time index for the \code{TAQ} time series.
-#' @param bid_offer the bid-offer spread expressed as a fraction of the prices.
-#'   The default value is equal to 0.001 (10bps).
-#' @return An \code{xts} time series, with time index equal to the input
+#' @param vol_at volatility per period of the \code{in_dex} time index (default
+#'   is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
+#' @param dri_ft drift per period of the \code{in_dex} time index (default is
+#'   0.0).
+#' @param in_dex time index for the \emph{TAQ} time series.
+#' @param bid_offer the bid-offer spread expressed as a fraction of the prices
+#'   (default is 0.001=10bps).
+#' @return An \emph{xts} time series, with time index equal to the input
 #'   \code{in_dex} time index, and with four columns containing the bid, ask,
 #'   and trade prices, and the trade volume.
-#' @details The function \code{random_taq()} calculates an \code{xts} time
-#'   series with four columns containing random log-normal prices: the bid, ask,
-#'   and trade prices, and the trade volume.
+#' @details The function \code{random_taq()} calculates an \emph{xts} time 
+#'   series with four columns containing random prices following geometric 
+#'   Brownian motion: the bid, ask, and trade prices, combined with random trade
+#'   volume data.
 #'   If \code{in_dex} isn't supplied as an argument, then by default it's
 #'   equal to the secondly index over the two previous calendar days.
 #' @examples
 #' # create secondly TAQ time series of random prices
 #' ta_q <- HighFreq::random_taq()
 #' # create random TAQ time series from SPY index
-#' ta_q <- HighFreq::random_taq(in_dex=SPY["2012-02-13/2012-02-15"])
+#' ta_q <- HighFreq::random_taq(in_dex=index(SPY["2012-02-13/2012-02-15"]))
 
-random_taq <- function(
+random_taq <- function(vol_at=6.5e-5, dri_ft=0.0, 
   in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
              to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"),
   bid_offer=0.001, ...) {
-  # create synthetic xts of random log-normal prices
-  ta_q <- xts(exp(cumsum(0.001*rnorm(length(in_dex)))), order.by=in_dex)
+  len_gth <- NROW(in_dex)
+  # create xts of random prices following geometric Brownian motion
+  ta_q <- xts(exp(cumsum(vol_at*rnorm(len_gth) + dri_ft - vol_at^2/2)), 
+              order.by=in_dex)
   # create vector of random bid-offer spreads
-  bid_offer <- bid_offer*(1 + runif(length(in_dex)))/2
+  bid_offer <- bid_offer*(1 + runif(len_gth))/2
   # create TAQ data from bid and offer prices
   ta_q <- merge(ta_q*(1-bid_offer), ta_q*(1+bid_offer))
   # add traded price to TAQ data
-  r_unif <- runif(length(in_dex))
+  r_unif <- runif(len_gth)
   ta_q <- merge(ta_q, r_unif*ta_q[, 1] + (1-r_unif)*ta_q[, 2])
   # add trade volume column
-  ta_q <- merge(ta_q, sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+  ta_q <- merge(ta_q, sample(x=10*(2:18), size=len_gth, replace=TRUE))
   colnames(ta_q) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
   ta_q
 }  # end random_taq
@@ -44,28 +51,37 @@ random_taq <- function(
 
 
 
-#' Calculate a random \code{OHLC} time series of prices and trading volumes, in
-#' \code{xts} format.
+#' Calculate a random \emph{OHLC} time series of prices and trading volumes, in
+#' \emph{xts} format.
 #'
-#' Calculate a random \code{OHLC} time series of prices and trading volumes,
-#' either by generating random log-normal prices, or by randomly sampling from
-#' an input time series.
+#' Calculate a random \emph{OHLC} time series either by simulating random prices
+#' following geometric Brownian motion, or by randomly sampling from an input 
+#' time series.
 #'
 #' @export
-#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
-#'   \code{xts} format.
-#' @param re_duce \code{Boolean} should \code{oh_lc} time series be transformed
-#'   to reduced form? (default is \code{TRUE})
-#' @return An \code{xts} time series with the same dimensions and the same time
+#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#'   \emph{xts} format (default is \emph{NULL}).
+#' @param vol_at volatility per period of the \code{in_dex} time index (default
+#'   is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
+#' @param dri_ft drift per period of the \code{in_dex} time index (default is
+#'   0.0).
+#' @param in_dex time index for the \emph{OHLC} time series.
+#' @param re_duce \emph{Boolean} argument: should \code{oh_lc} time series be
+#'   transformed to reduced form? (default is \code{TRUE})
+#' @return An \emph{xts} time series with the same dimensions and the same time
 #'   index as the input \code{oh_lc} time series.
-#' @details If the input \code{oh_lc} time series is \code{NULL} (the default),
-#'   then a synthetic minutely \code{OHLC} time series of random log-normal
-#'   prices is calculated, over the two previous calendar days.
-#'   If the input \code{oh_lc} time series is not \code{NULL}, then the rows of
+#' @details If the input \code{oh_lc} time series is \emph{NULL} (the default), 
+#'   then the function \code{random_ohlc()} simulates a minutely \emph{OHLC} 
+#'   time series of random prices following geometric Brownian motion, over the
+#'   two previous calendar days.
+#'   
+#'   If the input \code{oh_lc} time series is not \emph{NULL}, then the rows of
 #'   \code{oh_lc} are randomly sampled, to produce a random time series.
+#'   
 #'   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
 #'   series is first transformed to reduced form, then randomly sampled, and
 #'   finally converted to standard form.
+#'   
 #'   Note: randomly sampling from an intraday time series over multiple days
 #'   will cause the overnight price jumps to be re-arranged into intraday price
 #'   jumps.  This will cause moment estimates to become inflated compared to the
@@ -76,15 +92,15 @@ random_taq <- function(
 #' # create random time series from SPY by randomly sampling it
 #' oh_lc <- HighFreq::random_ohlc(oh_lc=SPY["2012-02-13/2012-02-15"])
 
-random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
+random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0, 
+    in_dex=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")), 
+      to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), ...) {
   if (is.null(oh_lc)) {
-    # create time index of one second intervals over several days
-    in_dex <- seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
-                  to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec")
-    # create synthetic xts of random log-normal prices
-    x_ts <- xts(exp(cumsum(0.01/sqrt(86400)*rnorm(length(in_dex)))), order.by=in_dex)
+    len_gth <- NROW(in_dex)
+    # create xts of random prices following geometric Brownian motion
+    x_ts <- xts(exp(cumsum(vol_at*rnorm(len_gth) + dri_ft - vol_at^2/2)), order.by=in_dex)
     # add trade volume column
-    x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=length(in_dex), replace=TRUE))
+    x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=len_gth, replace=TRUE))
     # aggregate to minutes OHLC data
     to.period(x=x_ts, period="minutes")
   } else {
@@ -101,28 +117,95 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, ...) {
 
 
 
-#' Calculate single period returns from either \code{TAQ} or \code{OHLC} prices.
+#' Remove overnight close-to-open price jumps from an \emph{OHLC} time series, 
+#' by adding adjustment terms to its prices.
 #'
 #' @export
-#' @param x_ts \code{xts} time series of either \code{TAQ} or \code{OHLC} data.
-#' @param col_umn the column number to extract from the \code{OHLC} data.
-#'   (default is \code{4}, or the \code{close} prices column)
-#' @return A single-column \code{xts} time series of returns.
-#' @details Calculates single period returns for either \code{TAQ} or
-#'   \code{OHLC} data, as the ratio of the differenced prices divided by the
-#'   time index differences.
-#'   Identifies the \code{x_ts} time series as \code{TAQ} data when it has six
-#'   columns, otherwise assumes it's \code{OHLC} data.
-#'   By default, for \code{OHLC} data, it differences the \code{close} prices,
-#'   but can also difference other prices depending on the value of
+#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#'   \emph{xts} format.
+#' @return An \emph{OHLC} time series with the same dimensions and the same time
+#'   index as the input \code{oh_lc} time series.
+#' @details The function \code{remove_jumps()} removes the overnight 
+#'   close-to-open price jumps from an \emph{OHLC} time series, by adjusting its
+#'   prices so that the first \emph{Open} price of the day is equal to the last 
+#'   \emph{Close} price of the previous day.
+#'   
+#'   The function \code{remove_jumps()} adds adjustment terms to all the 
+#'   \emph{OHLC} prices, so that intra-day returns and volatilities are not
+#'   affected.
+#' 
+#'   The function \code{remove_jumps()} identifies overnight periods as those 
+#'   that are greater than 60 seconds. This assumes that intra-day periods
+#'   between neighboring bars of data are 60 seconds or less.
+#'   
+#'   The time index of the \code{oh_lc} time series is assumed to be in 
+#'   \emph{POSIXct} format, so that its internal value is equal to the number of
+#'   seconds that have elapsed since the \emph{epoch}.
+#'   
+#' @examples
+#' # remove overnight close-to-open price jumps from SPY data
+#' oh_lc <- remove_jumps(SPY)
+
+remove_jumps <- function(oh_lc) {
+  # find time index of the periods greater than 60 seconds
+  peri_ods <- rutils::diff_it(as.vector(xts::.index(oh_lc)))
+  which_periods <- which(peri_ods > 60)
+  # calculate cumulative sum of overnight price jumps
+  jump_s <- numeric(NROW(oh_lc))
+  jump_s[which_periods] <- as.vector(oh_lc[which_periods, 1]) - as.vector(oh_lc[which_periods-1, 4])
+  jump_s <- cumsum(jump_s)
+  # subtract overnight price jumps from OHLC
+  oh_lc[, 1:4] <- coredata(oh_lc[, 1:4]) - jump_s
+  oh_lc
+}  # end remove_jumps
+
+
+
+
+#' Calculate single period percentage returns from either \emph{TAQ} or
+#' \emph{OHLC} prices.
+#'
+#' @export
+#' @param x_ts \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
+#' @param lag integer equal to the number of time periods of lag. (default is 1)
+#' @param col_umn the column number to extract from the \emph{OHLC} data.
+#'   (default is \code{4}, or the \emph{Close} prices column)
+#' @param sca_le \emph{Boolean} argument: should the returns be divided by the 
+#'   number of seconds in each period? (default is \code{TRUE})
+#' @return A single-column \emph{xts} time series of returns.
+#' @details The function \code{run_returns()} calculates the percentage returns 
+#'   for either \emph{TAQ} or \emph{OHLC} data, defined as the difference of log
+#'   prices.  Multi-period returns can be calculated by setting the \code{lag} 
+#'   parameter to values greater than \code{1} (the default).
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the returns are divided
+#'   by the differences of the time index (which scales the returns to units of
+#'   returns per second.)
+#'   
+#'   The time index of the \code{x_ts} time series is assumed to be in 
+#'   \emph{POSIXct} format, so that its internal value is equal to the number of
+#'   seconds that have elapsed since the \emph{epoch}.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the returns are
+#'   expressed in the scale of the time index of the \code{x_ts} time series. 
+#'   For example, if the time index is in seconds, then the returns are given in
+#'   units of returns per second.  If the time index is in days, then the
+#'   returns are equal to the returns per day.
+#'   
+#'   The function \code{run_returns()} identifies the \code{x_ts} time series as
+#'   \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
+#'   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
+#'   prices, but can also difference other prices depending on the value of 
 #'   \code{col_umn}.
 #' @examples
+#' # calculate secondly returns from TAQ data
+#' re_turns <- HighFreq::run_returns(x_ts=SPY_TAQ)
 #' # calculate close to close returns
 #' re_turns <- HighFreq::run_returns(x_ts=SPY)
 #' # calculate open to open returns
 #' re_turns <- HighFreq::run_returns(x_ts=SPY, col_umn=1)
 
-run_returns <- function(x_ts, col_umn=4) {
+run_returns <- function(x_ts, lag=1, col_umn=4, sca_le=TRUE) {
   # return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # calculate mid prices
@@ -131,8 +214,10 @@ run_returns <- function(x_ts, col_umn=4) {
   else
     re_turns <- x_ts[, col_umn]  # OHLC data
   # calculate returns
-  re_turns <- 86400*rutils::diff_xts(re_turns)/c(1, diff(.index(re_turns)))
-  re_turns[1, ] <- 0
+  re_turns <- rutils::diff_xts(log(re_turns), lag=lag)
+  if (sca_le)
+    re_turns <- re_turns / c(rep(1, lag), diff(xts::.index(re_turns), lag=lag))
+  re_turns[1:lag, ] <- 0
   colnames(re_turns) <- paste0(rutils::na_me(x_ts), ".returns")
   re_turns
 }  # end run_returns
@@ -140,129 +225,157 @@ run_returns <- function(x_ts, col_umn=4) {
 
 
 
-#' Identify extreme values in a single-column \code{xts} time series.
-#'
-#' Identifies extreme values as those that exceed a multiple of the rolling
-#' volatility.
+#' Calculate a \emph{Boolean} vector that identifies extreme tail values in a
+#' single-column \emph{xts} time series or vector, over a rolling window.
 #'
 #' @export
-#' @param x_ts single-column \code{xts} time series.
-#' @param win_dow number of data points for estimating rolling volatility.
-#' @param vol_mult volatility multiplier.
-#' @return A \code{Boolean} vector with the same number of rows as input time
-#'   series.
-#' @details Calculates the rolling volatility as a quantile of values over a
-#'   rolling window. Extreme values are those that exceed the product of the
-#'   volatility multiplier times the rolling volatility. Extreme values are the
-#'   very tips of the tails when the distribution of values becomes very
-#'   fat-tailed. The volatility multiplier \code{vol_mult} controls the
-#'   threshold at which values are identified as extreme. Smaller volatility
-#'   multiplier values will cause more values to be identified as extreme.
+#' @param x_ts A single-column \emph{xts} time series, or a \emph{numeric} or
+#'   \emph{Boolean} vector.
+#' @param win_dow number of data points for estimating rolling quantile.
+#' @param vol_mult quantile multiplier.
+#' @return A \emph{Boolean} vector with the same number of rows as the input
+#'   time series or vector.
+#' @details The function \code{which_extreme()} calculates a \emph{Boolean} 
+#'   vector, with \code{TRUE} for values that belong to the extreme tails
+#'   of the distribution of values.
+#'   
+#'   The function \code{which_extreme()} applies a version of the Hampel median 
+#'   filter to identify extreme values, but instead of using the median absolute
+#'   deviation (MAD), it uses the \code{0.9} quantile values calculated over a
+#'   rolling window.
+#'   
+#'   Extreme values are defined as those that exceed the product of the 
+#'   multiplier times the rolling quantile. Extreme values belong to the fat 
+#'   tails of the recent (trailing) distribution of values, so they are present 
+#'   only when the trailing distribution of values has fat tails.  If the
+#'   trailing distribution of values is closer to normal (without fat tails),
+#'   then there are no extreme values.
+#'   
+#'   The quantile multiplier \code{vol_mult} controls the threshold at which
+#'   values are identified as extreme. Smaller quantile multiplier values will
+#'   cause more values to be identified as extreme.
+#'   
 #' @examples
 #' # create local copy of SPY TAQ data
 #' ta_q <- SPY_TAQ
 #' # scrub quotes with suspect bid-offer spreads
 #' bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
-#' sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+#' sus_pect <- which_extreme(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 #' # remove suspect values
 #' ta_q <- ta_q[!sus_pect]
 
-extreme_values <- function(x_ts, win_dow=51, vol_mult=2) {
+which_extreme <- function(x_ts, win_dow=51, vol_mult=2) {
 # calculate volatility as rolling quantile
-  vo_lat <- caTools::runquantile(x=abs(as.vector(x_ts)), k=win_dow,
+  quan_tile <- caTools::runquantile(x=abs(as.vector(x_ts)), k=win_dow,
                         probs=0.9, endrule="constant", align="center")
-  vo_lat <- xts(vo_lat, order.by=index(x_ts))
-  colnames(vo_lat) <- "volat"
+#  quan_tile <- xts(quan_tile, order.by=index(x_ts))
+#  colnames(quan_tile) <- "volat"
 # carry forward non-zero volatility values
-  vo_lat[vo_lat==0] <- NA
-  vo_lat[1] <- 1
-  vo_lat <- na.locf(vo_lat)
-#  vo_lat <- na.locf(vo_lat, fromLast=TRUE)
+  quan_tile[quan_tile==0] <- NA
+  quan_tile[1] <- 1
+  quan_tile <- rutils::na_locf(quan_tile)
+#  quan_tile <- rutils::na_locf(quan_tile, fromLast=TRUE)
 
 # extreme value if x_ts greater than scaled volatility
-  ex_treme <- (abs(x_ts) > 2*vol_mult*vo_lat)
+  ex_treme <- (abs(x_ts) > 2*vol_mult*quan_tile)
   ex_treme[1] <- FALSE
-  colnames(ex_treme) <- "suspect"
+#  colnames(ex_treme) <- "suspect"
 
   cat("date:", format(as.Date(index(first(x_ts)))), "\tfound", sum(ex_treme), "extreme values\n")
   ex_treme
-}  # end extreme_values
+}  # end which_extreme
 
 
 
 
-#' Identify isolated price jumps in a single-column \code{xts} time series of
-#' prices, based on pairs of large neighboring returns of opposite sign.
+#' Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
+#' a single-column \emph{xts} time series or vector, over a rolling window.
 #'
 #' @export
-#' @param x_ts single-column \code{xts} time series of prices.
-#' @inheritParams extreme_values
-#' @return A \code{Boolean} vector with the same number of rows as input time
-#'   series.
-#' @details Isolated price jumps are single prices that are very different from
-#'   neighboring values.  Price jumps create pairs of large neighboring returns
-#'   of opposite sign. The function \code{price_jumps()} first calculates simple
-#'   returns from prices. Then it calculates the rolling volatility of returns
-#'   as a quantile of returns over a rolling window. Jump prices are identified
-#'   as those where neighboring returns both exceed a multiple of the rolling
-#'   volatility, but the sum of those returns doesn't exceed it.
+#' @inheritParams which_extreme
+#' @return A \emph{Boolean} vector with the same number of rows as the input
+#'   time series or vector.
+#' @details The function \code{which_jumps()} calculates a \emph{Boolean}
+#'   vector, with \code{TRUE} for values that are isolated jumps (spikes).
+#'   
+#'   The function \code{which_jumps()} applies a version of the Hampel median 
+#'   filter to identify jumps, but instead of using the median absolute 
+#'   deviation (MAD), it uses the \code{0.9} quantile of returns calculated over
+#'   a rolling window.
+#'   This is in contrast to function \code{which_extreme()}, which applies a
+#'   Hampel filter to the values themselves, instead of the returns.
+#'   Returns are defined as simple differences between neighboring values.
+#'   
+#'   Jumps (or spikes), are defined as isolated values that are very different
+#'   from the neighboring values, either before or after.  Jumps create
+#'   pairs of large neighboring returns of opposite sign.
+#'   
+#'   Jumps (spikes) must satisfy two conditions:
+#'   \enumerate{
+#'     \item Neighboring returns both exceed a multiple of the rolling quantile,
+#'     \item The sum of neighboring returns doesn't exceed that multiple.
+#'   }
+#'   
+#'   The quantile multiplier \code{vol_mult} controls the threshold at which
+#'   values are identified as jumps. Smaller quantile multiplier values will
+#'   cause more values to be identified as jumps.
+#'   
 #' @examples
 #' # create local copy of SPY TAQ data
 #' ta_q <- SPY_TAQ
 #' # calculate mid prices
 #' mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 #' # replace whole rows containing suspect price jumps with NA, and perform locf()
-#' ta_q[price_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
-#' ta_q <- na.locf(ta_q)
+#' ta_q[which_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
+#' ta_q <- zoo::na.locf(ta_q)
 
-price_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
+which_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 # calculate simple returns
-  diff_series <- rutils::diff_xts(x_ts)
-  diff_series[1, ] <- 0
-  colnames(diff_series) <- "diffs"
-  diff_series_fut <- lag(diff_series, -1)
-  diff_series_fut[NROW(diff_series_fut)] <- 0
-  colnames(diff_series_fut) <- "diff_series_fut"
+  re_turns <- rutils::diff_it(as.vector(x_ts))
+#  re_turns[1] <- 0
+#  colnames(re_turns) <- "diffs"
+  rets_advanced <- rutils::lag_it(re_turns, -1)
+#  rets_advanced[NROW(rets_advanced)] <- 0
+#  colnames(rets_advanced) <- "rets_advanced"
 
-# calculate vo_lat as rolling quantile
-  vo_lat <- caTools::runquantile(x=abs(as.vector(diff_series)), k=win_dow,
+# calculate volatility as the rolling quantile of returns
+  quan_tile <- caTools::runquantile(x=abs(re_turns), k=win_dow,
                         probs=0.9, endrule="constant", align="center")
-  vo_lat <- xts(vo_lat, order.by=index(diff_series))
-  colnames(vo_lat) <- "volat"
-# carry forward non-zero vo_lat values
-  vo_lat[vo_lat==0] <- NA
-  vo_lat[1] <- 1
-  vo_lat <- na.locf(vo_lat)
-#  vo_lat <- na.locf(vo_lat, fromLast=TRUE)
+#  quan_tile <- xts(quan_tile, order.by=index(re_turns))
+#  colnames(quan_tile) <- "volat"
+# carry forward non-zero quan_tile values
+  quan_tile[quan_tile==0] <- NA
+  quan_tile[1] <- 1
+  quan_tile <- rutils::na_locf(quan_tile)
+#  quan_tile <- rutils::na_locf(quan_tile, fromLast=TRUE)
 
-# suspect value if abs diffs greater than vo_lat, and if abs sum of diffs less than vo_lat
-  sus_pect <- (
-    (abs(diff_series) > vol_mult*vo_lat) &
-      (abs(diff_series_fut) > vol_mult*vo_lat) &
-      (abs(diff_series+diff_series_fut) < 2*vol_mult*vo_lat)
-  )
+# value is suspect if abs re_turns greater than quan_tile, 
+# and if abs sum of re_turns less than quan_tile
+  sus_pect <- ((abs(re_turns) > vol_mult*quan_tile) &
+      (abs(rets_advanced) > vol_mult*quan_tile) &
+      (abs(re_turns+rets_advanced) < 2*vol_mult*quan_tile))
   sus_pect[1] <- FALSE
-  colnames(sus_pect) <- "suspect"
+#  colnames(sus_pect) <- "suspect"
 # cat("Parsing", deparse(substitute(ta_q)), "\n")
 # cat("Parsing", strsplit(deparse(substitute(ta_q)), split="[.]")[[1]][4], "on date:", format(to_day), "\tfound", sum(sus_pect), "suspect prices\n")
   cat("date:", format(as.Date(index(first(x_ts)))), "\tfound", sum(sus_pect), "jump prices\n")
   sus_pect
-}  # end price_jumps
+}  # end which_jumps
 
 
 
 
-#' Scrub a single day of \code{TAQ} data in \code{xts} format, without
+#' Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 #' aggregation.
 #'
 #' @export
-#' @inheritParams extreme_values
-#' @param ta_q \code{TAQ} time series in \code{xts} format.
+#' @inheritParams which_extreme
+#' @param ta_q \emph{TAQ} time series in \emph{xts} format.
 #' @param tzone timezone to convert.
-#' @return A \code{TAQ} time series in \code{xts} format.
+#' @return A \emph{TAQ} time series in \emph{xts} format.
 #' @details The function \code{scrub_taq()} performs the same scrubbing
 #'   operations as \code{scrub_agg}, except it doesn't aggregate, and returns
-#'   the \code{TAQ} data in \code{xts} format.
+#'   the \emph{TAQ} data in \emph{xts} format.
 #' @examples
 # scrub a single day of TAQ data without aggregating it
 #' ta_q <- HighFreq::scrub_taq(ta_q=SPY_TAQ, win_dow=11, vol_mult=1)
@@ -275,7 +388,7 @@ scrub_taq <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # convert timezone of index to New_York
   index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 # subset data to NYSE trading hours
-  ta_q <- ta_q['T09:30:00/T16:00:00', ]
+  ta_q <- ta_q["T09:30:00/T16:00:00", ]
 # return NULL if no data
   if (NROW(ta_q)==0)  return(NULL)
 #  to_day <- as.Date(index(first(ta_q)))
@@ -286,7 +399,7 @@ scrub_taq <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
-  sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+  sus_pect <- which_extreme(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 # remove suspect values
   ta_q <- ta_q[!sus_pect]
 # replace suspect values
@@ -301,20 +414,20 @@ scrub_taq <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 # replace NA volumes with zero
   ta_q[is.na(ta_q[, "Volume"]), "Volume"] <- 0
 # replace whole rows containing suspect price jumps with NA, and perform locf()
-  ta_q[price_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult), ] <- NA
-  na.locf(ta_q)
+  ta_q[which_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult), ] <- NA
+  rutils::na_locf(ta_q)
 }  # end scrub_taq
 
 
 
 
-#' Scrub a single day of \code{TAQ} data, aggregate it, and convert to
-#' \code{OHLC} format.
+#' Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
+#' \emph{OHLC} format.
 #'
 #' @export
 #' @inheritParams scrub_taq
 #' @param period aggregation period.
-#' @return A \code{OHLC} time series in \code{xts} format.
+#' @return A \emph{OHLC} time series in \emph{xts} format.
 #' @details The function \code{scrub_agg()} performs:
 #' \itemize{
 #'   \item index timezone conversion,
@@ -323,7 +436,7 @@ scrub_taq <- function(ta_q, win_dow=51, vol_mult=2, tzone="America/New_York") {
 #'   \item scrubbing of quotes with suspect bid-offer spreads,
 #'   \item scrubbing of quotes with suspect price jumps,
 #'   \item cbinding of mid prices with volume data,
-#'   \item aggregation to OHLC using function \code{to.period} from package \code{xts},
+#'   \item aggregation to OHLC using function \code{to.period()} from package \emph{xts},
 #' }
 #' Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
 #' min", "15 min", "30 min", and "hours". The time index of the output time
@@ -343,7 +456,7 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 # convert timezone of index to New_York
   index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 # subset data to NYSE trading hours
-  ta_q <- ta_q['T09:30:00/T16:00:00', ]
+  ta_q <- ta_q["T09:30:00/T16:00:00", ]
 # return NULL if no data
   if (NROW(ta_q)==0)  return(NULL)
 #  to_day <- as.Date(index(first(ta_q)))
@@ -354,7 +467,7 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
-  sus_pect <- extreme_values(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+  sus_pect <- which_extreme(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
 # remove suspect values
   ta_q <- ta_q[!sus_pect]
 # replace suspect values
@@ -367,9 +480,9 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 #  mid_prices <- na.omit(mid_prices)
   colnames(mid_prices) <- "Mid.Price"
 # replace whole rows containing suspect price jumps with NA, and perform locf()
-  mid_prices[price_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult)] <- NA
-  mid_prices <- na.locf(mid_prices)
-#  mid_prices <- na.locf(mid_prices, fromLast=TRUE)
+  mid_prices[which_jumps(mid_prices, win_dow=win_dow, vol_mult=vol_mult)] <- NA
+  mid_prices <- rutils::na_locf(mid_prices)
+#  mid_prices <- rutils::na_locf(mid_prices, fromLast=TRUE)
 # cbind mid_prices with volume data, and replace NA volumes with zero
   mid_prices <- cbind(mid_prices, ta_q[index(mid_prices), "Volume"])
   mid_prices[is.na(mid_prices[, "Volume"]), "Volume"] <- 0
@@ -392,29 +505,29 @@ scrub_agg <- function(ta_q, win_dow=51, vol_mult=2,
 
 
 
-#' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-#' single symbol, and save the \code{OHLC} time series to a single
+#' Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
+#' single symbol, and save the \emph{OHLC} time series to a single
 #' \sQuote{\code{*.RData}} file.
 #'
 #' @export
-#' @param sym_bol \code{character} string representing symbol or ticker.
-#' @param data_dir \code{character} string representing directory containing
+#' @param sym_bol \emph{character} string representing symbol or ticker.
+#' @param data_dir \emph{character} string representing directory containing
 #'   input \sQuote{\code{*.RData}} files.
-#' @param output_dir \code{character} string representing directory containing
+#' @param output_dir \emph{character} string representing directory containing
 #'   output \sQuote{\code{*.RData}} files.
 #' @inheritParams scrub_agg
-#' @return An \code{OHLC} time series in \code{xts} format.
+#' @return An \emph{OHLC} time series in \emph{xts} format.
 #' @details The function \code{save_scrub_agg()} loads multiple days of
-#'   \code{TAQ} data, then scrubs, aggregates, and rbinds them into a
-#'   \code{OHLC} time series, and finally saves it to a single
-#'   \sQuote{\code{*.RData}} file. The \code{OHLC} time series is stored in a
+#'   \emph{TAQ} data, then scrubs, aggregates, and rbinds them into a
+#'   \emph{OHLC} time series, and finally saves it to a single
+#'   \sQuote{\code{*.RData}} file. The \emph{OHLC} time series is stored in a
 #'   variable named \sQuote{\code{symbol}}, and then it's saved to a file named
 #'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
-#'   The \code{TAQ} data files are assumed to be stored in separate directories
+#'   The \emph{TAQ} data files are assumed to be stored in separate directories
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
 #'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
 #' @examples
 #' \dontrun{
@@ -468,21 +581,21 @@ da_ta <- lapply(file_names, function(file_name) {
 
 
 
-#' Load and scrub multiple days of \code{TAQ} data for a single symbol, and save
+#' Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 #' it to multiple \sQuote{\code{*.RData}} files.
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return A \code{TAQ} time series in \code{xts} format.
-#' @details The function \code{save_taq()} loads multiple days of \code{TAQ}
+#' @return A \emph{TAQ} time series in \emph{xts} format.
+#' @details The function \code{save_taq()} loads multiple days of \emph{TAQ}
 #'   data, scrubs it, and saves the scrubbed TAQ data to individual
 #'   \sQuote{\code{*.RData}} files. It uses the same file names for output as
-#'   the input file names. The \code{TAQ} data files are assumed to be stored in
+#'   the input file names. The \emph{TAQ} data files are assumed to be stored in
 #'   separate directories for each \sQuote{\code{symbol}}. Each
 #'   \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
 #'   in the \sQuote{\code{data_dir}} directory.
 #'   Each \sQuote{\code{symbol}} directory contains multiple daily
-#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
 #' @examples
 #' \dontrun{
@@ -525,23 +638,23 @@ save_taq <- function(sym_bol,
 
 
 
-#' Load, scrub, aggregate, and rbind multiple days of \code{TAQ} data for a
-#' single symbol. Calculate returns and save them to a single \sQuote{\code{*.RData}}
-#' file.
+#' Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a 
+#' single symbol. Calculate returns and save them to a single
+#' \sQuote{\code{*.RData}} file.
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return A time series of returns and volume in \code{xts} format.
-#' @details The function \code{save_rets} loads multiple days of \code{TAQ}
-#'   data, then scrubs, aggregates, and rbinds them into a \code{OHLC} time
-#'   series.  It then calculates returns using function \code{run_returns}, and
+#' @return A time series of returns and volume in \emph{xts} format.
+#' @details The function \code{save_rets} loads multiple days of \emph{TAQ}
+#'   data, then scrubs, aggregates, and rbinds them into a \emph{OHLC} time
+#'   series.  It then calculates returns using function \code{run_returns()}, and
 #'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
 #'   to a file called \sQuote{\code{symbol.rets.RData}}.
-#'   The \code{TAQ} data files are assumed to be stored in separate directories
+#'   The \emph{TAQ} data files are assumed to be stored in separate directories
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
 #'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
-#'   \sQuote{\code{*.RData}} files, each file containing one day of \code{TAQ}
+#'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
 #' @examples
 #' \dontrun{
@@ -599,15 +712,15 @@ save_rets <- function(sym_bol,
 
 
 
-#' Load \code{OHLC} time series data for a single symbol, calculate its returns,
+#' Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 #' and save them to a single \sQuote{\code{*.RData}} file, without aggregation.
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return A time series of returns and volume in \code{xts} format.
-#' @details The function \code{save_rets_ohlc()} loads \code{OHLC} time series
+#' @return A time series of returns and volume in \emph{xts} format.
+#' @details The function \code{save_rets_ohlc()} loads \emph{OHLC} time series
 #'   data from a single file.  It then calculates returns using function
-#'   \code{run_returns}, and stores them in a variable named
+#'   \code{run_returns()}, and stores them in a variable named
 #'   \sQuote{\code{symbol.rets}}, and saves them to a file called
 #'   \sQuote{\code{symbol.rets.RData}}.
 #' @examples
@@ -641,17 +754,17 @@ save_rets_ohlc <- function(sym_bol,
 
 
 
-#' Calculate a time series of variance estimates for an \code{OHLC} time series,
-#' assuming zero drift.
+#' Calculate a time series of point estimates of variance for an \emph{OHLC}
+#' time series, using different range estimators for variance.
 #'
-#' Calculates the variance estimates for each bar of \code{OHLC} prices at each
-#' point in time (row), using the squared differences of \code{OHLC} prices at
-#' each point in time.
+#' Calculates the point variance estimates from individual bars of \emph{OHLC} 
+#' prices (rows of data), using the squared differences of \emph{OHLC} prices at
+#' each point in time, without averaging them over time.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @param calc_method \code{character} string representing method for estimating
-#'   variance.  The methods include:
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method \emph{character} string representing the method for
+#'   estimating variance.  The methods include:
 #'   \itemize{
 #'     \item "close" close to close,
 #'     \item "garman_klass" Garman-Klass,
@@ -660,28 +773,56 @@ save_rets_ohlc <- function(sym_bol,
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @return An \code{xts} time series with a single column and the same number of
+#' @param sca_le \emph{Boolean} argument: should the returns be divided by the 
+#'   number of seconds in each period? (default is \code{TRUE})
+#' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details The function \code{run_variance()} calculates a time series of
-#'   variance estimates from \code{OHLC} prices, one for each bar of \code{OHLC}
-#'   data.
-#'
+#' @details The function \code{run_variance()} calculates a time series of point
+#'   variance estimates of percentage returns, from \emph{OHLC} prices, without
+#'   averaging them over time. For example, the method \code{"close"} simply
+#'   calculates the squares of the differences of the log \emph{Close} prices.
+#'   
+#'   The other methods calculate the squares of other possible differences of 
+#'   the log \emph{OHLC} prices.  This way the point variance estimates only
+#'   depend on the price differences within individual bars of data (and
+#'   possibly from the neighboring bars.)
+#'   All the methods are implemented assuming zero drift, since the calculations
+#'   are performed only for a single bar of data, at a single point in time.
+#'   
 #'   The user can choose from several different variance estimation methods. The
 #'   methods \code{"close"}, \code{"garman_klass_yz"}, and \code{"yang_zhang"}
 #'   do account for close-to-open price jumps, while the methods
 #'   \code{"garman_klass"} and \code{"rogers_satchell"} do not account for
 #'   close-to-open price jumps. The default method is \code{"yang_zhang"}, which
-#'   theoretically has the lowest standard error among unbiased estimators. All
-#'   the methods are implemented assuming zero drift, for two reasons. First,
-#'   the drift in daily or intraday data is insignificant compared to the
-#'   volatility. Second, the purpose of the function \code{run_variance()} is to
-#'   produce technical indicators, rather than statistical estimates.
+#'   theoretically has the lowest standard error among unbiased estimators. 
 #'
-#'   The variance is scaled to the scale of the time index of the \code{OHLC} 
-#'   time series.  For example, if the time index is in seconds, then the 
-#'   variance is expressed in units equal to the variance per second, if the 
-#'   time index is in days, then the variance is equal to the variance per day.
-#'   The function \code{run_variance()} performs a similar operation to the 
+#'   The point variance estimates can be passed into function \code{roll_vwap()}
+#'   to perform averaging, to calculate rolling variance estimates.  This is
+#'   appropriate only for the methods \code{"garman_klass"} and
+#'   \code{"rogers_satchell"}, since they don't require subtracting the rolling
+#'   mean from the point variance estimates.
+#'   
+#'   The point variance estimates can also be considered to be technical
+#'   indicators, and can be used as inputs into trading models.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   by the squared differences of the time index (which scales the variance to 
+#'   units of variance per second squared.) This is useful for example, when
+#'   calculating intra-day variance from minutely bar data, because dividing
+#'   returns by the number of seconds decreases the effect of overnight price 
+#'   jumps.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is 
+#'   expressed in the scale of the time index of the \emph{OHLC} time series. 
+#'   For example, if the time index is in seconds, then the variance is given in
+#'   units of variance per second squared.  If the time index is in days, then
+#'   the variance is equal to the variance per day squared.
+#'   
+#'   The time index of the \code{oh_lc} time series is assumed to be in 
+#'   \emph{POSIXct} format, so that its internal value is equal to the number of
+#'   seconds that have elapsed since the \emph{epoch}.
+#'   
+#'   The function \code{run_variance()} performs similar calculations to the
 #'   function \code{volatility()} from package 
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it 
 #'   assumes zero drift, and doesn't calculate a running sum using 
@@ -697,7 +838,7 @@ save_rets_ohlc <- function(sym_bol,
 #' # calculate SPY variance without overnight jumps
 #' var_running <- HighFreq::run_variance(SPY, calc_method="rogers_satchell")
 
-run_variance <- function(oh_lc, calc_method="yang_zhang") {
+run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
   sym_bol <- rutils::na_me(oh_lc)
   oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
@@ -709,14 +850,16 @@ run_variance <- function(oh_lc, calc_method="yang_zhang") {
          "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
                             0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                             (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
-         "yang_zhang"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
-                       0.67*(oh_lc[, 1]-oh_lc[, 4])^2 +
-                       0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+         "yang_zhang"={co_eff <- 0.34/(1.34 + (win_dow + 1)/(win_dow - 1))
+                            (oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+                            co_eff*(oh_lc[, 1]-oh_lc[, 4])^2 +
+                            (1-co_eff)*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  vari_ance <- vari_ance/c(1, diff(.index(oh_lc)))^2
+  if (sca_le)
+    vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
-  vari_ance <- na.locf(vari_ance)
+  vari_ance <- rutils::na_locf(vari_ance)
   colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
 }  # end run_variance
@@ -724,20 +867,22 @@ run_variance <- function(oh_lc, calc_method="yang_zhang") {
 
 
 
-#' Calculate time series of skew estimates from a \code{OHLC} time series,
+#' Calculate time series of skew estimates from a \emph{OHLC} time series,
 #' assuming zero drift.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @param calc_method \code{character} string representing method for estimating
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method \emph{character} string representing method for estimating
 #'   skew.
 #' @return A time series of skew estimates.
 #' @details The function \code{run_skew()} calculates a time series of skew
-#'   estimates from \code{OHLC} prices, one for each bar of \code{OHLC} data.
-#'   The skew estimates are scaled to the time scale of the index of the
-#'   \code{OHLC} time series.  For example, if the time index is in seconds,
-#'   then the estimates are equal to the skew per second, if the time index is
-#'   in days, then the estimates are equal to the skew per day.
+#'   estimates from \emph{OHLC} prices, one for each bar of \emph{OHLC} data.
+#'   The skew estimates are expressed in the time scale of the index of the
+#'   \emph{OHLC} time series.  
+#'   For example, if the time index is in seconds, then the skew is given in 
+#'   units of skew per second.  If the time index is in days, then the skew is 
+#'   equal to the skew per day.
+#'   
 #'   Currently only the \code{"close"} skew estimation method is correct
 #'   (assuming zero drift), while the \code{"rogers_satchell"} method produces a
 #'   skew-like indicator, proportional to the skew. The default method is
@@ -766,9 +911,9 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
                     0.33*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                             (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  sk_ew <- sk_ew/c(1, diff(.index(oh_lc)))^3
+  sk_ew <- sk_ew/c(1, diff(xts::.index(oh_lc)))^3
   sk_ew[1, ] <- 0
-  sk_ew <- na.locf(sk_ew)
+  sk_ew <- rutils::na_locf(sk_ew)
   colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
 }  # end run_skew
@@ -776,20 +921,20 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 
 
 
-#' Calculate time series of Sharpe-like statistics for each bar of a \code{OHLC}
+#' Calculate time series of Sharpe-like statistics for each bar of a \emph{OHLC}
 #' time series.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @param calc_method \code{character} string representing method for estimating
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method \emph{character} string representing method for estimating
 #'   the Sharpe-like exponent.
-#' @return An \code{xts} time series with the same number of rows as the
+#' @return An \emph{xts} time series with the same number of rows as the
 #'   argument \code{oh_lc}.
 #' @details The function \code{run_sharpe()} calculates Sharpe-like statistics
-#'   for each bar of a \code{OHLC} time series.
+#'   for each bar of a \emph{OHLC} time series.
 #'   The Sharpe-like statistic is defined as the ratio of the difference between
-#'   \code{Close} minus \code{Open} prices divided by the difference between
-#'   \code{High} minus \code{Low} prices.
+#'   \emph{Close} minus \emph{Open} prices divided by the difference between
+#'   \emph{High} minus \emph{Low} prices.
 #'   This statistic may also be interpreted as something like a Hurst exponent
 #'   for a single bar of data.
 #'   The motivation for the Sharpe-like statistic is the notion that if prices
@@ -813,21 +958,21 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 
 
 #' Calculate the aggregation (weighted average) of a statistical estimator over
-#' a \code{OHLC} time series.
+#' a \emph{OHLC} time series.
 #'
 #' @export
-#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
-#'   \code{xts} format.
-#' @param mo_ment \code{character} string representing function for
+#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#'   \emph{xts} format.
+#' @param mo_ment \emph{character} string representing function for
 #'   estimating the moment.
-#' @param weight_ed \code{Boolean} should estimate be weighted by the trading
-#'   volume? (default is \code{TRUE})
+#' @param weight_ed \emph{Boolean} argument: should estimate be weighted by
+#'   the trading volume? (default is \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
-#' @return A single \code{numeric} value equal to the volume weighted average of
+#' @return A single \emph{numeric} value equal to the volume weighted average of
 #'   an estimator over the time series.
 #' @details The function \code{agg_regate()} calculates a single number
 #'   representing the volume weighted average of an estimator over the
-#'   \code{OHLC} time series of prices.  By default the sum is trade volume
+#'   \emph{OHLC} time series of prices.  By default the sum is trade volume
 #'   weighted.
 #' @examples
 #' # calculate weighted average variance for SPY (single number)
@@ -844,14 +989,14 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
     agg_regations <- oh_lc[, 5]*agg_regations
     agg_regations <- sum(agg_regations)/sum(oh_lc[, 5])
   } else
-    agg_regations <- sum(agg_regations)/length(agg_regations)
+    agg_regations <- sum(agg_regations)/NROW(agg_regations)
   agg_regations
 }  # end agg_regate
 
 
 
 
-#' Calculate the volume-weighted average price of an \code{OHLC} time series
+#' Calculate the volume-weighted average price of an \emph{OHLC} time series
 #' over a rolling window (lookback period).
 #'
 #' Performs the same operation as function \code{VWAP()} from package
@@ -859,11 +1004,11 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' but using vectorized functions, so it's a little faster.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
-#' @param x_ts single-column \code{xts} time series.
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param x_ts single-column \emph{xts} time series.
 #' @param win_dow the size of the lookback window, equal to the number of bars
 #'   of data used for calculating the average price.
-#' @return An \code{xts} time series with a single column and the same number of
+#' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
 #' @details The function \code{roll_vwap()} calculates the volume-weighted
 #'   average closing price, defined as the sum of the prices multiplied by
@@ -895,27 +1040,27 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], win_dow) {
 
 
 
-#' Calculate a vector of statistics over an \code{OHLC} time series, and
+#' Calculate a vector of statistics over an \emph{OHLC} time series, and
 #' calculate a rolling mean over the statistics.
 #'
 #' @export
-#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
-#'   \code{xts} format.
-#' @param mo_ment \code{character} string representing a function for
-#'   estimating statistics of a single bar of \code{OHLC} data, such as
+#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#'   \emph{xts} format.
+#' @param mo_ment \emph{character} string representing a function for
+#'   estimating statistics of a single bar of \emph{OHLC} data, such as
 #'   volatility, skew, and higher moments.
 #' @param win_dow the size of the lookback window, equal to the number of bars
 #'   of data used for calculating the rolling mean.
-#' @param weight_ed \code{Boolean} should statistic be weighted by trade volume?
-#'   (default \code{TRUE})
+#' @param weight_ed \emph{Boolean} argument: should statistic be weighted by
+#'   trade volume? (default \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
-#' @return An \code{xts} time series with a single column and the same number of
+#' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
 #' @details The function \code{roll_moment()} calculates a vector of statistics
-#'   over an \code{OHLC} time series, such as volatility, skew, and higher
+#'   over an \emph{OHLC} time series, such as volatility, skew, and higher
 #'   moments.  The statistics could also be any other aggregation of a single
-#'   bar of \code{OHLC} data, for example the \code{High} price minus the
-#'   \code{Low} price squared.  The length of the vector of statistics is equal
+#'   bar of \emph{OHLC} data, for example the \emph{High} price minus the
+#'   \emph{Low} price squared.  The length of the vector of statistics is equal
 #'   to the number of rows of the argument \code{oh_lc}. Then it calculates a
 #'   trade volume weighted rolling mean over the vector of statistics over and
 #'   calculate statistics.
@@ -925,7 +1070,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], win_dow) {
 #' skew_rolling <- roll_moment(oh_lc=SPY, mo_ment="run_skew", win_dow=21)
 #' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 #' skew_rolling[1, ] <- 0
-#' skew_rolling <- na.locf(skew_rolling)
+#' skew_rolling <- rutils::na_locf(skew_rolling)
 
 roll_moment <- function(oh_lc, mo_ment="run_variance", win_dow=11, weight_ed=TRUE, ...) {
 # match "mo_ment" with moment function
@@ -946,129 +1091,284 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", win_dow=11, weight_ed=TRU
 
 
 
-#' Calculate the rolling Sharpe ratio over a rolling lookback window for an
-#' \code{OHLC} time series.
+#' Calculate a time series of variance estimates over a rolling lookback window 
+#' for an \emph{OHLC} time series of prices, using different range estimators
+#' for variance.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method \emph{character} string representing method for estimating
+#'   variance.  The methods include:
+#'   \itemize{
+#'     \item "close" close to close,
+#'     \item "garman_klass" Garman-Klass,
+#'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+#'     \item "rogers_satchell" Rogers-Satchell,
+#'     \item "yang_zhang" Yang-Zhang,
+#'    }
+#'    (default is \code{"yang_zhang"})
 #' @param win_dow the size of the lookback window, equal to the number of bars
-#'   of data used for aggregating the \code{OHLC} prices.
-#' @return An \code{xts} time series with a single column and the same number of
+#'   of data used for calculating the variance. 
+#' @param sca_le \emph{Boolean} argument: should the returns be divided by the 
+#'   number of seconds in each period? (default is \code{TRUE})
+#' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details The function \code{roll_sharpe()} calculates the rolling Sharpe
-#'   ratio as the ratio of absolute returns over the lookback window (not
-#'   percentage returns), divided by the average volatility of returns.
+#' @details The function \code{roll_variance()} calculates a time series of 
+#'   variance estimates of percentage returns, from \emph{OHLC} prices, using
+#'   several different variance estimation methods based on the range of
+#'   \emph{OHLC} prices.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   by the squared differences of the time index (which scales the variance to 
+#'   units of variance per second squared.) This is useful for example, when
+#'   calculating intra-day variance from minutely bar data, because dividing
+#'   returns by the number of seconds decreases the effect of overnight price 
+#'   jumps.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is 
+#'   expressed in the scale of the time index of the \emph{OHLC} time series. 
+#'   For example, if the time index is in seconds, then the variance is given in
+#'   units of variance per second squared.  If the time index is in days, then
+#'   the variance is equal to the variance per day squared.
+#'   
+#'   The time index of the \code{oh_lc} time series is assumed to be in 
+#'   \emph{POSIXct} format, so that its internal value is equal to the number of
+#'   seconds that have elapsed since the \emph{epoch}.
+#'   
+#'   The methods \code{"close"}, \code{"garman_klass_yz"}, and
+#'   \code{"yang_zhang"} do account for close-to-open price jumps, while the
+#'   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
+#'   for close-to-open price jumps. 
+#'   
+#'   The default method is \code{"yang_zhang"}, which theoretically has the
+#'   lowest standard error among unbiased estimators.
+#'
+#'   The function \code{roll_variance()} performs the same calculations as the 
+#'   function \code{volatility()} from package 
+#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but 
+#'   it's a little faster because it uses function RcppRoll::roll_sd(), and it 
+#'   performs less data validation.
+#' @examples
+#' # create minutely OHLC time series of random prices
+#' oh_lc <- HighFreq::random_ohlc()
+#' # calculate variance estimates for oh_lc over a 21 period window
+#' var_rolling <- HighFreq::roll_variance(oh_lc, win_dow=21)
+#' # calculate variance estimates for SPY
+#' var_rolling <- HighFreq::roll_variance(SPY, calc_method="yang_zhang")
+#' # calculate SPY variance without accounting for overnight jumps
+#' var_rolling <- HighFreq::roll_variance(SPY, calc_method="rogers_satchell")
+
+roll_variance <- function(oh_lc, win_dow=11, calc_method="yang_zhang", sca_le=TRUE) {
+  sym_bol <- rutils::na_me(oh_lc)
+  oh_lc <- log(oh_lc[, 1:4])
+  vari_ance <- switch(calc_method,
+                      "close"={xts(c(rep(0, win_dow-1), 
+                            RcppRoll::roll_var(rutils::diff_xts(oh_lc[, 4]), n=win_dow, align="left")),
+                              order.by=index(oh_lc))},
+                      "garman_klass"={rutils::roll_sum(
+                            0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                            (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2, win_dow=win_dow) / win_dow},
+                      "rogers_satchell"={rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), win_dow=win_dow) / win_dow},
+                      "garman_klass_yz"={rutils::roll_sum(
+                            (oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                            (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2, win_dow=win_dow) / win_dow},
+                      "yang_zhang"={co_eff <- 0.34/(1.34 + (win_dow + 1)/(win_dow - 1))
+                            c(rep(0, win_dow-1), 
+                            RcppRoll::roll_var(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]), n=win_dow, align="left") +
+                            co_eff*RcppRoll::roll_var(oh_lc[, 1]-oh_lc[, 4], n=win_dow, align="left")) +
+                            (1-co_eff)*rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                              (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), win_dow=win_dow) / win_dow}
+  )  # end switch
+  if (sca_le)
+    vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
+  vari_ance[1, ] <- 0
+  vari_ance <- rutils::na_locf(vari_ance)
+  colnames(vari_ance) <- paste0(sym_bol, ".Variance")
+  vari_ance
+}  # end roll_variance
+
+
+
+
+#' Calculate the variance of an \emph{OHLC} time series, using different range
+#' estimators for variance.
+#'
+#' @export
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method \emph{character} string representing method for estimating
+#'   variance.  The methods include:
+#'   \itemize{
+#'     \item "close" close to close,
+#'     \item "garman_klass" Garman-Klass,
+#'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+#'     \item "rogers_satchell" Rogers-Satchell,
+#'     \item "yang_zhang" Yang-Zhang,
+#'    }
+#'    (default is \code{"yang_zhang"})
+#' @param sca_le \emph{Boolean} argument: should the returns be divided by the 
+#'   number of seconds in each period? (default is \code{TRUE})
+#' @return A \emph{numeric} value equal to the variance.
+#' @details The function \code{calc_variance()} calculates the variance estimate
+#'   from \emph{OHLC} prices, using several different variance estimation
+#'   methods based on the range of \emph{OHLC} prices.
+#'   
+#'   The methods \code{"close"}, \code{"garman_klass_yz"}, and
+#'   \code{"yang_zhang"} do account for close-to-open price jumps, while the
+#'   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
+#'   for close-to-open price jumps. 
+#'   
+#'   The default method is \code{"yang_zhang"}, which theoretically has the
+#'   lowest standard error among unbiased estimators.
+#'
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   by the squared differences of the time index (which scales the variance to 
+#'   units of variance per second squared.) This is useful for example, when 
+#'   calculating variance from minutely bar data, because dividing returns by
+#'   the number of seconds decreases the effect of overnight price jumps.
+#'   
+#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is 
+#'   expressed in the scale of the time index of the \emph{OHLC} time series. 
+#'   For example, if the time index is in seconds, then the variance is given in
+#'   units of variance per second squared.  If the time index is in days, then
+#'   the variance is equal to the variance per day squared.
+#'   
+#'   The function \code{calc_variance()} performs the same calculations as the 
+#'   function \code{run_variance()} and then calculates the average of the spot
+#'   variance estimates.
+#' @examples
+#' # create minutely OHLC time series of random prices
+#' oh_lc <- HighFreq::random_ohlc()
+#' # calculate variance of oh_lc
+#' vari_ance <- HighFreq::calc_variance(oh_lc)
+#' # calculate variance of SPY
+#' vari_ance <- HighFreq::calc_variance(SPY, calc_method="yang_zhang")
+#' # calculate variance of SPY without accounting for overnight jumps
+#' vari_ance <- HighFreq::calc_variance(SPY, calc_method="rogers_satchell")
+
+calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
+  if (sca_le)
+    in_dex <- c(1, diff(xts::.index(oh_lc)))
+  else
+    in_dex <- rep(1, NROW(oh_lc))
+  oh_lc <- log(oh_lc[, 1:4])
+  switch(calc_method,
+         "close"={var(rutils::diff_it(as.vector(oh_lc[, 4]))/in_dex)},
+         "garman_klass"={sum((0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
+         "rogers_satchell"={sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc)},
+         "garman_klass_yz"={sum(((oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
+         "yang_zhang"={co_eff <- 0.34/(1.34 + (NROW(oh_lc) + 1)/(NROW(oh_lc) - 1))
+                        drop(var((oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))/in_dex) +
+                          co_eff*var((oh_lc[, 1]-oh_lc[, 4])/in_dex) +
+                          (1-co_eff)*sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
+                                          (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc))}
+  )  # end switch
+}  # end calc_variance
+
+
+
+
+#' Calculate a time series of Sharpe ratios over a rolling lookback window for
+#' an \emph{OHLC} time series.
+#'
+#' @export
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param win_dow the size of the lookback window, equal to the number of bars
+#'   of data used for aggregating the \emph{OHLC} prices.
+#' @return An \emph{xts} time series with a single column and the same number of
+#'   rows as the argument \code{oh_lc}.
+#' @details The function \code{roll_sharpe()} calculates the rolling Sharpe 
+#'   ratio defined as the ratio of percentage returns over the lookback window,
+#'   divided by the average volatility of percentage returns.
 #' @examples
 #' # calculate rolling Sharpe ratio over SPY
-#' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=10)
+#' sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=11)
 
 roll_sharpe <- function(oh_lc, win_dow=11) {
-  var_ohlc_agg <- (oh_lc[, 4] - rutils::lag_xts(oh_lc[, 1], k=(win_dow-1)))/win_dow
-  var_ohlc <- sqrt(rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)/win_dow)
-  sharpe_rolling <- ifelse(var_ohlc==0,
-                       1.0,
-                       var_ohlc_agg/var_ohlc)
+  re_turns <- run_returns(oh_lc, lag=win_dow, sca_le=FALSE)
+  var_rolling <- sqrt(roll_variance(oh_lc, win_dow=win_dow, sca_le=FALSE))
+  sharpe_rolling <- ifelse(var_rolling==0,
+                           1.0,
+                           re_turns/var_rolling)
   colnames(sharpe_rolling) <- paste0(rutils::na_me(oh_lc), ".Sharpe")
-  na.locf(sharpe_rolling)
+  rutils::na_locf(sharpe_rolling)
 }  # end roll_sharpe
 
 
 
 
-#' Calculate the rolling Hurst exponent over a rolling lookback window or the
-#' end points of an \code{OHLC} time series.
+#' Calculate a time series of \emph{Hurst} exponents over a rolling lookback
+#' window.
 #'
 #' @export
-#' @param oh_lc an \code{OHLC} time series of prices in \code{xts} format.
+#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
 #' @param win_dow the size of the lookback window, equal to the number of bars
-#'   of data used for aggregating the \code{OHLC} prices.
-#' @param off_set the number of bars of data in the first, stub window.
-#' @param roll_end_points \code{Boolean} should the Hurst exponent be calculated
-#'   using aggregations over the end points, or by rolling over a lookback
-#'   window? (default is \code{FALSE})
-#' @return An \code{xts} time series with a single column and the same number of
+#'   of data used for aggregating the \emph{OHLC} prices.
+#' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
-#' @details The function \code{roll_hurst()} calculates the rolling Hurst
-#'   exponent in two different ways, depending on the argument
-#'   \code{roll_end_points}.
-#'
-#'   If \code{roll_end_points} is \code{FALSE} (the default), then the rolling
-#'   Hurst exponent is calculated as the logarithm of the ratios of two rolling
-#'   price range estimates. The Hurst exponent is defined as the logarithm of
-#'   the ratio of the range of aggregated prices, divided by the average range
-#'   of prices in each bar. The aggregated prices are calculated over
-#'   overlapping windows, and the Hurst exponent values are calculated at each
-#'   point in time.
-#'
-#'   If \code{roll_end_points} is \code{TRUE}, then the rolling Hurst exponent is
-#'   calculated as the logarithm of the ratios of two rolling variance
-#'   estimates. The Hurst exponent is defined as the logarithm of the ratio of
-#'   the variance of aggregated returns, divided by the variance of simple
-#'   returns. The aggregated returns are calculated over non-overlapping windows
-#'   spanned by the end points, using the function \code{to_period()}. The Hurst
-#'   exponent values are calculated only at the end points. The non-overlapping
-#'   aggregation windows can be shifted by using the argument \code{off_set},
-#'   which produces a slightly different series of rolling hurst exponent
-#'   values.
-#'
+#' @details The function \code{roll_hurst()} calculates a time series of
+#'   \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling lookback
+#'   window.
+#'   
+#'   The \emph{Hurst} exponent is defined as the logarithm of the ratio of the
+#'   price range, divided by the standard deviation of returns, and divided by
+#'   the logarithm of the window length.
+#'   
+#'   The function \code{roll_hurst()} doesn't use the same definition as the 
+#'   rescaled range definition of the \emph{Hurst} exponent.
+#'   First, because the price range is calculated using \emph{High} and 
+#'   \emph{Low} prices, which produces bigger range values, and higher
+#'   \emph{Hurst} exponent estimates.
+#'   Second, because the \emph{Hurst} exponent is estimated using a single
+#'   aggregation window, instead of multiple windows in the rescaled range
+#'   definition.
+#'   
+#'   The rationale for using a different definition of the \emph{Hurst} exponent
+#'   is that it's designed to be a technical indicator for use as input into
+#'   trading models, rather than an estimator for statistical analysis.
+#'   
 #' @examples
-#' # calculate rolling Hurst over SPY
-#' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10)
-#' # calculate Hurst over end points of SPY
-#' hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=10, off_set=0, roll_end_points=TRUE)
-#' # calculate a series of rolling hurst values using argument off_set
-#' hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, win_dow=10, roll_end_points=TRUE)
-#' hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
-#' # remove daily warmup periods
-#' hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
-#' chart_Series(x=hurst_rolling["2012-02-13"],
-#'   name=paste(colnames(hurst_rolling), "10-minute aggregations"))
+#' # calculate rolling Hurst for SPY in March 2009
+#' hurst_rolling <- roll_hurst(oh_lc=SPY["2009-03"], win_dow=11)
+#' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 
-roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
-  if(roll_end_points) {  # roll over end points
-    # aggregate oh_lc to a lower periodicity specified by end_points
-    ohlc_agg <- rutils::to_period(oh_lc=oh_lc,
-                                  end_points=rutils::end_points(oh_lc, inter_val=win_dow, off_set=off_set))
-    var_ohlc_agg <- run_variance(ohlc_agg)
-    in_dex <- index(ohlc_agg)
-    var_ohlc <- rutils::roll_sum(run_variance(oh_lc), win_dow=win_dow)[in_dex]/win_dow
-  }
-  else {  # roll over overlapping windows
-    max_hi <- TTR::runMax(x=oh_lc[, 2], n=win_dow)
-    min_lo <- -TTR::runMax(x=-oh_lc[, 3], n=win_dow)
-    var_ohlc_agg <- max_hi - min_lo
-    var_ohlc_agg[1:(win_dow-1), ] <- 0
-    var_ohlc <- rutils::roll_sum((oh_lc[, 2] - oh_lc[, 3]), win_dow=win_dow)/win_dow
-  }  # end if
-  hurst_rolling <- ifelse((var_ohlc==0) | (var_ohlc_agg==0),
-                       1.0,
-                       log(var_ohlc_agg/var_ohlc)/log(win_dow))
+roll_hurst <- function(oh_lc, win_dow=11) {
+  ran_ge <- c(rep(0, win_dow-1), (RcppRoll::roll_max(x=log(oh_lc[, 2]), n=win_dow) + 
+               RcppRoll::roll_max(x=-log(oh_lc[, 3]), n=win_dow)))
+  var_rolling <- sqrt(roll_variance(oh_lc, win_dow=win_dow, sca_le=FALSE))
+  hurst_rolling <- ifelse((var_rolling==0) | (ran_ge==0),
+                          0.5,
+                          log(ran_ge/var_rolling)/log(win_dow))
   colnames(hurst_rolling) <- paste0(rutils::na_me(oh_lc), ".Hurst")
-  na.locf(hurst_rolling)
+  rutils::na_locf(hurst_rolling)
 }  # end roll_hurst
 
 
 
 
 #' Apply an aggregation function over a rolling lookback window and the end
-#' points of an \code{OHLC} time series.
+#' points of an \emph{OHLC} time series.
 #'
 #' @export
-#' @param oh_lc \code{OHLC} time series of prices and trading volumes, in
-#'   \code{xts} format.
-#' @param agg_fun \code{character} string representing an aggregation function
+#' @param x_ts \emph{OHLC} time series of prices and trading volumes, in
+#'   \emph{xts} format.
+#' @param agg_fun \emph{character} string representing an aggregation function
 #'   to be applied over a rolling lookback window.
-#' @param win_dow the size of the lookback window, equal to the number of bars
-#'   of data used for applying the aggregation function.
-#' @param by_columns \code{Boolean} should the function \code{agg_fun()} be
-#'   applied column-wise (individually), or should it be applied to all the
-#'   columns combined? (default is \code{FALSE})
+#' @param win_dow the size of the lookback window, equal to the number of bars 
+#'   of data used for applying the aggregation function (including the current
+#'   bar).
+#' @param by_columns \emph{Boolean} argument: should the function
+#'   \code{agg_fun()} be applied column-wise (individually), or should it be
+#'   applied to all the columns combined? (default is \code{FALSE})
 #' @param end_points an integer vector of end points.
 #' @param ... additional parameters to the agg_fun function.
-#' @return An \code{xts} time series with the same number of rows as the
-#'   argument \code{oh_lc}.
+#' @return An \emph{xts} time series with the same number of rows as the
+#'   argument \code{x_ts}.
 #' @details The function \code{roll_apply()} applies an aggregation function
-#'   over a rolling lookback window and the end points of an \code{OHLC} time
+#'   over a rolling lookback window and the end points of an \emph{OHLC} time
 #'   series.
 #'
 #'   Performs similar operations to the functions \code{rollapply()} and
@@ -1081,7 +1381,7 @@ roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
 #'
 #'   But the function \code{roll_apply()} is faster because it performs less
 #'   type-checking and other overhead. Unlike the other functions,
-#'   \code{roll_apply()} doesn't produce any leading \code{NA} values.
+#'   \code{roll_apply()} doesn't produce any leading \emph{NA} values.
 #'
 #'   The function \code{roll_apply()} can be called in two different ways,
 #'   depending on the argument \code{end_points}.
@@ -1089,52 +1389,57 @@ roll_hurst <- function(oh_lc, win_dow=11, off_set=0, roll_end_points=FALSE) {
 #'   \code{roll_apply()}, then the default value is used, and
 #'   \code{roll_apply()} performs aggregations over overlapping windows at each
 #'   point in time.
-#'   If the argument \code{end_points} is explicitly passed to
-#'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-#'   overlapping windows spanned by the end_points.
+#'   If the argument \code{end_points} is explicitly passed to 
+#'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
+#'   windows spanned by the end_points.  If win_dow=2 then the aggregations are
+#'   performed over non-overlapping windows, otherwise they are performed over
+#'   overlapping windows.
 #'
-#'   The aggregation function \code{agg_fun} can return either a single value or
-#'   a vector of values. If the aggregation function \code{agg_fun} returns a
-#'   single value, then \code{roll_apply()} returns an \code{xts} time series
-#'   with a single column. If the aggregation function \code{agg_fun} returns a
-#'   vector of values, then \code{roll_apply()} returns an \code{xts} time
-#'   series with multiple columns equal to the length of the vector returned by
-#'   the aggregation function \code{agg_fun}.
+#'   The aggregation function \code{agg_fun()} can return either a single value
+#'   or a vector of values. If the aggregation function \code{agg_fun()} returns
+#'   a single value, then \code{roll_apply()} returns an \emph{xts} time series 
+#'   with a single column. If the aggregation function \code{agg_fun()} returns
+#'   a vector of values, then \code{roll_apply()} returns an \emph{xts} time 
+#'   series with multiple columns equal to the length of the vector returned by 
+#'   the aggregation function \code{agg_fun()}.
 #'
 #' @examples
 #' # extract a single day of SPY data
-#' x_ts <- SPY["2012-02-13"]
+#' oh_lc <- SPY["2012-02-13"]
 #' win_dow <- 11
-#' # calculate the rolling sums of the columns of x_ts
-#' agg_regations <- roll_apply(x_ts, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+#' # calculate the rolling sums of oh_lc columns over a rolling window
+#' agg_regations <- roll_apply(oh_lc, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
 #' # apply a vector-valued aggregation function over a rolling window
-#' agg_function <- function(x_ts)  c(max(x_ts[, 2]), min(x_ts[, 3]))
-#' agg_regations <- roll_apply(x_ts, agg_fun=agg_function, win_dow=win_dow)
+#' agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
+#' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, win_dow=win_dow)
 #' # define end points at 11-minute intervals (SPY is minutely bars)
-#' end_points <- rutils::end_points(x_ts, inter_val=win_dow)
-#' # calculate the rolling sums of the columns of x_ts over end_points
-#' agg_regations <- roll_apply(x_ts, agg_fun=sum, win_dow=2, end_points=end_points, by_columns=TRUE)
-#' # apply a vector-valued aggregation function over the end_points of x_ts
-#' agg_regations <- roll_apply(x_ts, agg_fun=agg_function, win_dow=2, end_points=end_points)
+#' end_points <- rutils::end_points(oh_lc, inter_val=win_dow)
+#' # calculate the sums of oh_lc columns over end_points using non-overlapping windows
+#' agg_regations <- roll_apply(oh_lc, agg_fun=sum, win_dow=2, 
+#'                             end_points=end_points, by_columns=TRUE)
+#' # apply a vector-valued aggregation function over the end_points of oh_lc
+#' # using overlapping windows
+#' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, 
+#'                             win_dow=5, end_points=end_points)
 
-roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11,
-                       end_points=(0:NROW(oh_lc)), by_columns=FALSE, ...) {
+roll_apply <- function(x_ts, agg_fun="run_variance", win_dow=11,
+                       end_points=(0:NROW(x_ts)), by_columns=FALSE, ...) {
   # match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
-  len_gth <- length(end_points)
+  len_gth <- NROW(end_points)
   # define start_points as lag of end_points
   start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] +
-    (NROW(oh_lc) > (len_gth+1))
+    (NROW(x_ts) > (len_gth+1))
   # perform aggregations over length of end_points
   agg_regations <- if(by_columns)
-    sapply(oh_lc, function(col_umn)
+    sapply(x_ts, function(col_umn)
       sapply(2:len_gth, function(in_dex)
         agg_fun(.subset_xts(col_umn,
                             start_points[in_dex]:end_points[in_dex]), ...)
       ))  # end sapply
   else {  # not by_columns
     agg_regations <- sapply(2:len_gth, function(in_dex)
-      agg_fun(.subset_xts(oh_lc,
+      agg_fun(.subset_xts(x_ts,
                           start_points[in_dex]:end_points[in_dex]), ...)
     )  # end sapply
     # coerce agg_regations into matrix and transpose it
@@ -1143,19 +1448,19 @@ roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11,
     agg_regations <- t(agg_regations)
   }  # end if
   # coerce agg_regations into xts series
-  xts(agg_regations, order.by=index(oh_lc[end_points]))
+  xts(agg_regations, order.by=index(x_ts[end_points]))
 }  # end roll_apply
 
 
 
 
-#' Perform seasonality aggregations over a single-column \code{xts} time series.
+#' Perform seasonality aggregations over a single-column \emph{xts} time series.
 #'
 #' @export
-#' @param x_ts single-column \code{xts} time series.
-#' @param in_dex vector of \code{character} strings representing points in time,
+#' @param x_ts single-column \emph{xts} time series.
+#' @param in_dex vector of \emph{character} strings representing points in time,
 #'   of the same length as the argument \code{x_ts}.
-#' @return An \code{xts} time series with mean aggregations over the seasonality
+#' @return An \emph{xts} time series with mean aggregations over the seasonality
 #'   interval.
 #' @details The function \code{season_ality()} calculates the mean of values
 #'   observed at the same points in time specified by the argument
@@ -1174,7 +1479,7 @@ roll_apply <- function(oh_lc, agg_fun="run_variance", win_dow=11,
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
 
-season_ality <- function(x_ts, in_dex=format(index(x_ts), "%H:%M")) {
+season_ality <- function(x_ts, in_dex=format(zoo::index(x_ts), "%H:%M")) {
 # aggregate the mean
   agg_regation <- tapply(X=x_ts, INDEX=in_dex, FUN=mean)
 # coerce from array to named vector
