@@ -42,132 +42,134 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-- [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
++ [ ] replace xts::.subset_xts() with brackets operator []
 
-- [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
++ [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
+
++ [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
 Possible fixes:
 modify random_ohlc() so that it samples from secondly return data and aggregates to minutely OHLC data (does this solve the problem?) - save random minutely OHLC prices to file for future use  
 modify random_ohlc() so that it samples from minutely return data scaled by time, and aggregates to minutely OHLC data
 
-- [ ] bootstrap range volatility estimators on random non-normal OHLC prices to check if indeed they have lowest standard error
++ [ ] bootstrap range volatility estimators on random non-normal OHLC prices to check if indeed they have lowest standard error
 use package meboot for maximum entropy bootstrap of time series ?
 https://cran.r-project.org/web/packages/meboot/index.html
 
-- [ ] add function for calculating microprice  
++ [ ] add function for calculating microprice  
 
-- [x] add volatility, drift rate, and convexity correction to functions random_taq() and random_ohlc()  
++ [x] add volatility, drift rate, and convexity correction to functions random_taq() and random_ohlc()  
 
-- [x] fix bug in random_ohlc(): transform to normal distribution before sampling from rows of OHLC (otherwise it produces negative prices)  
++ [x] fix bug in random_ohlc(): transform to normal distribution before sampling from rows of OHLC (otherwise it produces negative prices)  
 
-- [x] move functions adjust_ohlc(), to_period() and get_symbols() from HighFreq to rutils  
++ [x] move functions adjust_ohlc(), to_period() and get_symbols() from HighFreq to rutils  
 
-- [x] remove and/or adjust time scaling factors in run_variance(), run_skew(), and random_ohlc()
++ [x] remove and/or adjust time scaling factors in run_variance(), run_skew(), and random_ohlc()
 
-- [x] rename functions *_OHLC and *_TAQ to *_ohlc and *_taq
++ [x] rename functions *_OHLC and *_TAQ to *_ohlc and *_taq
 
-- [x] create function adjust_ohlc() that adjusts OHLC data, similar to quantmod::adjustOHLC()  
++ [x] create function adjust_ohlc() that adjusts OHLC data, similar to quantmod::adjustOHLC()  
 
-- [x] create function get_symbols() that downloads time series data, similar to quantmod::getSymbols()  
++ [x] create function get_symbols() that downloads time series data, similar to quantmod::getSymbols()  
 
-- [x] replace quantmod extractor functions Op(), Hi(), Lo(), Cl(), Vo() with direct subsetting: oh_lc[, 3] instead of Lo(oh_lc)
++ [x] replace quantmod extractor functions Op(), Hi(), Lo(), Cl(), Vo() with direct subsetting: oh_lc[, 3] instead of Lo(oh_lc)
 
-- [x] modify function run_returns(): add argument  
++ [x] modify function run_returns(): add argument  
 
-- [x] update README and web page  
++ [x] update README and web page  
 
-- [x] add vignettes directory and create multiple vignettes using files README and demo_HighFreq.R  
++ [x] add vignettes directory and create multiple vignettes using files README and demo_HighFreq.R  
 
-- [x] create function random_TAQ() that returns random TAQ data
++ [x] create function random_TAQ() that returns random TAQ data
 
-- [x] create function random_OHLC()
++ [x] create function random_OHLC()
 returns random OHLC data used for testing for data snooping (look ahead bias) and benchmarking
 Either create synthetic data or sample from real data.  
 Run random data through model to test if there is data snooping.  
 
-- [x] add a single day of TAQ data for SPY to hf_data.RData file  
++ [x] add a single day of TAQ data for SPY to hf_data.RData file  
 
-- [x] add TLT, VXX, and SPY to hf_data.RData file  
++ [x] add TLT, VXX, and SPY to hf_data.RData file  
 
-- [x] add lubridate to Imports in DESCRIPTION file  
++ [x] add lubridate to Imports in DESCRIPTION file  
 
-- [x] create function roll_sharpe()
++ [x] create function roll_sharpe()
 
-- [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
++ [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
-- [x] modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
++ [x] modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
 
-- [ ] create function sea_son() for calculating time of day (year) as fraction
++ [ ] create function sea_son() for calculating time of day (year) as fraction
 The time of day can be used as an input into a seasonal model
 
-- [ ] create volume-weighted Hurst and density plots  
++ [ ] create volume-weighted Hurst and density plots  
 https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
-- [ ] create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
++ [ ] create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
 
-- [ ] modify function season_ality() to discard elements corresponding to infrequent observations ?
++ [ ] modify function season_ality() to discard elements corresponding to infrequent observations ?
 
-- [ ] create Rcpp function for fast rolling aggregations over endpoints
++ [ ] create Rcpp function for fast rolling aggregations over endpoints
 
-- [ ] aggregate data to 10-second bars (?)  
++ [ ] aggregate data to 10-second bars (?)  
 
-- [ ] add wiki  
++ [ ] add wiki  
 
-- [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
++ [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
 
-- [ ] add vignette and automatically build vignette  
++ [ ] add vignette and automatically build vignette  
 
-- [ ] introduce unit testing using testthat and devtools: create /tests directory
++ [ ] introduce unit testing using testthat and devtools: create /tests directory
 
-- [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
++ [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
 add argument "open_to_close" with default value TRUE  
 
-- [ ] prove that OHLC skew formula is an estimator of skew  
++ [ ] prove that OHLC skew formula is an estimator of skew  
 Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
 perform simulation to find out  
 https://en.wikipedia.org/wiki/First-hitting-time_model  
 https://en.wikipedia.org/wiki/Wiener_process  
 
-- [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
++ [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
 
-- [ ] add logical arg as option to aggregate data or not
++ [ ] add logical arg as option to aggregate data or not
 
-- [ ] calculate rets from scrubbed data
++ [ ] calculate rets from scrubbed data
 
-- [ ] calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
++ [ ] calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
 
-- [ ] create function to estimate beta from HFreq data
++ [ ] create function to estimate beta from HFreq data
 
-- [ ] create function to forecast skewness
++ [ ] create function to forecast skewness
 Show that variance is predictable over time 
 Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
 so variables other than lagged skewness are required to forecast skewness.
 Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
 
-- [x] rename functions calc_returns(), vari_ance(), skew_ohlc(), sharpe_ohlc() to run_returns(), run_variance(), run_skew(), run_sharpe()  
++ [x] rename functions calc_returns(), vari_ance(), skew_ohlc(), sharpe_ohlc() to run_returns(), run_variance(), run_skew(), run_sharpe()  
 
-- [x] rename function v_wap() to roll_vwap()  
++ [x] rename function v_wap() to roll_vwap()  
 
-- [x] modify function roll_hurst() using TTR::runMax()  
++ [x] modify function roll_hurst() using TTR::runMax()  
 
-- [x] rename function hurst_ohlc() to sharpe_ohlc()  
++ [x] rename function hurst_ohlc() to sharpe_ohlc()  
 
-- [x] rename and modify function calc_rets() to calc_returns(): 
++ [x] rename and modify function calc_rets() to calc_returns(): 
 return single column with name "SPY.returns"
 will break save_rets() and save_rets_ohlc()
 
-- [x] modify function v_wap() to accept argument x_ts  
++ [x] modify function v_wap() to accept argument x_ts  
 
-- [x] remove .Rproj.user directory from GitHub repository
++ [x] remove .Rproj.user directory from GitHub repository
 steps:
 - open Windows PowerShell from GitHub Desktop
 - run: git filter-branch --tree-filter 'rm -f -R .Rproj.user' HEAD
 - run: git push origin master -f
 http://stackoverflow.com/questions/32228841/github-gitignore-adds-folder-previously-not-on-gitignore
 
-- [x] create project website for HighFreq on GitHub Pages using R Markdown  
++ [x] create project website for HighFreq on GitHub Pages using R Markdown  
 
-- [x] rename README.md to .Rmd and add more detailed description similar this to README.md:  
++ [x] rename README.md to .Rmd and add more detailed description similar this to README.md:  
 https://github.com/RcppCore/rcpp-gallery/blob/gh-pages/src/2016-05-27-HRP.Rmd
 use rmarkdown templates
 https://rud.is/b/2016/02/04/alternate-r-markdown-templates/
@@ -179,46 +181,46 @@ http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 ### tasks finished
 
-- [x] create function remove_jumps() to remove overnight close-to-open jumps from OHLC (?)  
++ [x] create function remove_jumps() to remove overnight close-to-open jumps from OHLC (?)  
 
-- [x] replace na.locf() with rutils::na_locf()
++ [x] replace na.locf() with rutils::na_locf()
 
-- [x] rename function extreme_values() to which_extreme()  
++ [x] rename function extreme_values() to which_extreme()  
 
-- [x] rename function price_jumps() to which_jumps()  
++ [x] rename function price_jumps() to which_jumps()  
 
-- [x] add arguments lag and sca_le to function run_returns()
++ [x] add arguments lag and sca_le to function run_returns()
 
-- [x] add argument sca_le to functions run_variance() and roll_variance()
++ [x] add argument sca_le to functions run_variance() and roll_variance()
 
-- [x] fix functions roll_hurst() and roll_sharpe() so they call roll_variance() instead of run_variance()  
++ [x] fix functions roll_hurst() and roll_sharpe() so they call roll_variance() instead of run_variance()  
 in roll_hurst() replace TTR::runMax() with RcppRoll::roll_max()
 
-- [x] remove arguments off_set and roll_end_points from function roll_hurst()
++ [x] remove arguments off_set and roll_end_points from function roll_hurst()
 
-- [x] create function calc_variance() which calculates a single variance number from the output of run_variance()
++ [x] create function calc_variance() which calculates a single variance number from the output of run_variance()
 
-- [x] create function roll_variance() that replicates TTR::volatility()  
++ [x] create function roll_variance() that replicates TTR::volatility()  
 clone run_variance(), but modify it by subtracting the means
 use functions RcppRoll::roll_var() and rutils::roll_sum()
 add correct coefficient co_eff for yang_zhang method
 
-- [x] modify comments for function run_variance() to explain that it's only an indicator, not an estimator
++ [x] modify comments for function run_variance() to explain that it's only an indicator, not an estimator
 
-- [x] modify function run_returns(): remove time scaling, calculate percentage returns  
++ [x] modify function run_returns(): remove time scaling, calculate percentage returns  
 
-- [x] apply Hampel median filter to scrub data: that's what HighFreq does already  
++ [x] apply Hampel median filter to scrub data: that's what HighFreq does already  
 http://dsp.stackexchange.com/questions/26552/what-is-a-hampel-filter-and-how-does-it-work
 update the documentation to reflect that HighFreq already uses Hampel median filter
 
-- [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
++ [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
 use apply_rolling() from utilLib
 
-- [x] rename function roll_agg() to roll_moment(), and its argument esti_mator to mo_ment  
++ [x] rename function roll_agg() to roll_moment(), and its argument esti_mator to mo_ment  
 
-- [x] modify function hurst_ohlc() to calculate (C-O)/(H-L)
++ [x] modify function hurst_ohlc() to calculate (C-O)/(H-L)
 
-- [x] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()  
++ [x] create function roll_hurst() for rolling Hurst exponent, similar to roll_sum()  
 Detrended fluctuation analysis - is it like variance ratios?
 Hurst analysis is related to Detrended fluctuation analysis:
 https://en.wikipedia.org/wiki/Detrended_fluctuation_analysis
@@ -226,71 +228,71 @@ HurstIndex() from PerformanceAnalytics is wrong because it uses range of returns
 variance ratio test
 http://quant.stackexchange.com/questions/7666/using-variance-ratios-to-test-for-mean-reversion
 
-- [x] move function roll_sum() from HighFreq to rutils
++ [x] move function roll_sum() from HighFreq to rutils
 
-- [x] add to function season_ality() in_dex argument
++ [x] add to function season_ality() in_dex argument
 
-- [x] perform bootstrap estimation of standard errors for all the methods in function vari_ance()  
++ [x] perform bootstrap estimation of standard errors for all the methods in function vari_ance()  
 benchmark to random OHLC
 
-- [x] add to function vari_ance() the methods "garman.klass_yz" and "yang.zhang"  
++ [x] add to function vari_ance() the methods "garman.klass_yz" and "yang.zhang"  
 
-- [x] modify functions vari_ance() to accomodate case when open price isn't equal to previous close price - methods "garman.klass_yz" and "yang.zhang"  
++ [x] modify functions vari_ance() to accomodate case when open price isn't equal to previous close price - methods "garman.klass_yz" and "yang.zhang"  
 
-- [x] rename function vol_ohlc() to vari_ance()
++ [x] rename function vol_ohlc() to vari_ance()
 
-- [x] create function to_period()  
++ [x] create function to_period()  
 
-- [x] rename argument agg_fun to esti_mator, in functions agg_regate() and roll_agg()  
++ [x] rename argument agg_fun to esti_mator, in functions agg_regate() and roll_agg()  
 
-- [x] remove calc_method argument from agg_regate() and roll_agg() - instead use "..." argument
++ [x] remove calc_method argument from agg_regate() and roll_agg() - instead use "..." argument
 
-- [x] rename agg_ohlc and roll_agg_ohlc() to agg_regate() and roll_agg()  
++ [x] rename agg_ohlc and roll_agg_ohlc() to agg_regate() and roll_agg()  
 
-- [x] dereference all external functions using "::", i.e. rutils::na_me()
++ [x] dereference all external functions using "::", i.e. rutils::na_me()
 
-- [x] add @export to roxygen code  
++ [x] add @export to roxygen code  
 
-- [x] convert all code from nrow() and ncol() to NROW() and NCOL()  
++ [x] convert all code from nrow() and ncol() to NROW() and NCOL()  
 
-- [x] replace strsplit(colnames(ohlc)[1], split="[.]")[[1]][1] with rutils::na_me(ohlc)  
++ [x] replace strsplit(colnames(ohlc)[1], split="[.]")[[1]][1] with rutils::na_me(ohlc)  
 
-- [x] fix roxygen .Rd documentation file building error - name at end of hf_data.R file was wrong - should be the names of objects, i.e. "SPY", "sym_bol", not the file name  
++ [x] fix roxygen .Rd documentation file building error - name at end of hf_data.R file was wrong - should be the names of objects, i.e. "SPY", "sym_bol", not the file name  
 
-- [x] create data documention  
++ [x] create data documention  
 
-- [x] rename moment_ohlc() and roll_moment_ohlc() to agg_ohlc and roll_agg_ohlc()
++ [x] rename moment_ohlc() and roll_moment_ohlc() to agg_ohlc and roll_agg_ohlc()
 mom_fun to agg_fun
 
-- [x] create function hurst_ohlc() for calculating Hurst exponent from OHLC data
++ [x] create function hurst_ohlc() for calculating Hurst exponent from OHLC data
 OHLC data naturally lends itself to Hurst analysis: ratio of (H-L)/(C-O)
 
-- [x] in moment_ohlc() and roll_moment_ohlc() removed log of ohlc
++ [x] in moment_ohlc() and roll_moment_ohlc() removed log of ohlc
 moment_ohlc() and roll_moment_ohlc() should pass ohlc to skew_ohlc() and vol_ohlc(), etc., not log ohlc
 
-- [x] modify skew_ohlc() and vol_ohlc() to accept ohlc, not log ohlc, and to apply log internally
++ [x] modify skew_ohlc() and vol_ohlc() to accept ohlc, not log ohlc, and to apply log internally
 
-- [x] include rutil package 
++ [x] include rutil package 
 
-- [x] create function for performing daily, weekly, and monthly seasonality aggregations
++ [x] create function for performing daily, weekly, and monthly seasonality aggregations
 
-- [x] rename functions run_*() to roll_*()
++ [x] rename functions run_*() to roll_*()
 
-- [x] rename save_OHLC() to save_scrub_agg()
++ [x] rename save_OHLC() to save_scrub_agg()
 
-- [x] in save_rets_OHLC() update documentation
++ [x] in save_rets_OHLC() update documentation
 
-- [x] in save_OHLC() combine sapply loops into one
++ [x] in save_OHLC() combine sapply loops into one
 
-- [x] in save_OHLC() and save_rets() pass scrub params to scrub_agg
++ [x] in save_OHLC() and save_rets() pass scrub params to scrub_agg
 
-- [x] add timezone to argument list
++ [x] add timezone to argument list
 
-- [x] create function save_TAQ()
++ [x] create function save_TAQ()
 	saves scrubbed TAQ and/or OHLC data in daily files
 	similar to save_OHLC, but doesn't aggregate and saves into multiple files
 
-- [x] create function calc_rets()
++ [x] create function calc_rets()
 	calculate returns of time series
 
 created function save_rets() (similar to save_OHLC): 
@@ -303,27 +305,27 @@ created function save_rets_OHLC()
 
 ### tasks deprecated
 
-- [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
++ [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]
 instead of:
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
 
-- [ ] modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
++ [ ] modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
 
-- [ ] subtract mean in functions run_variance() and run_skew() - no  
++ [ ] subtract mean in functions run_variance() and run_skew() - no  
 
-- [ ] convert function season_ality() to use split.xts() (?)  
++ [ ] convert function season_ality() to use split.xts() (?)  
 
-- [ ] replace caTools with TTR functions (?)  
++ [ ] replace caTools with TTR functions (?)  
 only runquantile() is called from caTools  
 but not easy to replace runquantile(), because no equivalent TTR function  
 would require rewriting extreme_values() and price_jumps(), and then benchmarking  
 
-- [ ] use .subset_xts() (?)
++ [ ] use .subset_xts() (?)
 
-- [ ] rename save_rets_OHLC to rets_OHLC (?)  
++ [ ] rename save_rets_OHLC to rets_OHLC (?)  
 
-- [ ] calculate volume-weighted moments and compare them to standard moments
++ [ ] calculate volume-weighted moments and compare them to standard moments
 add volume-weighting to vol_ohlc() and skew_ohlc()
 
 
