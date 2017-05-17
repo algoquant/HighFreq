@@ -180,7 +180,7 @@ var_rolling <- (6.5*60*60)*roll_variance(oh_lc=SPY, calc_method="rogers_satchell
 var_rolling <- var_rolling[end_points, ]
 
 ### calculate running and rolling SPY skew
-skew_running <- run_skew(oh_lc=SPY)
+skew_running <- (6.5*60*60)*run_skew(oh_lc=SPY)
 skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
 
 # calculate intraday seasonality of skew
@@ -282,7 +282,7 @@ colnames(var_running) <- "variance"
 # colnames(var_diff) <- "variance.diff"
 colnames(var_rolling) <- "variance.WA5"
 
-skew_running <- run_skew(oh_lc=SPY)
+skew_running <- (6.5*60*60)*run_skew(oh_lc=SPY)
 # skew_diff <- rutils::diff_xts(x_ts=skew_running)
 skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
 colnames(skew_running) <- "skew"
@@ -444,7 +444,7 @@ ran_ge <- range(da_ta[inter_val, 2])
 add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 
 # rolling volume-weighted skewness
-skew_rolling <- roll_moment(oh_lc=SPY[inter_val], mo_ment="run_skew", win_dow=10)
+skew_rolling <- roll_vwap(oh_lc=SPY[inter_val], x_ts=run_skew(oh_lc=SPY[inter_val]), win_dow=10)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- na.locf(skew_rolling)

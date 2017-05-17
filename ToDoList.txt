@@ -42,9 +42,14 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] replace xts::.subset_xts() with brackets operator []
++ [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
+deprecate roll_moment() because it's similar to roll_vwap() ?
+
++ [x] replace xts::.subset_xts() with brackets operator []
 
 + [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
+
++ [x] fix bug in function run_variance() for calc_method="yang_zhang": remove win_dow from formula for co_eff.
 
 + [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
@@ -57,6 +62,9 @@ use package meboot for maximum entropy bootstrap of time series ?
 https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] add function for calculating microprice  
+
++ [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
+The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
 + [x] add volatility, drift rate, and convexity correction to functions random_taq() and random_ohlc()  
 

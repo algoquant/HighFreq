@@ -850,7 +850,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
          "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
                             0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                             (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
-         "yang_zhang"={co_eff <- 0.34/(1.34 + (win_dow + 1)/(win_dow - 1))
+         "yang_zhang"={co_eff <- 0.34/2.34
                             (oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
                             co_eff*(oh_lc[, 1]-oh_lc[, 4])^2 +
                             (1-co_eff)*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
@@ -1033,7 +1033,8 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], win_dow) {
   volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5], win_dow=win_dow)
   roll_vwap <- roll_vwap/volume_rolling
   roll_vwap[is.na(roll_vwap)] <- 0
-  colnames(roll_vwap) <- paste0(rutils::na_me(oh_lc), ".VWAP")
+  # colnames(roll_vwap) <- paste0(rutils::na_me(oh_lc), ".VWAP")
+  colnames(roll_vwap) <- colnames(oh_lc)
   roll_vwap
 }  # end roll_vwap
 
@@ -1434,13 +1435,11 @@ roll_apply <- function(x_ts, agg_fun="run_variance", win_dow=11,
   agg_regations <- if(by_columns)
     sapply(x_ts, function(col_umn)
       sapply(2:len_gth, function(in_dex)
-        agg_fun(.subset_xts(col_umn,
-                            start_points[in_dex]:end_points[in_dex]), ...)
+        agg_fun(col_umn[start_points[in_dex]:end_points[in_dex]], ...)
       ))  # end sapply
   else {  # not by_columns
     agg_regations <- sapply(2:len_gth, function(in_dex)
-      agg_fun(.subset_xts(x_ts,
-                          start_points[in_dex]:end_points[in_dex]), ...)
+      agg_fun(x_ts[start_points[in_dex]:end_points[in_dex]], ...)
     )  # end sapply
     # coerce agg_regations into matrix and transpose it
     if (is.vector(agg_regations))
