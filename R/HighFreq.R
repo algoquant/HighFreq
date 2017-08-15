@@ -148,11 +148,11 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
 
 remove_jumps <- function(oh_lc) {
   # find time index of the periods greater than 60 seconds
-  peri_ods <- rutils::diff_it(as.vector(xts::.index(oh_lc)))
+  peri_ods <- rutils::diff_it(as.numeric(xts::.index(oh_lc)))
   which_periods <- which(peri_ods > 60)
   # calculate cumulative sum of overnight price jumps
   jump_s <- numeric(NROW(oh_lc))
-  jump_s[which_periods] <- as.vector(oh_lc[which_periods, 1]) - as.vector(oh_lc[which_periods-1, 4])
+  jump_s[which_periods] <- as.numeric(oh_lc[which_periods, 1]) - as.numeric(oh_lc[which_periods-1, 4])
   jump_s <- cumsum(jump_s)
   # subtract overnight price jumps from OHLC
   oh_lc[, 1:4] <- coredata(oh_lc[, 1:4]) - jump_s
@@ -266,7 +266,7 @@ run_returns <- function(x_ts, lag=1, col_umn=4, sca_le=TRUE) {
 
 which_extreme <- function(x_ts, win_dow=51, vol_mult=2) {
 # calculate volatility as rolling quantile
-  quan_tile <- caTools::runquantile(x=abs(as.vector(x_ts)), k=win_dow,
+  quan_tile <- caTools::runquantile(x=abs(as.numeric(x_ts)), k=win_dow,
                         probs=0.9, endrule="constant", align="center")
 #  quan_tile <- xts(quan_tile, order.by=index(x_ts))
 #  colnames(quan_tile) <- "volat"
@@ -331,7 +331,7 @@ which_extreme <- function(x_ts, win_dow=51, vol_mult=2) {
 
 which_jumps <- function(x_ts, win_dow=51, vol_mult=2) {
 # calculate simple returns
-  re_turns <- rutils::diff_it(as.vector(x_ts))
+  re_turns <- rutils::diff_it(as.numeric(x_ts))
 #  re_turns[1] <- 0
 #  colnames(re_turns) <- "diffs"
   rets_advanced <- rutils::lag_it(re_turns, -1)
@@ -1209,7 +1209,7 @@ roll_variance <- function(oh_lc, win_dow=11, calc_method="yang_zhang", sca_le=TR
 #'    (default is \code{"yang_zhang"})
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the 
 #'   number of seconds in each period? (default is \code{TRUE})
-#' @return A \emph{numeric} value equal to the variance.
+#' @return A single \emph{numeric} value equal to the variance.
 #' @details The function \code{calc_variance()} calculates the variance estimate
 #'   from \emph{OHLC} prices, using several different variance estimation
 #'   methods based on the range of \emph{OHLC} prices.
@@ -1254,7 +1254,7 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
     in_dex <- rep(1, NROW(oh_lc))
   oh_lc <- log(oh_lc[, 1:4])
   switch(calc_method,
-         "close"={var(rutils::diff_it(as.vector(oh_lc[, 4]))/in_dex)},
+         "close"={var(rutils::diff_it(as.numeric(oh_lc[, 4]))/in_dex)},
          "garman_klass"={sum((0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                           (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
          "rogers_satchell"={sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +

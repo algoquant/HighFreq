@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-11-20" />
+<meta name="date" content="2017-05-25" />
 
 <title>Estimating Running and Rolling Statistics Over Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Estimating Running and Rolling Statistics Over Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-11-20</em></h4>
+<h4 class="date"><em>2017-05-25</em></h4>
 
 
 
@@ -90,9 +90,7 @@ prices_rolling &lt;-<span class="st"> </span>rutils::<span class="kw">roll_sum</
        <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate rolling volume-weighted average closing prices using package <em>HighFreq</em>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># rolling volume-weighted average prices</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># rolling volume-weighted average prices</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">10</span>
 prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">win_dow=</span>win_dow)
 <span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span>
@@ -103,18 +101,17 @@ prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<
        <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate variance from <em>OHLC</em> prices using different range estimation methods:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># calculate variance of SPY using method yang_zhang</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate variance of SPY using method yang_zhang</span>
 <span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
 vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*HighFreq::<span class="kw">calc_variance</span>(SPY, <span class="dt">calc_method=</span><span class="st">&quot;yang_zhang&quot;</span>)
 <span class="co"># calculate variance of SPY without accounting for overnight jumps</span>
-vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*HighFreq::<span class="kw">calc_variance</span>(SPY, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)</code></pre></div>
+vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*HighFreq::<span class="kw">calc_variance</span>(SPY, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
+<span class="co"># calcuate daily intraday volatilities</span>
+var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">period.apply</span>(<span class="dt">x=</span>HighFreq::SPY, <span class="dt">INDEX=</span>end_days, HighFreq::calc_variance)
+<span class="kw">index</span>(var_daily) &lt;-<span class="st"> </span>lubridate::<span class="kw">floor_date</span>(<span class="kw">index</span>(var_daily), <span class="st">&quot;day&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate rolling variance and skew from minutely <em>OHLC</em> prices:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># calculate running variance using method rogers_satchell</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate running variance using method rogers_satchell</span>
 <span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
 var_running &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY, 
                                           <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
@@ -136,9 +133,7 @@ skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_ro
 <span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate rolling variance and skew using function <em>roll_moment()</em> (produces same result as above):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># calculate rolling volume-weighted average variance and skew</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate rolling volume-weighted average variance and skew</span>
 win_dow &lt;-<span class="st"> </span><span class="dv">21</span>
 var_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">win_dow=</span>win_dow)
 skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>SPY, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>, <span class="dt">win_dow=</span>win_dow)
@@ -146,9 +141,7 @@ skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_ro
 <span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate daily average open to close variance and skew from minutely <em>OHLC</em> prices:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># calculate daily average open to close variance</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate daily average open to close variance</span>
 var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*xts::<span class="kw">apply.daily</span>(<span class="dt">x=</span>SPY, <span class="dt">FUN=</span>agg_regate, 
                               <span class="dt">mo_ment=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
 <span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> &quot;SPY.Var&quot;</span>
@@ -162,9 +155,7 @@ inter_val &lt;-<span class="st"> &quot;2013-10/2013-12&quot;</span>
 <span class="kw">chart_Series</span>(skew_daily[inter_val], <span class="dt">name=</span><span class="st">&quot;SPY Skew&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Calculate intraday seasonality of trading volumes and variance:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(SPY))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(SPY))
 <span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> &quot;SPY.volume_seasonal&quot;</span>
 <span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of volume&quot;</span>)
 var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="fl">6.5</span>*<span class="dv">60</span>*<span class="dv">60</span>^<span class="dv">2</span>)*<span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>SPY))
@@ -172,9 +163,7 @@ var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(
 <span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of variance&quot;</span>)</code></pre></div>
 <p><br></p>
 <p>Apply an aggregation function over a rolling lookback window and the end points of an <em>OHLC</em> time series:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># extract a single day of SPY data</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># extract a single day of SPY data</span>
 x_ts &lt;-<span class="st"> </span>SPY[<span class="st">&quot;2012-02-13&quot;</span>]
 win_dow &lt;-<span class="st"> </span><span class="dv">11</span>
 <span class="co"># calculate the rolling sums of the columns of x_ts</span>
