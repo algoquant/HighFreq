@@ -17,11 +17,11 @@ options(max.print=80)
 rm(list=ls())  # remove all objects
 
 # install HighFreq from github
-install.packages("devtools")
-library(devtools)
-install_github(repo="algoquant/HighFreq")
+# install.packages("devtools")
+# library(devtools)
+devtools::install_github(repo="algoquant/HighFreq")
 
-# install HighFreq using install.packages()
+# install HighFreq from local directory using install.packages()
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source", lib="C:/Users/Jerzy/Downloads")
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source", lib="C:/Users/Jerzy/Documents/R/win-library/3.2")
@@ -40,7 +40,7 @@ output_dir <- "C:/Develop/data/hfreq/scrub/"
 
 
 ###########
-# process single day of data
+### process single day of high frequency data
 
 # load list of symbols from file in cwd
 # sym_bols <- read.csv(file="etf_list_hf.csv")
@@ -68,7 +68,7 @@ chart_Series(oh_lc, name=sym_bol)
 
 
 ###########
-# process TAQ data using package HighFreq: load TAQ data, aggregate to OHLC, and save to file
+### process TAQ data using package HighFreq: load TAQ data, aggregate to OHLC, and save to file
 
 # aggregate TAQ data to 15-min OHLC bar data, for a single symbol, and save to file
 save_scrub_agg(sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
@@ -111,10 +111,10 @@ chart_xts(vol_at)
 
 
 ###########
-# estimating rolling moments using package HighFreq
+### estimating rolling moments using package HighFreq
 library(HighFreq)
 
-win_dow <- 10
+look_back <- 10
 
 ### daily open to close variance and skew
 volume_daily <- xts::apply.daily(x=Vo(SPY), FUN=sum)
@@ -147,7 +147,7 @@ colnames(hurst_daily) <- paste0(sym_bol, ".autocorr")
 x11(width=6, height=4)
 inter_val <- "2013-06-01/"
 chart_Series(var_daily[inter_val], name=paste(sym_bol, "variance"))
-chart_Series(rutils::roll_sum(hurst_daily, win_dow=10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
+chart_Series(rutils::roll_sum(hurst_daily, look_back=10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
 abline(h=0.5, col="blue", lwd=2)
 
 # calculate minutely returns of OHLC data
@@ -159,8 +159,8 @@ num_agg <- n_row %/% 10
 end_points <- c(0, n_row-10*num_agg + 10*(0:num_agg))
 
 # rolling average prices
-win_dow <- 10
-prices_rolling <- rutils::roll_sum(SPY[, 1], win_dow=win_dow)/win_dow
+look_back <- 10
+prices_rolling <- rutils::roll_sum(SPY[, 1], look_back=look_back)/look_back
 colnames(prices_rolling) <- paste0(sym_bol, ".Prices")
 chart_Series(SPY["2013-11-12"], name=paste(sym_bol, "Prices"))
 add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
@@ -170,18 +170,18 @@ legend("top", legend=c("SPY prices", "average prices"),
 
 
 ### rolling volume-weighted returns
-returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
+returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, look_back=look_back)
 returns_rolling <- returns_rolling[end_points, ]
 
 ### calculate rolling SPY variance without overnight jumps
 var_rolling <- (6.5*60*60)*roll_variance(oh_lc=SPY, calc_method="rogers_satchell")
 # calculate rolling SPY variance
-# var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
+# var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, look_back=look_back)
 var_rolling <- var_rolling[end_points, ]
 
 ### calculate running and rolling SPY skew
 skew_running <- (6.5*60*60)*run_skew(oh_lc=SPY)
-skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
+skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, look_back=look_back)
 
 # calculate intraday seasonality of skew
 skew_seasonal <- season_ality(skew_running)
@@ -192,7 +192,7 @@ chart_Series(var_rolling[inter_val], name=colnames(var_rolling))
 
 ### calculate running and rolling Sharpe ratio
 sharpe_running <- run_sharpe(oh_lc=SPY)
-sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
+sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, look_back=look_back)
 
 
 ### calculate rolling Hurst exponents using different methods
@@ -201,7 +201,7 @@ sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
 oh_lc <- HighFreq::random_ohlc(in_dex=zoo::index(SPY["2009-03"]))
 
 # calculate rolling Hurst for random prices using ratio of price range divided by standard deviation of returns
-hurst_rolling <- roll_hurst(oh_lc=oh_lc, win_dow=win_dow)
+hurst_rolling <- roll_hurst(oh_lc=oh_lc, look_back=look_back)
 
 # remove overnight price jumps from SPY in March 2009
 oh_lc <- remove_jumps(SPY["2009-03"])
@@ -215,21 +215,21 @@ bar <- quantile(foo, probs=c(0.997, 0.003))
 bar <- which(foo > bar[1] | foo < bar[2])
 
 # calculate rolling Hurst for SPY in March 2009
-hurst_rolling <- roll_hurst(oh_lc=oh_lc, win_dow=win_dow)
-hurst_rolling <- roll_hurst(oh_lc=SPY["2009-03"], win_dow=win_dow)
+hurst_rolling <- roll_hurst(oh_lc=oh_lc, look_back=look_back)
+hurst_rolling <- roll_hurst(oh_lc=SPY["2009-03"], look_back=look_back)
 chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name=paste("SPY", "hurst_rolling"))
 
 # old version of roll_hurst(): calculate Hurst over end points of SPY
-hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=11, off_set=0, roll_end_points=TRUE)
+hurst_rolling <- roll_hurst(oh_lc=SPY, look_back=11, off_set=0, roll_end_points=TRUE)
 # calculate a series of rolling hurst values using argument off_set
-hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, win_dow=11, roll_end_points=TRUE)
+hurst_rolling <- lapply(0:9, roll_hurst, oh_lc=SPY, look_back=11, roll_end_points=TRUE)
 hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
 # remove daily warmup periods
 hurst_rolling <- hurst_rolling["T09:41:00/T16:00:00"]
 
 # calculate rolling Hurst using ratio of range variance estimators
 # old version of roll_hurst(): calculate hurst_rolling by applying roll_hurst() over argument off_set
-hurst_rolling <- lapply(0:(win_dow-1), roll_hurst, oh_lc=SPY, win_dow=win_dow)
+hurst_rolling <- lapply(0:(look_back-1), roll_hurst, oh_lc=SPY, look_back=look_back)
 hurst_rolling <- rutils::do_call_rbind(hurst_rolling)
 # merge and remove duplicate trailing values
 dupli_cated <- hurst_rolling[duplicated(index(hurst_rolling)), ]
@@ -260,7 +260,7 @@ chart_Series(x=hurst_rolling["2012-02-13"],
 ### rolling autocorrelation
 roll_autocorr <- returns_running*lag(returns_running)
 roll_autocorr[1, ] <- 0
-roll_autocorr <- rutils::roll_sum(roll_autocorr[, 1], win_dow=10)/10
+roll_autocorr <- rutils::roll_sum(roll_autocorr[, 1], look_back=10)/10
 roll_autocorr[1:10, ] <- 0
 colnames(roll_autocorr) <- paste0(sym_bol, ".autocorr")
 roll_autocorr <- roll_autocorr[end_points, ]
@@ -268,40 +268,40 @@ roll_autocorr <- roll_autocorr[end_points, ]
 
 ### design matrix called SPY_design containing columns of aggregations
 
-win_dow <- 5
+look_back <- 5
 returns_running <- run_returns(x_ts=SPY)
-returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, win_dow=win_dow)
+returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, look_back=look_back)
 colnames(returns_running) <- "returns"
 colnames(returns_rolling) <- "returns.WA5"
 
 var_running <- (6.5*60*60)*run_variance(oh_lc=SPY)
 # var_running <- run_variance(oh_lc=SPY, calc_method="rogers_satchell")
 # var_diff <- rutils::diff_xts(x_ts=var_running)
-var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, win_dow=win_dow)
+var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, look_back=look_back)
 colnames(var_running) <- "variance"
 # colnames(var_diff) <- "variance.diff"
 colnames(var_rolling) <- "variance.WA5"
 
 skew_running <- (6.5*60*60)*run_skew(oh_lc=SPY)
 # skew_diff <- rutils::diff_xts(x_ts=skew_running)
-skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, win_dow=win_dow)
+skew_rolling <- roll_vwap(oh_lc=SPY, x_ts=skew_running, look_back=look_back)
 colnames(skew_running) <- "skew"
 # colnames(skew_diff) <- "skew.diff"
 colnames(skew_rolling) <- "skew.WA5"
 
 sharpe_running <- run_sharpe(oh_lc=SPY)
-sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, win_dow=win_dow)
+sharpe_rolling <- roll_vwap(oh_lc=SPY, x_ts=sharpe_running, look_back=look_back)
 colnames(sharpe_running) <- "sharpe_running"
 colnames(sharpe_rolling) <- "sharpe_running.WA5"
 
-sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=win_dow)
+sharpe_rolling <- roll_sharpe(oh_lc=SPY, look_back=look_back)
 # sharpe_diff <- rutils::diff_xts(x_ts=sharpe_rolling)
 colnames(sharpe_rolling) <- "sharpe_rolling"
 # colnames(sharpe_diff) <- "sharpe.diff"
 # x11()
 # chart_Series(sharpe_rolling["2013-11-12", ], name=paste("SPY", "sharpe_rolling"))
 
-hurst_rolling <- roll_hurst(oh_lc=SPY, win_dow=win_dow)
+hurst_rolling <- roll_hurst(oh_lc=SPY, look_back=look_back)
 # hurst_diff <- rutils::diff_xts(x_ts=hurst_rolling)
 colnames(hurst_rolling) <- "hurst_rolling"
 # colnames(hurst_diff) <- "hurst.diff"
@@ -371,21 +371,21 @@ chart_Series(x=hurst_seasonal[-(1:10), ],
 # below is for run_hurst() which isn't really true Hurst
 hurst_seasonal <- season_ality(run_hurst(oh_lc=SPY[inter_val, 1:4]))
 hurst_seasonal <- hurst_seasonal[-NROW(hurst_seasonal)]
-colnames(hurst_seasonal) <- paste0(rutils::sym_bol, ".seasonal")
+colnames(hurst_seasonal) <- paste0(sym_bol, ".seasonal")
 season_data <- hurst_seasonal
 
 season_autocorr <- returns_running*lag(returns_running)
 season_autocorr[1, ] <- 0
-season_autocorr <- returns_running*lag(rutils::roll_sum(returns_running, win_dow=5)/5)
+season_autocorr <- returns_running*lag(rutils::roll_sum(returns_running, look_back=5)/5)
 season_autocorr[1:5, ] <- 0
 season_autocorr <- season_ality(season_autocorr)
 colnames(season_autocorr) <- paste0(sym_bol, ".season_autocorr")
-season_data <- rutils::roll_sum(season_autocorr, win_dow=5)/5
+season_data <- rutils::roll_sum(season_autocorr, look_back=5)/5
 
 # daily Hurst exponents
 hurst_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_hurst")
 hurst_daily <- xts::apply.daily(x=SPY, FUN=function(x, ...) abs(agg_regate(oh_lc=x, ...)), mo_ment="run_hurst")
-colnames(hurst_daily) <- paste0(rutils::sym_bol, ".Hurst.daily")
+colnames(hurst_daily) <- paste0(sym_bol, ".Hurst.daily")
 chart_Series(roll_sum(hurst_daily, 10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
 abline(h=0.5, col="blue", lwd=2)
 
@@ -444,7 +444,7 @@ ran_ge <- range(da_ta[inter_val, 2])
 add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 
 # rolling volume-weighted skewness
-skew_rolling <- roll_vwap(oh_lc=SPY[inter_val], x_ts=run_skew(oh_lc=SPY[inter_val]), win_dow=10)
+skew_rolling <- roll_vwap(oh_lc=SPY[inter_val], x_ts=run_skew(oh_lc=SPY[inter_val]), look_back=10)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- na.locf(skew_rolling)
@@ -501,7 +501,7 @@ boot_strap <- sapply(1:100, function(x) {
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
 # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(HighFreq::roll_variance(oh_lc, win_dow=win_dow, calc_method=meth_od))
+    sum(HighFreq::roll_variance(oh_lc, look_back=look_back, calc_method=meth_od))
   })  # end sapply
 })  # end sapply
 
@@ -514,7 +514,7 @@ boot_strap <- sapply(1:100, function(x) {
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
   # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(na.omit(TTR::volatility(oh_lc, n=win_dow, N=1, calc=meth_od))^2)
+    sum(na.omit(TTR::volatility(oh_lc, n=look_back, N=1, calc=meth_od))^2)
   })  # end sapply
 })  # end sapply
 
@@ -561,41 +561,41 @@ var_rolling <- (6.5*60*60)*roll_variance(SPY)
 
 # extract a single day of SPY data
 price_s <- SPY["2012-02-13"]
-win_dow <- 11
+look_back <- 11
 library(PerformanceAnalytics)  # load package PerformanceAnalytics
 # define aggregation function that returns a vector of values
 agg_function <- function(x_ts)  c(max(x_ts[, 1]), min(x_ts[, 4]))
 agg_function <- function(x_ts)  sapply(x_ts, mean)
 agg_function(price_s)
 # perform aggregations for vector-valued aggregation function
-foo <- xts:::rollapply.xts(price_s, FUN=agg_function, width=win_dow, align="right", by.column=FALSE)
-bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow)
+foo <- xts:::rollapply.xts(price_s, FUN=agg_function, width=look_back, align="right", by.column=FALSE)
+bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, look_back=look_back)
 # perform aggregations for scalar-valued aggregation function
-foo <- xts:::rollapply.xts(price_s, FUN=sum, width=win_dow, align="right")
-bar <- HighFreq::roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+foo <- xts:::rollapply.xts(price_s, FUN=sum, width=look_back, align="right")
+bar <- HighFreq::roll_apply(price_s, agg_fun=sum, look_back=look_back, by_columns=TRUE)
 
 # define end points at 10-minute intervals (SPY is minutely bars)
-end_points <- rutils::end_points(price_s, inter_val=win_dow)
+end_points <- rutils::calc_endpoints(price_s, inter_val=look_back)
 foo <- xts::period.apply(price_s[, 1], FUN=sum, INDEX=end_points)
-bar <- HighFreq::roll_apply(price_s[, 1], agg_fun=sum, win_dow=2, end_points=end_points)
+bar <- HighFreq::roll_apply(price_s[, 1], agg_fun=sum, look_back=2, end_points=end_points)
 foo <- xts::period.apply(price_s, FUN=agg_function, INDEX=end_points)
-bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=2, end_points=end_points)
+bar <- HighFreq::roll_apply(price_s, agg_fun=agg_function, look_back=2, end_points=end_points)
 
 # perform aggregations over length of end_points
-foo_bar <- PerformanceAnalytics::apply.rolling(price_s, FUN=agg_function, width=win_dow)
+foo_bar <- PerformanceAnalytics::apply.rolling(price_s, FUN=agg_function, width=look_back)
 head(cbind(foo, bar, foo_bar), 14)
 
 # benchmark the speed of the functionals
 library(microbenchmark)
 summary(microbenchmark(
-  roll_apply=HighFreq::roll_apply(price_s, agg_fun=sum, win_dow=win_dow, by_columns=TRUE),
-  rollapply=xts:::rollapply.xts(price_s, FUN=sum, width=win_dow, align="right"), 
-  apply.rolling=apply.rolling(price_s, FUN=sum, width=win_dow), 
+  roll_apply=HighFreq::roll_apply(price_s, agg_fun=sum, look_back=look_back, by_columns=TRUE),
+  rollapply=xts:::rollapply.xts(price_s, FUN=sum, width=look_back, align="right"), 
+  apply.rolling=apply.rolling(price_s, FUN=sum, width=look_back), 
   times=10))[, c(1, 4, 5)]
 
 summary(microbenchmark(
-  roll_apply=HighFreq::roll_apply(price_s, agg_fun=agg_function, win_dow=win_dow),
-  rollapply=xts:::rollapply.xts(price_s, FUN=agg_function, width=win_dow, align="right", by.column=FALSE), 
+  roll_apply=HighFreq::roll_apply(price_s, agg_fun=agg_function, look_back=look_back),
+  rollapply=xts:::rollapply.xts(price_s, FUN=agg_function, width=look_back, align="right", by.column=FALSE), 
   times=10))[, c(1, 4, 5)]
 
 

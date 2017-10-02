@@ -2,7 +2,7 @@
 #  # load HighFreq
 #  library(HighFreq)
 #  # create local copy of SPY TAQ data
-#  ta_q <- SPY_TAQ
+#  ta_q <- HighFreq::SPY_TAQ
 #  # convert timezone of index to New_York
 #  index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 #  # subset data to NYSE trading hours
@@ -11,18 +11,18 @@
 #  ta_q <- ta_q[!duplicated(index(ta_q)), ]
 #  # scrub quotes with suspect bid-offer spreads
 #  bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
-#  sus_pect <- which_extreme(bid_offer, win_dow=win_dow, vol_mult=vol_mult)
+#  sus_pect <- which_extreme(bid_offer, look_back=look_back, vol_mult=vol_mult)
 #  # remove suspect values
 #  ta_q <- ta_q[!sus_pect]
 #  # calculate mid prices
 #  mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 #  # replace whole rows containing suspect price jumps with NA, and perform locf()
-#  ta_q[which_jumps(mid_prices, win_dow=31, vol_mult=1.0), ] <- NA
+#  ta_q[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 #  ta_q <- na.locf(ta_q)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # scrub and aggregate a single day of SPY TAQ data to OHLC
-#  oh_lc <- HighFreq::scrub_agg(ta_q=SPY_TAQ)
+#  oh_lc <- HighFreq::scrub_agg(ta_q=HighFreq::SPY_TAQ)
 #  chart_Series(oh_lc, name=sym_bol)
 
 ## ----eval=FALSE----------------------------------------------------------

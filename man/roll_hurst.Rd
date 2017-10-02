@@ -2,15 +2,15 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_hurst}
 \alias{roll_hurst}
-\title{Calculate a time series of \emph{Hurst} exponents over a rolling lookback
+\title{Calculate a time series of \emph{Hurst} exponents over a rolling look-back
 window.}
 \usage{
-roll_hurst(oh_lc, win_dow = 11)
+roll_hurst(oh_lc, look_back = 11)
 }
 \arguments{
 \item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{win_dow}{the size of the lookback window, equal to the number of bars
+\item{look_back}{the size of the look-back window, equal to the number of rows
 of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
@@ -18,34 +18,34 @@ An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{
-Calculate a time series of \emph{Hurst} exponents over a rolling lookback
+Calculate a time series of \emph{Hurst} exponents over a rolling look-back
 window.
 }
 \details{
 The function \code{roll_hurst()} calculates a time series of
-  \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling lookback
+  \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling look-back
   window.
-  
+
   The \emph{Hurst} exponent is defined as the logarithm of the ratio of the
   price range, divided by the standard deviation of returns, and divided by
   the logarithm of the window length.
-  
-  The function \code{roll_hurst()} doesn't use the same definition as the 
+
+  The function \code{roll_hurst()} doesn't use the same definition as the
   rescaled range definition of the \emph{Hurst} exponent.
-  First, because the price range is calculated using \emph{High} and 
+  First, because the price range is calculated using \emph{High} and
   \emph{Low} prices, which produces bigger range values, and higher
   \emph{Hurst} exponent estimates.
   Second, because the \emph{Hurst} exponent is estimated using a single
   aggregation window, instead of multiple windows in the rescaled range
   definition.
-  
+
   The rationale for using a different definition of the \emph{Hurst} exponent
   is that it's designed to be a technical indicator for use as input into
   trading models, rather than an estimator for statistical analysis.
 }
 \examples{
 # calculate rolling Hurst for SPY in March 2009
-hurst_rolling <- roll_hurst(oh_lc=SPY["2009-03"], win_dow=11)
+hurst_rolling <- roll_hurst(oh_lc=HighFreq::SPY["2009-03"], look_back=11)
 chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 }
 

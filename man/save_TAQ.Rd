@@ -6,7 +6,7 @@
 it to multiple \sQuote{\code{*.RData}} files.}
 \usage{
 save_taq(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", win_dow = 51, vol_mult = 2,
+  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
   tzone = "America/New_York")
 }
 \arguments{
@@ -18,14 +18,15 @@ input \sQuote{\code{*.RData}} files.}
 \item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{win_dow}{number of data points for estimating rolling quantile.}
+\item{look_back}{number of data points in rolling look-back window for
+estimating rolling quantile.}
 
 \item{vol_mult}{quantile multiplier.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \emph{TAQ} time series in \emph{xts} format.
+a \emph{TAQ} time series in \emph{xts} format.
 }
 \description{
 Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save

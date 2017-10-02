@@ -29,7 +29,7 @@ The function \code{season_ality()} calculates the mean of values
 }
 \examples{
 # calculate running variance of each minutely OHLC bar of data
-x_ts <- run_variance(SPY)
+x_ts <- run_variance(HighFreq::SPY)
 # remove overnight variance spikes at "09:31"
 in_dex <- format(index(x_ts), "\%H:\%M")
 x_ts <- x_ts[!in_dex=="09:31", ]

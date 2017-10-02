@@ -7,7 +7,7 @@ single symbol, and save the \emph{OHLC} time series to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
 save_scrub_agg(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", win_dow = 51, vol_mult = 2,
+  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
   period = "minutes", tzone = "America/New_York")
 }
 \arguments{
@@ -19,7 +19,8 @@ input \sQuote{\code{*.RData}} files.}
 \item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{win_dow}{number of data points for estimating rolling quantile.}
+\item{look_back}{number of data points in rolling look-back window for
+estimating rolling quantile.}
 
 \item{vol_mult}{quantile multiplier.}
 

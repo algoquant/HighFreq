@@ -8,7 +8,7 @@ install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
 R CMD INSTALL C:\Develop\R\HighFreq
 # Install package from github
 devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
-# build package reference manual from *.Rd files
+# build vignette package reference manual from *.Rd files
 system("R CMD Rd2pdf C:/Develop/R/HighFreq")
 R CMD Rd2pdf C:\Develop\R\HighFreq
 
@@ -42,14 +42,12 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
-deprecate roll_moment() because it's similar to roll_vwap() ?
++ [x] create functional roll_backtest() similar to roll_apply(), but accepting two functions as arguments
 
-+ [x] replace xts::.subset_xts() with brackets operator []
++ [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
+deprecate function roll_moment() because it's similar to roll_vwap() ?
 
 + [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
-
-+ [x] fix bug in function run_variance() for calc_method="yang_zhang": remove win_dow from formula for co_eff.
 
 + [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
@@ -65,6 +63,12 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] replace "win_dow" with "look_back"
+
++ [x] fix bug in function run_variance() for calc_method="yang_zhang": remove win_dow from formula for co_eff.
+
++ [x] replace xts::.subset_xts() with brackets operator []
 
 + [x] add volatility, drift rate, and convexity correction to functions random_taq() and random_ohlc()  
 
@@ -221,7 +225,7 @@ add correct coefficient co_eff for yang_zhang method
 http://dsp.stackexchange.com/questions/26552/what-is-a-hampel-filter-and-how-does-it-work
 update the documentation to reflect that HighFreq already uses Hampel median filter
 
-+ [x] create function roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
++ [x] create functional roll_apply(), similar to xts:::rollapply.xts() and xts::period.apply()  
 use apply_rolling() from utilLib
 
 + [x] rename function roll_agg() to roll_moment(), and its argument esti_mator to mo_ment  

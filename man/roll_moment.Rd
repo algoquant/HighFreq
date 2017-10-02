@@ -5,18 +5,17 @@
 \title{Calculate a vector of statistics over an \emph{OHLC} time series, and
 calculate a rolling mean over the statistics.}
 \usage{
-roll_moment(oh_lc, mo_ment = "run_variance", win_dow = 11,
+roll_moment(oh_lc, mo_ment = "run_variance", look_back = 11,
   weight_ed = TRUE, ...)
 }
 \arguments{
 \item{oh_lc}{\emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
-\item{mo_ment}{\emph{character} string representing a function for
-estimating statistics of a single bar of \emph{OHLC} data, such as
-volatility, skew, and higher moments.}
+\item{mo_ment}{the name of the function for estimating statistics of a single
+row of \emph{OHLC} data, such as volatility, skew, and higher moments.}
 
-\item{win_dow}{the size of the lookback window, equal to the number of bars
+\item{look_back}{the size of the look-back window, equal to the number of rows
 of data used for calculating the rolling mean.}
 
 \item{weight_ed}{\emph{Boolean} argument: should statistic be weighted by
@@ -36,7 +35,7 @@ calculate a rolling mean over the statistics.
 The function \code{roll_moment()} calculates a vector of statistics
   over an \emph{OHLC} time series, such as volatility, skew, and higher
   moments.  The statistics could also be any other aggregation of a single
-  bar of \emph{OHLC} data, for example the \emph{High} price minus the
+  row of \emph{OHLC} data, for example the \emph{High} price minus the
   \emph{Low} price squared.  The length of the vector of statistics is equal
   to the number of rows of the argument \code{oh_lc}. Then it calculates a
   trade volume weighted rolling mean over the vector of statistics over and
@@ -44,8 +43,8 @@ The function \code{roll_moment()} calculates a vector of statistics
 }
 \examples{
 # calculate time series of rolling variance and skew estimates
-var_rolling <- roll_moment(oh_lc=SPY, win_dow=21)
-skew_rolling <- roll_moment(oh_lc=SPY, mo_ment="run_skew", win_dow=21)
+var_rolling <- roll_moment(oh_lc=HighFreq::SPY, look_back=21)
+skew_rolling <- roll_moment(oh_lc=HighFreq::SPY, mo_ment="run_skew", look_back=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)

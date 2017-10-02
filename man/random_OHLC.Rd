@@ -30,22 +30,22 @@ An \emph{xts} time series with the same dimensions and the same time
 }
 \description{
 Calculate a random \emph{OHLC} time series either by simulating random prices
-following geometric Brownian motion, or by randomly sampling from an input 
+following geometric Brownian motion, or by randomly sampling from an input
 time series.
 }
 \details{
-If the input \code{oh_lc} time series is \emph{NULL} (the default), 
-  then the function \code{random_ohlc()} simulates a minutely \emph{OHLC} 
+If the input \code{oh_lc} time series is \emph{NULL} (the default),
+  then the function \code{random_ohlc()} simulates a minutely \emph{OHLC}
   time series of random prices following geometric Brownian motion, over the
   two previous calendar days.
-  
+
   If the input \code{oh_lc} time series is not \emph{NULL}, then the rows of
   \code{oh_lc} are randomly sampled, to produce a random time series.
-  
+
   If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
   series is first transformed to reduced form, then randomly sampled, and
   finally converted to standard form.
-  
+
   Note: randomly sampling from an intraday time series over multiple days
   will cause the overnight price jumps to be re-arranged into intraday price
   jumps.  This will cause moment estimates to become inflated compared to the
@@ -55,6 +55,6 @@ If the input \code{oh_lc} time series is \emph{NULL} (the default),
 # create minutely synthetic OHLC time series of random prices
 oh_lc <- HighFreq::random_ohlc()
 # create random time series from SPY by randomly sampling it
-oh_lc <- HighFreq::random_ohlc(oh_lc=SPY["2012-02-13/2012-02-15"])
+oh_lc <- HighFreq::random_ohlc(oh_lc=HighFreq::SPY["2012-02-13/2012-02-15"])
 }
 

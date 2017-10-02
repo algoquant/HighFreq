@@ -5,19 +5,20 @@
 \title{Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 aggregation.}
 \usage{
-scrub_taq(ta_q, win_dow = 51, vol_mult = 2, tzone = "America/New_York")
+scrub_taq(ta_q, look_back = 51, vol_mult = 2, tzone = "America/New_York")
 }
 \arguments{
 \item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
 
-\item{win_dow}{number of data points for estimating rolling quantile.}
+\item{look_back}{number of data points in rolling look-back window for
+estimating rolling quantile.}
 
 \item{vol_mult}{quantile multiplier.}
 
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \emph{TAQ} time series in \emph{xts} format.
+a \emph{TAQ} time series in \emph{xts} format.
 }
 \description{
 Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
@@ -29,10 +30,10 @@ The function \code{scrub_taq()} performs the same scrubbing
   the \emph{TAQ} data in \emph{xts} format.
 }
 \examples{
-ta_q <- HighFreq::scrub_taq(ta_q=SPY_TAQ, win_dow=11, vol_mult=1)
+ta_q <- HighFreq::scrub_taq(ta_q=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
 # create random TAQ prices and scrub them
 ta_q <- HighFreq::random_taq()
 ta_q <- HighFreq::scrub_taq(ta_q=ta_q)
-ta_q <- HighFreq::scrub_taq(ta_q=ta_q, win_dow=11, vol_mult=1)
+ta_q <- HighFreq::scrub_taq(ta_q=ta_q, look_back=11, vol_mult=1)
 }
 

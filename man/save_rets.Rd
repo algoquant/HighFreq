@@ -2,12 +2,12 @@
 % Please edit documentation in R/HighFreq.R
 \name{save_rets}
 \alias{save_rets}
-\title{Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a 
+\title{Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
 single symbol. Calculate returns and save them to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
 save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", win_dow = 51, vol_mult = 2,
+  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
   period = "minutes", tzone = "America/New_York")
 }
 \arguments{
@@ -19,7 +19,8 @@ input \sQuote{\code{*.RData}} files.}
 \item{output_dir}{\emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{win_dow}{number of data points for estimating rolling quantile.}
+\item{look_back}{number of data points in rolling look-back window for
+estimating rolling quantile.}
 
 \item{vol_mult}{quantile multiplier.}
 
@@ -28,10 +29,10 @@ output \sQuote{\code{*.RData}} files.}
 \item{tzone}{timezone to convert.}
 }
 \value{
-A time series of returns and volume in \emph{xts} format.
+a time series of returns and volume in \emph{xts} format.
 }
 \description{
-Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a 
+Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
 single symbol. Calculate returns and save them to a single
 \sQuote{\code{*.RData}} file.
 }

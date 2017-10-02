@@ -32,8 +32,8 @@ Calculate a \emph{TAQ} time series of random prices following geometric
 Brownian motion, combined with random trading volumes.
 }
 \details{
-The function \code{random_taq()} calculates an \emph{xts} time 
-  series with four columns containing random prices following geometric 
+The function \code{random_taq()} calculates an \emph{xts} time
+  series with four columns containing random prices following geometric
   Brownian motion: the bid, ask, and trade prices, combined with random trade
   volume data.
   If \code{in_dex} isn't supplied as an argument, then by default it's
@@ -43,6 +43,6 @@ The function \code{random_taq()} calculates an \emph{xts} time
 # create secondly TAQ time series of random prices
 ta_q <- HighFreq::random_taq()
 # create random TAQ time series from SPY index
-ta_q <- HighFreq::random_taq(in_dex=index(SPY["2012-02-13/2012-02-15"]))
+ta_q <- HighFreq::random_taq(in_dex=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{remove_jumps}
 \alias{remove_jumps}
-\title{Remove overnight close-to-open price jumps from an \emph{OHLC} time series, 
+\title{Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
 by adding adjustment terms to its prices.}
 \usage{
 remove_jumps(oh_lc)
@@ -16,29 +16,29 @@ An \emph{OHLC} time series with the same dimensions and the same time
   index as the input \code{oh_lc} time series.
 }
 \description{
-Remove overnight close-to-open price jumps from an \emph{OHLC} time series, 
+Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
 by adding adjustment terms to its prices.
 }
 \details{
-The function \code{remove_jumps()} removes the overnight 
+The function \code{remove_jumps()} removes the overnight
   close-to-open price jumps from an \emph{OHLC} time series, by adjusting its
-  prices so that the first \emph{Open} price of the day is equal to the last 
+  prices so that the first \emph{Open} price of the day is equal to the last
   \emph{Close} price of the previous day.
-  
-  The function \code{remove_jumps()} adds adjustment terms to all the 
+
+  The function \code{remove_jumps()} adds adjustment terms to all the
   \emph{OHLC} prices, so that intra-day returns and volatilities are not
   affected.
 
-  The function \code{remove_jumps()} identifies overnight periods as those 
+  The function \code{remove_jumps()} identifies overnight periods as those
   that are greater than 60 seconds. This assumes that intra-day periods
-  between neighboring bars of data are 60 seconds or less.
-  
-  The time index of the \code{oh_lc} time series is assumed to be in 
+  between neighboring rows of data are 60 seconds or less.
+
+  The time index of the \code{oh_lc} time series is assumed to be in
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 }
 \examples{
 # remove overnight close-to-open price jumps from SPY data
-oh_lc <- remove_jumps(SPY)
+oh_lc <- remove_jumps(HighFreq::SPY)
 }
 

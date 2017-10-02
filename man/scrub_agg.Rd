@@ -5,13 +5,14 @@
 \title{Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
 \emph{OHLC} format.}
 \usage{
-scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
+scrub_agg(ta_q, look_back = 51, vol_mult = 2, period = "minutes",
   tzone = "America/New_York")
 }
 \arguments{
 \item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
 
-\item{win_dow}{number of data points for estimating rolling quantile.}
+\item{look_back}{number of data points in rolling look-back window for
+estimating rolling quantile.}
 
 \item{vol_mult}{quantile multiplier.}
 
@@ -20,7 +21,7 @@ scrub_agg(ta_q, win_dow = 51, vol_mult = 2, period = "minutes",
 \item{tzone}{timezone to convert.}
 }
 \value{
-A \emph{OHLC} time series in \emph{xts} format.
+a \emph{OHLC} time series in \emph{xts} format.
 }
 \description{
 Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
@@ -48,7 +49,7 @@ ta_q <- HighFreq::random_taq()
 oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
 chart_Series(oh_lc, name="random prices")
 # scrub and aggregate a single day of SPY TAQ data to OHLC
-oh_lc <- HighFreq::scrub_agg(ta_q=SPY_TAQ)
+oh_lc <- HighFreq::scrub_agg(ta_q=HighFreq::SPY_TAQ)
 chart_Series(oh_lc, name=sym_bol)
 }
 

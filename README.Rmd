@@ -39,12 +39,12 @@ The *running* statistics time series are calculated using individual bars of *OH
 
 + An example of a *running* statistic is a time series of squared differences of the *High* minus *Low* prices.  Each point in a *running* statistic depends only on a single bar of *OHLC* data (and possibly on the neighboring bars.) 
 
-+ An example of a *rolling* statistic is a time series of average *Close* prices calculated over a rolling lookback window. 
++ An example of a *rolling* statistic is a time series of average *Close* prices calculated over a rolling look-back window. 
 Some *rolling* statistics can be calculated from *running* statistics by calculating weighted averages. 
 
 + The functions called *run_\** calculate *running* statistics based on each bar of *OHLC* data, and produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
 
-+ The functions called *roll_\** calculate *rolling* statistics based on multiple bars of *OHLC* data taken from a rolling lookback window, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
++ The functions called *roll_\** calculate *rolling* statistics based on multiple bars of *OHLC* data taken from a rolling look-back window, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
 
 + *Running* and *rolling* statistics also represent a form of data aggregation, and can include many standard technical indicators, like *VWAP*, *Bollinger Bands*, etc.
 

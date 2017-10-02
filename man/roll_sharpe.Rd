@@ -2,15 +2,15 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_sharpe}
 \alias{roll_sharpe}
-\title{Calculate a time series of Sharpe ratios over a rolling lookback window for
+\title{Calculate a time series of Sharpe ratios over a rolling look-back window for
 an \emph{OHLC} time series.}
 \usage{
-roll_sharpe(oh_lc, win_dow = 11)
+roll_sharpe(oh_lc, look_back = 11)
 }
 \arguments{
 \item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{win_dow}{the size of the lookback window, equal to the number of bars
+\item{look_back}{the size of the look-back window, equal to the number of rows
 of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
@@ -18,16 +18,16 @@ An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{
-Calculate a time series of Sharpe ratios over a rolling lookback window for
+Calculate a time series of Sharpe ratios over a rolling look-back window for
 an \emph{OHLC} time series.
 }
 \details{
-The function \code{roll_sharpe()} calculates the rolling Sharpe 
-  ratio defined as the ratio of percentage returns over the lookback window,
+The function \code{roll_sharpe()} calculates the rolling Sharpe
+  ratio defined as the ratio of percentage returns over the look-back window,
   divided by the average volatility of percentage returns.
 }
 \examples{
 # calculate rolling Sharpe ratio over SPY
-sharpe_rolling <- roll_sharpe(oh_lc=SPY, win_dow=11)
+sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
 }
 

@@ -20,7 +20,7 @@ the trading volume? (default is \code{TRUE})}
 \item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-A single \emph{numeric} value equal to the volume weighted average of
+a single \emph{numeric} value equal to the volume weighted average of
   an estimator over the time series.
 }
 \description{
@@ -35,8 +35,8 @@ The function \code{agg_regate()} calculates a single number
 }
 \examples{
 # calculate weighted average variance for SPY (single number)
-vari_ance <- agg_regate(oh_lc=SPY, mo_ment="run_variance")
+vari_ance <- agg_regate(oh_lc=HighFreq::SPY, mo_ment="run_variance")
 # calculate time series of daily skew estimates for SPY
-skew_daily <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_skew")
+skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_regate, mo_ment="run_skew")
 }
 

@@ -2,22 +2,22 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_apply}
 \alias{roll_apply}
-\title{Apply an aggregation function over a rolling lookback window and the end
+\title{Apply an aggregation function over a rolling look-back window and the end
 points of an \emph{OHLC} time series.}
 \usage{
-roll_apply(x_ts, agg_fun = "run_variance", win_dow = 11,
+roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
   end_points = (0:NROW(x_ts)), by_columns = FALSE, ...)
 }
 \arguments{
 \item{x_ts}{\emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
-\item{agg_fun}{\emph{character} string representing an aggregation function
-to be applied over a rolling lookback window.}
+\item{agg_fun}{the name of the aggregation function to be applied over a
+rolling look-back window.}
 
-\item{win_dow}{the size of the lookback window, equal to the number of bars 
+\item{look_back}{the size of the look-back window, equal to the number of rows
 of data used for applying the aggregation function (including the current
-bar).}
+row).}
 
 \item{end_points}{an integer vector of end points.}
 
@@ -32,12 +32,12 @@ An \emph{xts} time series with the same number of rows as the
   argument \code{x_ts}.
 }
 \description{
-Apply an aggregation function over a rolling lookback window and the end
+Apply an aggregation function over a rolling look-back window and the end
 points of an \emph{OHLC} time series.
 }
 \details{
 The function \code{roll_apply()} applies an aggregation function
-  over a rolling lookback window and the end points of an \emph{OHLC} time
+  over a rolling look-back window and the end points of an \emph{OHLC} time
   series.
 
   Performs similar operations to the functions \code{rollapply()} and
@@ -49,7 +49,7 @@ The function \code{roll_apply()} applies an aggregation function
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.)
 
   But the function \code{roll_apply()} is faster because it performs less
-  type-checking and other overhead. Unlike the other functions,
+  type-checking and skips other overhead. Unlike the other functions,
   \code{roll_apply()} doesn't produce any leading \emph{NA} values.
 
   The function \code{roll_apply()} can be called in two different ways,
@@ -58,37 +58,37 @@ The function \code{roll_apply()} applies an aggregation function
   \code{roll_apply()}, then the default value is used, and
   \code{roll_apply()} performs aggregations over overlapping windows at each
   point in time.
-  If the argument \code{end_points} is explicitly passed to 
-  \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
-  windows spanned by the end_points.  If win_dow=2 then the aggregations are
+  If the argument \code{end_points} is explicitly passed to
+  \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
+  windows spanned by the end_points.  If look_back=2 then the aggregations are
   performed over non-overlapping windows, otherwise they are performed over
   overlapping windows.
 
   The aggregation function \code{agg_fun()} can return either a single value
   or a vector of values. If the aggregation function \code{agg_fun()} returns
-  a single value, then \code{roll_apply()} returns an \emph{xts} time series 
+  a single value, then \code{roll_apply()} returns an \emph{xts} time series
   with a single column. If the aggregation function \code{agg_fun()} returns
-  a vector of values, then \code{roll_apply()} returns an \emph{xts} time 
-  series with multiple columns equal to the length of the vector returned by 
+  a vector of values, then \code{roll_apply()} returns an \emph{xts} time
+  series with multiple columns equal to the length of the vector returned by
   the aggregation function \code{agg_fun()}.
 }
 \examples{
 # extract a single day of SPY data
 oh_lc <- SPY["2012-02-13"]
-win_dow <- 11
+look_back <- 11
 # calculate the rolling sums of oh_lc columns over a rolling window
-agg_regations <- roll_apply(oh_lc, agg_fun=sum, win_dow=win_dow, by_columns=TRUE)
+agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
 # apply a vector-valued aggregation function over a rolling window
 agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
-agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, win_dow=win_dow)
-# define end points at 11-minute intervals (SPY is minutely bars)
-end_points <- rutils::end_points(oh_lc, inter_val=win_dow)
+agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
+# define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
+end_points <- rutils::end_points(oh_lc, inter_val=look_back)
 # calculate the sums of oh_lc columns over end_points using non-overlapping windows
-agg_regations <- roll_apply(oh_lc, agg_fun=sum, win_dow=2, 
+agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=2,
                             end_points=end_points, by_columns=TRUE)
 # apply a vector-valued aggregation function over the end_points of oh_lc
 # using overlapping windows
-agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, 
-                            win_dow=5, end_points=end_points)
+agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
+                            look_back=5, end_points=end_points)
 }
 

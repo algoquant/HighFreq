@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2016-11-26" />
+<meta name="date" content="2017-09-18" />
 
 <title>Managing TAQ and OHLC Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Managing <em>TAQ</em> and <em>OHLC</em> Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2016-11-26</em></h4>
+<h4 class="date"><em>2017-09-18</em></h4>
 
 
 
@@ -80,7 +80,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq</span>
 <span class="kw">library</span>(HighFreq)
 <span class="co"># create local copy of SPY TAQ data</span>
-ta_q &lt;-<span class="st"> </span>SPY_TAQ
+ta_q &lt;-<span class="st"> </span>HighFreq::SPY_TAQ
 <span class="co"># convert timezone of index to New_York</span>
 <span class="kw">index</span>(ta_q) &lt;-<span class="st"> </span>lubridate::<span class="kw">with_tz</span>(<span class="dt">time=</span><span class="kw">index</span>(ta_q), <span class="dt">tzone=</span>tzone)
 <span class="co"># subset data to NYSE trading hours</span>
@@ -89,18 +89,18 @@ ta_q &lt;-<span class="st"> </span>ta_q[<span class="st">'T09:30:00/T16:00:00'</
 ta_q &lt;-<span class="st"> </span>ta_q[!<span class="kw">duplicated</span>(<span class="kw">index</span>(ta_q)), ]
 <span class="co"># scrub quotes with suspect bid-offer spreads</span>
 bid_offer &lt;-<span class="st"> </span>ta_q[, <span class="st">&quot;Ask.Price&quot;</span>] -<span class="st"> </span>ta_q[, <span class="st">&quot;Bid.Price&quot;</span>]
-sus_pect &lt;-<span class="st"> </span><span class="kw">which_extreme</span>(bid_offer, <span class="dt">win_dow=</span>win_dow, <span class="dt">vol_mult=</span>vol_mult)
+sus_pect &lt;-<span class="st"> </span><span class="kw">which_extreme</span>(bid_offer, <span class="dt">look_back=</span>look_back, <span class="dt">vol_mult=</span>vol_mult)
 <span class="co"># remove suspect values</span>
 ta_q &lt;-<span class="st"> </span>ta_q[!sus_pect]
 <span class="co"># calculate mid prices</span>
 mid_prices &lt;-<span class="st"> </span><span class="fl">0.5</span> *<span class="st"> </span>(ta_q[, <span class="st">&quot;Bid.Price&quot;</span>] +<span class="st"> </span>ta_q[, <span class="st">&quot;Ask.Price&quot;</span>])
 <span class="co"># replace whole rows containing suspect price jumps with NA, and perform locf()</span>
-ta_q[<span class="kw">which_jumps</span>(mid_prices, <span class="dt">win_dow=</span><span class="dv">31</span>, <span class="dt">vol_mult=</span><span class="fl">1.0</span>), ] &lt;-<span class="st"> </span><span class="ot">NA</span>
+ta_q[<span class="kw">which_jumps</span>(mid_prices, <span class="dt">look_back=</span><span class="dv">31</span>, <span class="dt">vol_mult=</span><span class="fl">1.0</span>), ] &lt;-<span class="st"> </span><span class="ot">NA</span>
 ta_q &lt;-<span class="st"> </span><span class="kw">na.locf</span>(ta_q)</code></pre></div>
 <p><br></p>
 <p>Scrub and aggregate a single day of <em>TAQ</em> data to <em>OHLC</em> format using function scrub_agg():</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># scrub and aggregate a single day of SPY TAQ data to OHLC</span>
-oh_lc &lt;-<span class="st"> </span>HighFreq::<span class="kw">scrub_agg</span>(<span class="dt">ta_q=</span>SPY_TAQ)
+oh_lc &lt;-<span class="st"> </span>HighFreq::<span class="kw">scrub_agg</span>(<span class="dt">ta_q=</span>HighFreq::SPY_TAQ)
 <span class="kw">chart_Series</span>(oh_lc, <span class="dt">name=</span>sym_bol)</code></pre></div>
 <p><br></p>
 <p><em>TAQ</em> data is organized in individual daily files. The function <em>save_scrub_agg()</em> reads all the <em>TAQ</em> files for a single symbol, and converts them into a single <em>OHLC</em> file. For a single symbol, aggregate all the daily <em>TAQ</em> data to 15-min <em>OHLC</em> bar data, and save the data to a single file:</p>
@@ -144,7 +144,7 @@ ta_q &lt;-<span class="st"> </span><span class="kw">scrub_taq</span>(<span class
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

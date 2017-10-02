@@ -14,7 +14,7 @@ run_skew(oh_lc, calc_method = "rogers_satchell")
 skew.}
 }
 \value{
-A time series of skew estimates.
+a time series of skew estimates.
 }
 \description{
 Calculate time series of skew estimates from a \emph{OHLC} time series,
@@ -22,13 +22,13 @@ assuming zero drift.
 }
 \details{
 The function \code{run_skew()} calculates a time series of skew
-  estimates from \emph{OHLC} prices, one for each bar of \emph{OHLC} data.
+  estimates from \emph{OHLC} prices, one for each row of \emph{OHLC} data.
   The skew estimates are expressed in the time scale of the index of the
-  \emph{OHLC} time series.  
-  For example, if the time index is in seconds, then the skew is given in 
-  units of skew per second.  If the time index is in days, then the skew is 
+  \emph{OHLC} time series.
+  For example, if the time index is in seconds, then the skew is given in
+  units of skew per second.  If the time index is in days, then the skew is
   equal to the skew per day.
-  
+
   Currently only the \code{"close"} skew estimation method is correct
   (assuming zero drift), while the \code{"rogers_satchell"} method produces a
   skew-like indicator, proportional to the skew. The default method is
@@ -36,6 +36,6 @@ The function \code{run_skew()} calculates a time series of skew
 }
 \examples{
 # calculate time series of skew estimates for SPY
-sk_ew <- HighFreq::run_skew(SPY)
+sk_ew <- HighFreq::run_skew(HighFreq::SPY)
 }
 

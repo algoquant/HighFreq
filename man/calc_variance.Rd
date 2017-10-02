@@ -21,11 +21,11 @@ variance.  The methods include:
  }
  (default is \code{"yang_zhang"})}
 
-\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the 
+\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
-A \emph{numeric} value equal to the variance.
+a single \emph{numeric} value equal to the variance.
 }
 \description{
 Calculate the variance of an \emph{OHLC} time series, using different range
@@ -35,28 +35,28 @@ estimators for variance.
 The function \code{calc_variance()} calculates the variance estimate
   from \emph{OHLC} prices, using several different variance estimation
   methods based on the range of \emph{OHLC} prices.
-  
+
   The methods \code{"close"}, \code{"garman_klass_yz"}, and
   \code{"yang_zhang"} do account for close-to-open price jumps, while the
   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
-  for close-to-open price jumps. 
-  
+  for close-to-open price jumps.
+
   The default method is \code{"yang_zhang"}, which theoretically has the
   lowest standard error among unbiased estimators.
 
   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
-  by the squared differences of the time index (which scales the variance to 
-  units of variance per second squared.) This is useful for example, when 
+  by the squared differences of the time index (which scales the variance to
+  units of variance per second squared.) This is useful for example, when
   calculating variance from minutely bar data, because dividing returns by
   the number of seconds decreases the effect of overnight price jumps.
-  
-  If \code{sca_le} is \code{TRUE} (the default), then the variance is 
-  expressed in the scale of the time index of the \emph{OHLC} time series. 
+
+  If \code{sca_le} is \code{TRUE} (the default), then the variance is
+  expressed in the scale of the time index of the \emph{OHLC} time series.
   For example, if the time index is in seconds, then the variance is given in
   units of variance per second squared.  If the time index is in days, then
   the variance is equal to the variance per day squared.
-  
-  The function \code{calc_variance()} performs the same calculations as the 
+
+  The function \code{calc_variance()} performs the same calculations as the
   function \code{run_variance()} and then calculates the average of the spot
   variance estimates.
 }
@@ -66,8 +66,8 @@ oh_lc <- HighFreq::random_ohlc()
 # calculate variance of oh_lc
 vari_ance <- HighFreq::calc_variance(oh_lc)
 # calculate variance of SPY
-vari_ance <- HighFreq::calc_variance(SPY, calc_method="yang_zhang")
+vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="yang_zhang")
 # calculate variance of SPY without accounting for overnight jumps
-vari_ance <- HighFreq::calc_variance(SPY, calc_method="rogers_satchell")
+vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="rogers_satchell")
 }
 
