@@ -8,16 +8,16 @@ a single-column \emph{xts} time series or vector, over a rolling window.}
 which_jumps(x_ts, look_back = 51, vol_mult = 2)
 }
 \arguments{
-\item{x_ts}{a single-column \emph{xts} time series, or a \emph{numeric} or
+\item{x_ts}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
-\item{look_back}{number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back window for
 estimating rolling quantile.}
 
-\item{vol_mult}{quantile multiplier.}
+\item{vol_mult}{The quantile multiplier.}
 }
 \value{
-a \emph{Boolean} vector with the same number of rows as the input
+A \emph{Boolean} vector with the same number of rows as the input
   time series or vector.
 }
 \description{

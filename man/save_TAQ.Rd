@@ -10,20 +10,20 @@ save_taq(sym_bol, data_dir = "E:/mktdata/sec/",
   tzone = "America/New_York")
 }
 \arguments{
-\item{sym_bol}{\emph{character} string representing symbol or ticker.}
+\item{sym_bol}{A \emph{character} string representing symbol or ticker.}
 
-\item{data_dir}{\emph{character} string representing directory containing
+\item{data_dir}{A \emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{\emph{character} string representing directory containing
+\item{output_dir}{A \emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{look_back}{number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back window for
 estimating rolling quantile.}
 
-\item{vol_mult}{quantile multiplier.}
+\item{vol_mult}{The quantile multiplier.}
 
-\item{tzone}{timezone to convert.}
+\item{tzone}{The timezone to convert.}
 }
 \value{
 a \emph{TAQ} time series in \emph{xts} format.

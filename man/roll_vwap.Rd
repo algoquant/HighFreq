@@ -8,12 +8,12 @@ over a rolling look-back window.}
 roll_vwap(oh_lc, x_ts = oh_lc[, 4], look_back)
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{x_ts}{single-column \emph{xts} time series.}
+\item{x_ts}{A single-column \emph{xts} time series.}
 
-\item{look_back}{the size of the look-back window, equal to the number of rows
-of data used for calculating the average price.}
+\item{look_back}{The size of the look-back window, equal to the number of
+rows of data used for calculating the average price.}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of

@@ -10,7 +10,9 @@ R CMD INSTALL C:\Develop\R\HighFreq
 devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
 # build vignette package reference manual from *.Rd files
 system("R CMD Rd2pdf C:/Develop/R/HighFreq")
+cd C:\Develop\R\HighFreq\vignettes
 R CMD Rd2pdf C:\Develop\R\HighFreq
+
 
 
 ### comments
@@ -42,7 +44,8 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [x] create functional roll_backtest() similar to roll_apply(), but accepting two functions as arguments
++ [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
+trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
 + [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 deprecate function roll_moment() because it's similar to roll_vwap() ?
@@ -63,6 +66,12 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] create functional roll_backtest() similar to roll_apply(), but accepting two functions as arguments
+
++ [x] replace argument "lag" with "lagg" (to avoid confusing it with stats function lag())  
+
++ [x] replace calls to is.vector(in_put) with is.null(dim(in_put))
 
 + [x] replace "win_dow" with "look_back"
 
@@ -316,6 +325,8 @@ created function save_rets_OHLC()
 
 
 ### tasks deprecated
+
++ [ ] modify function run_returns() to perform sapply() if argument has multiple columns ?
 
 + [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]

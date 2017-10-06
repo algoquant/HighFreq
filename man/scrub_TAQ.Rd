@@ -8,17 +8,17 @@ aggregation.}
 scrub_taq(ta_q, look_back = 51, vol_mult = 2, tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
+\item{ta_q}{\emph{TAQ} A time series in \emph{xts} format.}
 
-\item{look_back}{number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back window for
 estimating rolling quantile.}
 
-\item{vol_mult}{quantile multiplier.}
+\item{vol_mult}{The quantile multiplier.}
 
-\item{tzone}{timezone to convert.}
+\item{tzone}{The timezone to convert.}
 }
 \value{
-a \emph{TAQ} time series in \emph{xts} format.
+A \emph{TAQ} time series in \emph{xts} format.
 }
 \description{
 Scrub a single day of \emph{TAQ} data in \emph{xts} format, without

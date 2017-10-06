@@ -11,15 +11,15 @@ random_taq(vol_at = 6.5e-05, dri_ft = 0, in_dex = seq(from =
   bid_offer = 0.001, ...)
 }
 \arguments{
-\item{vol_at}{volatility per period of the \code{in_dex} time index (default
-is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
+\item{vol_at}{The volatility per period of the \code{in_dex} time index
+(default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{dri_ft}{drift per period of the \code{in_dex} time index (default is
-0.0).}
+\item{dri_ft}{The drift per period of the \code{in_dex} time index (default
+is 0.0).}
 
-\item{in_dex}{time index for the \emph{TAQ} time series.}
+\item{in_dex}{The time index for the \emph{TAQ} time series.}
 
-\item{bid_offer}{the bid-offer spread expressed as a fraction of the prices
+\item{bid_offer}{The bid-offer spread expressed as a fraction of the prices
 (default is 0.001=10bps).}
 }
 \value{

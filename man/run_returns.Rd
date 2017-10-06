@@ -5,21 +5,22 @@
 \title{Calculate single period percentage returns from either \emph{TAQ} or
 \emph{OHLC} prices.}
 \usage{
-run_returns(x_ts, lag = 1, col_umn = 4, sca_le = TRUE)
+run_returns(x_ts, lagg = 1, col_umn = 4, sca_le = TRUE)
 }
 \arguments{
-\item{x_ts}{\emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
+\item{x_ts}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
 
-\item{lag}{integer equal to the number of time periods of lag. (default is 1)}
+\item{lagg}{An integer equal to the number of time periods of lag. (default
+is 1)}
 
-\item{col_umn}{the column number to extract from the \emph{OHLC} data.
+\item{col_umn}{The column number to extract from the \emph{OHLC} data.
 (default is \code{4}, or the \emph{Close} prices column)}
 
 \item{sca_le}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
-a single-column \emph{xts} time series of returns.
+A single-column \emph{xts} time series of returns.
 }
 \description{
 Calculate single period percentage returns from either \emph{TAQ} or

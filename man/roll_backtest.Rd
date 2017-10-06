@@ -9,22 +9,22 @@ roll_backtest(x_ts, train_func, trade_func, look_back = look_forward,
   look_forward, end_points = rutils::calc_endpoints(x_ts, look_forward), ...)
 }
 \arguments{
-\item{x_ts}{a time series of prices, asset returns, trading volumes, and
+\item{x_ts}{A time series of prices, asset returns, trading volumes, and
 other data, in \emph{xts} format.}
 
-\item{train_func}{the name of the function for training (calibrating) a
+\item{train_func}{The name of the function for training (calibrating) a
 forecasting model, to be applied over a rolling look-back window.}
 
-\item{trade_func}{the name of the trading model function, to be applied over
+\item{trade_func}{The name of the trading model function, to be applied over
 a rolling look-forward window.}
 
-\item{look_back}{the size of the look-back window, equal to the number of
+\item{look_back}{The size of the look-back window, equal to the number of
 rows of data used for training the forecasting model.}
 
-\item{look_forward}{the size of the look-forward window, equal to the number
+\item{look_forward}{The size of the look-forward window, equal to the number
 of rows of data used for trading the strategy.}
 
-\item{end_points}{a vector of end points along the rows of the \code{x_ts}
+\item{end_points}{A vector of end points along the rows of the \code{x_ts}
 time series, given as either integers or dates.}
 
 \item{...}{additional parameters to the functions \code{train_func()} and

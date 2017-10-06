@@ -5,22 +5,25 @@
 #' Brownian motion, combined with random trading volumes.
 #'
 #' @export
-#' @param vol_at volatility per period of the \code{in_dex} time index (default
-#'   is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
-#' @param dri_ft drift per period of the \code{in_dex} time index (default is
-#'   0.0).
-#' @param in_dex time index for the \emph{TAQ} time series.
-#' @param bid_offer the bid-offer spread expressed as a fraction of the prices
+#' @param vol_at The volatility per period of the \code{in_dex} time index
+#'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
+#' @param dri_ft The drift per period of the \code{in_dex} time index (default
+#'   is 0.0).
+#' @param in_dex The time index for the \emph{TAQ} time series.
+#' @param bid_offer The bid-offer spread expressed as a fraction of the prices
 #'   (default is 0.001=10bps).
+#'
 #' @return An \emph{xts} time series, with time index equal to the input
 #'   \code{in_dex} time index, and with four columns containing the bid, ask,
 #'   and trade prices, and the trade volume.
+#'
 #' @details The function \code{random_taq()} calculates an \emph{xts} time
 #'   series with four columns containing random prices following geometric
 #'   Brownian motion: the bid, ask, and trade prices, combined with random trade
 #'   volume data.
 #'   If \code{in_dex} isn't supplied as an argument, then by default it's
 #'   equal to the secondly index over the two previous calendar days.
+#'
 #' @examples
 #' # create secondly TAQ time series of random prices
 #' ta_q <- HighFreq::random_taq()
@@ -59,17 +62,19 @@ random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
 #' time series.
 #'
 #' @export
-#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format (default is \emph{NULL}).
-#' @param vol_at volatility per period of the \code{in_dex} time index (default
-#'   is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
-#' @param dri_ft drift per period of the \code{in_dex} time index (default is
-#'   0.0).
-#' @param in_dex time index for the \emph{OHLC} time series.
+#' @param vol_at The volatility per period of the \code{in_dex} time index
+#'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
+#' @param dri_ft The drift per period of the \code{in_dex} time index (default
+#'   is 0.0).
+#' @param in_dex The time index for the \emph{OHLC} time series.
 #' @param re_duce \emph{Boolean} argument: should \code{oh_lc} time series be
 #'   transformed to reduced form? (default is \code{TRUE})
+#'
 #' @return An \emph{xts} time series with the same dimensions and the same time
 #'   index as the input \code{oh_lc} time series.
+#'
 #' @details If the input \code{oh_lc} time series is \emph{NULL} (the default),
 #'   then the function \code{random_ohlc()} simulates a minutely \emph{OHLC}
 #'   time series of random prices following geometric Brownian motion, over the
@@ -86,6 +91,7 @@ random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
 #'   will cause the overnight price jumps to be re-arranged into intraday price
 #'   jumps.  This will cause moment estimates to become inflated compared to the
 #'   original time series.
+#'
 #' @examples
 #' # create minutely synthetic OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
@@ -121,10 +127,12 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
 #' by adding adjustment terms to its prices.
 #'
 #' @export
-#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
+#'
 #' @return An \emph{OHLC} time series with the same dimensions and the same time
 #'   index as the input \code{oh_lc} time series.
+#'
 #' @details The function \code{remove_jumps()} removes the overnight
 #'   close-to-open price jumps from an \emph{OHLC} time series, by adjusting its
 #'   prices so that the first \emph{Open} price of the day is equal to the last
@@ -148,8 +156,7 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
 
 remove_jumps <- function(oh_lc) {
   # find time index of the periods greater than 60 seconds
-  peri_ods <- rutils::diff_it(as.numeric(xts::.index(oh_lc)))
-  which_periods <- which(peri_ods > 60)
+  which_periods <- which(c(1, diff(xts::.index(oh_lc))) > 60)
   # calculate cumulative sum of overnight price jumps
   jump_s <- numeric(NROW(oh_lc))
   jump_s[which_periods] <- as.numeric(oh_lc[which_periods, 1]) - as.numeric(oh_lc[which_periods-1, 4])
@@ -166,13 +173,16 @@ remove_jumps <- function(oh_lc) {
 #' \emph{OHLC} prices.
 #'
 #' @export
-#' @param x_ts \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
-#' @param lag integer equal to the number of time periods of lag. (default is 1)
-#' @param col_umn the column number to extract from the \emph{OHLC} data.
+#' @param x_ts An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
+#' @param lagg An integer equal to the number of time periods of lag. (default
+#'   is 1)
+#' @param col_umn The column number to extract from the \emph{OHLC} data.
 #'   (default is \code{4}, or the \emph{Close} prices column)
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
-#' @return a single-column \emph{xts} time series of returns.
+#'
+#' @return A single-column \emph{xts} time series of returns.
+#'
 #' @details The function \code{run_returns()} calculates the percentage returns
 #'   for either \emph{TAQ} or \emph{OHLC} data, defined as the difference of log
 #'   prices.  Multi-period returns can be calculated by setting the \code{lag}
@@ -197,6 +207,7 @@ remove_jumps <- function(oh_lc) {
 #'   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
 #'   prices, but can also difference other prices depending on the value of
 #'   \code{col_umn}.
+#'
 #' @examples
 #' # calculate secondly returns from TAQ data
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY_TAQ)
@@ -205,7 +216,7 @@ remove_jumps <- function(oh_lc) {
 #' # calculate open to open returns
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
 
-run_returns <- function(x_ts, lag=1, col_umn=4, sca_le=TRUE) {
+run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
   # return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # calculate mid prices
@@ -214,11 +225,11 @@ run_returns <- function(x_ts, lag=1, col_umn=4, sca_le=TRUE) {
   else
     re_turns <- x_ts[, col_umn]  # OHLC data
   # calculate returns
-  re_turns <- rutils::diff_xts(log(re_turns), lag=lag)
+  re_turns <- rutils::diff_xts(log(re_turns), lagg=lagg)
   if (sca_le)
-    re_turns <- re_turns / c(rep(1, lag), diff(xts::.index(re_turns), lag=lag))
-  re_turns[1:lag, ] <- 0
-  colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
+    re_turns <- re_turns / c(rep(1, lagg), diff(xts::.index(re_turns), lagg=lagg))
+  re_turns[1:lagg, ] <- 0
+  # colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
   re_turns
 }  # end run_returns
 
@@ -230,13 +241,15 @@ run_returns <- function(x_ts, lag=1, col_umn=4, sca_le=TRUE) {
 #' window.
 #'
 #' @export
-#' @param x_ts a single-column \emph{xts} time series, or a \emph{numeric} or
+#' @param x_ts A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
-#' @param look_back number of data points in rolling look-back window for
+#' @param look_back The number of data points in rolling look-back window for
 #'   estimating rolling quantile.
-#' @param vol_mult quantile multiplier.
-#' @return a \emph{Boolean} vector with the same number of rows as the input
+#' @param vol_mult The quantile multiplier.
+#'
+#' @return A \emph{Boolean} vector with the same number of rows as the input
 #'   time series or vector.
+#'
 #' @details The function \code{which_extreme()} calculates a \emph{Boolean}
 #'   vector, with \code{TRUE} for values that belong to the extreme tails
 #'   of the distribution of values.
@@ -295,8 +308,10 @@ which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
 #'
 #' @export
 #' @inheritParams which_extreme
-#' @return a \emph{Boolean} vector with the same number of rows as the input
+#'
+#' @return A \emph{Boolean} vector with the same number of rows as the input
 #'   time series or vector.
+#'
 #' @details The function \code{which_jumps()} calculates a \emph{Boolean}
 #'   vector, with \code{TRUE} for values that are isolated jumps (spikes).
 #'
@@ -372,12 +387,15 @@ which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
 #'
 #' @export
 #' @inheritParams which_extreme
-#' @param ta_q \emph{TAQ} time series in \emph{xts} format.
-#' @param tzone timezone to convert.
-#' @return a \emph{TAQ} time series in \emph{xts} format.
+#' @param ta_q \emph{TAQ} A time series in \emph{xts} format.
+#' @param tzone The timezone to convert.
+#'
+#' @return A \emph{TAQ} time series in \emph{xts} format.
+#'
 #' @details The function \code{scrub_taq()} performs the same scrubbing
 #'   operations as \code{scrub_agg}, except it doesn't aggregate, and returns
 #'   the \emph{TAQ} data in \emph{xts} format.
+#'
 #' @examples
 # scrub a single day of TAQ data without aggregating it
 #' ta_q <- HighFreq::scrub_taq(ta_q=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
@@ -428,8 +446,10 @@ scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") 
 #'
 #' @export
 #' @inheritParams scrub_taq
-#' @param period aggregation period.
-#' @return a \emph{OHLC} time series in \emph{xts} format.
+#' @param period The aggregation period.
+#'
+#' @return A \emph{OHLC} time series in \emph{xts} format.
+#'
 #' @details The function \code{scrub_agg()} performs:
 #' \itemize{
 #'   \item index timezone conversion,
@@ -443,6 +463,7 @@ scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") 
 #' Valid 'period' character strings include: "minutes", "3 min", "5 min", "10
 #' min", "15 min", "30 min", and "hours". The time index of the output time
 #' series is rounded up to the next integer multiple of 'period'.
+#'
 #' @examples
 #' # create random TAQ prices
 #' ta_q <- HighFreq::random_taq()
@@ -512,13 +533,15 @@ scrub_agg <- function(ta_q, look_back=51, vol_mult=2,
 #' \sQuote{\code{*.RData}} file.
 #'
 #' @export
-#' @param sym_bol \emph{character} string representing symbol or ticker.
-#' @param data_dir \emph{character} string representing directory containing
+#' @param sym_bol A \emph{character} string representing symbol or ticker.
+#' @param data_dir A \emph{character} string representing directory containing
 #'   input \sQuote{\code{*.RData}} files.
-#' @param output_dir \emph{character} string representing directory containing
+#' @param output_dir A \emph{character} string representing directory containing
 #'   output \sQuote{\code{*.RData}} files.
 #' @inheritParams scrub_agg
+#'
 #' @return An \emph{OHLC} time series in \emph{xts} format.
+#'
 #' @details The function \code{save_scrub_agg()} loads multiple days of
 #'   \emph{TAQ} data, then scrubs, aggregates, and rbinds them into a
 #'   \emph{OHLC} time series, and finally saves it to a single
@@ -588,7 +611,9 @@ da_ta <- lapply(file_names, function(file_name) {
 #'
 #' @export
 #' @inheritParams save_scrub_agg
+#'
 #' @return a \emph{TAQ} time series in \emph{xts} format.
+#'
 #' @details The function \code{save_taq()} loads multiple days of \emph{TAQ}
 #'   data, scrubs it, and saves the scrubbed TAQ data to individual
 #'   \sQuote{\code{*.RData}} files. It uses the same file names for output as
@@ -599,6 +624,7 @@ da_ta <- lapply(file_names, function(file_name) {
 #'   Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
+#'
 #' @examples
 #' \dontrun{
 #' save_taq("SPY")
@@ -646,7 +672,9 @@ save_taq <- function(sym_bol,
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return a time series of returns and volume in \emph{xts} format.
+#'
+#' @return A time series of returns and volume in \emph{xts} format.
+#'
 #' @details The function \code{save_rets} loads multiple days of \emph{TAQ}
 #'   data, then scrubs, aggregates, and rbinds them into a \emph{OHLC} time
 #'   series.  It then calculates returns using function \code{run_returns()}, and
@@ -658,6 +686,7 @@ save_taq <- function(sym_bol,
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
+#'
 #' @examples
 #' \dontrun{
 #' save_rets("SPY")
@@ -719,12 +748,15 @@ save_rets <- function(sym_bol,
 #'
 #' @export
 #' @inheritParams save_scrub_agg
-#' @return a time series of returns and volume in \emph{xts} format.
+#'
+#' @return A time series of returns and volume in \emph{xts} format.
+#'
 #' @details The function \code{save_rets_ohlc()} loads \emph{OHLC} time series
 #'   data from a single file.  It then calculates returns using function
 #'   \code{run_returns()}, and stores them in a variable named
 #'   \sQuote{\code{symbol.rets}}, and saves them to a file called
 #'   \sQuote{\code{symbol.rets.RData}}.
+#'
 #' @examples
 #' \dontrun{
 #' save_rets_ohlc("SPY")
@@ -764,8 +796,8 @@ save_rets_ohlc <- function(sym_bol,
 #' each point in time, without averaging them over time.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param calc_method \emph{character} string representing the method for
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method A \emph{character} string representing the method for
 #'   estimating variance.  The methods include:
 #'   \itemize{
 #'     \item "close" close to close,
@@ -777,8 +809,10 @@ save_rets_ohlc <- function(sym_bol,
 #'    (default is \code{"yang_zhang"})
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{run_variance()} calculates a time series of point
 #'   variance estimates of percentage returns, from \emph{OHLC} prices, without
 #'   averaging them over time. For example, the method \code{"close"} simply
@@ -830,6 +864,7 @@ save_rets_ohlc <- function(sym_bol,
 #'   assumes zero drift, and doesn't calculate a running sum using
 #'   \code{runSum()}.  It's also a little faster because it performs less data
 #'   validation.
+#'
 #' @examples
 #' # create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
@@ -862,7 +897,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
     vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- rutils::na_locf(vari_ance)
-  colnames(vari_ance) <- paste0(sym_bol, ".Variance")
+  # colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
 }  # end run_variance
 
@@ -873,10 +908,12 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 #' assuming zero drift.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param calc_method \emph{character} string representing method for estimating
-#'   skew.
-#' @return a time series of skew estimates.
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method A \emph{character} string representing method for
+#'   estimating skew.
+#'
+#' @return A time series of skew estimates.
+#'
 #' @details The function \code{run_skew()} calculates a time series of skew
 #'   estimates from \emph{OHLC} prices, one for each row of \emph{OHLC} data.
 #'   The skew estimates are expressed in the time scale of the index of the
@@ -889,6 +926,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 #'   (assuming zero drift), while the \code{"rogers_satchell"} method produces a
 #'   skew-like indicator, proportional to the skew. The default method is
 #'   \code{"rogers_satchell"}.
+#'
 #' @examples
 #' # calculate time series of skew estimates for SPY
 #' sk_ew <- HighFreq::run_skew(HighFreq::SPY)
@@ -916,7 +954,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
   sk_ew <- sk_ew/c(1, diff(xts::.index(oh_lc)))^3
   sk_ew[1, ] <- 0
   sk_ew <- rutils::na_locf(sk_ew)
-  colnames(sk_ew) <- paste0(sym_bol, ".Skew")
+  # colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
 }  # end run_skew
 
@@ -927,11 +965,13 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 #' time series.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param calc_method \emph{character} string representing method for estimating
-#'   the Sharpe-like exponent.
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method A \emph{character} string representing method for
+#'   estimating the Sharpe-like exponent.
+#'
 #' @return An \emph{xts} time series with the same number of rows as the
 #'   argument \code{oh_lc}.
+#'
 #' @details The function \code{run_sharpe()} calculates Sharpe-like statistics
 #'   for each row of a \emph{OHLC} time series.
 #'   The Sharpe-like statistic is defined as the ratio of the difference between
@@ -942,6 +982,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 #'   The motivation for the Sharpe-like statistic is the notion that if prices
 #'   are trending in the same direction inside a given time bar of data, then
 #'   this statistic is close to either 1 or -1.
+#'
 #' @examples
 #' # calculate time series of running Sharpe ratios for SPY
 #' sharpe_running <- run_sharpe(HighFreq::SPY)
@@ -952,7 +993,7 @@ run_sharpe <- function(oh_lc, calc_method="close") {
                    "method2"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])}
   )  # end switch
   sharpe_ratio <- ifelse(oh_lc[, 2]==oh_lc[, 3], 0, sharpe_ratio)
-  colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
+  # colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
   sharpe_ratio
 }  # end run_sharpe
 
@@ -963,19 +1004,22 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 #' a \emph{OHLC} time series.
 #'
 #' @export
-#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
-#' @param mo_ment \emph{character} string representing function for
+#' @param mo_ment A \emph{character} string representing function for
 #'   estimating the moment.
 #' @param weight_ed \emph{Boolean} argument: should estimate be weighted by
 #'   the trading volume? (default is \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
-#' @return a single \emph{numeric} value equal to the volume weighted average of
+#'
+#' @return A single \emph{numeric} value equal to the volume weighted average of
 #'   an estimator over the time series.
+#'
 #' @details The function \code{agg_regate()} calculates a single number
 #'   representing the volume weighted average of an estimator over the
 #'   \emph{OHLC} time series of prices.  By default the sum is trade volume
 #'   weighted.
+#'
 #' @examples
 #' # calculate weighted average variance for SPY (single number)
 #' vari_ance <- agg_regate(oh_lc=HighFreq::SPY, mo_ment="run_variance")
@@ -1006,17 +1050,20 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' but using vectorized functions, so it's a little faster.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param x_ts single-column \emph{xts} time series.
-#' @param look_back the size of the look-back window, equal to the number of rows
-#'   of data used for calculating the average price.
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param x_ts A single-column \emph{xts} time series.
+#' @param look_back The size of the look-back window, equal to the number of
+#'   rows of data used for calculating the average price.
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{roll_vwap()} calculates the volume-weighted
 #'   average closing price, defined as the sum of the prices multiplied by
 #'   trading volumes in the look-back window, divided by the sum of trading
 #'   volumes in the window. If the argument \code{x_ts} is passed in explicitly,
 #'   then its volume-weighted average value over time is calculated.
+#'
 #' @examples
 #' # calculate and plot rolling volume-weighted average closing prices (VWAP)
 #' prices_rolling <- roll_vwap(oh_lc=HighFreq::SPY["2013-11"], look_back=11)
@@ -1035,7 +1082,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
   volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5], look_back=look_back)
   roll_vwap <- roll_vwap/volume_rolling
   roll_vwap[is.na(roll_vwap)] <- 0
-  colnames(roll_vwap) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".VWAP")
+  # colnames(roll_vwap) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".VWAP")
   # colnames(roll_vwap) <- colnames(oh_lc)
   roll_vwap
 }  # end roll_vwap
@@ -1047,17 +1094,19 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 #' calculate a rolling mean over the statistics.
 #'
 #' @export
-#' @param oh_lc \emph{OHLC} time series of prices and trading volumes, in
+#' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
-#' @param mo_ment the name of the function for estimating statistics of a single
+#' @param mo_ment The name of the function for estimating statistics of a single
 #'   row of \emph{OHLC} data, such as volatility, skew, and higher moments.
-#' @param look_back the size of the look-back window, equal to the number of rows
+#' @param look_back The size of the look-back window, equal to the number of rows
 #'   of data used for calculating the rolling mean.
 #' @param weight_ed \emph{Boolean} argument: should statistic be weighted by
 #'   trade volume? (default \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{roll_moment()} calculates a vector of statistics
 #'   over an \emph{OHLC} time series, such as volatility, skew, and higher
 #'   moments.  The statistics could also be any other aggregation of a single
@@ -1066,6 +1115,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 #'   to the number of rows of the argument \code{oh_lc}. Then it calculates a
 #'   trade volume weighted rolling mean over the vector of statistics over and
 #'   calculate statistics.
+#'
 #' @examples
 #' # calculate time series of rolling variance and skew estimates
 #' var_rolling <- roll_moment(oh_lc=HighFreq::SPY, look_back=21)
@@ -1086,7 +1136,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
     agg_regations[is.na(agg_regations)] <- 0
   } else
     agg_regations <- rutils::roll_sum(agg_regations, look_back=look_back)/look_back
-  colnames(agg_regations) <- paste(rutils::get_name(colnames(oh_lc)[1]), "Vol", sep=".")
+  # colnames(agg_regations) <- paste(rutils::get_name(colnames(oh_lc)[1]), "Vol", sep=".")
   agg_regations
 }  # end roll_moment
 
@@ -1098,7 +1148,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #' for variance.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
 #' @param calc_method \emph{character} string representing method for estimating
 #'   variance.  The methods include:
 #'   \itemize{
@@ -1109,12 +1159,14 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @param look_back the size of the look-back window, equal to the number of rows
+#' @param look_back The size of the look-back window, equal to the number of rows
 #'   of data used for calculating the variance.
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{roll_variance()} calculates a time series of
 #'   variance estimates of percentage returns, from \emph{OHLC} prices, using
 #'   several different variance estimation methods based on the range of
@@ -1150,6 +1202,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
 #'   it's a little faster because it uses function RcppRoll::roll_sd(), and it
 #'   performs less data validation.
+#'
 #' @examples
 #' # create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
@@ -1186,7 +1239,7 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
     vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- rutils::na_locf(vari_ance)
-  colnames(vari_ance) <- paste0(sym_bol, ".Variance")
+  # colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
 }  # end roll_variance
 
@@ -1197,9 +1250,9 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #' estimators for variance.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param calc_method \emph{character} string representing method for estimating
-#'   variance.  The methods include:
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param calc_method A \emph{character} string representing the method for
+#'   estimating variance.  The methods include:
 #'   \itemize{
 #'     \item "close" close to close,
 #'     \item "garman_klass" Garman-Klass,
@@ -1210,7 +1263,9 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #'    (default is \code{"yang_zhang"})
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
-#' @return a single \emph{numeric} value equal to the variance.
+#'
+#' @return A single \emph{numeric} value equal to the variance.
+#'
 #' @details The function \code{calc_variance()} calculates the variance estimate
 #'   from \emph{OHLC} prices, using several different variance estimation
 #'   methods based on the range of \emph{OHLC} prices.
@@ -1238,6 +1293,7 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #'   The function \code{calc_variance()} performs the same calculations as the
 #'   function \code{run_variance()} and then calculates the average of the spot
 #'   variance estimates.
+#'
 #' @examples
 #' # create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
@@ -1277,14 +1333,17 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 #' an \emph{OHLC} time series.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back the size of the look-back window, equal to the number of rows
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param look_back The size of the look-back window, equal to the number of rows
 #'   of data used for aggregating the \emph{OHLC} prices.
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{roll_sharpe()} calculates the rolling Sharpe
 #'   ratio defined as the ratio of percentage returns over the look-back window,
 #'   divided by the average volatility of percentage returns.
+#'
 #' @examples
 #' # calculate rolling Sharpe ratio over SPY
 #' sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
@@ -1295,7 +1354,7 @@ roll_sharpe <- function(oh_lc, look_back=11) {
   sharpe_rolling <- ifelse(var_rolling==0,
                            1.0,
                            re_turns/var_rolling)
-  colnames(sharpe_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
+  # colnames(sharpe_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
   rutils::na_locf(sharpe_rolling)
 }  # end roll_sharpe
 
@@ -1306,11 +1365,13 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #' window.
 #'
 #' @export
-#' @param oh_lc an \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back the size of the look-back window, equal to the number of rows
-#'   of data used for aggregating the \emph{OHLC} prices.
+#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
+#' @param look_back The size of the look-back window, equal to the number of
+#'   rows of data used for aggregating the \emph{OHLC} prices.
+#'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
+#'
 #' @details The function \code{roll_hurst()} calculates a time series of
 #'   \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling look-back
 #'   window.
@@ -1344,7 +1405,7 @@ roll_hurst <- function(oh_lc, look_back=11) {
   hurst_rolling <- ifelse((var_rolling==0) | (ran_ge==0),
                           0.5,
                           log(ran_ge/var_rolling)/log(look_back))
-  colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Hurst")
+  # colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Hurst")
   rutils::na_locf(hurst_rolling)
 }  # end roll_hurst
 
@@ -1355,20 +1416,22 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #' points of an \emph{OHLC} time series.
 #'
 #' @export
-#' @param x_ts \emph{OHLC} time series of prices and trading volumes, in
+#' @param x_ts An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
-#' @param agg_fun the name of the aggregation function to be applied over a
+#' @param agg_fun The name of the aggregation function to be applied over a
 #'   rolling look-back window.
-#' @param look_back the size of the look-back window, equal to the number of rows
-#'   of data used for applying the aggregation function (including the current
-#'   row).
+#' @param look_back The size of the look-back window, equal to the number of
+#'   rows of data used for applying the aggregation function (including the
+#'   current row).
 #' @param by_columns \emph{Boolean} argument: should the function
 #'   \code{agg_fun()} be applied column-wise (individually), or should it be
 #'   applied to all the columns combined? (default is \code{FALSE})
-#' @param end_points an integer vector of end points.
+#' @param end_points An integer vector of end points.
 #' @param ... additional parameters to the agg_fun function.
+#'
 #' @return An \emph{xts} time series with the same number of rows as the
 #'   argument \code{x_ts}.
+#'
 #' @details The function \code{roll_apply()} applies an aggregation function
 #'   over a rolling look-back window and the end points of an \emph{OHLC} time
 #'   series.
@@ -1444,7 +1507,7 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
       agg_fun(x_ts[start_points[in_dex]:end_points[in_dex]], ...)
     )  # end sapply
     # coerce agg_regations into matrix and transpose it
-    if (is.vector(agg_regations))
+    if (is.null(dim(agg_regations)))
       agg_regations <- t(agg_regations)
     agg_regations <- t(agg_regations)
   }  # end if
@@ -1459,37 +1522,46 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
 #' end points along a time series of prices.
 #'
 #' @export
-#' @param x_ts a time series of prices, asset returns, trading volumes, and
+#' @param x_ts A time series of prices, asset returns, trading volumes, and
 #'   other data, in \emph{xts} format.
-#' @param train_func the name of the function for training (calibrating) a
+#' @param train_func The name of the function for training (calibrating) a
 #'   forecasting model, to be applied over a rolling look-back window.
-#' @param trade_func the name of the trading model function, to be applied over
+#' @param trade_func The name of the trading model function, to be applied over
 #'   a rolling look-forward window.
-#' @param look_back the size of the look-back window, equal to the number of
+#' @param look_back The size of the look-back window, equal to the number of
 #'   rows of data used for training the forecasting model.
-#' @param look_forward the size of the look-forward window, equal to the number
+#' @param look_forward The size of the look-forward window, equal to the number
 #'   of rows of data used for trading the strategy.
-#' @param end_points a vector of end points along the rows of the \code{x_ts}
+#' @param end_points A vector of end points along the rows of the \code{x_ts}
 #'   time series, given as either integers or dates.
 #' @param ... additional parameters to the functions \code{train_func()} and
 #'   \code{trade_func()}.
+#'
 #' @return An \emph{xts} time series with the number of rows equal to the number
 #'   of end points minus two.
+#'
 #' @details The function \code{roll_backtest()} performs a rolling backtest
 #'   simulation of a trading strategy over a vector of end points. At each end
 #'   point, it trains (calibrates) a forecasting model using past data taken
 #'   from the \code{x_ts} time series over the look-back window, and applies the
 #'   forecasts to the \code{trade_func()} trading model, using out-of-sample
 #'   future data from the look-forward window.
-#'   The function \code{trade_func()} should simulate the trading model and
-#'   should return a named vector of performance statistics.
+#'   
+#'   The function \code{trade_func()} should simulate the trading model, and it 
+#'   should return a named list with at least two elements: a named vector of 
+#'   performance statistics, and an \emph{xts} time series of out-of-sample 
+#'   returns.  The list returned by \code{trade_func()} can also have additional
+#'   elements, like the in-sample calibrated model statistics, etc.
 #'
-#'   The function \code{roll_backtest()} returns an \emph{xts} time series with
-#'   columns of performance statistics returned by \code{trade_func()}, and with
-#'   the number of rows equal to the number of end points minus two (because the
-#'   first and last end points can't be included in the backtest).
+#'   The function \code{roll_backtest()} returns a named list containing the
+#'   lists returned by function \code{trade_func()}.  The list names are equal
+#'   to the \emph{end_points} dates. 
+#'   The number of list elements is equal to the number of \emph{end_points}
+#'   minus two (because the first and last end points can't be included in the
+#'   backtest).
 #'
 #' @examples
+#' \dontrun{
 #' # combine two time series of prices
 #' price_s <- cbind(rutils::env_etf$XLU, rutils::env_etf$XLP)
 #' look_back <- 252
@@ -1505,6 +1577,7 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
 #'     model_params = model_params,
 #'     trading_params = trading_params,
 #'     x_ts=price_s)
+#' }
 
 roll_backtest <- function(x_ts,
                           train_func, trade_func,
@@ -1518,30 +1591,35 @@ roll_backtest <- function(x_ts,
 
   # convert end_points dates to integer
   if (inherits(end_points, c("Date", "POSIXt"))) {
+    end_dates <- end_points
     end_points <- match(end_points, index(x_ts))
+  } else {
+    end_dates <- index(x_ts[end_points])
   }  # end if
 
-  # define back_points and fwd_points
+  # define integer back_points and fwd_points from integer end_points
   back_points <- end_points - look_back + 1
-  back_points[back_points<1] <- 1
+  back_points[back_points < 0] <- 0
   fwd_points <- end_points + look_forward
-  fwd_points[fwd_points>NROW(x_ts)] <- NROW(x_ts)
+  fwd_points[fwd_points > NROW(x_ts)] <- NROW(x_ts)
 
   # perform backtest over length of end_points
   backtest_range <- 2:(NROW(end_points)-1)
-  back_test <- sapply(backtest_range, function(in_dex) {
-    trained_model <- train_func(x_ts[back_points[in_dex]:end_points[in_dex]],
-                             ...)
+  back_test <- lapply(backtest_range, function(in_dex) {
+    trained_model <- 
+      train_func(x_ts[back_points[in_dex]:end_points[in_dex]], ...)
     trade_func(x_ts[(end_points[in_dex]+1):fwd_points[in_dex]],
                trained_model, ...)
-  })  # end sapply
+  })  # end lapply
 
+  names(back_test) <- end_dates[backtest_range]
+  back_test
   # coerce back_test into matrix and transpose it
-  if (is.vector(back_test))
-    back_test <- t(back_test)
-  back_test <- t(back_test)
+  # if (is.null(dim(back_test)))
+  #   back_test <- t(back_test)
+  # back_test <- t(back_test)
   # coerce back_test into xts series
-  xts(back_test, order.by=index(x_ts[end_points[backtest_range]]))
+  # xts(back_test, order.by=index(x_ts[end_points[backtest_range]]))
 }  # end roll_backtest
 
 
@@ -1550,17 +1628,20 @@ roll_backtest <- function(x_ts,
 #' Perform seasonality aggregations over a single-column \emph{xts} time series.
 #'
 #' @export
-#' @param x_ts single-column \emph{xts} time series.
-#' @param in_dex vector of \emph{character} strings representing points in time,
-#'   of the same length as the argument \code{x_ts}.
+#' @param x_ts A single-column \emph{xts} time series.
+#' @param in_dex A vector of \emph{character} strings representing points in
+#'   time, of the same length as the argument \code{x_ts}.
+#'
 #' @return An \emph{xts} time series with mean aggregations over the seasonality
 #'   interval.
+#'
 #' @details The function \code{season_ality()} calculates the mean of values
 #'   observed at the same points in time specified by the argument
 #'   \code{in_dex}. An example of a daily seasonality aggregation is the average
 #'   price of a stock between 9:30AM and 10:00AM every day, over many days. The
 #'   argument \code{in_dex} is passed into function \code{tapply()}, and must be
 #'   the same length as the argument \code{x_ts}.
+#'
 #' @examples
 #' # calculate running variance of each minutely OHLC bar of data
 #' x_ts <- run_variance(HighFreq::SPY)

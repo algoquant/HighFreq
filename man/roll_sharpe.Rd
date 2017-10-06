@@ -8,9 +8,9 @@ an \emph{OHLC} time series.}
 roll_sharpe(oh_lc, look_back = 11)
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{look_back}{the size of the look-back window, equal to the number of rows
+\item{look_back}{The size of the look-back window, equal to the number of rows
 of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{

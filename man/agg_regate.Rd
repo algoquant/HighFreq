@@ -8,10 +8,10 @@ a \emph{OHLC} time series.}
 agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 }
 \arguments{
-\item{oh_lc}{\emph{OHLC} time series of prices and trading volumes, in
+\item{oh_lc}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
-\item{mo_ment}{\emph{character} string representing function for
+\item{mo_ment}{A \emph{character} string representing function for
 estimating the moment.}
 
 \item{weight_ed}{\emph{Boolean} argument: should estimate be weighted by
@@ -20,7 +20,7 @@ the trading volume? (default is \code{TRUE})}
 \item{...}{additional parameters to the mo_ment function.}
 }
 \value{
-a single \emph{numeric} value equal to the volume weighted average of
+A single \emph{numeric} value equal to the volume weighted average of
   an estimator over the time series.
 }
 \description{

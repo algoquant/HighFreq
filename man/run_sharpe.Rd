@@ -8,10 +8,10 @@ time series.}
 run_sharpe(oh_lc, calc_method = "close")
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\emph{character} string representing method for estimating
-the Sharpe-like exponent.}
+\item{calc_method}{A \emph{character} string representing method for
+estimating the Sharpe-like exponent.}
 }
 \value{
 An \emph{xts} time series with the same number of rows as the

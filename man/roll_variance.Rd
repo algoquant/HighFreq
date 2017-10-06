@@ -10,9 +10,9 @@ roll_variance(oh_lc, look_back = 11, calc_method = "yang_zhang",
   sca_le = TRUE)
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{look_back}{the size of the look-back window, equal to the number of rows
+\item{look_back}{The size of the look-back window, equal to the number of rows
 of data used for calculating the variance.}
 
 \item{calc_method}{\emph{character} string representing method for estimating

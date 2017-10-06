@@ -9,19 +9,19 @@ scrub_agg(ta_q, look_back = 51, vol_mult = 2, period = "minutes",
   tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\emph{TAQ} time series in \emph{xts} format.}
+\item{ta_q}{\emph{TAQ} A time series in \emph{xts} format.}
 
-\item{look_back}{number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back window for
 estimating rolling quantile.}
 
-\item{vol_mult}{quantile multiplier.}
+\item{vol_mult}{The quantile multiplier.}
 
-\item{period}{aggregation period.}
+\item{period}{The aggregation period.}
 
-\item{tzone}{timezone to convert.}
+\item{tzone}{The timezone to convert.}
 }
 \value{
-a \emph{OHLC} time series in \emph{xts} format.
+A \emph{OHLC} time series in \emph{xts} format.
 }
 \description{
 Scrub a single day of \emph{TAQ} data, aggregate it, and convert to

@@ -7,10 +7,10 @@
 season_ality(x_ts, in_dex = format(zoo::index(x_ts), "\%H:\%M"))
 }
 \arguments{
-\item{x_ts}{single-column \emph{xts} time series.}
+\item{x_ts}{A single-column \emph{xts} time series.}
 
-\item{in_dex}{vector of \emph{character} strings representing points in time,
-of the same length as the argument \code{x_ts}.}
+\item{in_dex}{A vector of \emph{character} strings representing points in
+time, of the same length as the argument \code{x_ts}.}
 }
 \value{
 An \emph{xts} time series with mean aggregations over the seasonality

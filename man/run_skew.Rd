@@ -8,13 +8,13 @@ assuming zero drift.}
 run_skew(oh_lc, calc_method = "rogers_satchell")
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\emph{character} string representing method for estimating
-skew.}
+\item{calc_method}{A \emph{character} string representing method for
+estimating skew.}
 }
 \value{
-a time series of skew estimates.
+A time series of skew estimates.
 }
 \description{
 Calculate time series of skew estimates from a \emph{OHLC} time series,

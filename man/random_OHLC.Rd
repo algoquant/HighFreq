@@ -10,19 +10,19 @@ random_ohlc(oh_lc = NULL, re_duce = TRUE, vol_at = 6.5e-05, dri_ft = 0,
   as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"), ...)
 }
 \arguments{
-\item{oh_lc}{\emph{OHLC} time series of prices and trading volumes, in
+\item{oh_lc}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format (default is \emph{NULL}).}
 
 \item{re_duce}{\emph{Boolean} argument: should \code{oh_lc} time series be
 transformed to reduced form? (default is \code{TRUE})}
 
-\item{vol_at}{volatility per period of the \code{in_dex} time index (default
-is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
+\item{vol_at}{The volatility per period of the \code{in_dex} time index
+(default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{dri_ft}{drift per period of the \code{in_dex} time index (default is
-0.0).}
+\item{dri_ft}{The drift per period of the \code{in_dex} time index (default
+is 0.0).}
 
-\item{in_dex}{time index for the \emph{OHLC} time series.}
+\item{in_dex}{The time index for the \emph{OHLC} time series.}
 }
 \value{
 An \emph{xts} time series with the same dimensions and the same time

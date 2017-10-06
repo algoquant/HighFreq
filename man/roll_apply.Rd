@@ -9,17 +9,17 @@ roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
   end_points = (0:NROW(x_ts)), by_columns = FALSE, ...)
 }
 \arguments{
-\item{x_ts}{\emph{OHLC} time series of prices and trading volumes, in
+\item{x_ts}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
-\item{agg_fun}{the name of the aggregation function to be applied over a
+\item{agg_fun}{The name of the aggregation function to be applied over a
 rolling look-back window.}
 
-\item{look_back}{the size of the look-back window, equal to the number of rows
-of data used for applying the aggregation function (including the current
-row).}
+\item{look_back}{The size of the look-back window, equal to the number of
+rows of data used for applying the aggregation function (including the
+current row).}
 
-\item{end_points}{an integer vector of end points.}
+\item{end_points}{An integer vector of end points.}
 
 \item{by_columns}{\emph{Boolean} argument: should the function
 \code{agg_fun()} be applied column-wise (individually), or should it be

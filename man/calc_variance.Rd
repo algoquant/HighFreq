@@ -8,10 +8,10 @@ estimators for variance.}
 calc_variance(oh_lc, calc_method = "yang_zhang", sca_le = TRUE)
 }
 \arguments{
-\item{oh_lc}{an \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{\emph{character} string representing method for estimating
-variance.  The methods include:
+\item{calc_method}{A \emph{character} string representing the method for
+estimating variance.  The methods include:
 \itemize{
   \item "close" close to close,
   \item "garman_klass" Garman-Klass,
@@ -25,7 +25,7 @@ variance.  The methods include:
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
-a single \emph{numeric} value equal to the variance.
+A single \emph{numeric} value equal to the variance.
 }
 \description{
 Calculate the variance of an \emph{OHLC} time series, using different range
