@@ -3,7 +3,7 @@
 \name{which_jumps}
 \alias{which_jumps}
 \title{Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
-a single-column \emph{xts} time series or vector, over a rolling window.}
+a single-column \emph{xts} time series or vector, over a rolling interval.}
 \usage{
 which_jumps(x_ts, look_back = 51, vol_mult = 2)
 }
@@ -11,7 +11,7 @@ which_jumps(x_ts, look_back = 51, vol_mult = 2)
 \item{x_ts}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
-\item{look_back}{The number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back interval for
 estimating rolling quantile.}
 
 \item{vol_mult}{The quantile multiplier.}
@@ -22,7 +22,7 @@ A \emph{Boolean} vector with the same number of rows as the input
 }
 \description{
 Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
-a single-column \emph{xts} time series or vector, over a rolling window.
+a single-column \emph{xts} time series or vector, over a rolling interval.
 }
 \details{
 The function \code{which_jumps()} calculates a \emph{Boolean}
@@ -31,7 +31,7 @@ The function \code{which_jumps()} calculates a \emph{Boolean}
   The function \code{which_jumps()} applies a version of the Hampel median
   filter to identify jumps, but instead of using the median absolute
   deviation (MAD), it uses the \code{0.9} quantile of returns calculated over
-  a rolling window.
+  a rolling interval.
   This is in contrast to function \code{which_extreme()}, which applies a
   Hampel filter to the values themselves, instead of the returns.
   Returns are defined as simple differences between neighboring values.

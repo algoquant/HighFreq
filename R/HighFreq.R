@@ -238,12 +238,12 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
 
 #' Calculate a \emph{Boolean} vector that identifies extreme tail values in a
 #' single-column \emph{xts} time series or vector, over a rolling look-back
-#' window.
+#' interval.
 #'
 #' @export
 #' @param x_ts A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
-#' @param look_back The number of data points in rolling look-back window for
+#' @param look_back The number of data points in rolling look-back interval for
 #'   estimating rolling quantile.
 #' @param vol_mult The quantile multiplier.
 #'
@@ -257,7 +257,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
 #'   The function \code{which_extreme()} applies a version of the Hampel median
 #'   filter to identify extreme values, but instead of using the median absolute
 #'   deviation (MAD), it uses the \code{0.9} quantile values calculated over a
-#'   rolling look-back window.
+#'   rolling look-back interval.
 #'
 #'   Extreme values are defined as those that exceed the product of the
 #'   multiplier times the rolling quantile. Extreme values belong to the fat
@@ -304,7 +304,7 @@ which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
 
 
 #' Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
-#' a single-column \emph{xts} time series or vector, over a rolling window.
+#' a single-column \emph{xts} time series or vector, over a rolling interval.
 #'
 #' @export
 #' @inheritParams which_extreme
@@ -318,7 +318,7 @@ which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
 #'   The function \code{which_jumps()} applies a version of the Hampel median
 #'   filter to identify jumps, but instead of using the median absolute
 #'   deviation (MAD), it uses the \code{0.9} quantile of returns calculated over
-#'   a rolling window.
+#'   a rolling interval.
 #'   This is in contrast to function \code{which_extreme()}, which applies a
 #'   Hampel filter to the values themselves, instead of the returns.
 #'   Returns are defined as simple differences between neighboring values.
@@ -1043,7 +1043,7 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 
 
 #' Calculate the volume-weighted average price of an \emph{OHLC} time series
-#' over a rolling look-back window.
+#' over a rolling look-back interval.
 #'
 #' Performs the same operation as function \code{VWAP()} from package
 #' \href{https://cran.r-project.org/web/packages/TTR/index.html}{VWAP},
@@ -1052,7 +1052,7 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
 #' @param x_ts A single-column \emph{xts} time series.
-#' @param look_back The size of the look-back window, equal to the number of
+#' @param look_back The size of the look-back interval, equal to the number of
 #'   rows of data used for calculating the average price.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1060,8 +1060,8 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #'
 #' @details The function \code{roll_vwap()} calculates the volume-weighted
 #'   average closing price, defined as the sum of the prices multiplied by
-#'   trading volumes in the look-back window, divided by the sum of trading
-#'   volumes in the window. If the argument \code{x_ts} is passed in explicitly,
+#'   trading volumes in the look-back interval, divided by the sum of trading
+#'   volumes in the interval. If the argument \code{x_ts} is passed in explicitly,
 #'   then its volume-weighted average value over time is calculated.
 #'
 #' @examples
@@ -1098,7 +1098,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 #'   \emph{xts} format.
 #' @param mo_ment The name of the function for estimating statistics of a single
 #'   row of \emph{OHLC} data, such as volatility, skew, and higher moments.
-#' @param look_back The size of the look-back window, equal to the number of rows
+#' @param look_back The size of the look-back interval, equal to the number of rows
 #'   of data used for calculating the rolling mean.
 #' @param weight_ed \emph{Boolean} argument: should statistic be weighted by
 #'   trade volume? (default \code{TRUE})
@@ -1143,7 +1143,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 
 
 
-#' Calculate a time series of variance estimates over a rolling look-back window
+#' Calculate a time series of variance estimates over a rolling look-back interval
 #' for an \emph{OHLC} time series of prices, using different range estimators
 #' for variance.
 #'
@@ -1159,7 +1159,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @param look_back The size of the look-back window, equal to the number of rows
+#' @param look_back The size of the look-back interval, equal to the number of rows
 #'   of data used for calculating the variance.
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
@@ -1206,7 +1206,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #' @examples
 #' # create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
-#' # calculate variance estimates for oh_lc over a 21 period window
+#' # calculate variance estimates for oh_lc over a 21 period interval
 #' var_rolling <- HighFreq::roll_variance(oh_lc, look_back=21)
 #' # calculate variance estimates for SPY
 #' var_rolling <- HighFreq::roll_variance(HighFreq::SPY, calc_method="yang_zhang")
@@ -1329,19 +1329,19 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 
 
 
-#' Calculate a time series of Sharpe ratios over a rolling look-back window for
+#' Calculate a time series of Sharpe ratios over a rolling look-back interval for
 #' an \emph{OHLC} time series.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back The size of the look-back window, equal to the number of rows
+#' @param look_back The size of the look-back interval, equal to the number of rows
 #'   of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
 #'
 #' @details The function \code{roll_sharpe()} calculates the rolling Sharpe
-#'   ratio defined as the ratio of percentage returns over the look-back window,
+#'   ratio defined as the ratio of percentage returns over the look-back interval,
 #'   divided by the average volatility of percentage returns.
 #'
 #' @examples
@@ -1362,11 +1362,11 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 
 
 #' Calculate a time series of \emph{Hurst} exponents over a rolling look-back
-#' window.
+#' interval.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back The size of the look-back window, equal to the number of
+#' @param look_back The size of the look-back interval, equal to the number of
 #'   rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1374,11 +1374,11 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #'
 #' @details The function \code{roll_hurst()} calculates a time series of
 #'   \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling look-back
-#'   window.
+#'   interval.
 #'
 #'   The \emph{Hurst} exponent is defined as the logarithm of the ratio of the
 #'   price range, divided by the standard deviation of returns, and divided by
-#'   the logarithm of the window length.
+#'   the logarithm of the interval length.
 #'
 #'   The function \code{roll_hurst()} doesn't use the same definition as the
 #'   rescaled range definition of the \emph{Hurst} exponent.
@@ -1386,7 +1386,7 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #'   \emph{Low} prices, which produces bigger range values, and higher
 #'   \emph{Hurst} exponent estimates.
 #'   Second, because the \emph{Hurst} exponent is estimated using a single
-#'   aggregation window, instead of multiple windows in the rescaled range
+#'   aggregation interval, instead of multiple intervals in the rescaled range
 #'   definition.
 #'
 #'   The rationale for using a different definition of the \emph{Hurst} exponent
@@ -1412,15 +1412,15 @@ roll_hurst <- function(oh_lc, look_back=11) {
 
 
 
-#' Apply an aggregation function over a rolling look-back window and the end
+#' Apply an aggregation function over a rolling look-back interval and the end
 #' points of an \emph{OHLC} time series.
 #'
 #' @export
 #' @param x_ts An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
 #' @param agg_fun The name of the aggregation function to be applied over a
-#'   rolling look-back window.
-#' @param look_back The size of the look-back window, equal to the number of
+#'   rolling look-back interval.
+#' @param look_back The size of the look-back interval, equal to the number of
 #'   rows of data used for applying the aggregation function (including the
 #'   current row).
 #' @param by_columns \emph{Boolean} argument: should the function
@@ -1433,7 +1433,7 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #'   argument \code{x_ts}.
 #'
 #' @details The function \code{roll_apply()} applies an aggregation function
-#'   over a rolling look-back window and the end points of an \emph{OHLC} time
+#'   over a rolling look-back interval and the end points of an \emph{OHLC} time
 #'   series.
 #'
 #'   Performs similar operations to the functions \code{rollapply()} and
@@ -1452,13 +1452,13 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #'   depending on the argument \code{end_points}.
 #'   If the argument \code{end_points} isn't explicitly passed to
 #'   \code{roll_apply()}, then the default value is used, and
-#'   \code{roll_apply()} performs aggregations over overlapping windows at each
+#'   \code{roll_apply()} performs aggregations over overlapping intervals at each
 #'   point in time.
 #'   If the argument \code{end_points} is explicitly passed to
 #'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-#'   windows spanned by the end_points.  If look_back=2 then the aggregations are
-#'   performed over non-overlapping windows, otherwise they are performed over
-#'   overlapping windows.
+#'   intervals spanned by the end_points.  If look_back=2 then the aggregations are
+#'   performed over non-overlapping intervals, otherwise they are performed over
+#'   overlapping intervals.
 #'
 #'   The aggregation function \code{agg_fun()} can return either a single value
 #'   or a vector of values. If the aggregation function \code{agg_fun()} returns
@@ -1472,18 +1472,18 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #' # extract a single day of SPY data
 #' oh_lc <- SPY["2012-02-13"]
 #' look_back <- 11
-#' # calculate the rolling sums of oh_lc columns over a rolling window
+#' # calculate the rolling sums of oh_lc columns over a rolling interval
 #' agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-#' # apply a vector-valued aggregation function over a rolling window
+#' # apply a vector-valued aggregation function over a rolling interval
 #' agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
 #' # define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 #' end_points <- rutils::end_points(oh_lc, inter_val=look_back)
-#' # calculate the sums of oh_lc columns over end_points using non-overlapping windows
+#' # calculate the sums of oh_lc columns over end_points using non-overlapping intervals
 #' agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=2,
 #'                             end_points=end_points, by_columns=TRUE)
 #' # apply a vector-valued aggregation function over the end_points of oh_lc
-#' # using overlapping windows
+#' # using overlapping intervals
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
 #'                             look_back=5, end_points=end_points)
 
@@ -1525,12 +1525,12 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
 #' @param x_ts A time series of prices, asset returns, trading volumes, and
 #'   other data, in \emph{xts} format.
 #' @param train_func The name of the function for training (calibrating) a
-#'   forecasting model, to be applied over a rolling look-back window.
+#'   forecasting model, to be applied over a rolling look-back interval.
 #' @param trade_func The name of the trading model function, to be applied over
-#'   a rolling look-forward window.
-#' @param look_back The size of the look-back window, equal to the number of
+#'   a rolling look-forward interval.
+#' @param look_back The size of the look-back interval, equal to the number of
 #'   rows of data used for training the forecasting model.
-#' @param look_forward The size of the look-forward window, equal to the number
+#' @param look_forward The size of the look-forward interval, equal to the number
 #'   of rows of data used for trading the strategy.
 #' @param end_points A vector of end points along the rows of the \code{x_ts}
 #'   time series, given as either integers or dates.
@@ -1543,9 +1543,9 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
 #' @details The function \code{roll_backtest()} performs a rolling backtest
 #'   simulation of a trading strategy over a vector of end points. At each end
 #'   point, it trains (calibrates) a forecasting model using past data taken
-#'   from the \code{x_ts} time series over the look-back window, and applies the
+#'   from the \code{x_ts} time series over the look-back interval, and applies the
 #'   forecasts to the \code{trade_func()} trading model, using out-of-sample
-#'   future data from the look-forward window.
+#'   future data from the look-forward interval.
 #'   
 #'   The function \code{trade_func()} should simulate the trading model, and it 
 #'   should return a named list with at least two elements: a named vector of 

@@ -2,7 +2,7 @@ Package: HighFreq
 Type: Package
 Title: High Frequency Time Series Management
 Version: 0.1
-Date: 2015-05-28
+Date: 2017-10-26
 Author: Jerzy Pawlowski (algoquant)
 Maintainer: Jerzy Pawlowski <jp3900@nyu.edu>
 Description: Functions for chaining and joining time series, scrubbing bad data,
@@ -18,6 +18,10 @@ Imports:
 	RcppRoll, 
 	caTools, 
 	lubridate, 
+    Rcpp,
+    RcppParallel
+LinkingTo: Rcpp, RcppArmadillo, RcppParallel
+SystemRequirements: GNU make, C++11
 Remotes: github::algoquant/rutils,
 VignetteBuilder: knitr
 LazyData: true

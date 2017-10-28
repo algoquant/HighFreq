@@ -11,7 +11,7 @@ scrub_agg(ta_q, look_back = 51, vol_mult = 2, period = "minutes",
 \arguments{
 \item{ta_q}{\emph{TAQ} A time series in \emph{xts} format.}
 
-\item{look_back}{The number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back interval for
 estimating rolling quantile.}
 
 \item{vol_mult}{The quantile multiplier.}

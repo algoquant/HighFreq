@@ -13,15 +13,15 @@ roll_backtest(x_ts, train_func, trade_func, look_back = look_forward,
 other data, in \emph{xts} format.}
 
 \item{train_func}{The name of the function for training (calibrating) a
-forecasting model, to be applied over a rolling look-back window.}
+forecasting model, to be applied over a rolling look-back interval.}
 
 \item{trade_func}{The name of the trading model function, to be applied over
-a rolling look-forward window.}
+a rolling look-forward interval.}
 
-\item{look_back}{The size of the look-back window, equal to the number of
+\item{look_back}{The size of the look-back interval, equal to the number of
 rows of data used for training the forecasting model.}
 
-\item{look_forward}{The size of the look-forward window, equal to the number
+\item{look_forward}{The size of the look-forward interval, equal to the number
 of rows of data used for trading the strategy.}
 
 \item{end_points}{A vector of end points along the rows of the \code{x_ts}
@@ -42,18 +42,25 @@ end points along a time series of prices.
 The function \code{roll_backtest()} performs a rolling backtest
   simulation of a trading strategy over a vector of end points. At each end
   point, it trains (calibrates) a forecasting model using past data taken
-  from the \code{x_ts} time series over the look-back window, and applies the
+  from the \code{x_ts} time series over the look-back interval, and applies the
   forecasts to the \code{trade_func()} trading model, using out-of-sample
-  future data from the look-forward window.
-  The function \code{trade_func()} should simulate the trading model and
-  should return a named vector of performance statistics.
+  future data from the look-forward interval.
+  
+  The function \code{trade_func()} should simulate the trading model, and it 
+  should return a named list with at least two elements: a named vector of 
+  performance statistics, and an \emph{xts} time series of out-of-sample 
+  returns.  The list returned by \code{trade_func()} can also have additional
+  elements, like the in-sample calibrated model statistics, etc.
 
-  The function \code{roll_backtest()} returns an \emph{xts} time series with
-  columns of performance statistics returned by \code{trade_func()}, and with
-  the number of rows equal to the number of end points minus two (because the
-  first and last end points can't be included in the backtest).
+  The function \code{roll_backtest()} returns a named list containing the
+  lists returned by function \code{trade_func()}.  The list names are equal
+  to the \emph{end_points} dates. 
+  The number of list elements is equal to the number of \emph{end_points}
+  minus two (because the first and last end points can't be included in the
+  backtest).
 }
 \examples{
+\dontrun{
 # combine two time series of prices
 price_s <- cbind(rutils::env_etf$XLU, rutils::env_etf$XLP)
 look_back <- 252
@@ -69,5 +76,6 @@ back_test <- roll_backtest(end_points=end_points,
     model_params = model_params,
     trading_params = trading_params,
     x_ts=price_s)
+}
 }
 

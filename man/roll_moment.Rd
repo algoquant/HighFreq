@@ -15,7 +15,7 @@ roll_moment(oh_lc, mo_ment = "run_variance", look_back = 11,
 \item{mo_ment}{The name of the function for estimating statistics of a single
 row of \emph{OHLC} data, such as volatility, skew, and higher moments.}
 
-\item{look_back}{The size of the look-back window, equal to the number of rows
+\item{look_back}{The size of the look-back interval, equal to the number of rows
 of data used for calculating the rolling mean.}
 
 \item{weight_ed}{\emph{Boolean} argument: should statistic be weighted by

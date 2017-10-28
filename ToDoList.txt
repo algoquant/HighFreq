@@ -44,6 +44,17 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] add Rcpp roll and run functions
+Convert roll functions from package RcppRoll to native Rcpp functions.
+Fix build error about RcppExports.R.
+Add by hand to NAMESPACE:
+useDynLib(HighFreq)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
+importFrom(RcppParallel, RcppParallelLibs)
+
++ [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
+
 + [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
@@ -115,8 +126,6 @@ Run random data through model to test if there is data snooping.
 + [x] add lubridate to Imports in DESCRIPTION file  
 
 + [x] create function roll_sharpe()
-
-+ [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [x] modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
 

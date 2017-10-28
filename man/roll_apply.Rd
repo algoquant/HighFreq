@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_apply}
 \alias{roll_apply}
-\title{Apply an aggregation function over a rolling look-back window and the end
+\title{Apply an aggregation function over a rolling look-back interval and the end
 points of an \emph{OHLC} time series.}
 \usage{
 roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
@@ -13,9 +13,9 @@ roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
 \emph{xts} format.}
 
 \item{agg_fun}{The name of the aggregation function to be applied over a
-rolling look-back window.}
+rolling look-back interval.}
 
-\item{look_back}{The size of the look-back window, equal to the number of
+\item{look_back}{The size of the look-back interval, equal to the number of
 rows of data used for applying the aggregation function (including the
 current row).}
 
@@ -32,12 +32,12 @@ An \emph{xts} time series with the same number of rows as the
   argument \code{x_ts}.
 }
 \description{
-Apply an aggregation function over a rolling look-back window and the end
+Apply an aggregation function over a rolling look-back interval and the end
 points of an \emph{OHLC} time series.
 }
 \details{
 The function \code{roll_apply()} applies an aggregation function
-  over a rolling look-back window and the end points of an \emph{OHLC} time
+  over a rolling look-back interval and the end points of an \emph{OHLC} time
   series.
 
   Performs similar operations to the functions \code{rollapply()} and
@@ -56,13 +56,13 @@ The function \code{roll_apply()} applies an aggregation function
   depending on the argument \code{end_points}.
   If the argument \code{end_points} isn't explicitly passed to
   \code{roll_apply()}, then the default value is used, and
-  \code{roll_apply()} performs aggregations over overlapping windows at each
+  \code{roll_apply()} performs aggregations over overlapping intervals at each
   point in time.
   If the argument \code{end_points} is explicitly passed to
   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-  windows spanned by the end_points.  If look_back=2 then the aggregations are
-  performed over non-overlapping windows, otherwise they are performed over
-  overlapping windows.
+  intervals spanned by the end_points.  If look_back=2 then the aggregations are
+  performed over non-overlapping intervals, otherwise they are performed over
+  overlapping intervals.
 
   The aggregation function \code{agg_fun()} can return either a single value
   or a vector of values. If the aggregation function \code{agg_fun()} returns
@@ -76,18 +76,18 @@ The function \code{roll_apply()} applies an aggregation function
 # extract a single day of SPY data
 oh_lc <- SPY["2012-02-13"]
 look_back <- 11
-# calculate the rolling sums of oh_lc columns over a rolling window
+# calculate the rolling sums of oh_lc columns over a rolling interval
 agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-# apply a vector-valued aggregation function over a rolling window
+# apply a vector-valued aggregation function over a rolling interval
 agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
 # define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 end_points <- rutils::end_points(oh_lc, inter_val=look_back)
-# calculate the sums of oh_lc columns over end_points using non-overlapping windows
+# calculate the sums of oh_lc columns over end_points using non-overlapping intervals
 agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=2,
                             end_points=end_points, by_columns=TRUE)
 # apply a vector-valued aggregation function over the end_points of oh_lc
-# using overlapping windows
+# using overlapping intervals
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
                             look_back=5, end_points=end_points)
 }

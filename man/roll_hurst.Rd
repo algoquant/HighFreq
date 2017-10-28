@@ -3,14 +3,14 @@
 \name{roll_hurst}
 \alias{roll_hurst}
 \title{Calculate a time series of \emph{Hurst} exponents over a rolling look-back
-window.}
+interval.}
 \usage{
 roll_hurst(oh_lc, look_back = 11)
 }
 \arguments{
 \item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{look_back}{The size of the look-back window, equal to the number of
+\item{look_back}{The size of the look-back interval, equal to the number of
 rows of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
@@ -19,16 +19,16 @@ An \emph{xts} time series with a single column and the same number of
 }
 \description{
 Calculate a time series of \emph{Hurst} exponents over a rolling look-back
-window.
+interval.
 }
 \details{
 The function \code{roll_hurst()} calculates a time series of
   \emph{Hurst} exponents from \emph{OHLC} prices, over a rolling look-back
-  window.
+  interval.
 
   The \emph{Hurst} exponent is defined as the logarithm of the ratio of the
   price range, divided by the standard deviation of returns, and divided by
-  the logarithm of the window length.
+  the logarithm of the interval length.
 
   The function \code{roll_hurst()} doesn't use the same definition as the
   rescaled range definition of the \emph{Hurst} exponent.
@@ -36,7 +36,7 @@ The function \code{roll_hurst()} calculates a time series of
   \emph{Low} prices, which produces bigger range values, and higher
   \emph{Hurst} exponent estimates.
   Second, because the \emph{Hurst} exponent is estimated using a single
-  aggregation window, instead of multiple windows in the rescaled range
+  aggregation interval, instead of multiple intervals in the rescaled range
   definition.
 
   The rationale for using a different definition of the \emph{Hurst} exponent

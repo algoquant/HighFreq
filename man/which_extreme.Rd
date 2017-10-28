@@ -4,7 +4,7 @@
 \alias{which_extreme}
 \title{Calculate a \emph{Boolean} vector that identifies extreme tail values in a
 single-column \emph{xts} time series or vector, over a rolling look-back
-window.}
+interval.}
 \usage{
 which_extreme(x_ts, look_back = 51, vol_mult = 2)
 }
@@ -12,7 +12,7 @@ which_extreme(x_ts, look_back = 51, vol_mult = 2)
 \item{x_ts}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
-\item{look_back}{The number of data points in rolling look-back window for
+\item{look_back}{The number of data points in rolling look-back interval for
 estimating rolling quantile.}
 
 \item{vol_mult}{The quantile multiplier.}
@@ -24,7 +24,7 @@ A \emph{Boolean} vector with the same number of rows as the input
 \description{
 Calculate a \emph{Boolean} vector that identifies extreme tail values in a
 single-column \emph{xts} time series or vector, over a rolling look-back
-window.
+interval.
 }
 \details{
 The function \code{which_extreme()} calculates a \emph{Boolean}
@@ -34,7 +34,7 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
   The function \code{which_extreme()} applies a version of the Hampel median
   filter to identify extreme values, but instead of using the median absolute
   deviation (MAD), it uses the \code{0.9} quantile values calculated over a
-  rolling look-back window.
+  rolling look-back interval.
 
   Extreme values are defined as those that exceed the product of the
   multiplier times the rolling quantile. Extreme values belong to the fat
