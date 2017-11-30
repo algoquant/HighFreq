@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // rcpp_hello_world
 CharacterVector rcpp_hello_world();
-RcppExport SEXP HighFreq_rcpp_hello_world() {
+RcppExport SEXP _HighFreq_rcpp_hello_world() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,7 +18,7 @@ END_RCPP
 }
 // rcpp_mult
 double rcpp_mult(double x, double y);
-RcppExport SEXP HighFreq_rcpp_mult(SEXP xSEXP, SEXP ySEXP) {
+RcppExport SEXP _HighFreq_rcpp_mult(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,7 +30,7 @@ END_RCPP
 }
 // rcpp_mult_vec
 NumericVector rcpp_mult_vec(NumericVector x, NumericVector y);
-RcppExport SEXP HighFreq_rcpp_mult_vec(SEXP xSEXP, SEXP ySEXP) {
+RcppExport SEXP _HighFreq_rcpp_mult_vec(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,7 +42,7 @@ END_RCPP
 }
 // rcpp_ou_proc
 NumericVector rcpp_ou_proc(int len_gth, double eq_price, double vol_at, double the_ta, NumericVector r_norm);
-RcppExport SEXP HighFreq_rcpp_ou_proc(SEXP len_gthSEXP, SEXP eq_priceSEXP, SEXP vol_atSEXP, SEXP the_taSEXP, SEXP r_normSEXP) {
+RcppExport SEXP _HighFreq_rcpp_ou_proc(SEXP len_gthSEXP, SEXP eq_priceSEXP, SEXP vol_atSEXP, SEXP the_taSEXP, SEXP r_normSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,7 +57,7 @@ END_RCPP
 }
 // roll_sum
 NumericVector roll_sum(NumericVector re_turns, int look_back);
-RcppExport SEXP HighFreq_roll_sum(SEXP re_turnsSEXP, SEXP look_backSEXP) {
+RcppExport SEXP _HighFreq_roll_sum(SEXP re_turnsSEXP, SEXP look_backSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,7 +69,7 @@ END_RCPP
 }
 // roll_var
 NumericVector roll_var(NumericVector re_turns, int look_back);
-RcppExport SEXP HighFreq_roll_var(SEXP re_turnsSEXP, SEXP look_backSEXP) {
+RcppExport SEXP _HighFreq_roll_var(SEXP re_turnsSEXP, SEXP look_backSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -81,7 +81,7 @@ END_RCPP
 }
 // roll_wsum
 NumericVector roll_wsum(NumericVector re_turns, NumericVector wei_ghts);
-RcppExport SEXP HighFreq_roll_wsum(SEXP re_turnsSEXP, SEXP wei_ghtsSEXP) {
+RcppExport SEXP _HighFreq_roll_wsum(SEXP re_turnsSEXP, SEXP wei_ghtsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -90,4 +90,20 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(roll_wsum(re_turns, wei_ghts));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_HighFreq_rcpp_hello_world", (DL_FUNC) &_HighFreq_rcpp_hello_world, 0},
+    {"_HighFreq_rcpp_mult", (DL_FUNC) &_HighFreq_rcpp_mult, 2},
+    {"_HighFreq_rcpp_mult_vec", (DL_FUNC) &_HighFreq_rcpp_mult_vec, 2},
+    {"_HighFreq_rcpp_ou_proc", (DL_FUNC) &_HighFreq_rcpp_ou_proc, 5},
+    {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
+    {"_HighFreq_roll_var", (DL_FUNC) &_HighFreq_roll_var, 2},
+    {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_HighFreq(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

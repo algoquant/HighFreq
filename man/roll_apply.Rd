@@ -5,8 +5,8 @@
 \title{Apply an aggregation function over a rolling look-back interval and the end
 points of an \emph{OHLC} time series.}
 \usage{
-roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
-  end_points = (0:NROW(x_ts)), by_columns = FALSE, ...)
+roll_apply(x_ts, agg_fun, look_back = 2, end_points = seq_along(x_ts),
+  by_columns = FALSE, out_xts = TRUE, ...)
 }
 \arguments{
 \item{x_ts}{An \emph{OHLC} time series of prices and trading volumes, in
@@ -15,9 +15,8 @@ roll_apply(x_ts, agg_fun = "run_variance", look_back = 11,
 \item{agg_fun}{The name of the aggregation function to be applied over a
 rolling look-back interval.}
 
-\item{look_back}{The size of the look-back interval, equal to the number of
-rows of data used for applying the aggregation function (including the
-current row).}
+\item{look_back}{The number of end points in the look-back interval used for
+applying the aggregation function (including the current row).}
 
 \item{end_points}{An integer vector of end points.}
 
@@ -25,44 +24,54 @@ current row).}
 \code{agg_fun()} be applied column-wise (individually), or should it be
 applied to all the columns combined? (default is \code{FALSE})}
 
+\item{out_xts}{\emph{Boolean} argument: should the output be coerced into an
+\emph{xts} series? (default is \code{TRUE})}
+
 \item{...}{additional parameters to the agg_fun function.}
 }
 \value{
-An \emph{xts} time series with the same number of rows as the
-  argument \code{x_ts}.
+Either an \emph{xts} time series with the number of rows equal to the
+  length of argument \code{end_points}, or a list the length of argument
+  \code{end_points}.
 }
 \description{
 Apply an aggregation function over a rolling look-back interval and the end
 points of an \emph{OHLC} time series.
 }
 \details{
-The function \code{roll_apply()} applies an aggregation function
-  over a rolling look-back interval and the end points of an \emph{OHLC} time
-  series.
+The function \code{roll_apply()} applies an aggregation function 
+  over a rolling look-back interval attached at the end points of an
+  \emph{OHLC} time series.
 
-  Performs similar operations to the functions \code{rollapply()} and
-  \code{period.apply()} from package
-  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and
-  also the function \code{apply.rolling()} from package
+  \code{HighFreq::roll_apply()} performs similar operations to the functions
+  \code{rollapply()} and \code{period.apply()} from package 
+  \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and 
+  also the function \code{apply.rolling()} from package 
   \href{https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html}{PerformanceAnalytics}.
-  (The function \code{rollapply()} isn't exported from the package
+  (The function \code{rollapply()} isn't exported from the package 
   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.)
 
-  But the function \code{roll_apply()} is faster because it performs less
-  type-checking and skips other overhead. Unlike the other functions,
+  But \code{HighFreq::roll_apply()} is faster because it performs less 
+  type-checking and skips other overhead. Unlike the other functions, 
   \code{roll_apply()} doesn't produce any leading \emph{NA} values.
 
   The function \code{roll_apply()} can be called in two different ways,
   depending on the argument \code{end_points}.
-  If the argument \code{end_points} isn't explicitly passed to
-  \code{roll_apply()}, then the default value is used, and
-  \code{roll_apply()} performs aggregations over overlapping intervals at each
-  point in time.
-  If the argument \code{end_points} is explicitly passed to
-  \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-  intervals spanned by the end_points.  If look_back=2 then the aggregations are
-  performed over non-overlapping intervals, otherwise they are performed over
-  overlapping intervals.
+  If the argument \code{end_points} isn't explicitly passed to 
+  \code{roll_apply()}, then the default value is used, and 
+  \code{roll_apply()} performs aggregations over overlapping intervals at
+  each point in time.
+  
+  If the argument \code{out_xts} is \code{TRUE} (the default) then the output
+  is coerced into an \emph{xts} series, with the number of rows equal to the 
+  length of argument \code{end_points}.  Otherwise a list is returned, with
+  the length equal to the length of argument \code{end_points}.
+  
+  If the argument \code{end_points} is explicitly passed to 
+  \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
+  intervals attached at the end_points.  If look_back=2 then the aggregations
+  are performed over non-overlapping intervals, otherwise they are performed
+  over overlapping intervals.
 
   The aggregation function \code{agg_fun()} can return either a single value
   or a vector of values. If the aggregation function \code{agg_fun()} returns
@@ -74,18 +83,18 @@ The function \code{roll_apply()} applies an aggregation function
 }
 \examples{
 # extract a single day of SPY data
-oh_lc <- SPY["2012-02-13"]
-look_back <- 11
-# calculate the rolling sums of oh_lc columns over a rolling interval
+oh_lc <- HighFreq::SPY["2012-02-13"]
+inter_val <- 11  # number of data points between end points
+look_back <- 4  # number of end points in look-back interval
+# calculate the rolling sums of oh_lc columns over a rolling look-back interval
 agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-# apply a vector-valued aggregation function over a rolling interval
+# apply a vector-valued aggregation function over a rolling look-back interval
 agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
 # define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
-end_points <- rutils::end_points(oh_lc, inter_val=look_back)
+end_points <- rutils::end_points(oh_lc, inter_val=inter_val)
 # calculate the sums of oh_lc columns over end_points using non-overlapping intervals
-agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=2,
-                            end_points=end_points, by_columns=TRUE)
+agg_regations <- roll_apply(oh_lc, agg_fun=sum, end_points=end_points, by_columns=TRUE)
 # apply a vector-valued aggregation function over the end_points of oh_lc
 # using overlapping intervals
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,

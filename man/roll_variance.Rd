@@ -2,9 +2,9 @@
 % Please edit documentation in R/HighFreq.R
 \name{roll_variance}
 \alias{roll_variance}
-\title{Calculate a time series of variance estimates over a rolling look-back interval
-for an \emph{OHLC} time series of prices, using different range estimators
-for variance.}
+\title{Calculate a time series of variance estimates over a rolling look-back
+interval for an \emph{OHLC} time series of prices, using different range
+estimators for variance.}
 \usage{
 roll_variance(oh_lc, look_back = 11, calc_method = "yang_zhang",
   sca_le = TRUE)
@@ -12,8 +12,8 @@ roll_variance(oh_lc, look_back = 11, calc_method = "yang_zhang",
 \arguments{
 \item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{look_back}{The size of the look-back interval, equal to the number of rows
-of data used for calculating the variance.}
+\item{look_back}{The size of the look-back interval, equal to the number of
+rows of data used for calculating the variance.}
 
 \item{calc_method}{\emph{character} string representing method for estimating
 variance.  The methods include:
@@ -34,9 +34,9 @@ An \emph{xts} time series with a single column and the same number of
   rows as the argument \code{oh_lc}.
 }
 \description{
-Calculate a time series of variance estimates over a rolling look-back interval
-for an \emph{OHLC} time series of prices, using different range estimators
-for variance.
+Calculate a time series of variance estimates over a rolling look-back
+interval for an \emph{OHLC} time series of prices, using different range
+estimators for variance.
 }
 \details{
 The function \code{roll_variance()} calculates a time series of

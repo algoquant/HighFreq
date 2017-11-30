@@ -19,7 +19,7 @@ input \sQuote{\code{*.RData}} files.}
 \item{output_dir}{A \emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
 
-\item{look_back}{The number of data points in rolling look-back interval for
+\item{look_back}{The number of data points in rolling look-back interval for 
 estimating rolling quantile.}
 
 \item{vol_mult}{The quantile multiplier.}

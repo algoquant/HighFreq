@@ -12,7 +12,7 @@ which_extreme(x_ts, look_back = 51, vol_mult = 2)
 \item{x_ts}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
-\item{look_back}{The number of data points in rolling look-back interval for
+\item{look_back}{The number of data points in rolling look-back interval for 
 estimating rolling quantile.}
 
 \item{vol_mult}{The quantile multiplier.}

@@ -220,7 +220,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
   # return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # calculate mid prices
-  if(NCOL(x_ts)==6)  # TAQ data has 6 columns
+  if (NCOL(x_ts)==6)  # TAQ data has 6 columns
     re_turns <- 0.5 * (x_ts[, "Bid.Price"] + x_ts[, "Ask.Price"])
   else
     re_turns <- x_ts[, col_umn]  # OHLC data
@@ -243,7 +243,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
 #' @export
 #' @param x_ts A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
-#' @param look_back The number of data points in rolling look-back interval for
+#' @param look_back The number of data points in rolling look-back interval for 
 #'   estimating rolling quantile.
 #' @param vol_mult The quantile multiplier.
 #'
@@ -1052,7 +1052,7 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
 #' @param x_ts A single-column \emph{xts} time series.
-#' @param look_back The size of the look-back interval, equal to the number of
+#' @param look_back The size of the look-back interval, equal to the number of 
 #'   rows of data used for calculating the average price.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1098,8 +1098,8 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 #'   \emph{xts} format.
 #' @param mo_ment The name of the function for estimating statistics of a single
 #'   row of \emph{OHLC} data, such as volatility, skew, and higher moments.
-#' @param look_back The size of the look-back interval, equal to the number of rows
-#'   of data used for calculating the rolling mean.
+#' @param look_back The size of the look-back interval, equal to the number of
+#'   rows of data used for calculating the rolling mean.
 #' @param weight_ed \emph{Boolean} argument: should statistic be weighted by
 #'   trade volume? (default \code{TRUE})
 #' @param ... additional parameters to the mo_ment function.
@@ -1143,9 +1143,9 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 
 
 
-#' Calculate a time series of variance estimates over a rolling look-back interval
-#' for an \emph{OHLC} time series of prices, using different range estimators
-#' for variance.
+#' Calculate a time series of variance estimates over a rolling look-back
+#' interval for an \emph{OHLC} time series of prices, using different range
+#' estimators for variance.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
@@ -1159,8 +1159,8 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @param look_back The size of the look-back interval, equal to the number of rows
-#'   of data used for calculating the variance.
+#' @param look_back The size of the look-back interval, equal to the number of
+#'   rows of data used for calculating the variance.
 #' @param sca_le \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
@@ -1329,20 +1329,20 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 
 
 
-#' Calculate a time series of Sharpe ratios over a rolling look-back interval for
-#' an \emph{OHLC} time series.
+#' Calculate a time series of Sharpe ratios over a rolling look-back interval
+#' for an \emph{OHLC} time series.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back The size of the look-back interval, equal to the number of rows
-#'   of data used for aggregating the \emph{OHLC} prices.
+#' @param look_back The size of the look-back interval, equal to the number of
+#'   rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
 #'
-#' @details The function \code{roll_sharpe()} calculates the rolling Sharpe
-#'   ratio defined as the ratio of percentage returns over the look-back interval,
-#'   divided by the average volatility of percentage returns.
+#' @details The function \code{roll_sharpe()} calculates the rolling Sharpe 
+#'   ratio defined as the ratio of percentage returns over the look-back
+#'   interval, divided by the average volatility of percentage returns.
 #'
 #' @examples
 #' # calculate rolling Sharpe ratio over SPY
@@ -1366,7 +1366,7 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param look_back The size of the look-back interval, equal to the number of
+#' @param look_back The size of the look-back interval, equal to the number of 
 #'   rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1420,99 +1420,116 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #'   \emph{xts} format.
 #' @param agg_fun The name of the aggregation function to be applied over a
 #'   rolling look-back interval.
-#' @param look_back The size of the look-back interval, equal to the number of
-#'   rows of data used for applying the aggregation function (including the
-#'   current row).
+#' @param look_back The number of end points in the look-back interval used for
+#'   applying the aggregation function (including the current row).
 #' @param by_columns \emph{Boolean} argument: should the function
 #'   \code{agg_fun()} be applied column-wise (individually), or should it be
 #'   applied to all the columns combined? (default is \code{FALSE})
+#' @param out_xts \emph{Boolean} argument: should the output be coerced into an
+#'   \emph{xts} series? (default is \code{TRUE})
 #' @param end_points An integer vector of end points.
 #' @param ... additional parameters to the agg_fun function.
 #'
-#' @return An \emph{xts} time series with the same number of rows as the
-#'   argument \code{x_ts}.
+#' @return Either an \emph{xts} time series with the number of rows equal to the
+#'   length of argument \code{end_points}, or a list the length of argument
+#'   \code{end_points}.
 #'
-#' @details The function \code{roll_apply()} applies an aggregation function
-#'   over a rolling look-back interval and the end points of an \emph{OHLC} time
-#'   series.
+#' @details The function \code{roll_apply()} applies an aggregation function 
+#'   over a rolling look-back interval attached at the end points of an
+#'   \emph{OHLC} time series.
 #'
-#'   Performs similar operations to the functions \code{rollapply()} and
-#'   \code{period.apply()} from package
-#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and
-#'   also the function \code{apply.rolling()} from package
+#'   \code{HighFreq::roll_apply()} performs similar operations to the functions
+#'   \code{rollapply()} and \code{period.apply()} from package 
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}, and 
+#'   also the function \code{apply.rolling()} from package 
 #'   \href{https://cran.r-project.org/web/packages/PerformanceAnalytics/index.html}{PerformanceAnalytics}.
-#'   (The function \code{rollapply()} isn't exported from the package
+#'   (The function \code{rollapply()} isn't exported from the package 
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.)
 #'
-#'   But the function \code{roll_apply()} is faster because it performs less
-#'   type-checking and skips other overhead. Unlike the other functions,
+#'   But \code{HighFreq::roll_apply()} is faster because it performs less 
+#'   type-checking and skips other overhead. Unlike the other functions, 
 #'   \code{roll_apply()} doesn't produce any leading \emph{NA} values.
 #'
 #'   The function \code{roll_apply()} can be called in two different ways,
 #'   depending on the argument \code{end_points}.
-#'   If the argument \code{end_points} isn't explicitly passed to
-#'   \code{roll_apply()}, then the default value is used, and
-#'   \code{roll_apply()} performs aggregations over overlapping intervals at each
-#'   point in time.
-#'   If the argument \code{end_points} is explicitly passed to
-#'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over
-#'   intervals spanned by the end_points.  If look_back=2 then the aggregations are
-#'   performed over non-overlapping intervals, otherwise they are performed over
-#'   overlapping intervals.
+#'   If the argument \code{end_points} isn't explicitly passed to 
+#'   \code{roll_apply()}, then the default value is used, and 
+#'   \code{roll_apply()} performs aggregations over overlapping intervals at
+#'   each point in time.
+#'   
+#'   If the argument \code{end_points} is explicitly passed to 
+#'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
+#'   intervals attached at the end_points.  If look_back=2 then the aggregations
+#'   are performed over non-overlapping intervals, otherwise they are performed
+#'   over overlapping intervals.
 #'
-#'   The aggregation function \code{agg_fun()} can return either a single value
-#'   or a vector of values. If the aggregation function \code{agg_fun()} returns
-#'   a single value, then \code{roll_apply()} returns an \emph{xts} time series
-#'   with a single column. If the aggregation function \code{agg_fun()} returns
-#'   a vector of values, then \code{roll_apply()} returns an \emph{xts} time
-#'   series with multiple columns equal to the length of the vector returned by
-#'   the aggregation function \code{agg_fun()}.
+#'   If the argument \code{out_xts} is \code{TRUE} (the default) then the output
+#'   is coerced into an \emph{xts} series, with the number of rows equal to the 
+#'   length of argument \code{end_points}.  Otherwise a list is returned, with
+#'   the length equal to the length of argument \code{end_points}.
+#'   
+#'   If \code{out_xts} is \code{TRUE} and the aggregation function 
+#'   \code{agg_fun()} returns a single value, then \code{roll_apply()} returns 
+#'   an \emph{xts} time series with a single column. If \code{out_xts} is
+#'   \code{TRUE} and if \code{agg_fun()} returns a vector of values, then
+#'   \code{roll_apply()} returns an \emph{xts} time series with multiple
+#'   columns, equal to the length of the vector returned by the aggregation
+#'   function \code{agg_fun()}.
 #'
 #' @examples
 #' # extract a single day of SPY data
-#' oh_lc <- SPY["2012-02-13"]
-#' look_back <- 11
-#' # calculate the rolling sums of oh_lc columns over a rolling interval
+#' oh_lc <- HighFreq::SPY["2012-02-13"]
+#' inter_val <- 11  # number of data points between end points
+#' look_back <- 4  # number of end points in look-back interval
+#' # calculate the rolling sums of oh_lc columns over a rolling look-back interval
 #' agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-#' # apply a vector-valued aggregation function over a rolling interval
+#' # apply a vector-valued aggregation function over a rolling look-back interval
 #' agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
 #' # define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
-#' end_points <- rutils::end_points(oh_lc, inter_val=look_back)
+#' end_points <- rutils::end_points(oh_lc, inter_val=inter_val)
 #' # calculate the sums of oh_lc columns over end_points using non-overlapping intervals
-#' agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=2,
-#'                             end_points=end_points, by_columns=TRUE)
+#' agg_regations <- roll_apply(oh_lc, agg_fun=sum, end_points=end_points, by_columns=TRUE)
 #' # apply a vector-valued aggregation function over the end_points of oh_lc
 #' # using overlapping intervals
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
 #'                             look_back=5, end_points=end_points)
 
-roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
-                       end_points=(0:NROW(x_ts)), by_columns=FALSE, ...) {
+roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts), 
+                       by_columns=FALSE, out_xts=TRUE, ...) {
   # match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
   len_gth <- NROW(end_points)
   # define start_points as lag of end_points
-  start_points <-  end_points[c(rep_len(1, look_back-1), 1:(len_gth-look_back+1))] +
-    (NROW(x_ts) > (len_gth+1))
+  start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
+  # define list of look-back intervals for aggregations over past
+  look_backs <- lapply(seq_along(end_points), 
+                       function(in_dex) {
+                         start_points[in_dex]:end_points[in_dex]
+                       })  # end lapply
   # perform aggregations over length of end_points
-  agg_regations <- if(by_columns)
+  if (by_columns) {
     # perform individual aggregations by columns
-    sapply(x_ts, function(col_umn)
-      sapply(2:len_gth, function(in_dex)
-        agg_fun(col_umn[start_points[in_dex]:end_points[in_dex]], ...)
-      ))  # end sapply
-  else {  # not by_columns
-    agg_regations <- sapply(2:len_gth, function(in_dex)
-      agg_fun(x_ts[start_points[in_dex]:end_points[in_dex]], ...)
-    )  # end sapply
+    agg_regations <- lapply(x_ts, function(col_umn)
+      lapply(look_backs, function(look_back)
+        agg_fun(x_ts[look_back], ...)
+      ))  # end lapply
+  } else {  # not by_columns
+    agg_regations <- lapply(look_backs, function(look_back)
+      agg_fun(x_ts[look_back], ...)
+    )  # end lapply
+  }  # end if
+  
+  if (out_xts) {
     # coerce agg_regations into matrix and transpose it
     if (is.null(dim(agg_regations)))
       agg_regations <- t(agg_regations)
     agg_regations <- t(agg_regations)
-  }  # end if
-  # coerce agg_regations into xts series
-  xts(agg_regations, order.by=index(x_ts[end_points]))
+    # coerce agg_regations into xts series
+    xts(agg_regations, order.by=index(x_ts[end_points]))
+  } else
+    agg_regations
+  
 }  # end roll_apply
 
 
@@ -1540,11 +1557,11 @@ roll_apply <- function(x_ts, agg_fun="run_variance", look_back=11,
 #' @return An \emph{xts} time series with the number of rows equal to the number
 #'   of end points minus two.
 #'
-#' @details The function \code{roll_backtest()} performs a rolling backtest
-#'   simulation of a trading strategy over a vector of end points. At each end
-#'   point, it trains (calibrates) a forecasting model using past data taken
-#'   from the \code{x_ts} time series over the look-back interval, and applies the
-#'   forecasts to the \code{trade_func()} trading model, using out-of-sample
+#' @details The function \code{roll_backtest()} performs a rolling backtest 
+#'   simulation of a trading strategy over a vector of end points. At each end 
+#'   point, it trains (calibrates) a forecasting model using past data taken 
+#'   from the \code{x_ts} time series over the look-back interval, and applies
+#'   the forecasts to the \code{trade_func()} trading model, using out-of-sample
 #'   future data from the look-forward interval.
 #'   
 #'   The function \code{trade_func()} should simulate the trading model, and it 
@@ -1599,7 +1616,8 @@ roll_backtest <- function(x_ts,
 
   # define integer back_points and fwd_points from integer end_points
   back_points <- end_points - look_back + 1
-  back_points[back_points < 0] <- 0
+  back_points[back_points < 1] <- 1
+  
   fwd_points <- end_points + look_forward
   fwd_points[fwd_points > NROW(x_ts)] <- NROW(x_ts)
 

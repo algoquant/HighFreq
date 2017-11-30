@@ -44,6 +44,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
+trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
+
 + [ ] add Rcpp roll and run functions
 Convert roll functions from package RcppRoll to native Rcpp functions.
 Fix build error about RcppExports.R.
@@ -54,9 +57,6 @@ importFrom(Rcpp, evalCpp)
 importFrom(RcppParallel, RcppParallelLibs)
 
 + [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
-
-+ [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
-trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
 + [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 deprecate function roll_moment() because it's similar to roll_vwap() ?
@@ -77,6 +77,11 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] modify functional roll_apply()
+Change endpoints calculation: define look_backs as a list of numeric vectors.
+Calculate aggregations using lapply() loop over the look_backs, instead of sapply().
+Add option to coerce output into xts series.
 
 + [x] create functional roll_backtest() similar to roll_apply(), but accepting two functions as arguments
 

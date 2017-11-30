@@ -39,11 +39,11 @@ Perform a backtest simulation of a trading strategy (model) over a vector of
 end points along a time series of prices.
 }
 \details{
-The function \code{roll_backtest()} performs a rolling backtest
-  simulation of a trading strategy over a vector of end points. At each end
-  point, it trains (calibrates) a forecasting model using past data taken
-  from the \code{x_ts} time series over the look-back interval, and applies the
-  forecasts to the \code{trade_func()} trading model, using out-of-sample
+The function \code{roll_backtest()} performs a rolling backtest 
+  simulation of a trading strategy over a vector of end points. At each end 
+  point, it trains (calibrates) a forecasting model using past data taken 
+  from the \code{x_ts} time series over the look-back interval, and applies
+  the forecasts to the \code{trade_func()} trading model, using out-of-sample
   future data from the look-forward interval.
   
   The function \code{trade_func()} should simulate the trading model, and it 

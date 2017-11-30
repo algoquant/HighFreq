@@ -12,7 +12,7 @@ roll_vwap(oh_lc, x_ts = oh_lc[, 4], look_back)
 
 \item{x_ts}{A single-column \emph{xts} time series.}
 
-\item{look_back}{The size of the look-back interval, equal to the number of
+\item{look_back}{The size of the look-back interval, equal to the number of 
 rows of data used for calculating the average price.}
 }
 \value{
