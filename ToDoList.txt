@@ -49,7 +49,10 @@ trade_func() should return a list with at least two elements: time series and na
 
 + [ ] add Rcpp roll and run functions
 Convert roll functions from package RcppRoll to native Rcpp functions.
-Fix build error about RcppExports.R.
+
++ [ ] generate man files for Rcpp functions
+
++ [ ] fix build error about RcppExports.R.
 Add by hand to NAMESPACE:
 useDynLib(HighFreq)
 exportPattern("^[[:alpha:]]+")
