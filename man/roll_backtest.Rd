@@ -78,4 +78,3 @@ back_test <- roll_backtest(end_points=end_points,
     x_ts=price_s)
 }
 }
-

@@ -54,4 +54,3 @@ The function \code{save_rets} loads multiple days of \emph{TAQ}
 save_rets("SPY")
 }
 }
-

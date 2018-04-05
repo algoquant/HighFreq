@@ -59,4 +59,3 @@ mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 ta_q[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 ta_q <- zoo::na.locf(ta_q)
 }
-

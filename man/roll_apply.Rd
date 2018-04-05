@@ -62,24 +62,24 @@ The function \code{roll_apply()} applies an aggregation function
   \code{roll_apply()} performs aggregations over overlapping intervals at
   each point in time.
   
-  If the argument \code{out_xts} is \code{TRUE} (the default) then the output
-  is coerced into an \emph{xts} series, with the number of rows equal to the 
-  length of argument \code{end_points}.  Otherwise a list is returned, with
-  the length equal to the length of argument \code{end_points}.
-  
   If the argument \code{end_points} is explicitly passed to 
   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
   intervals attached at the end_points.  If look_back=2 then the aggregations
   are performed over non-overlapping intervals, otherwise they are performed
   over overlapping intervals.
 
-  The aggregation function \code{agg_fun()} can return either a single value
-  or a vector of values. If the aggregation function \code{agg_fun()} returns
-  a single value, then \code{roll_apply()} returns an \emph{xts} time series
-  with a single column. If the aggregation function \code{agg_fun()} returns
-  a vector of values, then \code{roll_apply()} returns an \emph{xts} time
-  series with multiple columns equal to the length of the vector returned by
-  the aggregation function \code{agg_fun()}.
+  If the argument \code{out_xts} is \code{TRUE} (the default) then the output
+  is coerced into an \emph{xts} series, with the number of rows equal to the 
+  length of argument \code{end_points}.  Otherwise a list is returned, with
+  the length equal to the length of argument \code{end_points}.
+  
+  If \code{out_xts} is \code{TRUE} and the aggregation function 
+  \code{agg_fun()} returns a single value, then \code{roll_apply()} returns 
+  an \emph{xts} time series with a single column. If \code{out_xts} is
+  \code{TRUE} and if \code{agg_fun()} returns a vector of values, then
+  \code{roll_apply()} returns an \emph{xts} time series with multiple
+  columns, equal to the length of the vector returned by the aggregation
+  function \code{agg_fun()}.
 }
 \examples{
 # extract a single day of SPY data
@@ -100,4 +100,3 @@ agg_regations <- roll_apply(oh_lc, agg_fun=sum, end_points=end_points, by_column
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
                             look_back=5, end_points=end_points)
 }
-

@@ -2,8 +2,8 @@
 % Please edit documentation in R/hf_data.R
 \docType{data}
 \name{hf_data}
-\alias{SPY}
 \alias{hf_data}
+\alias{SPY}
 \title{High frequency data sets}
 \format{Each \code{xts} time series contains \code{OHLC} data, with each row 
   containing a single minute bar:
@@ -43,4 +43,3 @@ Wharton Research Data Service
 (\href{https://wrds-web.wharton.upenn.edu/wrds/}{WRDS})
 }
 \keyword{datasets}
-

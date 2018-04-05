@@ -52,4 +52,3 @@ chart_Series(oh_lc, name="random prices")
 oh_lc <- HighFreq::scrub_agg(ta_q=HighFreq::SPY_TAQ)
 chart_Series(oh_lc, name=sym_bol)
 }
-

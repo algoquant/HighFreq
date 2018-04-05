@@ -49,4 +49,3 @@ The function \code{save_taq()} loads multiple days of \emph{TAQ}
 save_taq("SPY")
 }
 }
-

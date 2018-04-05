@@ -49,4 +49,3 @@ skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)
 }
-

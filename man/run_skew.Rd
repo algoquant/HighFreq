@@ -38,4 +38,3 @@ The function \code{run_skew()} calculates a time series of skew
 # calculate time series of skew estimates for SPY
 sk_ew <- HighFreq::run_skew(HighFreq::SPY)
 }
-

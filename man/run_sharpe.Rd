@@ -37,4 +37,3 @@ The function \code{run_sharpe()} calculates Sharpe-like statistics
 # calculate time series of running Sharpe ratios for SPY
 sharpe_running <- run_sharpe(HighFreq::SPY)
 }
-

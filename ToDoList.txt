@@ -50,15 +50,6 @@ trade_func() should return a list with at least two elements: time series and na
 + [ ] add Rcpp roll and run functions
 Convert roll functions from package RcppRoll to native Rcpp functions.
 
-+ [ ] generate man files for Rcpp functions
-
-+ [ ] fix build error about RcppExports.R.
-Add by hand to NAMESPACE:
-useDynLib(HighFreq)
-exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
-importFrom(RcppParallel, RcppParallelLibs)
-
 + [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
@@ -80,6 +71,15 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] generate man files for Rcpp functions
+"Document" in build menu or devtools::document()
+
++ [x] fix build error about RcppExports.R.
+Add by hand to NAMESPACE:
+useDynLib(HighFreq)
+importFrom(Rcpp, evalCpp)
+exportPattern("^[[:alpha:]]+")
 
 + [x] modify functional roll_apply()
 Change endpoints calculation: define look_backs as a list of numeric vectors.

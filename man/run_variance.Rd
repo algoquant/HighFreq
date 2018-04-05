@@ -96,4 +96,3 @@ var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="yang_zhang")
 # calculate SPY variance without overnight jumps
 var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
 }
-

@@ -57,4 +57,3 @@ oh_lc <- HighFreq::random_ohlc()
 # create random time series from SPY by randomly sampling it
 oh_lc <- HighFreq::random_ohlc(oh_lc=HighFreq::SPY["2012-02-13/2012-02-15"])
 }
-

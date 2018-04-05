@@ -36,4 +36,3 @@ The function \code{save_rets_ohlc()} loads \emph{OHLC} time series
 save_rets_ohlc("SPY")
 }
 }
-

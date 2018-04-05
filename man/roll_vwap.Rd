@@ -44,4 +44,3 @@ returns_running <- run_returns(x_ts=HighFreq::SPY)
 # calculate the rolling volume-weighted average returns
 roll_vwap(oh_lc=HighFreq::SPY, x_ts=returns_running, look_back=11)
 }
-

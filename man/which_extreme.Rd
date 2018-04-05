@@ -56,4 +56,3 @@ sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
 # remove suspect values
 ta_q <- ta_q[!sus_pect]
 }
-

@@ -60,4 +60,3 @@ sym_bol <- "SPY"
 save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 }
 }
-

@@ -41,4 +41,3 @@ The function \code{remove_jumps()} removes the overnight
 # remove overnight close-to-open price jumps from SPY data
 oh_lc <- remove_jumps(HighFreq::SPY)
 }
-

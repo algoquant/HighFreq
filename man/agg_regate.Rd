@@ -39,4 +39,3 @@ vari_ance <- agg_regate(oh_lc=HighFreq::SPY, mo_ment="run_variance")
 # calculate time series of daily skew estimates for SPY
 skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_regate, mo_ment="run_skew")
 }
-

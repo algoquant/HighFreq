@@ -70,4 +70,3 @@ vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="yang_zhang")
 # calculate variance of SPY without accounting for overnight jumps
 vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="rogers_satchell")
 }
-

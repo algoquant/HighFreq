@@ -45,4 +45,3 @@ ta_q <- HighFreq::random_taq()
 # create random TAQ time series from SPY index
 ta_q <- HighFreq::random_taq(in_dex=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
 }
-

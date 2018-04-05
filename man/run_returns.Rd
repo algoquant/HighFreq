@@ -60,4 +60,3 @@ re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY)
 # calculate open to open returns
 re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
 }
-
