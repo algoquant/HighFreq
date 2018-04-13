@@ -69,7 +69,7 @@ NumericVector roll_sum(NumericVector vec_tor, int look_back) {
   int len_gth = vec_tor.size();
   NumericVector rolling_sum(len_gth);
 
-  // warmup period
+  // startup period
   rolling_sum[0] = vec_tor[0];
   for (int it = 1; it < look_back; it++) {
     rolling_sum[it] = rolling_sum[it-1] + vec_tor[it];
@@ -130,7 +130,7 @@ arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& wei_ghts) {
   // arma::vec rev_weights = arma::reverse(wei_ghts);
   arma::vec rev_weights = wei_ghts;
   
-  // warmup period
+  // startup period
   rolling_sum.subvec(0, look_back-2) = vec_tor.subvec(0, look_back-2);
   
   // remaining periods
@@ -238,47 +238,91 @@ NumericVector roll_var(NumericVector vec_tor, int look_back) {
 ////////////////////////////
 
 
-// The function inv_reg() calculates the regularized inverse 
-// of the covariance matrix, by truncating the number of 
-// eigen-vectors to max_eigen.
-//' Calculate a time series of variance estimates over a rolling look-back interval
-//' for an \emph{OHLC} time series of prices, using different range estimators
-//' for variance.
+//' Calculate the eigen decomposition of the covariance matrix of returns using
+//' \emph{RcppArmadillo}.
 //' 
-//' @param vec_tor A numeric \emph{vector} of data.
-//' @param look_back The length of the look-back interval, equal to the number of rows
-//'   of data used for calculating the variance.
+//' @param mat_rix A numeric \emph{matrix} of returns data.
 //'
-//' @return A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
+//' @return A list with two elements: a numeric \emph{vector} of eigenvalues 
+//'   (named "values"), and a numeric \emph{matrix} of eigenvectors (named
+//'   "vectors").
 //'
-//' @details The function \code{inv_reg()} calculates a \emph{vector} of rolling 
-//'   variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
+//' @details The function \code{calc_eigen()} first calculates the covariance 
+//'   matrix of the \code{mat_rix}, and then calculates its eigen decomposition.
 //'
 //' @examples
 //' \dontrun{
-//' # create minutely OHLC time series of random prices
-//' vec_tor <- HighFreq::random_ohlc()
-//' # calculate variance estimates for vec_tor over a 21 period interval
-//' var_rolling <- HighFreq::inv_reg(vec_tor, look_back=21)
-//' # calculate variance estimates for SPY
-//' var_rolling <- HighFreq::inv_reg(HighFreq::SPY, calc_method="yang_zhang")
-//' # calculate SPY variance without accounting for overnight jumps
-//' var_rolling <- HighFreq::inv_reg(HighFreq::SPY, calc_method="rogers_satchell")
+//' # Create random matrix
+//' mat_rix <- matrix(rnorm(500), nc=5)
+//' # Calculate eigen decomposition
+//' ei_gen <- HighFreq::calc_eigen(scale(mat_rix, scale=FALSE))
+//' # Calculate PCA
+//' pc_a <- prcomp(mat_rix)
+//' # Compare PCA with eigen decomposition
+//' all.equal(pc_a$sdev^2, drop(ei_gen$values))
+//' all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat inv_reg(const arma::mat& re_turns, const arma::uword& max_eigen) {
+List calc_eigen(const arma::mat& mat_rix) {
+  arma::mat eigen_vec;
+  arma::vec eigen_val;
+  arma::eig_sym(eigen_val, eigen_vec, cov(mat_rix));
+  // reverse the order of elements from largest eigenvalue to smallest, similar to R
+  return List::create(Named("values") = arma::flipud(eigen_val),
+                      Named("vectors") = arma::fliplr(eigen_vec));
+}  // end calc_eigen
+
+
+
+// The function calc_inv() calculates the regularized inverse 
+// of the covariance matrix, by truncating the number of 
+// eigenvectors to max_eigen.
+
+//' Calculate the regularized inverse of the covariance matrix of returns using 
+//' \emph{RcppArmadillo}.
+//' 
+//' @param mat_rix A numeric \emph{matrix} of returns data.
+//' @param max_eigen The number of eigenvalues and eigenvectors used for
+//'   calculating the inverse.
+//'
+//' @return A numeric \emph{matrix} equal to the regularized inverse. 
+//'
+//' @details The function \code{calc_inv()} first calculates the covariance 
+//'   matrix of the \code{mat_rix}, and then it calculates the regularized
+//'   inverse from the truncated eigen decomposition.
+//'   It uses only the largest \code{max_eigen} eigenvalues and their
+//'   corresponding eigenvectors.
+//'
+//' @examples
+//' \dontrun{
+//' # Create random matrix
+//' mat_rix <- matrix(rnorm(500), nc=5)
+//' max_eigen <- 3
+//' # Calculate regularized inverse using RcppArmadillo
+//' in_verse <- HighFreq::calc_inv(mat_rix, max_eigen)
+//' # Calculate regularized inverse from eigen decomposition in R
+//' ei_gen <- eigen(cov(mat_rix))
+//' inverse_r <-  ei_gen$vectors[, 1:max_eigen] %*% (t(ei_gen$vectors[, 1:max_eigen]) / ei_gen$values[1:max_eigen])
+//' # Compare RcppArmadillo with R
+//' all.equal(in_verse, inverse_r)
+//' }
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_inv(const arma::mat& mat_rix, const arma::uword& max_eigen) {
   arma::mat eigen_vec;
   arma::vec eigen_val;
   
-  arma::eig_sym(eigen_val, eigen_vec, cov(re_turns));
+  arma::eig_sym(eigen_val, eigen_vec, cov(mat_rix));
   eigen_vec = eigen_vec.cols(eigen_vec.n_cols-max_eigen, eigen_vec.n_cols-1);
   eigen_val = 1/eigen_val.subvec(eigen_val.n_elem-max_eigen, eigen_val.n_elem-1);
   // arma::mat eigen_valmat = diagmat(eigen_val);
   
   return eigen_vec*diagmat(eigen_val)*eigen_vec.t();
   
-}  // end inv_reg
+}  // end calc_inv
+
+
 
 
 ////////////////////////////
@@ -410,7 +454,7 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
   uword look_back = co_eff.n_elem;
   arma::vec ari_ma(len_gth);
   
-  // warmup period
+  // startup period
   ari_ma(0) = in_nov(0);
   ari_ma(1) = in_nov(1) + co_eff(look_back-1) * ari_ma(0);
   for (uword it = 2; it < look_back-1; it++) {
@@ -432,12 +476,14 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 ////////////////////////////
 
 
-// The function sharpe_weights_reg() calculates the maximum 
+// The function calc_weights() calculates the maximum 
 // Sharpe ratio portfolio weights for the matrix re_turns.
 // It uses the regularized inverse of the covariance matrix.
-//' Calculate a time series of variance estimates over a rolling look-back interval
-//' for an \emph{OHLC} time series of prices, using different range estimators
-//' for variance.
+//' Calculate the maximum Sharpe ratio portfolio weights for the matrix returns,
+//' using the regularized inverse of the covariance matrix, and
+//' \emph{RcppArmadillo}.
+//' 
+//' @param re_turns A numeric \emph{matrix} of returns data.
 //' 
 //' @param vec_tor A numeric \emph{vector} of data.
 //' @param look_back The length of the look-back interval, equal to the number of rows
@@ -445,7 +491,7 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //'
 //' @return A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
 //'
-//' @details The function \code{sharpe_weights_reg()} calculates a \emph{vector} of rolling 
+//' @details The function \code{calc_weights()} calculates a \emph{vector} of rolling 
 //'   variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
 //'
 //' @examples
@@ -453,19 +499,19 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //' # create minutely OHLC time series of random prices
 //' vec_tor <- HighFreq::random_ohlc()
 //' # calculate variance estimates for vec_tor over a 21 period interval
-//' var_rolling <- HighFreq::sharpe_weights_reg(vec_tor, look_back=21)
+//' var_rolling <- HighFreq::calc_weights(vec_tor, look_back=21)
 //' # calculate variance estimates for SPY
-//' var_rolling <- HighFreq::sharpe_weights_reg(HighFreq::SPY, calc_method="yang_zhang")
+//' var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="yang_zhang")
 //' # calculate SPY variance without accounting for overnight jumps
-//' var_rolling <- HighFreq::sharpe_weights_reg(HighFreq::SPY, calc_method="rogers_satchell")
+//' var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="rogers_satchell")
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec sharpe_weights_reg(const arma::mat& re_turns, 
-                             const arma::vec alpha_s, 
-                             const arma::vec alphas_b, 
-                             const arma::uword& max_eigen) {
-  arma::mat in_verse = inv_reg(re_turns, max_eigen);
+arma::vec calc_weights(const arma::mat& re_turns, 
+                       const arma::vec alpha_s, 
+                       const arma::vec alphas_b, 
+                       const arma::uword& max_eigen) {
+  arma::mat in_verse = calc_inv(re_turns, max_eigen);
   arma::vec weight_s = arma::trans(arma::mean(re_turns, 0));
   arma::vec mean_s(weight_s.n_elem);
   mean_s.fill(arma::mean(weight_s));
@@ -475,16 +521,13 @@ arma::vec sharpe_weights_reg(const arma::mat& re_turns,
   // apply regularized inverse
   weight_s = in_verse*weight_s;
   return weight_s/sqrt(sum(square(weight_s)));
-}  // end sharpe_weights_reg
+}  // end calc_weights
 
 
 
-// The function roll_portf() performs a loop over the 
-// end_points, subsets the re_turns matrix, and calculates 
-// the PCA variances using eigen decomposition.
-//' Calculate a time series of variance estimates over a rolling look-back interval
-//' for an \emph{OHLC} time series of prices, using different range estimators
-//' for variance.
+//' Simulate (backtest) a rolling portfolio optimization strategy.
+//' 
+//' @param re_turns A numeric \emph{matrix} of returns data.
 //' 
 //' @param vec_tor A numeric \emph{vector} of data.
 //' @param look_back The length of the look-back interval, equal to the number of rows
@@ -526,7 +569,7 @@ arma::mat roll_portf(const arma::mat& ex_cess, // portfolio returns
     // subset the returns
     arma::mat sub_returns = ex_cess.rows(start_points[i-1], end_points[i-1]);
     // calculate portfolio weights
-    weight_s = sharpe_weights_reg(sub_returns, alpha_s, alphas_b, max_eigen);
+    weight_s = calc_weights(sub_returns, alpha_s, alphas_b, max_eigen);
     // sub_returns = re_turns.rows(end_points[i-1]+1, end_points[i]);
     sre_turns.subvec(end_points[i-1]+1, end_points[i]) = re_turns.rows(end_points[i-1]+1, end_points[i])*weight_s;
     // arma::mat foo = re_turns.rows(end_points[i-1]+1, end_points[i])*weight_s;

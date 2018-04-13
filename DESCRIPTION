@@ -25,6 +25,7 @@ SystemRequirements: GNU make, C++11
 Remotes: github::algoquant/rutils,
 VignetteBuilder: knitr
 LazyData: true
+ByteCompile: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
 RoxygenNote: 6.0.1

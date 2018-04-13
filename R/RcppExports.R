@@ -164,33 +164,66 @@ roll_var <- function(vec_tor, look_back) {
     .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', vec_tor, look_back)
 }
 
-#' Calculate a time series of variance estimates over a rolling look-back interval
-#' for an \emph{OHLC} time series of prices, using different range estimators
-#' for variance.
+#' Calculate the eigen decomposition of the covariance matrix of returns using
+#' \emph{RcppArmadillo}.
 #' 
-#' @param vec_tor A numeric \emph{vector} of data.
-#' @param look_back The length of the look-back interval, equal to the number of rows
-#'   of data used for calculating the variance.
+#' @param mat_rix A numeric \emph{matrix} of returns data.
 #'
-#' @return A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
+#' @return A list with two elements: a numeric \emph{vector} of eigenvalues 
+#'   (named "values"), and a numeric \emph{matrix} of eigenvectors (named
+#'   "vectors").
 #'
-#' @details The function \code{inv_reg()} calculates a \emph{vector} of rolling 
-#'   variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
+#' @details The function \code{calc_eigen()} first calculates the covariance 
+#'   matrix of the \code{mat_rix}, and then calculates its eigen decomposition.
 #'
 #' @examples
 #' \dontrun{
-#' # create minutely OHLC time series of random prices
-#' vec_tor <- HighFreq::random_ohlc()
-#' # calculate variance estimates for vec_tor over a 21 period interval
-#' var_rolling <- HighFreq::inv_reg(vec_tor, look_back=21)
-#' # calculate variance estimates for SPY
-#' var_rolling <- HighFreq::inv_reg(HighFreq::SPY, calc_method="yang_zhang")
-#' # calculate SPY variance without accounting for overnight jumps
-#' var_rolling <- HighFreq::inv_reg(HighFreq::SPY, calc_method="rogers_satchell")
+#' # Create random matrix
+#' mat_rix <- matrix(rnorm(500), nc=5)
+#' # Calculate eigen decomposition
+#' ei_gen <- HighFreq::calc_eigen(scale(mat_rix, scale=FALSE))
+#' # Calculate PCA
+#' pc_a <- prcomp(mat_rix)
+#' # Compare PCA with eigen decomposition
+#' all.equal(pc_a$sdev^2, drop(ei_gen$values))
+#' all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
 #' }
 #' @export
-inv_reg <- function(re_turns, max_eigen) {
-    .Call('_HighFreq_inv_reg', PACKAGE = 'HighFreq', re_turns, max_eigen)
+calc_eigen <- function(mat_rix) {
+    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', mat_rix)
+}
+
+#' Calculate the regularized inverse of the covariance matrix of returns using 
+#' \emph{RcppArmadillo}.
+#' 
+#' @param mat_rix A numeric \emph{matrix} of returns data.
+#' @param max_eigen The number of eigenvalues and eigenvectors used for
+#'   calculating the inverse.
+#'
+#' @return A numeric \emph{matrix} equal to the regularized inverse. 
+#'
+#' @details The function \code{calc_inv()} first calculates the covariance 
+#'   matrix of the \code{mat_rix}, and then it calculates the regularized
+#'   inverse from the truncated eigen decomposition.
+#'   It uses only the largest \code{max_eigen} eigenvalues and their
+#'   corresponding eigenvectors.
+#'
+#' @examples
+#' \dontrun{
+#' # Create random matrix
+#' mat_rix <- matrix(rnorm(500), nc=5)
+#' max_eigen <- 3
+#' # Calculate regularized inverse using RcppArmadillo
+#' in_verse <- HighFreq::calc_inv(mat_rix, max_eigen)
+#' # Calculate regularized inverse from eigen decomposition in R
+#' ei_gen <- eigen(cov(mat_rix))
+#' inverse_r <-  ei_gen$vectors[, 1:max_eigen] %*% (t(ei_gen$vectors[, 1:max_eigen]) / ei_gen$values[1:max_eigen])
+#' # Compare RcppArmadillo with R
+#' all.equal(in_verse, inverse_r)
+#' }
+#' @export
+calc_inv <- function(mat_rix, max_eigen) {
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', mat_rix, max_eigen)
 }
 
 #' Simulate a \emph{GARCH} process using \emph{Rcpp}.
@@ -283,9 +316,11 @@ sim_arima <- function(in_nov, co_eff) {
     .Call('_HighFreq_sim_arima', PACKAGE = 'HighFreq', in_nov, co_eff)
 }
 
-#' Calculate a time series of variance estimates over a rolling look-back interval
-#' for an \emph{OHLC} time series of prices, using different range estimators
-#' for variance.
+#' Calculate the maximum Sharpe ratio portfolio weights for the matrix returns,
+#' using the regularized inverse of the covariance matrix, and
+#' \emph{RcppArmadillo}.
+#' 
+#' @param re_turns A numeric \emph{matrix} of returns data.
 #' 
 #' @param vec_tor A numeric \emph{vector} of data.
 #' @param look_back The length of the look-back interval, equal to the number of rows
@@ -293,7 +328,7 @@ sim_arima <- function(in_nov, co_eff) {
 #'
 #' @return A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
 #'
-#' @details The function \code{sharpe_weights_reg()} calculates a \emph{vector} of rolling 
+#' @details The function \code{calc_weights()} calculates a \emph{vector} of rolling 
 #'   variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
 #'
 #' @examples
@@ -301,20 +336,20 @@ sim_arima <- function(in_nov, co_eff) {
 #' # create minutely OHLC time series of random prices
 #' vec_tor <- HighFreq::random_ohlc()
 #' # calculate variance estimates for vec_tor over a 21 period interval
-#' var_rolling <- HighFreq::sharpe_weights_reg(vec_tor, look_back=21)
+#' var_rolling <- HighFreq::calc_weights(vec_tor, look_back=21)
 #' # calculate variance estimates for SPY
-#' var_rolling <- HighFreq::sharpe_weights_reg(HighFreq::SPY, calc_method="yang_zhang")
+#' var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="yang_zhang")
 #' # calculate SPY variance without accounting for overnight jumps
-#' var_rolling <- HighFreq::sharpe_weights_reg(HighFreq::SPY, calc_method="rogers_satchell")
+#' var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="rogers_satchell")
 #' }
 #' @export
-sharpe_weights_reg <- function(re_turns, alpha_s, alphas_b, max_eigen) {
-    .Call('_HighFreq_sharpe_weights_reg', PACKAGE = 'HighFreq', re_turns, alpha_s, alphas_b, max_eigen)
+calc_weights <- function(re_turns, alpha_s, alphas_b, max_eigen) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, alpha_s, alphas_b, max_eigen)
 }
 
-#' Calculate a time series of variance estimates over a rolling look-back interval
-#' for an \emph{OHLC} time series of prices, using different range estimators
-#' for variance.
+#' Simulate (backtest) a rolling portfolio optimization strategy.
+#' 
+#' @param re_turns A numeric \emph{matrix} of returns data.
 #' 
 #' @param vec_tor A numeric \emph{vector} of data.
 #' @param look_back The length of the look-back interval, equal to the number of rows
