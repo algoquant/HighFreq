@@ -2,37 +2,85 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_portf}
 \alias{roll_portf}
-\title{Simulate (backtest) a rolling portfolio optimization strategy.}
+\title{Simulate (backtest) a rolling portfolio optimization strategy, using
+\emph{RcppArmadillo}.}
 \usage{
-roll_portf(ex_cess, re_turns, start_points, end_points, al_pha, max_eigen)
+roll_portf(ex_cess, re_turns, start_points, end_points, max_eigen, al_pha)
 }
 \arguments{
-\item{re_turns}{A numeric \emph{matrix} of returns data.}
+\item{re_turns}{A numeric \emph{matrix} of excess returns data (the returns
+in excess of the risk-free rate).}
 
-\item{vec_tor}{A numeric \emph{vector} of data.}
+\item{max_eigen}{An \emph{integer} equal to the regularization intensity
+(the number of eigenvalues and eigenvectors used for calculating the 
+regularized inverse).}
 
-\item{look_back}{The length of the look-back interval, equal to the number of rows
-of data used for calculating the variance.}
+\item{al_pha}{The shrinkage intensity.}
 }
 \value{
-A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
+A numeric \emph{vector} of the same length as the number of rows
+  of \code{re_turns}.
 }
 \description{
-Simulate (backtest) a rolling portfolio optimization strategy.
+Simulate (backtest) a rolling portfolio optimization strategy, using
+\emph{RcppArmadillo}.
 }
 \details{
+The function \code{roll_portf()} calculates the scaled weights of
+  the portfolio with the maximum Sharpe ratio, using \emph{RcppArmadillo}.
+  
+  It first calculates the regularized inverse of the covariance matrix of
+  returns using function \code{HighFreq::calc_weights()}.
+  It then estimates the vector of mean returns and applies shrinkage to it,
+  by shrinking it to its common mean value.
+  The shrinkage intensity \code{al_pha} determines the amount of shrinkage 
+  that is applied, with \code{al_pha = 0} representing no shrinkage (with 
+  the estimator of mean returns equal to the means of the columns of 
+  \code{re_turns}), and \code{al_pha = 1} representing complete shrinkage 
+  (with the estimator of mean returns equal to the single mean of all the
+  columns of \code{re_turns})
+  
+  The function \code{roll_portf()} calculates the weights by multiplying 
+  the inverse of the covariance matrix times the estimator of the mean
+  returns. It finally scales the weights by their sum, so that the sum of
+  the weights is equal to \code{1}.
+
 The function \code{roll_portf()} calculates a \emph{vector} of rolling 
   variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
 }
 \examples{
 \dontrun{
-# create minutely OHLC time series of random prices
-vec_tor <- HighFreq::random_ohlc()
-# calculate variance estimates for vec_tor over a 21 period interval
-var_rolling <- HighFreq::roll_portf(vec_tor, look_back=21)
-# calculate variance estimates for SPY
-var_rolling <- HighFreq::roll_portf(HighFreq::SPY, calc_method="yang_zhang")
-# calculate SPY variance without accounting for overnight jumps
-var_rolling <- HighFreq::roll_portf(HighFreq::SPY, calc_method="rogers_satchell")
+# Calculate ETF prices
+sym_bols <- colnames(rutils::env_etf$price_s)
+sym_bols <- sym_bols[!(sym_bols=="VXX")]
+price_s <- rutils::env_etf$price_s[, sym_bols]
+# Carry forward non-NA prices
+price_s <- zoo::na.locf(price_s)
+price_s <- na.omit(price_s)
+# Calculate simple ETF returns
+re_turns <- rutils::diff_it(price_s)
+# Calculate the daily excess returns
+# risk_free is the daily risk-free rate
+risk_free <- 0.03/260
+ex_cess <- re_turns - risk_free
+# Define monthly end_points without initial warmpup period
+end_points <- rutils::calc_endpoints(re_turns, inter_val="months")
+end_points <- end_points[end_points>50]
+len_gth <- NROW(end_points)
+# Define 12-month look_back interval and start_points over sliding window
+look_back <- 12
+start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
+# Define shrinkage and regularization intensities
+al_pha <- 0.5
+max_eigen <- 3
+# Simulate a monthly rolling portfolio optimization strategy
+roll_rets <- HighFreq::roll_portf(ex_cess, re_turns, 
+                                  start_points-1, end_points-1, 
+                                  max_eigen, al_pha)
+roll_rets <- xts(roll_rets, index(re_turns))
+colnames(roll_rets) <- "roll_rets"
+# Plot dygraph of strategy
+dygraphs::dygraph(cumsum(strat_rets), 
+  main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 }
 }

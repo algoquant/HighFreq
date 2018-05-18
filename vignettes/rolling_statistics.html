@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2017-10-27" />
+<meta name="date" content="2018-04-16" />
 
 <title>Estimating Running and Rolling Statistics Over Time Series</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Estimating Running and Rolling Statistics Over Time Series</h1>
 <h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2017-10-27</em></h4>
+<h4 class="date"><em>2018-04-16</em></h4>
 
 
 
@@ -178,6 +178,86 @@ end_points &lt;-<span class="st"> </span>rutils::<span class="kw">end_points</sp
 agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>sum, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points, <span class="dt">by_columns=</span><span class="ot">TRUE</span>)
 <span class="co"># apply the vector-valued aggregation function over the end_points of x_ts</span>
 agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>agg_function, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points)</code></pre></div>
+<p><br></p>
+<p>Simulate (backtest) a rolling portfolio optimization strategy, using <em>RcppArmadillo</em></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Calculate ETF prices</span>
+sym_bols &lt;-<span class="st"> </span><span class="kw">colnames</span>(rutils::env_etf$price_s)
+sym_bols &lt;-<span class="st"> </span>sym_bols[!(sym_bols==<span class="st">&quot;VXX&quot;</span>)]
+price_s &lt;-<span class="st"> </span>rutils::env_etf$price_s[, sym_bols]
+<span class="co"># Carry forward non-NA prices</span>
+price_s &lt;-<span class="st"> </span>zoo::<span class="kw">na.locf</span>(price_s)
+price_s &lt;-<span class="st"> </span><span class="kw">na.omit</span>(price_s)
+<span class="co"># Calculate simple ETF returns</span>
+re_turns &lt;-<span class="st"> </span>rutils::<span class="kw">diff_it</span>(price_s)
+<span class="co"># Calculate the daily excess returns</span>
+<span class="co"># risk_free is the daily risk-free rate</span>
+risk_free &lt;-<span class="st"> </span><span class="fl">0.03</span>/<span class="dv">260</span>
+ex_cess &lt;-<span class="st"> </span>re_turns -<span class="st"> </span>risk_free
+<span class="co"># Define monthly end_points without initial warmpup period</span>
+end_points &lt;-<span class="st"> </span>rutils::<span class="kw">calc_endpoints</span>(re_turns, <span class="dt">inter_val=</span><span class="st">&quot;months&quot;</span>)
+end_points &lt;-<span class="st"> </span>end_points[end_points&gt;<span class="dv">50</span>]
+len_gth &lt;-<span class="st"> </span><span class="kw">NROW</span>(end_points)
+<span class="co"># Define 12-month look_back interval and start_points over sliding window</span>
+look_back &lt;-<span class="st"> </span><span class="dv">12</span>
+start_points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep_len</span>(<span class="dv">1</span>, look_back<span class="dv">-1</span>), end_points[<span class="dv">1</span>:(len_gth-look_back<span class="dv">+1</span>)])
+<span class="co"># Define shrinkage and regularization intensities</span>
+al_pha &lt;-<span class="st"> </span><span class="fl">0.5</span>
+max_eigen &lt;-<span class="st"> </span><span class="dv">3</span>
+<span class="co"># Simulate monthly rolling portfolio optimization strategy in pure R</span>
+roll_rets_R &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span>:<span class="kw">NROW</span>(end_points), function(i) {
+  <span class="co"># subset the ex_cess returns</span>
+  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="dv">-1</span>]:end_points[i<span class="dv">-1</span>], ]
+  ei_gen &lt;-<span class="st"> </span><span class="kw">eigen</span>(<span class="kw">cov</span>(ex_cess))
+  <span class="co"># Calculate regularized inverse of covariance matrix</span>
+  max_eigen &lt;-<span class="st"> </span><span class="dv">3</span>
+  eigen_vec &lt;-<span class="st"> </span>ei_gen$vectors[, <span class="dv">1</span>:max_eigen]
+  eigen_val &lt;-<span class="st"> </span>ei_gen$values[<span class="dv">1</span>:max_eigen]
+  in_verse &lt;-<span class="st"> </span>eigen_vec %*%<span class="st"> </span>(<span class="kw">t</span>(eigen_vec) /<span class="st"> </span>eigen_val)
+  <span class="co"># Apply shrinkage to the mean returns</span>
+  col_means &lt;-<span class="st"> </span><span class="kw">colMeans</span>(ex_cess)
+  col_means &lt;-<span class="st"> </span>((<span class="dv">1</span>-al_pha)*col_means +<span class="st"> </span>al_pha*<span class="kw">mean</span>(col_means))
+  <span class="co"># Calculate weights using R</span>
+  weight_s &lt;-<span class="st"> </span>in_verse %*%<span class="st"> </span>col_means
+  weight_s &lt;-<span class="st"> </span>weight_s/<span class="kw">sum</span>(weight_s)
+  <span class="co"># subset the re_turns to out-of-sample returns</span>
+  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="dv">-1</span>]+<span class="dv">1</span>):end_points[i], ]
+  <span class="co"># calculate the out-of-sample portfolio returns</span>
+  <span class="kw">xts</span>(re_turns %*%<span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))
+}  <span class="co"># end anonymous function</span>
+)  <span class="co"># end lapply</span>
+<span class="co"># Flatten the list of xts into a single xts series</span>
+roll_rets_R &lt;-<span class="st"> </span>rutils::<span class="kw">do_call</span>(rbind, roll_rets_R)
+<span class="kw">colnames</span>(roll_rets_R) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
+
+<span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::calc_weights()</span>
+roll_rets_arma &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span>:<span class="kw">NROW</span>(end_points), function(i) {
+<span class="co"># subset the ex_cess returns</span>
+  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="dv">-1</span>]:end_points[i<span class="dv">-1</span>], ]
+<span class="co"># apply regularized inverse to mean of ex_cess</span>
+  weight_s &lt;-<span class="st"> </span>HighFreq::<span class="kw">calc_weights</span>(ex_cess, max_eigen, al_pha)
+<span class="co"># subset the re_turns to out-of-sample returns</span>
+  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="dv">-1</span>]+<span class="dv">1</span>):end_points[i], ]
+<span class="co"># calculate the out-of-sample portfolio returns</span>
+  <span class="kw">xts</span>(re_turns %*%<span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))
+}  <span class="co"># end anonymous function</span>
+)  <span class="co"># end lapply</span>
+<span class="co"># Flatten the list of xts into a single xts series</span>
+roll_rets_arma &lt;-<span class="st"> </span>rutils::<span class="kw">do_call</span>(rbind, roll_rets_arma)
+<span class="kw">colnames</span>(roll_rets_arma) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
+<span class="co"># Compare RcppArmadillo with R</span>
+<span class="kw">all.equal</span>(roll_rets_arma, roll_rets_R)
+
+<span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::roll_portf()</span>
+roll_rets &lt;-<span class="st"> </span>HighFreq::<span class="kw">roll_portf</span>(ex_cess, re_turns, 
+                            start_points<span class="dv">-1</span>, end_points<span class="dv">-1</span>, 
+                            max_eigen, al_pha)
+roll_rets &lt;-<span class="st"> </span><span class="kw">xts</span>(roll_rets, <span class="kw">index</span>(re_turns))
+<span class="kw">colnames</span>(roll_rets) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
+<span class="co"># Compare RcppArmadillo with R</span>
+<span class="kw">all.equal</span>(roll_rets_arma, roll_rets[<span class="kw">index</span>(roll_rets_arma)])
+<span class="co"># Plot dygraph of strategy</span>
+dygraphs::<span class="kw">dygraph</span>(<span class="kw">cumsum</span>(roll_rets), 
+  <span class="dt">main=</span><span class="st">&quot;Cumulative Returns of Max Sharpe Portfolio Strategy&quot;</span>)</code></pre></div>
 <p><br></p>
 </div>
 

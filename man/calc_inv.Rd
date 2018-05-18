@@ -10,8 +10,9 @@ calc_inv(mat_rix, max_eigen)
 \arguments{
 \item{mat_rix}{A numeric \emph{matrix} of returns data.}
 
-\item{max_eigen}{The number of eigenvalues and eigenvectors used for
-calculating the inverse.}
+\item{max_eigen}{An \emph{integer} equal to the regularization intensity
+(the number of eigenvalues and eigenvectors used for calculating the 
+regularized inverse).}
 }
 \value{
 A numeric \emph{matrix} equal to the regularized inverse.

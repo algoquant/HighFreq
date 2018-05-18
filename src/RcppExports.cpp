@@ -6,6 +6,41 @@
 
 using namespace Rcpp;
 
+// calc_eigen
+List calc_eigen(const arma::mat& mat_rix);
+RcppExport SEXP _HighFreq_calc_eigen(SEXP mat_rixSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mat_rix(mat_rixSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_eigen(mat_rix));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_inv
+arma::mat calc_inv(const arma::mat& mat_rix, const arma::uword& max_eigen);
+RcppExport SEXP _HighFreq_calc_inv(SEXP mat_rixSEXP, SEXP max_eigenSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mat_rix(mat_rixSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_inv(mat_rix, max_eigen));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_scaled
+arma::mat calc_scaled(const arma::mat& mat_rix, const bool use_median);
+RcppExport SEXP _HighFreq_calc_scaled(SEXP mat_rixSEXP, SEXP use_medianSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type mat_rix(mat_rixSEXP);
+    Rcpp::traits::input_parameter< const bool >::type use_median(use_medianSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_scaled(mat_rix, use_median));
+    return rcpp_result_gen;
+END_RCPP
+}
 // vari_ance
 double vari_ance(NumericVector vec_tor);
 RcppExport SEXP _HighFreq_vari_ance(SEXP vec_torSEXP) {
@@ -14,6 +49,18 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type vec_tor(vec_torSEXP);
     rcpp_result_gen = Rcpp::wrap(vari_ance(vec_tor));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_lm
+Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign);
+RcppExport SEXP _HighFreq_calc_lm(SEXP res_ponseSEXP, SEXP de_signSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type res_ponse(res_ponseSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type de_sign(de_signSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_lm(res_ponse, de_sign));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -53,26 +100,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// calc_eigen
-List calc_eigen(const arma::mat& mat_rix);
-RcppExport SEXP _HighFreq_calc_eigen(SEXP mat_rixSEXP) {
+// roll_scale
+arma::mat roll_scale(const arma::mat& mat_rix, const arma::uword& look_back, const bool use_median);
+RcppExport SEXP _HighFreq_roll_scale(SEXP mat_rixSEXP, SEXP look_backSEXP, SEXP use_medianSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type mat_rix(mat_rixSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_eigen(mat_rix));
+    Rcpp::traits::input_parameter< const arma::uword& >::type look_back(look_backSEXP);
+    Rcpp::traits::input_parameter< const bool >::type use_median(use_medianSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_scale(mat_rix, look_back, use_median));
     return rcpp_result_gen;
 END_RCPP
 }
-// calc_inv
-arma::mat calc_inv(const arma::mat& mat_rix, const arma::uword& max_eigen);
-RcppExport SEXP _HighFreq_calc_inv(SEXP mat_rixSEXP, SEXP max_eigenSEXP) {
+// roll_zscores
+arma::vec roll_zscores(const arma::vec& res_ponse, const arma::mat& de_sign, const arma::uword& look_back);
+RcppExport SEXP _HighFreq_roll_zscores(SEXP res_ponseSEXP, SEXP de_signSEXP, SEXP look_backSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type mat_rix(mat_rixSEXP);
-    Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_inv(mat_rix, max_eigen));
+    Rcpp::traits::input_parameter< const arma::vec& >::type res_ponse(res_ponseSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type de_sign(de_signSEXP);
+    Rcpp::traits::input_parameter< const arma::uword& >::type look_back(look_backSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_zscores(res_ponse, de_sign, look_back));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -117,22 +167,21 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_weights
-arma::vec calc_weights(const arma::mat& re_turns, const arma::vec alpha_s, const arma::vec alphas_b, const arma::uword& max_eigen);
-RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP alpha_sSEXP, SEXP alphas_bSEXP, SEXP max_eigenSEXP) {
+arma::vec calc_weights(const arma::mat& re_turns, const arma::uword& max_eigen, const double& al_pha);
+RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type re_turns(re_turnsSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type alpha_s(alpha_sSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type alphas_b(alphas_bSEXP);
     Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, alpha_s, alphas_b, max_eigen));
+    Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, max_eigen, al_pha));
     return rcpp_result_gen;
 END_RCPP
 }
 // roll_portf
-arma::mat roll_portf(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const double& al_pha, const arma::uword& max_eigen);
-RcppExport SEXP _HighFreq_roll_portf(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP al_phaSEXP, SEXP max_eigenSEXP) {
+arma::mat roll_portf(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const arma::uword& max_eigen, const double& al_pha);
+RcppExport SEXP _HighFreq_roll_portf(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -140,24 +189,28 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type re_turns(re_turnsSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type start_points(start_pointsSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type end_points(end_pointsSEXP);
-    Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
     Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_portf(ex_cess, re_turns, start_points, end_points, al_pha, max_eigen));
+    Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_portf(ex_cess, re_turns, start_points, end_points, max_eigen, al_pha));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_HighFreq_calc_eigen", (DL_FUNC) &_HighFreq_calc_eigen, 1},
+    {"_HighFreq_calc_inv", (DL_FUNC) &_HighFreq_calc_inv, 2},
+    {"_HighFreq_calc_scaled", (DL_FUNC) &_HighFreq_calc_scaled, 2},
     {"_HighFreq_vari_ance", (DL_FUNC) &_HighFreq_vari_ance, 1},
+    {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 2},
     {"_HighFreq_roll_var", (DL_FUNC) &_HighFreq_roll_var, 2},
-    {"_HighFreq_calc_eigen", (DL_FUNC) &_HighFreq_calc_eigen, 1},
-    {"_HighFreq_calc_inv", (DL_FUNC) &_HighFreq_calc_inv, 2},
+    {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 3},
+    {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 3},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
     {"_HighFreq_sim_arima", (DL_FUNC) &_HighFreq_sim_arima, 2},
-    {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 4},
+    {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 3},
     {"_HighFreq_roll_portf", (DL_FUNC) &_HighFreq_roll_portf, 6},
     {NULL, NULL, 0}
 };

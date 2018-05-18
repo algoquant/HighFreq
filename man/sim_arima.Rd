@@ -24,9 +24,9 @@ coefficients.
 The function \code{sim_arima()} recursively filters a vector of
   innovations through a vector of \emph{ARIMA} coefficients, using 
   \emph{RcppArmadillo}.
-  It performs the same calculation as the standard \emph{R} function
+  It performs the same calculation as the standard \emph{R} function 
   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's about
-  six times faster.
+  \emph{6} times faster.
 }
 \examples{
 \dontrun{

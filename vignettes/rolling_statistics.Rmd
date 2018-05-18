@@ -161,3 +161,89 @@ agg_regations <- roll_apply(x_ts, agg_fun=agg_function, look_back=2, end_points=
 <br>
 
 
+Simulate (backtest) a rolling portfolio optimization strategy, using *RcppArmadillo*
+```{r eval=FALSE, echo=(-(1:2))}
+# load HighFreq
+library(HighFreq)
+# Calculate ETF prices
+sym_bols <- colnames(rutils::env_etf$price_s)
+sym_bols <- sym_bols[!(sym_bols=="VXX")]
+price_s <- rutils::env_etf$price_s[, sym_bols]
+# Carry forward non-NA prices
+price_s <- zoo::na.locf(price_s)
+price_s <- na.omit(price_s)
+# Calculate simple ETF returns
+re_turns <- rutils::diff_it(price_s)
+# Calculate the daily excess returns
+# risk_free is the daily risk-free rate
+risk_free <- 0.03/260
+ex_cess <- re_turns - risk_free
+# Define monthly end_points without initial warmpup period
+end_points <- rutils::calc_endpoints(re_turns, inter_val="months")
+end_points <- end_points[end_points>50]
+len_gth <- NROW(end_points)
+# Define 12-month look_back interval and start_points over sliding window
+look_back <- 12
+start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
+# Define shrinkage and regularization intensities
+al_pha <- 0.5
+max_eigen <- 3
+# Simulate monthly rolling portfolio optimization strategy in pure R
+roll_rets_R <- lapply(2:NROW(end_points), function(i) {
+  # subset the ex_cess returns
+  ex_cess <- ex_cess[start_points[i-1]:end_points[i-1], ]
+  ei_gen <- eigen(cov(ex_cess))
+  # Calculate regularized inverse of covariance matrix
+  max_eigen <- 3
+  eigen_vec <- ei_gen$vectors[, 1:max_eigen]
+  eigen_val <- ei_gen$values[1:max_eigen]
+  in_verse <- eigen_vec %*% (t(eigen_vec) / eigen_val)
+  # Apply shrinkage to the mean returns
+  col_means <- colMeans(ex_cess)
+  col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
+  # Calculate weights using R
+  weight_s <- in_verse %*% col_means
+  weight_s <- weight_s/sum(weight_s)
+  # subset the re_turns to out-of-sample returns
+  re_turns <- re_turns[(end_points[i-1]+1):end_points[i], ]
+  # calculate the out-of-sample portfolio returns
+  xts(re_turns %*% weight_s, index(re_turns))
+}  # end anonymous function
+)  # end lapply
+# Flatten the list of xts into a single xts series
+roll_rets_R <- rutils::do_call(rbind, roll_rets_R)
+colnames(roll_rets_R) <- "roll_rets"
+
+# Simulate monthly rolling portfolio optimization strategy using HighFreq::calc_weights()
+roll_rets_arma <- lapply(2:NROW(end_points), function(i) {
+# subset the ex_cess returns
+  ex_cess <- ex_cess[start_points[i-1]:end_points[i-1], ]
+# apply regularized inverse to mean of ex_cess
+  weight_s <- HighFreq::calc_weights(ex_cess, max_eigen, al_pha)
+# subset the re_turns to out-of-sample returns
+  re_turns <- re_turns[(end_points[i-1]+1):end_points[i], ]
+# calculate the out-of-sample portfolio returns
+  xts(re_turns %*% weight_s, index(re_turns))
+}  # end anonymous function
+)  # end lapply
+# Flatten the list of xts into a single xts series
+roll_rets_arma <- rutils::do_call(rbind, roll_rets_arma)
+colnames(roll_rets_arma) <- "roll_rets"
+# Compare RcppArmadillo with R
+all.equal(roll_rets_arma, roll_rets_R)
+
+# Simulate monthly rolling portfolio optimization strategy using HighFreq::roll_portf()
+roll_rets <- HighFreq::roll_portf(ex_cess, re_turns, 
+                            start_points-1, end_points-1, 
+                            max_eigen, al_pha)
+roll_rets <- xts(roll_rets, index(re_turns))
+colnames(roll_rets) <- "roll_rets"
+# Compare RcppArmadillo with R
+all.equal(roll_rets_arma, roll_rets[index(roll_rets_arma)])
+# Plot dygraph of strategy
+dygraphs::dygraph(cumsum(roll_rets), 
+  main="Cumulative Returns of Max Sharpe Portfolio Strategy")
+```
+<br>
+
+

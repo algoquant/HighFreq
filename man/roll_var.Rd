@@ -23,10 +23,10 @@ variance.  The methods include:
   \item "rogers_satchell" Rogers-Satchell,
   \item "yang_zhang" Yang-Zhang,
  }
- (default is \code{"yang_zhang"})}
+ (The default is \code{"yang_zhang"})}
 
 \item{sca_le}{\emph{Boolean} argument: should the returns be divided by the
-number of seconds in each period? (default is \code{TRUE})}
+number of seconds in each period? (The default is \code{TRUE})}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of

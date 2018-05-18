@@ -22,7 +22,7 @@ Calculate the rolling sum over a vector using \emph{Rcpp}.
 \details{
 The function \code{roll_sum()} calculates a \emph{vector} of 
   rolling sums, over a \emph{vector} of data, using \emph{Rcpp}.  The
-  function \code{roll_sum()} is over six times faster than
+  function \code{roll_sum()} is over \emph{6} times faster than
   \code{rutils::roll_sum()} which uses vectorized \emph{R}.
 }
 \examples{

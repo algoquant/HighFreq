@@ -44,13 +44,24 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [x] add ByteCompile: true to the DESCRIPTION
-
 + [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
-+ [ ] add Rcpp roll and run functions
-Convert roll functions from package RcppRoll to native Rcpp functions.
++ [ ] modify roll_zscores() to use updates of previous regression, instead of a new regression at every point in time
+
++ [ ] add sim_* functions using RcppArmadillo: sim_arima(), sim_garch()
+
++ [ ] add calc_* functions using RcppArmadillo: calc_eigen(), calc_inv(), calc_scaled(), calc_lm(), calc_weights()
+
++ [ ] add roll_* functions using RcppArmadillo: roll_wsum(), roll_zscores(), roll_scale(), roll_portf()
+
++ [ ] add rolling median using RcppArmadillo
+
++ [ ] convert roll functions from package RcppRoll to native Rcpp functions ?
+
++ [ ] add rolling Hampel filter using RcppArmadillo
+
++ [ ] modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix
 
 + [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
@@ -74,8 +85,10 @@ https://cran.r-project.org/web/packages/meboot/index.html
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
++ [x] add ByteCompile: true to the DESCRIPTION
+
 + [x] generate man files for Rcpp functions
-"Document" in build menu or devtools::document()
+select the "Document" item in build menu or run R command devtools::document()
 
 + [x] fix build error about RcppExports.R.
 Add by hand to NAMESPACE:

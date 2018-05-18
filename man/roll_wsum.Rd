@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_wsum}
 \alias{roll_wsum}
-\title{Calculate the rolling weighted sum over a vector using \emph{RcppArmadillo}.}
+\title{Calculate the rolling weighted sum over a vector of data using
+\emph{RcppArmadillo}.}
 \usage{
 roll_wsum(vec_tor, wei_ghts)
 }
@@ -16,14 +17,15 @@ A numeric \emph{vector} of the same length as the argument
   \code{vec_tor}.
 }
 \description{
-Calculate the rolling weighted sum over a vector using \emph{RcppArmadillo}.
+Calculate the rolling weighted sum over a vector of data using
+\emph{RcppArmadillo}.
 }
 \details{
 The function \code{roll_wsum()} calculates the rolling weighted sum
   of a vector over its past values (a convolution with the \emph{vector} of 
   weights), using \emph{RcppArmadillo}. It performs a similar calculation as
   the standard \emph{R} function \code{filter(x=vec_tor, filter=wei_ghts, 
-  method="convolution", sides=1)}, but it's about six times faster, and it 
+  method="convolution", sides=1)}, but it's about \emph{6} times faster, and it 
   doesn't produce any \emph{NA} values.
 }
 \examples{

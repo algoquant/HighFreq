@@ -2,41 +2,74 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_weights}
 \alias{calc_weights}
-\title{Calculate the maximum Sharpe ratio portfolio weights for the matrix returns,
-using the regularized inverse of the covariance matrix, and
-\emph{RcppArmadillo}.}
+\title{Calculate the scaled weights of the portfolio with the maximum Sharpe ratio.}
 \usage{
-calc_weights(re_turns, alpha_s, alphas_b, max_eigen)
+calc_weights(re_turns, max_eigen, al_pha)
 }
 \arguments{
-\item{re_turns}{A numeric \emph{matrix} of returns data.}
+\item{re_turns}{A numeric \emph{matrix} of excess returns data (the returns
+in excess of the risk-free rate).}
 
-\item{vec_tor}{A numeric \emph{vector} of data.}
+\item{max_eigen}{An \emph{integer} equal to the regularization intensity
+(the number of eigenvalues and eigenvectors used for calculating the 
+regularized inverse).}
 
-\item{look_back}{The length of the look-back interval, equal to the number of rows
-of data used for calculating the variance.}
+\item{al_pha}{The shrinkage intensity.}
 }
 \value{
-A numeric \emph{vector} of the same length as the argument \code{vec_tor}.
+A numeric \emph{vector} of the same length as the number of columns
+  of \code{re_turns}.
 }
 \description{
-Calculate the maximum Sharpe ratio portfolio weights for the matrix returns,
-using the regularized inverse of the covariance matrix, and
-\emph{RcppArmadillo}.
+Calculate the scaled weights of the portfolio with the maximum Sharpe ratio.
 }
 \details{
-The function \code{calc_weights()} calculates a \emph{vector} of rolling 
-  variance estimates, from over a \emph{vector} of returns, using \emph{Rcpp}.
+The function \code{calc_weights()} calculates the scaled weights of
+  the portfolio with the maximum Sharpe ratio, using \emph{RcppArmadillo}.
+  
+  It first calculates the regularized inverse of the covariance matrix of
+  returns using function \code{HighFreq::calc_inv()}.
+  It then estimates the vector of mean returns and applies shrinkage to it,
+  by shrinking it to its common mean value.
+  The shrinkage intensity \code{al_pha} determines the amount of shrinkage 
+  that is applied, with \code{al_pha = 0} representing no shrinkage (with 
+  the estimator of mean returns equal to the means of the columns of 
+  \code{re_turns}), and \code{al_pha = 1} representing complete shrinkage 
+  (with the estimator of mean returns equal to the single mean of all the
+  columns of \code{re_turns})
+  
+  The function \code{calc_weights()} calculates the weights by multiplying 
+  the inverse of the covariance matrix times the estimator of the mean
+  returns. It finally scales the weights by their sum, so that the sum of
+  the weights is equal to \code{1}.
 }
 \examples{
 \dontrun{
-# create minutely OHLC time series of random prices
-vec_tor <- HighFreq::random_ohlc()
-# calculate variance estimates for vec_tor over a 21 period interval
-var_rolling <- HighFreq::calc_weights(vec_tor, look_back=21)
-# calculate variance estimates for SPY
-var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="yang_zhang")
-# calculate SPY variance without accounting for overnight jumps
-var_rolling <- HighFreq::calc_weights(HighFreq::SPY, calc_method="rogers_satchell")
+# Calculate ETF prices
+sym_bols <- colnames(rutils::env_etf$price_s)
+sym_bols <- sym_bols[!(sym_bols=="VXX")]
+price_s <- rutils::env_etf$price_s[, sym_bols]
+# Carry forward non-NA prices
+price_s <- zoo::na.locf(price_s)
+price_s <- na.omit(price_s)
+# Calculate simple ETF returns
+re_turns <- rutils::diff_it(price_s)
+# Calculate covariance matrix
+ei_gen <- eigen(cov(re_turns))
+# Calculate regularized inverse of covariance matrix
+max_eigen <- 3
+eigen_vec <- ei_gen$vectors[, 1:max_eigen]
+eigen_val <- ei_gen$values[1:max_eigen]
+in_verse <- eigen_vec \%*\% (t(eigen_vec) / eigen_val)
+# Define shrinkage intensity and apply shrinkage to the mean returns
+al_pha <- 0.5
+col_means <- colMeans(re_turns)
+col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
+# Calculate weights using R
+weight_s <- in_verse \%*\% col_means
+weights_r <- drop(weight_s/sum(weight_s))
+# Calculate weights using RcppArmadillo
+weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen, al_pha=al_pha))
+all.equal(weight_s, weights_r)
 }
 }
