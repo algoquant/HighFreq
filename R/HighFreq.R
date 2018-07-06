@@ -225,7 +225,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
   else
     re_turns <- x_ts[, col_umn]  # OHLC data
   # calculate returns
-  re_turns <- rutils::diff_xts(log(re_turns), lagg=lagg)
+  re_turns <- rutils::diff_it(log(re_turns), lagg=lagg)
   if (sca_le)
     re_turns <- re_turns / c(rep(1, lagg), diff(xts::.index(re_turns), lagg=lagg))
   re_turns[1:lagg, ] <- 0
@@ -877,18 +877,18 @@ save_rets_ohlc <- function(sym_bol,
 
 run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
-  oh_lc <- log(oh_lc[, 1:4])
+  # oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
-         "close"={rutils::diff_xts(oh_lc[, 4])^2},
+         "close"={rutils::diff_it(oh_lc[, 4])^2},
          "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
          "rogers_satchell"={(oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                             (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])},
-         "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+         "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 +
                             0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                             (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
          "yang_zhang"={co_eff <- 0.34/2.34
-                            (oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 +
+                            (oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 +
                             co_eff*(oh_lc[, 1]-oh_lc[, 4])^2 +
                             (1-co_eff)*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
@@ -933,18 +933,18 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 
 run_skew <- function(oh_lc, calc_method="rogers_satchell") {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
-  oh_lc <- log(oh_lc[, 1:4])
+  # oh_lc <- log(oh_lc[, 1:4])
   sk_ew <- switch(calc_method,
-                  "close"={rutils::diff_xts(oh_lc[, 4])^3},
+                  "close"={rutils::diff_it(oh_lc[, 4])^3},
                   "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^3 -
                       (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^3},
                   "rogers_satchell"={
                     (oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1])*(oh_lc[, 2]-0.5*(oh_lc[, 4] + oh_lc[, 1])) +
                       (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1])*(oh_lc[, 3]-0.5*(oh_lc[, 4] + oh_lc[, 1]))},
-                  "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^3 +
+                  "garman_klass_yz"={(oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^3 +
                       0.5*(oh_lc[, 2]-oh_lc[, 3])^3 -
                       (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^3},
-                  "yang_zhang"={c_o <- oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]);
+                  "yang_zhang"={c_o <- oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]);
                   o_c <- oh_lc[, 1]-oh_lc[, 4];
                   (c_o-sum(c_o)/NROW(c_o))^3 +
                     0.67*(o_c-sum(o_c)/NROW(o_c))^3 +
@@ -1215,10 +1215,10 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 
 roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
-  oh_lc <- log(oh_lc[, 1:4])
+  # oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
                       "close"={xts(c(rep(0, look_back-1),
-                            RcppRoll::roll_var(rutils::diff_xts(oh_lc[, 4]), n=look_back, align="left")),
+                            RcppRoll::roll_var(rutils::diff_it(oh_lc[, 4]), n=look_back, align="left")),
                               order.by=index(oh_lc))},
                       "garman_klass"={rutils::roll_sum(
                             0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
@@ -1226,11 +1226,11 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
                       "rogers_satchell"={rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                             (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), look_back=look_back) / look_back},
                       "garman_klass_yz"={rutils::roll_sum(
-                            (oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+                            (oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                             (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2, look_back=look_back) / look_back},
                       "yang_zhang"={co_eff <- 0.34/(1.34 + (look_back + 1)/(look_back - 1))
                             c(rep(0, look_back-1),
-                            RcppRoll::roll_var(oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]), n=look_back, align="left") +
+                            RcppRoll::roll_var(oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]), n=look_back, align="left") +
                             co_eff*RcppRoll::roll_var(oh_lc[, 1]-oh_lc[, 4], n=look_back, align="left")) +
                             (1-co_eff)*rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                               (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), look_back=look_back) / look_back}
@@ -1309,17 +1309,17 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
     in_dex <- c(1, diff(xts::.index(oh_lc)))
   else
     in_dex <- rep(1, NROW(oh_lc))
-  oh_lc <- log(oh_lc[, 1:4])
+  # oh_lc <- log(oh_lc[, 1:4])
   switch(calc_method,
          "close"={var(rutils::diff_it(as.numeric(oh_lc[, 4]))/in_dex)},
          "garman_klass"={sum((0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                           (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
          "rogers_satchell"={sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                             (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc)},
-         "garman_klass_yz"={sum(((oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
+         "garman_klass_yz"={sum(((oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                           (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
          "yang_zhang"={co_eff <- 0.34/(1.34 + (NROW(oh_lc) + 1)/(NROW(oh_lc) - 1))
-                        drop(var((oh_lc[, 1]-rutils::lag_xts(oh_lc[, 4]))/in_dex) +
+                        drop(var((oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))/in_dex) +
                           co_eff*var((oh_lc[, 1]-oh_lc[, 4])/in_dex) +
                           (1-co_eff)*sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                           (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc))}
@@ -1399,8 +1399,8 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 
 roll_hurst <- function(oh_lc, look_back=11) {
-  ran_ge <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=log(oh_lc[, 2]), n=look_back) +
-               RcppRoll::roll_max(x=-log(oh_lc[, 3]), n=look_back)))
+  ran_ge <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=oh_lc[, 2], n=look_back) +
+               RcppRoll::roll_max(x=-oh_lc[, 3], n=look_back)))
   var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, sca_le=FALSE))
   hurst_rolling <- ifelse((var_rolling==0) | (ran_ge==0),
                           0.5,
