@@ -1580,7 +1580,7 @@ roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts),
 #' @examples
 #' \dontrun{
 #' # combine two time series of prices
-#' price_s <- cbind(rutils::env_etf$XLU, rutils::env_etf$XLP)
+#' price_s <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
 #' look_back <- 252
 #' look_forward <- 22
 #' # define end points

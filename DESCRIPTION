@@ -18,9 +18,8 @@ Imports:
 	RcppRoll, 
 	caTools, 
 	lubridate, 
-    Rcpp (>= 0.12.16),
-    RcppParallel
-LinkingTo: Rcpp, RcppArmadillo, RcppParallel
+    Rcpp (>= 0.12.16)
+LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make, C++11
 Remotes: github::algoquant/rutils,
 VignetteBuilder: knitr

@@ -166,9 +166,9 @@ Simulate (backtest) a rolling portfolio optimization strategy, using *RcppArmadi
 # load HighFreq
 library(HighFreq)
 # Calculate ETF prices
-sym_bols <- colnames(rutils::env_etf$price_s)
+sym_bols <- colnames(rutils::etf_env$price_s)
 sym_bols <- sym_bols[!(sym_bols=="VXX")]
-price_s <- rutils::env_etf$price_s[, sym_bols]
+price_s <- rutils::etf_env$price_s[, sym_bols]
 # Carry forward non-NA prices
 price_s <- zoo::na.locf(price_s)
 price_s <- na.omit(price_s)

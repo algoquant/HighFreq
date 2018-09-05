@@ -44,6 +44,10 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] create function for rolling Hampel filter using RcppArmadillo
+
++ [ ] create function roll_median() for rolling median using RcppArmadillo
+
 + [ ] create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
 + [ ] create function roll_lm() which performs rolling regressions over end points, and calculates the predicted out-of-sample values based on the coefficients from calc_lm()
@@ -52,13 +56,15 @@ adapt from roll_zscores()
 + [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
-+ [ ] modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
++ [ ] create functions write_xts() and read_xts() for writing and reading xts time series from csv files, using package data.table
+https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html
+https://github.com/Rdatatable/data.table/wiki
 
-+ [ ] add rolling median roll_median() using RcppArmadillo
++ [ ] modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] convert roll functions from package RcppRoll to native Rcpp functions ?
 
-+ [ ] add rolling Hampel filter using RcppArmadillo
++ [ ] create functions roll() and run() in Rcpp - already done ?
 
 + [ ] modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix
 
@@ -83,6 +89,8 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] remove RcppParallel dependency from DESCRIPTION
 
 + [x] add ByteCompile: TRUE to the DESCRIPTION file
 
@@ -169,7 +177,7 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
 + [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
 
-+ [ ] add vignette and automatically build vignette  
++ [x] add vignette and automatically build vignette  
 
 + [ ] introduce unit testing using testthat and devtools: create /tests directory
 
