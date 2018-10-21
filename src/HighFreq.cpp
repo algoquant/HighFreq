@@ -853,14 +853,17 @@ arma::vec calc_weights(const arma::mat& re_turns,
 ) {
   arma::mat in_verse = calc_inv(re_turns, max_eigen);
   arma::vec weight_s = arma::trans(arma::mean(re_turns, 0));
+  arma::vec returns_mean = arma::mean(re_turns, 1);
   
   // shrink weight_s to the mean of weight_s
   weight_s = ((1-al_pha)*weight_s + al_pha*arma::mean(weight_s));
   // apply regularized inverse
   weight_s = in_verse*weight_s;
+  arma::vec returns_portf = re_turns*weight_s;
   // scale weight_s and return them
+  return weight_s*arma::stddev(returns_mean)/arma::stddev(returns_portf);
   // return weight_s/sqrt(sum(square(weight_s)));
-  return weight_s/sum(weight_s);
+  // return weight_s/sum(weight_s);
 }  // end calc_weights
 
 

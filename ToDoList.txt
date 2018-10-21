@@ -44,31 +44,41 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] create function for rolling Hampel filter using RcppArmadillo
++ [ ] In function roll_portf() add transaction costs: 
+bid_offer = 0.001
+cost_s = bid_offer*abs(rutils::diff_it(weight_s))/2
 
-+ [ ] create function roll_median() for rolling median using RcppArmadillo
++ [ ] In function calc_weights() modify weight_s scaling: scale the weights to match the volatility of mean returns
+Calculate the row means of the re_turns matrix, and then calculate the volatility of the vector of mean returns.
+Introduce parameter sca_le ?
 
-+ [ ] create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
++ [x] Replace zoo::na.locf() with xts:::na.locf.xts()
 
-+ [ ] create function roll_lm() which performs rolling regressions over end points, and calculates the predicted out-of-sample values based on the coefficients from calc_lm()
++ [ ] Create function for rolling Hampel filter using RcppArmadillo
+
++ [ ] Create function roll_median() for rolling median using RcppArmadillo
+
++ [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
+
++ [ ] Create function roll_lm() which performs rolling regressions over end points, and calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 adapt from roll_zscores()
 
-+ [ ] modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
++ [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
-+ [ ] create functions write_xts() and read_xts() for writing and reading xts time series from csv files, using package data.table
++ [ ] Create functions write_xts() and read_xts() for writing and reading xts time series from csv files, using package data.table
 https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html
 https://github.com/Rdatatable/data.table/wiki
 
-+ [ ] modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
++ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
-+ [ ] convert roll functions from package RcppRoll to native Rcpp functions ?
++ [ ] Convert roll functions from package RcppRoll to native Rcpp functions ?
 
-+ [ ] create functions roll() and run() in Rcpp - already done ?
++ [ ] Create functions roll() and run() in Rcpp - already done ?
 
-+ [ ] modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix
++ [ ] Modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix
 
-+ [ ] modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
++ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 deprecate function roll_moment() because it's similar to roll_vwap() ?
@@ -159,17 +169,17 @@ Run random data through model to test if there is data snooping.
 
 + [x] modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
 
-+ [ ] create function sea_son() for calculating time of day (year) as fraction
++ [ ] Create function sea_son() for calculating time of day (year) as fraction
 The time of day can be used as an input into a seasonal model
 
-+ [ ] create volume-weighted Hurst and density plots  
++ [ ] Create volume-weighted Hurst and density plots  
 https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
-+ [ ] create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
++ [ ] Create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
 
-+ [ ] modify function season_ality() to discard elements corresponding to infrequent observations ?
++ [ ] Modify function season_ality() to discard elements corresponding to infrequent observations ?
 
-+ [ ] create Rcpp function for fast rolling aggregations over endpoints
++ [ ] Create Rcpp function for fast rolling aggregations over endpoints
 
 + [ ] aggregate data to 10-second bars (?)  
 
@@ -181,7 +191,7 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
 + [ ] introduce unit testing using testthat and devtools: create /tests directory
 
-+ [ ] modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
++ [ ] Modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
 add argument "open_to_close" with default value TRUE  
 
 + [ ] prove that OHLC skew formula is an estimator of skew  
@@ -194,13 +204,13 @@ https://en.wikipedia.org/wiki/Wiener_process
 
 + [ ] add logical arg as option to aggregate data or not
 
-+ [ ] calculate rets from scrubbed data
++ [ ] Calculate rets from scrubbed data
 
-+ [ ] calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
++ [ ] Calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
 
-+ [ ] create function to estimate beta from HFreq data
++ [ ] Create function to estimate beta from HFreq data
 
-+ [ ] create function to forecast skewness
++ [ ] Create function to forecast skewness
 Show that variance is predictable over time 
 Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
 so variables other than lagged skewness are required to forecast skewness.
@@ -377,18 +387,18 @@ created function save_rets_OHLC()
 
 ### tasks deprecated
 
-+ [ ] modify function run_returns() to perform sapply() if argument has multiple columns ?
++ [ ] Modify function run_returns() to perform sapply() if argument has multiple columns ?
 
 + [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]
 instead of:
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
 
-+ [ ] modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
++ [ ] Modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
 
 + [ ] subtract mean in functions run_variance() and run_skew() - no  
 
-+ [ ] convert function season_ality() to use split.xts() (?)  
++ [ ] Convert function season_ality() to use split.xts() (?)  
 
 + [ ] replace caTools with TTR functions (?)  
 only runquantile() is called from caTools  
@@ -399,7 +409,7 @@ would require rewriting extreme_values() and price_jumps(), and then benchmarkin
 
 + [ ] rename save_rets_OHLC to rets_OHLC (?)  
 
-+ [ ] calculate volume-weighted moments and compare them to standard moments
++ [ ] Calculate volume-weighted moments and compare them to standard moments
 add volume-weighting to vol_ohlc() and skew_ohlc()
 
 

@@ -447,7 +447,7 @@ add_TA(da_ta[inter_val, 2]/(ran_ge[2]-ran_ge[1]), on=1, col="blue", lwd=2)
 skew_rolling <- roll_vwap(oh_lc=SPY[inter_val], x_ts=run_skew(oh_lc=SPY[inter_val]), look_back=10)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
-skew_rolling <- na.locf(skew_rolling)
+skew_rolling <- xts:::na.locf.xts(skew_rolling)
 tail(skew_rolling, 11)
 
 

@@ -18,7 +18,7 @@
 #  mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 #  # replace whole rows containing suspect price jumps with NA, and perform locf()
 #  ta_q[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
-#  ta_q <- na.locf(ta_q)
+#  ta_q <- xts:::na.locf.xts(ta_q)
 
 ## ----eval=FALSE----------------------------------------------------------
 #  # scrub and aggregate a single day of SPY TAQ data to OHLC
