@@ -204,7 +204,7 @@ roll_sum <- function(vec_tor, look_back) {
 #' \emph{RcppArmadillo}.
 #' 
 #' @param vec_tor A numeric \emph{vector} of data.
-#' @param wei_ghts A numeric \emph{vector} of weights.
+#' @param weight_s A numeric \emph{vector} of weights.
 #'
 #' @return A numeric \emph{vector} of the same length as the argument
 #'   \code{vec_tor}.
@@ -212,35 +212,78 @@ roll_sum <- function(vec_tor, look_back) {
 #' @details The function \code{roll_wsum()} calculates the rolling weighted sum
 #'   of a vector over its past values (a convolution with the \emph{vector} of 
 #'   weights), using \emph{RcppArmadillo}. It performs a similar calculation as
-#'   the standard \emph{R} function \code{filter(x=vec_tor, filter=wei_ghts, 
-#'   method="convolution", sides=1)}, but it's about \emph{6} times faster, and it 
+#'   the standard \emph{R} function \code{filter(x=vec_tor, filter=weight_s, 
+#'   method="convolution", sides=1)}, but it's over \emph{6} times faster, and it 
 #'   doesn't produce any \emph{NA} values.
 #'   
 #' @examples
 #' \dontrun{
 #' # First example
 #' # create vector from historical prices
-#' vec_tor <- as.numeric(rutils::env_etf$VTI[, 6])
+#' vec_tor <- as.numeric(rutils::etf_env$VTI[, 6])
 #' # create simple weights
-#' wei_ghts <- c(1, rep(0, 10))
+#' weight_s <- c(1, rep(0, 10))
 #' # calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, wei_ghts=rev(wei_ghts))
+#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
 #' # compare with original
 #' all.equal(vec_tor, as.numeric(weight_ed))
 #' # Second example
 #' # create exponentially decaying weights
-#' wei_ghts <- exp(-0.2*1:11)
-#' wei_ghts <- wei_ghts/sum(wei_ghts)
+#' weight_s <- exp(-0.2*1:11)
+#' weight_s <- weight_s/sum(weight_s)
 #' # calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, wei_ghts=rev(wei_ghts))
+#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
 #' # calculate rolling weighted sum using filter()
-#' filter_ed <- filter(x=vec_tor, filter=wei_ghts, method="convolution", sides=1)
+#' filter_ed <- filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
 #' # compare both methods
-#' all.equal(as.numeric(filter_ed[-(1:11)]), as.numeric(weight_ed[-(1:11)]))
+#' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 #' }
 #' @export
-roll_wsum <- function(vec_tor, wei_ghts) {
-    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', vec_tor, wei_ghts)
+roll_wsum <- function(vec_tor, weight_s) {
+    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', vec_tor, weight_s)
+}
+
+#' Calculate the convolutions of the matrix columns with a vector of weights.
+#' 
+#' @param mat_rix A numeric \emph{matrix} of data.
+#' @param weight_s A column \emph{vector} of weights.
+#'
+#' @return A numeric \emph{matrix} with the same dimensions as the input
+#'   argument \code{mat_rix}.
+#'
+#' @details The function \code{roll_conv()} calculates the convolutions of the
+#'   matrix columns with a vector of weights.  It rolls over the matrix rows
+#'   and multiplies the past column values with the weights. It uses the
+#'   \emph{RcppArmadillo} function \code{arma::conv2()}. It performs a similar
+#'   calculation to the standard \emph{R} function \code{filter(x=mat_rix,
+#'   filter=weight_s, method="convolution", sides=1)}, but it's over \emph{6}
+#'   times faster, and it doesn't produce any leading \emph{NA} values.
+#'   
+#' @examples
+#' \dontrun{
+#' # First example
+#' # create matrix from historical prices
+#' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+#' # create simple weights
+#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+#' # calculate rolling weighted sum
+#' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+#' # compare with original
+#' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+#' # Second example
+#' # create exponentially decaying weights
+#' weight_s <- exp(-0.2*1:11)
+#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+#' # calculate rolling weighted sum
+#' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+#' # calculate rolling weighted sum using filter()
+#' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+#' # compare both methods
+#' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+#' }
+#' @export
+roll_conv <- function(mat_rix, weight_s) {
+    .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', mat_rix, weight_s)
 }
 
 #' Calculate a time series of variance estimates over a rolling look-back
@@ -301,8 +344,7 @@ roll_wsum <- function(vec_tor, wei_ghts) {
 #'   The function \code{roll_var()} performs the same calculations as the
 #'   function \code{volatility()} from package
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-#'   it's a little faster because it uses function RcppRoll::roll_sd(), and it
-#'   performs less data validation.
+#'   it's a little faster because it performs less data validation.
 #'
 #' @examples
 #' \dontrun{
@@ -377,7 +419,7 @@ roll_scale <- function(mat_rix, look_back, use_median = FALSE) {
 #'   \code{de_sign}.
 #'
 #' @details The function \code{roll_zscores()} performs rolling regressions 
-#'   along the rows of the design matrix \code{de_sign}, using function
+#'   along the rows of the design matrix \code{de_sign}, using the function
 #'   \code{calc_lm()}. 
 #'   
 #'   The function \code{roll_zscores()} performs a loop over the rows of 
@@ -391,8 +433,8 @@ roll_scale <- function(mat_rix, look_back, use_median = FALSE) {
 #' \dontrun{
 #' # calculate Z-scores from rolling time series regression using RcppArmadillo
 #' look_back <- 11
-#' clo_se <- as.numeric(Cl(rutils::env_etf$VTI))
-#' date_s <- xts::.index(rutils::env_etf$VTI)
+#' clo_se <- as.numeric(Cl(rutils::etf_env$VTI))
+#' date_s <- xts::.index(rutils::etf_env$VTI)
 #' z_scores <- HighFreq::roll_zscores(res_ponse=clo_se, 
 #'  de_sign=matrix(as.numeric(date_s), nc=1), 
 #'  look_back=look_back)
@@ -493,7 +535,7 @@ sim_ou <- function(eq_price, vol_at, the_ta, in_nov) {
 #'   innovations through a vector of \emph{ARIMA} coefficients, using 
 #'   \emph{RcppArmadillo}.
 #'   It performs the same calculation as the standard \emph{R} function 
-#'   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's about
+#'   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
 #'   \emph{6} times faster.
 #'   
 #' @examples
@@ -514,49 +556,60 @@ sim_arima <- function(in_nov, co_eff) {
     .Call('_HighFreq_sim_arima', PACKAGE = 'HighFreq', in_nov, co_eff)
 }
 
-#' Calculate the portfolio weights with the maximum Sharpe ratio.
+#' Calculate the optimal portfolio weights for different objective functions.
 #' 
 #' @param re_turns A numeric \emph{matrix} of excess returns data (the returns
 #'   in excess of the risk-free rate).
-#' @param max_eigen An \emph{integer} equal to the regularization intensity
-#'   (the number of eigenvalues and eigenvectors used for calculating the 
-#'   regularized inverse).
-#' @param al_pha The shrinkage intensity.  (The default is \code{0})
+#' @param typ_e A \emph{string} specifying the objective for calculating the
+#'   weights (see Details).
+#' @param max_eigen An \emph{integer} equal to the number of eigenvectors used
+#'   for calculating the regularized inverse of the covariance matrix (the
+#'   default is the number of columns of \code{re_turns}).
+#' @param al_pha The shrinkage intensity (the default is \code{0}).
+#' @param scal_e A \emph{Boolean} specifying whether the weights should be
+#'   scaled (the default is \code{TRUE}).
 #'
 #' @return A numeric \emph{vector} of the same length as the number of columns
 #'   of \code{re_turns}.
 #'
-#' @details The function \code{calc_weights()} calculates the scaled weights of
-#'   the portfolio with the maximum Sharpe ratio, using \emph{RcppArmadillo}.
+#' @details The function \code{calc_weights()} calculates the optimal portfolio
+#'   weights for different objective functions, using \emph{RcppArmadillo}.
+#' 
+#'   If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
+#'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
+#'   inverse of the covariance matrix times the mean column returns.
 #'   
-#'   It first calculates the regularized inverse of the covariance matrix of
-#'   returns using function \code{HighFreq::calc_inv()}.
-#'   It then estimates the vector of mean returns and applies shrinkage to it,
-#'   by shrinking it to its common mean value.
+#'   If \code{typ_e == "min_var"} then it calculates the weights of the minimum
+#'   variance portfolio under linear constraints.
+#'   
+#'   If \code{typ_e == "min_varpca"} then it calculates the weights of the
+#'   minimum variance portfolio under quadratic constraints (which is the
+#'   highest order principal component).
+#' 
+#'   If \code{typ_e == "rank"} then it calculates the weights as the ranks
+#'   (order index) of the trailing Sharpe ratios of the portfolio assets.
+#' 
+#'   If \code{scal_e == TRUE} (the default) then \code{calc_weights()} scales
+#'   the weights so that the resulting portfolio has the same volatility as the
+#'   equally weighted portfolio.
+#'   
+#'   \code{calc_weights()} applies dimensional regularization to calculate the
+#'   inverse of the covariance matrix of returns from its eigen decomposition,
+#'   using the function \code{arma::eig_sym()}.
+#'   
+#'   In addition, it applies shrinkage to the vector of mean column returns, by
+#'   shrinking it to its common mean value.
 #'   The shrinkage intensity \code{al_pha} determines the amount of shrinkage 
 #'   that is applied, with \code{al_pha = 0} representing no shrinkage (with 
 #'   the estimator of mean returns equal to the means of the columns of 
 #'   \code{re_turns}), and \code{al_pha = 1} representing complete shrinkage 
 #'   (with the estimator of mean returns equal to the single mean of all the
 #'   columns of \code{re_turns})
-#'   
-#'   The function \code{calc_weights()} calculates the weights by multiplying 
-#'   the inverse of the covariance matrix times the estimator of the mean
-#'   returns. It finally scales the weights by their sum, so that the sum of
-#'   the weights is equal to \code{1}.
 #' 
 #' @examples
 #' \dontrun{
-#' # Calculate ETF prices
-#' sym_bols <- colnames(rutils::env_etf$price_s)
-#' sym_bols <- sym_bols[!(sym_bols=="VXX")]
-#' price_s <- rutils::env_etf$price_s[, sym_bols]
-#' # Carry forward non-NA prices
-#' price_s <- zoo::na.locf(price_s)
-#' price_s <- na.omit(price_s)
-#' # Calculate simple ETF returns
-#' re_turns <- rutils::diff_it(price_s)
-#' # Calculate covariance matrix
+#' # Calculate covariance matrix of ETF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 #' ei_gen <- eigen(cov(re_turns))
 #' # Calculate regularized inverse of covariance matrix
 #' max_eigen <- 3
@@ -569,14 +622,15 @@ sim_arima <- function(in_nov, co_eff) {
 #' col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
 #' # Calculate weights using R
 #' weight_s <- in_verse %*% col_means
-#' weights_r <- drop(weight_s/sum(weight_s))
+#' n_col <- NCOL(re_turns)
+#' weights_r <- weights_r*sd(re_turns %*% rep(1/n_col, n_col))/sd(re_turns %*% weights_r)
 #' # Calculate weights using RcppArmadillo
-#' weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen, al_pha=al_pha))
+#' weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen=max_eigen, al_pha=al_pha))
 #' all.equal(weight_s, weights_r)
 #' }
 #' @export
-calc_weights <- function(re_turns, max_eigen, al_pha = 0) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, max_eigen, al_pha)
+calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, al_pha = 0, scal_e = TRUE) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, max_eigen, al_pha, scal_e)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -588,36 +642,54 @@ calc_weights <- function(re_turns, max_eigen, al_pha = 0) {
 #'   in excess of the risk-free rate).
 #' @param start_points An integer \emph{vector} of start points.
 #' @param end_points An integer \emph{vector} of end points.
-#' @param max_eigen An \emph{integer} equal to the regularization intensity
-#'   (the number of eigenvalues and eigenvectors used for calculating the 
-#'   regularized inverse).
-#' @param al_pha The shrinkage intensity.  (The default is \code{0})
+#' @param typ_e A \emph{string} specifying the objective for calculating the
+#'   weights (see Details).
+#' @param max_eigen An \emph{integer} equal to the number of eigenvectors used
+#'   for calculating the regularized inverse of the covariance matrix (the
+#'   default is the number of columns of \code{re_turns}).
+#' @param al_pha A numeric shrinkage intensity.  (The default is \code{0})
+#' @param scal_e A \emph{Boolean} specifying whether the weights should be
+#'   scaled (the default is \code{TRUE}).
+#' @param co_eff A numeric multiplier of the weights.  (The default is
+#'   \code{1})
+#' @param bid_offer A numeric bid-offer spread.  (The default is \code{0})
 #'
 #' @return A numeric \emph{vector} of strategy returns, with the same length as
 #'   the number of rows of \code{re_turns}.
 #'
-#' @details The function \code{roll_portf()} calculates a \emph{vector} of 
-#'   returns for a rolling portfolio optimization strategy. The function 
-#'   \code{roll_portf()} performs a loop over the \code{end_points}, and 
-#'   subsets the \emph{matrix} of excess returns \code{ex_cess} along its rows,
-#'   between the corresponding end point and the start point. It passes the
-#'   subset matrix of excess returns into the function \code{calc_weights()},
-#'   which calculates the optimal portfolio weights. It then multiplies the
-#'   weights times the future portfolio returns, to calculate the out-of-sample
+#' @details The function \code{back_test()} performs a backtest simulation of a
+#'   rolling portfolio optimization strategy over a \emph{vector} of
+#'   \code{end_points}.
+#'   
+#'   It performs a loop over the \code{end_points}, and subsets the
+#'   \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
+#'   corresponding end point and the start point. It passes the subset matrix
+#'   of excess returns into the function \code{calc_weights()}, which
+#'   calculates the optimal portfolio weights. The arguments \code{max_eigen},
+#'   \code{al_pha}, \code{typ_e}, and \code{scal_e} are also passed to the
+#'   function \code{calc_weights()}.
+#'   
+#'   The function \code{back_test()} multiplies the weights by the coefficient
+#'   \code{co_eff} (with default equal to \code{1}), which allows reverting a
+#'   strategy if \code{co_eff = -1}.
+#'   
+#'   The function \code{back_test()} then multiplies the weights times the
+#'   future portfolio returns, to calculate the out-of-sample strategy returns.
+#'   
+#'   The function \code{back_test()} calculates the transaction costs by
+#'   multiplying the bid-offer spread \code{bid_offer} times the absolute
+#'   difference between the current weights minus the weights from the previous
+#'   period. It then subtracts the transaction costs from the out-of-sample
 #'   strategy returns.
+#'   
+#'   The function \code{back_test()} returns a time series (column vector) of
+#'   strategy returns, of the same length as the number of rows of
+#'   \code{re_turns}.
 #'
 #' @examples
 #' \dontrun{
-#' # Calculate ETF prices
-#' sym_bols <- colnames(rutils::env_etf$price_s)
-#' sym_bols <- sym_bols[!(sym_bols=="VXX")]
-#' price_s <- rutils::env_etf$price_s[, sym_bols]
-#' # Carry forward non-NA prices
-#' price_s <- zoo::na.locf(price_s)
-#' price_s <- na.omit(price_s)
-#' # Calculate simple ETF returns
-#' re_turns <- rutils::diff_it(price_s)
-#' # Calculate the daily excess returns
+#' # Calculate the ETF daily excess returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 #' # risk_free is the daily risk-free rate
 #' risk_free <- 0.03/260
 #' ex_cess <- re_turns - risk_free
@@ -632,17 +704,17 @@ calc_weights <- function(re_turns, max_eigen, al_pha = 0) {
 #' al_pha <- 0.5
 #' max_eigen <- 3
 #' # Simulate a monthly rolling portfolio optimization strategy
-#' strat_rets <- HighFreq::roll_portf(ex_cess, re_turns, 
-#'                                   start_points-1, end_points-1, 
-#'                                   max_eigen, al_pha)
-#' strat_rets <- xts(strat_rets, index(re_turns))
-#' colnames(strat_rets) <- "strat_rets"
+#' pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
+#'                             start_points-1, end_points-1, 
+#'                             max_eigen, al_pha)
+#' pnl_s <- xts(pnl_s, index(re_turns))
+#' colnames(pnl_s) <- "strat_rets"
 #' # Plot dygraph of strategy
-#' dygraphs::dygraph(cumsum(strat_rets), 
+#' dygraphs::dygraph(cumsum(pnl_s), 
 #'   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 #' }
 #' @export
-roll_portf <- function(ex_cess, re_turns, start_points, end_points, max_eigen, al_pha = 0) {
-    .Call('_HighFreq_roll_portf', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, max_eigen, al_pha)
+back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", max_eigen = 1L, al_pha = 0, scal_e = TRUE, co_eff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, al_pha, scal_e, co_eff, bid_offer)
 }
 

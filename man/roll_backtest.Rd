@@ -6,7 +6,8 @@
 end points along a time series of prices.}
 \usage{
 roll_backtest(x_ts, train_func, trade_func, look_back = look_forward,
-  look_forward, end_points = rutils::calc_endpoints(x_ts, look_forward), ...)
+  look_forward, end_points = rutils::calc_endpoints(x_ts, look_forward),
+  ...)
 }
 \arguments{
 \item{x_ts}{A time series of prices, asset returns, trading volumes, and
@@ -62,7 +63,7 @@ The function \code{roll_backtest()} performs a rolling backtest
 \examples{
 \dontrun{
 # combine two time series of prices
-price_s <- cbind(rutils::env_etf$XLU, rutils::env_etf$XLP)
+price_s <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
 look_back <- 252
 look_forward <- 22
 # define end points

@@ -26,17 +26,22 @@ calculate a \emph{vector} of z-scores of the residuals.
 }
 \details{
 The function \code{roll_zscores()} performs rolling regressions 
-  along the rows of the design matrix \code{de_sign}, using function
-  \code{calc_lm()}. For each regression it calculates the \emph{z-score} of
-  the last residual value.  It returns a numeric \emph{vector} of the
-  \emph{z-scores}.
+  along the rows of the design matrix \code{de_sign}, using the function
+  \code{calc_lm()}. 
+  
+  The function \code{roll_zscores()} performs a loop over the rows of 
+  \code{de_sign}, and it subsets \code{de_sign} and \code{res_ponse} over a 
+  number of previous (past) rows equal to \code{look_back}.  It performs a 
+  regression on the subset data, and calculates the \emph{z-score} of the 
+  last residual value for each regression. It returns a numeric
+  \emph{vector} of the \emph{z-scores}.
 }
 \examples{
 \dontrun{
 # calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-clo_se <- as.numeric(Cl(rutils::env_etf$VTI))
-date_s <- xts::.index(rutils::env_etf$VTI)
+clo_se <- as.numeric(Cl(rutils::etf_env$VTI))
+date_s <- xts::.index(rutils::etf_env$VTI)
 z_scores <- HighFreq::roll_zscores(res_ponse=clo_se, 
  de_sign=matrix(as.numeric(date_s), nc=1), 
  look_back=look_back)

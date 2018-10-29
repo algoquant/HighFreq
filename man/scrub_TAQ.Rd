@@ -5,7 +5,8 @@
 \title{Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 aggregation.}
 \usage{
-scrub_taq(ta_q, look_back = 51, vol_mult = 2, tzone = "America/New_York")
+scrub_taq(ta_q, look_back = 51, vol_mult = 2,
+  tzone = "America/New_York")
 }
 \arguments{
 \item{ta_q}{\emph{TAQ} A time series in \emph{xts} format.}

@@ -1,3 +1,7 @@
+#' @useDynLib HighFreq
+#' @importFrom Rcpp evalCpp
+#' @exportPattern "^[[:alpha:]]+"
+
 #' Calculate a random \emph{TAQ} time series of prices and trading volumes, in
 #' \emph{xts} format.
 #'
@@ -1200,7 +1204,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'   The function \code{roll_variance()} performs the same calculations as the
 #'   function \code{volatility()} from package
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-#'   it's a little faster because it uses function RcppRoll::roll_sd(), and it
+#'   it's a little faster because it uses function RcppRoll::roll_var(), and it
 #'   performs less data validation.
 #'
 #' @examples

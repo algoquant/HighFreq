@@ -43,14 +43,14 @@ The function \code{calc_scaled()} scales (standardizes) the columns
 }
 \examples{
 \dontrun{
-in_nov <- matrix(rnorm(2000), nc=2)
-foo <- calc_scaled(mat_rix=in_nov, use_median=FALSE)
-bar <- scale(in_nov)
-all.equal(as.numeric(foo), as.numeric(bar))
+mat_rix <- matrix(rnorm(20000), nc=20)
+scale_d <- calc_scaled(mat_rix=mat_rix, use_median=FALSE)
+scale_d2 <- scale(mat_rix)
+all.equal(scale_d, scale_d2, check.attributes=FALSE)
 library(microbenchmark)
 summary(microbenchmark(
-  pure_r=scale(in_nov),
-  rcpp=calc_scaled(mat_rix=in_nov, use_median=FALSE),
+  pure_r=scale(mat_rix),
+  rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

@@ -2,59 +2,73 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_weights}
 \alias{calc_weights}
-\title{Calculate the scaled weights of the portfolio with the maximum Sharpe ratio.}
+\title{Calculate the optimal portfolio weights for different objective functions.}
 \usage{
-calc_weights(re_turns, max_eigen, al_pha)
+calc_weights(re_turns, typ_e = "max_sharpe", max_eigen = 1L,
+  al_pha = 0, scal_e = TRUE)
 }
 \arguments{
 \item{re_turns}{A numeric \emph{matrix} of excess returns data (the returns
 in excess of the risk-free rate).}
 
-\item{max_eigen}{An \emph{integer} equal to the regularization intensity
-(the number of eigenvalues and eigenvectors used for calculating the 
-regularized inverse).}
+\item{typ_e}{A \emph{string} specifying the objective for calculating the
+weights (see Details).}
 
-\item{al_pha}{The shrinkage intensity.}
+\item{max_eigen}{An \emph{integer} equal to the number of eigenvectors used
+for calculating the regularized inverse of the covariance matrix (the
+default is the number of columns of \code{re_turns}).}
+
+\item{al_pha}{The shrinkage intensity (the default is \code{0}).}
+
+\item{scal_e}{A \emph{Boolean} specifying whether the weights should be
+scaled (the default is \code{TRUE}).}
 }
 \value{
 A numeric \emph{vector} of the same length as the number of columns
   of \code{re_turns}.
 }
 \description{
-Calculate the scaled weights of the portfolio with the maximum Sharpe ratio.
+Calculate the optimal portfolio weights for different objective functions.
 }
 \details{
-The function \code{calc_weights()} calculates the scaled weights of
-  the portfolio with the maximum Sharpe ratio, using \emph{RcppArmadillo}.
+The function \code{calc_weights()} calculates the optimal portfolio
+  weights for different objective functions, using \emph{RcppArmadillo}.
+
+  If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
+  calculates the weights of the maximum Sharpe portfolio, by multiplying the
+  inverse of the covariance matrix times the mean column returns.
   
-  It first calculates the regularized inverse of the covariance matrix of
-  returns using function \code{HighFreq::calc_inv()}.
-  It then estimates the vector of mean returns and applies shrinkage to it,
-  by shrinking it to its common mean value.
+  If \code{typ_e == "min_var"} then it calculates the weights of the minimum
+  variance portfolio under linear constraints.
+  
+  If \code{typ_e == "min_varpca"} then it calculates the weights of the
+  minimum variance portfolio under quadratic constraints (which is the
+  highest order principal component).
+
+  If \code{typ_e == "rank"} then it calculates the weights as the ranks
+  (order index) of the trailing Sharpe ratios of the portfolio assets.
+
+  If \code{scal_e == TRUE} (the default) then \code{calc_weights()} scales
+  the weights so that the resulting portfolio has the same volatility as the
+  equally weighted portfolio.
+  
+  \code{calc_weights()} applies dimensional regularization to calculate the
+  inverse of the covariance matrix of returns from its eigen decomposition,
+  using the function \code{arma::eig_sym()}.
+  
+  In addition, it applies shrinkage to the vector of mean column returns, by
+  shrinking it to its common mean value.
   The shrinkage intensity \code{al_pha} determines the amount of shrinkage 
   that is applied, with \code{al_pha = 0} representing no shrinkage (with 
   the estimator of mean returns equal to the means of the columns of 
   \code{re_turns}), and \code{al_pha = 1} representing complete shrinkage 
   (with the estimator of mean returns equal to the single mean of all the
   columns of \code{re_turns})
-  
-  The function \code{calc_weights()} calculates the weights by multiplying 
-  the inverse of the covariance matrix times the estimator of the mean
-  returns. It finally scales the weights by their sum, so that the sum of
-  the weights is equal to \code{1}.
 }
 \examples{
 \dontrun{
-# Calculate ETF prices
-sym_bols <- colnames(rutils::env_etf$price_s)
-sym_bols <- sym_bols[!(sym_bols=="VXX")]
-price_s <- rutils::env_etf$price_s[, sym_bols]
-# Carry forward non-NA prices
-price_s <- zoo::na.locf(price_s)
-price_s <- na.omit(price_s)
-# Calculate simple ETF returns
-re_turns <- rutils::diff_it(price_s)
-# Calculate covariance matrix
+# Calculate covariance matrix of ETF returns
+re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 ei_gen <- eigen(cov(re_turns))
 # Calculate regularized inverse of covariance matrix
 max_eigen <- 3
@@ -67,9 +81,10 @@ col_means <- colMeans(re_turns)
 col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
 # Calculate weights using R
 weight_s <- in_verse \%*\% col_means
-weights_r <- drop(weight_s/sum(weight_s))
+n_col <- NCOL(re_turns)
+weights_r <- weights_r*sd(re_turns \%*\% rep(1/n_col, n_col))/sd(re_turns \%*\% weights_r)
 # Calculate weights using RcppArmadillo
-weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen, al_pha=al_pha))
+weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen=max_eigen, al_pha=al_pha))
 all.equal(weight_s, weights_r)
 }
 }

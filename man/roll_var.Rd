@@ -69,8 +69,7 @@ The function \code{roll_var()} calculates a time series of rolling
   The function \code{roll_var()} performs the same calculations as the
   function \code{volatility()} from package
   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-  it's a little faster because it uses function RcppRoll::roll_sd(), and it
-  performs less data validation.
+  it's a little faster because it performs less data validation.
 }
 \examples{
 \dontrun{

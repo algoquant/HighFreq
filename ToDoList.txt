@@ -2,6 +2,23 @@
 ### ToDo list for package HighFreq: high frequency data scrubbing
 
 ### scripts for package building
+
+## Steps for installing package called my_package, containing Rcpp code:
+1. Create empty package directory with Rcpp::Rcpp.package.skeleton()
+2. In the R directory create a file called my_package.R and add the header:
+
+#' @useDynLib my_package
+#' @importFrom Rcpp evalCpp
+#' @exportPattern "^[[:alpha:]]+"
+NULL
+
+Add your R functions below the header.
+
+3. Clean and rebuild (in Build menu)
+
+
+## Build scripts:
+
 # Install package from source on local drive
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
 # Install package from source on local drive using R CMD
@@ -44,15 +61,7 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] In function roll_portf() add transaction costs: 
-bid_offer = 0.001
-cost_s = bid_offer*abs(rutils::diff_it(weight_s))/2
-
-+ [ ] In function calc_weights() modify weight_s scaling: scale the weights to match the volatility of mean returns
-Calculate the row means of the re_turns matrix, and then calculate the volatility of the vector of mean returns.
-Introduce parameter sca_le ?
-
-+ [x] Replace zoo::na.locf() with xts:::na.locf.xts()
++ [ ] Remove all parallel code and references to parallel packages from HighFreq
 
 + [ ] Create function for rolling Hampel filter using RcppArmadillo
 
@@ -66,10 +75,6 @@ adapt from roll_zscores()
 + [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
-+ [ ] Create functions write_xts() and read_xts() for writing and reading xts time series from csv files, using package data.table
-https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html
-https://github.com/Rdatatable/data.table/wiki
-
 + [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] Convert roll functions from package RcppRoll to native Rcpp functions ?
@@ -80,25 +85,54 @@ https://github.com/Rdatatable/data.table/wiki
 
 + [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
-+ [ ] rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
++ [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 deprecate function roll_moment() because it's similar to roll_vwap() ?
 
-+ [ ] add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
++ [ ] Add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
 
-+ [ ] fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
++ [ ] Fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
 Possible fixes:
 modify random_ohlc() so that it samples from secondly return data and aggregates to minutely OHLC data (does this solve the problem?) - save random minutely OHLC prices to file for future use  
 modify random_ohlc() so that it samples from minutely return data scaled by time, and aggregates to minutely OHLC data
 
-+ [ ] bootstrap the range volatility estimators on random non-normal OHLC prices to check if indeed they have lowest standard error
++ [ ] Bootstrap the range volatility estimators on random non-normal OHLC prices to check if indeed they have lowest standard error
 use package meboot for maximum entropy bootstrap of time series ?
 https://cran.r-project.org/web/packages/meboot/index.html
 
-+ [ ] add function for calculating microprice  
++ [ ] Add function for calculating microprice  
 
 + [ ] tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] In function calc_weights() add additional option for rank momentum, with "typ_e == rank" argument: rank weights using trailing Sharpe
+
++ [x] In function back_test() add argument co_eff to multiply the weights.
+
++ [x] In function back_test() add transaction costs: remember previous weights and subtract current weights from previous weights
+Add argument bid_offer the bid-offer spread.
+
++ [x] Rename function roll_portf() to back_test()
+
++ [x] Add header to HighFreq.R file:
+#' @useDynLib HighFreq
+#' @importFrom Rcpp evalCpp
+#' @exportPattern "^[[:alpha:]]+"
+NULL
+Remove from NAMESPACE:
+useDynLib(HighFreq)
+importFrom(Rcpp, evalCpp)
+exportPattern("^[[:alpha:]]+")
+
++ [x] Add function roll_conv() for calculating the convolutions of the matrix columns
+
++ [x] In function calc_weights() add additional options for the typ_e argument: quadratic weights constraint (highest principal component)
+
++ [x] In function calc_weights() modify weight_s scaling: scale the weights to match the volatility of mean returns
+
++ [x] In function calc_weights() add argument called typ_e (with default value "max_sharpe"), which specifies the objective function of portfolio optimization used for calculating the weights
+
++ [x] Replace zoo::na.locf() with xts:::na.locf.xts()
 
 + [x] remove RcppParallel dependency from DESCRIPTION
 
@@ -106,6 +140,10 @@ The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
 + [x] generate man files for Rcpp functions
 select the "Document" item in build menu or run R command devtools::document()
+
++ [x] Modify DESCRIPTION file
+Added: Encoding: UTF-8
+Removed from Imports: caTools, lubridate, TTR, 
 
 + [x] fix build error about RcppExports.R.
 Add by hand to NAMESPACE:
@@ -181,11 +219,11 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
 + [ ] Create Rcpp function for fast rolling aggregations over endpoints
 
-+ [ ] aggregate data to 10-second bars (?)  
++ [ ] Aggregate data to 10-second bars (?)  
 
-+ [ ] add wiki  
++ [ ] Add wiki  
 
-+ [ ] run on travis, add .travis.yml file, add Build Status tag to README.Rmd
++ [ ] Run on travis, add .travis.yml file, add Build Status tag to README.Rmd
 
 + [x] add vignette and automatically build vignette  
 
@@ -200,9 +238,9 @@ perform simulation to find out
 https://en.wikipedia.org/wiki/First-hitting-time_model  
 https://en.wikipedia.org/wiki/Wiener_process  
 
-+ [ ] analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
++ [ ] Analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
 
-+ [ ] add logical arg as option to aggregate data or not
++ [ ] Add logical arg as option to aggregate data or not
 
 + [ ] Calculate rets from scrubbed data
 
@@ -389,7 +427,7 @@ created function save_rets_OHLC()
 
 + [ ] Modify function run_returns() to perform sapply() if argument has multiple columns ?
 
-+ [ ] remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
++ [ ] Remove extra increment of 1 in start_points index in roll_apply() - no, because otherwise it would create overlaps when aggregating returns (for example)  
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]
 instead of:
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
@@ -400,14 +438,14 @@ start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (
 
 + [ ] Convert function season_ality() to use split.xts() (?)  
 
-+ [ ] replace caTools with TTR functions (?)  
++ [ ] Replace caTools with TTR functions (?)  
 only runquantile() is called from caTools  
 but not easy to replace runquantile(), because no equivalent TTR function  
 would require rewriting extreme_values() and price_jumps(), and then benchmarking  
 
 + [ ] use .subset_xts() (?)
 
-+ [ ] rename save_rets_OHLC to rets_OHLC (?)  
++ [ ] Rename save_rets_OHLC to rets_OHLC (?)  
 
 + [ ] Calculate volume-weighted moments and compare them to standard moments
 add volume-weighting to vol_ohlc() and skew_ohlc()

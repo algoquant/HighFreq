@@ -77,14 +77,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_wsum
-arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& wei_ghts);
-RcppExport SEXP _HighFreq_roll_wsum(SEXP vec_torSEXP, SEXP wei_ghtsSEXP) {
+arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& weight_s);
+RcppExport SEXP _HighFreq_roll_wsum(SEXP vec_torSEXP, SEXP weight_sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type vec_tor(vec_torSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type wei_ghts(wei_ghtsSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_wsum(vec_tor, wei_ghts));
+    Rcpp::traits::input_parameter< const arma::vec& >::type weight_s(weight_sSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_wsum(vec_tor, weight_s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// roll_conv
+arma::mat roll_conv(arma::mat mat_rix, arma::mat& weight_s);
+RcppExport SEXP _HighFreq_roll_conv(SEXP mat_rixSEXP, SEXP weight_sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type mat_rix(mat_rixSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type weight_s(weight_sSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_conv(mat_rix, weight_s));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -167,21 +179,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_weights
-arma::vec calc_weights(const arma::mat& re_turns, const arma::uword& max_eigen, const double& al_pha);
-RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP) {
+arma::vec calc_weights(const arma::mat& re_turns, const std::string& typ_e, int max_eigen, const double& al_pha, const bool scal_e);
+RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type re_turns(re_turnsSEXP);
-    Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type typ_e(typ_eSEXP);
+    Rcpp::traits::input_parameter< int >::type max_eigen(max_eigenSEXP);
     Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, max_eigen, al_pha));
+    Rcpp::traits::input_parameter< const bool >::type scal_e(scal_eSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, typ_e, max_eigen, al_pha, scal_e));
     return rcpp_result_gen;
 END_RCPP
 }
-// roll_portf
-arma::mat roll_portf(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const arma::uword& max_eigen, const double& al_pha);
-RcppExport SEXP _HighFreq_roll_portf(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP) {
+// back_test
+arma::mat back_test(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const std::string& typ_e, const arma::uword& max_eigen, const double& al_pha, const bool& scal_e, const double& co_eff, const double& bid_offer);
+RcppExport SEXP _HighFreq_back_test(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP, SEXP co_effSEXP, SEXP bid_offerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -189,9 +203,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type re_turns(re_turnsSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type start_points(start_pointsSEXP);
     Rcpp::traits::input_parameter< const arma::uvec& >::type end_points(end_pointsSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type typ_e(typ_eSEXP);
     Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
     Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_portf(ex_cess, re_turns, start_points, end_points, max_eigen, al_pha));
+    Rcpp::traits::input_parameter< const bool& >::type scal_e(scal_eSEXP);
+    Rcpp::traits::input_parameter< const double& >::type co_eff(co_effSEXP);
+    Rcpp::traits::input_parameter< const double& >::type bid_offer(bid_offerSEXP);
+    rcpp_result_gen = Rcpp::wrap(back_test(ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, al_pha, scal_e, co_eff, bid_offer));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -204,14 +222,15 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 2},
+    {"_HighFreq_roll_conv", (DL_FUNC) &_HighFreq_roll_conv, 2},
     {"_HighFreq_roll_var", (DL_FUNC) &_HighFreq_roll_var, 2},
     {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 3},
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 3},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
     {"_HighFreq_sim_arima", (DL_FUNC) &_HighFreq_sim_arima, 2},
-    {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 3},
-    {"_HighFreq_roll_portf", (DL_FUNC) &_HighFreq_roll_portf, 6},
+    {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 5},
+    {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 10},
     {NULL, NULL, 0}
 };
 

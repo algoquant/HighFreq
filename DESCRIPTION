@@ -14,10 +14,7 @@ Depends:
     rutils,
     quantmod, 
 Imports:
-    TTR, 
 	RcppRoll, 
-	caTools, 
-	lubridate, 
     Rcpp (>= 0.12.16)
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make, C++11
@@ -27,4 +24,5 @@ LazyData: true
 ByteCompile: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
+Encoding: UTF-8

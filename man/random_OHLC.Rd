@@ -5,9 +5,10 @@
 \title{Calculate a random \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 \usage{
-random_ohlc(oh_lc = NULL, re_duce = TRUE, vol_at = 6.5e-05, dri_ft = 0,
-  in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
-  as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"), ...)
+random_ohlc(oh_lc = NULL, re_duce = TRUE, vol_at = 6.5e-05,
+  dri_ft = 0, in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3,
+  "09:30:00")), to = as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by =
+  "1 sec"), ...)
 }
 \arguments{
 \item{oh_lc}{An \emph{OHLC} time series of prices and trading volumes, in

@@ -33,6 +33,11 @@ Perform a rolling scaling (standardization) of the columns of a
 The function \code{roll_scale()} performs a rolling scaling
   (standardization) of the columns of the \code{mat_rix} argument using
   \emph{RcppArmadillo}.
+  The function \code{roll_scale()} performs a loop over the rows of 
+  \code{mat_rix}, then subsets a number of previous (past) rows equal to 
+  \code{look_back}, and scales the subset matrix.  It assigns the last row
+  of the scaled subset matrix to the return matrix.
+  
   If the argument \code{use_median} is \code{FALSE} (the default), then it
   performs a similar calculation as the function \code{roll::roll_scale()}.
   If the argument \code{use_median} is \code{TRUE}, then it calculates the
