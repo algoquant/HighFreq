@@ -1040,8 +1040,9 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //' # Simulate a monthly rolling portfolio optimization strategy
 //' pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
 //'                             start_points-1, end_points-1, 
-//'                             max_eigen, al_pha)
-//' pnl_s <- xts(pnl_s, index(re_turns))
+//'                             max_eigen = max_eigen, 
+//'                             al_pha = al_pha)
+//' pnl_s <- xts::xts(pnl_s, index(re_turns))
 //' colnames(pnl_s) <- "strat_rets"
 //' # Plot dygraph of strategy
 //' dygraphs::dygraph(cumsum(pnl_s), 

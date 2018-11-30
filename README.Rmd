@@ -3,6 +3,9 @@ title: HighFreq Package for High Frequency Time Series Data Management
 author: Jerzy Pawlowski (algoquant)
 abstract: Functions for chaining and joining time series, scrubbing bad data, managing time zones and alligning time indices, converting TAQ data to OHLC format, aggregating data to lower frequency, estimating volatility, skew, and higher moments.
 tags: high frequency, time series, volatility
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 [![Build Status](https://travis-ci.org/algoquant/HighFreq.svg?branch=master)](https://travis-ci.org/algoquant/HighFreq)

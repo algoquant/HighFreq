@@ -11,11 +11,15 @@ Description: Functions for chaining and joining time series, scrubbing bad data,
     higher moments.
 License: GPL (>= 2)
 Depends:
-    rutils,
+    xts, 
     quantmod, 
+    rutils
 Imports:
+    xts, 
+    quantmod, 
+    rutils,
 	RcppRoll, 
-    Rcpp (>= 0.12.16)
+    Rcpp
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: GNU make, C++11
 Remotes: github::algoquant/rutils,

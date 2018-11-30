@@ -61,6 +61,12 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] Add to back_test() the simulation with limit orders
+
++ [ ] Update the description of roll_var()
+
++ [ ] Pass model parameters into back_test() as a vector or a list
+
 + [ ] Remove all parallel code and references to parallel packages from HighFreq
 
 + [ ] Create function for rolling Hampel filter using RcppArmadillo
