@@ -61,6 +61,84 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] Add function na_locf()
+// [[Rcpp::export]]
+NumericVector na_locf(NumericVector x)
+{
+  NumericVector output = Rcpp::clone(x);
+
+  double lastNonNA = NA_REAL;
+  int n = x.size();
+
+  for (int i = 0; i < n; ++i)
+  {
+    double value = output[i];
+    if (!ISNAN(value))
+      lastNonNA = value;
+    else
+      output[i] = lastNonNA;
+  }
+  return output;
+}
+arma::uvec any_na_x(const NumericMatrix& x) {
+  
+  int n_rows_x = x.nrow();
+  int n_cols_x = x.ncol();
+  arma::uvec result(n_rows_x);
+  
+  for (int i = 0; i < n_rows_x; i++) {
+    
+    int any_na = 0;
+    int j = 0;
+    
+    while ((any_na == 0) && (j < n_cols_x)) {
+      if (std::isnan(x(i, j))) {
+        any_na = 1;
+      }
+      j += 1;
+    }
+    
+    result[i] = any_na;
+    
+  }
+  
+  return result;
+  
+}
+
+arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
+  
+  int n_rows_xy = x.nrow();
+  int n_cols_x = x.ncol();
+  int n_cols_y = y.ncol();
+  arma::uvec result(n_rows_xy);
+  
+  for (int i = 0; i < n_rows_xy; i++) {
+    
+    int any_na = 0;
+    int j = 0;
+    int k = 0;
+    while ((any_na == 0) && (j < n_cols_x)) {
+      if (std::isnan(x(i, j))) {
+        any_na = 1;
+      }
+      j += 1;
+    }
+    while ((any_na == 0) && (k < n_cols_y)) {
+      if (std::isnan(y(i, k))) {
+        any_na = 1;
+      }
+      k += 1;
+    }
+    result[i] = any_na;
+  }
+  return result;
+}
+
+
+
++ [ ] Add MAD, rank regression and rolling MAD and rank regression
+
 + [ ] Add to back_test() the simulation with limit orders
 
 + [ ] Update the description of roll_var()
