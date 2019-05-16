@@ -182,7 +182,7 @@ remove_jumps <- function(oh_lc) {
 #'   is 1)
 #' @param col_umn The column number to extract from the \emph{OHLC} data.
 #'   (default is \code{4}, or the \emph{Close} prices column)
-#' @param sca_le \emph{Boolean} argument: should the returns be divided by the
+#' @param scal_e \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
 #' @return A single-column \emph{xts} time series of returns.
@@ -192,7 +192,7 @@ remove_jumps <- function(oh_lc) {
 #'   prices.  Multi-period returns can be calculated by setting the \code{lag}
 #'   parameter to values greater than \code{1} (the default).
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the returns are divided
+#'   If \code{scal_e} is \code{TRUE} (the default), then the returns are divided
 #'   by the differences of the time index (which scales the returns to units of
 #'   returns per second.)
 #'
@@ -200,7 +200,7 @@ remove_jumps <- function(oh_lc) {
 #'   \emph{POSIXct} format, so that its internal value is equal to the number of
 #'   seconds that have elapsed since the \emph{epoch}.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the returns are
+#'   If \code{scal_e} is \code{TRUE} (the default), then the returns are
 #'   expressed in the scale of the time index of the \code{x_ts} time series.
 #'   For example, if the time index is in seconds, then the returns are given in
 #'   units of returns per second.  If the time index is in days, then the
@@ -220,7 +220,7 @@ remove_jumps <- function(oh_lc) {
 #' # calculate open to open returns
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
 
-run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
+run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
   # return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # calculate mid prices
@@ -230,7 +230,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, sca_le=TRUE) {
     re_turns <- x_ts[, col_umn]  # OHLC data
   # calculate returns
   re_turns <- rutils::diff_it(log(re_turns), lagg=lagg)
-  if (sca_le)
+  if (scal_e)
     re_turns <- re_turns / c(rep(1, lagg), diff(xts::.index(re_turns), lagg=lagg))
   re_turns[1:lagg, ] <- 0
   # colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
@@ -811,7 +811,7 @@ save_rets_ohlc <- function(sym_bol,
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @param sca_le \emph{Boolean} argument: should the returns be divided by the
+#' @param scal_e \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -845,14 +845,14 @@ save_rets_ohlc <- function(sym_bol,
 #'   The point variance estimates can also be considered to be technical
 #'   indicators, and can be used as inputs into trading models.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
 #'   by the squared differences of the time index (which scales the variance to
 #'   units of variance per second squared.) This is useful for example, when
 #'   calculating intra-day variance from minutely bar data, because dividing
 #'   returns by the number of seconds decreases the effect of overnight price
 #'   jumps.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is
 #'   expressed in the scale of the time index of the \emph{OHLC} time series.
 #'   For example, if the time index is in seconds, then the variance is given in
 #'   units of variance per second squared.  If the time index is in days, then
@@ -879,7 +879,7 @@ save_rets_ohlc <- function(sym_bol,
 #' # calculate SPY variance without overnight jumps
 #' var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
 
-run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
+run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
@@ -897,7 +897,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
                             (1-co_eff)*((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                                (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))}
   )  # end switch
-  if (sca_le)
+  if (scal_e)
     vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- rutils::na_locf(vari_ance)
@@ -1165,7 +1165,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'    (default is \code{"yang_zhang"})
 #' @param look_back The size of the look-back interval, equal to the number of
 #'   rows of data used for calculating the variance.
-#' @param sca_le \emph{Boolean} argument: should the returns be divided by the
+#' @param scal_e \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1176,14 +1176,14 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #'   several different variance estimation methods based on the range of
 #'   \emph{OHLC} prices.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
 #'   by the squared differences of the time index (which scales the variance to
 #'   units of variance per second squared.) This is useful for example, when
 #'   calculating intra-day variance from minutely bar data, because dividing
 #'   returns by the number of seconds decreases the effect of overnight price
 #'   jumps.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is
 #'   expressed in the scale of the time index of the \emph{OHLC} time series.
 #'   For example, if the time index is in seconds, then the variance is given in
 #'   units of variance per second squared.  If the time index is in days, then
@@ -1217,7 +1217,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 #' # calculate SPY variance without accounting for overnight jumps
 #' var_rolling <- HighFreq::roll_variance(HighFreq::SPY, calc_method="rogers_satchell")
 
-roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=TRUE) {
+roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", scal_e=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(calc_method,
@@ -1239,7 +1239,7 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
                             (1-co_eff)*rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
                               (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), look_back=look_back) / look_back}
   )  # end switch
-  if (sca_le)
+  if (scal_e)
     vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- rutils::na_locf(vari_ance)
@@ -1265,7 +1265,7 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
-#' @param sca_le \emph{Boolean} argument: should the returns be divided by the
+#' @param scal_e \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
 #' @return A single \emph{numeric} value equal to the variance.
@@ -1282,13 +1282,13 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #'   The default method is \code{"yang_zhang"}, which theoretically has the
 #'   lowest standard error among unbiased estimators.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
 #'   by the squared differences of the time index (which scales the variance to
 #'   units of variance per second squared.) This is useful for example, when
 #'   calculating variance from minutely bar data, because dividing returns by
 #'   the number of seconds decreases the effect of overnight price jumps.
 #'
-#'   If \code{sca_le} is \code{TRUE} (the default), then the variance is
+#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is
 #'   expressed in the scale of the time index of the \emph{OHLC} time series.
 #'   For example, if the time index is in seconds, then the variance is given in
 #'   units of variance per second squared.  If the time index is in days, then
@@ -1308,8 +1308,8 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", sca_le=
 #' # calculate variance of SPY without accounting for overnight jumps
 #' vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="rogers_satchell")
 
-calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
-  if (sca_le)
+calc_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
+  if (scal_e)
     in_dex <- c(1, diff(xts::.index(oh_lc)))
   else
     in_dex <- rep(1, NROW(oh_lc))
@@ -1353,8 +1353,8 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", sca_le=TRUE) {
 #' sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
 
 roll_sharpe <- function(oh_lc, look_back=11) {
-  re_turns <- run_returns(oh_lc, lag=look_back, sca_le=FALSE)
-  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, sca_le=FALSE))
+  re_turns <- run_returns(oh_lc, lag=look_back, scal_e=FALSE)
+  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, scal_e=FALSE))
   sharpe_rolling <- ifelse(var_rolling==0,
                            1.0,
                            re_turns/var_rolling)
@@ -1405,7 +1405,7 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 roll_hurst <- function(oh_lc, look_back=11) {
   ran_ge <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=oh_lc[, 2], n=look_back) +
                RcppRoll::roll_max(x=-oh_lc[, 3], n=look_back)))
-  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, sca_le=FALSE))
+  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, scal_e=FALSE))
   hurst_rolling <- ifelse((var_rolling==0) | (ran_ge==0),
                           0.5,
                           log(ran_ge/var_rolling)/log(look_back))

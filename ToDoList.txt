@@ -61,12 +61,27 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] Create a new package for fast rolling functions and move all Rcpp code there
+
++ [ ] Pass model function and its parameters into back_test() as a vector or a list
+http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
+https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
+https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
+https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
+
++ [ ] Adapt RcppArmadillo code from: https://thecoatlessprofessor.com/programming/common-operations-with-rcpparmadillo/
+
++ [ ] Add function roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
+roll_count() is in lm_arma.cpp
+roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
+Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
+Scale the count threshold levels depending on the level of volatility.
+
 + [ ] Add function na_locf()
 // [[Rcpp::export]]
-NumericVector na_locf(NumericVector x)
-{
+NumericVector na_locf(NumericVector x) {
   NumericVector output = Rcpp::clone(x);
-
   double lastNonNA = NA_REAL;
   int n = x.size();
 
@@ -81,7 +96,6 @@ NumericVector na_locf(NumericVector x)
   return output;
 }
 arma::uvec any_na_x(const NumericMatrix& x) {
-  
   int n_rows_x = x.nrow();
   int n_cols_x = x.ncol();
   arma::uvec result(n_rows_x);
@@ -97,24 +111,17 @@ arma::uvec any_na_x(const NumericMatrix& x) {
       }
       j += 1;
     }
-    
     result[i] = any_na;
-    
   }
-  
   return result;
-  
 }
-
 arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
-  
   int n_rows_xy = x.nrow();
   int n_cols_x = x.ncol();
   int n_cols_y = y.ncol();
   arma::uvec result(n_rows_xy);
   
   for (int i = 0; i < n_rows_xy; i++) {
-    
     int any_na = 0;
     int j = 0;
     int k = 0;
@@ -137,13 +144,14 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
 
 + [ ] Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
 
-+ [ ] Add MAD, rank regression and rolling MAD and rank regression
++ [ ] Create a function in RcppArmadillo which replicates the functions stats::filter() and roll::roll_sum()
+Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
+
++ [ ] Add MAD, rank regression and rolling MAD and rank regression using RcppArmadillo
 
 + [ ] Add to back_test() the simulation with limit orders
 
 + [ ] Update the description of roll_var()
-
-+ [ ] Pass model parameters into back_test() as a vector or a list
 
 + [ ] Remove all parallel code and references to parallel packages from HighFreq
 
