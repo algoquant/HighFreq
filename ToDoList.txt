@@ -63,6 +63,8 @@ Therefore 1-second bar returns carry almost no information.
 
 + [ ] Create a new package for fast rolling functions and move all Rcpp code there
 
++ [ ] Add data.table and fst functions for aggregating large datasets
+
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
@@ -101,7 +103,6 @@ arma::uvec any_na_x(const NumericMatrix& x) {
   arma::uvec result(n_rows_x);
   
   for (int i = 0; i < n_rows_x; i++) {
-    
     int any_na = 0;
     int j = 0;
     
@@ -153,11 +154,7 @@ Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
 
 + [ ] Update the description of roll_var()
 
-+ [ ] Remove all parallel code and references to parallel packages from HighFreq
-
-+ [ ] Create function for rolling Hampel filter using RcppArmadillo
-
-+ [ ] Create function roll_median() for rolling median using RcppArmadillo
++ [ ] Remove all parallel code and references to parallel packages from HighFreq  
 
 + [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
