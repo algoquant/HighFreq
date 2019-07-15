@@ -1073,7 +1073,7 @@ arma::mat back_test(const arma::mat& ex_cess, // portfolio excess returns
     // calculate out-of-sample returns
     pnl_s.subvec(end_points[it-1]+1, end_points[it]) = re_turns.rows(end_points[it-1]+1, end_points[it])*weight_s;
     // add transaction costs
-    pnl_s.row(end_points[it-1]+1) += bid_offer*sum(abs(weight_s - weights_past))/2;
+    pnl_s.row(end_points[it-1]+1) -= bid_offer*sum(abs(weight_s - weights_past))/2;
     weights_past = weight_s;
   }  // end for
   // return the strategy returns
