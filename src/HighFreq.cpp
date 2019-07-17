@@ -912,8 +912,7 @@ arma::vec calc_weights(const arma::mat& re_turns,
                        const std::string& typ_e = "max_sharpe",
                        int max_eigen = 1,
                        const double& al_pha = 0,
-                       const bool scal_e=true
-) {
+                       const bool scal_e = true) {
   // Initialize
   arma::vec weight_s(re_turns.n_cols);
   if (max_eigen == 1)  max_eigen = re_turns.n_cols;
@@ -946,12 +945,25 @@ arma::vec calc_weights(const arma::mat& re_turns,
     // weights equal to ranks of Sharpe
     weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
     weight_s = (weight_s - arma::mean(weight_s));
+  } else if (typ_e == "rankrob") {
+    // mean returns by columns
+    arma::vec mean_cols = arma::trans(arma::median(re_turns, 0));
+    // // standard deviation by columns
+    // arma::vec sd_cols = mean_cols;
+    // for (arma::uword it = 0; it < re_turns.n_cols; it++) {
+    //   sd_cols(it) = arma::median(arma::abs((re_turns.col(it) - sd_cols)));
+    // }  // end for
+    // sd_cols.replace(0, 1);
+    // mean_cols = mean_cols/sd_cols;
+    // weights equal to ranks of Sharpe
+    weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weight_s = (weight_s - arma::mean(weight_s));
   } else {
     cout << "Warning: Incorrect typ_e argument: " << typ_e << endl;
     return arma::ones(re_turns.n_cols);
   }  // end if
 
-  if (scal_e == true) {
+  if (scal_e == TRUE) {
     // returns of equally weighted portfolio
     // arma::vec mean_rows = arma::mean(re_turns, 1);
     // returns of weighted portfolio
@@ -1059,8 +1071,7 @@ arma::mat back_test(const arma::mat& ex_cess, // portfolio excess returns
                     const double& al_pha = 0,
                     const bool& scal_e = true,
                     const double& co_eff = 1.0,
-                    const double& bid_offer = 0.0
-) {
+                    const double& bid_offer = 0.0) {
   arma::vec pnl_s = zeros(re_turns.n_rows);
   arma::vec weights_past = zeros(re_turns.n_cols);
   arma::vec weight_s(re_turns.n_cols);

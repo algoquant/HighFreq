@@ -61,25 +61,24 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [x] In back_test() fix bid_offer bug: should be subtracted from PnL not added  
-
-+ [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 in top quantile, -1 in bottom quantile, and otherwise 0.
-
-+ [ ] Modify back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
-
-+ [ ] Pass model function and its parameters into back_test() as a vector or a list
-http://gallery.rcpp.org/articles/rcppnt2-introduction/
-http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
-https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
-https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
-https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
-
 + [ ] Add function roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
 roll_count() is in lm_arma.cpp
 roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
 Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
 Scale the count threshold levels depending on the level of volatility.
+
++ [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 in top quantile, -1 in bottom quantile, and otherwise 0.
+
++ [ ] Add function roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Add function roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
+
++ [ ] Add function roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
+
++ [ ] Add function roll_reg() for the rolling regressions using RcppArmadillo (similar to roll_zscores()): standard lm, Pearson, Spearman, and Kendall, robust Theil-Sen regression, rank regression 
+Add option to perform rolling predictions using the regressions.
+
++ [x] In back_test() fix bid_offer bug: should be subtracted from PnL not added  
 
 + [ ] Add data.table and fst functions for aggregating large datasets
 
@@ -153,8 +152,6 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
 + [ ] Create a function in RcppArmadillo which replicates the functions stats::filter() and roll::roll_sum()
 Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
 
-+ [ ] Add MAD, rank regression and rolling MAD and rank regression using RcppArmadillo
-
 + [ ] Add to back_test() the simulation with limit orders
 
 + [ ] Update the description of roll_var()
@@ -163,8 +160,24 @@ Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
 
 + [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
-+ [ ] Create function roll_lm() which performs rolling regressions over end points, and calculates the predicted out-of-sample values based on the coefficients from calc_lm()
-adapt from roll_zscores()
++ [ ] Modify back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
+
++ [ ] Pass model function and its parameters into back_test() as a vector or a list
+http://gallery.rcpp.org/articles/rcppnt2-introduction/
+http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
+https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
+https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
+https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
+
++ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
+https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
+https://en.cppreference.com/w/cpp/language/parameter_pack
+https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
+https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
+https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
+https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
+https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
 
 + [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
