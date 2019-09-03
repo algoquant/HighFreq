@@ -2,31 +2,33 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_inv}
 \alias{calc_inv}
-\title{Calculate the regularized inverse of the covariance matrix of returns using 
-\emph{RcppArmadillo}.}
+\title{Calculate the regularized inverse of the covariance \emph{matrix} of returns
+using \code{RcppArmadillo}.}
 \usage{
 calc_inv(mat_rix, max_eigen)
 }
 \arguments{
-\item{mat_rix}{A numeric \emph{matrix} of returns data.}
+\item{\code{mat_rix}}{A \emph{matrix} of returns data.}
 
-\item{max_eigen}{An \emph{integer} equal to the regularization intensity
-(the number of eigenvalues and eigenvectors used for calculating the 
-regularized inverse).}
+\item{\code{max_eigen}}{An \emph{integer} equal to the regularization
+intensity (the number of eigenvalues and eigenvectors used for calculating
+the regularized inverse).}
 }
 \value{
-A numeric \emph{matrix} equal to the regularized inverse.
+A \emph{matrix} equal to the regularized inverse.
 }
 \description{
-Calculate the regularized inverse of the covariance matrix of returns using 
-\emph{RcppArmadillo}.
+Calculate the regularized inverse of the covariance \emph{matrix} of returns
+using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_inv()} first calculates the covariance 
-  matrix of the \code{mat_rix}, and then it calculates the regularized
-  inverse from the truncated eigen decomposition.
-  It uses only the largest \code{max_eigen} eigenvalues and their
-  corresponding eigenvectors.
+The function calc_inv() calculates the regularized inverse of the
+  \emph{covariance matrix}, by truncating the number of eigenvectors to
+  \code{max_eigen}. The function \code{calc_inv()} first calculates the
+  covariance \emph{matrix} of the \code{mat_rix}, and then it calculates the
+  regularized inverse from the truncated eigen decomposition. It uses only
+  the largest \code{max_eigen} eigenvalues and their corresponding
+  eigenvectors.
 }
 \examples{
 \dontrun{
@@ -41,4 +43,5 @@ inverse_r <-  ei_gen$vectors[, 1:max_eigen] \%*\% (t(ei_gen$vectors[, 1:max_eige
 # Compare RcppArmadillo with R
 all.equal(in_verse, inverse_r)
 }
+
 }

@@ -53,8 +53,8 @@ If the input \code{oh_lc} time series is \emph{NULL} (the default),
   original time series.
 }
 \examples{
-# create minutely synthetic OHLC time series of random prices
+# Create minutely synthetic OHLC time series of random prices
 oh_lc <- HighFreq::random_ohlc()
-# create random time series from SPY by randomly sampling it
+# Create random time series from SPY by randomly sampling it
 oh_lc <- HighFreq::random_ohlc(oh_lc=HighFreq::SPY["2012-02-13/2012-02-15"])
 }

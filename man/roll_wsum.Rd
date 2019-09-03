@@ -2,52 +2,54 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_wsum}
 \alias{roll_wsum}
-\title{Calculate the rolling weighted sum over a vector of data using
-\emph{RcppArmadillo}.}
+\title{Calculate the rolling weighted sum over a \emph{vector} or a single-column
+\emph{time series} using \code{RcppArmadillo}.}
 \usage{
 roll_wsum(vec_tor, weight_s)
 }
 \arguments{
-\item{vec_tor}{A numeric \emph{vector} of data.}
+\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
 
-\item{weight_s}{A numeric \emph{vector} of weights.}
+\item{\code{weight_s}}{A \emph{vector} of weights.}
 }
 \value{
-A numeric \emph{vector} of the same length as the argument
+A \emph{vector} of the same length as the argument
   \code{vec_tor}.
 }
 \description{
-Calculate the rolling weighted sum over a vector of data using
-\emph{RcppArmadillo}.
+Calculate the rolling weighted sum over a \emph{vector} or a single-column
+\emph{time series} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_wsum()} calculates the rolling weighted sum
-  of a vector over its past values (a convolution with the \emph{vector} of 
-  weights), using \emph{RcppArmadillo}. It performs a similar calculation as
-  the standard \emph{R} function \code{filter(x=vec_tor, filter=weight_s, 
-  method="convolution", sides=1)}, but it's over \emph{6} times faster, and it 
-  doesn't produce any \emph{NA} values.
+  of a \emph{vector} over its past values (a convolution with the
+  \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
+  similar calculation as the standard \code{R} function
+  \code{filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)},
+  but it's over \code{6} times faster, and it doesn't produce any \code{NA}
+  values.
 }
 \examples{
 \dontrun{
 # First example
-# create vector from historical prices
+# Create vector from historical prices
 vec_tor <- as.numeric(rutils::etf_env$VTI[, 6])
-# create simple weights
+# Create simple weights
 weight_s <- c(1, rep(0, 10))
-# calculate rolling weighted sum
+# Calculate rolling weighted sum
 weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
-# compare with original
+# Compare with original
 all.equal(vec_tor, as.numeric(weight_ed))
 # Second example
-# create exponentially decaying weights
+# Create exponentially decaying weights
 weight_s <- exp(-0.2*1:11)
 weight_s <- weight_s/sum(weight_s)
-# calculate rolling weighted sum
+# Calculate rolling weighted sum
 weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
-# calculate rolling weighted sum using filter()
+# Calculate rolling weighted sum using filter()
 filter_ed <- filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
-# compare both methods
+# Compare both methods
 all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 }
+
 }

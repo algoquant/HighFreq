@@ -5,7 +5,7 @@
 \title{Calculate a time series of point estimates of variance for an \emph{OHLC}
 time series, using different range estimators for variance.}
 \usage{
-run_variance(oh_lc, calc_method = "yang_zhang", sca_le = TRUE)
+run_variance(oh_lc, calc_method = "yang_zhang", scal_e = TRUE)
 }
 \arguments{
 \item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
@@ -21,7 +21,7 @@ estimating variance.  The methods include:
  }
  (default is \code{"yang_zhang"})}
 
-\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the
+\item{scal_e}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
@@ -62,14 +62,14 @@ The function \code{run_variance()} calculates a time series of point
   The point variance estimates can also be considered to be technical
   indicators, and can be used as inputs into trading models.
 
-  If \code{sca_le} is \code{TRUE} (the default), then the variance is divided
+  If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
   by the squared differences of the time index (which scales the variance to
   units of variance per second squared.) This is useful for example, when
   calculating intra-day variance from minutely bar data, because dividing
   returns by the number of seconds decreases the effect of overnight price
   jumps.
 
-  If \code{sca_le} is \code{TRUE} (the default), then the variance is
+  If \code{scal_e} is \code{TRUE} (the default), then the variance is
   expressed in the scale of the time index of the \emph{OHLC} time series.
   For example, if the time index is in seconds, then the variance is given in
   units of variance per second squared.  If the time index is in days, then
@@ -87,12 +87,12 @@ The function \code{run_variance()} calculates a time series of point
   validation.
 }
 \examples{
-# create minutely OHLC time series of random prices
+# Create minutely OHLC time series of random prices
 oh_lc <- HighFreq::random_ohlc()
-# calculate variance estimates for oh_lc
+# Calculate variance estimates for oh_lc
 var_running <- HighFreq::run_variance(oh_lc)
-# calculate variance estimates for SPY
+# Calculate variance estimates for SPY
 var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="yang_zhang")
-# calculate SPY variance without overnight jumps
+# Calculate SPY variance without overnight jumps
 var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
 }

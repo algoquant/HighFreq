@@ -44,7 +44,7 @@ The function \code{roll_hurst()} calculates a time series of
   trading models, rather than an estimator for statistical analysis.
 }
 \examples{
-# calculate rolling Hurst for SPY in March 2009
+# Calculate rolling Hurst for SPY in March 2009
 hurst_rolling <- roll_hurst(oh_lc=HighFreq::SPY["2009-03"], look_back=11)
 chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 }

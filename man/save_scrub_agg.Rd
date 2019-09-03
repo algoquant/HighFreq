@@ -56,7 +56,7 @@ The function \code{save_scrub_agg()} loads multiple days of
 data_dir <- "C:/Develop/data/hfreq/src/"
 output_dir <- "C:/Develop/data/hfreq/scrub/"
 sym_bol <- "SPY"
-# aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
+# Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
 save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 }
 }

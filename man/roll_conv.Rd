@@ -2,51 +2,55 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_conv}
 \alias{roll_conv}
-\title{Calculate the convolutions of the matrix columns with a vector of weights.}
+\title{Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
+of weights.}
 \usage{
 roll_conv(mat_rix, weight_s)
 }
 \arguments{
-\item{mat_rix}{A numeric \emph{matrix} of data.}
+\item{\code{mat_rix}}{A \emph{matrix} of data.}
 
-\item{weight_s}{A column \emph{vector} of weights.}
+\item{\code{weight_s}}{A column \emph{vector} of weights.}
 }
 \value{
-A numeric \emph{matrix} with the same dimensions as the input
+A \emph{matrix} with the same dimensions as the input
   argument \code{mat_rix}.
 }
 \description{
-Calculate the convolutions of the matrix columns with a vector of weights.
+Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
+of weights.
 }
 \details{
 The function \code{roll_conv()} calculates the convolutions of the
-  matrix columns with a vector of weights.  It rolls over the matrix rows
-  and multiplies the past column values with the weights. It uses the
-  \emph{RcppArmadillo} function \code{arma::conv2()}. It performs a similar
-  calculation to the standard \emph{R} function \code{filter(x=mat_rix,
-  filter=weight_s, method="convolution", sides=1)}, but it's over \emph{6}
-  times faster, and it doesn't produce any leading \emph{NA} values.
+  \emph{matrix} columns with a \emph{vector} of weights.  It rolls over the
+  \emph{matrix} rows and multiplies the past column values with the weights.
+  It uses the \code{RcppArmadillo} function \code{arma::conv2()}. It
+  performs a similar calculation to the standard \code{R} function
+  \code{filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)},
+  but it's over \code{6} times faster, and it doesn't produce any leading
+  \code{NA} values.
 }
 \examples{
 \dontrun{
 # First example
-# create matrix from historical prices
+# Create matrix from historical prices
 mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
-# create simple weights
+# Create simple weights
 weight_s <- matrix(c(1, rep(0, 10)), nc=1)
-# calculate rolling weighted sum
+# Calculate rolling weighted sum
 weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
-# compare with original
+# Compare with original
 all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
 # Second example
-# create exponentially decaying weights
+# Create exponentially decaying weights
 weight_s <- exp(-0.2*1:11)
 weight_s <- matrix(weight_s/sum(weight_s), nc=1)
-# calculate rolling weighted sum
+# Calculate rolling weighted sum
 weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
-# calculate rolling weighted sum using filter()
+# Calculate rolling weighted sum using filter()
 filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
-# compare both methods
+# Compare both methods
 all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 }
+
 }

@@ -3,34 +3,34 @@
 \name{back_test}
 \alias{back_test}
 \title{Simulate (backtest) a rolling portfolio optimization strategy, using
-\emph{RcppArmadillo}.}
+\code{RcppArmadillo}.}
 \usage{
 back_test(ex_cess, re_turns, start_points, end_points,
-  typ_e = "max_sharpe", max_eigen = 1L, al_pha = 0, scal_e = TRUE,
-  co_eff = 1, bid_offer = 0)
+  typ_e = "max_sharpe", max_eigen = 1L, quan_tile = 0.1,
+  al_pha = 0, scal_e = TRUE, co_eff = 1, bid_offer = 0)
 }
 \arguments{
-\item{ex_cess}{A numeric \emph{matrix} of excess returns data (the returns
+\item{ex_cess}{A \emph{matrix} of excess returns data (the returns
 in excess of the risk-free rate).}
 
-\item{re_turns}{A numeric \emph{matrix} of excess returns data (the returns
+\item{re_turns}{A \emph{matrix} of excess returns data (the returns
 in excess of the risk-free rate).}
 
-\item{start_points}{An integer \emph{vector} of start points.}
+\item{start_points}{An \emph{integer vector} of start points.}
 
-\item{end_points}{An integer \emph{vector} of end points.}
+\item{end_points}{An \emph{integer vector} of end points.}
 
 \item{typ_e}{A \emph{string} specifying the objective for calculating the
 weights (see Details).}
 
 \item{max_eigen}{An \emph{integer} equal to the number of eigenvectors used
-for calculating the regularized inverse of the covariance matrix (the
-default is the number of columns of \code{re_turns}).}
+for calculating the regularized inverse of the covariance \emph{matrix}
+(the default is the number of columns of \code{re_turns}).}
 
 \item{al_pha}{A numeric shrinkage intensity.  (The default is \code{0})}
 
 \item{scal_e}{A \emph{Boolean} specifying whether the weights should be
-scaled (the default is \code{TRUE}).}
+scaled (the default is \code{scal_e=TRUE}).}
 
 \item{co_eff}{A numeric multiplier of the weights.  (The default is
 \code{1})}
@@ -38,12 +38,12 @@ scaled (the default is \code{TRUE}).}
 \item{bid_offer}{A numeric bid-offer spread.  (The default is \code{0})}
 }
 \value{
-A numeric \emph{vector} of strategy returns, with the same length as
+A \emph{vector} of strategy returns, with the same length as
   the number of rows of \code{re_turns}.
 }
 \description{
 Simulate (backtest) a rolling portfolio optimization strategy, using
-\emph{RcppArmadillo}.
+\code{RcppArmadillo}.
 }
 \details{
 The function \code{back_test()} performs a backtest simulation of a
@@ -71,9 +71,9 @@ The function \code{back_test()} performs a backtest simulation of a
   period. It then subtracts the transaction costs from the out-of-sample
   strategy returns.
   
-  The function \code{back_test()} returns a time series (column vector) of
-  strategy returns, of the same length as the number of rows of
-  \code{re_turns}.
+  The function \code{back_test()} returns a \emph{time series} (column
+  \emph{vector}) of strategy returns, of the same length as the number of
+  rows of \code{re_turns}.
 }
 \examples{
 \dontrun{
@@ -95,11 +95,13 @@ max_eigen <- 3
 # Simulate a monthly rolling portfolio optimization strategy
 pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
                             start_points-1, end_points-1, 
-                            max_eigen, al_pha)
-pnl_s <- xts(pnl_s, index(re_turns))
+                            max_eigen = max_eigen, 
+                            al_pha = al_pha)
+pnl_s <- xts::xts(pnl_s, index(re_turns))
 colnames(pnl_s) <- "strat_rets"
 # Plot dygraph of strategy
 dygraphs::dygraph(cumsum(pnl_s), 
   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 }
+
 }

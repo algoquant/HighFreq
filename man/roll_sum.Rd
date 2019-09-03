@@ -2,32 +2,46 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_sum}
 \alias{roll_sum}
-\title{Calculate the rolling sum over a vector using \emph{Rcpp}.}
+\title{Calculate the rolling sum over a \emph{vector} or a single-column \emph{time
+series} using \emph{Rcpp}.}
 \usage{
 roll_sum(vec_tor, look_back)
 }
 \arguments{
-\item{vec_tor}{A numeric \emph{vector} of data.}
+\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
 
-\item{look_back}{The length of the look-back interval, equal to the number 
-of elements of data used for calculating the sum.}
+\item{\code{look_back}}{The length of the look-back interval, equal to the
+number of elements of data used for calculating the sum.}
 }
 \value{
-A numeric \emph{vector} of the same length as the argument
+A \emph{vector} of the same length as the argument
   \code{vec_tor}.
 }
 \description{
-Calculate the rolling sum over a vector using \emph{Rcpp}.
+Calculate the rolling sum over a \emph{vector} or a single-column \emph{time
+series} using \emph{Rcpp}.
 }
 \details{
 The function \code{roll_sum()} calculates a \emph{vector} of 
   rolling sums, over a \emph{vector} of data, using \emph{Rcpp}.  The
-  function \code{roll_sum()} is over \emph{6} times faster than
-  \code{rutils::roll_sum()} which uses vectorized \emph{R}.
+  function \code{roll_sum()} is several times faster than
+  \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 }
 \examples{
 \dontrun{
-# calculate rolling sums over 11-period intervals
-sum_rolling <- HighFreq::roll_sum(rnorm(1000), look_back=11)
+# Create a vector of random returns
+re_turns <- rnorm(1e6)
+# Calculate rolling sums over 11-period lookback intervals
+sum_rolling <- HighFreq::roll_sum(re_turns, look_back=11)
+# Compare HighFreq::roll_sum() with rutils::roll_sum()
+all.equal(HighFreq::roll_sum(re_turns, look_back=11), 
+         rutils::roll_sum(re_turns, look_back=11))
+# Compare the speed of Rcpp with R code
+library(microbenchmark)
+summary(microbenchmark(
+  rcpp=HighFreq::roll_sum(re_turns, look_back=11),
+  rcode=rutils::roll_sum(re_turns, look_back=11),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
+
 }

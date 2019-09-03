@@ -51,11 +51,11 @@ The function \code{which_jumps()} calculates a \emph{Boolean}
   cause more values to be identified as jumps.
 }
 \examples{
-# create local copy of SPY TAQ data
+# Create local copy of SPY TAQ data
 ta_q <- SPY_TAQ
-# calculate mid prices
+# Calculate mid prices
 mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
-# replace whole rows containing suspect price jumps with NA, and perform locf()
+# Replace whole rows containing suspect price jumps with NA, and perform locf()
 ta_q[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 ta_q <- xts:::na.locf.xts(ta_q)
 }

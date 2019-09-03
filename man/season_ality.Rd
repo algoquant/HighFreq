@@ -28,12 +28,12 @@ The function \code{season_ality()} calculates the mean of values
   the same length as the argument \code{x_ts}.
 }
 \examples{
-# calculate running variance of each minutely OHLC bar of data
+# Calculate running variance of each minutely OHLC bar of data
 x_ts <- run_variance(HighFreq::SPY)
-# remove overnight variance spikes at "09:31"
+# Remove overnight variance spikes at "09:31"
 in_dex <- format(index(x_ts), "\%H:\%M")
 x_ts <- x_ts[!in_dex=="09:31", ]
-# calculate daily seasonality of variance
+# Calculate daily seasonality of variance
 var_seasonal <- season_ality(x_ts=x_ts)
 chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
   "daily seasonality of variance"))

@@ -5,7 +5,7 @@
 \title{Calculate single period percentage returns from either \emph{TAQ} or
 \emph{OHLC} prices.}
 \usage{
-run_returns(x_ts, lagg = 1, col_umn = 4, sca_le = TRUE)
+run_returns(x_ts, lagg = 1, col_umn = 4, scal_e = TRUE)
 }
 \arguments{
 \item{x_ts}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
@@ -16,7 +16,7 @@ is 1)}
 \item{col_umn}{The column number to extract from the \emph{OHLC} data.
 (default is \code{4}, or the \emph{Close} prices column)}
 
-\item{sca_le}{\emph{Boolean} argument: should the returns be divided by the
+\item{scal_e}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
@@ -32,7 +32,7 @@ The function \code{run_returns()} calculates the percentage returns
   prices.  Multi-period returns can be calculated by setting the \code{lag}
   parameter to values greater than \code{1} (the default).
 
-  If \code{sca_le} is \code{TRUE} (the default), then the returns are divided
+  If \code{scal_e} is \code{TRUE} (the default), then the returns are divided
   by the differences of the time index (which scales the returns to units of
   returns per second.)
 
@@ -40,7 +40,7 @@ The function \code{run_returns()} calculates the percentage returns
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 
-  If \code{sca_le} is \code{TRUE} (the default), then the returns are
+  If \code{scal_e} is \code{TRUE} (the default), then the returns are
   expressed in the scale of the time index of the \code{x_ts} time series.
   For example, if the time index is in seconds, then the returns are given in
   units of returns per second.  If the time index is in days, then the
@@ -53,10 +53,10 @@ The function \code{run_returns()} calculates the percentage returns
   \code{col_umn}.
 }
 \examples{
-# calculate secondly returns from TAQ data
+# Calculate secondly returns from TAQ data
 re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY_TAQ)
-# calculate close to close returns
+# Calculate close to close returns
 re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY)
-# calculate open to open returns
+# Calculate open to open returns
 re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
 }

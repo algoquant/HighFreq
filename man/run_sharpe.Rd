@@ -34,6 +34,6 @@ The function \code{run_sharpe()} calculates Sharpe-like statistics
   this statistic is close to either 1 or -1.
 }
 \examples{
-# calculate time series of running Sharpe ratios for SPY
+# Calculate time series of running Sharpe ratios for SPY
 sharpe_running <- run_sharpe(HighFreq::SPY)
 }

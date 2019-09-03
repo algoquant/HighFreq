@@ -38,6 +38,6 @@ The function \code{remove_jumps()} removes the overnight
   seconds that have elapsed since the \emph{epoch}.
 }
 \examples{
-# remove overnight close-to-open price jumps from SPY data
+# Remove overnight close-to-open price jumps from SPY data
 oh_lc <- remove_jumps(HighFreq::SPY)
 }

@@ -13,10 +13,10 @@ sim_ou(eq_price, vol_at, the_ta, in_nov)
 
 \item{the_ta}{The strength of mean reversion.}
 
-\item{in_nov}{A numeric \emph{vector} of innovations (random numbers).}
+\item{in_nov}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
-A numeric \emph{vector} representing the time series of prices, with
+A \emph{vector} representing the \emph{time series} of prices, with
   the same length as the argument \code{in_nov}.
 }
 \description{
@@ -25,7 +25,7 @@ Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 \details{
 The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
   process using \emph{Rcpp}, and returns a \emph{vector} representing the 
-  time series of prices.
+  \emph{time series} of prices.
 }
 \examples{
 \dontrun{
@@ -36,4 +36,5 @@ the_ta <- 0.01
 # Simulate Ornstein-Uhlenbeck process using Rcpp
 price_s <- HighFreq::sim_ou_rcpp(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
 }
+
 }

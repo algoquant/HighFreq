@@ -48,11 +48,11 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
   cause more values to be identified as extreme.
 }
 \examples{
-# create local copy of SPY TAQ data
+# Create local copy of SPY TAQ data
 ta_q <- HighFreq::SPY_TAQ
 # scrub quotes with suspect bid-offer spreads
 bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
-# remove suspect values
+# Remove suspect values
 ta_q <- ta_q[!sus_pect]
 }

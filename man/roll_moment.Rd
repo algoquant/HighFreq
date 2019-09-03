@@ -42,7 +42,7 @@ The function \code{roll_moment()} calculates a vector of statistics
   calculate statistics.
 }
 \examples{
-# calculate time series of rolling variance and skew estimates
+# Calculate time series of rolling variance and skew estimates
 var_rolling <- roll_moment(oh_lc=HighFreq::SPY, look_back=21)
 skew_rolling <- roll_moment(oh_lc=HighFreq::SPY, mo_ment="run_skew", look_back=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)

@@ -32,7 +32,7 @@ The function \code{scrub_taq()} performs the same scrubbing
 }
 \examples{
 ta_q <- HighFreq::scrub_taq(ta_q=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
-# create random TAQ prices and scrub them
+# Create random TAQ prices and scrub them
 ta_q <- HighFreq::random_taq()
 ta_q <- HighFreq::scrub_taq(ta_q=ta_q)
 ta_q <- HighFreq::scrub_taq(ta_q=ta_q, look_back=11, vol_mult=1)

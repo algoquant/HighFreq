@@ -86,16 +86,16 @@ The function \code{roll_apply()} applies an aggregation function
 oh_lc <- HighFreq::SPY["2012-02-13"]
 inter_val <- 11  # number of data points between end points
 look_back <- 4  # number of end points in look-back interval
-# calculate the rolling sums of oh_lc columns over a rolling look-back interval
+# Calculate the rolling sums of oh_lc columns over a rolling look-back interval
 agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-# apply a vector-valued aggregation function over a rolling look-back interval
+# Apply a vector-valued aggregation function over a rolling look-back interval
 agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
-# define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
+# Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 end_points <- rutils::end_points(oh_lc, inter_val=inter_val)
-# calculate the sums of oh_lc columns over end_points using non-overlapping intervals
+# Calculate the sums of oh_lc columns over end_points using non-overlapping intervals
 agg_regations <- roll_apply(oh_lc, agg_fun=sum, end_points=end_points, by_columns=TRUE)
-# apply a vector-valued aggregation function over the end_points of oh_lc
+# Apply a vector-valued aggregation function over the end_points of oh_lc
 # using overlapping intervals
 agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
                             look_back=5, end_points=end_points)

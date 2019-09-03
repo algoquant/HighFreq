@@ -6,15 +6,20 @@
 ## Steps for installing package called my_package, containing Rcpp code:
 1. Create empty package directory with Rcpp::Rcpp.package.skeleton()
 2. In the R directory create a file called my_package.R and add the header:
-
 #' @useDynLib my_package
 #' @importFrom Rcpp evalCpp
 #' @exportPattern "^[[:alpha:]]+"
 NULL
-
 Add your R functions below the header.
+3. Finally, Clean and rebuild (in Build menu)
 
-3. Clean and rebuild (in Build menu)
+## Steps to fix NAMESPACE after adding a new function
+1. Edit NAMESPACE file and remove all lines
+2. In RStudio run "document package"
+3. Edit NAMESPACE file again and remove all lines that don't contain export()
+4. Add by hand to top of NAMESPACE file the lines:
+useDynLib(HighFreq)
+importFrom(Rcpp, evalCpp)
 
 
 ## Build scripts:
@@ -34,7 +39,11 @@ R CMD Rd2pdf C:\Develop\R\HighFreq\
 
 ### comments
 
-# volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
+# When performing a rolling calculation, it's better to apply a single lag to a time series outside the loop instead of lagging it inside at each end point
+
+# Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.  But it can make it harder to pass in arguments when calling them from inside other functions.  The solution is to avoid nesting function calls, and instead create intermediate variables, and pass them into functions.  Passing in pointers also allows using const arguments so that they can't be modified inside the function.
+
+# Volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
 
 # The yang_zhang method has the lowest standard error assuming normal distribution, but not necessarily for fat-tailed distributions.
 In addition, the yang_zhang method has lower bias caused by finite sampling.
@@ -61,28 +70,61 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] Add function roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
++ [ ] Create a function called roll_var_ohlc() in RcppArmadillo which calculates the rolling variance over a time series of OHLC prices
+
++ [x] Rename roll_var() to roll_var_vec() and update its documentation
+
++ [x] Create a function called roll_var() in RcppArmadillo which calculates the rolling variance over a matrix
+
++ [ ] Convert function calls to roll functions from package RcppRoll to native Rcpp functions: roll_max() and roll_var()
+
++ [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
+Deprecate function roll_moment() because it's similar to roll_vwap() ?
+Update the description documentation of roll_moment()
+
++ [ ] Remove the existing function roll_variance() in R, and rewrite it in RcppArmadillo as roll_var()
+In roll_var() perform the lag of prices outside the rolling interval loop. 
+
++ [ ] Create a function called in RcppArmadillo which replicates the functions stats::filter() and roll::roll_sum()
+Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
+
++ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
+
++ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
 roll_count() is in lm_arma.cpp
 roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
 Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
 Scale the count threshold levels depending on the level of volatility.
 
-+ [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 in top quantile, -1 in bottom quantile, and otherwise 0.
++ [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
 
-+ [ ] Add function roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
++ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
+It should return a named vector of coefficients, z-scores, R-squared, etc.
+It should calculate Pearson, Spearman, and Kendall correlations.
 
-+ [ ] Add function roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
-
-+ [ ] Add function roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
-
-+ [ ] Add function roll_reg() for the rolling regressions using RcppArmadillo (similar to roll_zscores()): standard lm, Pearson, Spearman, and Kendall, robust Theil-Sen regression, rank regression 
++ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
 Add option to perform rolling predictions using the regressions.
 
-+ [x] In back_test() fix bid_offer bug: should be subtracted from PnL not added  
++ [ ] Perform rolling regressions over trading time - using a time-dependent look-back interval, so that the look-back interval always spans the same traded volume  
+Inoue Rolling Regressions Time Series Bias Variance Tradeoff.pdf
+Easley Volume Clock Trading Paradigm.pdf
+https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
+
++ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
+
++ [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory ?
+That may not always be correct, for example in the case of rolling calculations.
+
++ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
+Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
+
++ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
 
 + [ ] Add data.table and fst functions for aggregating large datasets
 
-+ [ ] Add function na_locf()
++ [ ] Create a function called na_locf()
 // [[Rcpp::export]]
 NumericVector na_locf(NumericVector x) {
   NumericVector output = Rcpp::clone(x);
@@ -145,22 +187,15 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
   return result;
 }
 
-+ [ ] Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
 + [ ] Create a function in RcppArmadillo which replicates the function zoo::na.fill(), and which replaces NA, NaN, and Inf values, but in place, without returning a value
 
-+ [ ] Create a function in RcppArmadillo which replicates the functions stats::filter() and roll::roll_sum()
-Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
-
 + [ ] Add to back_test() the simulation with limit orders
-
-+ [ ] Update the description of roll_var()
 
 + [ ] Remove all parallel code and references to parallel packages from HighFreq  
 
 + [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
-+ [ ] Modify back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
++ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
 
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
@@ -182,20 +217,17 @@ https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-
 + [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
-+ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
-
-+ [ ] Convert roll functions from package RcppRoll to native Rcpp functions ?
-
 + [ ] Create functions roll() and run() in Rcpp - already done ?
 
-+ [ ] Modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix
-
-+ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
-
-+ [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
-deprecate function roll_moment() because it's similar to roll_vwap() ?
++ [ ] Modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix ?
 
 + [ ] Add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
+
++ [ ] Apply dynamic dispatch to create s single function to handle both vector and matrix arguments
+https://gallery.rcpp.org/articles/dynamic-dispatch-for-sparse-matrices/
+https://stackoverflow.com/questions/27466319/templated-matrix-in-rcpp
+https://stackoverflow.com/questions/22513529/templated-function-for-sparse-and-dense-matrices-in-rcpparmadillo
+https://stackoverflow.com/questions/45163887/how-can-i-use-a-c-function-template-in-r-via-rcpp
 
 + [ ] Fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
@@ -207,10 +239,28 @@ modify random_ohlc() so that it samples from minutely return data scaled by time
 use package meboot for maximum entropy bootstrap of time series ?
 https://cran.r-project.org/web/packages/meboot/index.html
 
-+ [ ] Add function for calculating microprice  
++ [ ] Create a function for calculating microprice  
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Create the functions called diff_vec() and diff_it() (for matrices), similar to rutils::diff_it(), using the RcppArmadillo function arma::diff()
+
++ [x] Create a function called calc_var_ohlc() in RcppArmadillo, which calculates the variance of a time series of OHLC prices, similar to the function calc_var_ohlc_r()
+
++ [x] Rename the existing R function calc_variance() to calc_var_ohlc_r(), and refactor the code to make it faster and more readable
+
++ [x] Create a function called lag_it() using RcppArmadillo which lags a column vector or a matrix, similar to rutils::lag_it()
+
++ [x] Create a function called lag_vec() using RcppArmadillo which lags a vector
+
++ [x] Create a function called calc_var() in RcppArmadillo to calculate the variance of a matrix
+
++ [x] Create a function called calc_var_vec() in RcppArmadillo to calculate the variance of a vector
+
++ [x] Add RcppArmadillo function mult_vec_mat(), which multiplies the columns or rows of a matrix times a vector, element-wise.
+
++ [x] In back_test() fix bid_offer bug: should be subtracted from PnL not added  
 
 + [x] In function calc_weights() add additional option for rank momentum, with argument "typ_e == rank": rank weights using trailing Sharpe
 
@@ -221,17 +271,12 @@ Add argument bid_offer the bid-offer spread.
 
 + [x] Rename function roll_portf() to back_test()
 
-+ [x] Add header to HighFreq.R file:
++ [x] Add header to HighFreq.R file to fix NAMESPACE issue:
 #' @useDynLib HighFreq
 #' @importFrom Rcpp evalCpp
 #' @exportPattern "^[[:alpha:]]+"
-NULL
-Remove from NAMESPACE:
-useDynLib(HighFreq)
-importFrom(Rcpp, evalCpp)
-exportPattern("^[[:alpha:]]+")
 
-+ [x] Add function roll_conv() for calculating the convolutions of the matrix columns
++ [x] Create a function called roll_conv() for calculating the convolutions of the matrix columns
 
 + [x] In function calc_weights() add additional options for the typ_e argument: quadratic weights constraint (highest principal component)
 
@@ -253,10 +298,6 @@ Added: Encoding: UTF-8
 Removed from Imports: caTools, lubridate, TTR, 
 
 + [x] Fix build error about RcppExports.R.
-Add by hand to NAMESPACE:
-useDynLib(HighFreq)
-importFrom(Rcpp, evalCpp)
-exportPattern("^[[:alpha:]]+")
 
 + [x] Modify functional roll_apply()
 Change endpoints calculation: define look_backs as a list of numeric vectors.

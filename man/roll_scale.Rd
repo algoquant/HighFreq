@@ -3,12 +3,12 @@
 \name{roll_scale}
 \alias{roll_scale}
 \title{Perform a rolling scaling (standardization) of the columns of a
-\emph{matrix} of data using \emph{RcppArmadillo}.}
+\emph{matrix} of data using \code{RcppArmadillo}.}
 \usage{
 roll_scale(mat_rix, look_back, use_median = FALSE)
 }
 \arguments{
-\item{mat_rix}{A numeric \emph{matrix} of data.}
+\item{mat_rix}{A \emph{matrix} of data.}
 
 \item{look_back}{The length of the look-back interval, equal to the number 
 of rows of data used in the scaling.}
@@ -19,27 +19,27 @@ dispersion is calculated as the \emph{median absolute deviation}
 (\emph{MAD}).
 If \code{use_median} is \code{FALSE} then the centrality is calculated as 
 the \emph{mean} and the dispersion is calculated as the \emph{standard
-deviation}. (The default is \code{FALSE})}
+deviation}. (The default is \code{use_median=FALSE})}
 }
 \value{
-A numeric \emph{matrix} with the same dimensions as the input
+A \emph{matrix} with the same dimensions as the input
   argument \code{mat_rix}.
 }
 \description{
 Perform a rolling scaling (standardization) of the columns of a
-\emph{matrix} of data using \emph{RcppArmadillo}.
+\emph{matrix} of data using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_scale()} performs a rolling scaling
   (standardization) of the columns of the \code{mat_rix} argument using
-  \emph{RcppArmadillo}.
+  \code{RcppArmadillo}.
   The function \code{roll_scale()} performs a loop over the rows of 
   \code{mat_rix}, then subsets a number of previous (past) rows equal to 
   \code{look_back}, and scales the subset matrix.  It assigns the last row
-  of the scaled subset matrix to the return matrix.
+  of the scaled subset \emph{matrix} to the return matrix.
   
   If the argument \code{use_median} is \code{FALSE} (the default), then it
-  performs a similar calculation as the function \code{roll::roll_scale()}.
+  performs the same calculation as the function \code{roll::roll_scale()}.
   If the argument \code{use_median} is \code{TRUE}, then it calculates the
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
@@ -52,4 +52,5 @@ rolled_scaled <- roll::roll_scale(data=mat_rix, width=look_back, min_obs=1)
 rolled_scaled2 <- roll_scale(mat_rix=mat_rix, look_back=look_back, use_median=FALSE)
 all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
 }
+
 }

@@ -13,10 +13,10 @@ sim_garch(om_ega, al_pha, be_ta, in_nov)
 
 \item{be_ta}{The weight associated with the past variance estimates.}
 
-\item{in_nov}{A numeric \emph{vector} of innovations (random numbers).}
+\item{in_nov}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
-A numeric \emph{matrix} with two columns: the simulated returns and
+A \emph{matrix} with two columns: the simulated returns and
   variance, and with the same number of rows as the length of the argument 
   \code{in_nov}.
 }
@@ -36,4 +36,5 @@ be_ta <- 0.2
 # Simulate the GARCH process using Rcpp
 garch_rcpp <- sim_garch(om_ega=om_ega, al_pha=al_pha, be_ta=be_ta, in_nov=rnorm(10000))
 }
+
 }

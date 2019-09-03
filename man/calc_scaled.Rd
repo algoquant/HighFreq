@@ -3,14 +3,14 @@
 \name{calc_scaled}
 \alias{calc_scaled}
 \title{Scale (standardize) the columns of a \emph{matrix} of data using
-\emph{RcppArmadillo}.}
+\code{RcppArmadillo}.}
 \usage{
 calc_scaled(mat_rix, use_median = FALSE)
 }
 \arguments{
-\item{mat_rix}{A numeric \emph{matrix} of data.}
+\item{\code{mat_rix}}{A \emph{matrix} of data.}
 
-\item{use_median}{A \emph{Boolean} argument: if \code{TRUE} then the 
+\item{\code{use_median}}{A \emph{Boolean} argument: if \code{TRUE} then the 
 centrality (central tendency) is calculated as the \emph{median} and the 
 dispersion is calculated as the \emph{median absolute deviation}
 (\emph{MAD}).
@@ -19,38 +19,41 @@ the \emph{mean} and the dispersion is calculated as the \emph{standard
 deviation}. (The default is \code{FALSE})}
 }
 \value{
-A numeric \emph{matrix} with the same dimensions as the input
+A \emph{matrix} with the same dimensions as the input
   argument \code{mat_rix}.
 }
 \description{
 Scale (standardize) the columns of a \emph{matrix} of data using
-\emph{RcppArmadillo}.
+\code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_scaled()} scales (standardizes) the columns
-  of the \code{mat_rix} argument using \emph{RcppArmadillo}.
+  of the \code{mat_rix} argument using \code{RcppArmadillo}.
   If the argument \code{use_median} is \code{FALSE} (the default), then it
-  performs a similar calculation as the standard \emph{R} function
+  performs the same calculation as the standard \code{R} function
   \code{scale()}, and it calculates the centrality (central tendency) as the
   \emph{mean} and the dispersion as the \emph{standard deviation}.
   If the argument \code{use_median} is \code{TRUE}, then it calculates the
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
   
-  The function \code{calc_scaled()} uses \emph{RcppArmadillo} and is about
-  \emph{5} times faster than function \code{scale()}, for a matrix with
-  \emph{1,000} rows and \emph{20} columns.
+  The function \code{calc_scaled()} uses \code{RcppArmadillo} and is about
+  \emph{5} times faster than function \code{scale()}, for a \emph{matrix}
+  with \emph{1,000} rows and \emph{20} columns.
 }
 \examples{
 \dontrun{
+# Create a matrix of random data
 mat_rix <- matrix(rnorm(20000), nc=20)
 scale_d <- calc_scaled(mat_rix=mat_rix, use_median=FALSE)
 scale_d2 <- scale(mat_rix)
 all.equal(scale_d, scale_d2, check.attributes=FALSE)
+# Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  pure_r=scale(mat_rix),
   rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
+  rcode=scale(mat_rix),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }
+
 }

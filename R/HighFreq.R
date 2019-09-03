@@ -29,9 +29,9 @@
 #'   equal to the secondly index over the two previous calendar days.
 #'
 #' @examples
-#' # create secondly TAQ time series of random prices
+#' # Create secondly TAQ time series of random prices
 #' ta_q <- HighFreq::random_taq()
-#' # create random TAQ time series from SPY index
+#' # Create random TAQ time series from SPY index
 #' ta_q <- HighFreq::random_taq(in_dex=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
 
 random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
@@ -39,17 +39,17 @@ random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
              to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"),
   bid_offer=0.001, ...) {
   len_gth <- NROW(in_dex)
-  # create xts of random prices following geometric Brownian motion
+  # Create xts of random prices following geometric Brownian motion
   ta_q <- xts(exp(cumsum(vol_at*rnorm(len_gth) + dri_ft - vol_at^2/2)),
               order.by=in_dex)
-  # create vector of random bid-offer spreads
+  # Create vector of random bid-offer spreads
   bid_offer <- bid_offer*(1 + runif(len_gth))/2
-  # create TAQ data from bid and offer prices
+  # Create TAQ data from bid and offer prices
   ta_q <- merge(ta_q*(1-bid_offer), ta_q*(1+bid_offer))
-  # add traded price to TAQ data
+  # Add traded price to TAQ data
   r_unif <- runif(len_gth)
   ta_q <- merge(ta_q, r_unif*ta_q[, 1] + (1-r_unif)*ta_q[, 2])
-  # add trade volume column
+  # Add trade volume column
   ta_q <- merge(ta_q, sample(x=10*(2:18), size=len_gth, replace=TRUE))
   colnames(ta_q) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
   ta_q
@@ -97,9 +97,9 @@ random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
 #'   original time series.
 #'
 #' @examples
-#' # create minutely synthetic OHLC time series of random prices
+#' # Create minutely synthetic OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
-#' # create random time series from SPY by randomly sampling it
+#' # Create random time series from SPY by randomly sampling it
 #' oh_lc <- HighFreq::random_ohlc(oh_lc=HighFreq::SPY["2012-02-13/2012-02-15"])
 
 random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
@@ -107,19 +107,19 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
       to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), ...) {
   if (is.null(oh_lc)) {
     len_gth <- NROW(in_dex)
-    # create xts of random prices following geometric Brownian motion
+    # Create xts of random prices following geometric Brownian motion
     x_ts <- xts(exp(cumsum(vol_at*rnorm(len_gth) + dri_ft - vol_at^2/2)), order.by=in_dex)
-    # add trade volume column
+    # Add trade volume column
     x_ts <- merge(x_ts, volume=sample(x=10*(2:18), size=len_gth, replace=TRUE))
-    # aggregate to minutes OHLC data
+    # Aggregate to minutes OHLC data
     to.period(x=x_ts, period="minutes")
   } else {
     oh_lc <- log(oh_lc)  # transform to normal
-    if (re_duce)  # calculate reduced form of oh_lc
+    if (re_duce)  # Calculate reduced form of oh_lc
       oh_lc <- rutils::diff_ohlc(oh_lc)
     # randomly sample from the rows of oh_lc
     oh_lc <- xts(coredata(oh_lc)[c(1, sample(x=2:NROW(oh_lc), replace=TRUE)), ], order.by=index(oh_lc))
-    # return standard form of randomized oh_lc
+    # Return standard form of randomized oh_lc
     exp(rutils::diff_ohlc(oh_lc, re_duce=FALSE))
   }
 }  # end random_ohlc
@@ -155,13 +155,13 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
 #'   seconds that have elapsed since the \emph{epoch}.
 #'
 #' @examples
-#' # remove overnight close-to-open price jumps from SPY data
+#' # Remove overnight close-to-open price jumps from SPY data
 #' oh_lc <- remove_jumps(HighFreq::SPY)
 
 remove_jumps <- function(oh_lc) {
   # find time index of the periods greater than 60 seconds
   which_periods <- which(c(1, diff(xts::.index(oh_lc))) > 60)
-  # calculate cumulative sum of overnight price jumps
+  # Calculate cumulative sum of overnight price jumps
   jump_s <- numeric(NROW(oh_lc))
   jump_s[which_periods] <- as.numeric(oh_lc[which_periods, 1]) - as.numeric(oh_lc[which_periods-1, 4])
   jump_s <- cumsum(jump_s)
@@ -213,27 +213,27 @@ remove_jumps <- function(oh_lc) {
 #'   \code{col_umn}.
 #'
 #' @examples
-#' # calculate secondly returns from TAQ data
+#' # Calculate secondly returns from TAQ data
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY_TAQ)
-#' # calculate close to close returns
+#' # Calculate close to close returns
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY)
-#' # calculate open to open returns
+#' # Calculate open to open returns
 #' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
 
 run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
-  # return NULL if no data
+  # Return NULL if no data
   if (is.null(x_ts))  return(NULL)
-  # calculate mid prices
+  # Calculate mid prices
   if (NCOL(x_ts)==6)  # TAQ data has 6 columns
     re_turns <- 0.5 * (x_ts[, "Bid.Price"] + x_ts[, "Ask.Price"])
   else
     re_turns <- x_ts[, col_umn]  # OHLC data
-  # calculate returns
+  # Calculate returns
   re_turns <- rutils::diff_it(log(re_turns), lagg=lagg)
   if (scal_e)
     re_turns <- re_turns / c(rep(1, lagg), diff(xts::.index(re_turns), lagg=lagg))
   re_turns[1:lagg, ] <- 0
-  # colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
+  # Colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
   re_turns
 }  # end run_returns
 
@@ -275,21 +275,21 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
 #'   cause more values to be identified as extreme.
 #'
 #' @examples
-#' # create local copy of SPY TAQ data
+#' # Create local copy of SPY TAQ data
 #' ta_q <- HighFreq::SPY_TAQ
 #' # scrub quotes with suspect bid-offer spreads
 #' bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 #' sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
-#' # remove suspect values
+#' # Remove suspect values
 #' ta_q <- ta_q[!sus_pect]
 
 which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
-# calculate volatility as rolling quantile
+# Calculate volatility as rolling quantile
   quan_tile <- caTools::runquantile(x=abs(as.numeric(x_ts)), k=look_back,
                         probs=0.9, endrule="constant", align="center")
 #  quan_tile <- xts(quan_tile, order.by=index(x_ts))
 #  colnames(quan_tile) <- "volat"
-# carry forward non-zero volatility values
+# Carry forward non-zero volatility values
   quan_tile[quan_tile==0] <- NA
   quan_tile[1] <- 1
   quan_tile <- rutils::na_locf(quan_tile)
@@ -342,16 +342,16 @@ which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
 #'   cause more values to be identified as jumps.
 #'
 #' @examples
-#' # create local copy of SPY TAQ data
+#' # Create local copy of SPY TAQ data
 #' ta_q <- SPY_TAQ
-#' # calculate mid prices
+#' # Calculate mid prices
 #' mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
-#' # replace whole rows containing suspect price jumps with NA, and perform locf()
+#' # Replace whole rows containing suspect price jumps with NA, and perform locf()
 #' ta_q[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 #' ta_q <- xts:::na.locf.xts(ta_q)
 
 which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
-# calculate simple returns
+# Calculate simple returns
   re_turns <- rutils::diff_it(as.numeric(x_ts))
 #  re_turns[1] <- 0
 #  colnames(re_turns) <- "diffs"
@@ -359,12 +359,12 @@ which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
 #  rets_advanced[NROW(rets_advanced)] <- 0
 #  colnames(rets_advanced) <- "rets_advanced"
 
-# calculate volatility as the rolling quantile of returns
+# Calculate volatility as the rolling quantile of returns
   quan_tile <- caTools::runquantile(x=abs(re_turns), k=look_back,
                         probs=0.9, endrule="constant", align="center")
 #  quan_tile <- xts(quan_tile, order.by=index(re_turns))
 #  colnames(quan_tile) <- "volat"
-# carry forward non-zero quan_tile values
+# Carry forward non-zero quan_tile values
   quan_tile[quan_tile==0] <- NA
   quan_tile[1] <- 1
   quan_tile <- rutils::na_locf(quan_tile)
@@ -377,8 +377,8 @@ which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
       (abs(re_turns+rets_advanced) < 2*vol_mult*quan_tile))
   sus_pect[1] <- FALSE
 #  colnames(sus_pect) <- "suspect"
-# cat("Parsing", deparse(substitute(ta_q)), "\n")
-# cat("Parsing", strsplit(deparse(substitute(ta_q)), split="[.]")[[1]][4], "on date:", format(to_day), "\tfound", sum(sus_pect), "suspect prices\n")
+# Cat("Parsing", deparse(substitute(ta_q)), "\n")
+# Cat("Parsing", strsplit(deparse(substitute(ta_q)), split="[.]")[[1]][4], "on date:", format(to_day), "\tfound", sum(sus_pect), "suspect prices\n")
   cat("date:", format(as.Date(index(first(x_ts)))), "\tfound", sum(sus_pect), "jump prices\n")
   sus_pect
 }  # end which_jumps
@@ -403,41 +403,41 @@ which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
 #' @examples
 # scrub a single day of TAQ data without aggregating it
 #' ta_q <- HighFreq::scrub_taq(ta_q=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
-#' # create random TAQ prices and scrub them
+#' # Create random TAQ prices and scrub them
 #' ta_q <- HighFreq::random_taq()
 #' ta_q <- HighFreq::scrub_taq(ta_q=ta_q)
 #' ta_q <- HighFreq::scrub_taq(ta_q=ta_q, look_back=11, vol_mult=1)
 
 scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") {
-# convert timezone of index to New_York
+# Convert timezone of index to New_York
   index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 # subset data to NYSE trading hours
   ta_q <- ta_q["T09:30:00/T16:00:00", ]
-# return NULL if no data
+# Return NULL if no data
   if (NROW(ta_q)==0)  return(NULL)
 #  to_day <- as.Date(index(first(ta_q)))
 
-# remove duplicate time stamps using duplicated()
+# Remove duplicate time stamps using duplicated()
   ta_q <- ta_q[!duplicated(index(ta_q)), ]
 
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
   sus_pect <- which_extreme(bid_offer, look_back=look_back, vol_mult=vol_mult)
-# remove suspect values
+# Remove suspect values
   ta_q <- ta_q[!sus_pect]
-# replace suspect values
+# Replace suspect values
 # ta_q[sus_pect, "Bid.Price"] <- ta_q[sus_pect, "Trade.Price"]
 # ta_q[sus_pect, "Ask.Price"] <- ta_q[sus_pect, "Trade.Price"]
 
 # scrub quotes with suspect price jumps
-# calculate mid prices
+# Calculate mid prices
   mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 #  mid_prices <- na.omit(mid_prices)
 #  colnames(mid_prices) <- "Mid.Price"
-# replace NA volumes with zero
+# Replace NA volumes with zero
   ta_q[is.na(ta_q[, "Volume"]), "Volume"] <- 0
-# replace whole rows containing suspect price jumps with NA, and perform locf()
+# Replace whole rows containing suspect price jumps with NA, and perform locf()
   ta_q[which_jumps(mid_prices, look_back=look_back, vol_mult=vol_mult), ] <- NA
   rutils::na_locf(ta_q)
 }  # end scrub_taq
@@ -469,9 +469,9 @@ scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") 
 #' series is rounded up to the next integer multiple of 'period'.
 #'
 #' @examples
-#' # create random TAQ prices
+#' # Create random TAQ prices
 #' ta_q <- HighFreq::random_taq()
-#' # aggregate to ten minutes OHLC data
+#' # Aggregate to ten minutes OHLC data
 #' oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
 #' chart_Series(oh_lc, name="random prices")
 #' # scrub and aggregate a single day of SPY TAQ data to OHLC
@@ -480,41 +480,41 @@ scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") 
 
 scrub_agg <- function(ta_q, look_back=51, vol_mult=2,
                       period="minutes", tzone="America/New_York") {
-# convert timezone of index to New_York
+# Convert timezone of index to New_York
   index(ta_q) <- lubridate::with_tz(time=index(ta_q), tzone=tzone)
 # subset data to NYSE trading hours
   ta_q <- ta_q["T09:30:00/T16:00:00", ]
-# return NULL if no data
+# Return NULL if no data
   if (NROW(ta_q)==0)  return(NULL)
 #  to_day <- as.Date(index(first(ta_q)))
 
-# remove duplicate time stamps using duplicated()
+# Remove duplicate time stamps using duplicated()
   ta_q <- ta_q[!duplicated(index(ta_q)), ]
 
 # scrub quotes with suspect bid-offer spreads
   bid_offer <- ta_q[, "Ask.Price"] - ta_q[, "Bid.Price"]
 #  bid_offer <- na.omit(bid_offer)
   sus_pect <- which_extreme(bid_offer, look_back=look_back, vol_mult=vol_mult)
-# remove suspect values
+# Remove suspect values
   ta_q <- ta_q[!sus_pect]
-# replace suspect values
+# Replace suspect values
 # ta_q[sus_pect, "Bid.Price"] <- ta_q[sus_pect, "Trade.Price"]
 # ta_q[sus_pect, "Ask.Price"] <- ta_q[sus_pect, "Trade.Price"]
 
 # scrub quotes with suspect price jumps
-# calculate mid prices
+# Calculate mid prices
   mid_prices <- 0.5 * (ta_q[, "Bid.Price"] + ta_q[, "Ask.Price"])
 #  mid_prices <- na.omit(mid_prices)
   colnames(mid_prices) <- "Mid.Price"
-# replace whole rows containing suspect price jumps with NA, and perform locf()
+# Replace whole rows containing suspect price jumps with NA, and perform locf()
   mid_prices[which_jumps(mid_prices, look_back=look_back, vol_mult=vol_mult)] <- NA
   mid_prices <- rutils::na_locf(mid_prices)
 #  mid_prices <- rutils::na_locf(mid_prices, fromLast=TRUE)
-# cbind mid_prices with volume data, and replace NA volumes with zero
+# Cbind mid_prices with volume data, and replace NA volumes with zero
   mid_prices <- cbind(mid_prices, ta_q[index(mid_prices), "Volume"])
   mid_prices[is.na(mid_prices[, "Volume"]), "Volume"] <- 0
 
-# aggregate to OHLC and cumulative volume data
+# Aggregate to OHLC and cumulative volume data
   mid_prices <- switch(period,
                        "minutes"={sec_onds <- 60; to.period(x=mid_prices, period=period)},
                        "3 min"={sec_onds <- 3*60; to.minutes3(x=mid_prices)},
@@ -564,7 +564,7 @@ scrub_agg <- function(ta_q, look_back=51, vol_mult=2,
 #' data_dir <- "C:/Develop/data/hfreq/src/"
 #' output_dir <- "C:/Develop/data/hfreq/scrub/"
 #' sym_bol <- "SPY"
-#' # aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
+#' # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
 #' save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 #' }
 
@@ -575,11 +575,11 @@ save_scrub_agg <- function(sym_bol,
                       vol_mult=2,
                       period="minutes",
                       tzone="America/New_York") {
-# create path to directory containing *.RData files
+# Create path to directory containing *.RData files
   file_dir <- file.path(data_dir, sym_bol)
 # get list of *.RData files
   file_list <- list.files(file_dir)
-# create paths to *.RData files
+# Create paths to *.RData files
   file_names <- file.path(file_dir, file_list)
 
 # load TAQ data one by one, scrub and aggregate it, return list of xts
@@ -592,13 +592,13 @@ da_ta <- lapply(file_names, function(file_name) {
             period=period, tzone=tzone)
 })  # end sapply
 
-# recursively "rbind" the list into a single xts
+# Recursively "rbind" the list into a single xts
   da_ta <- rutils::do_call_rbind(da_ta)
 # assign column names, i.e. "symbol.High"
   colnames(da_ta) <- sapply(strsplit(colnames(da_ta), split="[.]"),
                            function(strng) paste(sym_bol, strng[-1], sep="."))
 
-# copy the xts data to a variable with the name 'sym_bol'
+# Copy the xts data to a variable with the name 'sym_bol'
   assign(sym_bol, da_ta)
 
 # save the xts data to a file in the output_dir
@@ -640,11 +640,11 @@ save_taq <- function(sym_bol,
                       look_back=51,
                       vol_mult=2,
                       tzone="America/New_York") {
-# create path to directory containing *.RData files
+# Create path to directory containing *.RData files
   data_dir <- file.path(data_dir, sym_bol)
 # get list of *.RData files
   file_names <- list.files(data_dir)
-# create path to directory for writing *.RData files
+# Create path to directory for writing *.RData files
   output_dir <- file.path(output_dir, sym_bol)
 
 # load TAQ data one-by-one, scrub, and save
@@ -703,11 +703,11 @@ save_rets <- function(sym_bol,
                       vol_mult=2,
                       period="minutes",
                       tzone="America/New_York") {
-# create path to directory containing *.RData files
+# Create path to directory containing *.RData files
   file_dir <- file.path(data_dir, sym_bol)
 # get list of *.RData files
   file_list <- list.files(file_dir)
-# create paths to *.RData files
+# Create paths to *.RData files
   file_names <- file.path(file_dir, file_list)
 
 # load TAQ data into list
@@ -724,16 +724,16 @@ save_rets <- function(sym_bol,
                       period=period,
                       tzone=tzone)
 
-# calculate returns
+# Calculate returns
   oh_lc <- lapply(oh_lc, run_returns)
 
-# recursively "rbind" the list into a single xts
+# Recursively "rbind" the list into a single xts
   oh_lc <- rutils::do_call_rbind(oh_lc)
 # assign column names, i.e. "symbol.rets"
   colnames(oh_lc) <-
     c(paste(sym_bol, "rets", sep="."), paste(sym_bol, "vol", sep="."))
 
-# copy the xts data to a variable with the name 'sym_bol'
+# Copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
   assign(sym_bol_rets, oh_lc)
 
@@ -769,16 +769,16 @@ save_rets <- function(sym_bol,
 save_rets_ohlc <- function(sym_bol,
                       data_dir="E:/output/data/",
                       output_dir="E:/output/data/") {
-# create path to directory containing sym_bol.RData file
+# Create path to directory containing sym_bol.RData file
   file_name <- file.path(data_dir, paste0(sym_bol, ".RData"))
 # load OHLC data
   cat("loading", sym_bol, "from file: ", file_name, "\n")
   sym_bol <- load(file_name)
 
-# calculate returns
+# Calculate returns
   da_ta <- run_returns(get(sym_bol))
 
-# copy the xts data to a variable with the name 'sym_bol'
+# Copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
   assign(sym_bol_rets, da_ta)
 
@@ -870,13 +870,13 @@ save_rets_ohlc <- function(sym_bol,
 #'   validation.
 #'
 #' @examples
-#' # create minutely OHLC time series of random prices
+#' # Create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
-#' # calculate variance estimates for oh_lc
+#' # Calculate variance estimates for oh_lc
 #' var_running <- HighFreq::run_variance(oh_lc)
-#' # calculate variance estimates for SPY
+#' # Calculate variance estimates for SPY
 #' var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="yang_zhang")
-#' # calculate SPY variance without overnight jumps
+#' # Calculate SPY variance without overnight jumps
 #' var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
 
 run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
@@ -901,7 +901,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
     vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
   vari_ance[1, ] <- 0
   vari_ance <- rutils::na_locf(vari_ance)
-  # colnames(vari_ance) <- paste0(sym_bol, ".Variance")
+  # Colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
 }  # end run_variance
 
@@ -932,7 +932,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 #'   \code{"rogers_satchell"}.
 #'
 #' @examples
-#' # calculate time series of skew estimates for SPY
+#' # Calculate time series of skew estimates for SPY
 #' sk_ew <- HighFreq::run_skew(HighFreq::SPY)
 
 run_skew <- function(oh_lc, calc_method="rogers_satchell") {
@@ -958,7 +958,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
   sk_ew <- sk_ew/c(1, diff(xts::.index(oh_lc)))^3
   sk_ew[1, ] <- 0
   sk_ew <- rutils::na_locf(sk_ew)
-  # colnames(sk_ew) <- paste0(sym_bol, ".Skew")
+  # Colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
 }  # end run_skew
 
@@ -988,7 +988,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 #'   this statistic is close to either 1 or -1.
 #'
 #' @examples
-#' # calculate time series of running Sharpe ratios for SPY
+#' # Calculate time series of running Sharpe ratios for SPY
 #' sharpe_running <- run_sharpe(HighFreq::SPY)
 
 run_sharpe <- function(oh_lc, calc_method="close") {
@@ -997,7 +997,7 @@ run_sharpe <- function(oh_lc, calc_method="close") {
                    "method2"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])}
   )  # end switch
   sharpe_ratio <- ifelse(oh_lc[, 2]==oh_lc[, 3], 0, sharpe_ratio)
-  # colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
+  # Colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
   sharpe_ratio
 }  # end run_sharpe
 
@@ -1025,9 +1025,9 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 #'   weighted.
 #'
 #' @examples
-#' # calculate weighted average variance for SPY (single number)
+#' # Calculate weighted average variance for SPY (single number)
 #' vari_ance <- agg_regate(oh_lc=HighFreq::SPY, mo_ment="run_variance")
-#' # calculate time series of daily skew estimates for SPY
+#' # Calculate time series of daily skew estimates for SPY
 #' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_regate, mo_ment="run_skew")
 
 agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
@@ -1069,16 +1069,16 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 #'   then its volume-weighted average value over time is calculated.
 #'
 #' @examples
-#' # calculate and plot rolling volume-weighted average closing prices (VWAP)
+#' # Calculate and plot rolling volume-weighted average closing prices (VWAP)
 #' prices_rolling <- roll_vwap(oh_lc=HighFreq::SPY["2013-11"], look_back=11)
 #' chart_Series(HighFreq::SPY["2013-11-12"], name="SPY prices")
 #' add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
 #' legend("top", legend=c("SPY prices", "VWAP prices"),
 #' bg="white", lty=c(1, 1), lwd=c(2, 2),
 #' col=c("black", "red"), bty="n")
-#' # calculate running returns
+#' # Calculate running returns
 #' returns_running <- run_returns(x_ts=HighFreq::SPY)
-#' # calculate the rolling volume-weighted average returns
+#' # Calculate the rolling volume-weighted average returns
 #' roll_vwap(oh_lc=HighFreq::SPY, x_ts=returns_running, look_back=11)
 
 roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
@@ -1086,8 +1086,8 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
   volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5], look_back=look_back)
   roll_vwap <- roll_vwap/volume_rolling
   roll_vwap[is.na(roll_vwap)] <- 0
-  # colnames(roll_vwap) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".VWAP")
-  # colnames(roll_vwap) <- colnames(oh_lc)
+  # Colnames(roll_vwap) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".VWAP")
+  # Colnames(roll_vwap) <- colnames(oh_lc)
   roll_vwap
 }  # end roll_vwap
 
@@ -1121,7 +1121,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 #'   calculate statistics.
 #'
 #' @examples
-#' # calculate time series of rolling variance and skew estimates
+#' # Calculate time series of rolling variance and skew estimates
 #' var_rolling <- roll_moment(oh_lc=HighFreq::SPY, look_back=21)
 #' skew_rolling <- roll_moment(oh_lc=HighFreq::SPY, mo_ment="run_skew", look_back=21)
 #' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
@@ -1140,112 +1140,9 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
     agg_regations[is.na(agg_regations)] <- 0
   } else
     agg_regations <- rutils::roll_sum(agg_regations, look_back=look_back)/look_back
-  # colnames(agg_regations) <- paste(rutils::get_name(colnames(oh_lc)[1]), "Vol", sep=".")
+  # Colnames(agg_regations) <- paste(rutils::get_name(colnames(oh_lc)[1]), "Vol", sep=".")
   agg_regations
 }  # end roll_moment
-
-
-
-
-#' Calculate a time series of variance estimates over a rolling look-back
-#' interval for an \emph{OHLC} time series of prices, using different range
-#' estimators for variance.
-#'
-#' @export
-#' @param oh_lc An \emph{OHLC} time series of prices in \emph{xts} format.
-#' @param calc_method \emph{character} string representing method for estimating
-#'   variance.  The methods include:
-#'   \itemize{
-#'     \item "close" close to close,
-#'     \item "garman_klass" Garman-Klass,
-#'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
-#'     \item "rogers_satchell" Rogers-Satchell,
-#'     \item "yang_zhang" Yang-Zhang,
-#'    }
-#'    (default is \code{"yang_zhang"})
-#' @param look_back The size of the look-back interval, equal to the number of
-#'   rows of data used for calculating the variance.
-#' @param scal_e \emph{Boolean} argument: should the returns be divided by the
-#'   number of seconds in each period? (default is \code{TRUE})
-#'
-#' @return An \emph{xts} time series with a single column and the same number of
-#'   rows as the argument \code{oh_lc}.
-#'
-#' @details The function \code{roll_variance()} calculates a time series of
-#'   variance estimates of percentage returns, from \emph{OHLC} prices, using
-#'   several different variance estimation methods based on the range of
-#'   \emph{OHLC} prices.
-#'
-#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
-#'   by the squared differences of the time index (which scales the variance to
-#'   units of variance per second squared.) This is useful for example, when
-#'   calculating intra-day variance from minutely bar data, because dividing
-#'   returns by the number of seconds decreases the effect of overnight price
-#'   jumps.
-#'
-#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is
-#'   expressed in the scale of the time index of the \emph{OHLC} time series.
-#'   For example, if the time index is in seconds, then the variance is given in
-#'   units of variance per second squared.  If the time index is in days, then
-#'   the variance is equal to the variance per day squared.
-#'
-#'   The time index of the \code{oh_lc} time series is assumed to be in
-#'   \emph{POSIXct} format, so that its internal value is equal to the number of
-#'   seconds that have elapsed since the \emph{epoch}.
-#'
-#'   The methods \code{"close"}, \code{"garman_klass_yz"}, and
-#'   \code{"yang_zhang"} do account for close-to-open price jumps, while the
-#'   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
-#'   for close-to-open price jumps.
-#'
-#'   The default method is \code{"yang_zhang"}, which theoretically has the
-#'   lowest standard error among unbiased estimators.
-#'
-#'   The function \code{roll_variance()} performs the same calculations as the
-#'   function \code{volatility()} from package
-#'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but
-#'   it's a little faster because it uses function RcppRoll::roll_var(), and it
-#'   performs less data validation.
-#'
-#' @examples
-#' # create minutely OHLC time series of random prices
-#' oh_lc <- HighFreq::random_ohlc()
-#' # calculate variance estimates for oh_lc over a 21 period interval
-#' var_rolling <- HighFreq::roll_variance(oh_lc, look_back=21)
-#' # calculate variance estimates for SPY
-#' var_rolling <- HighFreq::roll_variance(HighFreq::SPY, calc_method="yang_zhang")
-#' # calculate SPY variance without accounting for overnight jumps
-#' var_rolling <- HighFreq::roll_variance(HighFreq::SPY, calc_method="rogers_satchell")
-
-roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", scal_e=TRUE) {
-  sym_bol <- rutils::get_name(colnames(oh_lc)[1])
-  # oh_lc <- log(oh_lc[, 1:4])
-  vari_ance <- switch(calc_method,
-                      "close"={xts(c(rep(0, look_back-1),
-                            RcppRoll::roll_var(rutils::diff_it(oh_lc[, 4]), n=look_back, align="left")),
-                              order.by=index(oh_lc))},
-                      "garman_klass"={rutils::roll_sum(
-                            0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
-                            (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2, look_back=look_back) / look_back},
-                      "rogers_satchell"={rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
-                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), look_back=look_back) / look_back},
-                      "garman_klass_yz"={rutils::roll_sum(
-                            (oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
-                            (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2, look_back=look_back) / look_back},
-                      "yang_zhang"={co_eff <- 0.34/(1.34 + (look_back + 1)/(look_back - 1))
-                            c(rep(0, look_back-1),
-                            RcppRoll::roll_var(oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]), n=look_back, align="left") +
-                            co_eff*RcppRoll::roll_var(oh_lc[, 1]-oh_lc[, 4], n=look_back, align="left")) +
-                            (1-co_eff)*rutils::roll_sum((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
-                              (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]), look_back=look_back) / look_back}
-  )  # end switch
-  if (scal_e)
-    vari_ance <- vari_ance/c(1, diff(xts::.index(oh_lc)))^2
-  vari_ance[1, ] <- 0
-  vari_ance <- rutils::na_locf(vari_ance)
-  # colnames(vari_ance) <- paste0(sym_bol, ".Variance")
-  vari_ance
-}  # end roll_variance
 
 
 
@@ -1270,65 +1167,72 @@ roll_variance <- function(oh_lc, look_back=11, calc_method="yang_zhang", scal_e=
 #'
 #' @return A single \emph{numeric} value equal to the variance.
 #'
-#' @details The function \code{calc_variance()} calculates the variance estimate
-#'   from \emph{OHLC} prices, using several different variance estimation
-#'   methods based on the range of \emph{OHLC} prices.
+#' @details The function \code{calc_var_ohlc_r()} calculates the variance
+#'   from all the different intra-day and day-over-day returns (defined as the
+#'   differences of \emph{OHLC} prices), using several different variance
+#'   estimation methods.
 #'
+#'   The default method is \code{"yang_zhang"}, which theoretically has the
+#'   lowest standard error among unbiased estimators.
 #'   The methods \code{"close"}, \code{"garman_klass_yz"}, and
 #'   \code{"yang_zhang"} do account for close-to-open price jumps, while the
 #'   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
 #'   for close-to-open price jumps.
 #'
-#'   The default method is \code{"yang_zhang"}, which theoretically has the
-#'   lowest standard error among unbiased estimators.
-#'
-#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
-#'   by the squared differences of the time index (which scales the variance to
-#'   units of variance per second squared.) This is useful for example, when
-#'   calculating variance from minutely bar data, because dividing returns by
-#'   the number of seconds decreases the effect of overnight price jumps.
-#'
-#'   If \code{scal_e} is \code{TRUE} (the default), then the variance is
-#'   expressed in the scale of the time index of the \emph{OHLC} time series.
-#'   For example, if the time index is in seconds, then the variance is given in
-#'   units of variance per second squared.  If the time index is in days, then
-#'   the variance is equal to the variance per day squared.
-#'
-#'   The function \code{calc_variance()} performs the same calculations as the
-#'   function \code{run_variance()} and then calculates the average of the spot
-#'   variance estimates.
+#'   If \code{scal_e} is \code{TRUE} (the default), then the returns are divided
+#'   by the differences of the time index (which scales the variance to the
+#'   units of variance per second squared.) This is useful when calculating the
+#'   variance from minutely bar data, because dividing returns by the number of
+#'   seconds decreases the effect of overnight price jumps. If the time index is
+#'   in days, then the variance is equal to the variance per day squared.
+#'   
+#'   The function \code{calc_var_ohlc_r()} is implemented in \code{R} code.
 #'
 #' @examples
-#' # create minutely OHLC time series of random prices
-#' oh_lc <- HighFreq::random_ohlc()
-#' # calculate variance of oh_lc
-#' vari_ance <- HighFreq::calc_variance(oh_lc)
-#' # calculate variance of SPY
-#' vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="yang_zhang")
-#' # calculate variance of SPY without accounting for overnight jumps
-#' vari_ance <- HighFreq::calc_variance(HighFreq::SPY, calc_method="rogers_satchell")
+#' # Calculate the variance of SPY returns
+#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, calc_method="yang_zhang")
+#' # Calculate variance without accounting for overnight jumps
+#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, calc_method="rogers_satchell")
+#' # Calculate the variance without scaling the returns
+#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, scal_e=FALSE)
 
-calc_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
+calc_var_ohlc_r <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
+  
+  # oh_lc <- log(oh_lc[, 1:4])
+  num_rows <- NROW(oh_lc)
+  
+  # Define the time index for scaling the returns
   if (scal_e)
     in_dex <- c(1, diff(xts::.index(oh_lc)))
   else
-    in_dex <- rep(1, NROW(oh_lc))
-  # oh_lc <- log(oh_lc[, 1:4])
+    in_dex <- rep(1, num_rows)
+  
+  # Coerce oh_lc to matrix
+  if (is.xts(oh_lc))
+    oh_lc <- coredata(oh_lc)
+  
+  # Calculate all the different intra-day and day-over-day returns 
+  # (differences of OHLC prices)
+  close_close <- rutils::diff_it(oh_lc[, 4])/in_dex
+  open_close <- (oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))/in_dex
+  close_open <- (oh_lc[, 4]-oh_lc[, 1])/in_dex
+  close_high <- (oh_lc[, 4]-oh_lc[, 2])/in_dex
+  close_low <- (oh_lc[, 4]-oh_lc[, 3])/in_dex
+  high_low <- (oh_lc[, 2]-oh_lc[, 3])/in_dex
+  high_open <- (oh_lc[, 2]-oh_lc[, 1])/in_dex
+  low_open <- (oh_lc[, 3]-oh_lc[, 1])/in_dex
+  
   switch(calc_method,
-         "close"={var(rutils::diff_it(as.numeric(oh_lc[, 4]))/in_dex)},
-         "garman_klass"={sum((0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
-                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
-         "rogers_satchell"={sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
-                            (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc)},
-         "garman_klass_yz"={sum(((oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))^2 + 0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
-                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2)/in_dex^2) / NROW(oh_lc)},
-         "yang_zhang"={co_eff <- 0.34/(1.34 + (NROW(oh_lc) + 1)/(NROW(oh_lc) - 1))
-                        drop(var((oh_lc[, 1]-rutils::lag_it(oh_lc[, 4]))/in_dex) +
-                          co_eff*var((oh_lc[, 1]-oh_lc[, 4])/in_dex) +
-                          (1-co_eff)*sum(((oh_lc[, 2]-oh_lc[, 4])*(oh_lc[, 2]-oh_lc[, 1]) +
-                                          (oh_lc[, 3]-oh_lc[, 4])*(oh_lc[, 3]-oh_lc[, 1]))/in_dex^2) / NROW(oh_lc))}
+         "close"={var(close_close)},
+         "rogers_satchell"={-sum(close_high*high_open + close_low*low_open)/num_rows},
+         "garman_klass"={sum(0.5*high_low^2 - (2*log(2)-1)*close_open^2)/num_rows},
+         "garman_klass_yz"={sum(0.5*high_low^2 - (2*log(2)-1)*close_open^2)/num_rows + 
+             var(open_close)},
+         "yang_zhang"={co_eff <- 0.34/(1.34 + (num_rows+1)/(num_rows-1))
+         var(open_close) + co_eff*var(close_open) +
+           (co_eff-1)*sum(close_high*high_open + close_low*low_open)/num_rows}
   )  # end switch
-}  # end calc_variance
+}  # end calc_var_ohlc_r
 
 
 
@@ -1349,16 +1253,16 @@ calc_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 #'   interval, divided by the average volatility of percentage returns.
 #'
 #' @examples
-#' # calculate rolling Sharpe ratio over SPY
+#' # Calculate rolling Sharpe ratio over SPY
 #' sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
 
 roll_sharpe <- function(oh_lc, look_back=11) {
   re_turns <- run_returns(oh_lc, lag=look_back, scal_e=FALSE)
-  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, scal_e=FALSE))
+  var_rolling <- sqrt(HighFreq::roll_var_ohlc(oh_lc, look_back=look_back, scal_e=FALSE))
   sharpe_rolling <- ifelse(var_rolling==0,
                            1.0,
                            re_turns/var_rolling)
-  # colnames(sharpe_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
+  # Colnames(sharpe_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
   rutils::na_locf(sharpe_rolling)
 }  # end roll_sharpe
 
@@ -1398,18 +1302,18 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 #'   trading models, rather than an estimator for statistical analysis.
 #'
 #' @examples
-#' # calculate rolling Hurst for SPY in March 2009
+#' # Calculate rolling Hurst for SPY in March 2009
 #' hurst_rolling <- roll_hurst(oh_lc=HighFreq::SPY["2009-03"], look_back=11)
 #' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 
 roll_hurst <- function(oh_lc, look_back=11) {
   ran_ge <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=oh_lc[, 2], n=look_back) +
                RcppRoll::roll_max(x=-oh_lc[, 3], n=look_back)))
-  var_rolling <- sqrt(roll_variance(oh_lc, look_back=look_back, scal_e=FALSE))
+  var_rolling <- sqrt(HighFreq::roll_var_ohlc(oh_lc, look_back=look_back, scal_e=FALSE))
   hurst_rolling <- ifelse((var_rolling==0) | (ran_ge==0),
                           0.5,
                           log(ran_ge/var_rolling)/log(look_back))
-  # colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Hurst")
+  # Colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Hurst")
   rutils::na_locf(hurst_rolling)
 }  # end roll_hurst
 
@@ -1485,16 +1389,16 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #' oh_lc <- HighFreq::SPY["2012-02-13"]
 #' inter_val <- 11  # number of data points between end points
 #' look_back <- 4  # number of end points in look-back interval
-#' # calculate the rolling sums of oh_lc columns over a rolling look-back interval
+#' # Calculate the rolling sums of oh_lc columns over a rolling look-back interval
 #' agg_regations <- roll_apply(oh_lc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
-#' # apply a vector-valued aggregation function over a rolling look-back interval
+#' # Apply a vector-valued aggregation function over a rolling look-back interval
 #' agg_function <- function(oh_lc)  c(max(oh_lc[, 2]), min(oh_lc[, 3]))
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function, look_back=look_back)
-#' # define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
+#' # Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 #' end_points <- rutils::end_points(oh_lc, inter_val=inter_val)
-#' # calculate the sums of oh_lc columns over end_points using non-overlapping intervals
+#' # Calculate the sums of oh_lc columns over end_points using non-overlapping intervals
 #' agg_regations <- roll_apply(oh_lc, agg_fun=sum, end_points=end_points, by_columns=TRUE)
-#' # apply a vector-valued aggregation function over the end_points of oh_lc
+#' # Apply a vector-valued aggregation function over the end_points of oh_lc
 #' # using overlapping intervals
 #' agg_regations <- roll_apply(oh_lc, agg_fun=agg_function,
 #'                             look_back=5, end_points=end_points)
@@ -1504,16 +1408,16 @@ roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts),
   # match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
   len_gth <- NROW(end_points)
-  # define start_points as lag of end_points
+  # Define start_points as lag of end_points
   start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
-  # define list of look-back intervals for aggregations over past
+  # Define list of look-back intervals for aggregations over past
   look_backs <- lapply(seq_along(end_points), 
                        function(in_dex) {
                          start_points[in_dex]:end_points[in_dex]
                        })  # end lapply
-  # perform aggregations over length of end_points
+  # Perform aggregations over length of end_points
   if (by_columns) {
-    # perform individual aggregations by columns
+    # Perform individual aggregations by columns
     agg_regations <- lapply(x_ts, function(col_umn)
       lapply(look_backs, function(look_back)
         agg_fun(x_ts[look_back], ...)
@@ -1525,11 +1429,11 @@ roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts),
   }  # end if
   
   if (out_xts) {
-    # coerce agg_regations into matrix and transpose it
+    # Coerce agg_regations into matrix and transpose it
     if (is.null(dim(agg_regations)))
       agg_regations <- t(agg_regations)
     agg_regations <- t(agg_regations)
-    # coerce agg_regations into xts series
+    # Coerce agg_regations into xts series
     xts(agg_regations, order.by=index(x_ts[end_points]))
   } else
     agg_regations
@@ -1583,13 +1487,13 @@ roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts),
 #'
 #' @examples
 #' \dontrun{
-#' # combine two time series of prices
+#' # Combine two time series of prices
 #' price_s <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
 #' look_back <- 252
 #' look_forward <- 22
-#' # define end points
+#' # Define end points
 #' end_points <- rutils::calc_endpoints(price_s, look_forward)
-#' # perform back-test
+#' # Perform back-test
 #' back_test <- roll_backtest(end_points=end_points,
 #'     look_forward=look_forward,
 #'     look_back=look_back,
@@ -1610,7 +1514,7 @@ roll_backtest <- function(x_ts,
   train_func <- match.fun(train_func)
   trade_func <- match.fun(trade_func)
 
-  # convert end_points dates to integer
+  # Convert end_points dates to integer
   if (inherits(end_points, c("Date", "POSIXt"))) {
     end_dates <- end_points
     end_points <- match(end_points, index(x_ts))
@@ -1618,14 +1522,14 @@ roll_backtest <- function(x_ts,
     end_dates <- index(x_ts[end_points])
   }  # end if
 
-  # define integer back_points and fwd_points from integer end_points
+  # Define integer back_points and fwd_points from integer end_points
   back_points <- end_points - look_back + 1
   back_points[back_points < 1] <- 1
   
   fwd_points <- end_points + look_forward
   fwd_points[fwd_points > NROW(x_ts)] <- NROW(x_ts)
 
-  # perform backtest over length of end_points
+  # Perform backtest over length of end_points
   backtest_range <- 2:(NROW(end_points)-1)
   back_test <- lapply(backtest_range, function(in_dex) {
     trained_model <- 
@@ -1636,11 +1540,11 @@ roll_backtest <- function(x_ts,
 
   names(back_test) <- end_dates[backtest_range]
   back_test
-  # coerce back_test into matrix and transpose it
+  # Coerce back_test into matrix and transpose it
   # if (is.null(dim(back_test)))
   #   back_test <- t(back_test)
   # back_test <- t(back_test)
-  # coerce back_test into xts series
+  # Coerce back_test into xts series
   # xts(back_test, order.by=index(x_ts[end_points[backtest_range]]))
 }  # end roll_backtest
 
@@ -1665,22 +1569,22 @@ roll_backtest <- function(x_ts,
 #'   the same length as the argument \code{x_ts}.
 #'
 #' @examples
-#' # calculate running variance of each minutely OHLC bar of data
+#' # Calculate running variance of each minutely OHLC bar of data
 #' x_ts <- run_variance(HighFreq::SPY)
-#' # remove overnight variance spikes at "09:31"
+#' # Remove overnight variance spikes at "09:31"
 #' in_dex <- format(index(x_ts), "%H:%M")
 #' x_ts <- x_ts[!in_dex=="09:31", ]
-#' # calculate daily seasonality of variance
+#' # Calculate daily seasonality of variance
 #' var_seasonal <- season_ality(x_ts=x_ts)
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
 
 season_ality <- function(x_ts, in_dex=format(zoo::index(x_ts), "%H:%M")) {
-# aggregate the mean
+# Aggregate the mean
   agg_regation <- tapply(X=x_ts, INDEX=in_dex, FUN=mean)
-# coerce from array to named vector
+# Coerce from array to named vector
   agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
-# coerce to xts
+# Coerce to xts
   agg_regation <- xts(x=agg_regation,
       order.by=as.POSIXct(paste(Sys.Date(), names(agg_regation))))
   colnames(agg_regation) <- colnames(x_ts)

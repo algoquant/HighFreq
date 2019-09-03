@@ -2,43 +2,44 @@
 % Please edit documentation in R/RcppExports.R
 \name{sim_arima}
 \alias{sim_arima}
-\title{Recursively filter a vector of innovations through a vector of \emph{ARIMA} 
-coefficients.}
+\title{Recursively filter a \emph{vector} of innovations through a \emph{vector} of
+\emph{ARIMA} coefficients.}
 \usage{
 sim_arima(in_nov, co_eff)
 }
 \arguments{
-\item{in_nov}{A numeric \emph{vector} of innovations (random numbers).}
+\item{in_nov}{A \emph{vector} of innovations (random numbers).}
 
-\item{co_eff}{A numeric \emph{vector} of \emph{ARIMA} coefficients.}
+\item{co_eff}{A \emph{vector} of \emph{ARIMA} coefficients.}
 }
 \value{
-A numeric \emph{vector} of the same length as the argument
+A \emph{vector} of the same length as the argument
   \code{in_nov}.
 }
 \description{
-Recursively filter a vector of innovations through a vector of \emph{ARIMA} 
-coefficients.
+Recursively filter a \emph{vector} of innovations through a \emph{vector} of
+\emph{ARIMA} coefficients.
 }
 \details{
-The function \code{sim_arima()} recursively filters a vector of
-  innovations through a vector of \emph{ARIMA} coefficients, using 
-  \emph{RcppArmadillo}.
-  It performs the same calculation as the standard \emph{R} function 
+The function \code{sim_arima()} recursively filters a \emph{vector}
+  of innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
+  \code{RcppArmadillo}.
+  It performs the same calculation as the standard \code{R} function
   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
-  \emph{6} times faster.
+  \code{6} times faster.
 }
 \examples{
 \dontrun{
-# create vector of innovations
+# Create vector of innovations
 in_nov <- rnorm(100)
-# create ARIMA coefficients
+# Create ARIMA coefficients
 co_eff <- c(-0.8, 0.2)
-# calculate recursive filter using filter()
+# Calculate recursive filter using filter()
 filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
-# calculate recursive filter using RcppArmadillo
+# Calculate recursive filter using RcppArmadillo
 ari_ma <- HighFreq::sim_arima(in_nov, rev(co_eff))
-# compare the two methods
+# Compare the two methods
 all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
 }
+
 }

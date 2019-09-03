@@ -43,9 +43,9 @@ min", "15 min", "30 min", and "hours". The time index of the output time
 series is rounded up to the next integer multiple of 'period'.
 }
 \examples{
-# create random TAQ prices
+# Create random TAQ prices
 ta_q <- HighFreq::random_taq()
-# aggregate to ten minutes OHLC data
+# Aggregate to ten minutes OHLC data
 oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
 chart_Series(oh_lc, name="random prices")
 # scrub and aggregate a single day of SPY TAQ data to OHLC

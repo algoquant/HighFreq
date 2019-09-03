@@ -8,16 +8,16 @@ calculate a \emph{vector} of z-scores of the residuals.}
 roll_zscores(res_ponse, de_sign, look_back)
 }
 \arguments{
-\item{res_ponse}{A numeric \emph{vector} of response data.}
+\item{res_ponse}{A \emph{vector} of response data.}
 
-\item{de_sign}{A numeric \emph{matrix} of design (predictor i.e.
+\item{de_sign}{A \emph{matrix} of design (predictor i.e.
 explanatory) data.}
 
-\item{look_back}{The length of the look-back interval, equal to the number 
+\item{look_back}{The length of the look-back interval, equal to the number
 of elements of data used for calculating the regressions.}
 }
 \value{
-A numeric \emph{vector} of the same length as the number of rows of
+A \emph{vector} of the same length as the number of rows of
   \code{de_sign}.
 }
 \description{
@@ -25,20 +25,20 @@ Perform rolling regressions over the rows of the design matrix, and
 calculate a \emph{vector} of z-scores of the residuals.
 }
 \details{
-The function \code{roll_zscores()} performs rolling regressions 
-  along the rows of the design matrix \code{de_sign}, using the function
-  \code{calc_lm()}. 
+The function \code{roll_zscores()} performs rolling regressions
+  along the rows of the design \emph{matrix} \code{de_sign}, using the
+  function \code{calc_lm()}.
   
-  The function \code{roll_zscores()} performs a loop over the rows of 
-  \code{de_sign}, and it subsets \code{de_sign} and \code{res_ponse} over a 
-  number of previous (past) rows equal to \code{look_back}.  It performs a 
-  regression on the subset data, and calculates the \emph{z-score} of the 
+  The function \code{roll_zscores()} performs a loop over the rows of
+  \code{de_sign}, and it subsets \code{de_sign} and \code{res_ponse} over a
+  number of previous (past) rows equal to \code{look_back}.  It performs a
+  regression on the subset data, and calculates the \emph{z-score} of the
   last residual value for each regression. It returns a numeric
   \emph{vector} of the \emph{z-scores}.
 }
 \examples{
 \dontrun{
-# calculate Z-scores from rolling time series regression using RcppArmadillo
+# Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
 clo_se <- as.numeric(Cl(rutils::etf_env$VTI))
 date_s <- xts::.index(rutils::etf_env$VTI)
@@ -51,10 +51,10 @@ de_sign <- matrix(rnorm(n_var*len_gth), nc=n_var)
 # response equals linear form plus error terms
 weight_s <- rnorm(n_var)
 res_ponse <- -3 + de_sign \%*\% weight_s + rnorm(len_gth, sd=0.5)
-# calculate Z-scores from rolling multivariate regression using RcppArmadillo
+# Calculate Z-scores from rolling multivariate regression using RcppArmadillo
 look_back <- 11
 z_scores <- HighFreq::roll_zscores(res_ponse=res_ponse, de_sign=de_sign, look_back=look_back)
-# calculate z-scores in R from rolling multivariate regression using lm()
+# Calculate z-scores in R from rolling multivariate regression using lm()
 z_scores_r <- sapply(1:NROW(de_sign), function(ro_w) {
   if (ro_w==1) return(0)
   start_point <- max(1, ro_w-look_back+1)
@@ -64,8 +64,9 @@ z_scores_r <- sapply(1:NROW(de_sign), function(ro_w) {
   resid_uals <- reg_model$residuals
   resid_uals[NROW(resid_uals)]/sd(resid_uals)
 })  # end sapply
-# compare the outputs of both functions
+# Compare the outputs of both functions
 all.equal(unname(z_scores[-(1:look_back)]), 
   unname(z_scores_r[-(1:look_back)]))
 }
+
 }

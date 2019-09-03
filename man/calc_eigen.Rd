@@ -2,37 +2,44 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_eigen}
 \alias{calc_eigen}
-\title{Calculate the eigen decomposition of the covariance matrix of returns using
-\emph{RcppArmadillo}.}
+\title{Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+using \code{RcppArmadillo}.}
 \usage{
 calc_eigen(mat_rix)
 }
 \arguments{
-\item{mat_rix}{A numeric \emph{matrix} of returns data.}
+\item{\code{mat_rix}}{A numeric \emph{matrix} or \emph{time series} of
+returns data.}
 }
 \value{
-A list with two elements: a numeric \emph{vector} of eigenvalues 
-  (named "values"), and a numeric \emph{matrix} of eigenvectors (named
+A list with two elements: a \emph{vector} of eigenvalues 
+  (named "values"), and a \emph{matrix} of eigenvectors (named
   "vectors").
 }
 \description{
-Calculate the eigen decomposition of the covariance matrix of returns using
-\emph{RcppArmadillo}.
+Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_eigen()} first calculates the covariance 
-  matrix of the \code{mat_rix}, and then calculates its eigen decomposition.
+  \emph{matrix} of the returns, and then calculates its eigen decomposition.
 }
 \examples{
 \dontrun{
-# Create random matrix
-mat_rix <- matrix(rnorm(500), nc=5)
+# Create matrix of random returns
+re_turns <- matrix(rnorm(5e6), nc=5)
 # Calculate eigen decomposition
-ei_gen <- HighFreq::calc_eigen(scale(mat_rix, scale=FALSE))
+ei_gen <- HighFreq::calc_eigen(scale(re_turns, scale=FALSE))
 # Calculate PCA
-pc_a <- prcomp(mat_rix)
+pc_a <- prcomp(re_turns)
 # Compare PCA with eigen decomposition
 all.equal(pc_a$sdev^2, drop(ei_gen$values))
 all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
+# Compare the speed of Rcpp with R code
+summary(microbenchmark(
+  rcpp=HighFreq::calc_eigen(re_turns),
+  rcode=prcomp(re_turns),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
+
 }

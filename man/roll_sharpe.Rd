@@ -27,6 +27,6 @@ The function \code{roll_sharpe()} calculates the rolling Sharpe
   interval, divided by the average volatility of percentage returns.
 }
 \examples{
-# calculate rolling Sharpe ratio over SPY
+# Calculate rolling Sharpe ratio over SPY
 sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
 }

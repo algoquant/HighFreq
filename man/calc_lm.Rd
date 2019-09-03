@@ -2,32 +2,32 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_lm}
 \alias{calc_lm}
-\title{Perform multivariate linear regression using RcppArmadillo.}
+\title{Perform multivariate linear regression using \emph{Rcpp}.}
 \usage{
 calc_lm(res_ponse, de_sign)
 }
 \arguments{
-\item{res_ponse}{A numeric \emph{vector} of response data.}
+\item{\code{res_ponse}}{A \emph{vector} of response data.}
 
-\item{de_sign}{A numeric \emph{matrix} of design (predictor i.e.
+\item{\code{de_sign}}{A \emph{matrix} of design (predictor i.e.
 explanatory) data.}
 }
 \value{
-A named list with three elements: a numeric \emph{matrix} of 
+A named list with three elements: a \emph{matrix} of 
   coefficients (named \emph{"coefficients"}), the \emph{z-score} of the last
-  residual (named \emph{"z_score"}), and a numeric \emph{vector} with the 
+  residual (named \emph{"z_score"}), and a \emph{vector} with the 
   R-squared and F-statistic (named \emph{"stats"}). The numeric 
   \emph{matrix} of coefficients named \emph{"coefficients"} containes the 
   alpha and beta coefficients, and their \emph{t-values} and 
   \emph{p-values}.
 }
 \description{
-Perform multivariate linear regression using RcppArmadillo.
+Perform multivariate linear regression using \emph{Rcpp}.
 }
 \details{
 The function \code{calc_lm()} performs the same calculations as the
   function \code{lm()} from package \emph{stats}.
-  It uses \emph{RcppArmadillo} and is about \emph{10} times faster than
+  It uses \code{RcppArmadillo} and is about \emph{10} times faster than
   \code{lm()}.
   The code was inspired by this article (but it's not identical to it):
   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
@@ -46,10 +46,11 @@ sum_mary <- summary(reg_model)
 # perform multivariate regression using calc_lm()
 reg_model_arma <- calc_lm(res_ponse=res_ponse, de_sign=de_sign)
 reg_model_arma$coefficients
-# compare the outputs of both functions
+# Compare the outputs of both functions
 all.equal(reg_model_arma$coefficients[, "coeff"], unname(coef(reg_model)))
 all.equal(unname(reg_model_arma$coefficients), unname(sum_mary$coefficients))
 all.equal(drop(reg_model_arma$residuals), unname(reg_model$residuals))
 all.equal(unname(reg_model_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
 }
+
 }
