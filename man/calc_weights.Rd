@@ -24,7 +24,7 @@ for calculating the regularized inverse of the covariance \emph{matrix}
 scaled (the default is \code{scal_e=TRUE}).}
 }
 \value{
-A \emph{vector} of the same length as the number of columns
+A column \emph{vector} of the same length as the number of columns
   of \code{re_turns}.
 }
 \description{

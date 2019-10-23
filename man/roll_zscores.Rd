@@ -17,7 +17,7 @@ explanatory) data.}
 of elements of data used for calculating the regressions.}
 }
 \value{
-A \emph{vector} of the same length as the number of rows of
+A column \emph{vector} of the same length as the number of rows of
   \code{de_sign}.
 }
 \description{

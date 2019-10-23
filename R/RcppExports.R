@@ -448,8 +448,8 @@ calc_var <- function(mat_rix) {
 #' Calculate the variance of an \emph{OHLC time series}, using different range
 #' estimators and \code{RcppArmadillo}.
 #'
-#' @param \code{oh_lc} An \emph{OHLC time series} of prices or a \emph{numeric
-#'   matrix}.
+#' @param \code{oh_lc} An \emph{OHLC time series} or a \emph{numeric matrix} of
+#'   prices.
 #' @param \code{calc_method} A \emph{character} string representing the range
 #'   estimator for calculating the variance.  The estimators include:
 #'   \itemize{
@@ -477,18 +477,18 @@ calc_var <- function(mat_rix) {
 #'   differences of \emph{OHLC} prices), using several different variance
 #'   estimation methods.
 #'
-#'   The default method is \emph{"yang_zhang"}, which theoretically has the
-#'   lowest standard error among unbiased estimators.
+#'   The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+#'   has the lowest standard error among unbiased estimators.
 #'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
 #'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
 #'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 #'   account for \emph{close-to-open} price jumps.
 #'
 #'   The optional argument \code{in_dex} is the time index of the \emph{time
-#'   series}. If the time index is in seconds, then the differences of the
-#'   index are equal to the number of seconds in each time period.  If the time
-#'   index is in days, then the differences are equal to the number of days in
-#'   each time period.
+#'   series} \code{oh_lc}. If the time index is in seconds, then the
+#'   differences of the index are equal to the number of seconds in each time
+#'   period.  If the time index is in days, then the differences are equal to
+#'   the number of days in each time period.
 #'   
 #'   If \code{scal_e} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
@@ -543,18 +543,16 @@ calc_var_ohlc <- function(oh_lc, calc_method = "yang_zhang", lag_close = 0L, in_
 #' @param \code{de_sign} A \emph{matrix} of design (predictor i.e.
 #'   explanatory) data.
 #' 
-#' @return A named list with three elements: a \emph{matrix} of 
-#'   coefficients (named \emph{"coefficients"}), the \emph{z-score} of the last
-#'   residual (named \emph{"z_score"}), and a \emph{vector} with the 
-#'   R-squared and F-statistic (named \emph{"stats"}). The numeric 
-#'   \emph{matrix} of coefficients named \emph{"coefficients"} containes the 
-#'   alpha and beta coefficients, and their \emph{t-values} and 
-#'   \emph{p-values}.
+#' @return A named list with three elements: a \emph{matrix} of coefficients
+#'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
+#'   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+#'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
+#'   coefficients named \emph{"coefficients"} containes the alpha and beta
+#'   coefficients, and their \emph{t-values} and \emph{p-values}.
 #'
 #' @details The function \code{calc_lm()} performs the same calculations as the
-#'   function \code{lm()} from package \emph{stats}.
-#'   It uses \code{RcppArmadillo} and is about \emph{10} times faster than
-#'   \code{lm()}.
+#'   function \code{lm()} from package \emph{stats}. It uses
+#'   \code{RcppArmadillo} and is about \emph{10} times faster than \code{lm()}.
 #'   The code was inspired by this article (but it's not identical to it):
 #'   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 #'
@@ -591,7 +589,7 @@ calc_lm <- function(res_ponse, de_sign) {
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of elements of data used for calculating the sum.
 #'
-#' @return A \emph{vector} of the same length as the argument
+#' @return A column \emph{vector} of the same length as the argument
 #'   \code{vec_tor}.
 #'
 #' @details The function \code{roll_sum()} calculates a \emph{vector} of 
@@ -627,16 +625,16 @@ roll_sum <- function(vec_tor, look_back) {
 #' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{weight_s} A \emph{vector} of weights.
 #'
-#' @return A \emph{vector} of the same length as the argument
+#' @return A column \emph{vector} of the same length as the argument
 #'   \code{vec_tor}.
 #'
 #' @details The function \code{roll_wsum()} calculates the rolling weighted sum
 #'   of a \emph{vector} over its past values (a convolution with the
 #'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
 #'   similar calculation as the standard \code{R} function
-#'   \code{filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)},
-#'   but it's over \code{6} times faster, and it doesn't produce any \code{NA}
-#'   values.
+#'   \code{stats::filter(x=vec_tor, filter=weight_s, method="convolution",
+#'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+#'   \code{NA} values.
 #'   
 #' @examples
 #' \dontrun{
@@ -656,7 +654,7 @@ roll_sum <- function(vec_tor, look_back) {
 #' # Calculate rolling weighted sum
 #' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
 #' # Calculate rolling weighted sum using filter()
-#' filter_ed <- filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- stats::filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 #' }
@@ -721,12 +719,16 @@ roll_conv <- function(mat_rix, weight_s) {
 #'   number of \emph{vector} elements used for calculating a single variance
 #'   estimate.
 #'
-#' @return A single-column \emph{vector} with the same number of elements as
-#'   the input argument \code{vec_tor}.
+#' @return A column \emph{vector} with the same number of elements as the input
+#'   argument \code{vec_tor}.
 #'
 #' @details The function \code{roll_var_vec()} calculates a \code{vec_tor} of
 #'   variance estimates over a rolling look-back interval for a \emph{vector}
 #'   or a single-column \emph{time series}, using \code{RcppArmadillo}.
+#'   
+#'   The function \code{roll_var_vec()} uses an expanding look-back interval in
+#'   the initial warmup period, to calculate the same number of elements as the
+#'   input argument \code{vec_tor}.
 #'
 #'   The function \code{roll_var_vec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
@@ -753,20 +755,24 @@ roll_var_vec <- function(vec_tor, look_back = 11L) {
 }
 
 #' Calculate a \emph{matrix} of variance estimates over a rolling look-back
-#' interval for a \emph{matrix} or a \emph{time series}, using
+#' interval for a \emph{time series} or a \emph{matrix}, using
 #' \code{RcppArmadillo}.
 #'
 #' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
 #' @param \code{look_back} The length of the look-back interval, equal to the
-#'   number of \emph{matrix} rows used for calculating a single variance
-#'   estimate.
+#'   number of time periods (\emph{matrix} rows) used for calculating a single
+#'   variance estimate.
 #'
-#' @return A \emph{matrix} with the same number of rows as the input argument
-#'   \code{mat_rix}.
+#' @return A \emph{matrix} with the same number of rows and columns as the
+#'   input argument \code{mat_rix}.
 #'
 #' @details The function \code{roll_var()} calculates a \code{mat_rix} of
-#'   variance estimates over a rolling look-back interval for a \emph{matrix}
-#'   or a \emph{time series}, using \code{RcppArmadillo}.
+#'   variance estimates over a rolling look-back interval for a \emph{time
+#'   series} or a \emph{matrix}, using \code{RcppArmadillo}.
+#'
+#'   The function \code{roll_var()} uses an expanding look-back interval in the
+#'   initial warmup period, to calculate the same number of rows as the input
+#'   argument \code{mat_rix}.
 #'
 #'   The function \code{roll_var()} performs the same calculation as the
 #'   function \code{roll_var()} from package
@@ -792,11 +798,12 @@ roll_var <- function(mat_rix, look_back = 11L) {
     .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', mat_rix, look_back)
 }
 
-#' Calculate the variance of an \emph{OHLC time series}, using different range
-#' estimators and \code{RcppArmadillo}.
+#' Calculate a \emph{vector} of variance estimates over a rolling look-back
+#' interval for an \emph{OHLC time series}, using different range estimators
+#' and \code{RcppArmadillo}.
 #'
-#' @param \code{oh_lc} An \emph{OHLC time series} of prices or a \emph{numeric
-#'   matrix}.
+#' @param \code{oh_lc} An \emph{OHLC time series} or a \emph{numeric matrix} of
+#'   prices.
 #' @param \code{calc_method} A \emph{character} string representing the range
 #'   estimator for calculating the variance.  The estimators include:
 #'   \itemize{
@@ -807,35 +814,42 @@ roll_var <- function(mat_rix, look_back = 11L) {
 #'     \item "yang_zhang" Yang-Zhang estimator,
 #'    }
 #'    (The default is the \emph{"yang_zhang"} estimator.)
-#' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
-#'   of the \emph{OHLC time series}.  This is an optional argument. (The
-#'   default is \code{lag_close=0}.)
 #' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument. (The default is \code{in_dex=0}.)
 #' @param \code{scal_e} \emph{Boolean} argument: Should the returns be divided
 #'   by the number of seconds in each period? (The default is
 #'   \code{scal_e=TRUE}.)
+#' @param \code{look_back} The length of the look-back interval, equal to the
+#'   number of time periods (\code{oh_lc} rows) used for calculating a single
+#'   variance estimate.
 #'
-#' @return A single \emph{numeric} value equal to the variance of the
-#'   \emph{OHLC time series}.
+#' @return A column \emph{vector} of the same length as the number of rows of
+#'   \code{oh_lc}.
 #'
-#' @details The function \code{roll_var_ohlc()} calculates the variance
-#'   from all the different intra-day and day-over-day returns (defined as the
-#'   differences of \emph{OHLC} prices), using several different variance
-#'   estimation methods.
-#'
-#'   The default method is \emph{"yang_zhang"}, which theoretically has the
-#'   lowest standard error among unbiased estimators.
+#' @details The function \code{roll_var_ohlc()} performs a loop over the rows
+#'   of \code{oh_lc}, subsets a number of previous (past) rows equal to
+#'   \code{look_back}, and passes them into the function
+#'   \code{calc_var_ohlc()}. It uses an expanding look-back interval in the
+#'   initial warmup period, to calculate the same number of elements as the
+#'   number of rows in the input argument \code{oh_lc}.
+#' 
+#'   The function \code{roll_var_ohlc()} calculates the variance from all the
+#'   different intra-day and day-over-day returns (defined as the differences
+#'   of \emph{OHLC} prices), using several different variance estimation
+#'   methods.
+#'   
+#'   The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+#'   has the lowest standard error among unbiased estimators.
 #'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
 #'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
 #'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 #'   account for \emph{close-to-open} price jumps.
 #'
 #'   The optional argument \code{in_dex} is the time index of the \emph{time
-#'   series}. If the time index is in seconds, then the differences of the
-#'   index are equal to the number of seconds in each time period.  If the time
-#'   index is in days, then the differences are equal to the number of days in
-#'   each time period.
+#'   series} \code{oh_lc}. If the time index is in seconds, then the
+#'   differences of the index are equal to the number of seconds in each time
+#'   period.  If the time index is in days, then the differences are equal to
+#'   the number of days in each time period.
 #'   
 #'   If \code{scal_e} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
@@ -845,33 +859,20 @@ roll_var <- function(mat_rix, look_back = 11L) {
 #'   time index is in days, then the variance is equal to the variance per day
 #'   squared.
 #'   
-#'   The optional argument \code{lag_close} are the lagged \emph{close} prices
-#'   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
-#'   speeds up the calculation, so it's useful for rolling calculations.
-#'   
 #'   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-#'   code, and it's over \code{10} times faster than \code{roll_var_ohlc_r()},
-#'   which is implemented in \code{R} code.
+#'   code, so it's many times faster than the equivalent \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Extract time index of SPY returns
+#' oh_lc <- HighFreq::SPY
 #' in_dex <- c(1, diff(xts::.index(HighFreq::SPY)))
 #' # Calculate the rolling variance of SPY returns, with scaling of the returns
-#' HighFreq::roll_var_ohlc(HighFreq::SPY, 
-#'  calc_method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
-#' # Calculate rolling variance without accounting for overnight jumps
-#' HighFreq::roll_var_ohlc(HighFreq::SPY, 
-#'  calc_method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
-#' # Calculate the rolling variance without scaling the returns
-#' HighFreq::roll_var_ohlc(HighFreq::SPY, scal_e=FALSE)
-#' # Calculate the rolling variance by passing in the lagged close prices
-#' lag_close <- HighFreq::lag_it(HighFreq::SPY[, 4])
-#' all.equal(HighFreq::roll_var_ohlc(HighFreq::SPY), 
-#'   HighFreq::roll_var_ohlc(HighFreq::SPY, lag_close=lag_close))
-#' # Compare with HighFreq::roll_var_ohlc_r()
-#' all.equal(HighFreq::roll_var_ohlc(HighFreq::SPY, in_dex=in_dex), 
-#'   HighFreq::roll_var_ohlc_r(HighFreq::SPY))
+#' var_rolling <- roll_var_ohlc(oh_lc, 
+#'                               calc_method="yang_zhang", 
+#'                               in_dex=in_dex,
+#'                               scal_e=TRUE, 
+#'                               look_back=21)
 #' }
 #' @export
 roll_var_ohlc <- function(oh_lc, calc_method = "yang_zhang", in_dex = 0L, scal_e = TRUE, look_back = 11L) {
@@ -892,14 +893,14 @@ roll_var_ohlc <- function(oh_lc, calc_method = "yang_zhang", in_dex = 0L, scal_e
 #'   the \emph{mean} and the dispersion is calculated as the \emph{standard
 #'   deviation}. (The default is \code{use_median=FALSE})
 #'
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{mat_rix}.
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{mat_rix}.
 #'
 #' @details The function \code{roll_scale()} performs a rolling scaling
 #'   (standardization) of the columns of the \code{mat_rix} argument using
 #'   \code{RcppArmadillo}.
 #'   The function \code{roll_scale()} performs a loop over the rows of 
-#'   \code{mat_rix}, then subsets a number of previous (past) rows equal to 
+#'   \code{mat_rix}, subsets a number of previous (past) rows equal to 
 #'   \code{look_back}, and scales the subset matrix.  It assigns the last row
 #'   of the scaled subset \emph{matrix} to the return matrix.
 #'   
@@ -932,7 +933,7 @@ roll_scale <- function(mat_rix, look_back, use_median = FALSE) {
 #' @param look_back The length of the look-back interval, equal to the number
 #'   of elements of data used for calculating the regressions.
 #'
-#' @return A \emph{vector} of the same length as the number of rows of
+#' @return A column \emph{vector} of the same length as the number of rows of
 #'   \code{de_sign}.
 #'
 #' @details The function \code{roll_zscores()} performs rolling regressions
@@ -986,7 +987,8 @@ roll_zscores <- function(res_ponse, de_sign, look_back) {
 
 #' Simulate a \emph{GARCH} process using \emph{Rcpp}.
 #' 
-#' @param om_ega Parameter proportional to the long-term average level of variance.
+#' @param om_ega Parameter proportional to the long-term average level of
+#'   variance.
 #' @param al_pha The weight associated with recent realized variance updates.
 #' @param be_ta The weight associated with the past variance estimates.
 #' @param in_nov A \emph{vector} of innovations (random numbers).
@@ -1020,11 +1022,11 @@ sim_garch <- function(om_ega, al_pha, be_ta, in_nov) {
 #' @param the_ta The strength of mean reversion.
 #' @param in_nov A \emph{vector} of innovations (random numbers).
 #' 
-#' @return A \emph{vector} representing the \emph{time series} of prices, with
-#'   the same length as the argument \code{in_nov}.
+#' @return A column \emph{vector} representing the \emph{time series} of
+#'   prices, with the same length as the argument \code{in_nov}.
 #'
 #' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-#'   process using \emph{Rcpp}, and returns a \emph{vector} representing the 
+#'   process using \emph{Rcpp}, and returns A column \emph{vector} representing the 
 #'   \emph{time series} of prices.
 #'
 #' @examples
@@ -1048,7 +1050,7 @@ sim_ou <- function(eq_price, vol_at, the_ta, in_nov) {
 #' @param in_nov A \emph{vector} of innovations (random numbers).
 #' @param co_eff A \emph{vector} of \emph{ARIMA} coefficients.
 #'
-#' @return A \emph{vector} of the same length as the argument
+#' @return A column \emph{vector} of the same length as the argument
 #'   \code{in_nov}.
 #'
 #' @details The function \code{sim_arima()} recursively filters a \emph{vector}
@@ -1090,7 +1092,7 @@ sim_arima <- function(in_nov, co_eff) {
 #' @param scal_e A \emph{Boolean} specifying whether the weights should be
 #'   scaled (the default is \code{scal_e=TRUE}).
 #'
-#' @return A \emph{vector} of the same length as the number of columns
+#' @return A column \emph{vector} of the same length as the number of columns
 #'   of \code{re_turns}.
 #'
 #' @details The function \code{calc_weights()} calculates the optimal portfolio
@@ -1176,7 +1178,7 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, quan_ti
 #'   \code{1})
 #' @param bid_offer A numeric bid-offer spread.  (The default is \code{0})
 #'
-#' @return A \emph{vector} of strategy returns, with the same length as
+#' @return A column \emph{vector} of strategy returns, with the same length as
 #'   the number of rows of \code{re_turns}.
 #'
 #' @details The function \code{back_test()} performs a backtest simulation of a

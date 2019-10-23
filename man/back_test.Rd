@@ -38,7 +38,7 @@ scaled (the default is \code{scal_e=TRUE}).}
 \item{bid_offer}{A numeric bid-offer spread.  (The default is \code{0})}
 }
 \value{
-A \emph{vector} of strategy returns, with the same length as
+A column \emph{vector} of strategy returns, with the same length as
   the number of rows of \code{re_turns}.
 }
 \description{

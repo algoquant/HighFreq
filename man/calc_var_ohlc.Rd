@@ -9,8 +9,8 @@ calc_var_ohlc(oh_lc, calc_method = "yang_zhang", lag_close = 0L,
   in_dex = 0L, scal_e = TRUE)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC time series} of prices or a \emph{numeric
-matrix}.}
+\item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
+prices.}
 
 \item{\code{calc_method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
@@ -48,8 +48,8 @@ The function \code{calc_var_ohlc()} calculates the variance
   differences of \emph{OHLC} prices), using several different variance
   estimation methods.
 
-  The default method is \emph{"yang_zhang"}, which theoretically has the
-  lowest standard error among unbiased estimators.
+  The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+  has the lowest standard error among unbiased estimators.
   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not

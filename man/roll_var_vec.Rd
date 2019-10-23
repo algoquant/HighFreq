@@ -16,8 +16,8 @@ number of \emph{vector} elements used for calculating a single variance
 estimate.}
 }
 \value{
-A single-column \emph{vector} with the same number of elements as
-  the input argument \code{vec_tor}.
+A column \emph{vector} with the same number of elements as the input
+  argument \code{vec_tor}.
 }
 \description{
 Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -28,6 +28,10 @@ interval for a \emph{vector} or a single-column \emph{time series}, using
 The function \code{roll_var_vec()} calculates a \code{vec_tor} of
   variance estimates over a rolling look-back interval for a \emph{vector}
   or a single-column \emph{time series}, using \code{RcppArmadillo}.
+  
+  The function \code{roll_var_vec()} uses an expanding look-back interval in
+  the initial warmup period, to calculate the same number of elements as the
+  input argument \code{vec_tor}.
 
   The function \code{roll_var_vec()} performs the same calculation as the
   function \code{roll_var()} from package

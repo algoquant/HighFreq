@@ -2,15 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_var_ohlc}
 \alias{roll_var_ohlc}
-\title{Calculate the variance of an \emph{OHLC time series}, using different range
-estimators and \code{RcppArmadillo}.}
+\title{Calculate a \emph{vector} of variance estimates over a rolling look-back
+interval for an \emph{OHLC time series}, using different range estimators
+and \code{RcppArmadillo}.}
 \usage{
 roll_var_ohlc(oh_lc, calc_method = "yang_zhang", in_dex = 0L,
   scal_e = TRUE, look_back = 11L)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC time series} of prices or a \emph{numeric
-matrix}.}
+\item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
+prices.}
 
 \item{\code{calc_method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
@@ -23,33 +24,41 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \emph{"yang_zhang"} estimator.)}
 
-\item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
-of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{lag_close=0}.)}
-
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
 
 \item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
 by the number of seconds in each period? (The default is
 \code{scal_e=TRUE}.)}
+
+\item{\code{look_back}}{The length of the look-back interval, equal to the
+number of time periods (\code{oh_lc} rows) used for calculating a single
+variance estimate.}
 }
 \value{
-A single \emph{numeric} value equal to the variance of the
-  \emph{OHLC time series}.
+A column \emph{vector} of the same length as the number of rows of
+  \code{oh_lc}.
 }
 \description{
-Calculate the variance of an \emph{OHLC time series}, using different range
-estimators and \code{RcppArmadillo}.
+Calculate a \emph{vector} of variance estimates over a rolling look-back
+interval for an \emph{OHLC time series}, using different range estimators
+and \code{RcppArmadillo}.
 }
 \details{
-The function \code{roll_var_ohlc()} calculates the variance
-  from all the different intra-day and day-over-day returns (defined as the
-  differences of \emph{OHLC} prices), using several different variance
-  estimation methods.
+The function \code{roll_var_ohlc()} performs a loop over the rows
+  of \code{oh_lc}, subsets a number of previous (past) rows equal to
+  \code{look_back}, and passes them into the function
+  \code{calc_var_ohlc()}. It uses an expanding look-back interval in the
+  initial warmup period, to calculate the same number of elements as the
+  number of rows in the input argument \code{oh_lc}.
 
-  The default method is \emph{"yang_zhang"}, which theoretically has the
-  lowest standard error among unbiased estimators.
+  The function \code{roll_var_ohlc()} calculates the variance from all the
+  different intra-day and day-over-day returns (defined as the differences
+  of \emph{OHLC} prices), using several different variance estimation
+  methods.
+  
+  The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+  has the lowest standard error among unbiased estimators.
   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
@@ -69,32 +78,19 @@ The function \code{roll_var_ohlc()} calculates the variance
   time index is in days, then the variance is equal to the variance per day
   squared.
   
-  The optional argument \code{lag_close} are the lagged \emph{close} prices
-  of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
-  speeds up the calculation, so it's useful for rolling calculations.
-  
   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-  code, and it's over \code{10} times faster than \code{roll_var_ohlc_r()},
-  which is implemented in \code{R} code.
+  code, so it's many times faster than the equivalent \code{R} code.
 }
 \examples{
 \dontrun{
 # Extract time index of SPY returns
+oh_lc <- HighFreq::SPY
 in_dex <- c(1, diff(xts::.index(HighFreq::SPY)))
 # Calculate the rolling variance of SPY returns, with scaling of the returns
-HighFreq::roll_var_ohlc(HighFreq::SPY, 
- calc_method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
-# Calculate rolling variance without accounting for overnight jumps
-HighFreq::roll_var_ohlc(HighFreq::SPY, 
- calc_method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
-# Calculate the rolling variance without scaling the returns
-HighFreq::roll_var_ohlc(HighFreq::SPY, scal_e=FALSE)
-# Calculate the rolling variance by passing in the lagged close prices
-lag_close <- HighFreq::lag_it(HighFreq::SPY[, 4])
-all.equal(HighFreq::roll_var_ohlc(HighFreq::SPY), 
-  HighFreq::roll_var_ohlc(HighFreq::SPY, lag_close=lag_close))
-# Compare with HighFreq::roll_var_ohlc_r()
-all.equal(HighFreq::roll_var_ohlc(HighFreq::SPY, in_dex=in_dex), 
-  HighFreq::roll_var_ohlc_r(HighFreq::SPY))
+var_rolling <- roll_var_ohlc(oh_lc, 
+                              calc_method="yang_zhang", 
+                              in_dex=in_dex,
+                              scal_e=TRUE, 
+                              look_back=21)
 }
 }

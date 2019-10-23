@@ -13,22 +13,20 @@ calc_lm(res_ponse, de_sign)
 explanatory) data.}
 }
 \value{
-A named list with three elements: a \emph{matrix} of 
-  coefficients (named \emph{"coefficients"}), the \emph{z-score} of the last
-  residual (named \emph{"z_score"}), and a \emph{vector} with the 
-  R-squared and F-statistic (named \emph{"stats"}). The numeric 
-  \emph{matrix} of coefficients named \emph{"coefficients"} containes the 
-  alpha and beta coefficients, and their \emph{t-values} and 
-  \emph{p-values}.
+A named list with three elements: a \emph{matrix} of coefficients
+  (named \emph{"coefficients"}), the \emph{z-score} of the last residual
+  (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+  F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
+  coefficients named \emph{"coefficients"} containes the alpha and beta
+  coefficients, and their \emph{t-values} and \emph{p-values}.
 }
 \description{
 Perform multivariate linear regression using \emph{Rcpp}.
 }
 \details{
 The function \code{calc_lm()} performs the same calculations as the
-  function \code{lm()} from package \emph{stats}.
-  It uses \code{RcppArmadillo} and is about \emph{10} times faster than
-  \code{lm()}.
+  function \code{lm()} from package \emph{stats}. It uses
+  \code{RcppArmadillo} and is about \emph{10} times faster than \code{lm()}.
   The code was inspired by this article (but it's not identical to it):
   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 }

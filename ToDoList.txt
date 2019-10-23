@@ -70,25 +70,41 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
-+ [ ] Create a function called roll_var_ohlc() in RcppArmadillo which calculates the rolling variance over a time series of OHLC prices
++ [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
-+ [x] Rename roll_var() to roll_var_vec() and update its documentation
++ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
 
-+ [x] Create a function called roll_var() in RcppArmadillo which calculates the rolling variance over a matrix
++ [ ] Pass model function and its parameters into back_test() as a vector or a list
+http://gallery.rcpp.org/articles/rcppnt2-introduction/
+http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
+https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
+https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
+https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
+
++ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
+https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
+https://en.cppreference.com/w/cpp/language/parameter_pack
+https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
+https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
+https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
+https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
+https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
+
++ [ ] Rewrite roll_conv() to avoid copying data ?
+
++ [ ] Rename function roll_wsum() to roll_conv(), because it replicates convolution
+Is roll_wsum() same as roll_conv() ?
+
++ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] Convert function calls to roll functions from package RcppRoll to native Rcpp functions: roll_max() and roll_var()
+
++ [ ] Test the function roll_conv() to determine if it applies convolution only over past values
 
 + [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 Deprecate function roll_moment() because it's similar to roll_vwap() ?
 Update the description documentation of roll_moment()
-
-+ [ ] Remove the existing function roll_variance() in R, and rewrite it in RcppArmadillo as roll_var()
-In roll_var() perform the lag of prices outside the rolling interval loop. 
-
-+ [ ] Create a function called in RcppArmadillo which replicates the functions stats::filter() and roll::roll_sum()
-Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
-
-+ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
 roll_count() is in lm_arma.cpp
@@ -195,25 +211,6 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
 
 + [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
-+ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
-
-+ [ ] Pass model function and its parameters into back_test() as a vector or a list
-http://gallery.rcpp.org/articles/rcppnt2-introduction/
-http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
-https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
-https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
-https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
-
-+ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
-https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
-https://en.cppreference.com/w/cpp/language/parameter_pack
-https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
-https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
-https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
-https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
-https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
-
 + [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
@@ -243,6 +240,16 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Remove the existing function roll_variance() in R, and rewrite it in RcppArmadillo as roll_var()
+
++ [x] Compare the speed of performing RcppArmadillo loops over columns versus subviews of rows: loops over rows are slightly faster than over columns
+
++ [x] Create a function called roll_var_ohlc() in RcppArmadillo which calculates the rolling variance over a time series of OHLC prices
+
++ [x] Rename roll_var() to roll_var_vec() and update its documentation
+
++ [x] Create a function called roll_var() in RcppArmadillo which calculates the rolling variance over a matrix
 
 + [x] Create the functions called diff_vec() and diff_it() (for matrices), similar to rutils::diff_it(), using the RcppArmadillo function arma::diff()
 
@@ -437,10 +444,13 @@ http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 ### tasks finished
 
++ [x] Create a function called sim_arima() in RcppArmadillo which replicates the function stats::filter() with method="recursive"
+Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
+
 + [x] Add sim_* functions using RcppArmadillo: sim_arima(), sim_garch()
 
 + [x] Add calc_* functions using RcppArmadillo: calc_eigen(), calc_inv(), calc_scaled(), calc_lm(), calc_weights()
-	
+
 + [x] Add roll_* functions using RcppArmadillo: roll_wsum(), roll_zscores(), roll_scale(), roll_portf()
 
 + [x] Create function remove_jumps() to remove overnight close-to-open jumps from OHLC (?)  

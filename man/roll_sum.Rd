@@ -14,7 +14,7 @@ roll_sum(vec_tor, look_back)
 number of elements of data used for calculating the sum.}
 }
 \value{
-A \emph{vector} of the same length as the argument
+A column \emph{vector} of the same length as the argument
   \code{vec_tor}.
 }
 \description{

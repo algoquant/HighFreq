@@ -7,7 +7,8 @@
 sim_garch(om_ega, al_pha, be_ta, in_nov)
 }
 \arguments{
-\item{om_ega}{Parameter proportional to the long-term average level of variance.}
+\item{om_ega}{Parameter proportional to the long-term average level of
+variance.}
 
 \item{al_pha}{The weight associated with recent realized variance updates.}
 

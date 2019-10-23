@@ -178,12 +178,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_conv
-arma::mat roll_conv(arma::mat mat_rix, arma::mat& weight_s);
+arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s);
 RcppExport SEXP _HighFreq_roll_conv(SEXP mat_rixSEXP, SEXP weight_sSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type mat_rix(mat_rixSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type mat_rix(mat_rixSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type weight_s(weight_sSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_conv(mat_rix, weight_s));
     return rcpp_result_gen;

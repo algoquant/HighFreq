@@ -13,7 +13,7 @@ sim_arima(in_nov, co_eff)
 \item{co_eff}{A \emph{vector} of \emph{ARIMA} coefficients.}
 }
 \value{
-A \emph{vector} of the same length as the argument
+A column \emph{vector} of the same length as the argument
   \code{in_nov}.
 }
 \description{

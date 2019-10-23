@@ -22,8 +22,8 @@ the \emph{mean} and the dispersion is calculated as the \emph{standard
 deviation}. (The default is \code{use_median=FALSE})}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input
-  argument \code{mat_rix}.
+A \emph{matrix} with the same dimensions as the input argument
+  \code{mat_rix}.
 }
 \description{
 Perform a rolling scaling (standardization) of the columns of a
@@ -34,7 +34,7 @@ The function \code{roll_scale()} performs a rolling scaling
   (standardization) of the columns of the \code{mat_rix} argument using
   \code{RcppArmadillo}.
   The function \code{roll_scale()} performs a loop over the rows of 
-  \code{mat_rix}, then subsets a number of previous (past) rows equal to 
+  \code{mat_rix}, subsets a number of previous (past) rows equal to 
   \code{look_back}, and scales the subset matrix.  It assigns the last row
   of the scaled subset \emph{matrix} to the return matrix.
   

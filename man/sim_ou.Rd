@@ -16,15 +16,15 @@ sim_ou(eq_price, vol_at, the_ta, in_nov)
 \item{in_nov}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
-A \emph{vector} representing the \emph{time series} of prices, with
-  the same length as the argument \code{in_nov}.
+A column \emph{vector} representing the \emph{time series} of
+  prices, with the same length as the argument \code{in_nov}.
 }
 \description{
 Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 }
 \details{
 The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-  process using \emph{Rcpp}, and returns a \emph{vector} representing the 
+  process using \emph{Rcpp}, and returns A column \emph{vector} representing the 
   \emph{time series} of prices.
 }
 \examples{

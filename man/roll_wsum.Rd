@@ -13,7 +13,7 @@ roll_wsum(vec_tor, weight_s)
 \item{\code{weight_s}}{A \emph{vector} of weights.}
 }
 \value{
-A \emph{vector} of the same length as the argument
+A column \emph{vector} of the same length as the argument
   \code{vec_tor}.
 }
 \description{
