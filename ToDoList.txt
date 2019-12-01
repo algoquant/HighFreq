@@ -70,6 +70,26 @@ Therefore 1-second bar returns carry almost no information.
 
 ### tasks to-do
 
++ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
+It should return a named vector of coefficients, z-scores, R-squared, etc.
+It should calculate Pearson, Spearman, and Kendall correlations.
+
++ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
+Add option to perform rolling predictions using the regressions.
+
++ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
+Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
+
++ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
+
++ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
+roll_count() is already in lm_arma.cpp.
+roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
+Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
+Scale the count threshold levels depending on the level of volatility.
+
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
 + [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
@@ -106,20 +126,7 @@ Is roll_wsum() same as roll_conv() ?
 Deprecate function roll_moment() because it's similar to roll_vwap() ?
 Update the description documentation of roll_moment()
 
-+ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
-roll_count() is in lm_arma.cpp
-roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
-Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
-Scale the count threshold levels depending on the level of volatility.
-
 + [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
-
-+ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
-It should return a named vector of coefficients, z-scores, R-squared, etc.
-It should calculate Pearson, Spearman, and Kendall correlations.
-
-+ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
-Add option to perform rolling predictions using the regressions.
 
 + [ ] Perform rolling regressions over trading time - using a time-dependent look-back interval, so that the look-back interval always spans the same traded volume  
 Inoue Rolling Regressions Time Series Bias Variance Tradeoff.pdf
@@ -130,13 +137,6 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
 + [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory ?
 That may not always be correct, for example in the case of rolling calculations.
-
-+ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
-+ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
-Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
-+ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
 
 + [ ] Add data.table and fst functions for aggregating large datasets
 
