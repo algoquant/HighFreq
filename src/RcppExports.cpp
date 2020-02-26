@@ -141,6 +141,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_ranks
+arma::uvec calc_ranks(const arma::vec& vec_tor);
+RcppExport SEXP _HighFreq_calc_ranks(SEXP vec_torSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type vec_tor(vec_torSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_ranks(vec_tor));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_lm
 Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign);
 RcppExport SEXP _HighFreq_calc_lm(SEXP res_ponseSEXP, SEXP de_signSEXP) {
@@ -186,6 +197,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat& >::type mat_rix(mat_rixSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type weight_s(weight_sSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_conv(mat_rix, weight_s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// roll_conv_ref
+arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s);
+RcppExport SEXP _HighFreq_roll_conv_ref(SEXP mat_rixSEXP, SEXP weight_sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type mat_rix(mat_rixSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type weight_s(weight_sSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_conv_ref(mat_rix, weight_s));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -344,10 +367,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},
     {"_HighFreq_calc_var", (DL_FUNC) &_HighFreq_calc_var, 1},
     {"_HighFreq_calc_var_ohlc", (DL_FUNC) &_HighFreq_calc_var_ohlc, 5},
+    {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 2},
     {"_HighFreq_roll_conv", (DL_FUNC) &_HighFreq_roll_conv, 2},
+    {"_HighFreq_roll_conv_ref", (DL_FUNC) &_HighFreq_roll_conv_ref, 2},
     {"_HighFreq_roll_var_vec", (DL_FUNC) &_HighFreq_roll_var_vec, 2},
     {"_HighFreq_roll_var", (DL_FUNC) &_HighFreq_roll_var, 2},
     {"_HighFreq_roll_var_ohlc", (DL_FUNC) &_HighFreq_roll_var_ohlc, 5},

@@ -65,10 +65,10 @@ The function \code{roll_var_ohlc()} performs a loop over the rows
   account for \emph{close-to-open} price jumps.
 
   The optional argument \code{in_dex} is the time index of the \emph{time
-  series}. If the time index is in seconds, then the differences of the
-  index are equal to the number of seconds in each time period.  If the time
-  index is in days, then the differences are equal to the number of days in
-  each time period.
+  series} \code{oh_lc}. If the time index is in seconds, then the
+  differences of the index are equal to the number of seconds in each time
+  period.  If the time index is in days, then the differences are equal to
+  the number of days in each time period.
   
   If \code{scal_e} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to

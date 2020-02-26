@@ -268,9 +268,10 @@ arma::mat diff_it(arma::mat& mat_rix, int lagg=1, const bool& padd=false) {
 //'   If the \emph{matrix} is square and if \code{by_col} is \code{TRUE} then it
 //'   multiplies the columns, otherwise it multiplies the rows.
 //'   
-//'   It accepts pointers to the \emph{matrix} and \emph{vector}, and performs
-//'   the calculation in place, without copying the \emph{matrix} in memory
-//'   (which greatly increases the computation speed).
+//'   It accepts \emph{pointers} to the \emph{matrix} and \emph{vector}, and
+//'   replaces the old \emph{matrix} values with the new values.
+//'   It performs the calculation in place, without copying the \emph{matrix} in
+//'   memory (which greatly increases the computation speed).
 //'   It performs an implicit loop over the \emph{matrix} rows and columns using
 //'   the \emph{Armadillo} operators \code{each_row()} and \code{each_col()},
 //'   instead of performing explicit \code{for()} loops (both methods are
@@ -755,6 +756,61 @@ double calc_var_ohlc(arma::mat& oh_lc,
 
 
 
+////////////////////////////////////////////////////////////
+//' Calculate the ranks of the elements of a \emph{vector} or a single-column
+//' \emph{time series} using \code{RcppArmadillo}.
+//' 
+//' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+//'
+//' @return An \emph{integer vector} with the ranks of the elements of the
+//'   \emph{vector}.
+//'
+//' @details The function \code{calc_ranks()} calculates the ranks of the
+//'   elements of a \emph{vector} or a single-column \emph{time series}.
+//'   It uses the \code{RcppArmadillo} function \code{arma::sort_index()}.
+//'   The function \code{arma::sort_index()} calculates the permutation index to
+//'   sort a given vector into ascending order.
+//'   
+//'   Applying the function \code{arma::sort_index()} twice:
+//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+//'   permutation index to sort the vector from ascending order back into its
+//'   original unsorted order.
+//'   The permutation index produced by:
+//'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
+//'   permutation index produced by: \code{arma::sort_index()}.
+//'   
+//'   The ranks of the elements are equal to the \emph{reverse} permutation
+//'   index.
+//'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
+//'   index.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a vector of random data
+//' da_ta <- round(runif(7), 2)
+//' # Calculate the ranks of the elements in two ways
+//' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+//' # Create a time series of random data
+//' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+//' # Calculate the ranks of the elements in two ways
+//' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+//' # Compare the speed of RcppArmadillo with R code
+//' da_ta <- runif(7)
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   rcpp=calc_ranks(da_ta),
+//'   rcode=rank(da_ta),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::uvec calc_ranks(const arma::vec& vec_tor) {
+  return (arma::sort_index(arma::sort_index(vec_tor)) + 1);
+}  // end calc_ranks
+
+
+
 
 ////////////////////////////////////////////////////////////
 //' Perform multivariate linear regression using \emph{Rcpp}.
@@ -781,13 +837,13 @@ double calc_var_ohlc(arma::mat& oh_lc,
 //' # Define design matrix with explanatory variables
 //' len_gth <- 100; n_var <- 5
 //' de_sign <- matrix(rnorm(n_var*len_gth), nc=n_var)
-//' # response equals linear form plus error terms
+//' # Response equals linear form plus error terms
 //' weight_s <- rnorm(n_var)
 //' res_ponse <- -3 + de_sign %*% weight_s + rnorm(len_gth, sd=0.5)
-//' # perform multivariate regression using lm()
+//' # Perform multivariate regression using lm()
 //' reg_model <- lm(res_ponse ~ de_sign)
 //' sum_mary <- summary(reg_model)
-//' # perform multivariate regression using calc_lm()
+//' # Perform multivariate regression using calc_lm()
 //' reg_model_arma <- calc_lm(res_ponse=res_ponse, de_sign=de_sign)
 //' reg_model_arma$coefficients
 //' # Compare the outputs of both functions
@@ -928,7 +984,7 @@ NumericVector roll_sum(NumericVector vec_tor, int look_back) {
 //' # Create simple weights
 //' weight_s <- c(1, rep(0, 10))
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
+//' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
 //' # Compare with original
 //' all.equal(vec_tor, as.numeric(weight_ed))
 //' # Second example
@@ -936,7 +992,7 @@ NumericVector roll_sum(NumericVector vec_tor, int look_back) {
 //' weight_s <- exp(-0.2*1:11)
 //' weight_s <- weight_s/sum(weight_s)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
+//' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
 //' # Calculate rolling weighted sum using filter()
 //' filter_ed <- stats::filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
@@ -949,7 +1005,7 @@ arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& weight_s) {
   arma::uword len_gth = vec_tor.n_elem;
   arma::uword look_back = weight_s.n_elem;
   arma::vec rolling_sum(len_gth);
-  // arma::vec rev_weights = arma::reverse(weight_s);
+  arma::vec rev_weights = arma::reverse(weight_s);
   // arma::vec rev_weights = weight_s;
   
   // Warmup period
@@ -957,11 +1013,12 @@ arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& weight_s) {
   
   // Remaining periods
   for (arma::uword it=look_back-1; it < len_gth; it++) {
-    rolling_sum(it) = arma::dot(weight_s, vec_tor.subvec(it-look_back+1, it));
+    rolling_sum(it) = arma::dot(rev_weights, vec_tor.subvec(it-look_back+1, it));
   }  // end for
   
   return rolling_sum;
 }  // end roll_wsum
+
 
 
 
@@ -977,31 +1034,34 @@ arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& weight_s) {
 //'   argument \code{mat_rix}.
 //'
 //' @details The function \code{roll_conv()} calculates the convolutions of the
-//'   \emph{matrix} columns with a \emph{vector} of weights.  It rolls over the
-//'   \emph{matrix} rows and multiplies the past column values with the weights.
-//'   It uses the \code{RcppArmadillo} function \code{arma::conv2()}. It
-//'   performs a similar calculation to the standard \code{R} function
-//'   \code{filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)},
-//'   but it's over \code{6} times faster, and it doesn't produce any leading
-//'   \code{NA} values.
+//'   \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
+//'   down over the \emph{matrix} rows and multiplies the past (higher) values
+//'   by the weights.  It calculates the rolling weighted sum of the past
+//'   values.
+//'   
+//'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
+//'   \code{arma::conv2()}. It performs a similar calculation to the standard
+//'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+//'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
+//'   it doesn't produce any leading \code{NA} values.
 //'   
 //' @examples
 //' \dontrun{
 //' # First example
 //' # Create matrix from historical prices
 //' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
-//' # Create simple weights
+//' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+//' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
 //' # Compare with original
 //' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
 //' # Second example
 //' # Create exponentially decaying weights
-//' weight_s <- exp(-0.2*1:11)
+//' weight_s <- exp(-0.2*(1:11))
 //' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+//' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
 //' # Calculate rolling weighted sum using filter()
 //' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
@@ -1011,12 +1071,86 @@ arma::vec roll_wsum(const arma::vec& vec_tor, const arma::vec& weight_s) {
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
+  arma::uword look_back = weight_s.n_rows-2;
+  arma::uword num_rows = mat_rix.n_rows-1;
+  
   // Calculate the convolutions
   arma::mat roll_conv = arma::conv2(mat_rix, weight_s, "full");
-  // Copy the convolutions
-  mat_rix.rows(weight_s.n_rows-1, mat_rix.n_rows-1) = roll_conv.rows(weight_s.n_rows-1, mat_rix.n_rows-1);
-  return mat_rix;
+  
+  // Copy the warmup period
+  roll_conv.rows(0, look_back) = mat_rix.rows(0, look_back);
+  
+  return roll_conv.rows(0, num_rows);
 }  // end roll_conv
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
+//' of weights.
+//' 
+//' @param \code{mat_rix} A \emph{matrix} of data.
+//' @param \code{weight_s} A column \emph{vector} of weights.
+//'
+//' @return A \emph{matrix} with the same dimensions as the input
+//'   argument \code{mat_rix}.
+//'
+//' @details The function \code{roll_conv_ref()} calculates the convolutions of
+//'   the \emph{matrix} columns with a \emph{vector} of weights.  It performs a
+//'   loop down over the \emph{matrix} rows and multiplies the past (higher)
+//'   values by the weights.  It calculates the rolling weighted sum of the past
+//'   values.
+//'   
+//'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
+//'   \code{mat_rix}, and replaces the old \emph{matrix} values with the
+//'   weighted sums.
+//'   It performs the calculation in place, without copying the \emph{matrix} in
+//'   memory (which greatly increases the computation speed).
+//'   
+//'   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
+//'   \code{arma::conv2()}. It performs a similar calculation to the standard
+//'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+//'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
+//'   it doesn't produce any leading \code{NA} values.
+//'   
+//' @examples
+//' \dontrun{
+//' # First example
+//' # Create matrix from historical prices
+//' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+//' # Create simple weights equal to a 1 value plus zeros
+//' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+//' # Calculate rolling weighted sum
+//' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+//' # Compare with original
+//' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+//' # Second example
+//' # Create exponentially decaying weights
+//' weight_s <- exp(-0.2*(1:11))
+//' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+//' # Calculate rolling weighted sum
+//' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+//' # Calculate rolling weighted sum using filter()
+//' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+//' # Compare both methods
+//' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
+  arma::uword look_back = weight_s.n_rows-1;
+  arma::uword num_rows = mat_rix.n_rows-1;
+  
+  // Calculate the convolutions
+  arma::mat roll_conv_ref = arma::conv2(mat_rix, weight_s, "full");
+  
+  // Copy the convolutions
+  mat_rix.rows(look_back, num_rows) = roll_conv_ref.rows(look_back, num_rows);
+  
+  return mat_rix;
+}  // end roll_conv_ref
 
 
 
@@ -1707,7 +1841,7 @@ arma::vec calc_weights(const arma::mat& re_turns,
     // mean_cols = mean_cols/sd_cols;
     // Weights equal to ranks of Sharpe
     weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
-    quan_tile;
+    // quan_tile;
     // weight_s = (weight_s - arma::mean(weight_s));
   } else {
     cout << "Warning: Incorrect typ_e argument: " << typ_e << endl;

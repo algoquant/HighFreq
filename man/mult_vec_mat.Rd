@@ -37,9 +37,10 @@ The function \code{mult_vec_mat()} multiplies the columns or rows
   If the \emph{matrix} is square and if \code{by_col} is \code{TRUE} then it
   multiplies the columns, otherwise it multiplies the rows.
   
-  It accepts pointers to the \emph{matrix} and \emph{vector}, and performs
-  the calculation in place, without copying the \emph{matrix} in memory
-  (which greatly increases the computation speed).
+  It accepts \emph{pointers} to the \emph{matrix} and \emph{vector}, and
+  replaces the old \emph{matrix} values with the new values.
+  It performs the calculation in place, without copying the \emph{matrix} in
+  memory (which greatly increases the computation speed).
   It performs an implicit loop over the \emph{matrix} rows and columns using
   the \emph{Armadillo} operators \code{each_row()} and \code{each_col()},
   instead of performing explicit \code{for()} loops (both methods are

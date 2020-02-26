@@ -1,7 +1,7 @@
 ############
 ### ToDo list for package HighFreq: high frequency data scrubbing
 
-### scripts for package building
+### Scripts for package building
 
 ## Steps for installing package called my_package, containing Rcpp code:
 1. Create empty package directory with Rcpp::Rcpp.package.skeleton()
@@ -11,12 +11,18 @@
 #' @exportPattern "^[[:alpha:]]+"
 NULL
 Add your R functions below the header.
-3. Finally, Clean and rebuild (in Build menu)
+3. Finally, from the Build menu run Clean and rebuild.
 
-## Steps to fix NAMESPACE after adding a new function
-1. Edit NAMESPACE file and remove all lines
-2. In RStudio run "document package"
-3. Edit NAMESPACE file again and remove all lines that don't contain export()
+
+## How to update the NAMESPACE file after adding a new function
+Edit the NAMESPACE file and add a line to export the new function new_func(): 
+export(new_func)
+
+
+## Steps to fix the NAMESPACE file after adding a new function - sometimes produces a bad NAMESPACE file
+1. Edit the NAMESPACE file and remove all lines
+2. In RStudio run "document package" - sometimes produces a bad NAMESPACE file
+3. Edit the NAMESPACE file again and remove all lines that don't contain export()
 4. Add by hand to top of NAMESPACE file the lines:
 useDynLib(HighFreq)
 importFrom(Rcpp, evalCpp)
@@ -37,7 +43,7 @@ R CMD Rd2pdf C:\Develop\R\HighFreq\
 
 
 
-### comments
+### Comments
 
 # When performing a rolling calculation, it's better to apply a single lag to a time series outside the loop instead of lagging it inside at each end point
 
@@ -68,31 +74,22 @@ Second, the 1-second bar prices bounce randomly between static bid and ask price
 Therefore 1-second bar returns carry almost no information.
 
 
-### tasks to-do
+### Tasks to-do
 
-+ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
-It should return a named vector of coefficients, z-scores, R-squared, etc.
-It should calculate Pearson, Spearman, and Kendall correlations.
++ [ ] Add unit testing using testthat and devtools: create /tests directory
 
-+ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
-Add option to perform rolling predictions using the regressions.
++ [ ] Change license from GPL to MPL.
 
-+ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
-+ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
-Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
-+ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
-
-+ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
-roll_count() is already in lm_arma.cpp.
-roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
-Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
-Scale the count threshold levels depending on the level of volatility.
-
-+ [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
++ [ ] Create RcppArmadillo function calc_quantile() to calculate or update the quantile of a vector of numbers
+The value of the quantile can be updated based on the old quantile value and the new updated vector values.
+If there are very few new vector values and if they're all far from the old quantile value, then the quantile may remain unchanged.
+Apply it to the calculation or rolling quantiles.
 
 + [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
+https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
+http://bytes.com/forum/thread656124.html
+https://bytes.com/topic/c/answers/561361-string-convert-function-name
+
 
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
@@ -111,16 +108,50 @@ https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templa
 https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
 https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
 
-+ [ ] Rewrite roll_conv() to avoid copying data ?
++ [ ] Convert all code to STL iterators: iterators are pointers to vector and matrix elements 
+https://www.geeksforgeeks.org/iterators-c-stl/
 
-+ [ ] Rename function roll_wsum() to roll_conv(), because it replicates convolution
-Is roll_wsum() same as roll_conv() ?
++ [ ] Replace all Rcpp syntax with Armadillo or Boost or STL.
+For example, replace NumericVector with std::vector<double> . 
+
++ [ ] Create RcppArmadillo function calc_alpha() to calculate the performance of an asset relative to an index. 
+calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
+One robust method should be the Wilcoxon W statistic.
+Another robust method should be the Kruskal-Wallis H statistic as follows:
+Combine the given asset returns with the index returns into a single vector.
+Rank the vector of combined returns.
+Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
+The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
+
++ [ ] Create RcppArmadillo function calc_ret_stats() for calculating aggregations (statistics) over a vector of returns
+Examples of statistics are the mean, median, Sharpe ratio (t-value), Wilcoxon statistic, etc.
+
++ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
+It should return a named vector of coefficients, z-scores, R-squared, etc.
+It should calculate Pearson, Spearman, and Kendall correlations.
+
++ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
+Add option to perform rolling predictions using the regressions.
+
++ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
+Use moment update formulas from package fromo: Pebay Fast Moments.pdf
+Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
+
++ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
+
++ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
+roll_count() is already in lm_arma.cpp.
+roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
+Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
+Scale the count threshold levels depending on the level of volatility.
+
++ [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
 + [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] Convert function calls to roll functions from package RcppRoll to native Rcpp functions: roll_max() and roll_var()
-
-+ [ ] Test the function roll_conv() to determine if it applies convolution only over past values
 
 + [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 Deprecate function roll_moment() because it's similar to roll_vwap() ?
@@ -240,6 +271,16 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Rename roll_conv() to roll_conv_ref(), and modify roll_conv() so it doesn't copy over the input argument mat_rix.
+Copying over the input argument mat_rix causes snooping data leak in backtest.
+
++ [x] Test the function roll_conv() to determine if it applies convolution only over past values.
+
++ [x] Rename function roll_wsum() to roll_conv(), because it replicates convolution - no!
+The function roll_wsum() is for vectors and is not the same as roll_conv() which is for matrices.
+
++ [x] Create RcppArmadillo function calc_ranks() for calculating the ranks of the elements of a vector.
 
 + [x] Remove the existing function roll_variance() in R, and rewrite it in RcppArmadillo as roll_var()
 
@@ -442,7 +483,7 @@ http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 
 
-### tasks finished
+### Tasks finished
 
 + [x] Create a function called sim_arima() in RcppArmadillo which replicates the function stats::filter() with method="recursive"
 Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
@@ -581,7 +622,7 @@ created function save_rets_OHLC()
 	- no scrubbing or aggregation
 
 
-### tasks deprecated
+### Tasks deprecated
 
 + [ ] Modify function run_returns() to perform sapply() if argument has multiple columns ?
 
@@ -609,7 +650,7 @@ would require rewriting extreme_values() and price_jumps(), and then benchmarkin
 add volume-weighting to vol_ohlc() and skew_ohlc()
 
 
-### commits
+### Commits
 
 # commit 05-18-16
 added rutils to depends in DESCRIPTION

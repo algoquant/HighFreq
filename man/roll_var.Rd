@@ -3,7 +3,7 @@
 \name{roll_var}
 \alias{roll_var}
 \title{Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval for a \emph{matrix} or a \emph{time series}, using
+interval for a \emph{time series} or a \emph{matrix}, using
 \code{RcppArmadillo}.}
 \usage{
 roll_var(mat_rix, look_back = 11L)
@@ -21,13 +21,13 @@ A \emph{matrix} with the same number of rows and columns as the
 }
 \description{
 Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval for a \emph{matrix} or a \emph{time series}, using
+interval for a \emph{time series} or a \emph{matrix}, using
 \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_var()} calculates a \code{mat_rix} of
-  variance estimates over a rolling look-back interval for a \emph{matrix}
-  or a \emph{time series}, using \code{RcppArmadillo}.
+  variance estimates over a rolling look-back interval for a \emph{time
+  series} or a \emph{matrix}, using \code{RcppArmadillo}.
 
   The function \code{roll_var()} uses an expanding look-back interval in the
   initial warmup period, to calculate the same number of rows as the input

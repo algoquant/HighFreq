@@ -204,9 +204,10 @@ diff_it <- function(mat_rix, lagg = 1L, padd = FALSE) {
 #'   If the \emph{matrix} is square and if \code{by_col} is \code{TRUE} then it
 #'   multiplies the columns, otherwise it multiplies the rows.
 #'   
-#'   It accepts pointers to the \emph{matrix} and \emph{vector}, and performs
-#'   the calculation in place, without copying the \emph{matrix} in memory
-#'   (which greatly increases the computation speed).
+#'   It accepts \emph{pointers} to the \emph{matrix} and \emph{vector}, and
+#'   replaces the old \emph{matrix} values with the new values.
+#'   It performs the calculation in place, without copying the \emph{matrix} in
+#'   memory (which greatly increases the computation speed).
 #'   It performs an implicit loop over the \emph{matrix} rows and columns using
 #'   the \emph{Armadillo} operators \code{each_row()} and \code{each_col()},
 #'   instead of performing explicit \code{for()} loops (both methods are
@@ -537,6 +538,57 @@ calc_var_ohlc <- function(oh_lc, calc_method = "yang_zhang", lag_close = 0L, in_
     .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', oh_lc, calc_method, lag_close, in_dex, scal_e)
 }
 
+#' Calculate the ranks of the elements of a \emph{vector} or a single-column
+#' \emph{time series} using \code{RcppArmadillo}.
+#' 
+#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#'
+#' @return An \emph{integer vector} with the ranks of the elements of the
+#'   \emph{vector}.
+#'
+#' @details The function \code{calc_ranks()} calculates the ranks of the
+#'   elements of a \emph{vector} or a single-column \emph{time series}.
+#'   It uses the \code{RcppArmadillo} function \code{arma::sort_index()}.
+#'   The function \code{arma::sort_index()} calculates the permutation index to
+#'   sort a given vector into ascending order.
+#'   
+#'   Applying the function \code{arma::sort_index()} twice:
+#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+#'   permutation index to sort the vector from ascending order back into its
+#'   original unsorted order.
+#'   The permutation index produced by:
+#'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
+#'   permutation index produced by: \code{arma::sort_index()}.
+#'   
+#'   The ranks of the elements are equal to the \emph{reverse} permutation
+#'   index.
+#'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
+#'   index.
+#'
+#' @examples
+#' \dontrun{
+#' # Create a vector of random data
+#' da_ta <- round(runif(7), 2)
+#' # Calculate the ranks of the elements in two ways
+#' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+#' # Create a time series of random data
+#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+#' # Calculate the ranks of the elements in two ways
+#' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+#' # Compare the speed of RcppArmadillo with R code
+#' da_ta <- runif(7)
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   rcpp=calc_ranks(da_ta),
+#'   rcode=rank(da_ta),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_ranks <- function(vec_tor) {
+    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', vec_tor)
+}
+
 #' Perform multivariate linear regression using \emph{Rcpp}.
 #' 
 #' @param \code{res_ponse} A \emph{vector} of response data.
@@ -644,7 +696,7 @@ roll_sum <- function(vec_tor, look_back) {
 #' # Create simple weights
 #' weight_s <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
+#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
 #' # Compare with original
 #' all.equal(vec_tor, as.numeric(weight_ed))
 #' # Second example
@@ -652,7 +704,7 @@ roll_sum <- function(vec_tor, look_back) {
 #' weight_s <- exp(-0.2*1:11)
 #' weight_s <- weight_s/sum(weight_s)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=rev(weight_s))
+#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
 #' # Calculate rolling weighted sum using filter()
 #' filter_ed <- stats::filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
@@ -674,31 +726,34 @@ roll_wsum <- function(vec_tor, weight_s) {
 #'   argument \code{mat_rix}.
 #'
 #' @details The function \code{roll_conv()} calculates the convolutions of the
-#'   \emph{matrix} columns with a \emph{vector} of weights.  It rolls over the
-#'   \emph{matrix} rows and multiplies the past column values with the weights.
-#'   It uses the \code{RcppArmadillo} function \code{arma::conv2()}. It
-#'   performs a similar calculation to the standard \code{R} function
-#'   \code{filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)},
-#'   but it's over \code{6} times faster, and it doesn't produce any leading
-#'   \code{NA} values.
+#'   \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
+#'   down over the \emph{matrix} rows and multiplies the past (higher) values
+#'   by the weights.  It calculates the rolling weighted sum of the past
+#'   values.
+#'   
+#'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
+#'   \code{arma::conv2()}. It performs a similar calculation to the standard
+#'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+#'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
+#'   it doesn't produce any leading \code{NA} values.
 #'   
 #' @examples
 #' \dontrun{
 #' # First example
 #' # Create matrix from historical prices
 #' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
-#' # Create simple weights
+#' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
 #' # Compare with original
 #' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
 #' # Second example
 #' # Create exponentially decaying weights
-#' weight_s <- exp(-0.2*1:11)
+#' weight_s <- exp(-0.2*(1:11))
 #' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_conv(mat_rix=mat_rix, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
 #' # Calculate rolling weighted sum using filter()
 #' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
@@ -708,6 +763,61 @@ roll_wsum <- function(vec_tor, weight_s) {
 #' @export
 roll_conv <- function(mat_rix, weight_s) {
     .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', mat_rix, weight_s)
+}
+
+#' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
+#' of weights.
+#' 
+#' @param \code{mat_rix} A \emph{matrix} of data.
+#' @param \code{weight_s} A column \emph{vector} of weights.
+#'
+#' @return A \emph{matrix} with the same dimensions as the input
+#'   argument \code{mat_rix}.
+#'
+#' @details The function \code{roll_conv_ref()} calculates the convolutions of
+#'   the \emph{matrix} columns with a \emph{vector} of weights.  It performs a
+#'   loop down over the \emph{matrix} rows and multiplies the past (higher)
+#'   values by the weights.  It calculates the rolling weighted sum of the past
+#'   values.
+#'   
+#'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
+#'   \code{mat_rix}, and replaces the old \emph{matrix} values with the
+#'   weighted sums.
+#'   It performs the calculation in place, without copying the \emph{matrix} in
+#'   memory (which greatly increases the computation speed).
+#'   
+#'   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
+#'   \code{arma::conv2()}. It performs a similar calculation to the standard
+#'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+#'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
+#'   it doesn't produce any leading \code{NA} values.
+#'   
+#' @examples
+#' \dontrun{
+#' # First example
+#' # Create matrix from historical prices
+#' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+#' # Create simple weights equal to a 1 value plus zeros
+#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+#' # Calculate rolling weighted sum
+#' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+#' # Compare with original
+#' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+#' # Second example
+#' # Create exponentially decaying weights
+#' weight_s <- exp(-0.2*(1:11))
+#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+#' # Calculate rolling weighted sum
+#' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+#' # Calculate rolling weighted sum using filter()
+#' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+#' # Compare both methods
+#' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+#' }
+#' 
+#' @export
+roll_conv_ref <- function(mat_rix, weight_s) {
+    .Call('_HighFreq_roll_conv_ref', PACKAGE = 'HighFreq', mat_rix, weight_s)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
