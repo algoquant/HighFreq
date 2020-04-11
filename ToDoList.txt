@@ -76,9 +76,18 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create RcppArmadillo function calc_covar() to calculate a nonparametric (robust) covariance matrix
+Two possible methods are: 
+Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
+Hodges-Lehmann estimator: 
+
+
+
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
-+ [ ] Change license from GPL to MPL.
++ [x] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
+
++ [x] Change license from GPL to MPL, similar to package data.table.
 
 + [ ] Create RcppArmadillo function calc_quantile() to calculate or update the quantile of a vector of numbers
 The value of the quantile can be updated based on the old quantile value and the new updated vector values.
@@ -90,7 +99,6 @@ https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-v
 http://bytes.com/forum/thread656124.html
 https://bytes.com/topic/c/answers/561361-string-convert-function-name
 
-
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
 http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
@@ -101,12 +109,13 @@ https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxpt
 
 + [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
 https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
-https://en.cppreference.com/w/cpp/language/parameter_pack
 https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
 https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
 https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
 https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
 https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
+https://www.wikihow.com/Use-Function-Template-Parameter-Packs-in-C%2B%2B
+https://en.cppreference.com/w/cpp/language/parameter_pack
 
 + [ ] Convert all code to STL iterators: iterators are pointers to vector and matrix elements 
 https://www.geeksforgeeks.org/iterators-c-stl/
@@ -156,8 +165,6 @@ Scale the count threshold levels depending on the level of volatility.
 + [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 Deprecate function roll_moment() because it's similar to roll_vwap() ?
 Update the description documentation of roll_moment()
-
-+ [ ] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
 
 + [ ] Perform rolling regressions over trading time - using a time-dependent look-back interval, so that the look-back interval always spans the same traded volume  
 Inoue Rolling Regressions Time Series Bias Variance Tradeoff.pdf

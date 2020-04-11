@@ -1789,7 +1789,7 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 arma::vec calc_weights(const arma::mat& re_turns, 
                        const std::string& typ_e = "max_sharpe",
                        int max_eigen = 1,
-                       const double& quan_tile = 0.1,
+                       const double& pro_b = 0.1,
                        const double& al_pha = 0.0,
                        const bool scal_e = true) {
   // Initialize
@@ -1802,6 +1802,14 @@ arma::vec calc_weights(const arma::mat& re_turns,
     arma::vec mean_cols = arma::trans(arma::mean(re_turns, 0));
     // Shrink mean_cols to the mean of re_turns
     mean_cols = ((1-al_pha)*mean_cols + al_pha*arma::mean(mean_cols));
+    // Apply regularized inverse
+    // arma::mat in_verse = calc_inv(re_turns, max_eigen);
+    weight_s = calc_inv(re_turns, max_eigen)*mean_cols;
+  } else if (typ_e == "max_sharpe_median") {
+    // Mean returns by columns
+    arma::vec mean_cols = arma::trans(arma::median(re_turns, 0));
+    // Shrink mean_cols to the mean of re_turns
+    mean_cols = ((1-al_pha)*mean_cols + al_pha*arma::median(mean_cols));
     // Apply regularized inverse
     // arma::mat in_verse = calc_inv(re_turns, max_eigen);
     weight_s = calc_inv(re_turns, max_eigen)*mean_cols;
@@ -1825,9 +1833,13 @@ arma::vec calc_weights(const arma::mat& re_turns,
     weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
     weight_s = (weight_s - arma::mean(weight_s));
   } else if (typ_e == "rankrob") {
-    // Mean returns by columns
+    // Median returns by columns
     arma::vec mean_cols = arma::trans(arma::median(re_turns, 0));
-    mean_cols = ((1-al_pha)*mean_cols + al_pha*arma::mean(mean_cols));
+    // mean_cols = ((1-al_pha)*mean_cols + al_pha*arma::mean(mean_cols));
+    // Standard deviation by columns
+    arma::vec sd_cols = arma::trans(arma::stddev(re_turns, 0));
+    sd_cols.replace(0, 1);
+    mean_cols = mean_cols/sd_cols;
     // Apply regularized inverse
     // arma::mat in_verse = calc_inv(re_turns, max_eigen);
     // weight_s = calc_inv(re_turns, max_eigen)*mean_cols;
@@ -1841,8 +1853,15 @@ arma::vec calc_weights(const arma::mat& re_turns,
     // mean_cols = mean_cols/sd_cols;
     // Weights equal to ranks of Sharpe
     weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
-    // quan_tile;
-    // weight_s = (weight_s - arma::mean(weight_s));
+    // pro_b;
+    weight_s = (weight_s - arma::mean(weight_s));
+  } else if (typ_e == "quan_tile") {
+    // Sum of quantiles for columns
+    arma::vec prob_s = {pro_b, 1-pro_b};
+    weight_s = conv_to< vec >::from(arma::sum(arma::quantile(re_turns, prob_s, 0), 0));
+    // Weights equal to ranks
+    weight_s = conv_to< vec >::from(arma::sort_index(arma::sort_index(weight_s)));
+    weight_s = (weight_s - arma::mean(weight_s));
   } else {
     cout << "Warning: Incorrect typ_e argument: " << typ_e << endl;
     return arma::ones(re_turns.n_cols);
@@ -1955,7 +1974,7 @@ arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
                     const arma::uvec& end_points, 
                     const std::string& typ_e = "max_sharpe",
                     const arma::uword& max_eigen = 1,
-                    const double& quan_tile = 0.1,
+                    const double& pro_b = 0.1,
                     const double& al_pha = 0,
                     const bool& scal_e = true,
                     const double& co_eff = 1.0,
@@ -1968,7 +1987,7 @@ arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
   for (arma::uword it=1; it < end_points.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate portfolio weights
-    weight_s = co_eff*calc_weights(ex_cess.rows(start_points(it-1), end_points(it-1)), typ_e, max_eigen, quan_tile, al_pha, scal_e);
+    weight_s = co_eff*calc_weights(ex_cess.rows(start_points(it-1), end_points(it-1)), typ_e, max_eigen, pro_b, al_pha, scal_e);
     // Calculate out-of-sample returns
     pnl_s.subvec(end_points(it-1)+1, end_points(it)) = re_turns.rows(end_points(it-1)+1, end_points(it))*weight_s;
     // Add transaction costs

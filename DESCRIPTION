@@ -9,7 +9,7 @@ Description: Functions for chaining and joining time series, scrubbing bad data,
     managing time zones and alligning time indices, converting TAQ data to OHLC
     format, aggregating data to lower frequency, estimating volatility, skew, and
     higher moments.
-License: GPL (>= 2)
+License: MPL-2.0
 Depends:
     xts, 
     quantmod, 

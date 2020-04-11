@@ -318,24 +318,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_weights
-arma::vec calc_weights(const arma::mat& re_turns, const std::string& typ_e, int max_eigen, const double& quan_tile, const double& al_pha, const bool scal_e);
-RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP quan_tileSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP) {
+arma::vec calc_weights(const arma::mat& re_turns, const std::string& typ_e, int max_eigen, const double& pro_b, const double& al_pha, const bool scal_e);
+RcppExport SEXP _HighFreq_calc_weights(SEXP re_turnsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP pro_bSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type re_turns(re_turnsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type typ_e(typ_eSEXP);
     Rcpp::traits::input_parameter< int >::type max_eigen(max_eigenSEXP);
-    Rcpp::traits::input_parameter< const double& >::type quan_tile(quan_tileSEXP);
+    Rcpp::traits::input_parameter< const double& >::type pro_b(pro_bSEXP);
     Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
     Rcpp::traits::input_parameter< const bool >::type scal_e(scal_eSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, typ_e, max_eigen, quan_tile, al_pha, scal_e));
+    rcpp_result_gen = Rcpp::wrap(calc_weights(re_turns, typ_e, max_eigen, pro_b, al_pha, scal_e));
     return rcpp_result_gen;
 END_RCPP
 }
 // back_test
-arma::mat back_test(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const std::string& typ_e, const arma::uword& max_eigen, const double& quan_tile, const double& al_pha, const bool& scal_e, const double& co_eff, const double& bid_offer);
-RcppExport SEXP _HighFreq_back_test(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP quan_tileSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP, SEXP co_effSEXP, SEXP bid_offerSEXP) {
+arma::mat back_test(const arma::mat& ex_cess, const arma::mat& re_turns, const arma::uvec& start_points, const arma::uvec& end_points, const std::string& typ_e, const arma::uword& max_eigen, const double& pro_b, const double& al_pha, const bool& scal_e, const double& co_eff, const double& bid_offer);
+RcppExport SEXP _HighFreq_back_test(SEXP ex_cessSEXP, SEXP re_turnsSEXP, SEXP start_pointsSEXP, SEXP end_pointsSEXP, SEXP typ_eSEXP, SEXP max_eigenSEXP, SEXP pro_bSEXP, SEXP al_phaSEXP, SEXP scal_eSEXP, SEXP co_effSEXP, SEXP bid_offerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -345,12 +345,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::uvec& >::type end_points(end_pointsSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type typ_e(typ_eSEXP);
     Rcpp::traits::input_parameter< const arma::uword& >::type max_eigen(max_eigenSEXP);
-    Rcpp::traits::input_parameter< const double& >::type quan_tile(quan_tileSEXP);
+    Rcpp::traits::input_parameter< const double& >::type pro_b(pro_bSEXP);
     Rcpp::traits::input_parameter< const double& >::type al_pha(al_phaSEXP);
     Rcpp::traits::input_parameter< const bool& >::type scal_e(scal_eSEXP);
     Rcpp::traits::input_parameter< const double& >::type co_eff(co_effSEXP);
     Rcpp::traits::input_parameter< const double& >::type bid_offer(bid_offerSEXP);
-    rcpp_result_gen = Rcpp::wrap(back_test(ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, quan_tile, al_pha, scal_e, co_eff, bid_offer));
+    rcpp_result_gen = Rcpp::wrap(back_test(ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, pro_b, al_pha, scal_e, co_eff, bid_offer));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -613,13 +613,13 @@ calc_ranks <- function(vec_tor) {
 #' # Define design matrix with explanatory variables
 #' len_gth <- 100; n_var <- 5
 #' de_sign <- matrix(rnorm(n_var*len_gth), nc=n_var)
-#' # response equals linear form plus error terms
+#' # Response equals linear form plus error terms
 #' weight_s <- rnorm(n_var)
 #' res_ponse <- -3 + de_sign %*% weight_s + rnorm(len_gth, sd=0.5)
-#' # perform multivariate regression using lm()
+#' # Perform multivariate regression using lm()
 #' reg_model <- lm(res_ponse ~ de_sign)
 #' sum_mary <- summary(reg_model)
-#' # perform multivariate regression using calc_lm()
+#' # Perform multivariate regression using calc_lm()
 #' reg_model_arma <- calc_lm(res_ponse=res_ponse, de_sign=de_sign)
 #' reg_model_arma$coefficients
 #' # Compare the outputs of both functions
@@ -1263,8 +1263,8 @@ sim_arima <- function(in_nov, co_eff) {
 #' }
 #' 
 #' @export
-calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, quan_tile = 0.1, al_pha = 0.0, scal_e = TRUE) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, max_eigen, quan_tile, al_pha, scal_e)
+calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, pro_b = 0.1, al_pha = 0.0, scal_e = TRUE) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, max_eigen, pro_b, al_pha, scal_e)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -1350,7 +1350,7 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, quan_ti
 #' }
 #' 
 #' @export
-back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", max_eigen = 1L, quan_tile = 0.1, al_pha = 0, scal_e = TRUE, co_eff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, quan_tile, al_pha, scal_e, co_eff, bid_offer)
+back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", max_eigen = 1L, pro_b = 0.1, al_pha = 0, scal_e = TRUE, co_eff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, pro_b, al_pha, scal_e, co_eff, bid_offer)
 }
 
