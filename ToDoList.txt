@@ -76,11 +76,12 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
 + [ ] Create RcppArmadillo function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Two possible methods are: 
 Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
 Hodges-Lehmann estimator: 
-
 
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
@@ -141,8 +142,6 @@ It should calculate Pearson, Spearman, and Kendall correlations.
 
 + [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
 Add option to perform rolling predictions using the regressions.
-
-+ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
 + [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
 Use moment update formulas from package fromo: Pebay Fast Moments.pdf
