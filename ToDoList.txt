@@ -83,6 +83,9 @@ Two possible methods are:
 Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
 Hodges-Lehmann estimator: 
 
++ [ ] In function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
+
++ [ ] In function calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
@@ -99,6 +102,10 @@ Apply it to the calculation or rolling quantiles.
 https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
 http://bytes.com/forum/thread656124.html
 https://bytes.com/topic/c/answers/561361-string-convert-function-name
+
++ [ ] Pass a function pointer
+https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
 
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
@@ -118,11 +125,16 @@ https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-
 https://www.wikihow.com/Use-Function-Template-Parameter-Packs-in-C%2B%2B
 https://en.cppreference.com/w/cpp/language/parameter_pack
 
-+ [ ] Convert all code to STL iterators: iterators are pointers to vector and matrix elements 
++ [ ] Convert all loops to STL iterators: iterators are pointers to vector and matrix elements 
 https://www.geeksforgeeks.org/iterators-c-stl/
 
-+ [ ] Replace all Rcpp syntax with Armadillo or Boost or STL.
-For example, replace NumericVector with std::vector<double> . 
++ [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
+There are several advantages of using Rcpp::NumericVector instead of std::vector<double> :
+NumericVector avoids deep copy of data between R and C++
+NumericVector provides access to Sugar functions.
+For example, if you replace NumericVector with std::vector<double> then you lose flexibility and need two copies of every function - one for integer and one for double.
+cpp::NumericVector over std::vector<double>
+https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
 + [ ] Create RcppArmadillo function calc_alpha() to calculate the performance of an asset relative to an index. 
 calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
@@ -174,8 +186,6 @@ https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
 
 + [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory ?
 That may not always be correct, for example in the case of rolling calculations.
-
-+ [ ] Add data.table and fst functions for aggregating large datasets
 
 + [ ] Create a function called na_locf()
 // [[Rcpp::export]]
@@ -241,6 +251,22 @@ arma::uvec any_na_xy(const NumericMatrix& x, const NumericMatrix& y) {
 }
 
 + [ ] Create a function in RcppArmadillo which replicates the function zoo::na.fill(), and which replaces NA, NaN, and Inf values, but in place, without returning a value
+
++ [ ] Add functions for median and MAD in Rcpp
+http://gallery.rcpp.org/articles/robust-estimators/
+
++ [ ] Apply STL algorithm function to perform find/which operation
+http://adv-r.had.co.nz/Rcpp.html#stl
+
++ [ ] Add very fast RcppArmadillo functions: whi_ch(), cum_sum(), select_sub_mat()
+http://arma.sourceforge.net/docs.html
+https://stackoverflow.com/questions/23849354/equivalent-of-which-function-in-rcpp
+
++ [ ] Create new roll functions using RcppRoll::rollit() ?
+
++ [ ] Convert roll_*() functions to RcppRoll ?
+No, because RcppArmadillo and Rcpp
+are better
 
 + [ ] Add to back_test() the simulation with limit orders
 
