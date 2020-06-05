@@ -83,9 +83,13 @@ Two possible methods are:
 Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
 Hodges-Lehmann estimator: 
 
++ [ ] In function back_test() add parameter for lagging the weights - for applying the weights with a lag
+
 + [ ] In function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
 
 + [ ] In function calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
+
++ [ ] In function calc_inv() regularize the inverse by discarding small eigenvalues: use arma::pinv()
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
