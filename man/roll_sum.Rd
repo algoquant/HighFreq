@@ -5,17 +5,17 @@
 \title{Calculate the rolling sum over a \emph{vector} or a single-column \emph{time
 series} using \emph{Rcpp}.}
 \usage{
-roll_sum(vec_tor, look_back)
+roll_sum(re_turns, look_back)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
+\item{\code{re_turns}}{A \emph{vector} or a single-column \emph{time series}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of elements of data used for calculating the sum.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{vec_tor}.
+  \code{re_turns}.
 }
 \description{
 Calculate the rolling sum over a \emph{vector} or a single-column \emph{time

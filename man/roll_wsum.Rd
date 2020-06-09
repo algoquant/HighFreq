@@ -5,16 +5,16 @@
 \title{Calculate the rolling weighted sum over a \emph{vector} or a single-column
 \emph{time series} using \code{RcppArmadillo}.}
 \usage{
-roll_wsum(vec_tor, weight_s)
+roll_wsum(re_turns, weight_s)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
+\item{\code{re_turns}}{A \emph{vector} or a single-column \emph{time series}.}
 
 \item{\code{weight_s}}{A \emph{vector} of weights.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{vec_tor}.
+  \code{re_turns}.
 }
 \description{
 Calculate the rolling weighted sum over a \emph{vector} or a single-column
@@ -25,7 +25,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sum
   of a \emph{vector} over its past values (a convolution with the
   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
   similar calculation as the standard \code{R} function
-  \code{stats::filter(x=vec_tor, filter=weight_s, method="convolution",
+  \code{stats::filter(x=re_turns, filter=weight_s, method="convolution",
   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
   \code{NA} values.
 }
@@ -33,21 +33,21 @@ The function \code{roll_wsum()} calculates the rolling weighted sum
 \dontrun{
 # First example
 # Create vector from historical prices
-vec_tor <- as.numeric(rutils::etf_env$VTI[, 6])
+re_turns <- as.numeric(rutils::etf_env$VTI[, 6])
 # Create simple weights
 weight_s <- c(1, rep(0, 10))
 # Calculate rolling weighted sum
-weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
+weight_ed <- HighFreq::roll_wsum(re_turns=re_turns, weight_s=weight_s)
 # Compare with original
-all.equal(vec_tor, as.numeric(weight_ed))
+all.equal(re_turns, as.numeric(weight_ed))
 # Second example
 # Create exponentially decaying weights
 weight_s <- exp(-0.2*1:11)
 weight_s <- weight_s/sum(weight_s)
 # Calculate rolling weighted sum
-weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
+weight_ed <- HighFreq::roll_wsum(re_turns=re_turns, weight_s=weight_s)
 # Calculate rolling weighted sum using filter()
-filter_ed <- stats::filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
+filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 # Compare both methods
 all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 }

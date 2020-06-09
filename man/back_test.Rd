@@ -6,36 +6,47 @@
 \code{RcppArmadillo}.}
 \usage{
 back_test(ex_cess, re_turns, start_points, end_points,
-  typ_e = "max_sharpe", max_eigen = 1L, quan_tile = 0.1,
-  al_pha = 0, scal_e = TRUE, co_eff = 1, bid_offer = 0)
+  typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1,
+  al_pha = 0, scal_e = TRUE, vo_l = 0.01, co_eff = 1,
+  bid_offer = 0)
 }
 \arguments{
-\item{ex_cess}{A \emph{matrix} of excess returns data (the returns
+\item{\code{ex_cess}}{A \emph{matrix} of excess returns data (the returns in
+excess of the risk-free rate).}
+
+\item{\code{re_turns}}{A \emph{matrix} of excess returns data (the returns
 in excess of the risk-free rate).}
 
-\item{re_turns}{A \emph{matrix} of excess returns data (the returns
-in excess of the risk-free rate).}
+\item{\code{start_points}}{An \emph{integer vector} of start points.}
 
-\item{start_points}{An \emph{integer vector} of start points.}
+\item{\code{end_points}}{An \emph{integer vector} of end points.}
 
-\item{end_points}{An \emph{integer vector} of end points.}
+\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
+the weights (see Details).}
 
-\item{typ_e}{A \emph{string} specifying the objective for calculating the
-weights (see Details).}
+\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
+eigenvalues in order to regularize the matrix inverse.  (The default is
+\code{0.001})}
 
-\item{max_eigen}{An \emph{integer} equal to the number of eigenvectors used
-for calculating the regularized inverse of the covariance \emph{matrix}
-(the default is the number of columns of \code{re_turns}).}
+\item{\code{max_eigen}}{An \emph{integer} equal to the number of
+eigenvectors used for calculating the regularized inverse of the
+covariance \emph{matrix} (the default is the number of columns of
+\code{re_turns}).}
 
-\item{al_pha}{A numeric shrinkage intensity.  (The default is \code{0})}
+\item{\code{al_pha}}{The shrinkage intensity between \code{0} and \code{1}.
+(the default is \code{0}).}
 
-\item{scal_e}{A \emph{Boolean} specifying whether the weights should be
-scaled (the default is \code{scal_e=TRUE}).}
+\item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
+be scaled (the default is \code{scal_e=TRUE}).}
 
-\item{co_eff}{A numeric multiplier of the weights.  (The default is
-\code{1})}
+\item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
+weights.  (The default is \code{0.001})}
 
-\item{bid_offer}{A numeric bid-offer spread.  (The default is \code{0})}
+\item{\code{co_eff}}{A \emph{numeric} multiplier of the weights.  (The
+default is \code{1})}
+
+\item{\code{bid_offer}}{A \emph{numeric} bid-offer spread.  (The default is
+\code{0})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as

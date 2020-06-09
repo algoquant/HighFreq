@@ -7,14 +7,15 @@
 sim_garch(om_ega, al_pha, be_ta, in_nov)
 }
 \arguments{
-\item{om_ega}{Parameter proportional to the long-term average level of
-variance.}
+\item{\code{om_ega}}{Parameter proportional to the long-term average level
+of variance.}
 
-\item{al_pha}{The weight associated with recent realized variance updates.}
+\item{\code{al_pha}}{The weight associated with recent realized variance
+updates.}
 
-\item{be_ta}{The weight associated with the past variance estimates.}
+\item{\code{be_ta}}{The weight associated with the past variance estimates.}
 
-\item{in_nov}{A \emph{vector} of innovations (random numbers).}
+\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
 A \emph{matrix} with two columns: the simulated returns and

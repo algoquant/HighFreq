@@ -84,10 +84,10 @@ lag_it <- function(mat_rix, lagg = 1L) {
 #'   lag when calculating the differences (the default is \code{lagg=1}).
 #' @param \code{padd} \emph{Boolean} argument: Should the output \emph{vector}
 #'   be padded (extended) with zeros, in order to return a \emph{vector} of the
-#'   same length as the input? (the default is \code{padd=FALSE})
+#'   same length as the input? (the default is \code{padd=TRUE})
 #'
-#' @return A column \emph{vector} containing the differences of the input
-#'   vector.
+#' @return A column \emph{vector} containing the differences between the
+#'   elements of the input vector.
 #'
 #' @details The function \code{diff_vec()} calculates the differences between
 #'   the input \emph{vector} or \emph{time series} and its lagged version. 
@@ -100,29 +100,29 @@ lag_it <- function(mat_rix, lagg = 1L) {
 #'   The argument \code{padd} specifies whether the output \emph{vector} should
 #'   be padded (extended) with zeros at the beginning, in order to return a
 #'   \emph{vector} of the same length as the input.  The default is
-#'   \code{padd=FALSE}. The padding operation is time-consuming, so that
-#'   \code{padd=FALSE} can be twice as fast as \code{padd=TRUE}.
+#'   \code{padd=TRUE}. The padding operation can be time-consuming, because it
+#'   requires the copying of data.
 #'   
 #'   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
-#'   code, which makes it slightly faster than \code{R} code.
+#'   code, which makes it several times faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Compare diff_vec() with rutils::diff_it()
-#' all.equal(drop(HighFreq::diff_vec(re_turns, padd=TRUE)),
-#'   rutils::diff_it(re_turns))
+#' all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE)),
+#'   rutils::diff_it(re_turns, lagg=3))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::diff_vec(re_turns, padd=TRUE),
-#'   rcode=rutils::diff_it(re_turns),
+#'   rcpp=HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE),
+#'   rcode=rutils::diff_it(re_turns, lagg=3),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-diff_vec <- function(vec_tor, lagg = 1L, padd = FALSE) {
+diff_vec <- function(vec_tor, lagg = 1L, padd = TRUE) {
     .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', vec_tor, lagg, padd)
 }
 
@@ -135,10 +135,10 @@ diff_vec <- function(vec_tor, lagg = 1L, padd = FALSE) {
 #'   \code{lagg=1}).
 #' @param \code{padd} \emph{Boolean} argument: Should the output \emph{matrix}
 #'   be padded (extended) with zeros, in order to return a \emph{matrix} with
-#'   the same number of rows as the input? (the default is \code{padd=FALSE})
+#'   the same number of rows as the input? (the default is \code{padd=TRUE})
 #'
-#' @return A \emph{matrix} containing the differences of the input
-#'   \emph{matrix}.
+#' @return A \emph{matrix} containing the differences between the rows of the
+#'   input \emph{matrix}.
 #'
 #' @details The function \code{diff_it()} calculates the differences between
 #'   the rows of the input \emph{matrix} or \emph{time series} and its lagged
@@ -154,29 +154,29 @@ diff_vec <- function(vec_tor, lagg = 1L, padd = FALSE) {
 #'   The argument \code{padd} specifies whether the output \emph{matrix} should
 #'   be padded (extended) with rows of zeros at the beginning, in order to
 #'   return a \emph{matrix} with the same number of rows as the input.  The
-#'   default is \code{padd=FALSE}. The padding operation is time-consuming, so
-#'   that \code{padd=FALSE} can be twice as fast as \code{padd=TRUE}.
+#'   default is \code{padd=TRUE}. The padding operation can be time-consuming, 
+#'   because it requires the copying of data.
 #'   
 #'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-#'   code, which makes it slightly faster than \code{R} code.
+#'   code, which makes it several times faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random returns
 #' re_turns <- matrix(rnorm(5e6), nc=5)
 #' # Compare diff_it() with rutils::diff_it()
-#' all.equal(HighFreq::diff_it(re_turns, padd=TRUE),
-#'   rutils::diff_it(re_turns))
+#' all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
+#'   rutils::diff_it(re_turns, lagg=3))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::diff_it(re_turns, padd=TRUE),
-#'   rcode=rutils::diff_it(re_turns),
+#'   rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
+#'   rcode=rutils::diff_it(re_turns, lagg=3),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-diff_it <- function(mat_rix, lagg = 1L, padd = FALSE) {
+diff_it <- function(mat_rix, lagg = 1L, padd = TRUE) {
     .Call('_HighFreq_diff_it', PACKAGE = 'HighFreq', mat_rix, lagg, padd)
 }
 
@@ -257,7 +257,7 @@ mult_vec_mat <- function(vec_tor, mat_rix, by_col = TRUE) {
 #' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{mat_rix} A numeric \emph{matrix} or \emph{time series} of
+#' @param \code{re_turns} A numeric \emph{matrix} or \emph{time series} of
 #'   returns data.
 #'
 #' @return A list with two elements: a \emph{vector} of eigenvalues 
@@ -286,14 +286,17 @@ mult_vec_mat <- function(vec_tor, mat_rix, by_col = TRUE) {
 #' }
 #' 
 #' @export
-calc_eigen <- function(mat_rix) {
-    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', mat_rix)
+calc_eigen <- function(re_turns) {
+    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', re_turns)
 }
 
 #' Calculate the regularized inverse of the covariance \emph{matrix} of returns
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{mat_rix} A \emph{matrix} of returns data.
+#' @param \code{re_turns} A \emph{matrix} of returns data.
+#' @param \code{to_l} A \emph{numeric} tolerance level for discarding small
+#'   eigenvalues in order to regularize the matrix inverse.  (The default is
+#'   \code{0.001})
 #' @param \code{max_eigen} An \emph{integer} equal to the regularization
 #'   intensity (the number of eigenvalues and eigenvectors used for calculating
 #'   the regularized inverse).
@@ -301,30 +304,34 @@ calc_eigen <- function(mat_rix) {
 #' @return A \emph{matrix} equal to the regularized inverse. 
 #'
 #' @details The function calc_inv() calculates the regularized inverse of the
-#'   \emph{covariance matrix}, by truncating the number of eigenvectors to
-#'   \code{max_eigen}. The function \code{calc_inv()} first calculates the
-#'   covariance \emph{matrix} of the \code{mat_rix}, and then it calculates the
-#'   regularized inverse from the truncated eigen decomposition. It uses only
-#'   the largest \code{max_eigen} eigenvalues and their corresponding
-#'   eigenvectors.
+#'   \emph{covariance matrix}, by discarding eigenvectors with small
+#'   eigenvalues less than the tolerance level \code{to_l}.
+#'   The function \code{calc_inv()} first calculates the covariance
+#'   \emph{matrix} of the \code{re_turns}, and then it calculates its
+#'   regularized inverse.
+#'   If \code{max_eigen} is not specified then it calculates the
+#'   regularized inverse using the function \code{arma::pinv()}.
+#'   If \code{max_eigen} is specified then it calculates the regularized
+#'   inverse using eigen decomposition with only the largest \code{max_eigen}
+#'   eigenvalues and their corresponding eigenvectors.
 #'
 #' @examples
 #' \dontrun{
 #' # Create random matrix
-#' mat_rix <- matrix(rnorm(500), nc=5)
+#' re_turns <- matrix(rnorm(500), nc=5)
 #' max_eigen <- 3
 #' # Calculate regularized inverse using RcppArmadillo
-#' in_verse <- HighFreq::calc_inv(mat_rix, max_eigen)
+#' in_verse <- HighFreq::calc_inv(re_turns, max_eigen)
 #' # Calculate regularized inverse from eigen decomposition in R
-#' ei_gen <- eigen(cov(mat_rix))
+#' ei_gen <- eigen(cov(re_turns))
 #' inverse_r <-  ei_gen$vectors[, 1:max_eigen] %*% (t(ei_gen$vectors[, 1:max_eigen]) / ei_gen$values[1:max_eigen])
 #' # Compare RcppArmadillo with R
 #' all.equal(in_verse, inverse_r)
 #' }
 #' 
 #' @export
-calc_inv <- function(mat_rix, max_eigen) {
-    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', mat_rix, max_eigen)
+calc_inv <- function(re_turns, to_l = 0.001, max_eigen = 0L) {
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', re_turns, to_l, max_eigen)
 }
 
 #' Scale (standardize) the columns of a \emph{matrix} of data using
@@ -379,7 +386,7 @@ calc_scaled <- function(mat_rix, use_median = FALSE) {
 #' Calculate the variance of a \emph{vector} or a single-column \emph{time
 #' series} using \code{RcppArmadillo}.
 #' 
-#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#' @param \code{re_turns} A \emph{vector} or a single-column \emph{time series}.
 #'
 #' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 #'
@@ -403,8 +410,8 @@ calc_scaled <- function(mat_rix, use_median = FALSE) {
 #' }
 #' 
 #' @export
-calc_var_vec <- function(vec_tor) {
-    .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', vec_tor)
+calc_var_vec <- function(re_turns) {
+    .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', re_turns)
 }
 
 #' Calculate the variance of the columns of a \emph{matrix} or \emph{time
@@ -634,15 +641,93 @@ calc_lm <- function(res_ponse, de_sign) {
     .Call('_HighFreq_calc_lm', PACKAGE = 'HighFreq', res_ponse, de_sign)
 }
 
+#' Aggregate an \emph{OHLC} time series to a single \emph{OHLC} bar.
+#'
+#' @export
+#' @param \code{oh_lc} A \emph{matrix} or \emph{time series} with four or
+#'   five columns of \emph{OHLC} data.
+#'
+#' @return A \emph{single row matrix} with the \emph{open}, \emph{high},
+#'   \emph{low}, and \emph{close} values, and also the total \emph{volume} (if
+#'   provided in the fifth column of \code{oh_lc}).
+#'
+#' @details The function \code{agg_ohlc()} calculates the \emph{open} value as
+#'   equal to the \emph{open} of the first row of \code{oh_lc}.
+#'   The \emph{high} value as the maximum of the \emph{high} column of
+#'   \code{oh_lc}.
+#'   The \emph{low} value as the minimum of the \emph{low} column of
+#'   \code{oh_lc}.
+#'   The \emph{close} value as the \emph{close} of the last row of
+#'   \code{oh_lc}.
+#'   The \emph{volume} value as the sum of the \emph{volume} column of
+#'   \code{oh_lc}.
+#'
+#' @examples
+#' \dontrun{
+#' # Define matrix of OHLC data
+#' oh_lc <- coredata(rutils::etf_env$VTI[, 1:5])
+#' # Aggregate to single row matrix
+#' ohlc_agg <- HighFreq::agg_ohlc(oh_lc)
+#' # Compare with calculation in R
+#' all.equal(drop(ohlc_agg),
+#'   c(oh_lc[1, 1], max(oh_lc[, 2]), min(oh_lc[, 3]), oh_lc[NROW(oh_lc), 4], sum(oh_lc[, 5])), 
+#'   check.attributes=FALSE)
+#' }
+#' 
+#' @export
+agg_ohlc <- function(oh_lc) {
+    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', oh_lc)
+}
+
+#' Aggregate an \emph{OHLC} time series to a lower periodicity.
+#'
+#' Given an \emph{OHLC} time series at high periodicity (say seconds),
+#' calculates the \emph{OHLC} prices at lower periodicity (say minutes).
+#'
+#' @export
+#' @param \code{oh_lc} A \emph{matrix} or \emph{time series} with four or
+#'   five columns of \emph{OHLC} data.
+#'   
+#' @param \emph{end_points} An integer \emph{vector} of end points.
+#'
+#' @return A \emph{matrix} with \emph{OHLC} data, with the same number of
+#'   columns as \code{oh_lc}, and the number of rows equal to the number of
+#'   \emph{end_points} minus one.
+#'   
+#' @details The function \code{to_period()} performs a loop over the
+#'   \emph{end_points} and calls function \code{agg_ohlc()}.
+#'
+#'   The function \code{to_period()} performs a similar aggregation as function
+#'   \code{to.period()} from package
+#'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.
+#'
+#' @examples
+#' \dontrun{
+#' # Define matrix of OHLC data
+#' oh_lc <- rutils::etf_env$VTI[, 1:5]
+#' # Define end points at 25 day intervals
+#' end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
+#' # Aggregate over end_points:
+#' ohlc_agg <- HighFreq::to_period(oh_lc=oh_lc, end_points=end_points-1)
+#' # Compare with xts::to.period()
+#' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
+#' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
+#' }
+#' 
+#' @export
+to_period <- function(oh_lc, end_points) {
+    .Call('_HighFreq_to_period', PACKAGE = 'HighFreq', oh_lc, end_points)
+}
+
 #' Calculate the rolling sum over a \emph{vector} or a single-column \emph{time
 #' series} using \emph{Rcpp}.
 #' 
-#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#' @param \code{re_turns} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of elements of data used for calculating the sum.
 #'
 #' @return A column \emph{vector} of the same length as the argument
-#'   \code{vec_tor}.
+#'   \code{re_turns}.
 #'
 #' @details The function \code{roll_sum()} calculates a \emph{vector} of 
 #'   rolling sums, over a \emph{vector} of data, using \emph{Rcpp}.  The
@@ -667,24 +752,24 @@ calc_lm <- function(res_ponse, de_sign) {
 #' }
 #' 
 #' @export
-roll_sum <- function(vec_tor, look_back) {
-    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', vec_tor, look_back)
+roll_sum <- function(re_turns, look_back) {
+    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', re_turns, look_back)
 }
 
 #' Calculate the rolling weighted sum over a \emph{vector} or a single-column
 #' \emph{time series} using \code{RcppArmadillo}.
 #' 
-#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#' @param \code{re_turns} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{weight_s} A \emph{vector} of weights.
 #'
 #' @return A column \emph{vector} of the same length as the argument
-#'   \code{vec_tor}.
+#'   \code{re_turns}.
 #'
 #' @details The function \code{roll_wsum()} calculates the rolling weighted sum
 #'   of a \emph{vector} over its past values (a convolution with the
 #'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
 #'   similar calculation as the standard \code{R} function
-#'   \code{stats::filter(x=vec_tor, filter=weight_s, method="convolution",
+#'   \code{stats::filter(x=re_turns, filter=weight_s, method="convolution",
 #'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
 #'   \code{NA} values.
 #'   
@@ -692,28 +777,28 @@ roll_sum <- function(vec_tor, look_back) {
 #' \dontrun{
 #' # First example
 #' # Create vector from historical prices
-#' vec_tor <- as.numeric(rutils::etf_env$VTI[, 6])
+#' re_turns <- as.numeric(rutils::etf_env$VTI[, 6])
 #' # Create simple weights
 #' weight_s <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_wsum(re_turns=re_turns, weight_s=weight_s)
 #' # Compare with original
-#' all.equal(vec_tor, as.numeric(weight_ed))
+#' all.equal(re_turns, as.numeric(weight_ed))
 #' # Second example
 #' # Create exponentially decaying weights
 #' weight_s <- exp(-0.2*1:11)
 #' weight_s <- weight_s/sum(weight_s)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(vec_tor=vec_tor, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_wsum(re_turns=re_turns, weight_s=weight_s)
 #' # Calculate rolling weighted sum using filter()
-#' filter_ed <- stats::filter(x=vec_tor, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_wsum <- function(vec_tor, weight_s) {
-    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', vec_tor, weight_s)
+roll_wsum <- function(re_turns, weight_s) {
+    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', re_turns, weight_s)
 }
 
 #' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
@@ -824,21 +909,21 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #' interval for a \emph{vector} or a single-column \emph{time series}, using
 #' \code{RcppArmadillo}.
 #'
-#' @param \code{vec_tor} A \emph{vector} or a single-column \emph{time series}.
+#' @param \code{re_turns} A \emph{vector} or a single-column \emph{time series}.
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of \emph{vector} elements used for calculating a single variance
 #'   estimate.
 #'
 #' @return A column \emph{vector} with the same number of elements as the input
-#'   argument \code{vec_tor}.
+#'   argument \code{re_turns}.
 #'
-#' @details The function \code{roll_var_vec()} calculates a \code{vec_tor} of
+#' @details The function \code{roll_var_vec()} calculates a \code{re_turns} of
 #'   variance estimates over a rolling look-back interval for a \emph{vector}
 #'   or a single-column \emph{time series}, using \code{RcppArmadillo}.
 #'   
 #'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
-#'   input argument \code{vec_tor}.
+#'   input argument \code{re_turns}.
 #'
 #'   The function \code{roll_var_vec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
@@ -860,8 +945,8 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var_vec <- function(vec_tor, look_back = 11L) {
-    .Call('_HighFreq_roll_var_vec', PACKAGE = 'HighFreq', vec_tor, look_back)
+roll_var_vec <- function(re_turns, look_back = 11L) {
+    .Call('_HighFreq_roll_var_vec', PACKAGE = 'HighFreq', re_turns, look_back)
 }
 
 #' Calculate a \emph{matrix} of variance estimates over a rolling look-back
@@ -1097,11 +1182,12 @@ roll_zscores <- function(res_ponse, de_sign, look_back) {
 
 #' Simulate a \emph{GARCH} process using \emph{Rcpp}.
 #' 
-#' @param om_ega Parameter proportional to the long-term average level of
-#'   variance.
-#' @param al_pha The weight associated with recent realized variance updates.
-#' @param be_ta The weight associated with the past variance estimates.
-#' @param in_nov A \emph{vector} of innovations (random numbers).
+#' @param \code{om_ega} Parameter proportional to the long-term average level
+#'   of variance.
+#' @param \code{al_pha} The weight associated with recent realized variance
+#'   updates.
+#' @param \code{be_ta} The weight associated with the past variance estimates.
+#' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
 #' 
 #' @return A \emph{matrix} with two columns: the simulated returns and
 #'   variance, and with the same number of rows as the length of the argument 
@@ -1127,10 +1213,10 @@ sim_garch <- function(om_ega, al_pha, be_ta, in_nov) {
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 #' 
-#' @param eq_price The equilibrium price. 
-#' @param vol_at The volatility of returns.
-#' @param the_ta The strength of mean reversion.
-#' @param in_nov A \emph{vector} of innovations (random numbers).
+#' @param \code{eq_price} The equilibrium price. 
+#' @param \code{vol_at} The volatility of returns.
+#' @param \code{the_ta} The strength of mean reversion.
+#' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
 #' 
 #' @return A column \emph{vector} representing the \emph{time series} of
 #'   prices, with the same length as the argument \code{in_nov}.
@@ -1157,8 +1243,8 @@ sim_ou <- function(eq_price, vol_at, the_ta, in_nov) {
 #' Recursively filter a \emph{vector} of innovations through a \emph{vector} of
 #' \emph{ARIMA} coefficients.
 #' 
-#' @param in_nov A \emph{vector} of innovations (random numbers).
-#' @param co_eff A \emph{vector} of \emph{ARIMA} coefficients.
+#' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
+#' @param \code{co_eff} A \emph{vector} of \emph{ARIMA} coefficients.
 #'
 #' @return A column \emph{vector} of the same length as the argument
 #'   \code{in_nov}.
@@ -1191,17 +1277,30 @@ sim_arima <- function(in_nov, co_eff) {
 
 #' Calculate the optimal portfolio weights for different objective functions.
 #' 
-#' @param re_turns A \emph{matrix} of excess returns data (the returns
+#' @param \code{re_turns} A \emph{matrix} of excess returns data (the returns
 #'   in excess of the risk-free rate).
-#' @param typ_e A \emph{string} specifying the objective for calculating the
-#'   weights (see Details).
-#' @param max_eigen An \emph{integer} equal to the number of eigenvectors used
-#'   for calculating the regularized inverse of the covariance \emph{matrix}
-#'   (the default is the number of columns of \code{re_turns}).
-#' @param al_pha The shrinkage intensity (the default is \code{0}).
-#' @param scal_e A \emph{Boolean} specifying whether the weights should be
-#'   scaled (the default is \code{scal_e=TRUE}).
+#'   
+#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
+#'   the weights (see Details).
+#'   
+#' @param \code{to_l} A \emph{numeric} tolerance level for discarding small
+#'   eigenvalues in order to regularize the matrix inverse.  (The default is
+#'   \code{0.001})
+#'   
+#' @param \code{max_eigen} An \emph{integer} equal to the number of
+#'   eigenvectors used for calculating the regularized inverse of the
+#'   covariance \emph{matrix} (the default is the number of columns of
+#'   \code{re_turns}).
+#'   
+#' @param \code{al_pha} The shrinkage intensity between \code{0} and \code{1}.
+#'   (the default is \code{0}).
+#' 
+#' @param \code{scal_e} A \emph{Boolean} specifying whether the weights should
+#'   be scaled (the default is \code{scal_e=TRUE}).
 #'
+#' @param \code{vo_l} A \emph{numeric} volatility target for scaling the
+#'   weights.  (The default is \code{0.001})
+#'   
 #' @return A column \emph{vector} of the same length as the number of columns
 #'   of \code{re_turns}.
 #'
@@ -1222,9 +1321,8 @@ sim_arima <- function(in_nov, co_eff) {
 #'   If \code{typ_e == "rank"} then it calculates the weights as the ranks
 #'   (order index) of the trailing Sharpe ratios of the portfolio assets.
 #' 
-#'   If \code{scal_e == TRUE} (the default) then \code{calc_weights()} scales
-#'   the weights so that the resulting portfolio has the same volatility as the
-#'   equally weighted portfolio.
+#'   If \code{scal_e == TRUE} (the default) then the weights are scaled so that
+#'   the resulting portfolio has a volatility equal to \code{vo_l}.
 #'   
 #'   \code{calc_weights()} applies dimensional regularization to calculate the
 #'   inverse of the covariance \emph{matrix} of returns from its eigen
@@ -1263,30 +1361,38 @@ sim_arima <- function(in_nov, co_eff) {
 #' }
 #' 
 #' @export
-calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, pro_b = 0.1, al_pha = 0.0, scal_e = TRUE) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, max_eigen, pro_b, al_pha, scal_e)
+calc_weights <- function(re_turns, typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0.0, scal_e = TRUE, vo_l = 0.01) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
 #' \code{RcppArmadillo}.
 #' 
-#' @param ex_cess A \emph{matrix} of excess returns data (the returns
+#' @param \code{ex_cess} A \emph{matrix} of excess returns data (the returns in
+#'   excess of the risk-free rate).
+#' @param \code{re_turns} A \emph{matrix} of excess returns data (the returns
 #'   in excess of the risk-free rate).
-#' @param re_turns A \emph{matrix} of excess returns data (the returns
-#'   in excess of the risk-free rate).
-#' @param start_points An \emph{integer vector} of start points.
-#' @param end_points An \emph{integer vector} of end points.
-#' @param typ_e A \emph{string} specifying the objective for calculating the
-#'   weights (see Details).
-#' @param max_eigen An \emph{integer} equal to the number of eigenvectors used
-#'   for calculating the regularized inverse of the covariance \emph{matrix}
-#'   (the default is the number of columns of \code{re_turns}).
-#' @param al_pha A numeric shrinkage intensity.  (The default is \code{0})
-#' @param scal_e A \emph{Boolean} specifying whether the weights should be
-#'   scaled (the default is \code{scal_e=TRUE}).
-#' @param co_eff A numeric multiplier of the weights.  (The default is
-#'   \code{1})
-#' @param bid_offer A numeric bid-offer spread.  (The default is \code{0})
+#' @param \code{start_points} An \emph{integer vector} of start points.
+#' @param \code{end_points} An \emph{integer vector} of end points.
+#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
+#'   the weights (see Details).
+#' @param \code{to_l} A \emph{numeric} tolerance level for discarding small
+#'   eigenvalues in order to regularize the matrix inverse.  (The default is
+#'   \code{0.001})
+#' @param \code{max_eigen} An \emph{integer} equal to the number of
+#'   eigenvectors used for calculating the regularized inverse of the
+#'   covariance \emph{matrix} (the default is the number of columns of
+#'   \code{re_turns}).
+#' @param \code{al_pha} The shrinkage intensity between \code{0} and \code{1}.
+#'   (the default is \code{0}).
+#' @param \code{scal_e} A \emph{Boolean} specifying whether the weights should
+#'   be scaled (the default is \code{scal_e=TRUE}).
+#' @param \code{vo_l} A \emph{numeric} volatility target for scaling the
+#'   weights.  (The default is \code{0.001})
+#' @param \code{co_eff} A \emph{numeric} multiplier of the weights.  (The
+#'   default is \code{1})
+#' @param \code{bid_offer} A \emph{numeric} bid-offer spread.  (The default is
+#'   \code{0})
 #'
 #' @return A column \emph{vector} of strategy returns, with the same length as
 #'   the number of rows of \code{re_turns}.
@@ -1350,7 +1456,7 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", max_eigen = 1L, pro_b =
 #' }
 #' 
 #' @export
-back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", max_eigen = 1L, pro_b = 0.1, al_pha = 0, scal_e = TRUE, co_eff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, max_eigen, pro_b, al_pha, scal_e, co_eff, bid_offer)
+back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0, scal_e = TRUE, vo_l = 0.01, co_eff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l, co_eff, bid_offer)
 }
 

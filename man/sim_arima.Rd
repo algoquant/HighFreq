@@ -8,9 +8,9 @@
 sim_arima(in_nov, co_eff)
 }
 \arguments{
-\item{in_nov}{A \emph{vector} of innovations (random numbers).}
+\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
 
-\item{co_eff}{A \emph{vector} of \emph{ARIMA} coefficients.}
+\item{\code{co_eff}}{A \emph{vector} of \emph{ARIMA} coefficients.}
 }
 \value{
 A column \emph{vector} of the same length as the argument

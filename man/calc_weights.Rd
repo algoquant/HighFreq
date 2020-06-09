@@ -4,24 +4,34 @@
 \alias{calc_weights}
 \title{Calculate the optimal portfolio weights for different objective functions.}
 \usage{
-calc_weights(re_turns, typ_e = "max_sharpe", max_eigen = 1L,
-  quan_tile = 0.1, al_pha = 0, scal_e = TRUE)
+calc_weights(re_turns, typ_e = "max_sharpe", to_l = 0.001,
+  max_eigen = 0L, pro_b = 0.1, al_pha = 0, scal_e = TRUE,
+  vo_l = 0.01)
 }
 \arguments{
-\item{re_turns}{A \emph{matrix} of excess returns data (the returns
+\item{\code{re_turns}}{A \emph{matrix} of excess returns data (the returns
 in excess of the risk-free rate).}
 
-\item{typ_e}{A \emph{string} specifying the objective for calculating the
-weights (see Details).}
+\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
+the weights (see Details).}
 
-\item{max_eigen}{An \emph{integer} equal to the number of eigenvectors used
-for calculating the regularized inverse of the covariance \emph{matrix}
-(the default is the number of columns of \code{re_turns}).}
+\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
+eigenvalues in order to regularize the matrix inverse.  (The default is
+\code{0.001})}
 
-\item{al_pha}{The shrinkage intensity (the default is \code{0}).}
+\item{\code{max_eigen}}{An \emph{integer} equal to the number of
+eigenvectors used for calculating the regularized inverse of the
+covariance \emph{matrix} (the default is the number of columns of
+\code{re_turns}).}
 
-\item{scal_e}{A \emph{Boolean} specifying whether the weights should be
-scaled (the default is \code{scal_e=TRUE}).}
+\item{\code{al_pha}}{The shrinkage intensity between \code{0} and \code{1}.
+(the default is \code{0}).}
+
+\item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
+be scaled (the default is \code{scal_e=TRUE}).}
+
+\item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
+weights.  (The default is \code{0.001})}
 }
 \value{
 A column \emph{vector} of the same length as the number of columns
@@ -48,9 +58,8 @@ The function \code{calc_weights()} calculates the optimal portfolio
   If \code{typ_e == "rank"} then it calculates the weights as the ranks
   (order index) of the trailing Sharpe ratios of the portfolio assets.
 
-  If \code{scal_e == TRUE} (the default) then \code{calc_weights()} scales
-  the weights so that the resulting portfolio has the same volatility as the
-  equally weighted portfolio.
+  If \code{scal_e == TRUE} (the default) then the weights are scaled so that
+  the resulting portfolio has a volatility equal to \code{vo_l}.
   
   \code{calc_weights()} applies dimensional regularization to calculate the
   inverse of the covariance \emph{matrix} of returns from its eigen

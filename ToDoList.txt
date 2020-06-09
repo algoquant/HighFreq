@@ -76,28 +76,24 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping returns: the variance of returns aggregated over k time periods
+
++ [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
+
 + [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
-+ [ ] Create RcppArmadillo function calc_covar() to calculate a nonparametric (robust) covariance matrix
++ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Two possible methods are: 
 Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
 Hodges-Lehmann estimator: 
 
-+ [ ] In function back_test() add parameter for lagging the weights - for applying the weights with a lag
-
-+ [ ] In function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
++ [ ] In function back_test() add parameter for lagging the weights - for applying the weights with an extra lag
 
 + [ ] In function calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
 
-+ [ ] In function calc_inv() regularize the inverse by discarding small eigenvalues: use arma::pinv()
-
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
-+ [x] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
-
-+ [x] Change license from GPL to MPL, similar to package data.table.
-
-+ [ ] Create RcppArmadillo function calc_quantile() to calculate or update the quantile of a vector of numbers
++ [ ] Create function calc_quantile() to calculate or update the quantile of a vector of numbers
 The value of the quantile can be updated based on the old quantile value and the new updated vector values.
 If there are very few new vector values and if they're all far from the old quantile value, then the quantile may remain unchanged.
 Apply it to the calculation or rolling quantiles.
@@ -140,7 +136,7 @@ For example, if you replace NumericVector with std::vector<double> then you lose
 cpp::NumericVector over std::vector<double>
 https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
-+ [ ] Create RcppArmadillo function calc_alpha() to calculate the performance of an asset relative to an index. 
++ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
 calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
 One robust method should be the Wilcoxon W statistic.
 Another robust method should be the Kruskal-Wallis H statistic as follows:
@@ -149,14 +145,14 @@ Rank the vector of combined returns.
 Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
 The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
 
-+ [ ] Create RcppArmadillo function calc_ret_stats() for calculating aggregations (statistics) over a vector of returns
++ [ ] Create function calc_ret_stats() for calculating aggregations (statistics) over a vector of returns
 Examples of statistics are the mean, median, Sharpe ratio (t-value), Wilcoxon statistic, etc.
 
-+ [ ] Create RcppArmadillo function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
++ [ ] Create function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
 It should return a named vector of coefficients, z-scores, R-squared, etc.
 It should calculate Pearson, Spearman, and Kendall correlations.
 
-+ [ ] Create RcppArmadillo function roll_reg() for performing rolling PCA and robust regressions  
++ [ ] Create function roll_reg() for performing rolling PCA and robust regressions  
 Add option to perform rolling predictions using the regressions.
 
 + [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
@@ -308,6 +304,19 @@ https://cran.r-project.org/web/packages/meboot/index.html
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
++ [x] Create the functions called agg_ohlc() and to_period() for aggregating an OHLC time series to lower periodicity, similar to xts::to.period()
+
++ [x] Modify the functions diff_it() and diff_vec() so they don't use arma::diff(), because it doesn't apply lags greater than one
+
++ [x] In function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
+
++ [x] In function calc_inv() add option to regularize the inverse by discarding small eigenvalues less than a tolerance level: use arma::pinv()
+This is because the best choice for max_eigen can change in a rolling calculation, so it's better to introduce a tolerance cutoff.
+
++ [x] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
+
++ [x] Change license from GPL to MPL, similar to package data.table.
+
 + [x] Rename roll_conv() to roll_conv_ref(), and modify roll_conv() so it doesn't copy over the input argument mat_rix.
 Copying over the input argument mat_rix causes snooping data leak in backtest.
 
@@ -444,8 +453,6 @@ The time of day can be used as an input into a seasonal model
 
 + [ ] Create volume-weighted Hurst and density plots  
 https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
-
-+ [ ] Create function to_period_rolling() for aggregating an OHLC time series to lower periodicity, similar to to_period(), but doesn't use end points,  
 
 + [ ] Modify function season_ality() to discard elements corresponding to infrequent observations ?
 

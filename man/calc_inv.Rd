@@ -5,10 +5,14 @@
 \title{Calculate the regularized inverse of the covariance \emph{matrix} of returns
 using \code{RcppArmadillo}.}
 \usage{
-calc_inv(mat_rix, max_eigen)
+calc_inv(re_turns, to_l = 0.001, max_eigen = 0L)
 }
 \arguments{
-\item{\code{mat_rix}}{A \emph{matrix} of returns data.}
+\item{\code{re_turns}}{A \emph{matrix} of returns data.}
+
+\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
+eigenvalues in order to regularize the matrix inverse.  (The default is
+\code{0.001})}
 
 \item{\code{max_eigen}}{An \emph{integer} equal to the regularization
 intensity (the number of eigenvalues and eigenvectors used for calculating
@@ -23,22 +27,26 @@ using \code{RcppArmadillo}.
 }
 \details{
 The function calc_inv() calculates the regularized inverse of the
-  \emph{covariance matrix}, by truncating the number of eigenvectors to
-  \code{max_eigen}. The function \code{calc_inv()} first calculates the
-  covariance \emph{matrix} of the \code{mat_rix}, and then it calculates the
-  regularized inverse from the truncated eigen decomposition. It uses only
-  the largest \code{max_eigen} eigenvalues and their corresponding
-  eigenvectors.
+  \emph{covariance matrix}, by discarding eigenvectors with small
+  eigenvalues less than the tolerance level \code{to_l}.
+  The function \code{calc_inv()} first calculates the covariance
+  \emph{matrix} of the \code{re_turns}, and then it calculates its
+  regularized inverse.
+  If \code{max_eigen} is not specified then it calculates the
+  regularized inverse using the function \code{arma::pinv()}.
+  If \code{max_eigen} is specified then it calculates the regularized
+  inverse using eigen decomposition with only the largest \code{max_eigen}
+  eigenvalues and their corresponding eigenvectors.
 }
 \examples{
 \dontrun{
 # Create random matrix
-mat_rix <- matrix(rnorm(500), nc=5)
+re_turns <- matrix(rnorm(500), nc=5)
 max_eigen <- 3
 # Calculate regularized inverse using RcppArmadillo
-in_verse <- HighFreq::calc_inv(mat_rix, max_eigen)
+in_verse <- HighFreq::calc_inv(re_turns, max_eigen)
 # Calculate regularized inverse from eigen decomposition in R
-ei_gen <- eigen(cov(mat_rix))
+ei_gen <- eigen(cov(re_turns))
 inverse_r <-  ei_gen$vectors[, 1:max_eigen] \%*\% (t(ei_gen$vectors[, 1:max_eigen]) / ei_gen$values[1:max_eigen])
 # Compare RcppArmadillo with R
 all.equal(in_verse, inverse_r)

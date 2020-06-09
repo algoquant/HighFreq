@@ -35,13 +35,13 @@ The function \code{calc_lm()} performs the same calculations as the
 # Define design matrix with explanatory variables
 len_gth <- 100; n_var <- 5
 de_sign <- matrix(rnorm(n_var*len_gth), nc=n_var)
-# response equals linear form plus error terms
+# Response equals linear form plus error terms
 weight_s <- rnorm(n_var)
 res_ponse <- -3 + de_sign \%*\% weight_s + rnorm(len_gth, sd=0.5)
-# perform multivariate regression using lm()
+# Perform multivariate regression using lm()
 reg_model <- lm(res_ponse ~ de_sign)
 sum_mary <- summary(reg_model)
-# perform multivariate regression using calc_lm()
+# Perform multivariate regression using calc_lm()
 reg_model_arma <- calc_lm(res_ponse=res_ponse, de_sign=de_sign)
 reg_model_arma$coefficients
 # Compare the outputs of both functions

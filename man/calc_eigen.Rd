@@ -5,10 +5,10 @@
 \title{Calculate the eigen decomposition of the covariance \emph{matrix} of returns
 using \code{RcppArmadillo}.}
 \usage{
-calc_eigen(mat_rix)
+calc_eigen(re_turns)
 }
 \arguments{
-\item{\code{mat_rix}}{A numeric \emph{matrix} or \emph{time series} of
+\item{\code{re_turns}}{A numeric \emph{matrix} or \emph{time series} of
 returns data.}
 }
 \value{

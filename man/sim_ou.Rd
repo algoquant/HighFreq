@@ -7,13 +7,13 @@
 sim_ou(eq_price, vol_at, the_ta, in_nov)
 }
 \arguments{
-\item{eq_price}{The equilibrium price.}
+\item{\code{eq_price}}{The equilibrium price.}
 
-\item{vol_at}{The volatility of returns.}
+\item{\code{vol_at}}{The volatility of returns.}
 
-\item{the_ta}{The strength of mean reversion.}
+\item{\code{the_ta}}{The strength of mean reversion.}
 
-\item{in_nov}{A \emph{vector} of innovations (random numbers).}
+\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
 A column \emph{vector} representing the \emph{time series} of

@@ -1005,7 +1005,7 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 
 
 #' Calculate the aggregation (weighted average) of a statistical estimator over
-#' a \emph{OHLC} time series.
+#' a \emph{OHLC} time series using \code{R}.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
@@ -1023,6 +1023,8 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 #'   representing the volume weighted average of an estimator over the
 #'   \emph{OHLC} time series of prices.  By default the sum is trade volume
 #'   weighted.
+#'   
+#'   The function \code{agg_regate()} is implemented in \code{R} code.
 #'
 #' @examples
 #' # Calculate weighted average variance for SPY (single number)
