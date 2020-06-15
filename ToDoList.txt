@@ -76,16 +76,27 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Enhance the function calc_var() to calculate the variance for overlapping returns: the variance of returns aggregated over k time periods
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods ?
+
++ [ ] Modify the functions roll_var() and roll_var_ohlc() to perform aggregations over end points if eve_ry argument is passed in
+
++ [x] Modify the function agg_ohlc() so it can accept either one or two columns of data (second column for volume), or four or five columns of OHLC data
+
++ [x] Rename the function to_period() to roll_ohlc()
+
++ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
+Several possible methods are: 
+The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
+cov = (VAR(r1+r2) - VAR(r1-r2))/4
+Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
+Hodges-Lehmann estimator: 
+
++ [ ] Create a function called get_fun() for
+Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation
 
 + [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
 
 + [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
-+ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
-Two possible methods are: 
-Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
-Hodges-Lehmann estimator: 
 
 + [ ] In function back_test() add parameter for lagging the weights - for applying the weights with an extra lag
 
@@ -303,6 +314,8 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Create a function called calc_endpoints() to calculate the end points, similar to rutils::calc_endpoints()
 
 + [x] Create the functions called agg_ohlc() and to_period() for aggregating an OHLC time series to lower periodicity, similar to xts::to.period()
 

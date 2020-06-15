@@ -180,6 +180,65 @@ diff_it <- function(mat_rix, lagg = 1L, padd = TRUE) {
     .Call('_HighFreq_diff_it', PACKAGE = 'HighFreq', mat_rix, lagg, padd)
 }
 
+#' Calculate a vector of end points that divides a vector into equal intervals.
+#'
+#' @param \code{len_gth} An \emph{integer} equal to the length of the vector to
+#'   be divide into equal intervals.
+#'   
+#' @param \code{agg} The number of elements in each interval.
+#' 
+#' @param \code{front} \emph{Boolean} argument: if \code{TRUE} then add a stub
+#'   interval at the beginning, else add a stub interval at the end.  (default
+#'   is \code{TRUE})
+#'
+#' @return An \emph{integer} vector of equally spaced end points (vector of
+#'   integers).
+#'
+#' @details The end points are a vector of integers which divide the vector of
+#'   length equal to \code{len_gth} into equally spaced intervals.
+#'   If a whole number of intervals doesn't fit over the vector, then
+#'   \code{calc_endpoints()} adds a stub interval either at the beginning (the
+#'   default) or at the end.
+#'   The end points are shifted by \code{-1} because indexing starts at
+#'   \code{0} in \code{C++} code.
+#'
+#'   The function \code{calc_endpoints()} is similar to the function
+#'   \code{rutils::calc_endpoints()} from package
+#'   \href{https://github.com/algoquant/rutils}{rutils}.
+#'   
+#'   The end points produced by \code{calc_endpoints()} don't include the first
+#'   placeholder end point, which is usually equal to zero.
+#'   For example, consider the end points for a vector of length \code{20}
+#'   divided into intervals of length \code{5}: \code{0, 5, 10, 15, 20}.
+#'   In order for all the differences between neighboring end points to be
+#'   equal to \code{5}, the first end point must be equal to \code{0}.
+#'   The first end point is a placeholder and doesn't correspond to any vector
+#'   element.
+#'   
+#'   This works in \code{R} code because the vector element corresponding to
+#'   index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
+#'   1)]} produces \code{4}.  So in \code{R} we can select vector elements
+#'   using the end points starting at zero.
+#'   
+#'   In \code{C++} the end points must be shifted by \code{-1} because indexing
+#'   starts at \code{0}: \code{-1, 4, 9, 14, 19}.  But there is no vector
+#'   element corresponding to index \code{-1}. So in \code{C++} we cannot
+#'   select vector elements using the end points starting at \code{-1}. The
+#'   solution is to drop the first placeholder end point.
+#'   
+#' @examples
+#' # Calculate end points without a stub interval
+#' HighFreq::calc_endpoints(25, 5)
+#' # Calculate end points with initial stub interval
+#' HighFreq::calc_endpoints(23, 5)
+#' # Calculate end points with a stub interval at the end
+#' HighFreq::calc_endpoints(23, 5, FALSE)
+#'
+#' @export
+calc_endpoints <- function(len_gth, agg, front = TRUE) {
+    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', len_gth, agg, front)
+}
+
 #' Multiply the columns or rows of a \emph{matrix} times a \emph{vector},
 #' element-wise.
 #' 
@@ -225,12 +284,12 @@ diff_it <- function(mat_rix, lagg = 1L, padd = TRUE) {
 #' vec_tor <- round(runif(5e2), 2)
 #' prod_uct <- vec_tor*mat_rix
 #' # Multiply the matrix in place
-#' mult_vec_mat(vec_tor, mat_rix)
+#' HighFreq::mult_vec_mat(vec_tor, mat_rix)
 #' all.equal(prod_uct, mat_rix)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'     rcpp=mult_vec_mat(vec_tor, mat_rix),
+#'     rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
 #'     rcode=vec_tor*mat_rix,
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' 
@@ -239,12 +298,12 @@ diff_it <- function(mat_rix, lagg = 1L, padd = TRUE) {
 #' vec_tor <- round(runif(5e2), 2)
 #' prod_uct <- t(vec_tor*t(mat_rix))
 #' # Multiply the matrix in place
-#' mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
+#' HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
 #' all.equal(prod_uct, mat_rix)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'     rcpp=mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
+#'     rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
 #'     rcode=t(vec_tor*t(mat_rix)),
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -417,9 +476,10 @@ calc_var_vec <- function(re_turns) {
 #' Calculate the variance of the columns of a \emph{matrix} or \emph{time
 #' series} using \code{RcppArmadillo}.
 #' 
-#' @param \code{mat_rix} A \emph{matrix} or a \emph{time series}.
+#' @param \code{re_turns} A \emph{matrix} or a \emph{time series} of data.
 #'
-#' @return A row vector equal to the variance of the \emph{matrix} columns.
+#' @return A row vector equal to the variance of the columns of \code{re_turns}
+#'   matrix.
 #'
 #' @details The function \code{calc_var()} calculates the variance of the
 #'   columns of a \emph{matrix} using \code{RcppArmadillo}. 
@@ -449,8 +509,8 @@ calc_var_vec <- function(re_turns) {
 #' }
 #' 
 #' @export
-calc_var <- function(mat_rix) {
-    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', mat_rix)
+calc_var <- function(re_turns) {
+    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', re_turns)
 }
 
 #' Calculate the variance of an \emph{OHLC time series}, using different range
@@ -641,26 +701,36 @@ calc_lm <- function(res_ponse, de_sign) {
     .Call('_HighFreq_calc_lm', PACKAGE = 'HighFreq', res_ponse, de_sign)
 }
 
-#' Aggregate an \emph{OHLC} time series to a single \emph{OHLC} bar.
+#' Aggregate a time series of data into a single bar of \emph{OHLC} data.
 #'
 #' @export
-#' @param \code{oh_lc} A \emph{matrix} or \emph{time series} with four or
-#'   five columns of \emph{OHLC} data.
+#' @param \code{t_series} A \emph{matrix} or \emph{time series} with multiple
+#'   columns of data.
 #'
-#' @return A \emph{single row matrix} with the \emph{open}, \emph{high},
-#'   \emph{low}, and \emph{close} values, and also the total \emph{volume} (if
-#'   provided in the fifth column of \code{oh_lc}).
+#' @return A \emph{matrix} containing a single row, with the \emph{open},
+#'   \emph{high}, \emph{low}, and \emph{close} values, and also the total
+#'   \emph{volume} (if provided as either the second or fifth column of
+#'   \code{t_series}).
 #'
-#' @details The function \code{agg_ohlc()} calculates the \emph{open} value as
-#'   equal to the \emph{open} of the first row of \code{oh_lc}.
+#' @details The function \code{agg_ohlc()} aggregates a time series of data
+#'   into a single bar of \emph{OHLC} data.
+#'   It can accept either a single column of data or four columns of
+#'   \emph{OHLC} data.
+#'   It can also accept an additional column containing the trading volume.
+#'   
+#' The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
+#' the \emph{open} value of the first row of \code{t_series}.
 #'   The \emph{high} value as the maximum of the \emph{high} column of
-#'   \code{oh_lc}.
+#'   \code{t_series}.
 #'   The \emph{low} value as the minimum of the \emph{low} column of
-#'   \code{oh_lc}.
+#'   \code{t_series}.
 #'   The \emph{close} value as the \emph{close} of the last row of
-#'   \code{oh_lc}.
+#'   \code{t_series}.
 #'   The \emph{volume} value as the sum of the \emph{volume} column of
-#'   \code{oh_lc}.
+#'   \code{t_series}.
+#'
+#'   For a single column of data, the \emph{open}, \emph{high}, \emph{low}, and
+#'   \emph{close} values are all the same.
 #'
 #' @examples
 #' \dontrun{
@@ -675,16 +745,15 @@ calc_lm <- function(res_ponse, de_sign) {
 #' }
 #' 
 #' @export
-agg_ohlc <- function(oh_lc) {
-    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', oh_lc)
+agg_ohlc <- function(t_series) {
+    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', t_series)
 }
 
 #' Aggregate an \emph{OHLC} time series to a lower periodicity.
 #'
 #' Given an \emph{OHLC} time series at high periodicity (say seconds),
-#' calculates the \emph{OHLC} prices at lower periodicity (say minutes).
+#' calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 #'
-#' @export
 #' @param \code{oh_lc} A \emph{matrix} or \emph{time series} with four or
 #'   five columns of \emph{OHLC} data.
 #'   
@@ -694,11 +763,15 @@ agg_ohlc <- function(oh_lc) {
 #'   columns as \code{oh_lc}, and the number of rows equal to the number of
 #'   \emph{end_points} minus one.
 #'   
-#' @details The function \code{to_period()} performs a loop over the
-#'   \emph{end_points} and calls function \code{agg_ohlc()}.
+#' @details The function \code{roll_ohlc()} performs a loop over the
+#'   \emph{end_points}, along the rows of the \code{oh_lc} data. At each
+#'   \emph{end_point}, it selects the past rows of \code{oh_lc} data, starting
+#'   at the first bar after the previous \emph{end_point}, and then calls the
+#'   function \code{agg_ohlc()} on the selected \code{oh_lc} data to calculate
+#'   the aggregations.
 #'
-#'   The function \code{to_period()} performs a similar aggregation as function
-#'   \code{to.period()} from package
+#'   The function \code{roll_ohlc()} performs a similar aggregation as the
+#'   function \code{to.period()} from package
 #'   \href{https://cran.r-project.org/web/packages/xts/index.html}{xts}.
 #'
 #' @examples
@@ -708,15 +781,15 @@ agg_ohlc <- function(oh_lc) {
 #' # Define end points at 25 day intervals
 #' end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
 #' # Aggregate over end_points:
-#' ohlc_agg <- HighFreq::to_period(oh_lc=oh_lc, end_points=end_points-1)
+#' ohlc_agg <- HighFreq::roll_ohlc(oh_lc=oh_lc, end_points=(end_points-1))
 #' # Compare with xts::to.period()
 #' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 #' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
 #' }
 #' 
 #' @export
-to_period <- function(oh_lc, end_points) {
-    .Call('_HighFreq_to_period', PACKAGE = 'HighFreq', oh_lc, end_points)
+roll_ohlc <- function(oh_lc, end_points) {
+    .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', oh_lc, end_points)
 }
 
 #' Calculate the rolling sum over a \emph{vector} or a single-column \emph{time

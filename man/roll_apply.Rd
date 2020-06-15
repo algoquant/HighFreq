@@ -3,7 +3,7 @@
 \name{roll_apply}
 \alias{roll_apply}
 \title{Apply an aggregation function over a rolling look-back interval and the end
-points of an \emph{OHLC} time series.}
+points of an \emph{OHLC} time series, using \code{R} code.}
 \usage{
 roll_apply(x_ts, agg_fun, look_back = 2, end_points = seq_along(x_ts),
   by_columns = FALSE, out_xts = TRUE, ...)
@@ -36,12 +36,15 @@ Either an \emph{xts} time series with the number of rows equal to the
 }
 \description{
 Apply an aggregation function over a rolling look-back interval and the end
-points of an \emph{OHLC} time series.
+points of an \emph{OHLC} time series, using \code{R} code.
 }
 \details{
 The function \code{roll_apply()} applies an aggregation function 
   over a rolling look-back interval attached at the end points of an
   \emph{OHLC} time series.
+
+  The function \code{roll_apply()} is implemented in \code{R} code.
+
 
   \code{HighFreq::roll_apply()} performs similar operations to the functions
   \code{rollapply()} and \code{period.apply()} from package 

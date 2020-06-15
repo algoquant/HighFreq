@@ -2,33 +2,43 @@
 % Please edit documentation in R/RcppExports.R
 \name{agg_ohlc}
 \alias{agg_ohlc}
-\title{Aggregate an \emph{OHLC} time series to a single \emph{OHLC} bar.}
+\title{Aggregate a time series of data into a single bar of \emph{OHLC} data.}
 \usage{
-agg_ohlc(oh_lc)
+agg_ohlc(t_series)
 }
 \arguments{
-\item{\code{oh_lc}}{A \emph{matrix} or \emph{time series} with four or
-five columns of \emph{OHLC} data.}
+\item{\code{t_series}}{A \emph{matrix} or \emph{time series} with multiple
+columns of data.}
 }
 \value{
-A \emph{single row matrix} with the \emph{open}, \emph{high},
-  \emph{low}, and \emph{close} values, and also the total \emph{volume} (if
-  provided in the fifth column of \code{oh_lc}).
+A \emph{matrix} containing a single row, with the \emph{open},
+  \emph{high}, \emph{low}, and \emph{close} values, and also the total
+  \emph{volume} (if provided as either the second or fifth column of
+  \code{t_series}).
 }
 \description{
-Aggregate an \emph{OHLC} time series to a single \emph{OHLC} bar.
+Aggregate a time series of data into a single bar of \emph{OHLC} data.
 }
 \details{
-The function \code{agg_ohlc()} calculates the \emph{open} value as
-  equal to the \emph{open} of the first row of \code{oh_lc}.
+The function \code{agg_ohlc()} aggregates a time series of data
+  into a single bar of \emph{OHLC} data.
+  It can accept either a single column of data or four columns of
+  \emph{OHLC} data.
+  It can also accept an additional column containing the trading volume.
+  
+The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
+the \emph{open} value of the first row of \code{t_series}.
   The \emph{high} value as the maximum of the \emph{high} column of
-  \code{oh_lc}.
+  \code{t_series}.
   The \emph{low} value as the minimum of the \emph{low} column of
-  \code{oh_lc}.
+  \code{t_series}.
   The \emph{close} value as the \emph{close} of the last row of
-  \code{oh_lc}.
+  \code{t_series}.
   The \emph{volume} value as the sum of the \emph{volume} column of
-  \code{oh_lc}.
+  \code{t_series}.
+
+  For a single column of data, the \emph{open}, \emph{high}, \emph{low}, and
+  \emph{close} values are all the same.
 }
 \examples{
 \dontrun{

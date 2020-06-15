@@ -58,12 +58,12 @@ mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
 vec_tor <- round(runif(5e2), 2)
 prod_uct <- vec_tor*mat_rix
 # Multiply the matrix in place
-mult_vec_mat(vec_tor, mat_rix)
+HighFreq::mult_vec_mat(vec_tor, mat_rix)
 all.equal(prod_uct, mat_rix)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    rcpp=mult_vec_mat(vec_tor, mat_rix),
+    rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
     rcode=vec_tor*mat_rix,
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 
@@ -72,12 +72,12 @@ mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
 vec_tor <- round(runif(5e2), 2)
 prod_uct <- t(vec_tor*t(mat_rix))
 # Multiply the matrix in place
-mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
+HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
 all.equal(prod_uct, mat_rix)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    rcpp=mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
+    rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
     rcode=t(vec_tor*t(mat_rix)),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

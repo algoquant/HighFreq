@@ -3,7 +3,7 @@
 \name{agg_regate}
 \alias{agg_regate}
 \title{Calculate the aggregation (weighted average) of a statistical estimator over
-a \emph{OHLC} time series using \code{R}.}
+a \emph{OHLC} time series using \code{R} code.}
 \usage{
 agg_regate(oh_lc, mo_ment = "run_variance", weight_ed = TRUE, ...)
 }
@@ -25,7 +25,7 @@ A single \emph{numeric} value equal to the volume weighted average of
 }
 \description{
 Calculate the aggregation (weighted average) of a statistical estimator over
-a \emph{OHLC} time series using \code{R}.
+a \emph{OHLC} time series using \code{R} code.
 }
 \details{
 The function \code{agg_regate()} calculates a single number

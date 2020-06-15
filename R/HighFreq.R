@@ -2,6 +2,8 @@
 #' @importFrom Rcpp evalCpp
 #' @exportPattern "^[[:alpha:]]+"
 
+
+##########################################################################
 #' Calculate a random \emph{TAQ} time series of prices and trading volumes, in
 #' \emph{xts} format.
 #'
@@ -58,6 +60,7 @@ random_taq <- function(vol_at=6.5e-5, dri_ft=0.0,
 
 
 
+##########################################################################
 #' Calculate a random \emph{OHLC} time series of prices and trading volumes, in
 #' \emph{xts} format.
 #'
@@ -127,6 +130,7 @@ random_ohlc <- function(oh_lc=NULL, re_duce=TRUE, vol_at=6.5e-5, dri_ft=0.0,
 
 
 
+##########################################################################
 #' Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
 #' by adding adjustment terms to its prices.
 #'
@@ -173,6 +177,7 @@ remove_jumps <- function(oh_lc) {
 
 
 
+##########################################################################
 #' Calculate single period percentage returns from either \emph{TAQ} or
 #' \emph{OHLC} prices.
 #'
@@ -240,6 +245,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
 
 
 
+##########################################################################
 #' Calculate a \emph{Boolean} vector that identifies extreme tail values in a
 #' single-column \emph{xts} time series or vector, over a rolling look-back
 #' interval.
@@ -307,6 +313,7 @@ which_extreme <- function(x_ts, look_back=51, vol_mult=2) {
 
 
 
+##########################################################################
 #' Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
 #' a single-column \emph{xts} time series or vector, over a rolling interval.
 #'
@@ -386,6 +393,7 @@ which_jumps <- function(x_ts, look_back=51, vol_mult=2) {
 
 
 
+##########################################################################
 #' Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 #' aggregation.
 #'
@@ -445,6 +453,7 @@ scrub_taq <- function(ta_q, look_back=51, vol_mult=2, tzone="America/New_York") 
 
 
 
+##########################################################################
 #' Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
 #' \emph{OHLC} format.
 #'
@@ -532,6 +541,7 @@ scrub_agg <- function(ta_q, look_back=51, vol_mult=2,
 
 
 
+##########################################################################
 #' Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
 #' single symbol, and save the \emph{OHLC} time series to a single
 #' \sQuote{\code{*.RData}} file.
@@ -610,6 +620,7 @@ da_ta <- lapply(file_names, function(file_name) {
 
 
 
+##########################################################################
 #' Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 #' it to multiple \sQuote{\code{*.RData}} files.
 #'
@@ -670,6 +681,7 @@ save_taq <- function(sym_bol,
 
 
 
+##########################################################################
 #' Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
 #' single symbol. Calculate returns and save them to a single
 #' \sQuote{\code{*.RData}} file.
@@ -747,6 +759,7 @@ save_rets <- function(sym_bol,
 
 
 
+##########################################################################
 #' Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 #' and save them to a single \sQuote{\code{*.RData}} file, without aggregation.
 #'
@@ -792,6 +805,7 @@ save_rets_ohlc <- function(sym_bol,
 
 
 
+##########################################################################
 #' Calculate a time series of point estimates of variance for an \emph{OHLC}
 #' time series, using different range estimators for variance.
 #'
@@ -908,6 +922,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 
 
 
+##########################################################################
 #' Calculate time series of skew estimates from a \emph{OHLC} time series,
 #' assuming zero drift.
 #'
@@ -965,6 +980,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 
 
 
+##########################################################################
 #' Calculate time series of Sharpe-like statistics for each row of a \emph{OHLC}
 #' time series.
 #'
@@ -1004,8 +1020,9 @@ run_sharpe <- function(oh_lc, calc_method="close") {
 
 
 
+##########################################################################
 #' Calculate the aggregation (weighted average) of a statistical estimator over
-#' a \emph{OHLC} time series using \code{R}.
+#' a \emph{OHLC} time series using \code{R} code.
 #'
 #' @export
 #' @param oh_lc An \emph{OHLC} time series of prices and trading volumes, in
@@ -1048,6 +1065,7 @@ agg_regate <- function(oh_lc, mo_ment="run_variance", weight_ed=TRUE, ...) {
 
 
 
+##########################################################################
 #' Calculate the volume-weighted average price of an \emph{OHLC} time series
 #' over a rolling look-back interval.
 #'
@@ -1096,6 +1114,7 @@ roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
 
 
 
+##########################################################################
 #' Calculate a vector of statistics over an \emph{OHLC} time series, and
 #' calculate a rolling mean over the statistics.
 #'
@@ -1149,6 +1168,7 @@ roll_moment <- function(oh_lc, mo_ment="run_variance", look_back=11, weight_ed=T
 
 
 
+##########################################################################
 #' Calculate the variance of an \emph{OHLC} time series, using different range
 #' estimators for variance.
 #'
@@ -1239,6 +1259,7 @@ calc_var_ohlc_r <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 
 
 
+##########################################################################
 #' Calculate a time series of Sharpe ratios over a rolling look-back interval
 #' for an \emph{OHLC} time series.
 #'
@@ -1271,6 +1292,7 @@ roll_sharpe <- function(oh_lc, look_back=11) {
 
 
 
+##########################################################################
 #' Calculate a time series of \emph{Hurst} exponents over a rolling look-back
 #' interval.
 #'
@@ -1322,8 +1344,9 @@ roll_hurst <- function(oh_lc, look_back=11) {
 
 
 
+##########################################################################
 #' Apply an aggregation function over a rolling look-back interval and the end
-#' points of an \emph{OHLC} time series.
+#' points of an \emph{OHLC} time series, using \code{R} code.
 #'
 #' @export
 #' @param x_ts An \emph{OHLC} time series of prices and trading volumes, in
@@ -1347,6 +1370,9 @@ roll_hurst <- function(oh_lc, look_back=11) {
 #' @details The function \code{roll_apply()} applies an aggregation function 
 #'   over a rolling look-back interval attached at the end points of an
 #'   \emph{OHLC} time series.
+#'
+#'   The function \code{roll_apply()} is implemented in \code{R} code.
+#'
 #'
 #'   \code{HighFreq::roll_apply()} performs similar operations to the functions
 #'   \code{rollapply()} and \code{period.apply()} from package 
@@ -1445,6 +1471,7 @@ roll_apply <- function(x_ts, agg_fun, look_back=2, end_points=seq_along(x_ts),
 
 
 
+##########################################################################
 #' Perform a backtest simulation of a trading strategy (model) over a vector of
 #' end points along a time series of prices.
 #'
@@ -1553,6 +1580,7 @@ roll_backtest <- function(x_ts,
 
 
 
+##########################################################################
 #' Perform seasonality aggregations over a single-column \emph{xts} time series.
 #'
 #' @export
