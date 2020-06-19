@@ -8,13 +8,13 @@ calculate a \emph{vector} of z-scores of the residuals.}
 roll_zscores(res_ponse, de_sign, look_back)
 }
 \arguments{
-\item{res_ponse}{A \emph{vector} of response data.}
+\item{\code{res_ponse}}{A \emph{vector} of response data.}
 
-\item{de_sign}{A \emph{matrix} of design (predictor i.e.
+\item{\code{de_sign}}{A \emph{matrix} of design (predictor i.e.
 explanatory) data.}
 
-\item{look_back}{The length of the look-back interval, equal to the number
-of elements of data used for calculating the regressions.}
+\item{\code{look_back}}{The length of the look-back interval, equal to the
+number of elements of data used for calculating the regressions.}
 }
 \value{
 A column \emph{vector} of the same length as the number of rows of

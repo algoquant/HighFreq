@@ -8,7 +8,7 @@ using \code{RcppArmadillo}.}
 calc_inv(re_turns, to_l = 0.001, max_eigen = 0L)
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{matrix} of returns data.}
+\item{\code{re_turns}}{A \emph{time series} or \emph{matrix} of returns data.}
 
 \item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
 eigenvalues in order to regularize the matrix inverse.  (The default is

@@ -2,23 +2,23 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_ohlc}
 \alias{roll_ohlc}
-\title{Aggregate an \emph{OHLC} time series to a lower periodicity.}
+\title{Aggregate a time series to an \emph{OHLC} time series with lower
+periodicity.}
 \usage{
-roll_ohlc(oh_lc, end_points)
+roll_ohlc(t_series, end_points)
 }
 \arguments{
-\item{\code{oh_lc}}{A \emph{matrix} or \emph{time series} with four or
-five columns of \emph{OHLC} data.}
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} with multiple
+columns of data.}
 
 \item{\emph{end_points}}{An integer \emph{vector} of end points.}
 }
 \value{
-A \emph{matrix} with \emph{OHLC} data, with the same number of
-  columns as \code{oh_lc}, and the number of rows equal to the number of
-  \emph{end_points} minus one.
+A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
+  to the number of \emph{end_points} minus one.
 }
 \description{
-Given an \emph{OHLC} time series at high periodicity (say seconds),
+Given a time series of prices at a higher periodicity (say seconds), it
 calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 }
 \details{
@@ -28,6 +28,9 @@ The function \code{roll_ohlc()} performs a loop over the
   at the first bar after the previous \emph{end_point}, and then calls the
   function \code{agg_ohlc()} on the selected \code{oh_lc} data to calculate
   the aggregations.
+  It can accept either a single column of data or four columns of
+  \emph{OHLC} data.
+  It can also accept an additional column containing the trading volume.
 
   The function \code{roll_ohlc()} performs a similar aggregation as the
   function \code{to.period()} from package

@@ -8,8 +8,8 @@ using \code{RcppArmadillo}.}
 calc_eigen(re_turns)
 }
 \arguments{
-\item{\code{re_turns}}{A numeric \emph{matrix} or \emph{time series} of
-returns data.}
+\item{\code{re_turns}}{A \emph{time series} or \emph{matrix} of returns
+data.}
 }
 \value{
 A list with two elements: a \emph{vector} of eigenvalues 

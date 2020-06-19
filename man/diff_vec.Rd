@@ -2,13 +2,13 @@
 % Please edit documentation in R/RcppExports.R
 \name{diff_vec}
 \alias{diff_vec}
-\title{Calculate the differences of a \emph{vector} or a single-column
-\emph{time series} using \emph{RcppArmadillo}.}
+\title{Calculate the differences between the neighboring elements of a
+single-column \emph{time series} or a \emph{vector}.}
 \usage{
-diff_vec(vec_tor, lagg = 1L, padd = TRUE)
+diff_vec(t_series, lagg = 1L, padd = TRUE)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector} or single-column \emph{time series}.}
+\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of time periods to
 lag when calculating the differences (the default is \code{lagg=1}).}
@@ -22,12 +22,12 @@ A column \emph{vector} containing the differences between the
   elements of the input vector.
 }
 \description{
-Calculate the differences of a \emph{vector} or a single-column
-\emph{time series} using \emph{RcppArmadillo}.
+Calculate the differences between the neighboring elements of a
+single-column \emph{time series} or a \emph{vector}.
 }
 \details{
 The function \code{diff_vec()} calculates the differences between
-  the input \emph{vector} or \emph{time series} and its lagged version. 
+  the input \emph{time series} or \emph{vector} and its lagged version. 
   
   The argument \code{lagg} specifies the number of lags.  For example, if
   \code{lagg=3} then the differences will be taken between each element

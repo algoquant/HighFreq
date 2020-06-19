@@ -11,11 +11,11 @@ back_test(ex_cess, re_turns, start_points, end_points,
   bid_offer = 0)
 }
 \arguments{
-\item{\code{ex_cess}}{A \emph{matrix} of excess returns data (the returns in
-excess of the risk-free rate).}
+\item{\code{ex_cess}}{A \emph{time series} or a \emph{matrix} of excess
+returns data (the returns in excess of the risk-free rate).}
 
-\item{\code{re_turns}}{A \emph{matrix} of excess returns data (the returns
-in excess of the risk-free rate).}
+\item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
+data (the returns in excess of the risk-free rate).}
 
 \item{\code{start_points}}{An \emph{integer vector} of start points.}
 
@@ -37,7 +37,7 @@ covariance \emph{matrix} (the default is the number of columns of
 (the default is \code{0}).}
 
 \item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scal_e=TRUE}).}
+be scaled (the default is \code{scal_e = TRUE}).}
 
 \item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
 weights.  (The default is \code{0.001})}

@@ -6,7 +6,7 @@
 estimators and \code{RcppArmadillo}.}
 \usage{
 calc_var_ohlc(oh_lc, calc_method = "yang_zhang", lag_close = 0L,
-  in_dex = 0L, scal_e = TRUE)
+  scal_e = TRUE, in_dex = 0L)
 }
 \arguments{
 \item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
@@ -27,12 +27,12 @@ estimator for calculating the variance.  The estimators include:
 of the \emph{OHLC time series}.  This is an optional argument. (The
 default is \code{lag_close=0}.)}
 
+\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
+by the time index, the number of seconds in each period? (The default is
+\code{scal_e = TRUE}.)}
+
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
-
-\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
-by the number of seconds in each period? (The default is
-\code{scal_e=TRUE}.)}
 }
 \value{
 A single \emph{numeric} value equal to the variance of the
@@ -55,12 +55,6 @@ The function \code{calc_var_ohlc()} calculates the variance
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  The optional argument \code{in_dex} is the time index of the \emph{time
-  series} \code{oh_lc}. If the time index is in seconds, then the
-  differences of the index are equal to the number of seconds in each time
-  period.  If the time index is in days, then the differences are equal to
-  the number of days in each time period.
-  
   If \code{scal_e} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
@@ -68,6 +62,12 @@ The function \code{calc_var_ohlc()} calculates the variance
   number of seconds decreases the effect of overnight price jumps. If the
   time index is in days, then the variance is equal to the variance per day
   squared.
+  
+  The optional argument \code{in_dex} is the time index of the \emph{time
+  series} \code{oh_lc}. If the time index is in seconds, then the
+  differences of the index are equal to the number of seconds in each time
+  period.  If the time index is in days, then the differences are equal to
+  the number of days in each time period.
   
   The optional argument \code{lag_close} are the lagged \emph{close} prices
   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices

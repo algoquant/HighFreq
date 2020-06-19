@@ -78,11 +78,13 @@ Therefore 1-second bar returns carry almost no information.
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods ?
 
-+ [ ] Modify the functions roll_var() and roll_var_ohlc() to perform aggregations over end points if eve_ry argument is passed in
++ [x] Modify the functions roll_var() and roll_var_ohlc() to perform calculations over end points if ste_p argument is passed in
 
 + [x] Modify the function agg_ohlc() so it can accept either one or two columns of data (second column for volume), or four or five columns of OHLC data
 
 + [x] Rename the function to_period() to roll_ohlc()
+
++ [x] Create function calc_startpoints() as a lag of end points (unsigned integers)
 
 + [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Several possible methods are: 

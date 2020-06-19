@@ -2,20 +2,20 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var_vec}
 \alias{calc_var_vec}
-\title{Calculate the variance of a \emph{vector} or a single-column \emph{time
-series} using \code{RcppArmadillo}.}
+\title{Calculate the variance of a a single-column \emph{time series} or a
+\emph{vector} using \code{RcppArmadillo}.}
 \usage{
-calc_var_vec(re_turns)
+calc_var_vec(t_series)
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{vector} or a single-column \emph{time series}.}
+\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
 }
 \value{
 A \emph{numeric} value equal to the variance of the \emph{vector}.
 }
 \description{
-Calculate the variance of a \emph{vector} or a single-column \emph{time
-series} using \code{RcppArmadillo}.
+Calculate the variance of a a single-column \emph{time series} or a
+\emph{vector} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_var_vec()} calculates the variance of a

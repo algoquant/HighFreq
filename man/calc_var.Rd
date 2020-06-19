@@ -5,13 +5,13 @@
 \title{Calculate the variance of the columns of a \emph{matrix} or \emph{time
 series} using \code{RcppArmadillo}.}
 \usage{
-calc_var(re_turns)
+calc_var(t_series)
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{matrix} or a \emph{time series} of data.}
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
 }
 \value{
-A row vector equal to the variance of the columns of \code{re_turns}
+A row vector equal to the variance of the columns of \code{t_series}
   matrix.
 }
 \description{

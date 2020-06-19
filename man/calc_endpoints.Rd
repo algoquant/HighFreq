@@ -4,29 +4,30 @@
 \alias{calc_endpoints}
 \title{Calculate a vector of end points that divides a vector into equal intervals.}
 \usage{
-calc_endpoints(len_gth, agg, front = TRUE)
+calc_endpoints(len_gth, ste_p = 1L, front = TRUE)
 }
 \arguments{
 \item{\code{len_gth}}{An \emph{integer} equal to the length of the vector to
 be divide into equal intervals.}
 
-\item{\code{agg}}{The number of elements in each interval.}
+\item{\code{ste_p}}{The number of elements in each interval between
+neighboring end points.}
 
 \item{\code{front}}{\emph{Boolean} argument: if \code{TRUE} then add a stub
 interval at the beginning, else add a stub interval at the end.  (default
 is \code{TRUE})}
 }
 \value{
-An \emph{integer} vector of equally spaced end points (vector of
-  integers).
+A vector of equally spaced index values representing the end points
+  (a vector of unsigned integers).
 }
 \description{
 Calculate a vector of end points that divides a vector into equal intervals.
 }
 \details{
-The end points are a vector of integers which divide the vector of
-  length equal to \code{len_gth} into equally spaced intervals.
-  If a whole number of intervals doesn't fit over the vector, then
+The end points are a vector of unsigned integers which divide a
+  vector of length equal to \code{len_gth} into equally spaced intervals. If
+  a whole number of intervals doesn't fit over the vector, then
   \code{calc_endpoints()} adds a stub interval either at the beginning (the
   default) or at the end.
   The end points are shifted by \code{-1} because indexing starts at

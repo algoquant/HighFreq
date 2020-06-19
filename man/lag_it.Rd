@@ -2,23 +2,23 @@
 % Please edit documentation in R/RcppExports.R
 \name{lag_it}
 \alias{lag_it}
-\title{Apply a lag to a \emph{matrix} or \emph{time series} using
+\title{Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 \code{RcppArmadillo}.}
 \usage{
-lag_it(mat_rix, lagg = 1L)
+lag_it(t_series, lagg = 1L)
 }
 \arguments{
-\item{\code{mat_rix}}{A \emph{matrix} or \emph{time series}.}
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
 (the default is \code{lagg=1}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{mat_rix}.
+  argument \code{t_series}.
 }
 \description{
-Apply a lag to a \emph{matrix} or \emph{time series} using
+Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 \code{RcppArmadillo}.
 }
 \details{

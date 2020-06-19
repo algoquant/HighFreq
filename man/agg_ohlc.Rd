@@ -7,7 +7,7 @@
 agg_ohlc(t_series)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{matrix} or \emph{time series} with multiple
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 }
 \value{

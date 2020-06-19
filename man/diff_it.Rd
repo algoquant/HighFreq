@@ -5,10 +5,10 @@
 \title{Calculate the row differences of a \emph{matrix} or a \emph{time
 series} using \emph{RcppArmadillo}.}
 \usage{
-diff_it(mat_rix, lagg = 1L, padd = TRUE)
+diff_it(t_series, lagg = 1L, padd = TRUE)
 }
 \arguments{
-\item{\code{mat_rix}}{A \emph{matrix} or \emph{time series}.}
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of rows (time
 periods) to lag when calculating the differences (the default is
@@ -28,7 +28,7 @@ series} using \emph{RcppArmadillo}.
 }
 \details{
 The function \code{diff_it()} calculates the differences between
-  the rows of the input \emph{matrix} or \emph{time series} and its lagged
+  the rows of the input \emph{time series} or \emph{matrix} and its lagged
   version. The lagged version has its rows shifted down by the number equal
   to \code{lagg} rows.
   

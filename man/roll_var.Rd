@@ -3,48 +3,64 @@
 \name{roll_var}
 \alias{roll_var}
 \title{Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval for a \emph{time series} or a \emph{matrix}, using
-\code{RcppArmadillo}.}
+interval attached at the end points of a \emph{time series} or a
+\emph{matrix}.}
 \usage{
-roll_var(mat_rix, look_back = 11L)
+roll_var(t_series, ste_p = 1L, look_back = 1L)
 }
 \arguments{
-\item{\code{mat_rix}}{A \emph{matrix} or a \emph{time series}.}
+\item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
-number of time periods (\emph{matrix} rows) used for calculating a single
-variance estimate.}
+\item{\code{ste_p}}{The number of time periods between the end points.}
+
+\item{\code{look_back}}{The number of end points in the look-back interval.}
 }
 \value{
-A \emph{matrix} with the same number of rows and columns as the
-  input argument \code{mat_rix}.
+A \emph{matrix} with the same number of columns as the input time
+  series \code{t_series}, and the number of rows equal to the number of end
+  points.
 }
 \description{
 Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval for a \emph{time series} or a \emph{matrix}, using
-\code{RcppArmadillo}.
+interval attached at the end points of a \emph{time series} or a
+\emph{matrix}.
 }
 \details{
-The function \code{roll_var()} calculates a \code{mat_rix} of
-  variance estimates over a rolling look-back interval for a \emph{time
-  series} or a \emph{matrix}, using \code{RcppArmadillo}.
+The function \code{roll_var()} calculates a \emph{matrix} of
+  variance estimates over rolling look-back intervals attached at the end
+  points of the \emph{time series} \code{t_series}.
+  
+  The end points are calculated along the rows of \code{t_series} using the
+  function \code{calc_endpoints()}, with the number of time periods between
+  the end points equal to \code{ste_p}.
+  
+  At each end point, the variance is calculated over a look-back interval
+  equal to \code{look_back} number of end points.
+  In the initial warmup period, the variance is calculated over an expanding
+  look-back interval.
+  
+  For example, the rolling variance at \code{25} day end points, with a
+  \code{75} day look-back, can be calculated using the parameters
+  \code{ste_p = 25} and \code{look_back = 3}.
 
-  The function \code{roll_var()} uses an expanding look-back interval in the
-  initial warmup period, to calculate the same number of rows as the input
-  argument \code{mat_rix}.
-
-  The function \code{roll_var()} performs the same calculation as the
-  function \code{roll_var()} from package
+  The function \code{roll_var()} with the parameter \code{ste_p = 1}
+  performs the same calculation as the function \code{roll_var()} from
+  package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
   but it's several times faster because it uses \code{RcppArmadillo}.
+  
+  The function \code{roll_var()} is implemented in \code{RcppArmadillo}
+  code, so it's many times faster than the equivalent \code{R} code.
 }
 \examples{
 \dontrun{
-# Create a matrix of random returns
-re_turns <- matrix(rnorm(5e3), nc=5)
+# Define time series of returns using package rutils
+re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+# Calculate the rolling variance at 25 day end points, with a 75 day look-back
+vari_ance <- HighFreq::roll_var(re_turns, ste_p=25, look_back=3)
 # Compare the variance estimates over 11-period lookback intervals
 all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
-  RcppRoll::roll_var(re_turns, n=11))
+  drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(

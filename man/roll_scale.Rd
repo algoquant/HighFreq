@@ -10,9 +10,6 @@ roll_scale(mat_rix, look_back, use_median = FALSE)
 \arguments{
 \item{mat_rix}{A \emph{matrix} of data.}
 
-\item{look_back}{The length of the look-back interval, equal to the number 
-of rows of data used in the scaling.}
-
 \item{use_median}{A \emph{Boolean} argument: if \code{TRUE} then the 
 centrality (central tendency) is calculated as the \emph{median} and the 
 dispersion is calculated as the \emph{median absolute deviation}
@@ -20,6 +17,9 @@ dispersion is calculated as the \emph{median absolute deviation}
 If \code{use_median} is \code{FALSE} then the centrality is calculated as 
 the \emph{mean} and the dispersion is calculated as the \emph{standard
 deviation}. (The default is \code{use_median=FALSE})}
+
+\item{\code{look_back}}{The length of the look-back interval, equal to the number 
+of rows of data used in the scaling.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
@@ -48,8 +48,8 @@ The function \code{roll_scale()} performs a rolling scaling
 \dontrun{
 mat_rix <- matrix(rnorm(20000), nc=2)
 look_back <- 11
-rolled_scaled <- roll::roll_scale(data=mat_rix, width=look_back, min_obs=1)
-rolled_scaled2 <- roll_scale(mat_rix=mat_rix, look_back=look_back, use_median=FALSE)
+rolled_scaled <- roll::roll_scale(data=mat_rix, width = look_back, min_obs=1)
+rolled_scaled2 <- roll_scale(mat_rix=mat_rix, look_back = look_back, use_median=FALSE)
 all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
 }
 

@@ -3,15 +3,19 @@
 \name{roll_var_ohlc}
 \alias{roll_var_ohlc}
 \title{Calculate a \emph{vector} of variance estimates over a rolling look-back
-interval for an \emph{OHLC time series}, using different range estimators
-and \code{RcppArmadillo}.}
+interval attached at the end points of a \emph{time series} or a
+\emph{matrix} with \emph{OHLC} price data.}
 \usage{
-roll_var_ohlc(oh_lc, calc_method = "yang_zhang", in_dex = 0L,
-  scal_e = TRUE, look_back = 11L)
+roll_var_ohlc(oh_lc, ste_p = 1L, look_back = 1L,
+  calc_method = "yang_zhang", scal_e = TRUE, in_dex = 0L)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
-prices.}
+\item{\code{oh_lc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
+price data.}
+
+\item{\code{ste_p}}{The number of time periods between the end points.}
+
+\item{\code{look_back}}{The number of end points in the look-back interval.}
 
 \item{\code{calc_method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
@@ -24,37 +28,51 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \emph{"yang_zhang"} estimator.)}
 
+\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
+by the time index, the number of seconds in each period? (The default is
+\code{scal_e = TRUE}.)}
+
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
-
-\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
-by the number of seconds in each period? (The default is
-\code{scal_e=TRUE}.)}
-
-\item{\code{look_back}}{The length of the look-back interval, equal to the
-number of time periods (\code{oh_lc} rows) used for calculating a single
-variance estimate.}
 }
 \value{
-A column \emph{vector} of the same length as the number of rows of
-  \code{oh_lc}.
+A column \emph{vector} of variance estimates, with the number of
+  rows equal to the number of end points.
 }
 \description{
 Calculate a \emph{vector} of variance estimates over a rolling look-back
-interval for an \emph{OHLC time series}, using different range estimators
-and \code{RcppArmadillo}.
+interval attached at the end points of a \emph{time series} or a
+\emph{matrix} with \emph{OHLC} price data.
 }
 \details{
-The function \code{roll_var_ohlc()} performs a loop over the rows
-  of \code{oh_lc}, subsets a number of previous (past) rows equal to
-  \code{look_back}, and passes them into the function
-  \code{calc_var_ohlc()}. It uses an expanding look-back interval in the
-  initial warmup period, to calculate the same number of elements as the
-  number of rows in the input argument \code{oh_lc}.
+The function \code{roll_var_ohlc()} calculates a \emph{vector} of
+  variance estimates over a rolling look-back interval attached at the end
+  points of the \emph{time series} \code{oh_lc}.
+  
+  The end points are calculated along the rows of \code{oh_lc} using the
+  function \code{calc_endpoints()}, with the number of time periods between
+  the end points equal to \code{ste_p}.
+  
+  The function \code{roll_var_ohlc()} performs a loop over the end points,
+  subsets the previous (past) rows of \code{oh_lc}, and passes them into the
+  function \code{calc_var_ohlc()}.
+
+  At each end point, the variance is calculated over a look-back interval
+  equal to \code{look_back} number of end points.
+  In the initial warmup period, the variance is calculated over an expanding
+  look-back interval.
+  
+  For example, the rolling variance at daily end points with an
+  \code{11} day look-back, can be calculated using the parameters
+  \code{ste_p = 1} and \code{look_back = 11}.
+
+  The rolling variance at \code{25} day end points with a \code{75} day
+  look-back, can be calculated using the parameters \code{ste_p = 25} and
+  \code{look_back = 3} (because \code{3*25 = 75}).
 
   The function \code{roll_var_ohlc()} calculates the variance from all the
   different intra-day and day-over-day returns (defined as the differences
-  of \emph{OHLC} prices), using several different variance estimation
+  between \emph{OHLC} prices), using several different variance estimation
   methods.
   
   The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
@@ -64,12 +82,6 @@ The function \code{roll_var_ohlc()} performs a loop over the rows
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  The optional argument \code{in_dex} is the time index of the \emph{time
-  series} \code{oh_lc}. If the time index is in seconds, then the
-  differences of the index are equal to the number of seconds in each time
-  period.  If the time index is in days, then the differences are equal to
-  the number of days in each time period.
-  
   If \code{scal_e} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
@@ -78,6 +90,12 @@ The function \code{roll_var_ohlc()} performs a loop over the rows
   time index is in days, then the variance is equal to the variance per day
   squared.
   
+  The optional argument \code{in_dex} is the time index of the \emph{time
+  series} \code{oh_lc}. If the time index is in seconds, then the
+  differences of the index are equal to the number of seconds in each time
+  period.  If the time index is in days, then the differences are equal to
+  the number of days in each time period.
+  
   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
   code, so it's many times faster than the equivalent \code{R} code.
 }
@@ -85,12 +103,34 @@ The function \code{roll_var_ohlc()} performs a loop over the rows
 \dontrun{
 # Extract time index of SPY returns
 oh_lc <- HighFreq::SPY
-in_dex <- c(1, diff(xts::.index(HighFreq::SPY)))
-# Calculate the rolling variance of SPY returns, with scaling of the returns
-var_rolling <- roll_var_ohlc(oh_lc, 
+in_dex <- c(1, diff(xts::.index(oh_lc)))
+# Rolling variance at minutely end points, with a 21 minute look-back
+var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+                              ste_p=1, look_back=21, 
                               calc_method="yang_zhang", 
-                              in_dex=in_dex,
-                              scal_e=TRUE, 
-                              look_back=21)
+                              in_dex=in_dex, scal_e=TRUE)
+# Daily OHLC prices
+oh_lc <- rutils::etf_env$VTI
+in_dex <- c(1, diff(xts::.index(oh_lc)))
+# Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
+var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+                              ste_p=5, look_back=4, 
+                              calc_method="yang_zhang", 
+                              in_dex=in_dex, scal_e=TRUE)
+# Same calculation in R
+n_rows <- NROW(oh_lc)
+lag_close = HighFreq::lag_it(oh_lc[, 4])
+end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
+start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
+n_pts <- NROW(end_p)
+var_rollingr <- sapply(2:n_pts, function(it) {
+  ran_ge <- start_p[it]:end_p[it]
+  sub_ohlc = oh_lc[ran_ge, ]
+  sub_close = lag_close[ran_ge]
+  sub_index = in_dex[ran_ge]
+  HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scal_e=TRUE, in_dex=sub_index)
+})  # end sapply
+var_rollingr <- c(0, var_rollingr)
+all.equal(drop(var_rolling), var_rollingr)
 }
 }

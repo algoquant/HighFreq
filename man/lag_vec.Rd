@@ -2,13 +2,13 @@
 % Please edit documentation in R/RcppExports.R
 \name{lag_vec}
 \alias{lag_vec}
-\title{Apply a lag to a \emph{vector} or a single-column \emph{time series}
+\title{Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 using \code{RcppArmadillo}.}
 \usage{
-lag_vec(vec_tor, lagg = 1L)
+lag_vec(t_series, lagg = 1L)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
+\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
 (the default is \code{lagg=1}).}
@@ -18,12 +18,12 @@ A column \emph{vector} with the same number of elements as the input
   vector.
 }
 \description{
-Apply a lag to a \emph{vector} or a single-column \emph{time series}
+Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 using \code{RcppArmadillo}.
 }
 \details{
-The function \code{lag_vec()} applies a lag to the input
-  \emph{vector} by shifting its elements by the number equal to the argument
+The function \code{lag_vec()} applies a lag to the input \emph{time
+  series} by shifting its elements by the number equal to the argument
   \code{lagg}. For positive \code{lagg} values, the elements are shifted
   forward, and for negative \code{lagg} values they are shifted backward.
   The output \emph{vector} is padded with either the first or the last

@@ -9,8 +9,8 @@ calc_weights(re_turns, typ_e = "max_sharpe", to_l = 0.001,
   vo_l = 0.01)
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{matrix} of excess returns data (the returns
-in excess of the risk-free rate).}
+\item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
+data (the returns in excess of the risk-free rate).}
 
 \item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
 the weights (see Details).}
@@ -28,7 +28,7 @@ covariance \emph{matrix} (the default is the number of columns of
 (the default is \code{0}).}
 
 \item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scal_e=TRUE}).}
+be scaled (the default is \code{scal_e = TRUE}).}
 
 \item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
 weights.  (The default is \code{0.001})}

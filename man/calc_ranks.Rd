@@ -2,25 +2,25 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_ranks}
 \alias{calc_ranks}
-\title{Calculate the ranks of the elements of a \emph{vector} or a single-column
-\emph{time series} using \code{RcppArmadillo}.}
+\title{Calculate the ranks of the elements of a single-column \emph{time series} or
+a \emph{vector} using \code{RcppArmadillo}.}
 \usage{
 calc_ranks(vec_tor)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector} or a single-column \emph{time series}.}
+\item{\code{vec_tor}}{A single-column \emph{time series} or a \emph{vector}.}
 }
 \value{
 An \emph{integer vector} with the ranks of the elements of the
   \emph{vector}.
 }
 \description{
-Calculate the ranks of the elements of a \emph{vector} or a single-column
-\emph{time series} using \code{RcppArmadillo}.
+Calculate the ranks of the elements of a single-column \emph{time series} or
+a \emph{vector} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_ranks()} calculates the ranks of the
-  elements of a \emph{vector} or a single-column \emph{time series}.
+  elements of a single-column \emph{time series} or a \emph{vector}.
   It uses the \code{RcppArmadillo} function \code{arma::sort_index()}.
   The function \code{arma::sort_index()} calculates the permutation index to
   sort a given vector into ascending order.
