@@ -37,9 +37,9 @@ The function \code{calc_scaled()} scales (standardizes) the columns
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
   
-  The function \code{calc_scaled()} uses \code{RcppArmadillo} and is about
-  \emph{5} times faster than function \code{scale()}, for a \emph{matrix}
-  with \emph{1,000} rows and \emph{20} columns.
+  The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
+  code and is about \emph{5} times faster than function \code{scale()}, for
+  a \emph{matrix} with \emph{1,000} rows and \emph{20} columns.
 }
 \examples{
 \dontrun{

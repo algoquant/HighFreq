@@ -2,15 +2,15 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_sharpe}
 \alias{run_sharpe}
-\title{Calculate time series of Sharpe-like statistics for each row of a \emph{OHLC}
-time series.}
+\title{Calculate time series of point Sharpe-like statistics for each row of a
+\emph{OHLC} time series.}
 \usage{
 run_sharpe(oh_lc, calc_method = "close")
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{A \emph{character} string representing method for
+\item{\code{calc_method}}{A \emph{character} string representing method for
 estimating the Sharpe-like exponent.}
 }
 \value{
@@ -18,8 +18,8 @@ An \emph{xts} time series with the same number of rows as the
   argument \code{oh_lc}.
 }
 \description{
-Calculate time series of Sharpe-like statistics for each row of a \emph{OHLC}
-time series.
+Calculate time series of point Sharpe-like statistics for each row of a
+\emph{OHLC} time series.
 }
 \details{
 The function \code{run_sharpe()} calculates Sharpe-like statistics
@@ -27,8 +27,8 @@ The function \code{run_sharpe()} calculates Sharpe-like statistics
   The Sharpe-like statistic is defined as the ratio of the difference between
   \emph{Close} minus \emph{Open} prices divided by the difference between
   \emph{High} minus \emph{Low} prices.
-  This statistic may also be interpreted as something like a Hurst exponent
-  for a single row of data.
+  This statistic may also be interpreted as something like a \emph{Hurst
+  exponent} for a single row of data.
   The motivation for the Sharpe-like statistic is the notion that if prices
   are trending in the same direction inside a given time bar of data, then
   this statistic is close to either 1 or -1.

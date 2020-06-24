@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var}
 \alias{calc_var}
-\title{Calculate the variance of the columns of a \emph{matrix} or \emph{time
-series} using \code{RcppArmadillo}.}
+\title{Calculate the variance of the columns of a \emph{time series} or a
+\emph{matrix} using \code{RcppArmadillo}.}
 \usage{
 calc_var(t_series)
 }
@@ -15,17 +15,18 @@ A row vector equal to the variance of the columns of \code{t_series}
   matrix.
 }
 \description{
-Calculate the variance of the columns of a \emph{matrix} or \emph{time
-series} using \code{RcppArmadillo}.
+Calculate the variance of the columns of a \emph{time series} or a
+\emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_var()} calculates the variance of the
-  columns of a \emph{matrix} using \code{RcppArmadillo}. 
+  columns of a \emph{time series} or a \emph{matrix} of data using
+  \code{RcppArmadillo} \code{C++} code.
   
   The function \code{calc_var()} performs the same calculation as the
   function \code{colVars()} from package
   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-  but it's much faster because it uses \code{RcppArmadillo}.
+  but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 }
 \examples{
 \dontrun{

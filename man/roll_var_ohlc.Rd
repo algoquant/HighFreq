@@ -62,13 +62,14 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of
   In the initial warmup period, the variance is calculated over an expanding
   look-back interval.
   
-  For example, the rolling variance at daily end points with an
-  \code{11} day look-back, can be calculated using the parameters
-  \code{ste_p = 1} and \code{look_back = 11}.
+  For example, the rolling variance at daily end points with an \code{11}
+  day look-back, can be calculated using the parameters \code{ste_p = 1} and
+  \code{look_back = 11} (Assuming the \code{oh_lc} data has daily
+  frequency.)
 
-  The rolling variance at \code{25} day end points with a \code{75} day
-  look-back, can be calculated using the parameters \code{ste_p = 25} and
-  \code{look_back = 3} (because \code{3*25 = 75}).
+  Similarly, the rolling variance at \code{25} day end points with a
+  \code{75} day look-back, can be calculated using the parameters
+  \code{ste_p = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
 
   The function \code{roll_var_ohlc()} calculates the variance from all the
   different intra-day and day-over-day returns (defined as the differences
@@ -97,7 +98,8 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of
   the number of days in each time period.
   
   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-  code, so it's many times faster than the equivalent \code{R} code.
+  \code{C++} code, so it's many times faster than the equivalent \code{R}
+  code.
 }
 \examples{
 \dontrun{

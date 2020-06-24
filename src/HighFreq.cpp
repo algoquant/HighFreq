@@ -19,20 +19,36 @@ using namespace arma;
 //' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 //' using \code{RcppArmadillo}.
 //' 
-//' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
-//' 
+//' @param \code{t_series} A single-column \emph{time series} or a
+//'   \emph{vector}.
+//'
 //' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-//'   (the default is \code{lagg=1}).
+//'   (the default is \code{lagg = 1}).
+//'
+//' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
+//'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 //'
 //' @return A column \emph{vector} with the same number of elements as the input
-//'   vector.
+//'   time series.
 //'
 //' @details The function \code{lag_vec()} applies a lag to the input \emph{time
-//'   series} by shifting its elements by the number equal to the argument
-//'   \code{lagg}. For positive \code{lagg} values, the elements are shifted
-//'   forward, and for negative \code{lagg} values they are shifted backward.
-//'   The output \emph{vector} is padded with either the first or the last
-//'   element, to maintain its original length.
+//'   series} \code{t_series} by shifting its elements by the number equal to
+//'   the argument \code{lagg}. For positive \code{lagg} values, the elements
+//'   are shifted forward, and for negative \code{lagg} values they are shifted
+//'   backward.
+//'   
+//'   The output \emph{vector} is padded with either zeros (the default), or
+//'   with data from \code{t_series}, so that it has the same number of element
+//'   as \code{t_series}.
+//'   If the \code{lagg} is positive, then the first element is copied and added
+//'   upfront.
+//'   If the \code{lagg} is negative, then the last element is copied and added
+//'   to the end.
+//'   
+//'   As a rule, if \code{t_series} contains returns data, then the output
+//'   \emph{matrix} should be padded with zeros, to avoid data snooping.
+//'   If \code{t_series} contains prices, then the output \emph{matrix} should
+//'   be padded with the prices.
 //'
 //' @examples
 //' \dontrun{
@@ -51,16 +67,33 @@ using namespace arma;
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec lag_vec(arma::vec& t_series, int lagg=1) {
+arma::vec lag_vec(arma::vec& t_series, 
+                  arma::sword lagg = 1, 
+                  bool pad_zeros = true) {
   
-  int len_gth = (t_series.n_elem-1);
+  arma::uword num_rows = (t_series.n_elem-1);
   
-  if (lagg > 0)
-    return arma::join_cols(arma::repelem(t_series.subvec(0, 0), lagg, 1), 
-                           t_series.subvec(0, len_gth-lagg));
-  else
-    return arma::join_cols(t_series.subvec(-lagg, len_gth), 
-                           arma::repelem(t_series.subvec(len_gth, len_gth), -lagg, 1));
+  if (lagg > 0) {
+    if (pad_zeros) {
+      // Pad front with zeros
+      return arma::join_cols(arma::zeros(lagg), 
+                             t_series.subvec(0, num_rows-lagg));
+    } else {
+      // Pad front with first element of t_series
+      return arma::join_cols(arma::repelem(t_series.subvec(0, 0), lagg, 1), 
+                             t_series.subvec(0, num_rows-lagg));
+    }  // end if
+  } else {
+    if (pad_zeros) {
+      // Pad back with zeros
+      return arma::join_cols(t_series.subvec(-lagg, num_rows), 
+                             arma::zeros(-lagg));
+    } else {
+      // Pad back with last element of t_series
+      return arma::join_cols(t_series.subvec(-lagg, num_rows), 
+                             arma::repelem(t_series.subvec(num_rows, num_rows), -lagg, 1));
+    }  // end if
+  }  // end if
   
 }  // end lag_vec
 
@@ -74,8 +107,11 @@ arma::vec lag_vec(arma::vec& t_series, int lagg=1) {
 //' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
 //' 
 //' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-//'   (the default is \code{lagg=1}).
+//'   (the default is \code{lagg = 1}).
 //'
+//' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
+//'   with zeros? (The default is \code{pad_zeros = TRUE}.)
+//'   
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{t_series}.
 //'
@@ -83,9 +119,20 @@ arma::vec lag_vec(arma::vec& t_series, int lagg=1) {
 //'   \emph{matrix} by shifting its rows by the number equal to the argument
 //'   \code{lagg}. For positive \code{lagg} values, the rows are shifted forward
 //'   (down), and for negative \code{lagg} values they are shifted backward
-//'   (up). The output \emph{matrix} is padded with either the first or the last
-//'   row, to maintain it original dimensions. The function \code{lag_it()} can
-//'   be applied to vectors in the form of single-column matrices.
+//'   (up). 
+//'   
+//'   The output \emph{matrix} is padded with either zeros (the default), or
+//'   with rows of data from \code{t_series}, so that it has the same dimensions
+//'   as \code{t_series}.
+//'   If the \code{lagg} is positive, then the first row is copied and added
+//'   upfront.
+//'   If the \code{lagg} is negative, then the last row is copied and added
+//'   to the end.
+//'   
+//'   As a rule, if \code{t_series} contains returns data, then the output
+//'   \emph{matrix} should be padded with zeros, to avoid data snooping.
+//'   If \code{t_series} contains prices, then the output \emph{matrix} should
+//'   be padded with the prices.
 //'
 //' @examples
 //' \dontrun{
@@ -104,15 +151,46 @@ arma::vec lag_vec(arma::vec& t_series, int lagg=1) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat lag_it(arma::mat& t_series, int lagg=1) {
-  int num_rows = (t_series.n_rows-1);
+arma::mat lag_it(arma::mat& t_series, 
+                 arma::sword lagg = 1, 
+                 bool pad_zeros = true) {
   
-  if (lagg > 0)
-    return arma::join_cols(arma::repelem(t_series.row(0), lagg, 1), 
-                           t_series.rows(0, num_rows-lagg));
-  else
-    return arma::join_cols(t_series.rows(-lagg, num_rows), 
-                           arma::repelem(t_series.row(num_rows), -lagg, 1));
+  arma::uword num_rows = (t_series.n_rows-1);
+  arma::uword num_cols = t_series.n_cols;
+  
+  if (lagg > 0) {
+    // Positive lag
+    if (pad_zeros) {
+      // Pad front with zeros
+      return arma::join_cols(arma::zeros(lagg, num_cols), 
+                             t_series.rows(0, num_rows-lagg));
+    } else {
+      // Pad front with first element of t_series
+      return arma::join_cols(arma::repmat(t_series.rows(0, 0), lagg, 1), 
+                             t_series.rows(0, num_rows-lagg));
+    }  // end if
+  } else {
+    // Negative lag
+    if (pad_zeros) {
+      // Pad back with zeros
+      return arma::join_cols(t_series.rows(-lagg, num_rows), 
+                             arma::zeros(-lagg, num_cols));
+    } else {
+      // Pad back with last element of t_series
+      return arma::join_cols(t_series.rows(-lagg, num_rows), 
+                             arma::repmat(t_series.rows(num_rows, num_rows), -lagg, 1));
+    }  // end if
+  }  // end if
+  
+  // Old code below
+  // if (lagg > 0)
+  //   // Positive lag
+  //   return arma::join_cols(arma::repelem(t_series.row(0), lagg, 1), 
+  //                          t_series.rows(0, num_rows-lagg));
+  // else
+  //   // Negative lag
+  //   return arma::join_cols(t_series.rows(-lagg, num_rows), 
+  //                          arma::repelem(t_series.row(num_rows), -lagg, 1));
   
 }  // end lag_it
 
@@ -126,11 +204,11 @@ arma::mat lag_it(arma::mat& t_series, int lagg=1) {
 //' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
 //' 
 //' @param \code{lagg} An \emph{integer} equal to the number of time periods to
-//'   lag when calculating the differences (the default is \code{lagg=1}).
+//'   lag when calculating the differences (the default is \code{lagg = 1}).
 //'   
 //' @param \code{padd} \emph{Boolean} argument: Should the output \emph{vector}
 //'   be padded (extended) with zeros, in order to return a \emph{vector} of the
-//'   same length as the input? (the default is \code{padd=TRUE})
+//'   same length as the input? (the default is \code{padd = TRUE})
 //'
 //' @return A column \emph{vector} containing the differences between the
 //'   elements of the input vector.
@@ -141,16 +219,16 @@ arma::mat lag_it(arma::mat& t_series, int lagg=1) {
 //'   The argument \code{lagg} specifies the number of lags.  For example, if
 //'   \code{lagg=3} then the differences will be taken between each element
 //'   minus the element three time periods before it (in the past).  The default
-//'   is \code{lagg=1}.
+//'   is \code{lagg = 1}.
 //' 
 //'   The argument \code{padd} specifies whether the output \emph{vector} should
 //'   be padded (extended) with zeros at the beginning, in order to return a
 //'   \emph{vector} of the same length as the input.  The default is
-//'   \code{padd=TRUE}. The padding operation can be time-consuming, because it
+//'   \code{padd = TRUE}. The padding operation can be time-consuming, because it
 //'   requires the copying of data.
 //'   
 //'   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
-//'   code, which makes it several times faster than \code{R} code.
+//'   \code{C++} code, which makes it several times faster than \code{R} code.
 //'
 //' @examples
 //' \dontrun{
@@ -169,7 +247,7 @@ arma::mat lag_it(arma::mat& t_series, int lagg=1) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec diff_vec(arma::vec& t_series, int lagg=1, bool padd=true) {
+arma::vec diff_vec(arma::vec& t_series, int lagg = 1, bool padd = true) {
   
   int len_gth = (t_series.n_elem-1);
   
@@ -187,16 +265,18 @@ arma::vec diff_vec(arma::vec& t_series, int lagg=1, bool padd=true) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the row differences of a \emph{matrix} or a \emph{time
-//' series} using \emph{RcppArmadillo}.
+//' Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+//' using \emph{RcppArmadillo}.
 //' 
 //' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+//' 
 //' @param \code{lagg} An \emph{integer} equal to the number of rows (time
 //'   periods) to lag when calculating the differences (the default is
-//'   \code{lagg=1}).
+//'   \code{lagg = 1}).
+//'   
 //' @param \code{padd} \emph{Boolean} argument: Should the output \emph{matrix}
 //'   be padded (extended) with zeros, in order to return a \emph{matrix} with
-//'   the same number of rows as the input? (the default is \code{padd=TRUE})
+//'   the same number of rows as the input? (the default is \code{padd = TRUE})
 //'
 //' @return A \emph{matrix} containing the differences between the rows of the
 //'   input \emph{matrix}.
@@ -210,24 +290,25 @@ arma::vec diff_vec(arma::vec& t_series, int lagg=1, bool padd=true) {
 //'   of the lagged version. For example, if \code{lagg=3} then the lagged
 //'   version will have its rows shifted down by \code{3} rows, and the
 //'   differences will be taken between each row minus the row three time
-//'   periods before it (in the past). The default is \code{lagg=1}.
+//'   periods before it (in the past). The default is \code{lagg = 1}.
 //' 
 //'   The argument \code{padd} specifies whether the output \emph{matrix} should
-//'   be padded (extended) with rows of zeros at the beginning, in order to
-//'   return a \emph{matrix} with the same number of rows as the input.  The
-//'   default is \code{padd=TRUE}. The padding operation can be time-consuming, 
-//'   because it requires the copying of data.
+//'   be padded (extended) with the rows of the initial (warmup) period at the
+//'   beginning, in order to return a \emph{matrix} with the same number of rows
+//'   as the input.  The default is \code{padd = TRUE}. The padding operation
+//'   can be time-consuming, because it requires the copying of data.
 //'   
 //'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-//'   code, which makes it several times faster than \code{R} code.
+//'   \code{C++} code, which makes it several times faster than \code{R} code.
 //'
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random returns
 //' re_turns <- matrix(rnorm(5e6), nc=5)
 //' # Compare diff_it() with rutils::diff_it()
-//' all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-//'   rutils::diff_it(re_turns, lagg=3))
+//' all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE), 
+//'   zoo::coredata(rutils::diff_it(re_turns, lagg=3)), 
+//'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -238,15 +319,17 @@ arma::vec diff_vec(arma::vec& t_series, int lagg=1, bool padd=true) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat diff_it(arma::mat& t_series, int lagg=1, bool padd=true) {
-
-  int num_rows = (t_series.n_rows-1);
+arma::mat diff_it(arma::mat& t_series, 
+                  arma::uword lagg = 1, 
+                  bool padd = true) {
+  
+  arma::uword num_rows = (t_series.n_rows-1);
   // Matrix difference without padding
   arma::mat diff_mat = (t_series.rows(lagg, num_rows) - t_series.rows(0, num_rows - lagg));
-
+  
   if (padd)
-    // Pad diff_mat with zeros at the beginning
-    return arma::join_cols(arma::zeros(lagg, t_series.n_cols), diff_mat);
+    // Pad diff_mat with warmup period at the beginning
+    return arma::join_cols(t_series.rows(0, lagg - 1), diff_mat);
   else
     // Don't pad the output
     return diff_mat;
@@ -314,7 +397,7 @@ arma::mat diff_it(arma::mat& t_series, int lagg=1, bool padd=true) {
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_endpoints(arma::uword len_gth, arma::uword ste_p = 1, bool front=true) {
+arma::uvec calc_endpoints(arma::uword len_gth, arma::uword ste_p = 1, bool front = true) {
   
   // Calculate number of intervals that fit over len_gth
   arma::uword num_points = len_gth/ste_p;
@@ -411,7 +494,7 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 //' 
 //' @param \code{by_col} A \emph{Boolean} argument: if \code{TRUE} then multiply
 //'   the columns, otherwise multiply the rows. (The default is
-//'   \code{by_col=TRUE}.)
+//'   \code{by_col = TRUE}.)
 //' 
 //' @return A single \emph{integer} value, equal to either the number of
 //'   \emph{matrix} columns or the number of rows.
@@ -437,10 +520,10 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 //'   instead of performing explicit \code{for()} loops (both methods are
 //'   equally fast).
 //'
-//'   The function \code{mult_vec_mat()} uses \code{RcppArmadillo}, so when
-//'   multiplying large \emph{matrix} columns it's several times faster than
-//'   vectorized \code{R} code, and it's even much faster compared to \code{R}
-//'   when multiplying the \emph{matrix} rows.
+//'   The function \code{mult_vec_mat()} uses \code{RcppArmadillo} \code{C++}
+//'   code, so when multiplying large \emph{matrix} columns it's several times
+//'   faster than vectorized \code{R} code, and it's even much faster compared
+//'   to \code{R} when multiplying the \emph{matrix} rows.
 //'   
 //' @examples
 //' \dontrun{
@@ -477,7 +560,7 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 // [[Rcpp::export]]
 arma::uword mult_vec_mat(const arma::vec& vec_tor,
                    arma::mat& mat_rix,
-                   const bool& by_col=true) {
+                   const bool& by_col = true) {
   arma::uword num_elem = vec_tor.n_elem;
   arma::uword num_rows = mat_rix.n_rows;
   arma::uword num_cols = mat_rix.n_cols;
@@ -648,9 +731,9 @@ arma::mat calc_inv(const arma::mat& re_turns,
 //'   centrality as the \emph{median} and the dispersion as the \emph{median
 //'   absolute deviation} (\emph{MAD}).
 //'   
-//'   The function \code{calc_scaled()} uses \code{RcppArmadillo} and is about
-//'   \emph{5} times faster than function \code{scale()}, for a \emph{matrix}
-//'   with \emph{1,000} rows and \emph{20} columns.
+//'   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
+//'   code and is about \emph{5} times faster than function \code{scale()}, for
+//'   a \emph{matrix} with \emph{1,000} rows and \emph{20} columns.
 //'   
 //' @examples
 //' \dontrun{
@@ -711,8 +794,8 @@ arma::mat calc_scaled(const arma::mat& mat_rix,
 //' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 //'
 //' @details The function \code{calc_var_vec()} calculates the variance of a
-//'   \emph{vector} using \code{RcppArmadillo}, so it's significantly faster
-//'   than the \code{R} function \code{var()}.
+//'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
+//'   significantly faster than the \code{R} function \code{var()}.
 //'
 //' @examples
 //' \dontrun{
@@ -739,8 +822,8 @@ double calc_var_vec(arma::vec& t_series) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the variance of the columns of a \emph{matrix} or \emph{time
-//' series} using \code{RcppArmadillo}.
+//' Calculate the variance of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
 //' 
 //' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 //'
@@ -748,12 +831,13 @@ double calc_var_vec(arma::vec& t_series) {
 //'   matrix.
 //'
 //' @details The function \code{calc_var()} calculates the variance of the
-//'   columns of a \emph{matrix} using \code{RcppArmadillo}. 
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
 //'   
 //'   The function \code{calc_var()} performs the same calculation as the
 //'   function \code{colVars()} from package
 //'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-//'   but it's much faster because it uses \code{RcppArmadillo}.
+//'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
@@ -777,7 +861,9 @@ double calc_var_vec(arma::vec& t_series) {
 //' @export
 // [[Rcpp::export]]
 arma::rowvec calc_var(arma::mat& t_series) {
+  
   return arma::var(t_series);
+  
 }  // end calc_var
 
 
@@ -846,8 +932,8 @@ arma::rowvec calc_var(arma::mat& t_series) {
 //'   speeds up the calculation, so it's useful for rolling calculations.
 //'   
 //'   The function \code{calc_var_ohlc()} is implemented in \code{RcppArmadillo}
-//'   code, and it's over \code{10} times faster than \code{calc_var_ohlc_r()},
-//'   which is implemented in \code{R} code.
+//'   \code{C++} code, and it's over \code{10} times faster than
+//'   \code{calc_var_ohlc_r()}, which is implemented in \code{R} code.
 //'
 //' @examples
 //' \dontrun{
@@ -880,7 +966,7 @@ arma::rowvec calc_var(arma::mat& t_series) {
 double calc_var_ohlc(arma::mat& oh_lc, 
                      const std::string& calc_method="yang_zhang", 
                      arma::colvec lag_close=0, 
-                     const bool& scal_e=true, 
+                     const bool& scal_e = true, 
                      arma::colvec in_dex=0) {
   
   int num_rows = oh_lc.n_rows;
@@ -1015,8 +1101,9 @@ arma::uvec calc_ranks(const arma::vec& vec_tor) {
 //'
 //' @details The function \code{calc_lm()} performs the same calculations as the
 //'   function \code{lm()} from package \emph{stats}. It uses
-//'   \code{RcppArmadillo} and is about \emph{10} times faster than \code{lm()}.
-//'   The code was inspired by this article (but it's not identical to it):
+//'   \code{RcppArmadillo} \code{C++} code and is about \emph{10} times faster
+//'   than \code{lm()}. The code was inspired by this article (but it's not
+//'   identical to it):
 //'   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 //'
 //' @examples
@@ -1253,31 +1340,32 @@ arma::mat roll_ohlc(arma::mat& t_series, arma::uvec& end_points) {
 //' @return A column \emph{vector} of the same length as the argument
 //'   \code{t_series}.
 //'
-//' @details The function \code{roll_sum()} calculates a \emph{vector} of 
-//'   rolling sums, over a \emph{vector} of data, using \emph{Rcpp}.  The
-//'   function \code{roll_sum()} is several times faster than
-//'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+//' @details The function \code{roll_vec()} calculates a \emph{vector} of
+//'   rolling sums, over a \emph{vector} of data, using fast \emph{Rcpp}
+//'   \code{C++} code.  The function \code{roll_vec()} is several times faster
+//'   than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 //'
 //' @examples
 //' \dontrun{
 //' # Create a vector of random returns
 //' re_turns <- rnorm(1e6)
 //' # Calculate rolling sums over 11-period lookback intervals
-//' sum_rolling <- HighFreq::roll_sum(re_turns, look_back=11)
-//' # Compare HighFreq::roll_sum() with rutils::roll_sum()
-//' all.equal(HighFreq::roll_sum(re_turns, look_back=11), 
+//' sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
+//' # Compare HighFreq::roll_vec() with rutils::roll_sum()
+//' all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
 //'          rutils::roll_sum(re_turns, look_back=11))
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::roll_sum(re_turns, look_back=11),
+//'   rcpp=HighFreq::roll_vec(re_turns, look_back=11),
 //'   rcode=rutils::roll_sum(re_turns, look_back=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-NumericVector roll_sum(NumericVector t_series, int look_back) {
+NumericVector roll_vec(NumericVector t_series, int look_back) {
+  
   int len_gth = t_series.size();
   NumericVector rolling_sum(len_gth);
 
@@ -1293,7 +1381,8 @@ NumericVector roll_sum(NumericVector t_series, int look_back) {
   }  // end for
   
   return rolling_sum;
-}  // end roll_sum
+  
+}  // end roll_vec
 
 
 
@@ -1309,7 +1398,7 @@ NumericVector roll_sum(NumericVector t_series, int look_back) {
 //' @return A column \emph{vector} of the same length as the argument
 //'   \code{t_series}.
 //'
-//' @details The function \code{roll_wsum()} calculates the rolling weighted sum
+//' @details The function \code{roll_vecw()} calculates the rolling weighted sum
 //'   of a \emph{vector} over its past values (a convolution with the
 //'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
 //'   similar calculation as the standard \code{R} function
@@ -1325,7 +1414,7 @@ NumericVector roll_sum(NumericVector t_series, int look_back) {
 //' # Create simple weights
 //' weight_s <- c(1, rep(0, 10))
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(t_series=re_turns, weight_s=weight_s)
+//' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
 //' # Compare with original
 //' all.equal(re_turns, as.numeric(weight_ed))
 //' # Second example
@@ -1333,7 +1422,7 @@ NumericVector roll_sum(NumericVector t_series, int look_back) {
 //' weight_s <- exp(-0.2*1:11)
 //' weight_s <- weight_s/sum(weight_s)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(t_series=re_turns, weight_s=weight_s)
+//' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
 //' # Calculate rolling weighted sum using filter()
 //' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
@@ -1342,7 +1431,8 @@ NumericVector roll_sum(NumericVector t_series, int look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_wsum(const arma::vec& t_series, const arma::vec& weight_s) {
+arma::vec roll_vecw(const arma::vec& t_series, const arma::vec& weight_s) {
+  
   arma::uword len_gth = t_series.n_elem;
   arma::uword look_back = weight_s.n_elem;
   arma::vec rolling_sum(len_gth);
@@ -1358,7 +1448,8 @@ arma::vec roll_wsum(const arma::vec& t_series, const arma::vec& weight_s) {
   }  // end for
   
   return rolling_sum;
-}  // end roll_wsum
+  
+}  // end roll_vecw
 
 
 
@@ -1412,6 +1503,7 @@ arma::vec roll_wsum(const arma::vec& t_series, const arma::vec& weight_s) {
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
+  
   arma::uword look_back = weight_s.n_rows-2;
   arma::uword num_rows = mat_rix.n_rows-1;
   
@@ -1422,6 +1514,7 @@ arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
   roll_conv.rows(0, look_back) = mat_rix.rows(0, look_back);
   
   return roll_conv.rows(0, num_rows);
+  
 }  // end roll_conv
 
 
@@ -1497,6 +1590,178 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 
 
 ////////////////////////////////////////////////////////////
+//' Calculate the rolling weighted sum over a \emph{time series} or a
+//' \emph{matrix} using \emph{Rcpp}.
+//' 
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+//' 
+//' @param \code{look_back} The length of the look-back interval, equal to the
+//'   number of data points included in calculating the rolling sum (the default
+//'   is \code{look_back = 1}).
+//'   
+//' @param \code{stu_b} An \emph{integer} value equal to the first stub interval
+//'   for calculating the end points.
+//' 
+//' @param \code{end_points} An \emph{unsigned integer} vector of end
+//' points.
+//'   
+//' @param \code{weight_s} A column \emph{vector} of weights.
+//'
+//' @return A \emph{matrix} with the same dimensions as the input
+//'   argument \code{t_series}.
+//'
+//' @details The function \code{roll_sum()} calculates the rolling sums over the
+//'   columns of the \code{t_series} data.  
+//'   The sums are calculated over a number of data points equal to
+//'   \code{look_back}.
+//'   
+//'   The function \code{roll_sum()} returns a \emph{matrix} with the same
+//'   dimensions as the input argument \code{t_series}.
+//' 
+//'   The arguments \code{stu_b}, \code{end_points}, and \code{weight_s} are
+//'   optional.
+//'   
+//'   If either the arguments \code{stu_b} or \code{end_points} are supplied,
+//'   then the rolling sums are calculated at the end points. 
+//'   
+//'   If only the argument \code{stu_b} is supplied, then the end points are
+//'   calculated from the \code{stu_b} and \code{look_back} arguments. The first
+//'   end point is equal to \code{stu_b} and the end points are spaced
+//'   \code{look_back} periods apart.
+//'   
+//'   If the argument \code{weight_s} is supplied, then weighted sums are
+//'   calculated.
+//'   Then the function \code{roll_sum()} calculates the rolling weighted sums
+//'   of the past values.
+//'   
+//'   The function \code{roll_sum()} calculates the rolling weighted sums as
+//'   convolutions of the \code{t_series} columns with the \emph{vector} of
+//'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}.
+//'   It performs a similar calculation to the standard \code{R} function
+//'   \code{stats::filter(x=t_series, filter=weight_s, method="convolution",
+//'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+//'   leading \code{NA} values. using fast \emph{RcppArmadillo} \code{C++} code.
+//'   The function \code{roll_sum()} is several times faster than
+//'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+//'   
+//' @examples
+//' \dontrun{
+//' # First example
+//' # Create series of historical returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+//' # Define parameters
+//' look_back <- 22
+//' stu_b <- 21
+//' # Calculate rolling sums at each point
+//' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
+//' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+//' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+//' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+//' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
+//' r_sum <- (r_sum - lag_sum)
+//' all.equal(c_sum, r_sum, check.attributes=FALSE)
+//' 
+//' # Calculate rolling sums at end points
+//' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back, stu_b=stu_b)
+//' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
+//' end_p <- end_p[end_p < NROW(re_turns)]
+//' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+//' r_sum <- r_sum[end_p+1, ]
+//' lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
+//' r_sum <- (r_sum - lag_sum)
+//' all.equal(c_sum, r_sum, check.attributes=FALSE)
+//' 
+//' # Calculate rolling sums at end points - pass in end_points
+//' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p)
+//' all.equal(c_sum, r_sum, check.attributes=FALSE)
+//' 
+//' # Create exponentially decaying weights
+//' weight_s <- exp(-0.2*(1:11))
+//' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+//' # Calculate rolling weighted sum
+//' c_sum <- HighFreq::roll_sum(re_turns, weight_s=weight_s)
+//' # Calculate rolling weighted sum using filter()
+//' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+//' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
+//' 
+//' # Calculate rolling weighted sums at end points
+//' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p, weight_s=weight_s)
+//' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
+//' 
+//' # Create simple weights equal to a 1 value plus zeros
+//' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+//' # Calculate rolling weighted sum
+//' weight_ed <- HighFreq::roll_sum(re_turns, weight_s)
+//' # Compare with original
+//' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat roll_sum(arma::mat& t_series,
+                   arma::uword look_back = 1,
+                   Rcpp::Nullable<int> stu_b = R_NilValue, 
+                   Rcpp::Nullable<Rcpp::IntegerVector> end_points = R_NilValue, 
+                   Rcpp::Nullable<Rcpp::NumericVector> weight_s = R_NilValue) {
+  
+  arma::uword num_rows = t_series.n_rows;
+  arma::mat cum_sum;
+  
+  if (weight_s.isNotNull()) {
+    // Copy weight_s
+    arma::vec weights_vec = Rcpp::as<vec>(weight_s);
+    arma::uword num_weights = weights_vec.n_elem;
+    // Calculate the weighted averages as convolutions
+    cum_sum = arma::conv2(t_series, weights_vec, "full");
+    // Copy the warmup period
+    // cout << "num_weights = " << num_weights << endl;
+    cum_sum.rows(0, num_weights-2) = t_series.rows(0, num_weights-2);
+    cum_sum = cum_sum.rows(0, num_rows-1);
+    // cout << "cum_sum.n_rows = " << cum_sum.n_rows << endl;
+  } else {
+    // Calculate cumulative returns
+    cum_sum = arma::cumsum(t_series, 0);
+  }  // end if
+  
+  
+  // Declare empty end points
+  arma::uvec end_p;
+  // Update end points
+  if (end_points.isNotNull()) {
+    // Copy end_points
+    end_p = Rcpp::as<uvec>(end_points);
+  } else if (stu_b.isNotNull()) {
+    // Calculate end points with stu_b
+    end_p = arma::regspace<uvec>(Rcpp::as<uword>(stu_b), look_back, num_rows + look_back);
+    end_p = end_p.elem(find(end_p < num_rows));
+  }  // end if
+  
+  
+  // Calculate the rolling sums
+  if (end_p.is_empty() && weight_s.isNotNull()) {
+    // Do nothing
+    // Return the weighted averages (convolutions) at each point
+    // return cum_sum;
+  } else if (end_p.is_empty() && !weight_s.isNotNull()) {
+    // Return rolling sums at each point
+    cum_sum = diff_it(cum_sum, look_back, true);
+  } else if (!end_p.is_empty() && weight_s.isNotNull()) {
+    // Return the weighted averages (convolutions) at end points
+    cum_sum = cum_sum.rows(end_p);
+  } else if (!end_p.is_empty() && !weight_s.isNotNull()) {
+    // Return the rolling sums at end points
+    cum_sum = cum_sum.rows(end_p);
+    cum_sum = diff_it(cum_sum, 1, true);
+  }  // end if
+  
+  return cum_sum;
+  
+}  // end roll_sum
+
+
+
+
+////////////////////////////////////////////////////////////
 //' Calculate a \emph{vector} of variance estimates over a rolling look-back
 //' interval for a single-column \emph{time series} or a \emph{vector}, using
 //' \code{RcppArmadillo}.
@@ -1512,7 +1777,8 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //'
 //' @details The function \code{roll_var_vec()} calculates a \emph{vector} of
 //'   variance estimates over a rolling look-back interval for a single-column
-//'   \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}.
+//'   \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}
+//'   \code{C++} code.
 //'   
 //'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 //'   the initial warmup period, to calculate the same number of elements as the
@@ -1521,7 +1787,8 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //'   The function \code{roll_var_vec()} performs the same calculation as the
 //'   function \code{roll_var()} from package
 //'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-//'   but it's several times faster because it uses \code{RcppArmadillo}.
+//'   but it's several times faster because it uses \code{RcppArmadillo}
+//'   \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
@@ -1595,10 +1862,12 @@ arma::vec roll_var_vec(arma::vec& t_series, arma::uword look_back=11) {
 //'   performs the same calculation as the function \code{roll_var()} from
 //'   package
 //'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-//'   but it's several times faster because it uses \code{RcppArmadillo}.
-//'   
+//'   but it's several times faster because it uses \code{RcppArmadillo}
+//'   \code{C++} code.
+//'
 //'   The function \code{roll_var()} is implemented in \code{RcppArmadillo}
-//'   code, so it's many times faster than the equivalent \code{R} code.
+//'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+//'   code.
 //'
 //' @examples
 //' \dontrun{
@@ -1630,9 +1899,11 @@ arma::mat roll_var(arma::mat& t_series, arma::uword ste_p = 1, arma::uword look_
   arma::mat vari_ance = arma::zeros(num_points, t_series.n_cols);
 
   // Perform loop over the end_points
-  for (arma::uword it = 0; it < num_points; it++) {
+  for (arma::uword ep = 0; ep < num_points; ep++) {
     // Calculate variance
-    vari_ance.row(it) = arma::var(t_series.rows(start_p(it), end_p(it)));
+    if (end_p(ep) > start_p(ep)) {
+      vari_ance.row(ep) = arma::var(t_series.rows(start_p(ep), end_p(ep)));
+    }  // end if
   }  // end for
 
   // Old code below
@@ -1702,13 +1973,14 @@ arma::mat roll_var(arma::mat& t_series, arma::uword ste_p = 1, arma::uword look_
 //'   In the initial warmup period, the variance is calculated over an expanding
 //'   look-back interval.
 //'   
-//'   For example, the rolling variance at daily end points with an
-//'   \code{11} day look-back, can be calculated using the parameters
-//'   \code{ste_p = 1} and \code{look_back = 11}.
+//'   For example, the rolling variance at daily end points with an \code{11}
+//'   day look-back, can be calculated using the parameters \code{ste_p = 1} and
+//'   \code{look_back = 11} (Assuming the \code{oh_lc} data has daily
+//'   frequency.)
 //' 
-//'   The rolling variance at \code{25} day end points with a \code{75} day
-//'   look-back, can be calculated using the parameters \code{ste_p = 25} and
-//'   \code{look_back = 3} (because \code{3*25 = 75}).
+//'   Similarly, the rolling variance at \code{25} day end points with a
+//'   \code{75} day look-back, can be calculated using the parameters
+//'   \code{ste_p = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
 //' 
 //'   The function \code{roll_var_ohlc()} calculates the variance from all the
 //'   different intra-day and day-over-day returns (defined as the differences
@@ -1737,7 +2009,8 @@ arma::mat roll_var(arma::mat& t_series, arma::uword ste_p = 1, arma::uword look_
 //'   the number of days in each time period.
 //'   
 //'   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-//'   code, so it's many times faster than the equivalent \code{R} code.
+//'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+//'   code.
 //'
 //' @examples
 //' \dontrun{
@@ -1787,6 +2060,7 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
   arma::uvec end_p = calc_endpoints(num_rows, ste_p);
   // Start points equal to end points lagged by look_back
   arma::uvec start_p = calc_startpoints(end_p, look_back);
+  
   // Allocate variance matrix
   arma::uword num_points = end_p.n_elem;
   arma::vec vari_ance = arma::zeros(num_points);
@@ -1795,23 +2069,24 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
   arma::colvec clo_se = oh_lc.col(3);
   arma::colvec lag_close = lag_it(clo_se);
 
+  // Set the time index to 1 if scal_e = FALSE
   if (!scal_e || (in_dex.n_rows == 1)) {
     in_dex = arma::ones(num_rows);
   }  // end if
 
-  // Define data subsets
+  // Define data subsets over look-back intervals
   arma::mat sub_ohlc;
   arma::colvec sub_close;
   arma::colvec sub_index;
   
   // Perform loop over the end_points
-  for (arma::uword it = 0; it < num_points; it++) {
-    if (end_p(it) > start_p(it)) {
-      sub_ohlc = oh_lc.rows(start_p(it), end_p(it));
-      sub_close = lag_close.rows(start_p(it), end_p(it));
-      sub_index = in_dex.subvec(start_p(it), end_p(it));
+  for (arma::uword ep = 0; ep < num_points; ep++) {
+    if (end_p(ep) > start_p(ep)) {
+      sub_ohlc = oh_lc.rows(start_p(ep), end_p(ep));
+      sub_close = lag_close.rows(start_p(ep), end_p(ep));
+      sub_index = in_dex.subvec(start_p(ep), end_p(ep));
       // Calculate variance
-      vari_ance.row(it) = calc_var_ohlc(sub_ohlc, calc_method, sub_close, scal_e, sub_index);
+      vari_ance.row(ep) = calc_var_ohlc(sub_ohlc, calc_method, sub_close, scal_e, sub_index);
     }  // end if
   }  // end for
 
@@ -1844,8 +2119,10 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
 //' \emph{matrix} of data using \code{RcppArmadillo}.
 //' 
 //' @param mat_rix A \emph{matrix} of data.
+//' 
 //' @param \code{look_back} The length of the look-back interval, equal to the number 
 //'   of rows of data used in the scaling.
+//'   
 //' @param use_median A \emph{Boolean} argument: if \code{TRUE} then the 
 //'   centrality (central tendency) is calculated as the \emph{median} and the 
 //'   dispersion is calculated as the \emph{median absolute deviation}
@@ -1885,6 +2162,7 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
 arma::mat roll_scale(const arma::mat& mat_rix, 
                      const arma::uword& look_back,
                      const bool use_median=false) {
+  
   arma::uword num_rows = mat_rix.n_rows;
   arma::mat scaled_mat(num_rows, mat_rix.n_cols);
   arma::mat sub_mat;
@@ -1896,6 +2174,7 @@ arma::mat roll_scale(const arma::mat& mat_rix,
     sub_mat = calc_scaled(sub_mat, use_median);
     scaled_mat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
+  
   // Remaining periods
   for (arma::uword it = look_back; it < num_rows; it++) {
     sub_mat = mat_rix.rows(it-look_back+1, it);
@@ -1972,6 +2251,7 @@ arma::mat roll_scale(const arma::mat& mat_rix,
 arma::vec roll_zscores(const arma::vec& res_ponse, 
                        const arma::mat& de_sign, 
                        const arma::uword& look_back) {
+  
   arma::uword num_rows = de_sign.n_rows;
   arma::vec z_scores(num_rows);
   arma::vec sub_response;
@@ -2018,7 +2298,7 @@ arma::vec roll_zscores(const arma::vec& res_ponse,
 //'   \code{in_nov}.
 //'
 //' @details The function \code{sim_garch()} simulates a \emph{GARCH} process
-//'   using \emph{Rcpp}.
+//'   using fast \emph{Rcpp} \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
@@ -2066,8 +2346,9 @@ NumericMatrix sim_garch(double om_ega,
 //'   prices, with the same length as the argument \code{in_nov}.
 //'
 //' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-//'   process using \emph{Rcpp}, and returns A column \emph{vector} representing the 
-//'   \emph{time series} of prices.
+//'   process using fast \emph{Rcpp} \code{C++} code.
+//'   It returns a column \emph{vector} representing the \emph{time series} of
+//'   prices.
 //'
 //' @examples
 //' \dontrun{
@@ -2111,7 +2392,7 @@ NumericVector sim_ou(double eq_price,
 //'
 //' @details The function \code{sim_arima()} recursively filters a \emph{vector}
 //'   of innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
-//'   \code{RcppArmadillo}.
+//'   \code{RcppArmadillo} \code{C++} code.
 //'   It performs the same calculation as the standard \code{R} function
 //'   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
 //'   \code{6} times faster.
@@ -2190,7 +2471,8 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //'   of \code{re_turns}.
 //'
 //' @details The function \code{calc_weights()} calculates the optimal portfolio
-//'   weights for different objective functions, using \code{RcppArmadillo}.
+//'   weights for different objective functions, using \code{RcppArmadillo}
+//'   \code{C++} code.
 //' 
 //'   If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
 //'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
@@ -2466,9 +2748,10 @@ arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
                     double vo_l = 0.01,
                     const double& co_eff = 1.0,
                     const double& bid_offer = 0.0) {
-  arma::vec pnl_s = zeros(re_turns.n_rows);
-  arma::vec weights_past = zeros(re_turns.n_cols);
+  
   arma::vec weight_s(re_turns.n_cols);
+  arma::vec weights_past = zeros(re_turns.n_cols);
+  arma::vec pnl_s = zeros(re_turns.n_rows);
   
   // Perform loop over the end_points
   for (arma::uword it = 1; it < end_points.size(); it++) {
@@ -2481,6 +2764,8 @@ arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
     pnl_s.row(end_points(it-1)+1) -= bid_offer*sum(abs(weight_s - weights_past))/2;
     weights_past = weight_s;
   }  // end for
-  // Return the strategy returns
+  
+  // Return the strategy pnl_s
   return pnl_s;
+  
 }  // end back_test

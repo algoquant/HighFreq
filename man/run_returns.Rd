@@ -8,15 +8,15 @@
 run_returns(x_ts, lagg = 1, col_umn = 4, scal_e = TRUE)
 }
 \arguments{
-\item{x_ts}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
+\item{\code{x_ts}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
 
-\item{lagg}{An integer equal to the number of time periods of lag. (default
+\item{\code{lagg}}{An integer equal to the number of time periods of lag. (default
 is 1)}
 
-\item{col_umn}{The column number to extract from the \emph{OHLC} data.
+\item{\code{col_umn}}{The column number to extract from the \emph{OHLC} data.
 (default is \code{4}, or the \emph{Close} prices column)}
 
-\item{scal_e}{\emph{Boolean} argument: should the returns be divided by the
+\item{\code{scal_e}}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{

@@ -8,15 +8,6 @@ and save them to a single \sQuote{\code{*.RData}} file, without aggregation.}
 save_rets_ohlc(sym_bol, data_dir = "E:/output/data/",
   output_dir = "E:/output/data/")
 }
-\arguments{
-\item{sym_bol}{A \emph{character} string representing symbol or ticker.}
-
-\item{data_dir}{A \emph{character} string representing directory containing
-input \sQuote{\code{*.RData}} files.}
-
-\item{output_dir}{A \emph{character} string representing directory containing
-output \sQuote{\code{*.RData}} files.}
-}
 \value{
 A time series of returns and volume in \emph{xts} format.
 }

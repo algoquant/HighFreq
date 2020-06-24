@@ -76,78 +76,22 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods ?
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods.
 
-+ [x] Modify the functions roll_var() and roll_var_ohlc() to perform calculations over end points if ste_p argument is passed in
++ [ ] Rewrite all weighted averages using convolution and function arma::conv2()
 
-+ [x] Modify the function agg_ohlc() so it can accept either one or two columns of data (second column for volume), or four or five columns of OHLC data
++ [ ] Deprecate function roll_conv_ref() ?
 
-+ [x] Rename the function to_period() to roll_ohlc()
-
-+ [x] Create function calc_startpoints() as a lag of end points (unsigned integers)
++ [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
+Worker agg_ohlc()
 
 + [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
+Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
 Several possible methods are: 
 The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
 cov = (VAR(r1+r2) - VAR(r1-r2))/4
 Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
 Hodges-Lehmann estimator: 
-
-+ [ ] Create a function called get_fun() for
-Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation
-
-+ [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
-
-+ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
-+ [ ] In function back_test() add parameter for lagging the weights - for applying the weights with an extra lag
-
-+ [ ] In function calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
-
-+ [ ] Add unit testing using testthat and devtools: create /tests directory
-
-+ [ ] Create function calc_quantile() to calculate or update the quantile of a vector of numbers
-The value of the quantile can be updated based on the old quantile value and the new updated vector values.
-If there are very few new vector values and if they're all far from the old quantile value, then the quantile may remain unchanged.
-Apply it to the calculation or rolling quantiles.
-
-+ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
-https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
-http://bytes.com/forum/thread656124.html
-https://bytes.com/topic/c/answers/561361-string-convert-function-name
-
-+ [ ] Pass a function pointer
-https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
-
-+ [ ] Pass model function and its parameters into back_test() as a vector or a list
-http://gallery.rcpp.org/articles/rcppnt2-introduction/
-http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
-https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
-https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
-https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
-
-+ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
-https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
-https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
-https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
-https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
-https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
-https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
-https://www.wikihow.com/Use-Function-Template-Parameter-Packs-in-C%2B%2B
-https://en.cppreference.com/w/cpp/language/parameter_pack
-
-+ [ ] Convert all loops to STL iterators: iterators are pointers to vector and matrix elements 
-https://www.geeksforgeeks.org/iterators-c-stl/
-
-+ [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
-There are several advantages of using Rcpp::NumericVector instead of std::vector<double> :
-NumericVector avoids deep copy of data between R and C++
-NumericVector provides access to Sugar functions.
-For example, if you replace NumericVector with std::vector<double> then you lose flexibility and need two copies of every function - one for integer and one for double.
-cpp::NumericVector over std::vector<double>
-https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
 + [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
 calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
@@ -181,6 +125,66 @@ Create a contrarian strategy using roll_count(): the number of consecutive close
 Scale the count threshold levels depending on the level of volatility.
 
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
+
++ [ ] Modify back_test() add parameter for lagging the weights - for applying the weights with an extra lag
+
++ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Convert all time loops to loops over the end points, using calc_endpoints() and calc_startpoints()
+
++ [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
+
++ [ ] Create function calc_quantile() to calculate or update the quantile of a vector of numbers
+The value of the quantile can be updated based on the old quantile value and the new updated vector values.
+If there are very few new vector values and if they're all far from the old quantile value, then the quantile may remain unchanged.
+Apply it to the calculation or rolling quantiles.
+
++ [ ] Modify calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
+
++ [ ] Add roxygen code for inherited parameters
+//' @inheritParams which_extreme
+
++ [ ] Add unit testing using testthat and devtools: create /tests directory
+
++ [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
+
++ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
+https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
+http://bytes.com/forum/thread656124.html
+https://bytes.com/topic/c/answers/561361-string-convert-function-name
+
++ [ ] Pass a function pointer
+https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
+
++ [ ] Pass model function and its parameters into back_test() as a vector or a list
+http://gallery.rcpp.org/articles/rcppnt2-introduction/
+http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
+https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
+https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
+https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
+
++ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
+https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
+https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
+https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
+https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
+https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
+https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
+https://www.wikihow.com/Use-Function-Template-Parameter-Packs-in-C%2B%2B
+https://en.cppreference.com/w/cpp/language/parameter_pack
+
++ [ ] Convert all loops to STL iterators: iterators are pointers to vector and matrix elements ?
+https://www.geeksforgeeks.org/iterators-c-stl/
+
++ [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
+There are several advantages of using Rcpp::NumericVector instead of std::vector<double> :
+NumericVector avoids deep copy of data between R and C++
+NumericVector provides access to Sugar functions.
+For example, if you replace NumericVector with std::vector<double> then you lose flexibility and need two copies of every function - one for integer and one for double.
+cpp::NumericVector over std::vector<double>
+https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
 + [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
@@ -277,7 +281,7 @@ https://stackoverflow.com/questions/23849354/equivalent-of-which-function-in-rcp
 
 + [ ] Create new roll functions using RcppRoll::rollit() ?
 
-+ [ ] Convert roll_*() functions to RcppRoll ?
++ [ ] Convert roll_* functions to RcppRoll ?
 No, because RcppArmadillo and Rcpp
 are better
 
@@ -291,8 +295,6 @@ are better
 trade_func() should return a list with at least two elements: time series and named vector of statistics (Sharpe, etc.)
 
 + [ ] Create functions roll() and run() in Rcpp - already done ?
-
-+ [ ] Modify function roll_sum() so that it also calculates the rolling sum over the columns of a matrix ?
 
 + [ ] Add to function random_ohlc(): simulate random non-normal OHLC prices from Heston model
 
@@ -316,6 +318,43 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Rename roll_sum() to roll_vec(), and roll_wsum() to roll_vecw()
+
++ [x] Modify the old function roll_sum() so that it accepts matrix argument and calculates the rolling sum over the columns of a matrix
+Modify function roll_sum() to use arma::cumsum() and diff_it(), instead of explicit loop.
+Function roll_sum() aggregates returns to a lower periodicity, similar to roll_ohlc().
+If weight_s argument is not NULL, then perform weighted sum using convolution and function arma::conv2().
+It would then replicate functions roll_wsum(), roll_conv(), and roll_conv_ref().
+Pass in parameters end_points and weight_s with default NULL values, using the syntax:
+Rcpp::Nullable<Rcpp::IntegerVector> end_points = R_NilValue
+https://stackoverflow.com/questions/34205925/default-null-parameter-rcpp
+
++ [x] Modify function diff_it() to pad with initial (warmup) period
+
++ [x] Modify functions lag_vec() and lag_it() to add parameter pad_zeros
+Add Boolean argument pad_zeros with default TRUE.
+Modify the padding of leading or trailing values in the functions lag_it() and lag_vec()
+If pad_zeros is TRUE then pad the leading or trailing values with zeros, else pad with leading or trailing row.
+The returns data should be padded with zeros, not the first or last element of the input vector.
+The prices should be padded with the first or last element of the input vector, not with zeros.
+
++ [x] Rename the R function roll_moment() to roll_stats()
+
++ [x] Rename the R function agg_regate() to agg_stats_r(), and parameter mo_ment to calc_bars
+
++ [x] Add to file README.Rmd overview of function taxonomy
+The functions run_* aggregate individual rows of TAQ or OHLC data into single numbers, and they transform multiple column of TAQ or OHLC data into column vectors
+The functions calc_* aggregate columnar data into a single number.
+The functions roll_* perform loops over the rows of columnar data, and they apply the functions calc_* to subsets of the data over look-back intervals.
+
++ [x] Modify the functions roll_var() and roll_var_ohlc() to perform calculations over end points if ste_p argument is passed in
+
++ [x] Modify the function agg_ohlc() so it can accept either one or two columns of data (second column for volume), or four or five columns of OHLC data
+
++ [x] Rename the function to_period() to roll_ohlc()
+
++ [x] Create function calc_startpoints() as a lag of end points (unsigned integers)
 
 + [x] Create a function called calc_endpoints() to calculate the end points, similar to rutils::calc_endpoints()
 
@@ -653,7 +692,7 @@ moment_ohlc() and roll_moment_ohlc() should pass ohlc to skew_ohlc() and vol_ohl
 
 + [x] Create function for performing daily, weekly, and monthly seasonality aggregations
 
-+ [x] Rename functions run_*() to roll_*()
++ [x] Rename functions run_* to roll_*
 
 + [x] Rename save_OHLC() to save_scrub_agg()
 
@@ -681,6 +720,8 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Rename the functions run_* to to cast_* apply_* transform_* accumulate_*?
 
 + [ ] Modify function run_returns() to perform sapply() if argument has multiple columns ?
 

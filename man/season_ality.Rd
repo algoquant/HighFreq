@@ -7,9 +7,9 @@
 season_ality(x_ts, in_dex = format(zoo::index(x_ts), "\%H:\%M"))
 }
 \arguments{
-\item{x_ts}{A single-column \emph{xts} time series.}
+\item{\code{x_ts}}{A single-column \emph{xts} time series.}
 
-\item{in_dex}{A vector of \emph{character} strings representing points in
+\item{\code{in_dex}}{A vector of \emph{character} strings representing points in
 time, of the same length as the argument \code{x_ts}.}
 }
 \value{

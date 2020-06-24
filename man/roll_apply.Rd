@@ -9,25 +9,25 @@ roll_apply(x_ts, agg_fun, look_back = 2, end_points = seq_along(x_ts),
   by_columns = FALSE, out_xts = TRUE, ...)
 }
 \arguments{
-\item{x_ts}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{...}{additional parameters to the function \code{agg_fun}.}
+
+\item{\code{x_ts}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
-\item{agg_fun}{The name of the aggregation function to be applied over a
+\item{\code{agg_fun}}{The name of the aggregation function to be applied over a
 rolling look-back interval.}
 
-\item{look_back}{The number of end points in the look-back interval used for
+\item{\code{look_back}}{The number of end points in the look-back interval used for
 applying the aggregation function (including the current row).}
 
-\item{end_points}{An integer vector of end points.}
-
-\item{by_columns}{\emph{Boolean} argument: should the function
+\item{\code{by_columns}}{\emph{Boolean} argument: should the function
 \code{agg_fun()} be applied column-wise (individually), or should it be
 applied to all the columns combined? (default is \code{FALSE})}
 
-\item{out_xts}{\emph{Boolean} argument: should the output be coerced into an
+\item{\code{out_xts}}{\emph{Boolean} argument: should the output be coerced into an
 \emph{xts} series? (default is \code{TRUE})}
 
-\item{...}{additional parameters to the agg_fun function.}
+\item{\code{end_points}}{An integer vector of end points.}
 }
 \value{
 Either an \emph{xts} time series with the number of rows equal to the

@@ -14,7 +14,7 @@ mult_vec_mat(vec_tor, mat_rix, by_col = TRUE)
 
 \item{\code{by_col}}{A \emph{Boolean} argument: if \code{TRUE} then multiply
 the columns, otherwise multiply the rows. (The default is
-\code{by_col=TRUE}.)}
+\code{by_col = TRUE}.)}
 }
 \value{
 A single \emph{integer} value, equal to either the number of
@@ -46,10 +46,10 @@ The function \code{mult_vec_mat()} multiplies the columns or rows
   instead of performing explicit \code{for()} loops (both methods are
   equally fast).
 
-  The function \code{mult_vec_mat()} uses \code{RcppArmadillo}, so when
-  multiplying large \emph{matrix} columns it's several times faster than
-  vectorized \code{R} code, and it's even much faster compared to \code{R}
-  when multiplying the \emph{matrix} rows.
+  The function \code{mult_vec_mat()} uses \code{RcppArmadillo} \code{C++}
+  code, so when multiplying large \emph{matrix} columns it's several times
+  faster than vectorized \code{R} code, and it's even much faster compared
+  to \code{R} when multiplying the \emph{matrix} rows.
 }
 \examples{
 \dontrun{

@@ -8,7 +8,7 @@ by adding adjustment terms to its prices.}
 remove_jumps(oh_lc)
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 }
 \value{

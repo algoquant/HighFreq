@@ -4,20 +4,36 @@
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
-#' 
+#' @param \code{t_series} A single-column \emph{time series} or a
+#'   \emph{vector}.
+#'
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-#'   (the default is \code{lagg=1}).
+#'   (the default is \code{lagg = 1}).
+#'
+#' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
+#'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 #'
 #' @return A column \emph{vector} with the same number of elements as the input
-#'   vector.
+#'   time series.
 #'
 #' @details The function \code{lag_vec()} applies a lag to the input \emph{time
-#'   series} by shifting its elements by the number equal to the argument
-#'   \code{lagg}. For positive \code{lagg} values, the elements are shifted
-#'   forward, and for negative \code{lagg} values they are shifted backward.
-#'   The output \emph{vector} is padded with either the first or the last
-#'   element, to maintain its original length.
+#'   series} \code{t_series} by shifting its elements by the number equal to
+#'   the argument \code{lagg}. For positive \code{lagg} values, the elements
+#'   are shifted forward, and for negative \code{lagg} values they are shifted
+#'   backward.
+#'   
+#'   The output \emph{vector} is padded with either zeros (the default), or
+#'   with data from \code{t_series}, so that it has the same number of element
+#'   as \code{t_series}.
+#'   If the \code{lagg} is positive, then the first element is copied and added
+#'   upfront.
+#'   If the \code{lagg} is negative, then the last element is copied and added
+#'   to the end.
+#'   
+#'   As a rule, if \code{t_series} contains returns data, then the output
+#'   \emph{matrix} should be padded with zeros, to avoid data snooping.
+#'   If \code{t_series} contains prices, then the output \emph{matrix} should
+#'   be padded with the prices.
 #'
 #' @examples
 #' \dontrun{
@@ -35,8 +51,8 @@
 #' }
 #' 
 #' @export
-lag_vec <- function(t_series, lagg = 1L) {
-    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', t_series, lagg)
+lag_vec <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', t_series, lagg, pad_zeros)
 }
 
 #' Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
@@ -45,8 +61,11 @@ lag_vec <- function(t_series, lagg = 1L) {
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-#'   (the default is \code{lagg=1}).
+#'   (the default is \code{lagg = 1}).
 #'
+#' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
+#'   with zeros? (The default is \code{pad_zeros = TRUE}.)
+#'   
 #' @return A \emph{matrix} with the same dimensions as the input
 #'   argument \code{t_series}.
 #'
@@ -54,9 +73,20 @@ lag_vec <- function(t_series, lagg = 1L) {
 #'   \emph{matrix} by shifting its rows by the number equal to the argument
 #'   \code{lagg}. For positive \code{lagg} values, the rows are shifted forward
 #'   (down), and for negative \code{lagg} values they are shifted backward
-#'   (up). The output \emph{matrix} is padded with either the first or the last
-#'   row, to maintain it original dimensions. The function \code{lag_it()} can
-#'   be applied to vectors in the form of single-column matrices.
+#'   (up). 
+#'   
+#'   The output \emph{matrix} is padded with either zeros (the default), or
+#'   with rows of data from \code{t_series}, so that it has the same dimensions
+#'   as \code{t_series}.
+#'   If the \code{lagg} is positive, then the first row is copied and added
+#'   upfront.
+#'   If the \code{lagg} is negative, then the last row is copied and added
+#'   to the end.
+#'   
+#'   As a rule, if \code{t_series} contains returns data, then the output
+#'   \emph{matrix} should be padded with zeros, to avoid data snooping.
+#'   If \code{t_series} contains prices, then the output \emph{matrix} should
+#'   be padded with the prices.
 #'
 #' @examples
 #' \dontrun{
@@ -74,8 +104,8 @@ lag_vec <- function(t_series, lagg = 1L) {
 #' }
 #' 
 #' @export
-lag_it <- function(t_series, lagg = 1L) {
-    .Call('_HighFreq_lag_it', PACKAGE = 'HighFreq', t_series, lagg)
+lag_it <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_lag_it', PACKAGE = 'HighFreq', t_series, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
@@ -84,11 +114,11 @@ lag_it <- function(t_series, lagg = 1L) {
 #' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of time periods to
-#'   lag when calculating the differences (the default is \code{lagg=1}).
+#'   lag when calculating the differences (the default is \code{lagg = 1}).
 #'   
 #' @param \code{padd} \emph{Boolean} argument: Should the output \emph{vector}
 #'   be padded (extended) with zeros, in order to return a \emph{vector} of the
-#'   same length as the input? (the default is \code{padd=TRUE})
+#'   same length as the input? (the default is \code{padd = TRUE})
 #'
 #' @return A column \emph{vector} containing the differences between the
 #'   elements of the input vector.
@@ -99,16 +129,16 @@ lag_it <- function(t_series, lagg = 1L) {
 #'   The argument \code{lagg} specifies the number of lags.  For example, if
 #'   \code{lagg=3} then the differences will be taken between each element
 #'   minus the element three time periods before it (in the past).  The default
-#'   is \code{lagg=1}.
+#'   is \code{lagg = 1}.
 #' 
 #'   The argument \code{padd} specifies whether the output \emph{vector} should
 #'   be padded (extended) with zeros at the beginning, in order to return a
 #'   \emph{vector} of the same length as the input.  The default is
-#'   \code{padd=TRUE}. The padding operation can be time-consuming, because it
+#'   \code{padd = TRUE}. The padding operation can be time-consuming, because it
 #'   requires the copying of data.
 #'   
 #'   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
-#'   code, which makes it several times faster than \code{R} code.
+#'   \code{C++} code, which makes it several times faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
@@ -130,16 +160,18 @@ diff_vec <- function(t_series, lagg = 1L, padd = TRUE) {
     .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', t_series, lagg, padd)
 }
 
-#' Calculate the row differences of a \emph{matrix} or a \emph{time
-#' series} using \emph{RcppArmadillo}.
+#' Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+#' using \emph{RcppArmadillo}.
 #' 
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' 
 #' @param \code{lagg} An \emph{integer} equal to the number of rows (time
 #'   periods) to lag when calculating the differences (the default is
-#'   \code{lagg=1}).
+#'   \code{lagg = 1}).
+#'   
 #' @param \code{padd} \emph{Boolean} argument: Should the output \emph{matrix}
 #'   be padded (extended) with zeros, in order to return a \emph{matrix} with
-#'   the same number of rows as the input? (the default is \code{padd=TRUE})
+#'   the same number of rows as the input? (the default is \code{padd = TRUE})
 #'
 #' @return A \emph{matrix} containing the differences between the rows of the
 #'   input \emph{matrix}.
@@ -153,24 +185,25 @@ diff_vec <- function(t_series, lagg = 1L, padd = TRUE) {
 #'   of the lagged version. For example, if \code{lagg=3} then the lagged
 #'   version will have its rows shifted down by \code{3} rows, and the
 #'   differences will be taken between each row minus the row three time
-#'   periods before it (in the past). The default is \code{lagg=1}.
+#'   periods before it (in the past). The default is \code{lagg = 1}.
 #' 
 #'   The argument \code{padd} specifies whether the output \emph{matrix} should
-#'   be padded (extended) with rows of zeros at the beginning, in order to
-#'   return a \emph{matrix} with the same number of rows as the input.  The
-#'   default is \code{padd=TRUE}. The padding operation can be time-consuming, 
-#'   because it requires the copying of data.
+#'   be padded (extended) with the rows of the initial (warmup) period at the
+#'   beginning, in order to return a \emph{matrix} with the same number of rows
+#'   as the input.  The default is \code{padd = TRUE}. The padding operation
+#'   can be time-consuming, because it requires the copying of data.
 #'   
 #'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-#'   code, which makes it several times faster than \code{R} code.
+#'   \code{C++} code, which makes it several times faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random returns
 #' re_turns <- matrix(rnorm(5e6), nc=5)
 #' # Compare diff_it() with rutils::diff_it()
-#' all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-#'   rutils::diff_it(re_turns, lagg=3))
+#' all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE), 
+#'   zoo::coredata(rutils::diff_it(re_turns, lagg=3)), 
+#'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -292,7 +325,7 @@ calc_startpoints <- function(end_points, look_back) {
 #' 
 #' @param \code{by_col} A \emph{Boolean} argument: if \code{TRUE} then multiply
 #'   the columns, otherwise multiply the rows. (The default is
-#'   \code{by_col=TRUE}.)
+#'   \code{by_col = TRUE}.)
 #' 
 #' @return A single \emph{integer} value, equal to either the number of
 #'   \emph{matrix} columns or the number of rows.
@@ -318,10 +351,10 @@ calc_startpoints <- function(end_points, look_back) {
 #'   instead of performing explicit \code{for()} loops (both methods are
 #'   equally fast).
 #'
-#'   The function \code{mult_vec_mat()} uses \code{RcppArmadillo}, so when
-#'   multiplying large \emph{matrix} columns it's several times faster than
-#'   vectorized \code{R} code, and it's even much faster compared to \code{R}
-#'   when multiplying the \emph{matrix} rows.
+#'   The function \code{mult_vec_mat()} uses \code{RcppArmadillo} \code{C++}
+#'   code, so when multiplying large \emph{matrix} columns it's several times
+#'   faster than vectorized \code{R} code, and it's even much faster compared
+#'   to \code{R} when multiplying the \emph{matrix} rows.
 #'   
 #' @examples
 #' \dontrun{
@@ -466,9 +499,9 @@ calc_inv <- function(re_turns, to_l = 0.001, max_eigen = 0L) {
 #'   centrality as the \emph{median} and the dispersion as the \emph{median
 #'   absolute deviation} (\emph{MAD}).
 #'   
-#'   The function \code{calc_scaled()} uses \code{RcppArmadillo} and is about
-#'   \emph{5} times faster than function \code{scale()}, for a \emph{matrix}
-#'   with \emph{1,000} rows and \emph{20} columns.
+#'   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
+#'   code and is about \emph{5} times faster than function \code{scale()}, for
+#'   a \emph{matrix} with \emph{1,000} rows and \emph{20} columns.
 #'   
 #' @examples
 #' \dontrun{
@@ -498,8 +531,8 @@ calc_scaled <- function(mat_rix, use_median = FALSE) {
 #' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 #'
 #' @details The function \code{calc_var_vec()} calculates the variance of a
-#'   \emph{vector} using \code{RcppArmadillo}, so it's significantly faster
-#'   than the \code{R} function \code{var()}.
+#'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
+#'   significantly faster than the \code{R} function \code{var()}.
 #'
 #' @examples
 #' \dontrun{
@@ -521,8 +554,8 @@ calc_var_vec <- function(t_series) {
     .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', t_series)
 }
 
-#' Calculate the variance of the columns of a \emph{matrix} or \emph{time
-#' series} using \code{RcppArmadillo}.
+#' Calculate the variance of the columns of a \emph{time series} or a
+#' \emph{matrix} using \code{RcppArmadillo}.
 #' 
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
@@ -530,12 +563,13 @@ calc_var_vec <- function(t_series) {
 #'   matrix.
 #'
 #' @details The function \code{calc_var()} calculates the variance of the
-#'   columns of a \emph{matrix} using \code{RcppArmadillo}. 
+#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   \code{RcppArmadillo} \code{C++} code.
 #'   
 #'   The function \code{calc_var()} performs the same calculation as the
 #'   function \code{colVars()} from package
 #'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-#'   but it's much faster because it uses \code{RcppArmadillo}.
+#'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 #'
 #' @examples
 #' \dontrun{
@@ -623,8 +657,8 @@ calc_var <- function(t_series) {
 #'   speeds up the calculation, so it's useful for rolling calculations.
 #'   
 #'   The function \code{calc_var_ohlc()} is implemented in \code{RcppArmadillo}
-#'   code, and it's over \code{10} times faster than \code{calc_var_ohlc_r()},
-#'   which is implemented in \code{R} code.
+#'   \code{C++} code, and it's over \code{10} times faster than
+#'   \code{calc_var_ohlc_r()}, which is implemented in \code{R} code.
 #'
 #' @examples
 #' \dontrun{
@@ -723,8 +757,9 @@ calc_ranks <- function(vec_tor) {
 #'
 #' @details The function \code{calc_lm()} performs the same calculations as the
 #'   function \code{lm()} from package \emph{stats}. It uses
-#'   \code{RcppArmadillo} and is about \emph{10} times faster than \code{lm()}.
-#'   The code was inspired by this article (but it's not identical to it):
+#'   \code{RcppArmadillo} \code{C++} code and is about \emph{10} times faster
+#'   than \code{lm()}. The code was inspired by this article (but it's not
+#'   identical to it):
 #'   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 #'
 #' @examples
@@ -858,31 +893,31 @@ roll_ohlc <- function(t_series, end_points) {
 #' @return A column \emph{vector} of the same length as the argument
 #'   \code{t_series}.
 #'
-#' @details The function \code{roll_sum()} calculates a \emph{vector} of 
-#'   rolling sums, over a \emph{vector} of data, using \emph{Rcpp}.  The
-#'   function \code{roll_sum()} is several times faster than
-#'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#' @details The function \code{roll_vec()} calculates a \emph{vector} of
+#'   rolling sums, over a \emph{vector} of data, using fast \emph{Rcpp}
+#'   \code{C++} code.  The function \code{roll_vec()} is several times faster
+#'   than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
 #' # Calculate rolling sums over 11-period lookback intervals
-#' sum_rolling <- HighFreq::roll_sum(re_turns, look_back=11)
-#' # Compare HighFreq::roll_sum() with rutils::roll_sum()
-#' all.equal(HighFreq::roll_sum(re_turns, look_back=11), 
+#' sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
+#' # Compare HighFreq::roll_vec() with rutils::roll_sum()
+#' all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
 #'          rutils::roll_sum(re_turns, look_back=11))
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   rcpp=HighFreq::roll_sum(re_turns, look_back=11),
+#'   rcpp=HighFreq::roll_vec(re_turns, look_back=11),
 #'   rcode=rutils::roll_sum(re_turns, look_back=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-roll_sum <- function(t_series, look_back) {
-    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', t_series, look_back)
+roll_vec <- function(t_series, look_back) {
+    .Call('_HighFreq_roll_vec', PACKAGE = 'HighFreq', t_series, look_back)
 }
 
 #' Calculate the rolling weighted sum over a single-column \emph{time series}
@@ -895,7 +930,7 @@ roll_sum <- function(t_series, look_back) {
 #' @return A column \emph{vector} of the same length as the argument
 #'   \code{t_series}.
 #'
-#' @details The function \code{roll_wsum()} calculates the rolling weighted sum
+#' @details The function \code{roll_vecw()} calculates the rolling weighted sum
 #'   of a \emph{vector} over its past values (a convolution with the
 #'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
 #'   similar calculation as the standard \code{R} function
@@ -911,7 +946,7 @@ roll_sum <- function(t_series, look_back) {
 #' # Create simple weights
 #' weight_s <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(t_series=re_turns, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
 #' # Compare with original
 #' all.equal(re_turns, as.numeric(weight_ed))
 #' # Second example
@@ -919,7 +954,7 @@ roll_sum <- function(t_series, look_back) {
 #' weight_s <- exp(-0.2*1:11)
 #' weight_s <- weight_s/sum(weight_s)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(t_series=re_turns, weight_s=weight_s)
+#' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
 #' # Calculate rolling weighted sum using filter()
 #' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
@@ -927,8 +962,8 @@ roll_sum <- function(t_series, look_back) {
 #' }
 #' 
 #' @export
-roll_wsum <- function(t_series, weight_s) {
-    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', t_series, weight_s)
+roll_vecw <- function(t_series, weight_s) {
+    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', t_series, weight_s)
 }
 
 #' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
@@ -1035,6 +1070,117 @@ roll_conv_ref <- function(mat_rix, weight_s) {
     .Call('_HighFreq_roll_conv_ref', PACKAGE = 'HighFreq', mat_rix, weight_s)
 }
 
+#' Calculate the rolling weighted sum over a \emph{time series} or a
+#' \emph{matrix} using \emph{Rcpp}.
+#' 
+#' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' 
+#' @param \code{look_back} The length of the look-back interval, equal to the
+#'   number of data points included in calculating the rolling sum (the default
+#'   is \code{look_back = 1}).
+#'   
+#' @param \code{stu_b} An \emph{integer} value equal to the first stub interval
+#'   for calculating the end points.
+#' 
+#' @param \code{end_points} An \emph{unsigned integer} vector of end
+#' points.
+#'   
+#' @param \code{weight_s} A column \emph{vector} of weights.
+#'
+#' @return A \emph{matrix} with the same dimensions as the input
+#'   argument \code{t_series}.
+#'
+#' @details The function \code{roll_sum()} calculates the rolling sums over the
+#'   columns of the \code{t_series} data.  
+#'   The sums are calculated over a number of data points equal to
+#'   \code{look_back}.
+#'   
+#'   The function \code{roll_sum()} returns a \emph{matrix} with the same
+#'   dimensions as the input argument \code{t_series}.
+#' 
+#'   The arguments \code{stu_b}, \code{end_points}, and \code{weight_s} are
+#'   optional.
+#'   
+#'   If either the arguments \code{stu_b} or \code{end_points} are supplied,
+#'   then the rolling sums are calculated at the end points. 
+#'   
+#'   If only the argument \code{stu_b} is supplied, then the end points are
+#'   calculated from the \code{stu_b} and \code{look_back} arguments. The first
+#'   end point is equal to \code{stu_b} and the end points are spaced
+#'   \code{look_back} periods apart.
+#'   
+#'   If the argument \code{weight_s} is supplied, then weighted sums are
+#'   calculated.
+#'   Then the function \code{roll_sum()} calculates the rolling weighted sums
+#'   of the past values.
+#'   
+#'   The function \code{roll_sum()} calculates the rolling weighted sums as
+#'   convolutions of the \code{t_series} columns with the \emph{vector} of
+#'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}.
+#'   It performs a similar calculation to the standard \code{R} function
+#'   \code{stats::filter(x=t_series, filter=weight_s, method="convolution",
+#'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+#'   leading \code{NA} values. using fast \emph{RcppArmadillo} \code{C++} code.
+#'   The function \code{roll_sum()} is several times faster than
+#'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#'   
+#' @examples
+#' \dontrun{
+#' # First example
+#' # Create series of historical returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' # Define parameters
+#' look_back <- 22
+#' stu_b <- 21
+#' # Calculate rolling sums at each point
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
+#' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+#' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+#' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
+#' r_sum <- (r_sum - lag_sum)
+#' all.equal(c_sum, r_sum, check.attributes=FALSE)
+#' 
+#' # Calculate rolling sums at end points
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back, stu_b=stu_b)
+#' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
+#' end_p <- end_p[end_p < NROW(re_turns)]
+#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+#' r_sum <- r_sum[end_p+1, ]
+#' lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
+#' r_sum <- (r_sum - lag_sum)
+#' all.equal(c_sum, r_sum, check.attributes=FALSE)
+#' 
+#' # Calculate rolling sums at end points - pass in end_points
+#' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p)
+#' all.equal(c_sum, r_sum, check.attributes=FALSE)
+#' 
+#' # Create exponentially decaying weights
+#' weight_s <- exp(-0.2*(1:11))
+#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+#' # Calculate rolling weighted sum
+#' c_sum <- HighFreq::roll_sum(re_turns, weight_s=weight_s)
+#' # Calculate rolling weighted sum using filter()
+#' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+#' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
+#' 
+#' # Calculate rolling weighted sums at end points
+#' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p, weight_s=weight_s)
+#' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
+#' 
+#' # Create simple weights equal to a 1 value plus zeros
+#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+#' # Calculate rolling weighted sum
+#' weight_ed <- HighFreq::roll_sum(re_turns, weight_s)
+#' # Compare with original
+#' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+#' }
+#' 
+#' @export
+roll_sum <- function(t_series, look_back = 1L, stu_b = NULL, end_points = NULL, weight_s = NULL) {
+    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', t_series, look_back, stu_b, end_points, weight_s)
+}
+
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
 #' interval for a single-column \emph{time series} or a \emph{vector}, using
 #' \code{RcppArmadillo}.
@@ -1050,7 +1196,8 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #'
 #' @details The function \code{roll_var_vec()} calculates a \emph{vector} of
 #'   variance estimates over a rolling look-back interval for a single-column
-#'   \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}.
+#'   \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}
+#'   \code{C++} code.
 #'   
 #'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
@@ -1059,7 +1206,8 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #'   The function \code{roll_var_vec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
 #'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-#'   but it's several times faster because it uses \code{RcppArmadillo}.
+#'   but it's several times faster because it uses \code{RcppArmadillo}
+#'   \code{C++} code.
 #'
 #' @examples
 #' \dontrun{
@@ -1115,10 +1263,12 @@ roll_var_vec <- function(t_series, look_back = 11L) {
 #'   performs the same calculation as the function \code{roll_var()} from
 #'   package
 #'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-#'   but it's several times faster because it uses \code{RcppArmadillo}.
-#'   
+#'   but it's several times faster because it uses \code{RcppArmadillo}
+#'   \code{C++} code.
+#'
 #'   The function \code{roll_var()} is implemented in \code{RcppArmadillo}
-#'   code, so it's many times faster than the equivalent \code{R} code.
+#'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+#'   code.
 #'
 #' @examples
 #' \dontrun{
@@ -1190,13 +1340,14 @@ roll_var <- function(t_series, ste_p = 1L, look_back = 1L) {
 #'   In the initial warmup period, the variance is calculated over an expanding
 #'   look-back interval.
 #'   
-#'   For example, the rolling variance at daily end points with an
-#'   \code{11} day look-back, can be calculated using the parameters
-#'   \code{ste_p = 1} and \code{look_back = 11}.
+#'   For example, the rolling variance at daily end points with an \code{11}
+#'   day look-back, can be calculated using the parameters \code{ste_p = 1} and
+#'   \code{look_back = 11} (Assuming the \code{oh_lc} data has daily
+#'   frequency.)
 #' 
-#'   The rolling variance at \code{25} day end points with a \code{75} day
-#'   look-back, can be calculated using the parameters \code{ste_p = 25} and
-#'   \code{look_back = 3} (because \code{3*25 = 75}).
+#'   Similarly, the rolling variance at \code{25} day end points with a
+#'   \code{75} day look-back, can be calculated using the parameters
+#'   \code{ste_p = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
 #' 
 #'   The function \code{roll_var_ohlc()} calculates the variance from all the
 #'   different intra-day and day-over-day returns (defined as the differences
@@ -1225,7 +1376,8 @@ roll_var <- function(t_series, ste_p = 1L, look_back = 1L) {
 #'   the number of days in each time period.
 #'   
 #'   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-#'   code, so it's many times faster than the equivalent \code{R} code.
+#'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+#'   code.
 #'
 #' @examples
 #' \dontrun{
@@ -1270,8 +1422,10 @@ roll_var_ohlc <- function(oh_lc, ste_p = 1L, look_back = 1L, calc_method = "yang
 #' \emph{matrix} of data using \code{RcppArmadillo}.
 #' 
 #' @param mat_rix A \emph{matrix} of data.
+#' 
 #' @param \code{look_back} The length of the look-back interval, equal to the number 
 #'   of rows of data used in the scaling.
+#'   
 #' @param use_median A \emph{Boolean} argument: if \code{TRUE} then the 
 #'   centrality (central tendency) is calculated as the \emph{median} and the 
 #'   dispersion is calculated as the \emph{median absolute deviation}
@@ -1388,7 +1542,7 @@ roll_zscores <- function(res_ponse, de_sign, look_back) {
 #'   \code{in_nov}.
 #'
 #' @details The function \code{sim_garch()} simulates a \emph{GARCH} process
-#'   using \emph{Rcpp}.
+#'   using fast \emph{Rcpp} \code{C++} code.
 #'
 #' @examples
 #' \dontrun{
@@ -1416,8 +1570,9 @@ sim_garch <- function(om_ega, al_pha, be_ta, in_nov) {
 #'   prices, with the same length as the argument \code{in_nov}.
 #'
 #' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-#'   process using \emph{Rcpp}, and returns A column \emph{vector} representing the 
-#'   \emph{time series} of prices.
+#'   process using fast \emph{Rcpp} \code{C++} code.
+#'   It returns a column \emph{vector} representing the \emph{time series} of
+#'   prices.
 #'
 #' @examples
 #' \dontrun{
@@ -1445,7 +1600,7 @@ sim_ou <- function(eq_price, vol_at, the_ta, in_nov) {
 #'
 #' @details The function \code{sim_arima()} recursively filters a \emph{vector}
 #'   of innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
-#'   \code{RcppArmadillo}.
+#'   \code{RcppArmadillo} \code{C++} code.
 #'   It performs the same calculation as the standard \code{R} function
 #'   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
 #'   \code{6} times faster.
@@ -1499,7 +1654,8 @@ sim_arima <- function(in_nov, co_eff) {
 #'   of \code{re_turns}.
 #'
 #' @details The function \code{calc_weights()} calculates the optimal portfolio
-#'   weights for different objective functions, using \code{RcppArmadillo}.
+#'   weights for different objective functions, using \code{RcppArmadillo}
+#'   \code{C++} code.
 #' 
 #'   If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
 #'   calculates the weights of the maximum Sharpe portfolio, by multiplying the

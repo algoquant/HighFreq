@@ -5,17 +5,21 @@
 \title{Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 using \code{RcppArmadillo}.}
 \usage{
-lag_vec(t_series, lagg = 1L)
+lag_vec(t_series, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
-\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{t_series}}{A single-column \emph{time series} or a
+\emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
-(the default is \code{lagg=1}).}
+(the default is \code{lagg = 1}).}
+
+\item{\code{pad_zeros}}{\emph{Boolean} argument: Should the output be padded
+with zeros? (The default is \code{pad_zeros = TRUE}.)}
 }
 \value{
 A column \emph{vector} with the same number of elements as the input
-  vector.
+  time series.
 }
 \description{
 Apply a lag to a single-column \emph{time series} or a \emph{vector} 
@@ -23,11 +27,23 @@ using \code{RcppArmadillo}.
 }
 \details{
 The function \code{lag_vec()} applies a lag to the input \emph{time
-  series} by shifting its elements by the number equal to the argument
-  \code{lagg}. For positive \code{lagg} values, the elements are shifted
-  forward, and for negative \code{lagg} values they are shifted backward.
-  The output \emph{vector} is padded with either the first or the last
-  element, to maintain its original length.
+  series} \code{t_series} by shifting its elements by the number equal to
+  the argument \code{lagg}. For positive \code{lagg} values, the elements
+  are shifted forward, and for negative \code{lagg} values they are shifted
+  backward.
+  
+  The output \emph{vector} is padded with either zeros (the default), or
+  with data from \code{t_series}, so that it has the same number of element
+  as \code{t_series}.
+  If the \code{lagg} is positive, then the first element is copied and added
+  upfront.
+  If the \code{lagg} is negative, then the last element is copied and added
+  to the end.
+  
+  As a rule, if \code{t_series} contains returns data, then the output
+  \emph{matrix} should be padded with zeros, to avoid data snooping.
+  If \code{t_series} contains prices, then the output \emph{matrix} should
+  be padded with the prices.
 }
 \examples{
 \dontrun{

@@ -10,24 +10,6 @@ save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
   period = "minutes", tzone = "America/New_York")
 }
-\arguments{
-\item{sym_bol}{A \emph{character} string representing symbol or ticker.}
-
-\item{data_dir}{A \emph{character} string representing directory containing
-input \sQuote{\code{*.RData}} files.}
-
-\item{output_dir}{A \emph{character} string representing directory containing
-output \sQuote{\code{*.RData}} files.}
-
-\item{look_back}{The number of data points in rolling look-back interval for 
-estimating rolling quantile.}
-
-\item{vol_mult}{The quantile multiplier.}
-
-\item{period}{The aggregation period.}
-
-\item{tzone}{The timezone to convert.}
-}
 \value{
 A time series of returns and volume in \emph{xts} format.
 }

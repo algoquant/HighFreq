@@ -7,15 +7,6 @@ a single-column \emph{xts} time series or vector, over a rolling interval.}
 \usage{
 which_jumps(x_ts, look_back = 51, vol_mult = 2)
 }
-\arguments{
-\item{x_ts}{A single-column \emph{xts} time series, or a \emph{numeric} or
-\emph{Boolean} vector.}
-
-\item{look_back}{The number of data points in rolling look-back interval for 
-estimating rolling quantile.}
-
-\item{vol_mult}{The quantile multiplier.}
-}
 \value{
 A \emph{Boolean} vector with the same number of rows as the input
   time series or vector.

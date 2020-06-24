@@ -27,7 +27,8 @@ interval for a single-column \emph{time series} or a \emph{vector}, using
 \details{
 The function \code{roll_var_vec()} calculates a \emph{vector} of
   variance estimates over a rolling look-back interval for a single-column
-  \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}.
+  \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}
+  \code{C++} code.
   
   The function \code{roll_var_vec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the
@@ -36,7 +37,8 @@ The function \code{roll_var_vec()} calculates a \emph{vector} of
   The function \code{roll_var_vec()} performs the same calculation as the
   function \code{roll_var()} from package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-  but it's several times faster because it uses \code{RcppArmadillo}.
+  but it's several times faster because it uses \code{RcppArmadillo}
+  \code{C++} code.
 }
 \examples{
 \dontrun{

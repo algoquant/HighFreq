@@ -2,22 +2,22 @@
 % Please edit documentation in R/HighFreq.R
 \name{run_skew}
 \alias{run_skew}
-\title{Calculate time series of skew estimates from a \emph{OHLC} time series,
+\title{Calculate time series of point skew estimates from a \emph{OHLC} time series,
 assuming zero drift.}
 \usage{
 run_skew(oh_lc, calc_method = "rogers_satchell")
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{A \emph{character} string representing method for
+\item{\code{calc_method}}{A \emph{character} string representing method for
 estimating skew.}
 }
 \value{
-A time series of skew estimates.
+A time series of point skew estimates.
 }
 \description{
-Calculate time series of skew estimates from a \emph{OHLC} time series,
+Calculate time series of point skew estimates from a \emph{OHLC} time series,
 assuming zero drift.
 }
 \details{

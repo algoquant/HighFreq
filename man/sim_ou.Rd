@@ -24,8 +24,9 @@ Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 }
 \details{
 The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-  process using \emph{Rcpp}, and returns A column \emph{vector} representing the 
-  \emph{time series} of prices.
+  process using fast \emph{Rcpp} \code{C++} code.
+  It returns a column \emph{vector} representing the \emph{time series} of
+  prices.
 }
 \examples{
 \dontrun{

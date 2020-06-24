@@ -74,8 +74,8 @@ The function \code{calc_var_ohlc()} calculates the variance
   speeds up the calculation, so it's useful for rolling calculations.
   
   The function \code{calc_var_ohlc()} is implemented in \code{RcppArmadillo}
-  code, and it's over \code{10} times faster than \code{calc_var_ohlc_r()},
-  which is implemented in \code{R} code.
+  \code{C++} code, and it's over \code{10} times faster than
+  \code{calc_var_ohlc_r()}, which is implemented in \code{R} code.
 }
 \examples{
 \dontrun{

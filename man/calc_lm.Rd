@@ -26,8 +26,9 @@ Perform multivariate linear regression using \emph{Rcpp}.
 \details{
 The function \code{calc_lm()} performs the same calculations as the
   function \code{lm()} from package \emph{stats}. It uses
-  \code{RcppArmadillo} and is about \emph{10} times faster than \code{lm()}.
-  The code was inspired by this article (but it's not identical to it):
+  \code{RcppArmadillo} \code{C++} code and is about \emph{10} times faster
+  than \code{lm()}. The code was inspired by this article (but it's not
+  identical to it):
   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 }
 \examples{

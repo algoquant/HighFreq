@@ -119,14 +119,14 @@ look_back <- 10
 ### daily open to close variance and skew
 volume_daily <- xts::apply.daily(x=Vo(SPY), FUN=sum)
 colnames(volume_daily) <- paste0(sym_bol, ".Volume")
-var_daily <- (6.5*60*60)*xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="roll_variance", calc_method="rogers_satchell")
+var_daily <- (6.5*60*60)*xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="roll_variance", calc_method="rogers_satchell")
 colnames(var_daily) <- paste0(sym_bol, ".Var")
-skew_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_skew")
+skew_daily <- xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
 colnames(skew_daily) <- paste0(sym_bol, ".Skew")
 
 # daily Sharpe
-sharpe_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_sharpe")
+sharpe_daily <- xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="run_sharpe")
 colnames(sharpe_daily) <- paste0(sym_bol, ".Sharpe")
 chart_Series(sharpe_daily[inter_val], name=paste(sym_bol, "Sharpe"))
 
@@ -383,8 +383,8 @@ colnames(season_autocorr) <- paste0(sym_bol, ".season_autocorr")
 season_data <- rutils::roll_sum(season_autocorr, look_back=5)/5
 
 # daily Hurst exponents
-hurst_daily <- xts::apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_hurst")
-hurst_daily <- xts::apply.daily(x=SPY, FUN=function(x, ...) abs(agg_regate(oh_lc=x, ...)), mo_ment="run_hurst")
+hurst_daily <- xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="run_hurst")
+hurst_daily <- xts::apply.daily(x=SPY, FUN=function(x, ...) abs(agg_stats_r(oh_lc=x, ...)), calc_bars="run_hurst")
 colnames(hurst_daily) <- paste0(sym_bol, ".Hurst.daily")
 chart_Series(roll_sum(hurst_daily, 10)[-(1:10)]/10, name=paste(sym_bol, "Hurst"))
 abline(h=0.5, col="blue", lwd=2)

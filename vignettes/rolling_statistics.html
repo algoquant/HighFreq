@@ -7,59 +7,293 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Jerzy Pawlowski (algoquant)" />
 
-<meta name="date" content="2018-10-27" />
+<meta name="date" content="2020-06-20" />
 
 <title>Estimating Running and Rolling Statistics Over Time Series</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -69,198 +303,201 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Estimating Running and Rolling Statistics Over Time Series</h1>
-<h4 class="author"><em>Jerzy Pawlowski (algoquant)</em></h4>
-<h4 class="date"><em>2018-10-27</em></h4>
+<h4 class="author">Jerzy Pawlowski (algoquant)</h4>
+<h4 class="date">2020-06-20</h4>
 
 
 
 <div id="below-are-examples-of-applying-functions-from-the-package-highfreq-for-estimating-running-and-rolling-statistics-over-time-series" class="section level3">
 <h3>Below are examples of applying functions from the package <em>HighFreq</em> for estimating running and rolling statistics over time series</h3>
 <p>Calculate rolling average closing prices using package <em>rutils</em>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load HighFreq to load SPY data</span>
-<span class="kw">library</span>(HighFreq)
-<span class="co"># rolling average prices</span>
-look_back &lt;-<span class="st"> </span><span class="dv">10</span>
-prices_rolling &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">roll_sum</span>(<span class="kw">Cl</span>(HighFreq<span class="op">::</span>SPY), <span class="dt">look_back=</span>look_back)<span class="op">/</span>look_back
-<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span>
-<span class="kw">chart_Series</span>(HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Prices&quot;</span>)
-<span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)
-<span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;average prices&quot;</span>), 
-       <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), 
-       <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># load HighFreq to load SPY data</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(HighFreq)</a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="co"># rolling average prices</span></a>
+<a class="sourceLine" id="cb1-4" title="4">look_back &lt;-<span class="st"> </span><span class="dv">10</span></a>
+<a class="sourceLine" id="cb1-5" title="5">prices_rolling &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">roll_sum</span>(<span class="kw">Cl</span>(HighFreq<span class="op">::</span>SPY), <span class="dt">look_back=</span>look_back)<span class="op">/</span>look_back</a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span></a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="kw">chart_Series</span>(HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Prices&quot;</span>)</a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-9" title="9"><span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;average prices&quot;</span>), </a>
+<a class="sourceLine" id="cb1-10" title="10">       <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), </a>
+<a class="sourceLine" id="cb1-11" title="11">       <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Calculate rolling volume-weighted average closing prices using package <em>HighFreq</em>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># rolling volume-weighted average prices</span>
-look_back &lt;-<span class="st"> </span><span class="dv">10</span>
-prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">look_back=</span>look_back)
-<span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span>
-<span class="kw">chart_Series</span>(HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY VWAP Prices&quot;</span>)
-<span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)
-<span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;VWAP prices&quot;</span>), 
-       <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), 
-       <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="co"># rolling volume-weighted average prices</span></a>
+<a class="sourceLine" id="cb2-2" title="2">look_back &lt;-<span class="st"> </span><span class="dv">10</span></a>
+<a class="sourceLine" id="cb2-3" title="3">prices_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="kw">colnames</span>(prices_rolling) &lt;-<span class="st"> &quot;SPY.Prices&quot;</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="kw">chart_Series</span>(HighFreq<span class="op">::</span>SPY[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY VWAP Prices&quot;</span>)</a>
+<a class="sourceLine" id="cb2-6" title="6"><span class="kw">add_TA</span>(prices_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">on=</span><span class="dv">1</span>, <span class="dt">col=</span><span class="st">&quot;red&quot;</span>, <span class="dt">lwd=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="kw">legend</span>(<span class="st">&quot;top&quot;</span>, <span class="dt">legend=</span><span class="kw">c</span>(<span class="st">&quot;SPY prices&quot;</span>, <span class="st">&quot;VWAP prices&quot;</span>), </a>
+<a class="sourceLine" id="cb2-8" title="8">       <span class="dt">bg=</span><span class="st">&quot;white&quot;</span>, <span class="dt">lty=</span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="dt">lwd=</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">2</span>), </a>
+<a class="sourceLine" id="cb2-9" title="9">       <span class="dt">col=</span><span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dt">bty=</span><span class="st">&quot;n&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Calculate variance from <em>OHLC</em> prices using different range estimation methods:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate variance of SPY using method yang_zhang</span>
-<span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
-vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>HighFreq<span class="op">::</span><span class="kw">calc_variance</span>(HighFreq<span class="op">::</span>SPY, <span class="dt">calc_method=</span><span class="st">&quot;yang_zhang&quot;</span>)
-<span class="co"># calculate variance of SPY without accounting for overnight jumps</span>
-vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>HighFreq<span class="op">::</span><span class="kw">calc_variance</span>(HighFreq<span class="op">::</span>SPY, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
-<span class="co"># calcuate daily intraday volatilities</span>
-var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">period.apply</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">INDEX=</span>end_days, HighFreq<span class="op">::</span>calc_variance)
-<span class="kw">index</span>(var_daily) &lt;-<span class="st"> </span>lubridate<span class="op">::</span><span class="kw">floor_date</span>(<span class="kw">index</span>(var_daily), <span class="st">&quot;day&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># calculate variance of SPY using method yang_zhang</span></a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span></a>
+<a class="sourceLine" id="cb3-3" title="3">vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>HighFreq<span class="op">::</span><span class="kw">calc_variance</span>(HighFreq<span class="op">::</span>SPY, <span class="dt">calc_method=</span><span class="st">&quot;yang_zhang&quot;</span>)</a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co"># calculate variance of SPY without accounting for overnight jumps</span></a>
+<a class="sourceLine" id="cb3-5" title="5">vari_ance &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>HighFreq<span class="op">::</span><span class="kw">calc_variance</span>(HighFreq<span class="op">::</span>SPY, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)</a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co"># calcuate daily intraday volatilities</span></a>
+<a class="sourceLine" id="cb3-7" title="7">var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">period.apply</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">INDEX=</span>end_days, HighFreq<span class="op">::</span>calc_variance)</a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="kw">index</span>(var_daily) &lt;-<span class="st"> </span>lubridate<span class="op">::</span><span class="kw">floor_date</span>(<span class="kw">index</span>(var_daily), <span class="st">&quot;day&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Calculate rolling variance and skew from minutely <em>OHLC</em> prices:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate running variance using method rogers_satchell</span>
-<span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span>
-var_running &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, 
-                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
-<span class="co"># calculate rolling volume-weighted average daily variance</span>
-look_back &lt;-<span class="st"> </span><span class="dv">21</span>
-var_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">x_ts=</span>var_running, <span class="dt">look_back=</span>look_back)
-<span class="kw">colnames</span>(var_rolling) &lt;-<span class="st"> &quot;SPY.Var&quot;</span>
-
-<span class="co"># calculate rolling daily variance using roll_variance()</span>
-var_rolling &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">roll_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, 
-                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>, 
-                                          <span class="dt">look_back=</span>look_back)
-
-<span class="co"># calculate rolling volume-weighted average skew indicator</span>
-skew_running &lt;-<span class="st"> </span><span class="kw">run_skew</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY)
-skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">x_ts=</span>skew_running, <span class="dt">look_back=</span>look_back)
-skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling<span class="op">&gt;</span><span class="dv">0</span>, skew_rolling<span class="op">/</span>(var_rolling)<span class="op">^</span>(<span class="fl">1.5</span>), <span class="dv">0</span>)
-<span class="kw">colnames</span>(skew_rolling) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span>
-<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># calculate running variance using method rogers_satchell</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="co"># scale from minutely to daily frequency and also apply factor to compensate for secondly units</span></a>
+<a class="sourceLine" id="cb4-3" title="3">var_running &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, </a>
+<a class="sourceLine" id="cb4-4" title="4">                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)</a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co"># calculate rolling volume-weighted average daily variance</span></a>
+<a class="sourceLine" id="cb4-6" title="6">look_back &lt;-<span class="st"> </span><span class="dv">21</span></a>
+<a class="sourceLine" id="cb4-7" title="7">var_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">x_ts=</span>var_running, <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="kw">colnames</span>(var_rolling) &lt;-<span class="st"> &quot;SPY.Var&quot;</span></a>
+<a class="sourceLine" id="cb4-9" title="9"></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co"># calculate rolling daily variance using roll_variance()</span></a>
+<a class="sourceLine" id="cb4-11" title="11">var_rolling &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">roll_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, </a>
+<a class="sourceLine" id="cb4-12" title="12">                                          <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>, </a>
+<a class="sourceLine" id="cb4-13" title="13">                                          <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb4-14" title="14"></a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="co"># calculate rolling volume-weighted average skew indicator</span></a>
+<a class="sourceLine" id="cb4-16" title="16">skew_running &lt;-<span class="st"> </span><span class="kw">run_skew</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY)</a>
+<a class="sourceLine" id="cb4-17" title="17">skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_vwap</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">x_ts=</span>skew_running, <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb4-18" title="18">skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling<span class="op">&gt;</span><span class="dv">0</span>, skew_rolling<span class="op">/</span>(var_rolling)<span class="op">^</span>(<span class="fl">1.5</span>), <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb4-19" title="19"><span class="kw">colnames</span>(skew_rolling) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span></a>
+<a class="sourceLine" id="cb4-20" title="20"><span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</a></code></pre></div>
 <p><br></p>
-<p>Calculate rolling variance and skew using function <em>roll_moment()</em> (produces same result as above):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate rolling volume-weighted average variance and skew</span>
-look_back &lt;-<span class="st"> </span><span class="dv">21</span>
-var_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">look_back=</span>look_back)
-skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_moment</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>, <span class="dt">look_back=</span>look_back)
-skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling<span class="op">&gt;</span><span class="dv">0</span>, skew_rolling<span class="op">/</span>(var_rolling)<span class="op">^</span>(<span class="fl">1.5</span>), <span class="dv">0</span>)
-<span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</code></pre></div>
+<p>Calculate rolling variance and skew using function <em>roll_stats()</em> (produces same result as above):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co"># calculate rolling volume-weighted average variance and skew</span></a>
+<a class="sourceLine" id="cb5-2" title="2">look_back &lt;-<span class="st"> </span><span class="dv">21</span></a>
+<a class="sourceLine" id="cb5-3" title="3">var_rolling &lt;-<span class="st"> </span><span class="kw">roll_stats</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb5-4" title="4">skew_rolling &lt;-<span class="st"> </span><span class="kw">roll_stats</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">calc_stats=</span><span class="st">&quot;run_skew&quot;</span>, <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb5-5" title="5">skew_rolling &lt;-<span class="st"> </span><span class="kw">ifelse</span>(var_rolling<span class="op">&gt;</span><span class="dv">0</span>, skew_rolling<span class="op">/</span>(var_rolling)<span class="op">^</span>(<span class="fl">1.5</span>), <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="kw">chart_Series</span>(skew_rolling[<span class="st">&quot;2013-11-12&quot;</span>], <span class="dt">name=</span><span class="st">&quot;SPY Rolling Skew&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Calculate daily average open to close variance and skew from minutely <em>OHLC</em> prices:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># calculate daily average open to close variance</span>
-var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>xts<span class="op">::</span><span class="kw">apply.daily</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">FUN=</span>agg_regate, 
-                              <span class="dt">mo_ment=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)
-<span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> &quot;SPY.Var&quot;</span>
-<span class="kw">chart_Series</span>(<span class="dv">100</span><span class="op">*</span><span class="kw">sqrt</span>(var_daily[<span class="st">&quot;/2010&quot;</span>]), <span class="dt">name=</span><span class="st">&quot;SPY daily standard deviation&quot;</span>)
-
-<span class="co"># calculate daily average skew</span>
-skew_daily &lt;-<span class="st"> </span>xts<span class="op">::</span><span class="kw">apply.daily</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">FUN=</span>agg_regate, <span class="dt">mo_ment=</span><span class="st">&quot;run_skew&quot;</span>)
-skew_daily &lt;-<span class="st"> </span>skew_daily<span class="op">/</span>(var_daily)<span class="op">^</span>(<span class="fl">1.5</span>)
-<span class="kw">colnames</span>(skew_daily) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span>
-inter_val &lt;-<span class="st"> &quot;2013-10/2013-12&quot;</span>
-<span class="kw">chart_Series</span>(skew_daily[inter_val], <span class="dt">name=</span><span class="st">&quot;SPY Skew&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co"># calculate daily average open to close variance</span></a>
+<a class="sourceLine" id="cb6-2" title="2">var_daily &lt;-<span class="st"> </span>(<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span>xts<span class="op">::</span><span class="kw">apply.daily</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">FUN=</span>agg_stats_r, </a>
+<a class="sourceLine" id="cb6-3" title="3">                              <span class="dt">calc_bars=</span><span class="st">&quot;run_variance&quot;</span>, <span class="dt">calc_method=</span><span class="st">&quot;rogers_satchell&quot;</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw">colnames</span>(var_daily) &lt;-<span class="st"> &quot;SPY.Var&quot;</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw">chart_Series</span>(<span class="dv">100</span><span class="op">*</span><span class="kw">sqrt</span>(var_daily[<span class="st">&quot;/2010&quot;</span>]), <span class="dt">name=</span><span class="st">&quot;SPY daily standard deviation&quot;</span>)</a>
+<a class="sourceLine" id="cb6-6" title="6"></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co"># calculate daily average skew</span></a>
+<a class="sourceLine" id="cb6-8" title="8">skew_daily &lt;-<span class="st"> </span>xts<span class="op">::</span><span class="kw">apply.daily</span>(<span class="dt">x=</span>HighFreq<span class="op">::</span>SPY, <span class="dt">FUN=</span>agg_stats_r, <span class="dt">calc_bars=</span><span class="st">&quot;run_skew&quot;</span>)</a>
+<a class="sourceLine" id="cb6-9" title="9">skew_daily &lt;-<span class="st"> </span>skew_daily<span class="op">/</span>(var_daily)<span class="op">^</span>(<span class="fl">1.5</span>)</a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="kw">colnames</span>(skew_daily) &lt;-<span class="st"> &quot;SPY.Skew&quot;</span></a>
+<a class="sourceLine" id="cb6-11" title="11">inter_val &lt;-<span class="st"> &quot;2013-10/2013-12&quot;</span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="kw">chart_Series</span>(skew_daily[inter_val], <span class="dt">name=</span><span class="st">&quot;SPY Skew&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Calculate intraday seasonality of trading volumes and variance:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(HighFreq<span class="op">::</span>SPY))
-<span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> &quot;SPY.volume_seasonal&quot;</span>
-<span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of volume&quot;</span>)
-var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY))
-<span class="kw">colnames</span>(var_seasonal) &lt;-<span class="st"> &quot;SPY.var_seasonal&quot;</span>
-<span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of variance&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">volume_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>(<span class="kw">Vo</span>(HighFreq<span class="op">::</span>SPY))</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="kw">colnames</span>(volume_seasonal) &lt;-<span class="st"> &quot;SPY.volume_seasonal&quot;</span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="kw">chart_Series</span>(volume_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of volume&quot;</span>)</a>
+<a class="sourceLine" id="cb7-4" title="4">var_seasonal &lt;-<span class="st"> </span><span class="kw">season_ality</span>((<span class="fl">6.5</span><span class="op">*</span><span class="dv">60</span><span class="op">*</span><span class="dv">60</span><span class="op">^</span><span class="dv">2</span>)<span class="op">*</span><span class="kw">run_variance</span>(<span class="dt">oh_lc=</span>HighFreq<span class="op">::</span>SPY))</a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="kw">colnames</span>(var_seasonal) &lt;-<span class="st"> &quot;SPY.var_seasonal&quot;</span></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="kw">chart_Series</span>(var_seasonal, <span class="dt">name=</span><span class="st">&quot;SPY intraday seasonality of variance&quot;</span>)</a></code></pre></div>
 <p><br></p>
 <p>Apply an aggregation function over a rolling look-back window and the end points of an <em>OHLC</em> time series:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># extract a single day of SPY data</span>
-x_ts &lt;-<span class="st"> </span>SPY[<span class="st">&quot;2012-02-13&quot;</span>]
-look_back &lt;-<span class="st"> </span><span class="dv">11</span>
-<span class="co"># calculate the rolling sums of the columns of x_ts</span>
-agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>sum, <span class="dt">look_back=</span>look_back, <span class="dt">by_columns=</span><span class="ot">TRUE</span>)
-<span class="co"># define a vector-valued aggregation function</span>
-agg_function &lt;-<span class="st"> </span><span class="cf">function</span>(x_ts)  <span class="kw">c</span>(<span class="kw">max</span>(x_ts[, <span class="dv">2</span>]), <span class="kw">min</span>(x_ts[, <span class="dv">3</span>]))
-<span class="co"># apply the aggregation function over a rolling window</span>
-agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>agg_function, <span class="dt">look_back=</span>look_back)
-<span class="co"># define end points at 11-minute intervals (SPY is minutely bars)</span>
-end_points &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">end_points</span>(x_ts, <span class="dt">inter_val=</span>look_back)
-<span class="co"># calculate the rolling sums of the columns of x_ts over end_points</span>
-agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>sum, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points, <span class="dt">by_columns=</span><span class="ot">TRUE</span>)
-<span class="co"># apply the vector-valued aggregation function over the end_points of x_ts</span>
-agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>agg_function, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points)</code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="co"># extract a single day of SPY data</span></a>
+<a class="sourceLine" id="cb8-2" title="2">x_ts &lt;-<span class="st"> </span>SPY[<span class="st">&quot;2012-02-13&quot;</span>]</a>
+<a class="sourceLine" id="cb8-3" title="3">look_back &lt;-<span class="st"> </span><span class="dv">11</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co"># calculate the rolling sums of the columns of x_ts</span></a>
+<a class="sourceLine" id="cb8-5" title="5">agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>sum, <span class="dt">look_back=</span>look_back, <span class="dt">by_columns=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co"># define a vector-valued aggregation function</span></a>
+<a class="sourceLine" id="cb8-7" title="7">agg_function &lt;-<span class="st"> </span><span class="cf">function</span>(x_ts)  <span class="kw">c</span>(<span class="kw">max</span>(x_ts[, <span class="dv">2</span>]), <span class="kw">min</span>(x_ts[, <span class="dv">3</span>]))</a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co"># apply the aggregation function over a rolling window</span></a>
+<a class="sourceLine" id="cb8-9" title="9">agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>agg_function, <span class="dt">look_back=</span>look_back)</a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co"># define end points at 11-minute intervals (SPY is minutely bars)</span></a>
+<a class="sourceLine" id="cb8-11" title="11">end_points &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">end_points</span>(x_ts, <span class="dt">inter_val=</span>look_back)</a>
+<a class="sourceLine" id="cb8-12" title="12"><span class="co"># calculate the rolling sums of the columns of x_ts over end_points</span></a>
+<a class="sourceLine" id="cb8-13" title="13">agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>sum, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points, <span class="dt">by_columns=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="co"># apply the vector-valued aggregation function over the end_points of x_ts</span></a>
+<a class="sourceLine" id="cb8-15" title="15">agg_regations &lt;-<span class="st"> </span><span class="kw">roll_apply</span>(x_ts, <span class="dt">agg_fun=</span>agg_function, <span class="dt">look_back=</span><span class="dv">2</span>, <span class="dt">end_points=</span>end_points)</a></code></pre></div>
 <p><br></p>
 <p>Simulate (backtest) a rolling portfolio optimization strategy, using <em>RcppArmadillo</em></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Calculate ETF prices</span>
-sym_bols &lt;-<span class="st"> </span><span class="kw">colnames</span>(rutils<span class="op">::</span>etf_env<span class="op">$</span>price_s)
-sym_bols &lt;-<span class="st"> </span>sym_bols[<span class="op">!</span>(sym_bols<span class="op">==</span><span class="st">&quot;VXX&quot;</span>)]
-price_s &lt;-<span class="st"> </span>rutils<span class="op">::</span>etf_env<span class="op">$</span>price_s[, sym_bols]
-<span class="co"># Carry forward non-NA prices</span>
-price_s &lt;-<span class="st"> </span>zoo<span class="op">::</span><span class="kw">na.locf</span>(price_s)
-price_s &lt;-<span class="st"> </span><span class="kw">na.omit</span>(price_s)
-<span class="co"># Calculate simple ETF returns</span>
-re_turns &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">diff_it</span>(price_s)
-<span class="co"># Calculate the daily excess returns</span>
-<span class="co"># risk_free is the daily risk-free rate</span>
-risk_free &lt;-<span class="st"> </span><span class="fl">0.03</span><span class="op">/</span><span class="dv">260</span>
-ex_cess &lt;-<span class="st"> </span>re_turns <span class="op">-</span><span class="st"> </span>risk_free
-<span class="co"># Define monthly end_points without initial warmpup period</span>
-end_points &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">calc_endpoints</span>(re_turns, <span class="dt">inter_val=</span><span class="st">&quot;months&quot;</span>)
-end_points &lt;-<span class="st"> </span>end_points[end_points<span class="op">&gt;</span><span class="dv">50</span>]
-len_gth &lt;-<span class="st"> </span><span class="kw">NROW</span>(end_points)
-<span class="co"># Define 12-month look_back interval and start_points over sliding window</span>
-look_back &lt;-<span class="st"> </span><span class="dv">12</span>
-start_points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep_len</span>(<span class="dv">1</span>, look_back<span class="op">-</span><span class="dv">1</span>), end_points[<span class="dv">1</span><span class="op">:</span>(len_gth<span class="op">-</span>look_back<span class="op">+</span><span class="dv">1</span>)])
-<span class="co"># Define shrinkage and regularization intensities</span>
-al_pha &lt;-<span class="st"> </span><span class="fl">0.5</span>
-max_eigen &lt;-<span class="st"> </span><span class="dv">3</span>
-<span class="co"># Simulate monthly rolling portfolio optimization strategy in pure R</span>
-roll_rets_R &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span><span class="op">:</span><span class="kw">NROW</span>(end_points), <span class="cf">function</span>(i) {
-  <span class="co"># subset the ex_cess returns</span>
-  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="op">-</span><span class="dv">1</span>]<span class="op">:</span>end_points[i<span class="op">-</span><span class="dv">1</span>], ]
-  ei_gen &lt;-<span class="st"> </span><span class="kw">eigen</span>(<span class="kw">cov</span>(ex_cess))
-  <span class="co"># Calculate regularized inverse of covariance matrix</span>
-  max_eigen &lt;-<span class="st"> </span><span class="dv">3</span>
-  eigen_vec &lt;-<span class="st"> </span>ei_gen<span class="op">$</span>vectors[, <span class="dv">1</span><span class="op">:</span>max_eigen]
-  eigen_val &lt;-<span class="st"> </span>ei_gen<span class="op">$</span>values[<span class="dv">1</span><span class="op">:</span>max_eigen]
-  in_verse &lt;-<span class="st"> </span>eigen_vec <span class="op">%*%</span><span class="st"> </span>(<span class="kw">t</span>(eigen_vec) <span class="op">/</span><span class="st"> </span>eigen_val)
-  <span class="co"># Apply shrinkage to the mean returns</span>
-  col_means &lt;-<span class="st"> </span><span class="kw">colMeans</span>(ex_cess)
-  col_means &lt;-<span class="st"> </span>((<span class="dv">1</span><span class="op">-</span>al_pha)<span class="op">*</span>col_means <span class="op">+</span><span class="st"> </span>al_pha<span class="op">*</span><span class="kw">mean</span>(col_means))
-  <span class="co"># Calculate weights using R</span>
-  weight_s &lt;-<span class="st"> </span>in_verse <span class="op">%*%</span><span class="st"> </span>col_means
-  weight_s &lt;-<span class="st"> </span>weight_s<span class="op">/</span><span class="kw">sum</span>(weight_s)
-  <span class="co"># subset the re_turns to out-of-sample returns</span>
-  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="dv">1</span>)<span class="op">:</span>end_points[i], ]
-  <span class="co"># calculate the out-of-sample portfolio returns</span>
-  <span class="kw">xts</span>(re_turns <span class="op">%*%</span><span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))
-}  <span class="co"># end anonymous function</span>
-)  <span class="co"># end lapply</span>
-<span class="co"># Flatten the list of xts into a single xts series</span>
-roll_rets_R &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">do_call</span>(rbind, roll_rets_R)
-<span class="kw">colnames</span>(roll_rets_R) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
-
-<span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::calc_weights()</span>
-roll_rets_arma &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span><span class="op">:</span><span class="kw">NROW</span>(end_points), <span class="cf">function</span>(i) {
-<span class="co"># subset the ex_cess returns</span>
-  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="op">-</span><span class="dv">1</span>]<span class="op">:</span>end_points[i<span class="op">-</span><span class="dv">1</span>], ]
-<span class="co"># apply regularized inverse to mean of ex_cess</span>
-  weight_s &lt;-<span class="st"> </span>HighFreq<span class="op">::</span><span class="kw">calc_weights</span>(ex_cess, max_eigen, al_pha)
-<span class="co"># subset the re_turns to out-of-sample returns</span>
-  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="dv">1</span>)<span class="op">:</span>end_points[i], ]
-<span class="co"># calculate the out-of-sample portfolio returns</span>
-  <span class="kw">xts</span>(re_turns <span class="op">%*%</span><span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))
-}  <span class="co"># end anonymous function</span>
-)  <span class="co"># end lapply</span>
-<span class="co"># Flatten the list of xts into a single xts series</span>
-roll_rets_arma &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">do_call</span>(rbind, roll_rets_arma)
-<span class="kw">colnames</span>(roll_rets_arma) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
-<span class="co"># Compare RcppArmadillo with R</span>
-<span class="kw">all.equal</span>(roll_rets_arma, roll_rets_R)
-
-<span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::roll_portf()</span>
-roll_rets &lt;-<span class="st"> </span>HighFreq<span class="op">::</span><span class="kw">roll_portf</span>(ex_cess, re_turns, 
-                            start_points<span class="op">-</span><span class="dv">1</span>, end_points<span class="op">-</span><span class="dv">1</span>, 
-                            max_eigen, al_pha)
-roll_rets &lt;-<span class="st"> </span><span class="kw">xts</span>(roll_rets, <span class="kw">index</span>(re_turns))
-<span class="kw">colnames</span>(roll_rets) &lt;-<span class="st"> &quot;roll_rets&quot;</span>
-<span class="co"># Compare RcppArmadillo with R</span>
-<span class="kw">all.equal</span>(roll_rets_arma, roll_rets[<span class="kw">index</span>(roll_rets_arma)])
-<span class="co"># Plot dygraph of strategy</span>
-dygraphs<span class="op">::</span><span class="kw">dygraph</span>(<span class="kw">cumsum</span>(roll_rets), 
-  <span class="dt">main=</span><span class="st">&quot;Cumulative Returns of Max Sharpe Portfolio Strategy&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co"># Calculate ETF prices</span></a>
+<a class="sourceLine" id="cb9-2" title="2">sym_bols &lt;-<span class="st"> </span><span class="kw">colnames</span>(rutils<span class="op">::</span>etf_env<span class="op">$</span>price_s)</a>
+<a class="sourceLine" id="cb9-3" title="3">sym_bols &lt;-<span class="st"> </span>sym_bols[<span class="op">!</span>(sym_bols<span class="op">==</span><span class="st">&quot;VXX&quot;</span>)]</a>
+<a class="sourceLine" id="cb9-4" title="4">price_s &lt;-<span class="st"> </span>rutils<span class="op">::</span>etf_env<span class="op">$</span>price_s[, sym_bols]</a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co"># Carry forward non-NA prices</span></a>
+<a class="sourceLine" id="cb9-6" title="6">price_s &lt;-<span class="st"> </span>zoo<span class="op">::</span><span class="kw">na.locf</span>(price_s)</a>
+<a class="sourceLine" id="cb9-7" title="7">price_s &lt;-<span class="st"> </span><span class="kw">na.omit</span>(price_s)</a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co"># Calculate simple ETF returns</span></a>
+<a class="sourceLine" id="cb9-9" title="9">re_turns &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">diff_it</span>(price_s)</a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co"># Calculate the daily excess returns</span></a>
+<a class="sourceLine" id="cb9-11" title="11"><span class="co"># risk_free is the daily risk-free rate</span></a>
+<a class="sourceLine" id="cb9-12" title="12">risk_free &lt;-<span class="st"> </span><span class="fl">0.03</span><span class="op">/</span><span class="dv">260</span></a>
+<a class="sourceLine" id="cb9-13" title="13">ex_cess &lt;-<span class="st"> </span>re_turns <span class="op">-</span><span class="st"> </span>risk_free</a>
+<a class="sourceLine" id="cb9-14" title="14"><span class="co"># Define monthly end_points without initial warmpup period</span></a>
+<a class="sourceLine" id="cb9-15" title="15">end_points &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">calc_endpoints</span>(re_turns, <span class="dt">inter_val=</span><span class="st">&quot;months&quot;</span>)</a>
+<a class="sourceLine" id="cb9-16" title="16">end_points &lt;-<span class="st"> </span>end_points[end_points<span class="op">&gt;</span><span class="dv">50</span>]</a>
+<a class="sourceLine" id="cb9-17" title="17">len_gth &lt;-<span class="st"> </span><span class="kw">NROW</span>(end_points)</a>
+<a class="sourceLine" id="cb9-18" title="18"><span class="co"># Define 12-month look_back interval and start_points over sliding window</span></a>
+<a class="sourceLine" id="cb9-19" title="19">look_back &lt;-<span class="st"> </span><span class="dv">12</span></a>
+<a class="sourceLine" id="cb9-20" title="20">start_points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">rep_len</span>(<span class="dv">1</span>, look_back<span class="dv">-1</span>), end_points[<span class="dv">1</span><span class="op">:</span>(len_gth<span class="op">-</span>look_back<span class="op">+</span><span class="dv">1</span>)])</a>
+<a class="sourceLine" id="cb9-21" title="21"><span class="co"># Define shrinkage and regularization intensities</span></a>
+<a class="sourceLine" id="cb9-22" title="22">al_pha &lt;-<span class="st"> </span><span class="fl">0.5</span></a>
+<a class="sourceLine" id="cb9-23" title="23">max_eigen &lt;-<span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb9-24" title="24"><span class="co"># Simulate monthly rolling portfolio optimization strategy in pure R</span></a>
+<a class="sourceLine" id="cb9-25" title="25">roll_rets_R &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span><span class="op">:</span><span class="kw">NROW</span>(end_points), <span class="cf">function</span>(i) {</a>
+<a class="sourceLine" id="cb9-26" title="26">  <span class="co"># subset the ex_cess returns</span></a>
+<a class="sourceLine" id="cb9-27" title="27">  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="dv">-1</span>]<span class="op">:</span>end_points[i<span class="dv">-1</span>], ]</a>
+<a class="sourceLine" id="cb9-28" title="28">  ei_gen &lt;-<span class="st"> </span><span class="kw">eigen</span>(<span class="kw">cov</span>(ex_cess))</a>
+<a class="sourceLine" id="cb9-29" title="29">  <span class="co"># Calculate regularized inverse of covariance matrix</span></a>
+<a class="sourceLine" id="cb9-30" title="30">  max_eigen &lt;-<span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb9-31" title="31">  eigen_vec &lt;-<span class="st"> </span>ei_gen<span class="op">$</span>vectors[, <span class="dv">1</span><span class="op">:</span>max_eigen]</a>
+<a class="sourceLine" id="cb9-32" title="32">  eigen_val &lt;-<span class="st"> </span>ei_gen<span class="op">$</span>values[<span class="dv">1</span><span class="op">:</span>max_eigen]</a>
+<a class="sourceLine" id="cb9-33" title="33">  in_verse &lt;-<span class="st"> </span>eigen_vec <span class="op">%*%</span><span class="st"> </span>(<span class="kw">t</span>(eigen_vec) <span class="op">/</span><span class="st"> </span>eigen_val)</a>
+<a class="sourceLine" id="cb9-34" title="34">  <span class="co"># Apply shrinkage to the mean returns</span></a>
+<a class="sourceLine" id="cb9-35" title="35">  col_means &lt;-<span class="st"> </span><span class="kw">colMeans</span>(ex_cess)</a>
+<a class="sourceLine" id="cb9-36" title="36">  col_means &lt;-<span class="st"> </span>((<span class="dv">1</span><span class="op">-</span>al_pha)<span class="op">*</span>col_means <span class="op">+</span><span class="st"> </span>al_pha<span class="op">*</span><span class="kw">mean</span>(col_means))</a>
+<a class="sourceLine" id="cb9-37" title="37">  <span class="co"># Calculate weights using R</span></a>
+<a class="sourceLine" id="cb9-38" title="38">  weight_s &lt;-<span class="st"> </span>in_verse <span class="op">%*%</span><span class="st"> </span>col_means</a>
+<a class="sourceLine" id="cb9-39" title="39">  weight_s &lt;-<span class="st"> </span>weight_s<span class="op">/</span><span class="kw">sum</span>(weight_s)</a>
+<a class="sourceLine" id="cb9-40" title="40">  <span class="co"># subset the re_turns to out-of-sample returns</span></a>
+<a class="sourceLine" id="cb9-41" title="41">  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="dv">-1</span>]<span class="op">+</span><span class="dv">1</span>)<span class="op">:</span>end_points[i], ]</a>
+<a class="sourceLine" id="cb9-42" title="42">  <span class="co"># calculate the out-of-sample portfolio returns</span></a>
+<a class="sourceLine" id="cb9-43" title="43">  <span class="kw">xts</span>(re_turns <span class="op">%*%</span><span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))</a>
+<a class="sourceLine" id="cb9-44" title="44">}  <span class="co"># end anonymous function</span></a>
+<a class="sourceLine" id="cb9-45" title="45">)  <span class="co"># end lapply</span></a>
+<a class="sourceLine" id="cb9-46" title="46"><span class="co"># Flatten the list of xts into a single xts series</span></a>
+<a class="sourceLine" id="cb9-47" title="47">roll_rets_R &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">do_call</span>(rbind, roll_rets_R)</a>
+<a class="sourceLine" id="cb9-48" title="48"><span class="kw">colnames</span>(roll_rets_R) &lt;-<span class="st"> &quot;roll_rets&quot;</span></a>
+<a class="sourceLine" id="cb9-49" title="49"></a>
+<a class="sourceLine" id="cb9-50" title="50"><span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::calc_weights()</span></a>
+<a class="sourceLine" id="cb9-51" title="51">roll_rets_arma &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="dv">2</span><span class="op">:</span><span class="kw">NROW</span>(end_points), <span class="cf">function</span>(i) {</a>
+<a class="sourceLine" id="cb9-52" title="52"><span class="co"># subset the ex_cess returns</span></a>
+<a class="sourceLine" id="cb9-53" title="53">  ex_cess &lt;-<span class="st"> </span>ex_cess[start_points[i<span class="dv">-1</span>]<span class="op">:</span>end_points[i<span class="dv">-1</span>], ]</a>
+<a class="sourceLine" id="cb9-54" title="54"><span class="co"># apply regularized inverse to mean of ex_cess</span></a>
+<a class="sourceLine" id="cb9-55" title="55">  weight_s &lt;-<span class="st"> </span>HighFreq<span class="op">::</span><span class="kw">calc_weights</span>(ex_cess, max_eigen, al_pha)</a>
+<a class="sourceLine" id="cb9-56" title="56"><span class="co"># subset the re_turns to out-of-sample returns</span></a>
+<a class="sourceLine" id="cb9-57" title="57">  re_turns &lt;-<span class="st"> </span>re_turns[(end_points[i<span class="dv">-1</span>]<span class="op">+</span><span class="dv">1</span>)<span class="op">:</span>end_points[i], ]</a>
+<a class="sourceLine" id="cb9-58" title="58"><span class="co"># calculate the out-of-sample portfolio returns</span></a>
+<a class="sourceLine" id="cb9-59" title="59">  <span class="kw">xts</span>(re_turns <span class="op">%*%</span><span class="st"> </span>weight_s, <span class="kw">index</span>(re_turns))</a>
+<a class="sourceLine" id="cb9-60" title="60">}  <span class="co"># end anonymous function</span></a>
+<a class="sourceLine" id="cb9-61" title="61">)  <span class="co"># end lapply</span></a>
+<a class="sourceLine" id="cb9-62" title="62"><span class="co"># Flatten the list of xts into a single xts series</span></a>
+<a class="sourceLine" id="cb9-63" title="63">roll_rets_arma &lt;-<span class="st"> </span>rutils<span class="op">::</span><span class="kw">do_call</span>(rbind, roll_rets_arma)</a>
+<a class="sourceLine" id="cb9-64" title="64"><span class="kw">colnames</span>(roll_rets_arma) &lt;-<span class="st"> &quot;roll_rets&quot;</span></a>
+<a class="sourceLine" id="cb9-65" title="65"><span class="co"># Compare RcppArmadillo with R</span></a>
+<a class="sourceLine" id="cb9-66" title="66"><span class="kw">all.equal</span>(roll_rets_arma, roll_rets_R)</a>
+<a class="sourceLine" id="cb9-67" title="67"></a>
+<a class="sourceLine" id="cb9-68" title="68"><span class="co"># Simulate monthly rolling portfolio optimization strategy using HighFreq::roll_portf()</span></a>
+<a class="sourceLine" id="cb9-69" title="69">roll_rets &lt;-<span class="st"> </span>HighFreq<span class="op">::</span><span class="kw">roll_portf</span>(ex_cess, re_turns, </a>
+<a class="sourceLine" id="cb9-70" title="70">                            start_points<span class="dv">-1</span>, end_points<span class="dv">-1</span>, </a>
+<a class="sourceLine" id="cb9-71" title="71">                            max_eigen, al_pha)</a>
+<a class="sourceLine" id="cb9-72" title="72">roll_rets &lt;-<span class="st"> </span><span class="kw">xts</span>(roll_rets, <span class="kw">index</span>(re_turns))</a>
+<a class="sourceLine" id="cb9-73" title="73"><span class="kw">colnames</span>(roll_rets) &lt;-<span class="st"> &quot;roll_rets&quot;</span></a>
+<a class="sourceLine" id="cb9-74" title="74"><span class="co"># Compare RcppArmadillo with R</span></a>
+<a class="sourceLine" id="cb9-75" title="75"><span class="kw">all.equal</span>(roll_rets_arma, roll_rets[<span class="kw">index</span>(roll_rets_arma)])</a>
+<a class="sourceLine" id="cb9-76" title="76"><span class="co"># Plot dygraph of strategy</span></a>
+<a class="sourceLine" id="cb9-77" title="77">dygraphs<span class="op">::</span><span class="kw">dygraph</span>(<span class="kw">cumsum</span>(roll_rets), </a>
+<a class="sourceLine" id="cb9-78" title="78">  <span class="dt">main=</span><span class="st">&quot;Cumulative Returns of Max Sharpe Portfolio Strategy&quot;</span>)</a></code></pre></div>
 <p><br></p>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

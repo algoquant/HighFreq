@@ -19,8 +19,8 @@ Calculate the variance of a a single-column \emph{time series} or a
 }
 \details{
 The function \code{calc_var_vec()} calculates the variance of a
-  \emph{vector} using \code{RcppArmadillo}, so it's significantly faster
-  than the \code{R} function \code{var()}.
+  \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
+  significantly faster than the \code{R} function \code{var()}.
 }
 \examples{
 \dontrun{

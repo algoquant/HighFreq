@@ -11,11 +11,11 @@ diff_vec(t_series, lagg = 1L, padd = TRUE)
 \item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of time periods to
-lag when calculating the differences (the default is \code{lagg=1}).}
+lag when calculating the differences (the default is \code{lagg = 1}).}
 
 \item{\code{padd}}{\emph{Boolean} argument: Should the output \emph{vector}
 be padded (extended) with zeros, in order to return a \emph{vector} of the
-same length as the input? (the default is \code{padd=TRUE})}
+same length as the input? (the default is \code{padd = TRUE})}
 }
 \value{
 A column \emph{vector} containing the differences between the
@@ -32,16 +32,16 @@ The function \code{diff_vec()} calculates the differences between
   The argument \code{lagg} specifies the number of lags.  For example, if
   \code{lagg=3} then the differences will be taken between each element
   minus the element three time periods before it (in the past).  The default
-  is \code{lagg=1}.
+  is \code{lagg = 1}.
 
   The argument \code{padd} specifies whether the output \emph{vector} should
   be padded (extended) with zeros at the beginning, in order to return a
   \emph{vector} of the same length as the input.  The default is
-  \code{padd=TRUE}. The padding operation can be time-consuming, because it
+  \code{padd = TRUE}. The padding operation can be time-consuming, because it
   requires the copying of data.
   
   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
-  code, which makes it several times faster than \code{R} code.
+  \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{

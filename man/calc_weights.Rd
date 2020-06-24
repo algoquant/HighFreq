@@ -42,7 +42,8 @@ Calculate the optimal portfolio weights for different objective functions.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different objective functions, using \code{RcppArmadillo}.
+  weights for different objective functions, using \code{RcppArmadillo}
+  \code{C++} code.
 
   If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
   calculates the weights of the maximum Sharpe portfolio, by multiplying the

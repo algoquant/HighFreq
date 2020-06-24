@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{diff_it}
 \alias{diff_it}
-\title{Calculate the row differences of a \emph{matrix} or a \emph{time
-series} using \emph{RcppArmadillo}.}
+\title{Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+using \emph{RcppArmadillo}.}
 \usage{
 diff_it(t_series, lagg = 1L, padd = TRUE)
 }
@@ -12,19 +12,19 @@ diff_it(t_series, lagg = 1L, padd = TRUE)
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of rows (time
 periods) to lag when calculating the differences (the default is
-\code{lagg=1}).}
+\code{lagg = 1}).}
 
 \item{\code{padd}}{\emph{Boolean} argument: Should the output \emph{matrix}
 be padded (extended) with zeros, in order to return a \emph{matrix} with
-the same number of rows as the input? (the default is \code{padd=TRUE})}
+the same number of rows as the input? (the default is \code{padd = TRUE})}
 }
 \value{
 A \emph{matrix} containing the differences between the rows of the
   input \emph{matrix}.
 }
 \description{
-Calculate the row differences of a \emph{matrix} or a \emph{time
-series} using \emph{RcppArmadillo}.
+Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+using \emph{RcppArmadillo}.
 }
 \details{
 The function \code{diff_it()} calculates the differences between
@@ -36,24 +36,25 @@ The function \code{diff_it()} calculates the differences between
   of the lagged version. For example, if \code{lagg=3} then the lagged
   version will have its rows shifted down by \code{3} rows, and the
   differences will be taken between each row minus the row three time
-  periods before it (in the past). The default is \code{lagg=1}.
+  periods before it (in the past). The default is \code{lagg = 1}.
 
   The argument \code{padd} specifies whether the output \emph{matrix} should
-  be padded (extended) with rows of zeros at the beginning, in order to
-  return a \emph{matrix} with the same number of rows as the input.  The
-  default is \code{padd=TRUE}. The padding operation can be time-consuming, 
-  because it requires the copying of data.
+  be padded (extended) with the rows of the initial (warmup) period at the
+  beginning, in order to return a \emph{matrix} with the same number of rows
+  as the input.  The default is \code{padd = TRUE}. The padding operation
+  can be time-consuming, because it requires the copying of data.
   
   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-  code, which makes it several times faster than \code{R} code.
+  \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{
 # Create a matrix of random returns
 re_turns <- matrix(rnorm(5e6), nc=5)
 # Compare diff_it() with rutils::diff_it()
-all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-  rutils::diff_it(re_turns, lagg=3))
+all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE), 
+  zoo::coredata(rutils::diff_it(re_turns, lagg=3)), 
+  check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

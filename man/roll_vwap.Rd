@@ -8,11 +8,11 @@ over a rolling look-back interval.}
 roll_vwap(oh_lc, x_ts = oh_lc[, 4], look_back)
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{x_ts}{A single-column \emph{xts} time series.}
+\item{\code{x_ts}}{A single-column \emph{xts} time series.}
 
-\item{look_back}{The size of the look-back interval, equal to the number of 
+\item{\code{look_back}}{The size of the look-back interval, equal to the number of 
 rows of data used for calculating the average price.}
 }
 \value{

@@ -8,9 +8,9 @@ interval.}
 roll_hurst(oh_lc, look_back = 11)
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{look_back}{The size of the look-back interval, equal to the number of 
+\item{\code{look_back}}{The size of the look-back interval, equal to the number of 
 rows of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{

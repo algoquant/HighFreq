@@ -34,20 +34,25 @@ The package *HighFreq* relies on *OHLC* price and volume data formatted as *xts*
 
 Definitions of running and rolling statistics (aggregations):
 
-+ A statistic is some function of *OHLC* data, for example the difference between
-*High* minus *Low* prices is a simple statistic.  Estimators of volatility, skew, and higher moments are also statistics.
++ A statistic is some function of *OHLC* data.  For example, the difference between
+the *High* minus the *Low* prices is a simple statistic.  The estimators of volatility, skew, and higher moments are also statistics.
+
++ The functions called *calc_\** calculate aggregations over columnar data, and produce a single number or a vector.  For example, the function *calc_var()* calculates the variance of the columns of returns data, and produces a row vector.
+
++ The functions called *agg_\** calculate various other data aggregations over columnar data.  For example, the function *agg_ohlc()* aggregates a time series of data into a single bar of *OHLC* data.
 
 + The package *HighFreq* calculates two different types of statistics time series: *running* and *rolling* statistics.
 The *running* statistics time series are calculated using individual bars of *OHLC* data, while *rolling* statistics time series are calculated using multiple bars of *OHLC* data. 
 
 + An example of a *running* statistic is a time series of squared differences of the *High* minus *Low* prices.  Each point in a *running* statistic depends only on a single bar of *OHLC* data (and possibly on the neighboring bars.) 
 
-+ An example of a *rolling* statistic is a time series of average *Close* prices calculated over a rolling look-back window. 
++ An example of a *rolling* statistic is a time series of average *Close* prices calculated over a rolling look-back interval. 
 Some *rolling* statistics can be calculated from *running* statistics by calculating weighted averages. 
 
 + The functions called *run_\** calculate *running* statistics based on each bar of *OHLC* data, and produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
 
-+ The functions called *roll_\** calculate *rolling* statistics based on multiple bars of *OHLC* data taken from a rolling look-back window, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
++ The functions called *roll_\** calculate *rolling* statistics based on multiple bars of *OHLC* data taken from a rolling look-back interval, and often produce a single-column *xts* time series with the same number of rows as the *OHLC* time series.
+The *roll_\** functions perform loops over the rows of the data, and they can apply the *calc_\** functions to subsets of the data over look-back intervals.
 
 + *Running* and *rolling* statistics also represent a form of data aggregation, and can include many standard technical indicators, like *VWAP*, *Bollinger Bands*, etc.
 
@@ -157,8 +162,8 @@ chart_Series(x=daily_volume, name="daily trading volumes for SPY")
 Calculate daily average open to close variance from minutely *OHLC* prices:  
 ```{r eval=FALSE}
 # calculate daily average open to close variance
-var_daily <- (6.5*60*60^2)*xts::apply.daily(x=SPY, FUN=agg_regate, 
-                              mo_ment="run_variance", calc_method="rogers_satchell")
+var_daily <- (6.5*60*60^2)*xts::apply.daily(x=SPY, FUN=agg_stats_r, 
+                              calc_bars="run_variance", calc_method="rogers_satchell")
 colnames(var_daily) <- "SPY.Var"
 chart_Series(100*sqrt(var_daily["/2010"]), name="SPY daily standard deviation")
 ```
@@ -166,7 +171,7 @@ chart_Series(100*sqrt(var_daily["/2010"]), name="SPY daily standard deviation")
 
 Calculate daily skew from minutely *OHLC* prices:  
 ```{r eval=FALSE}
-skew_daily <- apply.daily(x=SPY, FUN=agg_regate, mo_ment="run_skew")
+skew_daily <- apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
 colnames(skew_daily) <- "SPY.Skew")
 chart_Series(x=skew_daily, name="daily skew for SPY")
@@ -185,7 +190,7 @@ add_TA(roll_prices["2013-11-12"], on=1, col="red", lwd=2)
 
 Calculate rolling volume-weighted variance:  
 ```{r eval=FALSE}
-var_rolling <- roll_moment(oh_lc=SPY["2012"], mo_ment="run_variance", win_dow = 10)
+var_rolling <- roll_stats(oh_lc=SPY["2012"], calc_stats="run_variance", win_dow = 10)
 # plot without overnight jump
 chart_Series(var_rolling["2012-11-12", ][-(1:11)], name="SPY rolling volume-weighted variance")
 ```

@@ -47,10 +47,12 @@ The function \code{roll_var()} calculates a \emph{matrix} of
   performs the same calculation as the function \code{roll_var()} from
   package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-  but it's several times faster because it uses \code{RcppArmadillo}.
-  
+  but it's several times faster because it uses \code{RcppArmadillo}
+  \code{C++} code.
+
   The function \code{roll_var()} is implemented in \code{RcppArmadillo}
-  code, so it's many times faster than the equivalent \code{R} code.
+  \code{C++} code, so it's many times faster than the equivalent \code{R}
+  code.
 }
 \examples{
 \dontrun{

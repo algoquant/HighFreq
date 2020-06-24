@@ -11,22 +11,13 @@ save_scrub_agg(sym_bol, data_dir = "E:/mktdata/sec/",
   period = "minutes", tzone = "America/New_York")
 }
 \arguments{
-\item{sym_bol}{A \emph{character} string representing symbol or ticker.}
+\item{\code{sym_bol}}{A \emph{character} string representing symbol or ticker.}
 
-\item{data_dir}{A \emph{character} string representing directory containing
+\item{\code{data_dir}}{A \emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
 
-\item{output_dir}{A \emph{character} string representing directory containing
+\item{\code{output_dir}}{A \emph{character} string representing directory containing
 output \sQuote{\code{*.RData}} files.}
-
-\item{look_back}{The number of data points in rolling look-back interval for 
-estimating rolling quantile.}
-
-\item{vol_mult}{The quantile multiplier.}
-
-\item{period}{The aggregation period.}
-
-\item{tzone}{The timezone to convert.}
 }
 \value{
 An \emph{OHLC} time series in \emph{xts} format.

@@ -9,14 +9,9 @@ scrub_taq(ta_q, look_back = 51, vol_mult = 2,
   tzone = "America/New_York")
 }
 \arguments{
-\item{ta_q}{\emph{TAQ} A time series in \emph{xts} format.}
+\item{\code{ta_q}}{\emph{TAQ} A time series in \emph{xts} format.}
 
-\item{look_back}{The number of data points in rolling look-back interval for 
-estimating rolling quantile.}
-
-\item{vol_mult}{The quantile multiplier.}
-
-\item{tzone}{The timezone to convert.}
+\item{\code{tzone}}{The timezone to convert.}
 }
 \value{
 A \emph{TAQ} time series in \emph{xts} format.

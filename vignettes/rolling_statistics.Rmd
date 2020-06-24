@@ -90,14 +90,14 @@ chart_Series(skew_rolling["2013-11-12"], name="SPY Rolling Skew")
 <br>
 
 
-Calculate rolling variance and skew using function *roll_moment()* (produces same result as above):
+Calculate rolling variance and skew using function *roll_stats()* (produces same result as above):
 ```{r eval=FALSE, echo=(-(1:2))}
 # load HighFreq
 library(HighFreq)
 # calculate rolling volume-weighted average variance and skew
 look_back <- 21
-var_rolling <- roll_moment(oh_lc=HighFreq::SPY, look_back=look_back)
-skew_rolling <- roll_moment(oh_lc=HighFreq::SPY, mo_ment="run_skew", look_back=look_back)
+var_rolling <- roll_stats(oh_lc=HighFreq::SPY, look_back=look_back)
+skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="run_skew", look_back=look_back)
 skew_rolling <- ifelse(var_rolling>0, skew_rolling/(var_rolling)^(1.5), 0)
 chart_Series(skew_rolling["2013-11-12"], name="SPY Rolling Skew")
 ```
@@ -109,13 +109,13 @@ Calculate daily average open to close variance and skew from minutely *OHLC* pri
 # load HighFreq
 library(HighFreq)
 # calculate daily average open to close variance
-var_daily <- (6.5*60*60^2)*xts::apply.daily(x=HighFreq::SPY, FUN=agg_regate, 
-                              mo_ment="run_variance", calc_method="rogers_satchell")
+var_daily <- (6.5*60*60^2)*xts::apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, 
+                              calc_bars="run_variance", calc_method="rogers_satchell")
 colnames(var_daily) <- "SPY.Var"
 chart_Series(100*sqrt(var_daily["/2010"]), name="SPY daily standard deviation")
 
 # calculate daily average skew
-skew_daily <- xts::apply.daily(x=HighFreq::SPY, FUN=agg_regate, mo_ment="run_skew")
+skew_daily <- xts::apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
 colnames(skew_daily) <- "SPY.Skew"
 inter_val <- "2013-10/2013-12"

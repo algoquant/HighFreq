@@ -8,9 +8,9 @@ time series, using different range estimators for variance.}
 run_variance(oh_lc, calc_method = "yang_zhang", scal_e = TRUE)
 }
 \arguments{
-\item{oh_lc}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{calc_method}{A \emph{character} string representing the method for
+\item{\code{calc_method}}{A \emph{character} string representing the method for
 estimating variance.  The methods include:
 \itemize{
   \item "close" close to close,
@@ -21,7 +21,7 @@ estimating variance.  The methods include:
  }
  (default is \code{"yang_zhang"})}
 
-\item{scal_e}{\emph{Boolean} argument: should the returns be divided by the
+\item{\code{scal_e}}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{

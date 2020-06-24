@@ -27,7 +27,7 @@ Simulate a \emph{GARCH} process using \emph{Rcpp}.
 }
 \details{
 The function \code{sim_garch()} simulates a \emph{GARCH} process
-  using \emph{Rcpp}.
+  using fast \emph{Rcpp} \code{C++} code.
 }
 \examples{
 \dontrun{

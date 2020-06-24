@@ -10,26 +10,26 @@ roll_backtest(x_ts, train_func, trade_func, look_back = look_forward,
   ...)
 }
 \arguments{
-\item{x_ts}{A time series of prices, asset returns, trading volumes, and
-other data, in \emph{xts} format.}
-
-\item{train_func}{The name of the function for training (calibrating) a
-forecasting model, to be applied over a rolling look-back interval.}
-
-\item{trade_func}{The name of the trading model function, to be applied over
-a rolling look-forward interval.}
-
-\item{look_back}{The size of the look-back interval, equal to the number of
-rows of data used for training the forecasting model.}
-
-\item{look_forward}{The size of the look-forward interval, equal to the number
-of rows of data used for trading the strategy.}
-
-\item{end_points}{A vector of end points along the rows of the \code{x_ts}
-time series, given as either integers or dates.}
-
 \item{...}{additional parameters to the functions \code{train_func()} and
 \code{trade_func()}.}
+
+\item{\code{x_ts}}{A time series of prices, asset returns, trading volumes, and
+other data, in \emph{xts} format.}
+
+\item{\code{train_func}}{The name of the function for training (calibrating) a
+forecasting model, to be applied over a rolling look-back interval.}
+
+\item{\code{trade_func}}{The name of the trading model function, to be applied over
+a rolling look-forward interval.}
+
+\item{\code{look_back}}{The size of the look-back interval, equal to the number of
+rows of data used for training the forecasting model.}
+
+\item{\code{look_forward}}{The size of the look-forward interval, equal to the number
+of rows of data used for trading the strategy.}
+
+\item{\code{end_points}}{A vector of end points along the rows of the \code{x_ts}
+time series, given as either integers or dates.}
 }
 \value{
 An \emph{xts} time series with the number of rows equal to the number
