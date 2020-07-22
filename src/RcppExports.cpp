@@ -203,6 +203,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// roll_count
+arma::uvec roll_count(arma::uvec& vec_tor);
+RcppExport SEXP _HighFreq_roll_count(SEXP vec_torSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::uvec& >::type vec_tor(vec_torSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_count(vec_tor));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_ohlc
 arma::mat roll_ohlc(arma::mat& t_series, arma::uvec& end_points);
 RcppExport SEXP _HighFreq_roll_ohlc(SEXP t_seriesSEXP, SEXP end_pointsSEXP) {
@@ -444,6 +455,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_agg_ohlc", (DL_FUNC) &_HighFreq_agg_ohlc, 1},
+    {"_HighFreq_roll_count", (DL_FUNC) &_HighFreq_roll_count, 1},
     {"_HighFreq_roll_ohlc", (DL_FUNC) &_HighFreq_roll_ohlc, 2},
     {"_HighFreq_roll_vec", (DL_FUNC) &_HighFreq_roll_vec, 2},
     {"_HighFreq_roll_vecw", (DL_FUNC) &_HighFreq_roll_vecw, 2},

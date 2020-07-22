@@ -118,11 +118,9 @@ Calculate running variance efficiently (used by package fromo): https://www.john
 
 + [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
 
-+ [ ] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
++ [x] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
 roll_count() is already in lm_arma.cpp.
 roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
-Create a contrarian strategy using roll_count(): the number of consecutive close_low or close_high.
-Scale the count threshold levels depending on the level of volatility.
 
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 

@@ -11,7 +11,7 @@ roll_ohlc(t_series, end_points)
 \item{\code{t_series}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 
-\item{\emph{end_points}}{An integer \emph{vector} of end points.}
+\item{\emph{end_points}}{An \emph{integer vector} of end points.}
 }
 \value{
 A \emph{matrix} with \emph{OHLC} data, with the number of rows equal

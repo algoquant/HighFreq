@@ -836,6 +836,34 @@ agg_ohlc <- function(t_series) {
     .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', t_series)
 }
 
+#' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
+#' and reset the count to zero after every \code{FALSE} element.
+#' 
+#' @param vec_tor A \emph{Boolean vector} of data.
+#'
+#' @return An \emph{integer vector} of the same length as the argument
+#'   \code{vec_tor}.
+#'
+#' @details The function \code{roll_count()} calculates the number of
+#'   consecutive \code{TRUE} elements in a Boolean vector, and it resets the
+#'   count to zero after every \code{FALSE} element.  
+#'   
+#'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
+#'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
+#'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
+#'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
+#'   \code{4}, \code{5}, \code{0}}.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate the number of consecutive TRUE elements
+#' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
+#' }
+#' @export
+roll_count <- function(vec_tor) {
+    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', vec_tor)
+}
+
 #' Aggregate a time series to an \emph{OHLC} time series with lower
 #' periodicity.
 #'
@@ -845,7 +873,7 @@ agg_ohlc <- function(t_series) {
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'   
-#' @param \emph{end_points} An integer \emph{vector} of end points.
+#' @param \emph{end_points} An \emph{integer vector} of end points.
 #'
 #' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
 #'   to the number of \emph{end_points} minus one.

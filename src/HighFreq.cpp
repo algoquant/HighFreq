@@ -1263,6 +1263,57 @@ arma::mat agg_ohlc(const arma::mat& t_series) {
 
 
 
+
+////////////////////////////////////////////////////////////
+//' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
+//' and reset the count to zero after every \code{FALSE} element.
+//' 
+//' @param vec_tor A \emph{Boolean vector} of data.
+//'
+//' @return An \emph{integer vector} of the same length as the argument
+//'   \code{vec_tor}.
+//'
+//' @details The function \code{roll_count()} calculates the number of
+//'   consecutive \code{TRUE} elements in a Boolean vector, and it resets the
+//'   count to zero after every \code{FALSE} element.  
+//'   
+//'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
+//'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
+//'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
+//'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
+//'   \code{4}, \code{5}, \code{0}}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate the number of consecutive TRUE elements
+//' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
+//' }
+//' @export
+// [[Rcpp::export]]
+arma::uvec roll_count(arma::uvec& vec_tor) {
+  
+  arma::uword len_gth = vec_tor.n_elem;
+  arma::uvec count_true(len_gth);
+  
+  // Initialize count
+  count_true[0] = vec_tor[0];
+  // Loop over vec_tor
+  for (arma::uword it = 1; it < len_gth; it++) {
+    if (vec_tor[it])
+      // Add count number
+      count_true[it] = count_true[it-1] + 1;
+    else
+      // Reset count to zero
+      count_true[it] = vec_tor[it];
+  }  // end for
+  
+  return count_true;
+  
+}  // end roll_count
+
+
+
+
 ////////////////////////////////////////////////////////////
 //' Aggregate a time series to an \emph{OHLC} time series with lower
 //' periodicity.
@@ -1273,7 +1324,7 @@ arma::mat agg_ohlc(const arma::mat& t_series) {
 //' @param \code{t_series} A \emph{time series} or a \emph{matrix} with multiple
 //'   columns of data.
 //'   
-//' @param \emph{end_points} An integer \emph{vector} of end points.
+//' @param \emph{end_points} An \emph{integer vector} of end points.
 //'
 //' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
 //'   to the number of \emph{end_points} minus one.
