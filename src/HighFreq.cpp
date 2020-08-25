@@ -1135,7 +1135,7 @@ arma::mat calc_mad(arma::mat& t_series) {
 // This is needed because Rcpp can't map C++ enum type to R variable SEXP.
 enum skew_type {Pearson, Quantile, Nonparametric};
 // Map string to C++ enum type for switch statement.
-skew_type get_type(const std::string& typ_e) {
+skew_type calc_skew_type(const std::string& typ_e) {
   if (typ_e == "Pearson" || typ_e == "pearson" || typ_e == "p") 
     return skew_type::Pearson;
   else if (typ_e == "Quantile" || typ_e == "quantile" || typ_e == "q")
@@ -1144,7 +1144,7 @@ skew_type get_type(const std::string& typ_e) {
     return skew_type::Nonparametric;
   else 
     return skew_type::Pearson;
-}  // end get_type
+}  // end calc_skew_type
 
 
 
@@ -1233,7 +1233,7 @@ arma::mat calc_skew(arma::mat t_series,
                     double al_pha = 0.25) {
   
   // switch statement for all the different types of skew
-  switch(get_type(typ_e)) {
+  switch(calc_skew_type(typ_e)) {
   case skew_type::Pearson: {  // Pearson
     double num_rows = t_series.n_rows;
     arma::mat mean_s = arma::mean(t_series);
