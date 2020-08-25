@@ -742,17 +742,17 @@ calc_ranks <- function(vec_tor) {
     .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', vec_tor)
 }
 
-#' Calculate the Median Absolute Deviations \emph{MAD} of the columns of a
+#' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 #' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 #'
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @return A row vector equal to the Median Absolute Deviations \emph{MAD} of
-#'   the columns of \code{t_series} matrix.
+#' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
+#'   of the columns of \code{t_series}.
 #'
-#' @details The function \code{calc_mad()} calculates the variance of the
-#'   columns of a \emph{time series} or a \emph{matrix} of data using
-#'   \code{RcppArmadillo} \code{C++} code.
+#' @details The function \code{calc_mad()} calculates the Median Absolute
+#'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
+#'   \emph{matrix} of data using \code{RcppArmadillo} \code{C++} code.
 #'
 #'   The function \code{calc_mad()} performs the same calculation as the
 #'   function \code{stats::mad()}, but it's much faster because it uses
@@ -783,13 +783,13 @@ calc_mad <- function(t_series) {
 #'
 #' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
-#'   the weights (see Details). (The default is the \code{typ_e = "pearson"}.)
+#' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+#'   Details). (The default is the \code{typ_e = "pearson"}.)
 #'
 #' @param \code{al_pha} The confidence level for calculating the quantiles.
-#'   (the default is \code{0.25}).
+#'   (the default is \code{al_pha = 0.25}).
 #'
-#' @return A row vector equal to the skewness of the columns of
+#' @return A single-row matrix with the skewness of the columns of
 #'   \code{t_series}.
 #'
 #' @details The function \code{calc_skew()} calculates the skewness of the
@@ -820,7 +820,7 @@ calc_mad <- function(t_series) {
 #'   x <- (x-mean(x)); nr <- NROW(x);
 #'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 #' }  # end calc_skewr
-#' all.equal(drop(HighFreq::calc_skew(re_turns)), 
+#' all.equal(HighFreq::calc_skew(re_turns), 
 #'   calc_skewr(re_turns), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)

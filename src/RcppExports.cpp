@@ -192,13 +192,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_skew
-arma::mat calc_skew(arma::mat t_series, std::string typ_e, double al_pha);
+arma::mat calc_skew(arma::mat t_series, const std::string& typ_e, double al_pha);
 RcppExport SEXP _HighFreq_calc_skew(SEXP t_seriesSEXP, SEXP typ_eSEXP, SEXP al_phaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type t_series(t_seriesSEXP);
-    Rcpp::traits::input_parameter< std::string >::type typ_e(typ_eSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type typ_e(typ_eSEXP);
     Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
     rcpp_result_gen = Rcpp::wrap(calc_skew(t_series, typ_e, al_pha));
     return rcpp_result_gen;

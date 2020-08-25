@@ -1131,6 +1131,24 @@ arma::mat calc_mad(arma::mat& t_series) {
 
 
 ////////////////////////////////////////////////////////////
+// Switch statement in calc_skew() uses C++ enum type.
+// This is needed because Rcpp can't map C++ enum type to R variable SEXP.
+enum skew_type {Pearson, Quantile, Nonparametric};
+// Map string to C++ enum type for switch statement.
+skew_type get_type(const std::string& typ_e) {
+  if (typ_e == "Pearson" || typ_e == "pearson" || typ_e == "p") 
+    return skew_type::Pearson;
+  else if (typ_e == "Quantile" || typ_e == "quantile" || typ_e == "q")
+    return skew_type::Quantile;
+  else if (typ_e == "Nonparametric" || typ_e == "nonparametric" || typ_e == "n")
+    return skew_type::Nonparametric;
+  else 
+    return skew_type::Pearson;
+}  // end get_type
+
+
+
+////////////////////////////////////////////////////////////
 //' Calculate the skewness of the columns of a \emph{time series} or a
 //' \emph{matrix} using \code{RcppArmadillo}.
 //'
@@ -1211,11 +1229,12 @@ arma::mat calc_mad(arma::mat& t_series) {
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_skew(arma::mat t_series,
-                    std::string typ_e = "pearson", 
+                    const std::string& typ_e = "pearson", 
                     double al_pha = 0.25) {
+  
   // switch statement for all the different types of skew
-  switch(typ_e[0]) {
-  case 'p' : {  // Pearson
+  switch(get_type(typ_e)) {
+  case skew_type::Pearson: {  // Pearson
     double num_rows = t_series.n_rows;
     arma::mat mean_s = arma::mean(t_series);
     arma::mat var_s = arma::var(t_series);
@@ -1223,12 +1242,12 @@ arma::mat calc_skew(arma::mat t_series,
     t_series.each_row() -= mean_s;
     return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(t_series, 3))/arma::pow(var_s, 1.5);
   }  // end pearson
-  case 'q' : {  // Quantile
+  case skew_type::Quantile: {  // Quantile
     arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
     arma::mat quantile_s = quantile(t_series, prob_s);
     return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
   }  // end quantile
-  case 'n' : {  // Nonparametric
+  case skew_type::Nonparametric: {  // Nonparametric
     return (arma::mean(t_series) - arma::median(t_series))/arma::stddev(t_series);
   }  // end nonparametric
   default : {

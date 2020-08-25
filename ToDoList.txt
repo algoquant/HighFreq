@@ -34,7 +34,10 @@ importFrom(Rcpp, evalCpp)
 install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
 # Install package from source on local drive using R CMD
 R CMD INSTALL C:\Develop\R\HighFreq
-# Install package from github
+# Install NPE package from local drive
+setwd("C:/Develop/R/HighFreq")
+install.packages(pkgs="C:/Develop/R/HighFreq", repos=NULL, type="source")
+# Install package from Github
 devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
 # Document the package - run R command
 devtools::document()
