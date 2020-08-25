@@ -5,14 +5,14 @@ using namespace std;
 using namespace Rcpp;
 using namespace arma;
 
-////////////////////////////
+////////////////////////////////////////////////////////////
 // Rcpp and RcppArmadillo functions for package HighFreq
-////////////////////////////
+////////////////////////////////////////////////////////////
 
 
-////////////////////////////
+////////////////////////////////////////////////////////////
 // Functions for matrix algebra
-////////////////////////////
+////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
@@ -33,9 +33,9 @@ using namespace arma;
 //'
 //' @details The function \code{lag_vec()} applies a lag to the input \emph{time
 //'   series} \code{t_series} by shifting its elements by the number equal to
-//'   the argument \code{lagg}. For positive \code{lagg} values, the elements
-//'   are shifted forward, and for negative \code{lagg} values they are shifted
-//'   backward.
+//'   the argument \code{lagg}.  For positive \code{lagg} values, the elements
+//'   are shifted forward in time (down), and for negative \code{lagg} values
+//'   they are shifted backward (up).
 //'   
 //'   The output \emph{vector} is padded with either zeros (the default), or
 //'   with data from \code{t_series}, so that it has the same number of element
@@ -60,8 +60,8 @@ using namespace arma;
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::lag_vec(re_turns),
-//'   rcode=rutils::lag_it(re_turns),
+//'   Rcpp=HighFreq::lag_vec(re_turns),
+//'   Rcode=rutils::lag_it(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -144,8 +144,8 @@ arma::vec lag_vec(arma::vec& t_series,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::lag_it(re_turns),
-//'   rcode=rutils::lag_it(re_turns),
+//'   Rcpp=HighFreq::lag_it(re_turns),
+//'   Rcode=rutils::lag_it(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -240,8 +240,8 @@ arma::mat lag_it(arma::mat& t_series,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE),
-//'   rcode=rutils::diff_it(re_turns, lagg=3),
+//'   Rcpp=HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE),
+//'   Rcode=rutils::diff_it(re_turns, lagg=3),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -312,8 +312,8 @@ arma::vec diff_vec(arma::vec& t_series, int lagg = 1, bool padd = true) {
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-//'   rcode=rutils::diff_it(re_turns, lagg=3),
+//'   Rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
+//'   Rcode=rutils::diff_it(re_turns, lagg=3),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -485,8 +485,8 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 
 
 ////////////////////////////////////////////////////////////
-//' Multiply the columns or rows of a \emph{matrix} times a \emph{vector},
-//' element-wise.
+//' Multiply in place (without copying) the columns or rows of a \emph{matrix}
+//' times a \emph{vector}, element-wise.
 //' 
 //' @param \code{vec_tor} A \emph{vector}.
 //' 
@@ -537,8 +537,8 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'     rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
-//'     rcode=vec_tor*mat_rix,
+//'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
+//'     Rcode=vec_tor*mat_rix,
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' 
 //' # Multiply matrix rows using R
@@ -551,8 +551,8 @@ arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'     rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
-//'     rcode=t(vec_tor*t(mat_rix)),
+//'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
+//'     Rcode=t(vec_tor*t(mat_rix)),
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -619,8 +619,8 @@ arma::uword mult_vec_mat(const arma::vec& vec_tor,
 //' all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
 //' # Compare the speed of Rcpp with R code
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::calc_eigen(re_turns),
-//'   rcode=prcomp(re_turns),
+//'   Rcpp=HighFreq::calc_eigen(re_turns),
+//'   Rcode=prcomp(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -745,8 +745,8 @@ arma::mat calc_inv(const arma::mat& re_turns,
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
-//'   rcode=scale(mat_rix),
+//'   Rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
+//'   Rcode=scale(mat_rix),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -780,9 +780,9 @@ arma::mat calc_scaled(const arma::mat& mat_rix,
 
 
 
-////////////////////////////
+////////////////////////////////////////////////////////////
 // Functions for statistics
-////////////////////////////
+////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
@@ -807,8 +807,8 @@ arma::mat calc_scaled(const arma::mat& mat_rix,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::calc_var_vec(re_turns),
-//'   rcode=var(re_turns),
+//'   Rcpp=HighFreq::calc_var_vec(re_turns),
+//'   Rcode=var(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -852,9 +852,9 @@ double calc_var_vec(arma::vec& t_series) {
 //' # Compare the speed of RcppArmadillo with matrixStats and with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::calc_var(re_turns),
+//'   Rcpp=HighFreq::calc_var(re_turns),
 //'   matrixStats=matrixStats::colVars(re_turns),
-//'   rcode=apply(re_turns, 2, var),
+//'   Rcode=apply(re_turns, 2, var),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -885,18 +885,18 @@ arma::rowvec calc_var(arma::mat& t_series) {
 //'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
 //'     \item "yang_zhang" Yang-Zhang estimator,
 //'    }
-//'    (The default is the \emph{"yang_zhang"} estimator.)
+//'    (The default is the \code{calc_method = "yang_zhang"}.)
 //'    
 //' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
-//'   default is \code{lag_close=0}.)
+//'   default is \code{lag_close = 0}.)
 //'   
 //' @param \code{scal_e} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
 //'   \code{scal_e = TRUE}.)
 //'
 //' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument. (The default is \code{in_dex=0}.)
+//'   series}.  This is an optional argument. (The default is \code{in_dex = 0}.)
 //'   
 //' @return A single \emph{numeric} value equal to the variance of the
 //'   \emph{OHLC time series}.
@@ -957,8 +957,8 @@ arma::rowvec calc_var(arma::mat& t_series) {
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
-//'   rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
+//'   Rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
+//'   Rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
@@ -1069,8 +1069,8 @@ double calc_var_ohlc(arma::mat& oh_lc,
 //' da_ta <- runif(7)
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=calc_ranks(da_ta),
-//'   rcode=rank(da_ta),
+//'   Rcpp=calc_ranks(da_ta),
+//'   Rcode=rank(da_ta),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -1082,6 +1082,214 @@ arma::uvec calc_ranks(const arma::vec& vec_tor) {
   
 }  // end calc_ranks
 
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
+//' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
+//'   of the columns of \code{t_series}.
+//'
+//' @details The function \code{calc_mad()} calculates the Median Absolute
+//'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
+//'   \emph{matrix} of data using \code{RcppArmadillo} \code{C++} code.
+//'
+//'   The function \code{calc_mad()} performs the same calculation as the
+//'   function \code{stats::mad()}, but it's much faster because it uses
+//'   \code{RcppArmadillo} \code{C++} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate VTI returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' # Compare calc_mad() with stats::mad()
+//' all.equal(drop(HighFreq::calc_mad(re_turns)), 
+//'   mad(re_turns)/1.4826)
+//' # Compare the speed of RcppArmadillo with stats::mad()
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_mad(re_turns),
+//'   Rcode=mad(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_mad(arma::mat& t_series) {
+  
+  // De-median the columns of t_series
+  t_series.each_row() -= arma::median(t_series);
+  
+  return arma::median(arma::abs(t_series));
+  
+}  // end calc_mad
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the skewness of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
+//'   Details). (The default is the \code{typ_e = "pearson"}.)
+//'
+//' @param \code{al_pha} The confidence level for calculating the quantiles.
+//'   (the default is \code{al_pha = 0.25}).
+//'
+//' @return A single-row matrix with the skewness of the columns of
+//'   \code{t_series}.
+//'
+//' @details The function \code{calc_skew()} calculates the skewness of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+//'   calculates the Pearson skewness using the third moment of the data.
+//'
+//'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+//'   differences between the quantiles of the data.
+//'
+//'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+//'   difference between the mean of the data minus its median, divided by the
+//'   standard deviation.
+//'   
+//'   The code examples below compare the function \code{calc_skew()} with the
+//'   skewness calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate VTI returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' # Calculate the Pearson skewness
+//' HighFreq::calc_skew(re_turns)
+//' # Compare HighFreq::calc_skew() with Pearson skewness
+//' calc_skewr <- function(x) {
+//'   x <- (x-mean(x)); nr <- NROW(x);
+//'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
+//' }  # end calc_skewr
+//' all.equal(HighFreq::calc_skew(re_turns), 
+//'   calc_skewr(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns),
+//'   Rcode=calc_skewr(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the quantile skewness
+//' HighFreq::calc_skew(re_turns, typ_e = "quantile", al_pha = 0.1)
+//' # Compare HighFreq::calc_skew() with quantile skewness
+//' calc_skewq <- function(x) {
+//'   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
+//'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+//' }  # end calc_skewq
+//' all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "quantile")), 
+//'   calc_skewq(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns, typ_e = "quantile"),
+//'   Rcode=calc_skewq(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the nonparametric skewness
+//' HighFreq::calc_skew(re_turns, typ_e = "nonparametric")
+//' # Compare HighFreq::calc_skew() with R nonparametric skewness
+//' all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "nonparametric")), 
+//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//'   check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns, typ_e = "nonparametric"),
+//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew(arma::mat t_series,
+                    std::string typ_e = "pearson", 
+                    double al_pha = 0.25) {
+  // switch statement for all the different types of skew
+  switch(typ_e[0]) {
+  case 'p' : {  // Pearson
+    double num_rows = t_series.n_rows;
+    arma::mat mean_s = arma::mean(t_series);
+    arma::mat var_s = arma::var(t_series);
+    // De-mean the columns of t_series
+    t_series.each_row() -= mean_s;
+    return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(t_series, 3))/arma::pow(var_s, 1.5);
+  }  // end pearson
+  case 'q' : {  // Quantile
+    arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
+    arma::mat quantile_s = quantile(t_series, prob_s);
+    return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  }  // end quantile
+  case 'n' : {  // Nonparametric
+    return (arma::mean(t_series) - arma::median(t_series))/arma::stddev(t_series);
+  }  // end nonparametric
+  default : {
+    cout << "Invalid typ_e" << endl;
+    return 0;
+  }  // end default
+  }  // end switch
+  
+}  // end calc_skew
+
+
+
+// wippp
+// These below are special cases of calc_skew()
+// These below need documentation
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew_pearson(arma::mat& t_series) {
+  
+  double num_rows = t_series.n_rows;
+  
+  arma::mat mean_s = arma::mean(t_series);
+  arma::mat var_s = arma::var(t_series);
+  
+  // De-mean the columns of t_series
+  t_series.each_row() -= mean_s;
+  
+  return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(t_series, 3))/arma::pow(var_s, 1.5);
+  
+}  // end calc_skew_pearson
+
+
+
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew_quant(arma::mat& t_series, double al_pha = 0.25) {
+  
+  arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
+  arma::mat quantile_s = quantile(t_series, prob_s);
+  
+  // arma::mat skew_s = (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  // skew_s /= calc_mad(t_series);
+  // skew_s /= (quantile_s.row(2) - quantile_s.row(0));
+  
+  return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  
+}  // end calc_skew_quant
+
+
+
+
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew_nonp(arma::mat& t_series) {
+  
+  return (arma::mean(t_series) - arma::median(t_series))/arma::stddev(t_series);
+  
+}  // end calc_skew_nonp
+
+
+// wippp end
 
 
 
@@ -1330,13 +1538,14 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //'   to the number of \emph{end_points} minus one.
 //'   
 //' @details The function \code{roll_ohlc()} performs a loop over the
-//'   \emph{end_points}, along the rows of the \code{oh_lc} data. At each
-//'   \emph{end_point}, it selects the past rows of \code{oh_lc} data, starting
-//'   at the first bar after the previous \emph{end_point}, and then calls the
-//'   function \code{agg_ohlc()} on the selected \code{oh_lc} data to calculate
-//'   the aggregations.
-//'   It can accept either a single column of data or four columns of
-//'   \emph{OHLC} data.
+//'   \emph{end_points}, along the rows of the \code{t_series} data. At each
+//'   \emph{end_point}, it selects the past rows of \code{t_series} data,
+//'   starting at the first bar after the previous \emph{end_point}, and then
+//'   calls the function \code{agg_ohlc()} on the selected \code{t_series} data
+//'   to calculate the aggregations.
+//'   
+//'   The function \code{roll_ohlc()} can accept either a single column of data
+//'   or four columns of \emph{OHLC} data.
 //'   It can also accept an additional column containing the trading volume.
 //'
 //'   The function \code{roll_ohlc()} performs a similar aggregation as the
@@ -1350,7 +1559,7 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //' # Define end points at 25 day intervals
 //' end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
 //' # Aggregate over end_points:
-//' ohlc_agg <- HighFreq::roll_ohlc(oh_lc=oh_lc, end_points=(end_points-1))
+//' ohlc_agg <- HighFreq::roll_ohlc(t_series=oh_lc, end_points=(end_points-1))
 //' # Compare with xts::to.period()
 //' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 //' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
@@ -1408,8 +1617,8 @@ arma::mat roll_ohlc(arma::mat& t_series, arma::uvec& end_points) {
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   rcpp=HighFreq::roll_vec(re_turns, look_back=11),
-//'   rcode=rutils::roll_sum(re_turns, look_back=11),
+//'   Rcpp=HighFreq::roll_vec(re_turns, look_back=11),
+//'   Rcode=rutils::roll_sum(re_turns, look_back=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2180,7 +2389,7 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
 //'   (\emph{MAD}).
 //'   If \code{use_median} is \code{FALSE} then the centrality is calculated as 
 //'   the \emph{mean} and the dispersion is calculated as the \emph{standard
-//'   deviation}. (The default is \code{use_median=FALSE})
+//'   deviation}. (The default is \code{use_median = FALSE})
 //'
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{mat_rix}.
@@ -2284,7 +2493,7 @@ arma::mat roll_scale(const arma::mat& mat_rix,
 //' z_scores <- HighFreq::roll_zscores(res_ponse=res_ponse, de_sign=de_sign, look_back=look_back)
 //' # Calculate z-scores in R from rolling multivariate regression using lm()
 //' z_scores_r <- sapply(1:NROW(de_sign), function(ro_w) {
-//'   if (ro_w==1) return(0)
+//'   if (ro_w == 1) return(0)
 //'   start_point <- max(1, ro_w-look_back+1)
 //'   sub_response <- res_ponse[start_point:ro_w]
 //'   sub_design <- de_sign[start_point:ro_w, ]
@@ -2525,21 +2734,21 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //'   weights for different objective functions, using \code{RcppArmadillo}
 //'   \code{C++} code.
 //' 
-//'   If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
+//'   If \code{typ_e = "max_sharpe"} (the default) then \code{calc_weights()}
 //'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
 //'   inverse of the covariance \emph{matrix} times the mean column returns.
 //'   
-//'   If \code{typ_e == "min_var"} then it calculates the weights of the minimum
+//'   If \code{typ_e = "min_var"} then it calculates the weights of the minimum
 //'   variance portfolio under linear constraints.
 //'   
-//'   If \code{typ_e == "min_varpca"} then it calculates the weights of the
+//'   If \code{typ_e = "min_varpca"} then it calculates the weights of the
 //'   minimum variance portfolio under quadratic constraints (which is the
 //'   highest order principal component).
 //' 
-//'   If \code{typ_e == "rank"} then it calculates the weights as the ranks
+//'   If \code{typ_e = "rank"} then it calculates the weights as the ranks
 //'   (order index) of the trailing Sharpe ratios of the portfolio assets.
 //' 
-//'   If \code{scal_e == TRUE} (the default) then the weights are scaled so that
+//'   If \code{scal_e = TRUE} (the default) then the weights are scaled so that
 //'   the resulting portfolio has a volatility equal to \code{vo_l}.
 //'   
 //'   \code{calc_weights()} applies dimensional regularization to calculate the

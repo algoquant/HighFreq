@@ -99,8 +99,8 @@ all.equal(HighFreq::calc_var_ohlc(HighFreq::SPY, in_dex=in_dex),
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
-  rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
+  Rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
+  Rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

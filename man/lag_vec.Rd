@@ -28,9 +28,9 @@ using \code{RcppArmadillo}.
 \details{
 The function \code{lag_vec()} applies a lag to the input \emph{time
   series} \code{t_series} by shifting its elements by the number equal to
-  the argument \code{lagg}. For positive \code{lagg} values, the elements
-  are shifted forward, and for negative \code{lagg} values they are shifted
-  backward.
+  the argument \code{lagg}.  For positive \code{lagg} values, the elements
+  are shifted forward in time (down), and for negative \code{lagg} values
+  they are shifted backward (up).
   
   The output \emph{vector} is padded with either zeros (the default), or
   with data from \code{t_series}, so that it has the same number of element
@@ -55,8 +55,8 @@ all.equal(drop(HighFreq::lag_vec(re_turns)),
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::lag_vec(re_turns),
-  rcode=rutils::lag_it(re_turns),
+  Rcpp=HighFreq::lag_vec(re_turns),
+  Rcode=rutils::lag_it(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

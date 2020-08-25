@@ -39,8 +39,8 @@ all.equal(HighFreq::roll_vec(re_turns, look_back=11),
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::roll_vec(re_turns, look_back=11),
-  rcode=rutils::roll_sum(re_turns, look_back=11),
+  Rcpp=HighFreq::roll_vec(re_turns, look_back=11),
+  Rcode=rutils::roll_sum(re_turns, look_back=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

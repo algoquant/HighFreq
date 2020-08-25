@@ -41,9 +41,9 @@ all.equal(drop(HighFreq::calc_var(re_turns)),
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::calc_var(re_turns),
+  Rcpp=HighFreq::calc_var(re_turns),
   matrixStats=matrixStats::colVars(re_turns),
-  rcode=apply(re_turns, 2, var),
+  Rcode=apply(re_turns, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

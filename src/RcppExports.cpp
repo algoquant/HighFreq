@@ -180,6 +180,64 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_mad
+arma::mat calc_mad(arma::mat& t_series);
+RcppExport SEXP _HighFreq_calc_mad(SEXP t_seriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type t_series(t_seriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_mad(t_series));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_skew
+arma::mat calc_skew(arma::mat t_series, std::string typ_e, double al_pha);
+RcppExport SEXP _HighFreq_calc_skew(SEXP t_seriesSEXP, SEXP typ_eSEXP, SEXP al_phaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type t_series(t_seriesSEXP);
+    Rcpp::traits::input_parameter< std::string >::type typ_e(typ_eSEXP);
+    Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_skew(t_series, typ_e, al_pha));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_skew_pearson
+arma::mat calc_skew_pearson(arma::mat& t_series);
+RcppExport SEXP _HighFreq_calc_skew_pearson(SEXP t_seriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type t_series(t_seriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_skew_pearson(t_series));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_skew_quant
+arma::mat calc_skew_quant(arma::mat& t_series, double al_pha);
+RcppExport SEXP _HighFreq_calc_skew_quant(SEXP t_seriesSEXP, SEXP al_phaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type t_series(t_seriesSEXP);
+    Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_skew_quant(t_series, al_pha));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_skew_nonp
+arma::mat calc_skew_nonp(arma::mat& t_series);
+RcppExport SEXP _HighFreq_calc_skew_nonp(SEXP t_seriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type t_series(t_seriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_skew_nonp(t_series));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_lm
 Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign);
 RcppExport SEXP _HighFreq_calc_lm(SEXP res_ponseSEXP, SEXP de_signSEXP) {
@@ -453,6 +511,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_var", (DL_FUNC) &_HighFreq_calc_var, 1},
     {"_HighFreq_calc_var_ohlc", (DL_FUNC) &_HighFreq_calc_var_ohlc, 5},
     {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
+    {"_HighFreq_calc_mad", (DL_FUNC) &_HighFreq_calc_mad, 1},
+    {"_HighFreq_calc_skew", (DL_FUNC) &_HighFreq_calc_skew, 3},
+    {"_HighFreq_calc_skew_pearson", (DL_FUNC) &_HighFreq_calc_skew_pearson, 1},
+    {"_HighFreq_calc_skew_quant", (DL_FUNC) &_HighFreq_calc_skew_quant, 2},
+    {"_HighFreq_calc_skew_nonp", (DL_FUNC) &_HighFreq_calc_skew_nonp, 1},
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_agg_ohlc", (DL_FUNC) &_HighFreq_agg_ohlc, 1},
     {"_HighFreq_roll_count", (DL_FUNC) &_HighFreq_roll_count, 1},

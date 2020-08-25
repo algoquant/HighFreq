@@ -58,8 +58,8 @@ all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-  rcode=rutils::diff_it(re_turns, lagg=3),
+  Rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
+  Rcode=rutils::diff_it(re_turns, lagg=3),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

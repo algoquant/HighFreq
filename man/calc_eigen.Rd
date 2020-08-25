@@ -37,8 +37,8 @@ all.equal(pc_a$sdev^2, drop(ei_gen$values))
 all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
 # Compare the speed of Rcpp with R code
 summary(microbenchmark(
-  rcpp=HighFreq::calc_eigen(re_turns),
-  rcode=prcomp(re_turns),
+  Rcpp=HighFreq::calc_eigen(re_turns),
+  Rcode=prcomp(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

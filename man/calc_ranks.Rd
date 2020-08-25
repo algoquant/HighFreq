@@ -52,8 +52,8 @@ all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
 da_ta <- runif(7)
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=calc_ranks(da_ta),
-  rcode=rank(da_ta),
+  Rcpp=calc_ranks(da_ta),
+  Rcode=rank(da_ta),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

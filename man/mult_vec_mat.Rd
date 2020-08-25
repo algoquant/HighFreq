@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{mult_vec_mat}
 \alias{mult_vec_mat}
-\title{Multiply the columns or rows of a \emph{matrix} times a \emph{vector},
-element-wise.}
+\title{Multiply in place (without copying) the columns or rows of a \emph{matrix}
+times a \emph{vector}, element-wise.}
 \usage{
 mult_vec_mat(vec_tor, mat_rix, by_col = TRUE)
 }
@@ -21,8 +21,8 @@ A single \emph{integer} value, equal to either the number of
   \emph{matrix} columns or the number of rows.
 }
 \description{
-Multiply the columns or rows of a \emph{matrix} times a \emph{vector},
-element-wise.
+Multiply in place (without copying) the columns or rows of a \emph{matrix}
+times a \emph{vector}, element-wise.
 }
 \details{
 The function \code{mult_vec_mat()} multiplies the columns or rows
@@ -63,8 +63,8 @@ all.equal(prod_uct, mat_rix)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
-    rcode=vec_tor*mat_rix,
+    Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
+    Rcode=vec_tor*mat_rix,
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 
 # Multiply matrix rows using R
@@ -77,8 +77,8 @@ all.equal(prod_uct, mat_rix)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
-    rcode=t(vec_tor*t(mat_rix)),
+    Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
+    Rcode=t(vec_tor*t(mat_rix)),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

@@ -32,8 +32,8 @@ all.equal(HighFreq::calc_var_vec(re_turns),
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=HighFreq::calc_var_vec(re_turns),
-  rcode=var(re_turns),
+  Rcpp=HighFreq::calc_var_vec(re_turns),
+  Rcode=var(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

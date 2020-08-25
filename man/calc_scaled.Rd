@@ -51,8 +51,8 @@ all.equal(scale_d, scale_d2, check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
-  rcode=scale(mat_rix),
+  Rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
+  Rcode=scale(mat_rix),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

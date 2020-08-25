@@ -23,13 +23,14 @@ calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 }
 \details{
 The function \code{roll_ohlc()} performs a loop over the
-  \emph{end_points}, along the rows of the \code{oh_lc} data. At each
-  \emph{end_point}, it selects the past rows of \code{oh_lc} data, starting
-  at the first bar after the previous \emph{end_point}, and then calls the
-  function \code{agg_ohlc()} on the selected \code{oh_lc} data to calculate
-  the aggregations.
-  It can accept either a single column of data or four columns of
-  \emph{OHLC} data.
+  \emph{end_points}, along the rows of the \code{t_series} data. At each
+  \emph{end_point}, it selects the past rows of \code{t_series} data,
+  starting at the first bar after the previous \emph{end_point}, and then
+  calls the function \code{agg_ohlc()} on the selected \code{t_series} data
+  to calculate the aggregations.
+  
+  The function \code{roll_ohlc()} can accept either a single column of data
+  or four columns of \emph{OHLC} data.
   It can also accept an additional column containing the trading volume.
 
   The function \code{roll_ohlc()} performs a similar aggregation as the
@@ -43,7 +44,7 @@ oh_lc <- rutils::etf_env$VTI[, 1:5]
 # Define end points at 25 day intervals
 end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
 # Aggregate over end_points:
-ohlc_agg <- HighFreq::roll_ohlc(oh_lc=oh_lc, end_points=(end_points-1))
+ohlc_agg <- HighFreq::roll_ohlc(t_series=oh_lc, end_points=(end_points-1))
 # Compare with xts::to.period()
 ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
