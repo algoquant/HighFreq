@@ -81,7 +81,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Create functions calc_mad(), calc_skew(), and calc_skewnp() to calculate the Median Absolute Deviation, the skewness, and the nonparametric skewness
++ [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
+
++ [x] Create functions calc_mad(), calc_skew(), and calc_skewnp() to calculate the Median Absolute Deviation, the skewness, and the nonparametric skewness
 Calculate the nonparametric skewness estimator using the quantiles: skewness = (quartile_75 - median) - (median - quartile_25)
 
 + [ ] Modify function diff_it() to pad with zeros
