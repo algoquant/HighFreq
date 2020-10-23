@@ -10,14 +10,14 @@ calc_skew(t_series, typ_e = "pearson", al_pha = 0.25)
 \arguments{
 \item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
-the weights (see Details).}
+\item{\code{typ_e}}{A \emph{string} specifying the type of skewness (see
+Details). (The default is the \code{typ_e = "pearson"}.)}
 
 \item{\code{al_pha}}{The confidence level for calculating the quantiles.
-(the default is \code{0.25}).}
+(the default is \code{al_pha = 0.25}).}
 }
 \value{
-A row vector equal to the skewness of the columns of
+A single-row matrix with the skewness of the columns of
   \code{t_series}.
 }
 \description{
@@ -29,15 +29,18 @@ The function \code{calc_skew()} calculates the skewness of the
   columns of a \emph{time series} or a \emph{matrix} of data using
   \code{RcppArmadillo} \code{C++} code.
 
-  If \code{typ_e == "pearson"} (the default) then \code{calc_skew()}
+  If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
   calculates the Pearson skewness using the third moment of the data.
 
-  If \code{typ_e == "quantile"} then it calculates the skewness using the
+  If \code{typ_e = "quantile"} then it calculates the skewness using the
   differences between the quantiles of the data.
 
-  If \code{typ_e == "nonparametric"} then it calculates the skewness as the
+  If \code{typ_e = "nonparametric"} then it calculates the skewness as the
   difference between the mean of the data minus its median, divided by the
   standard deviation.
+  
+  The code examples below compare the function \code{calc_skew()} with the
+  skewness calculated using \code{R} code.
 }
 \examples{
 \dontrun{
@@ -50,7 +53,7 @@ calc_skewr <- function(x) {
   x <- (x-mean(x)); nr <- NROW(x);
   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
 }  # end calc_skewr
-all.equal(drop(HighFreq::calc_skew(re_turns)), 
+all.equal(HighFreq::calc_skew(re_turns), 
   calc_skewr(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)

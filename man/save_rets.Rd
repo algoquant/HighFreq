@@ -6,9 +6,15 @@
 single symbol. Calculate returns and save them to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
-save_rets(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
-  period = "minutes", tzone = "America/New_York")
+save_rets(
+  sym_bol,
+  data_dir = "E:/mktdata/sec/",
+  output_dir = "E:/output/data/",
+  look_back = 51,
+  vol_mult = 2,
+  period = "minutes",
+  tzone = "America/New_York"
+)
 }
 \value{
 A time series of returns and volume in \emph{xts} format.

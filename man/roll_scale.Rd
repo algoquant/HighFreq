@@ -16,7 +16,7 @@ dispersion is calculated as the \emph{median absolute deviation}
 (\emph{MAD}).
 If \code{use_median} is \code{FALSE} then the centrality is calculated as 
 the \emph{mean} and the dispersion is calculated as the \emph{standard
-deviation}. (The default is \code{use_median=FALSE})}
+deviation}. (The default is \code{use_median = FALSE})}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the number 
 of rows of data used in the scaling.}

@@ -6,8 +6,14 @@
 interval attached at the end points of a \emph{time series} or a
 \emph{matrix} with \emph{OHLC} price data.}
 \usage{
-roll_var_ohlc(oh_lc, ste_p = 1L, look_back = 1L,
-  calc_method = "yang_zhang", scal_e = TRUE, in_dex = 0L)
+roll_var_ohlc(
+  oh_lc,
+  ste_p = 1L,
+  look_back = 1L,
+  calc_method = "yang_zhang",
+  scal_e = TRUE,
+  in_dex = 0L
+)
 }
 \arguments{
 \item{\code{oh_lc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}

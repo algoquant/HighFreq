@@ -6,9 +6,15 @@
 single symbol, and save the \emph{OHLC} time series to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
-save_scrub_agg(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
-  period = "minutes", tzone = "America/New_York")
+save_scrub_agg(
+  sym_bol,
+  data_dir = "E:/mktdata/sec/",
+  output_dir = "E:/output/data/",
+  look_back = 51,
+  vol_mult = 2,
+  period = "minutes",
+  tzone = "America/New_York"
+)
 }
 \arguments{
 \item{\code{sym_bol}}{A \emph{character} string representing symbol or ticker.}

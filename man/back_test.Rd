@@ -5,10 +5,21 @@
 \title{Simulate (backtest) a rolling portfolio optimization strategy, using
 \code{RcppArmadillo}.}
 \usage{
-back_test(ex_cess, re_turns, start_points, end_points,
-  typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1,
-  al_pha = 0, scal_e = TRUE, vo_l = 0.01, co_eff = 1,
-  bid_offer = 0)
+back_test(
+  ex_cess,
+  re_turns,
+  start_points,
+  end_points,
+  typ_e = "max_sharpe",
+  to_l = 0.001,
+  max_eigen = 0L,
+  pro_b = 0.1,
+  al_pha = 0,
+  scal_e = TRUE,
+  vo_l = 0.01,
+  co_eff = 1,
+  bid_offer = 0
+)
 }
 \arguments{
 \item{\code{ex_cess}}{A \emph{time series} or a \emph{matrix} of excess

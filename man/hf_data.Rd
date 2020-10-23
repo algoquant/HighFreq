@@ -5,7 +5,8 @@
 \alias{hf_data}
 \alias{SPY}
 \title{High frequency data sets}
-\format{Each \code{xts} time series contains \code{OHLC} data, with each row 
+\format{
+Each \code{xts} time series contains \code{OHLC} data, with each row 
   containing a single minute bar:
 \describe{
   \item{Open}{Open price in the bar}
@@ -13,7 +14,8 @@
   \item{Low}{Low price in the bar}
   \item{Close}{Close price in the bar}
   \item{Volume}{trading volume in the bar}
-}}
+}
+}
 \source{
 \url{https://wrds-web.wharton.upenn.edu/wrds/}
 }

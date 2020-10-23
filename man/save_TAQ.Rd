@@ -5,9 +5,14 @@
 \title{Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 it to multiple \sQuote{\code{*.RData}} files.}
 \usage{
-save_taq(sym_bol, data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/", look_back = 51, vol_mult = 2,
-  tzone = "America/New_York")
+save_taq(
+  sym_bol,
+  data_dir = "E:/mktdata/sec/",
+  output_dir = "E:/output/data/",
+  look_back = 51,
+  vol_mult = 2,
+  tzone = "America/New_York"
+)
 }
 \value{
 a \emph{TAQ} time series in \emph{xts} format.

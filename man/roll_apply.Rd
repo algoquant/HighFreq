@@ -5,8 +5,15 @@
 \title{Apply an aggregation function over a rolling look-back interval and the end
 points of an \emph{OHLC} time series, using \code{R} code.}
 \usage{
-roll_apply(x_ts, agg_fun, look_back = 2, end_points = seq_along(x_ts),
-  by_columns = FALSE, out_xts = TRUE, ...)
+roll_apply(
+  x_ts,
+  agg_fun,
+  look_back = 2,
+  end_points = seq_along(x_ts),
+  by_columns = FALSE,
+  out_xts = TRUE,
+  ...
+)
 }
 \arguments{
 \item{...}{additional parameters to the function \code{agg_fun}.}

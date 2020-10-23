@@ -4,9 +4,16 @@
 \alias{calc_weights}
 \title{Calculate the optimal portfolio weights for different objective functions.}
 \usage{
-calc_weights(re_turns, typ_e = "max_sharpe", to_l = 0.001,
-  max_eigen = 0L, pro_b = 0.1, al_pha = 0, scal_e = TRUE,
-  vo_l = 0.01)
+calc_weights(
+  re_turns,
+  typ_e = "max_sharpe",
+  to_l = 0.001,
+  max_eigen = 0L,
+  pro_b = 0.1,
+  al_pha = 0,
+  scal_e = TRUE,
+  vo_l = 0.01
+)
 }
 \arguments{
 \item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
@@ -45,21 +52,21 @@ The function \code{calc_weights()} calculates the optimal portfolio
   weights for different objective functions, using \code{RcppArmadillo}
   \code{C++} code.
 
-  If \code{typ_e == "max_sharpe"} (the default) then \code{calc_weights()}
+  If \code{typ_e = "max_sharpe"} (the default) then \code{calc_weights()}
   calculates the weights of the maximum Sharpe portfolio, by multiplying the
   inverse of the covariance \emph{matrix} times the mean column returns.
   
-  If \code{typ_e == "min_var"} then it calculates the weights of the minimum
+  If \code{typ_e = "min_var"} then it calculates the weights of the minimum
   variance portfolio under linear constraints.
   
-  If \code{typ_e == "min_varpca"} then it calculates the weights of the
+  If \code{typ_e = "min_varpca"} then it calculates the weights of the
   minimum variance portfolio under quadratic constraints (which is the
   highest order principal component).
 
-  If \code{typ_e == "rank"} then it calculates the weights as the ranks
+  If \code{typ_e = "rank"} then it calculates the weights as the ranks
   (order index) of the trailing Sharpe ratios of the portfolio assets.
 
-  If \code{scal_e == TRUE} (the default) then the weights are scaled so that
+  If \code{scal_e = TRUE} (the default) then the weights are scaled so that
   the resulting portfolio has a volatility equal to \code{vo_l}.
   
   \code{calc_weights()} applies dimensional regularization to calculate the

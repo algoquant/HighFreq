@@ -5,9 +5,15 @@
 \title{Perform a backtest simulation of a trading strategy (model) over a vector of
 end points along a time series of prices.}
 \usage{
-roll_backtest(x_ts, train_func, trade_func, look_back = look_forward,
-  look_forward, end_points = rutils::calc_endpoints(x_ts, look_forward),
-  ...)
+roll_backtest(
+  x_ts,
+  train_func,
+  trade_func,
+  look_back = look_forward,
+  look_forward,
+  end_points = rutils::calc_endpoints(x_ts, look_forward),
+  ...
+)
 }
 \arguments{
 \item{...}{additional parameters to the functions \code{train_func()} and

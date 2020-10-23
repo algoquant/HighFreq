@@ -5,8 +5,13 @@
 \title{Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
 \emph{OHLC} format.}
 \usage{
-scrub_agg(ta_q, look_back = 51, vol_mult = 2, period = "minutes",
-  tzone = "America/New_York")
+scrub_agg(
+  ta_q,
+  look_back = 51,
+  vol_mult = 2,
+  period = "minutes",
+  tzone = "America/New_York"
+)
 }
 \arguments{
 \item{\code{period}}{The aggregation period.}

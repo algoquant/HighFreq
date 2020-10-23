@@ -5,8 +5,13 @@
 \title{Calculate the variance of an \emph{OHLC time series}, using different range
 estimators and \code{RcppArmadillo}.}
 \usage{
-calc_var_ohlc(oh_lc, calc_method = "yang_zhang", lag_close = 0L,
-  scal_e = TRUE, in_dex = 0L)
+calc_var_ohlc(
+  oh_lc,
+  calc_method = "yang_zhang",
+  lag_close = 0L,
+  scal_e = TRUE,
+  in_dex = 0L
+)
 }
 \arguments{
 \item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
@@ -21,18 +26,18 @@ estimator for calculating the variance.  The estimators include:
   \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
   \item "yang_zhang" Yang-Zhang estimator,
  }
- (The default is the \emph{"yang_zhang"} estimator.)}
+ (The default is the \code{calc_method = "yang_zhang"}.)}
 
 \item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{lag_close=0}.)}
+default is \code{lag_close = 0}.)}
 
 \item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
 \code{scal_e = TRUE}.)}
 
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
+series}.  This is an optional argument. (The default is \code{in_dex = 0}.)}
 }
 \value{
 A single \emph{numeric} value equal to the variance of the

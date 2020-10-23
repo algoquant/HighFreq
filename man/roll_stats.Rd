@@ -5,8 +5,13 @@
 \title{Calculate a vector of statistics over an \emph{OHLC} time series, and
 calculate a rolling mean over the statistics.}
 \usage{
-roll_stats(oh_lc, calc_stats = "run_variance", look_back = 11,
-  weight_ed = TRUE, ...)
+roll_stats(
+  oh_lc,
+  calc_stats = "run_variance",
+  look_back = 11,
+  weight_ed = TRUE,
+  ...
+)
 }
 \arguments{
 \item{...}{additional parameters to the function \code{calc_stats}.}

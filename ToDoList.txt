@@ -90,7 +90,7 @@ Calculate the nonparametric skewness estimator using the quantiles: skewness = (
 
 + [ ] Modify function calc_endpoints(): call function xts::endpoints() if argument is an xts series
 
-+ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods.
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2()
 

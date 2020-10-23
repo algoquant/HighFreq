@@ -56,7 +56,7 @@ look_back <- 11
 z_scores <- HighFreq::roll_zscores(res_ponse=res_ponse, de_sign=de_sign, look_back=look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
 z_scores_r <- sapply(1:NROW(de_sign), function(ro_w) {
-  if (ro_w==1) return(0)
+  if (ro_w == 1) return(0)
   start_point <- max(1, ro_w-look_back+1)
   sub_response <- res_ponse[start_point:ro_w]
   sub_design <- de_sign[start_point:ro_w, ]

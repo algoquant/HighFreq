@@ -5,8 +5,13 @@
 \title{Calculate the rolling weighted sum over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_sum(t_series, look_back = 1L, stu_b = NULL, end_points = NULL,
-  weight_s = NULL)
+roll_sum(
+  t_series,
+  look_back = 1L,
+  stu_b = NULL,
+  end_points = NULL,
+  weight_s = NULL
+)
 }
 \arguments{
 \item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
