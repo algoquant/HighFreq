@@ -5,10 +5,10 @@
 \title{Calculate the variance of a a single-column \emph{time series} or a
 \emph{vector} using \code{RcppArmadillo}.}
 \usage{
-calc_var_vec(t_series)
+calc_var_vec(se_ries)
 }
 \arguments{
-\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
 }
 \value{
 A \emph{numeric} value equal to the variance of the \emph{vector}.

@@ -5,14 +5,14 @@
 \title{Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_mad(t_series)
+calc_mad(se_ries)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 }
 \value{
 A single-row matrix with the Median Absolute Deviations \emph{MAD}
-  of the columns of \code{t_series}.
+  of the columns of \code{se_ries}.
 }
 \description{
 Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a

@@ -83,8 +83,9 @@ Therefore 1-second bar returns carry almost no information.
 
 + [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
-+ [x] Create functions calc_mad(), calc_skew(), and calc_skewnp() to calculate the Median Absolute Deviation, the skewness, and the nonparametric skewness
-Calculate the nonparametric skewness estimator using the quantiles: skewness = (quartile_75 - median) - (median - quartile_25)
++ [ ] Modify function calc_weights(): 
+Rename model_type == "rank" to model_type == "rank_sharpe"
+Add model_type == "rank" for ranking the re_turns directly.
 
 + [ ] Modify function diff_it() to pad with zeros
 
@@ -125,12 +126,13 @@ It should calculate Pearson, Spearman, and Kendall correlations.
 
 + [ ] Create function roll_reg() for performing rolling PCA and robust regressions  
 Add option to perform rolling predictions using the regressions.
+It's already partially implemented in C:/Develop/R/Rcpp/roll_reg.cpp
 
 + [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
 Use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
 
-+ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
++ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators - It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
@@ -142,6 +144,8 @@ Calculate running variance efficiently (used by package fromo): https://www.john
 
 + [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 
++ [ ] Create a function called roll_quantile() for the rolling quantile
+
 + [ ] Create function calc_quantile() to calculate or update the quantile of a vector of numbers
 The value of the quantile can be updated based on the old quantile value and the new updated vector values.
 If there are very few new vector values and if they're all far from the old quantile value, then the quantile may remain unchanged.
@@ -150,6 +154,7 @@ Apply it to the calculation or rolling quantiles.
 + [ ] Modify calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
 
 + [ ] Add roxygen code for inherited parameters
+Use the example roxygen code:
 //' @inheritParams which_extreme
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
@@ -289,10 +294,6 @@ https://stackoverflow.com/questions/23849354/equivalent-of-which-function-in-rcp
 
 + [ ] Create new roll functions using RcppRoll::rollit() ?
 
-+ [ ] Convert roll_* functions to RcppRoll ?
-No, because RcppArmadillo and Rcpp
-are better
-
 + [ ] Add to back_test() the simulation with limit orders
 
 + [ ] Remove all parallel code and references to parallel packages from HighFreq  
@@ -326,6 +327,17 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Rename argument t_series to se_ries
+
++ [x] Create function roll_sum() for calculating a simple rolling sum over the columns of a matrix, without weighting or end points
+
++ [x] Rename roll_sum() to roll_wsum()
+
++ [x] Modify functions back_test() and calc_weights(): rename argument typ_e to model_type
+
++ [x] Create functions calc_mad(), calc_skew(), and calc_skewnp() to calculate the Median Absolute Deviation, the skewness, and the nonparametric skewness
+Calculate the nonparametric skewness estimator using the quantiles: skewness = (quartile_75 - median) - (median - quartile_25)
 
 + [x] Create a function called roll_count() using RcppArmadillo which reproduces roll_countr() in scratch.R
 roll_count() is already in lm_arma.cpp.
@@ -732,6 +744,8 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Convert roll_* functions to RcppRoll ?  No, because RcppArmadillo and Rcpp are better
 
 + [ ] Rename the functions run_* to to cast_* apply_* transform_* accumulate_*?
 

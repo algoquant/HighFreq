@@ -2,11 +2,11 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_weights}
 \alias{calc_weights}
-\title{Calculate the optimal portfolio weights for different objective functions.}
+\title{Calculate the optimal portfolio weights for different model types.}
 \usage{
 calc_weights(
   re_turns,
-  typ_e = "max_sharpe",
+  model_type = "rank_sharpe",
   to_l = 0.001,
   max_eigen = 0L,
   pro_b = 0.1,
@@ -19,8 +19,9 @@ calc_weights(
 \item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
-the weights (see Details).}
+\item{\code{model_type}}{A \emph{string} specifying the model type for
+calculating the weights (see Details).  (The default is \code{model_type =
+"rank_sharpe"})}
 
 \item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
 eigenvalues in order to regularize the matrix inverse.  (The default is
@@ -45,30 +46,34 @@ A column \emph{vector} of the same length as the number of columns
   of \code{re_turns}.
 }
 \description{
-Calculate the optimal portfolio weights for different objective functions.
+Calculate the optimal portfolio weights for different model types.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different objective functions, using \code{RcppArmadillo}
+  weights for different model types, using \code{RcppArmadillo}
   \code{C++} code.
 
-  If \code{typ_e = "max_sharpe"} (the default) then \code{calc_weights()}
-  calculates the weights of the maximum Sharpe portfolio, by multiplying the
-  inverse of the covariance \emph{matrix} times the mean column returns.
-  
-  If \code{typ_e = "min_var"} then it calculates the weights of the minimum
-  variance portfolio under linear constraints.
-  
-  If \code{typ_e = "min_varpca"} then it calculates the weights of the
+  If \code{model_type = "rank_sharpe"} (the default) then it calculates the
+  weights as the ranks (order index) of the trailing Sharpe ratios of the
+  asset \code{re_turns}.
+
+  If \code{model_type = "rank"} then it calculates the weights
+  as the ranks (order index) of the last row of the \code{re_turns}.
+
+  If \code{model_type = "max_sharpe"} then \code{calc_weights()} calculates
+  the weights of the maximum Sharpe portfolio, by multiplying the inverse of
+  the covariance \emph{matrix} times the mean column returns.
+
+  If \code{model_type = "min_var"} then it calculates the weights of the
+  minimum variance portfolio under linear constraints.
+
+  If \code{model_type = "min_varpca"} then it calculates the weights of the
   minimum variance portfolio under quadratic constraints (which is the
   highest order principal component).
 
-  If \code{typ_e = "rank"} then it calculates the weights as the ranks
-  (order index) of the trailing Sharpe ratios of the portfolio assets.
-
   If \code{scal_e = TRUE} (the default) then the weights are scaled so that
   the resulting portfolio has a volatility equal to \code{vo_l}.
-  
+
   \code{calc_weights()} applies dimensional regularization to calculate the
   inverse of the covariance \emph{matrix} of returns from its eigen
   decomposition, using the function \code{arma::eig_sym()}.

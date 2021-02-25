@@ -4,7 +4,7 @@
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a
+#' @param \code{se_ries} A single-column \emph{time series} or a
 #'   \emph{vector}.
 #'
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
@@ -17,22 +17,22 @@
 #'   time series.
 #'
 #' @details The function \code{lag_vec()} applies a lag to the input \emph{time
-#'   series} \code{t_series} by shifting its elements by the number equal to
+#'   series} \code{se_ries} by shifting its elements by the number equal to
 #'   the argument \code{lagg}.  For positive \code{lagg} values, the elements
 #'   are shifted forward in time (down), and for negative \code{lagg} values
 #'   they are shifted backward (up).
 #'   
 #'   The output \emph{vector} is padded with either zeros (the default), or
-#'   with data from \code{t_series}, so that it has the same number of element
-#'   as \code{t_series}.
+#'   with data from \code{se_ries}, so that it has the same number of element
+#'   as \code{se_ries}.
 #'   If the \code{lagg} is positive, then the first element is copied and added
 #'   upfront.
 #'   If the \code{lagg} is negative, then the last element is copied and added
 #'   to the end.
 #'   
-#'   As a rule, if \code{t_series} contains returns data, then the output
+#'   As a rule, if \code{se_ries} contains returns data, then the output
 #'   \emph{matrix} should be padded with zeros, to avoid data snooping.
-#'   If \code{t_series} contains prices, then the output \emph{matrix} should
+#'   If \code{se_ries} contains prices, then the output \emph{matrix} should
 #'   be padded with the prices.
 #'
 #' @examples
@@ -51,14 +51,14 @@
 #' }
 #' 
 #' @export
-lag_vec <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', t_series, lagg, pad_zeros)
+lag_vec <- function(se_ries, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', se_ries, lagg, pad_zeros)
 }
 
 #' Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 #' \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
 #'   (the default is \code{lagg = 1}).
@@ -67,7 +67,7 @@ lag_vec <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
 #'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{t_series}.
+#'   argument \code{se_ries}.
 #'
 #' @details The function \code{lag_it()} applies a lag to the input
 #'   \emph{matrix} by shifting its rows by the number equal to the argument
@@ -76,16 +76,16 @@ lag_vec <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
 #'   (up). 
 #'   
 #'   The output \emph{matrix} is padded with either zeros (the default), or
-#'   with rows of data from \code{t_series}, so that it has the same dimensions
-#'   as \code{t_series}.
+#'   with rows of data from \code{se_ries}, so that it has the same dimensions
+#'   as \code{se_ries}.
 #'   If the \code{lagg} is positive, then the first row is copied and added
 #'   upfront.
 #'   If the \code{lagg} is negative, then the last row is copied and added
 #'   to the end.
 #'   
-#'   As a rule, if \code{t_series} contains returns data, then the output
+#'   As a rule, if \code{se_ries} contains returns data, then the output
 #'   \emph{matrix} should be padded with zeros, to avoid data snooping.
-#'   If \code{t_series} contains prices, then the output \emph{matrix} should
+#'   If \code{se_ries} contains prices, then the output \emph{matrix} should
 #'   be padded with the prices.
 #'
 #' @examples
@@ -104,14 +104,14 @@ lag_vec <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
 #' }
 #' 
 #' @export
-lag_it <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_lag_it', PACKAGE = 'HighFreq', t_series, lagg, pad_zeros)
+lag_it <- function(se_ries, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_lag_it', PACKAGE = 'HighFreq', se_ries, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
 #' single-column \emph{time series} or a \emph{vector}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of time periods to
 #'   lag when calculating the differences (the default is \code{lagg = 1}).
@@ -156,14 +156,14 @@ lag_it <- function(t_series, lagg = 1L, pad_zeros = TRUE) {
 #' }
 #' 
 #' @export
-diff_vec <- function(t_series, lagg = 1L, padd = TRUE) {
-    .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', t_series, lagg, padd)
+diff_vec <- function(se_ries, lagg = 1L, padd = TRUE) {
+    .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', se_ries, lagg, padd)
 }
 
 #' Calculate the row differences of a a \emph{time series} or a \emph{matrix}
 #' using \emph{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of rows (time
 #'   periods) to lag when calculating the differences (the default is
@@ -213,8 +213,8 @@ diff_vec <- function(t_series, lagg = 1L, padd = TRUE) {
 #' }
 #' 
 #' @export
-diff_it <- function(t_series, lagg = 1L, padd = TRUE) {
-    .Call('_HighFreq_diff_it', PACKAGE = 'HighFreq', t_series, lagg, padd)
+diff_it <- function(se_ries, lagg = 1L, padd = TRUE) {
+    .Call('_HighFreq_diff_it', PACKAGE = 'HighFreq', se_ries, lagg, padd)
 }
 
 #' Calculate a vector of end points that divides a vector into equal intervals.
@@ -526,7 +526,7 @@ calc_scaled <- function(mat_rix, use_median = FALSE) {
 #' Calculate the variance of a a single-column \emph{time series} or a
 #' \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 #'
 #' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 #'
@@ -550,16 +550,16 @@ calc_scaled <- function(mat_rix, use_median = FALSE) {
 #' }
 #' 
 #' @export
-calc_var_vec <- function(t_series) {
-    .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', t_series)
+calc_var_vec <- function(se_ries) {
+    .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' Calculate the variance of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @return A row vector equal to the variance of the columns of \code{t_series}
+#' @return A row vector equal to the variance of the columns of \code{se_ries}
 #'   matrix.
 #'
 #' @details The function \code{calc_var()} calculates the variance of the
@@ -591,8 +591,8 @@ calc_var_vec <- function(t_series) {
 #' }
 #' 
 #' @export
-calc_var <- function(t_series) {
-    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', t_series)
+calc_var <- function(se_ries) {
+    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' Calculate the variance of an \emph{OHLC time series}, using different range
@@ -745,10 +745,10 @@ calc_ranks <- function(vec_tor) {
 #' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
 #' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
-#'   of the columns of \code{t_series}.
+#'   of the columns of \code{se_ries}.
 #'
 #' @details The function \code{calc_mad()} calculates the Median Absolute
 #'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
@@ -774,14 +774,14 @@ calc_ranks <- function(vec_tor) {
 #' }
 #' 
 #' @export
-calc_mad <- function(t_series) {
-    .Call('_HighFreq_calc_mad', PACKAGE = 'HighFreq', t_series)
+calc_mad <- function(se_ries) {
+    .Call('_HighFreq_calc_mad', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
 #'   Details). (The default is the \code{typ_e = "pearson"}.)
@@ -790,7 +790,7 @@ calc_mad <- function(t_series) {
 #'   (the default is \code{al_pha = 0.25}).
 #'
 #' @return A single-row matrix with the skewness of the columns of
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'
 #' @details The function \code{calc_skew()} calculates the skewness of the
 #'   columns of a \emph{time series} or a \emph{matrix} of data using
@@ -856,23 +856,23 @@ calc_mad <- function(t_series) {
 #' }
 #' 
 #' @export
-calc_skew <- function(t_series, typ_e = "pearson", al_pha = 0.25) {
-    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', t_series, typ_e, al_pha)
+calc_skew <- function(se_ries, typ_e = "pearson", al_pha = 0.25) {
+    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', se_ries, typ_e, al_pha)
 }
 
 #' @export
-calc_skew_pearson <- function(t_series) {
-    .Call('_HighFreq_calc_skew_pearson', PACKAGE = 'HighFreq', t_series)
+calc_skew_pearson <- function(se_ries) {
+    .Call('_HighFreq_calc_skew_pearson', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' @export
-calc_skew_quant <- function(t_series, al_pha = 0.25) {
-    .Call('_HighFreq_calc_skew_quant', PACKAGE = 'HighFreq', t_series, al_pha)
+calc_skew_quant <- function(se_ries, al_pha = 0.25) {
+    .Call('_HighFreq_calc_skew_quant', PACKAGE = 'HighFreq', se_ries, al_pha)
 }
 
 #' @export
-calc_skew_nonp <- function(t_series) {
-    .Call('_HighFreq_calc_skew_nonp', PACKAGE = 'HighFreq', t_series)
+calc_skew_nonp <- function(se_ries) {
+    .Call('_HighFreq_calc_skew_nonp', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' Perform multivariate linear regression using \emph{Rcpp}.
@@ -924,13 +924,13 @@ calc_lm <- function(res_ponse, de_sign) {
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
 #'
 #' @export
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix} with multiple
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'
 #' @return A \emph{matrix} containing a single row, with the \emph{open},
 #'   \emph{high}, \emph{low}, and \emph{close} values, and also the total
 #'   \emph{volume} (if provided as either the second or fifth column of
-#'   \code{t_series}).
+#'   \code{se_ries}).
 #'
 #' @details The function \code{agg_ohlc()} aggregates a time series of data
 #'   into a single bar of \emph{OHLC} data.
@@ -939,15 +939,15 @@ calc_lm <- function(res_ponse, de_sign) {
 #'   It can also accept an additional column containing the trading volume.
 #'   
 #' The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
-#' the \emph{open} value of the first row of \code{t_series}.
+#' the \emph{open} value of the first row of \code{se_ries}.
 #'   The \emph{high} value as the maximum of the \emph{high} column of
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'   The \emph{low} value as the minimum of the \emph{low} column of
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'   The \emph{close} value as the \emph{close} of the last row of
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'   The \emph{volume} value as the sum of the \emph{volume} column of
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'
 #'   For a single column of data, the \emph{open}, \emph{high}, \emph{low}, and
 #'   \emph{close} values are all the same.
@@ -965,8 +965,8 @@ calc_lm <- function(res_ponse, de_sign) {
 #' }
 #' 
 #' @export
-agg_ohlc <- function(t_series) {
-    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', t_series)
+agg_ohlc <- function(se_ries) {
+    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', se_ries)
 }
 
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
@@ -1003,7 +1003,7 @@ roll_count <- function(vec_tor) {
 #' Given a time series of prices at a higher periodicity (say seconds), it
 #' calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 #'
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix} with multiple
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'   
 #' @param \emph{end_points} An \emph{integer vector} of end points.
@@ -1012,10 +1012,10 @@ roll_count <- function(vec_tor) {
 #'   to the number of \emph{end_points} minus one.
 #'   
 #' @details The function \code{roll_ohlc()} performs a loop over the
-#'   \emph{end_points}, along the rows of the \code{t_series} data. At each
-#'   \emph{end_point}, it selects the past rows of \code{t_series} data,
+#'   \emph{end_points}, along the rows of the \code{se_ries} data. At each
+#'   \emph{end_point}, it selects the past rows of \code{se_ries} data,
 #'   starting at the first bar after the previous \emph{end_point}, and then
-#'   calls the function \code{agg_ohlc()} on the selected \code{t_series} data
+#'   calls the function \code{agg_ohlc()} on the selected \code{se_ries} data
 #'   to calculate the aggregations.
 #'   
 #'   The function \code{roll_ohlc()} can accept either a single column of data
@@ -1033,27 +1033,27 @@ roll_count <- function(vec_tor) {
 #' # Define end points at 25 day intervals
 #' end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
 #' # Aggregate over end_points:
-#' ohlc_agg <- HighFreq::roll_ohlc(t_series=oh_lc, end_points=(end_points-1))
+#' ohlc_agg <- HighFreq::roll_ohlc(se_ries=oh_lc, end_points=(end_points-1))
 #' # Compare with xts::to.period()
 #' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 #' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_ohlc <- function(t_series, end_points) {
-    .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', t_series, end_points)
+roll_ohlc <- function(se_ries, end_points) {
+    .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', se_ries, end_points)
 }
 
-#' Calculate the rolling sum over a single-column \emph{time series} or a
-#' \emph{vector} using \emph{Rcpp}.
+#' Calculate the rolling weighted sums over a single-column \emph{time series}
+#' or a \emph{vector} using \emph{Rcpp}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of elements of data used for calculating the sum.
 #'
 #' @return A column \emph{vector} of the same length as the argument
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'
 #' @details The function \code{roll_vec()} calculates a \emph{vector} of
 #'   rolling sums, over a \emph{vector} of data, using fast \emph{Rcpp}
@@ -1078,25 +1078,25 @@ roll_ohlc <- function(t_series, end_points) {
 #' }
 #' 
 #' @export
-roll_vec <- function(t_series, look_back) {
-    .Call('_HighFreq_roll_vec', PACKAGE = 'HighFreq', t_series, look_back)
+roll_vec <- function(se_ries, look_back) {
+    .Call('_HighFreq_roll_vec', PACKAGE = 'HighFreq', se_ries, look_back)
 }
 
-#' Calculate the rolling weighted sum over a single-column \emph{time series}
+#' Calculate the rolling weighted sums over a single-column \emph{time series}
 #' or a \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{weight_s} A \emph{vector} of weights.
 #'
 #' @return A column \emph{vector} of the same length as the argument
-#'   \code{t_series}.
+#'   \code{se_ries}.
 #'
-#' @details The function \code{roll_vecw()} calculates the rolling weighted sum
+#' @details The function \code{roll_vecw()} calculates the rolling weighted sums
 #'   of a \emph{vector} over its past values (a convolution with the
 #'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
 #'   similar calculation as the standard \code{R} function
-#'   \code{stats::filter(x=t_series, filter=weight_s, method="convolution",
+#'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
 #'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
 #'   \code{NA} values.
 #'   
@@ -1107,25 +1107,25 @@ roll_vec <- function(t_series, look_back) {
 #' re_turns <- as.numeric(rutils::etf_env$VTI[, 6])
 #' # Create simple weights
 #' weight_s <- c(1, rep(0, 10))
-#' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
+#' # Calculate rolling weighted sums
+#' weight_ed <- HighFreq::roll_vecw(se_ries=re_turns, weight_s=weight_s)
 #' # Compare with original
 #' all.equal(re_turns, as.numeric(weight_ed))
 #' # Second example
 #' # Create exponentially decaying weights
 #' weight_s <- exp(-0.2*1:11)
 #' weight_s <- weight_s/sum(weight_s)
-#' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_vecw(t_series=re_turns, weight_s=weight_s)
-#' # Calculate rolling weighted sum using filter()
+#' # Calculate rolling weighted sums
+#' weight_ed <- HighFreq::roll_vecw(se_ries=re_turns, weight_s=weight_s)
+#' # Calculate rolling weighted sums using filter()
 #' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_vecw <- function(t_series, weight_s) {
-    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', t_series, weight_s)
+roll_vecw <- function(se_ries, weight_s) {
+    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', se_ries, weight_s)
 }
 
 #' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
@@ -1140,7 +1140,7 @@ roll_vecw <- function(t_series, weight_s) {
 #' @details The function \code{roll_conv()} calculates the convolutions of the
 #'   \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
 #'   down over the \emph{matrix} rows and multiplies the past (higher) values
-#'   by the weights.  It calculates the rolling weighted sum of the past
+#'   by the weights.  It calculates the rolling weighted sums of the past
 #'   values.
 #'   
 #'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
@@ -1156,7 +1156,7 @@ roll_vecw <- function(t_series, weight_s) {
 #' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
 #' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
-#' # Calculate rolling weighted sum
+#' # Calculate rolling weighted sums
 #' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
 #' # Compare with original
 #' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
@@ -1164,9 +1164,9 @@ roll_vecw <- function(t_series, weight_s) {
 #' # Create exponentially decaying weights
 #' weight_s <- exp(-0.2*(1:11))
 #' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
-#' # Calculate rolling weighted sum
+#' # Calculate rolling weighted sums
 #' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
-#' # Calculate rolling weighted sum using filter()
+#' # Calculate rolling weighted sums using filter()
 #' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
@@ -1189,7 +1189,7 @@ roll_conv <- function(mat_rix, weight_s) {
 #' @details The function \code{roll_conv_ref()} calculates the convolutions of
 #'   the \emph{matrix} columns with a \emph{vector} of weights.  It performs a
 #'   loop down over the \emph{matrix} rows and multiplies the past (higher)
-#'   values by the weights.  It calculates the rolling weighted sum of the past
+#'   values by the weights.  It calculates the rolling weighted sums of the past
 #'   values.
 #'   
 #'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
@@ -1211,7 +1211,7 @@ roll_conv <- function(mat_rix, weight_s) {
 #' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
 #' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
-#' # Calculate rolling weighted sum
+#' # Calculate rolling weighted sums
 #' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
 #' # Compare with original
 #' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
@@ -1219,9 +1219,9 @@ roll_conv <- function(mat_rix, weight_s) {
 #' # Create exponentially decaying weights
 #' weight_s <- exp(-0.2*(1:11))
 #' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
-#' # Calculate rolling weighted sum
+#' # Calculate rolling weighted sums
 #' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
-#' # Calculate rolling weighted sum using filter()
+#' # Calculate rolling weighted sums using filter()
 #' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
@@ -1232,10 +1232,55 @@ roll_conv_ref <- function(mat_rix, weight_s) {
     .Call('_HighFreq_roll_conv_ref', PACKAGE = 'HighFreq', mat_rix, weight_s)
 }
 
-#' Calculate the rolling weighted sum over a \emph{time series} or a
+#' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
+#' using \emph{Rcpp}.
+#' 
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
+#' 
+#' @param \code{look_back} The length of the look-back interval, equal to the
+#'   number of data points included in calculating the rolling sum (the default
+#'   is \code{look_back = 1}).
+#'   
+#' @return A \emph{matrix} with the same dimensions as the input
+#'   argument \code{se_ries}.
+#'
+#' @details The function \code{roll_sum()} calculates the rolling sums over the
+#'   columns of the \code{se_ries} data.
+#'   
+#'   The function \code{roll_sum()} returns a \emph{matrix} with the same
+#'   dimensions as the input argument \code{se_ries}.
+#' 
+#'   The function \code{roll_sum()} uses the fast \code{RcppArmadillo} function
+#'   \code{arma::cumsum()}, without explicit loops.
+#'   The function \code{roll_sum()} is several times faster than
+#'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#'   
+#' @examples
+#' \dontrun{
+#' # First example
+#' # Create series of historical returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' # Define parameters
+#' look_back <- 22
+#' # Calculate rolling sums
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
+#' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+#' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+#' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
+#' r_sum <- (r_sum - lag_sum)
+#' all.equal(c_sum, r_sum, check.attributes=FALSE)
+#' }
+#' 
+#' @export
+roll_sum <- function(se_ries, look_back = 1L) {
+    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', se_ries, look_back)
+}
+
+#' Calculate the rolling weighted sums over a \emph{time series} or a
 #' \emph{matrix} using \emph{Rcpp}.
 #' 
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of data points included in calculating the rolling sum (the default
@@ -1250,20 +1295,21 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #' @param \code{weight_s} A column \emph{vector} of weights.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{t_series}.
+#'   argument \code{se_ries}.
 #'
-#' @details The function \code{roll_sum()} calculates the rolling sums over the
-#'   columns of the \code{t_series} data.  
-#'   The sums are calculated over a number of data points equal to
-#'   \code{look_back}.
+#' @details The function \code{roll_wsum()} calculates the rolling weighted
+#'   sums over the columns of the \code{se_ries} data. 
 #'   
-#'   The function \code{roll_sum()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{t_series}.
+#'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
+#'   dimensions as the input argument \code{se_ries}.
 #' 
-#'   The arguments \code{stu_b}, \code{end_points}, and \code{weight_s} are
+#'   The arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
 #'   optional.
 #'   
-#'   If either the arguments \code{stu_b} or \code{end_points} are supplied,
+#'   If the argument \code{weight_s} is not supplied, then simple sums are
+#'   calculated, not weighted sums.
+#'   
+#'   If either the \code{stu_b} or \code{end_points} arguments are supplied,
 #'   then the rolling sums are calculated at the end points. 
 #'   
 #'   If only the argument \code{stu_b} is supplied, then the end points are
@@ -1271,20 +1317,23 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #'   end point is equal to \code{stu_b} and the end points are spaced
 #'   \code{look_back} periods apart.
 #'   
-#'   If the argument \code{weight_s} is supplied, then weighted sums are
-#'   calculated.
-#'   Then the function \code{roll_sum()} calculates the rolling weighted sums
-#'   of the past values.
+#'   If the arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
+#'   not supplied, then the sums are calculated over a number of data points
+#'   equal to \code{look_back}.
 #'   
-#'   The function \code{roll_sum()} calculates the rolling weighted sums as
-#'   convolutions of the \code{t_series} columns with the \emph{vector} of
+#'   The function \code{roll_wsum()} calculates the rolling weighted sums as
+#'   convolutions of the \code{se_ries} columns with the \emph{vector} of
 #'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}.
 #'   It performs a similar calculation to the standard \code{R} function
-#'   \code{stats::filter(x=t_series, filter=weight_s, method="convolution",
+#'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
 #'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
 #'   leading \code{NA} values. using fast \emph{RcppArmadillo} \code{C++} code.
-#'   The function \code{roll_sum()} is several times faster than
+#'   The function \code{roll_wsum()} is several times faster than
 #'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#'   
+#'   Technical note:
+#'   The function \code{roll_wsum()} has arguments with default values equal to
+#'   \code{NULL}, which are implemented in \code{Rcpp} code.
 #'   
 #' @examples
 #' \dontrun{
@@ -1293,9 +1342,8 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 #' # Define parameters
 #' look_back <- 22
-#' stu_b <- 21
 #' # Calculate rolling sums at each point
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
+#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back)
 #' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1304,7 +1352,8 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
 #' # Calculate rolling sums at end points
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back, stu_b=stu_b)
+#' stu_b <- 21
+#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stu_b=stu_b)
 #' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
 #' end_p <- end_p[end_p < NROW(re_turns)]
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1314,47 +1363,47 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
 #' # Calculate rolling sums at end points - pass in end_points
-#' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p)
+#' c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
 #' # Create exponentially decaying weights
 #' weight_s <- exp(-0.2*(1:11))
 #' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 #' # Calculate rolling weighted sum
-#' c_sum <- HighFreq::roll_sum(re_turns, weight_s=weight_s)
+#' c_sum <- HighFreq::roll_wsum(re_turns, weight_s=weight_s)
 #' # Calculate rolling weighted sum using filter()
 #' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 #' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 #' 
 #' # Calculate rolling weighted sums at end points
-#' c_sum <- HighFreq::roll_sum(re_turns, end_points=end_p, weight_s=weight_s)
+#' c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p, weight_s=weight_s)
 #' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
 #' 
 #' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_sum(re_turns, weight_s)
+#' weight_ed <- HighFreq::roll_wsum(re_turns, weight_s)
 #' # Compare with original
 #' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_sum <- function(t_series, look_back = 1L, stu_b = NULL, end_points = NULL, weight_s = NULL) {
-    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', t_series, look_back, stu_b, end_points, weight_s)
+roll_wsum <- function(se_ries, look_back = 1L, stu_b = NULL, end_points = NULL, weight_s = NULL) {
+    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', se_ries, look_back, stu_b, end_points, weight_s)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
 #' interval for a single-column \emph{time series} or a \emph{vector}, using
 #' \code{RcppArmadillo}.
 #'
-#' @param \code{t_series} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of \emph{vector} elements used for calculating a single variance
 #'   estimate.
 #'
 #' @return A column \emph{vector} with the same number of elements as the input
-#'   argument \code{t_series}.
+#'   argument \code{se_ries}.
 #'
 #' @details The function \code{roll_var_vec()} calculates a \emph{vector} of
 #'   variance estimates over a rolling look-back interval for a single-column
@@ -1363,7 +1412,7 @@ roll_sum <- function(t_series, look_back = 1L, stu_b = NULL, end_points = NULL, 
 #'   
 #'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
-#'   input argument \code{t_series}.
+#'   input argument \code{se_ries}.
 #'
 #'   The function \code{roll_var_vec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
@@ -1386,29 +1435,29 @@ roll_sum <- function(t_series, look_back = 1L, stu_b = NULL, end_points = NULL, 
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var_vec <- function(t_series, look_back = 11L) {
-    .Call('_HighFreq_roll_var_vec', PACKAGE = 'HighFreq', t_series, look_back)
+roll_var_vec <- function(se_ries, look_back = 11L) {
+    .Call('_HighFreq_roll_var_vec', PACKAGE = 'HighFreq', se_ries, look_back)
 }
 
 #' Calculate a \emph{matrix} of variance estimates over a rolling look-back
 #' interval attached at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #'
-#' @param \code{t_series} A \emph{time series} or a \emph{matrix}.
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{ste_p} The number of time periods between the end points.
 #'
 #' @param \code{look_back} The number of end points in the look-back interval.
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
-#'   series \code{t_series}, and the number of rows equal to the number of end
+#'   series \code{se_ries}, and the number of rows equal to the number of end
 #'   points.
 #'
 #' @details The function \code{roll_var()} calculates a \emph{matrix} of
 #'   variance estimates over rolling look-back intervals attached at the end
-#'   points of the \emph{time series} \code{t_series}.
+#'   points of the \emph{time series} \code{se_ries}.
 #'   
-#'   The end points are calculated along the rows of \code{t_series} using the
+#'   The end points are calculated along the rows of \code{se_ries} using the
 #'   function \code{calc_endpoints()}, with the number of time periods between
 #'   the end points equal to \code{ste_p}.
 #'   
@@ -1449,8 +1498,8 @@ roll_var_vec <- function(t_series, look_back = 11L) {
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var <- function(t_series, ste_p = 1L, look_back = 1L) {
-    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', t_series, ste_p, look_back)
+roll_var <- function(se_ries, ste_p = 1L, look_back = 1L) {
+    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', se_ries, ste_p, look_back)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -1786,13 +1835,14 @@ sim_arima <- function(in_nov, co_eff) {
     .Call('_HighFreq_sim_arima', PACKAGE = 'HighFreq', in_nov, co_eff)
 }
 
-#' Calculate the optimal portfolio weights for different objective functions.
+#' Calculate the optimal portfolio weights for different model types.
 #' 
 #' @param \code{re_turns} A \emph{time series} or a \emph{matrix} of returns
 #'   data (the returns in excess of the risk-free rate).
 #'   
-#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
-#'   the weights (see Details).
+#' @param \code{model_type} A \emph{string} specifying the model type for
+#'   calculating the weights (see Details).  (The default is \code{model_type =
+#'   "rank_sharpe"})
 #'   
 #' @param \code{to_l} A \emph{numeric} tolerance level for discarding small
 #'   eigenvalues in order to regularize the matrix inverse.  (The default is
@@ -1816,26 +1866,30 @@ sim_arima <- function(in_nov, co_eff) {
 #'   of \code{re_turns}.
 #'
 #' @details The function \code{calc_weights()} calculates the optimal portfolio
-#'   weights for different objective functions, using \code{RcppArmadillo}
+#'   weights for different model types, using \code{RcppArmadillo}
 #'   \code{C++} code.
 #' 
-#'   If \code{typ_e = "max_sharpe"} (the default) then \code{calc_weights()}
-#'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-#'   inverse of the covariance \emph{matrix} times the mean column returns.
-#'   
-#'   If \code{typ_e = "min_var"} then it calculates the weights of the minimum
-#'   variance portfolio under linear constraints.
-#'   
-#'   If \code{typ_e = "min_varpca"} then it calculates the weights of the
+#'   If \code{model_type = "rank_sharpe"} (the default) then it calculates the
+#'   weights as the ranks (order index) of the trailing Sharpe ratios of the
+#'   asset \code{re_turns}.
+#'
+#'   If \code{model_type = "rank"} then it calculates the weights
+#'   as the ranks (order index) of the last row of the \code{re_turns}.
+#'
+#'   If \code{model_type = "max_sharpe"} then \code{calc_weights()} calculates
+#'   the weights of the maximum Sharpe portfolio, by multiplying the inverse of
+#'   the covariance \emph{matrix} times the mean column returns.
+#'
+#'   If \code{model_type = "min_var"} then it calculates the weights of the
+#'   minimum variance portfolio under linear constraints.
+#'
+#'   If \code{model_type = "min_varpca"} then it calculates the weights of the
 #'   minimum variance portfolio under quadratic constraints (which is the
 #'   highest order principal component).
-#' 
-#'   If \code{typ_e = "rank"} then it calculates the weights as the ranks
-#'   (order index) of the trailing Sharpe ratios of the portfolio assets.
-#' 
+#'
 #'   If \code{scal_e = TRUE} (the default) then the weights are scaled so that
 #'   the resulting portfolio has a volatility equal to \code{vo_l}.
-#'   
+#'
 #'   \code{calc_weights()} applies dimensional regularization to calculate the
 #'   inverse of the covariance \emph{matrix} of returns from its eigen
 #'   decomposition, using the function \code{arma::eig_sym()}.
@@ -1873,8 +1927,8 @@ sim_arima <- function(in_nov, co_eff) {
 #' }
 #' 
 #' @export
-calc_weights <- function(re_turns, typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0.0, scal_e = TRUE, vo_l = 0.01) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, typ_e, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l)
+calc_weights <- function(re_turns, model_type = "rank_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0.0, scal_e = TRUE, vo_l = 0.01) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', re_turns, model_type, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -1890,8 +1944,9 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", to_l = 0.001, max_eigen
 #' 
 #' @param \code{end_points} An \emph{integer vector} of end points.
 #' 
-#' @param \code{typ_e} A \emph{string} specifying the objective for calculating
-#'   the weights (see Details).
+#' @param \code{model_type} A \emph{string} specifying the model type for
+#'   calculating the weights (see Details).  (The default is \code{model_type =
+#'   "rank_sharpe"})
 #'   
 #' @param \code{to_l} A \emph{numeric} tolerance level for discarding small
 #'   eigenvalues in order to regularize the matrix inverse.  (The default is
@@ -1929,7 +1984,7 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", to_l = 0.001, max_eigen
 #'   corresponding end point and the start point. It passes the subset matrix
 #'   of excess returns into the function \code{calc_weights()}, which
 #'   calculates the optimal portfolio weights. The arguments \code{max_eigen},
-#'   \code{al_pha}, \code{typ_e}, and \code{scal_e} are also passed to the
+#'   \code{al_pha}, \code{model_type}, and \code{scal_e} are also passed to the
 #'   function \code{calc_weights()}.
 #'   
 #'   The function \code{back_test()} multiplies the weights by the coefficient
@@ -1979,7 +2034,7 @@ calc_weights <- function(re_turns, typ_e = "max_sharpe", to_l = 0.001, max_eigen
 #' }
 #' 
 #' @export
-back_test <- function(ex_cess, re_turns, start_points, end_points, typ_e = "max_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0, scal_e = TRUE, vo_l = 0.01, co_eff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, typ_e, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l, co_eff, bid_offer)
+back_test <- function(ex_cess, re_turns, start_points, end_points, model_type = "rank_sharpe", to_l = 0.001, max_eigen = 0L, pro_b = 0.1, al_pha = 0, scal_e = TRUE, vo_l = 0.01, co_eff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', ex_cess, re_turns, start_points, end_points, model_type, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l, co_eff, bid_offer)
 }
 

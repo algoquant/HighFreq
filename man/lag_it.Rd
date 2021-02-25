@@ -5,10 +5,10 @@
 \title{Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 \code{RcppArmadillo}.}
 \usage{
-lag_it(t_series, lagg = 1L, pad_zeros = TRUE)
+lag_it(se_ries, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
 (the default is \code{lagg = 1}).}
@@ -18,7 +18,7 @@ with zeros? (The default is \code{pad_zeros = TRUE}.)}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{t_series}.
+  argument \code{se_ries}.
 }
 \description{
 Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
@@ -32,16 +32,16 @@ The function \code{lag_it()} applies a lag to the input
   (up). 
   
   The output \emph{matrix} is padded with either zeros (the default), or
-  with rows of data from \code{t_series}, so that it has the same dimensions
-  as \code{t_series}.
+  with rows of data from \code{se_ries}, so that it has the same dimensions
+  as \code{se_ries}.
   If the \code{lagg} is positive, then the first row is copied and added
   upfront.
   If the \code{lagg} is negative, then the last row is copied and added
   to the end.
   
-  As a rule, if \code{t_series} contains returns data, then the output
+  As a rule, if \code{se_ries} contains returns data, then the output
   \emph{matrix} should be padded with zeros, to avoid data snooping.
-  If \code{t_series} contains prices, then the output \emph{matrix} should
+  If \code{se_ries} contains prices, then the output \emph{matrix} should
   be padded with the prices.
 }
 \examples{

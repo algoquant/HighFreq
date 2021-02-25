@@ -5,10 +5,10 @@
 \title{Calculate the skewness of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_skew(t_series, typ_e = "pearson", al_pha = 0.25)
+calc_skew(se_ries, typ_e = "pearson", al_pha = 0.25)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{typ_e}}{A \emph{string} specifying the type of skewness (see
 Details). (The default is the \code{typ_e = "pearson"}.)}
@@ -18,7 +18,7 @@ Details). (The default is the \code{typ_e = "pearson"}.)}
 }
 \value{
 A single-row matrix with the skewness of the columns of
-  \code{t_series}.
+  \code{se_ries}.
 }
 \description{
 Calculate the skewness of the columns of a \emph{time series} or a

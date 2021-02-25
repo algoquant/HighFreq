@@ -5,10 +5,10 @@
 \title{Aggregate a time series to an \emph{OHLC} time series with lower
 periodicity.}
 \usage{
-roll_ohlc(t_series, end_points)
+roll_ohlc(se_ries, end_points)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{time series} or a \emph{matrix} with multiple
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 
 \item{\emph{end_points}}{An \emph{integer vector} of end points.}
@@ -23,10 +23,10 @@ calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 }
 \details{
 The function \code{roll_ohlc()} performs a loop over the
-  \emph{end_points}, along the rows of the \code{t_series} data. At each
-  \emph{end_point}, it selects the past rows of \code{t_series} data,
+  \emph{end_points}, along the rows of the \code{se_ries} data. At each
+  \emph{end_point}, it selects the past rows of \code{se_ries} data,
   starting at the first bar after the previous \emph{end_point}, and then
-  calls the function \code{agg_ohlc()} on the selected \code{t_series} data
+  calls the function \code{agg_ohlc()} on the selected \code{se_ries} data
   to calculate the aggregations.
   
   The function \code{roll_ohlc()} can accept either a single column of data
@@ -44,7 +44,7 @@ oh_lc <- rutils::etf_env$VTI[, 1:5]
 # Define end points at 25 day intervals
 end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
 # Aggregate over end_points:
-ohlc_agg <- HighFreq::roll_ohlc(t_series=oh_lc, end_points=(end_points-1))
+ohlc_agg <- HighFreq::roll_ohlc(se_ries=oh_lc, end_points=(end_points-1))
 # Compare with xts::to.period()
 ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)

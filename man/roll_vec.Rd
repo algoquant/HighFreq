@@ -2,24 +2,24 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_vec}
 \alias{roll_vec}
-\title{Calculate the rolling sum over a single-column \emph{time series} or a
-\emph{vector} using \emph{Rcpp}.}
+\title{Calculate the rolling weighted sums over a single-column \emph{time series}
+or a \emph{vector} using \emph{Rcpp}.}
 \usage{
-roll_vec(t_series, look_back)
+roll_vec(se_ries, look_back)
 }
 \arguments{
-\item{\code{t_series}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of elements of data used for calculating the sum.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{t_series}.
+  \code{se_ries}.
 }
 \description{
-Calculate the rolling sum over a single-column \emph{time series} or a
-\emph{vector} using \emph{Rcpp}.
+Calculate the rolling weighted sums over a single-column \emph{time series}
+or a \emph{vector} using \emph{Rcpp}.
 }
 \details{
 The function \code{roll_vec()} calculates a \emph{vector} of

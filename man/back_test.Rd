@@ -10,7 +10,7 @@ back_test(
   re_turns,
   start_points,
   end_points,
-  typ_e = "max_sharpe",
+  model_type = "rank_sharpe",
   to_l = 0.001,
   max_eigen = 0L,
   pro_b = 0.1,
@@ -32,8 +32,9 @@ data (the returns in excess of the risk-free rate).}
 
 \item{\code{end_points}}{An \emph{integer vector} of end points.}
 
-\item{\code{typ_e}}{A \emph{string} specifying the objective for calculating
-the weights (see Details).}
+\item{\code{model_type}}{A \emph{string} specifying the model type for
+calculating the weights (see Details).  (The default is \code{model_type =
+"rank_sharpe"})}
 
 \item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
 eigenvalues in order to regularize the matrix inverse.  (The default is
@@ -77,7 +78,7 @@ The function \code{back_test()} performs a backtest simulation of a
   corresponding end point and the start point. It passes the subset matrix
   of excess returns into the function \code{calc_weights()}, which
   calculates the optimal portfolio weights. The arguments \code{max_eigen},
-  \code{al_pha}, \code{typ_e}, and \code{scal_e} are also passed to the
+  \code{al_pha}, \code{model_type}, and \code{scal_e} are also passed to the
   function \code{calc_weights()}.
   
   The function \code{back_test()} multiplies the weights by the coefficient

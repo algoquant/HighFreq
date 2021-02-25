@@ -6,10 +6,10 @@
 interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
-roll_var(t_series, ste_p = 1L, look_back = 1L)
+roll_var(se_ries, ste_p = 1L, look_back = 1L)
 }
 \arguments{
-\item{\code{t_series}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{ste_p}}{The number of time periods between the end points.}
 
@@ -17,7 +17,7 @@ roll_var(t_series, ste_p = 1L, look_back = 1L)
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
-  series \code{t_series}, and the number of rows equal to the number of end
+  series \code{se_ries}, and the number of rows equal to the number of end
   points.
 }
 \description{
@@ -28,9 +28,9 @@ interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_var()} calculates a \emph{matrix} of
   variance estimates over rolling look-back intervals attached at the end
-  points of the \emph{time series} \code{t_series}.
+  points of the \emph{time series} \code{se_ries}.
   
-  The end points are calculated along the rows of \code{t_series} using the
+  The end points are calculated along the rows of \code{se_ries} using the
   function \code{calc_endpoints()}, with the number of time periods between
   the end points equal to \code{ste_p}.
   
