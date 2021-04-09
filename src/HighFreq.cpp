@@ -2683,12 +2683,18 @@ NumericMatrix sim_garch(double om_ega,
 //' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
 //' 
 //' @return A column \emph{vector} representing the \emph{time series} of
-//'   prices, with the same length as the argument \code{in_nov}.
+//'   log prices, with the same length as the argument \code{in_nov}.
 //'
 //' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
 //'   process using fast \emph{Rcpp} \code{C++} code.
 //'   It returns a column \emph{vector} representing the \emph{time series} of
-//'   prices.
+//'   log prices.
+//'   The function \code{sim_ou()} simulates the percentage returns as equal to
+//'   the difference between the equilibrium price \code{eq_price} minus the
+//'   latest price, times the mean reversion parameter \code{the_ta}, plus a
+//'   random innovation.
+//'   The log prices are calculated as the sum of returns (not compounded), so
+//'   they can become negative.
 //'
 //' @examples
 //' \dontrun{
@@ -2697,7 +2703,7 @@ NumericMatrix sim_garch(double om_ega,
 //' vol_at <- 0.01
 //' the_ta <- 0.01
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' price_s <- HighFreq::sim_ou_rcpp(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
+//' price_s <- HighFreq::sim_ou(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
 //' }
 //' 
 //' @export
@@ -2713,10 +2719,63 @@ NumericVector sim_ou(double eq_price,
   price_s[0] = eq_price;
   for (int it = 1; it < len_gth; it++) {
     re_turns[it] = the_ta*(eq_price - price_s[it-1]) + vol_at*in_nov[it-1];
-    price_s[it] = price_s[it-1] * exp(re_turns[it]);
+    price_s[it] = price_s[it-1] + re_turns[it];
   }  // end for
   return price_s;
 }  // end sim_ou
+
+
+
+////////////////////////////////////////////////////////////
+//' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
+//' 
+//' @param \code{eq_price} The equilibrium price. 
+//' @param \code{vol_at} The volatility of returns.
+//' @param \code{the_ta} The strength of mean reversion.
+//' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
+//' 
+//' @return A column \emph{vector} representing the \emph{time series} of
+//'   prices, with the same length as the argument \code{in_nov}.
+//'
+//' @details The function \code{sim_schwartz()} simulates a \emph{Schwartz}
+//'   process using fast \emph{Rcpp} \code{C++} code.
+//'   It returns a column \emph{vector} representing the \emph{time series} of
+//'   prices.
+//'   The function \code{sim_schwartz()} simulates the percentage returns as
+//'   equal to the difference between the equilibrium price \code{eq_price}
+//'   minus the latest price, times the mean reversion parameter \code{the_ta},
+//'   plus a random innovation.
+//'   The prices are calculated as the exponentially compounded returns, so they
+//'   are never negative. The log prices can be obtained by taking the logarithm
+//'   of the prices.
+//'
+//' @examples
+//' \dontrun{
+//' # Define the Schwartz model parameters
+//' eq_price <- 5.0
+//' vol_at <- 0.01
+//' the_ta <- 0.01
+//' # Simulate Schwartz process using Rcpp
+//' price_s <- HighFreq::sim_schwartz(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+NumericVector sim_schwartz(double eq_price, 
+                           double vol_at, 
+                           double the_ta, 
+                           NumericVector in_nov) {
+  int len_gth = in_nov.size();
+  NumericVector price_s(len_gth);
+  NumericVector re_turns(len_gth);
+  
+  price_s[0] = eq_price;
+  for (int it = 1; it < len_gth; it++) {
+    re_turns[it] = the_ta*(eq_price - price_s[it-1]) + vol_at*in_nov[it-1];
+    price_s[it] = price_s[it-1] * exp(re_turns[it]);
+  }  // end for
+  return price_s;
+}  // end sim_schwartz
 
 
 

@@ -454,6 +454,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sim_schwartz
+NumericVector sim_schwartz(double eq_price, double vol_at, double the_ta, NumericVector in_nov);
+RcppExport SEXP _HighFreq_sim_schwartz(SEXP eq_priceSEXP, SEXP vol_atSEXP, SEXP the_taSEXP, SEXP in_novSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
+    Rcpp::traits::input_parameter< double >::type vol_at(vol_atSEXP);
+    Rcpp::traits::input_parameter< double >::type the_ta(the_taSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type in_nov(in_novSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_schwartz(eq_price, vol_at, the_ta, in_nov));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sim_arima
 arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff);
 RcppExport SEXP _HighFreq_sim_arima(SEXP in_novSEXP, SEXP co_effSEXP) {
@@ -545,6 +559,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 3},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
+    {"_HighFreq_sim_schwartz", (DL_FUNC) &_HighFreq_sim_schwartz, 4},
     {"_HighFreq_sim_arima", (DL_FUNC) &_HighFreq_sim_arima, 2},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 8},
     {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 13},

@@ -81,7 +81,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
++ [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
+
++ [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
 
 + [ ] Modify function calc_weights(): 
 Rename model_type == "rank" to model_type == "rank_sharpe"
@@ -93,12 +95,16 @@ Add model_type == "rank" for ranking the re_turns directly.
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
++ [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
+Worker agg_ohlc()
+
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2()
+
++ [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
 + [ ] Deprecate function roll_conv_ref() ?
 
-+ [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
-Worker agg_ohlc()
++ [ ] Combine functions sim_ou() and sim_schwartz() into a single function?
 
 + [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
@@ -327,6 +333,8 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Create functions sim_ou() and sim_schwartz() to simulate the Ornstein-Uhlenbeck process and the Schwartz process.
 
 + [x] Rename argument t_series to se_ries
 

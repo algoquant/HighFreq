@@ -1257,15 +1257,15 @@ roll_conv_ref <- function(mat_rix, weight_s) {
 #'   
 #' @examples
 #' \dontrun{
-#' # First example
 #' # Create series of historical returns
 #' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 #' # Define parameters
 #' look_back <- 22
-#' # Calculate rolling sums
+#' # Calculate rolling sums and compare with rutils::roll_sum()
 #' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 #' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+#' # Calculate rolling sums using pure R
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 #' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 #' r_sum <- (r_sum - lag_sum)
@@ -1342,10 +1342,11 @@ roll_sum <- function(se_ries, look_back = 1L) {
 #' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 #' # Define parameters
 #' look_back <- 22
-#' # Calculate rolling sums at each point
-#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back)
+#' # Calculate rolling sums and compare with rutils::roll_sum()
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 #' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+#' # Calculate rolling sums using pure R
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 #' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 #' r_sum <- (r_sum - lag_sum)
@@ -1778,12 +1779,18 @@ sim_garch <- function(om_ega, al_pha, be_ta, in_nov) {
 #' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
 #' 
 #' @return A column \emph{vector} representing the \emph{time series} of
-#'   prices, with the same length as the argument \code{in_nov}.
+#'   log prices, with the same length as the argument \code{in_nov}.
 #'
 #' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
 #'   process using fast \emph{Rcpp} \code{C++} code.
 #'   It returns a column \emph{vector} representing the \emph{time series} of
-#'   prices.
+#'   log prices.
+#'   The function \code{sim_ou()} simulates the percentage returns as equal to
+#'   the difference between the equilibrium price \code{eq_price} minus the
+#'   latest price, times the mean reversion parameter \code{the_ta}, plus a
+#'   random innovation.
+#'   The log prices are calculated as the sum of returns (not compounded), so
+#'   they can become negative.
 #'
 #' @examples
 #' \dontrun{
@@ -1792,12 +1799,49 @@ sim_garch <- function(om_ega, al_pha, be_ta, in_nov) {
 #' vol_at <- 0.01
 #' the_ta <- 0.01
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' price_s <- HighFreq::sim_ou_rcpp(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
+#' price_s <- HighFreq::sim_ou(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
 #' }
 #' 
 #' @export
 sim_ou <- function(eq_price, vol_at, the_ta, in_nov) {
     .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', eq_price, vol_at, the_ta, in_nov)
+}
+
+#' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
+#' 
+#' @param \code{eq_price} The equilibrium price. 
+#' @param \code{vol_at} The volatility of returns.
+#' @param \code{the_ta} The strength of mean reversion.
+#' @param \code{in_nov} A \emph{vector} of innovations (random numbers).
+#' 
+#' @return A column \emph{vector} representing the \emph{time series} of
+#'   prices, with the same length as the argument \code{in_nov}.
+#'
+#' @details The function \code{sim_schwartz()} simulates a \emph{Schwartz}
+#'   process using fast \emph{Rcpp} \code{C++} code.
+#'   It returns a column \emph{vector} representing the \emph{time series} of
+#'   prices.
+#'   The function \code{sim_schwartz()} simulates the percentage returns as
+#'   equal to the difference between the equilibrium price \code{eq_price}
+#'   minus the latest price, times the mean reversion parameter \code{the_ta},
+#'   plus a random innovation.
+#'   The prices are calculated as the exponentially compounded returns, so they
+#'   are never negative. The log prices can be obtained by taking the logarithm
+#'   of the prices.
+#'
+#' @examples
+#' \dontrun{
+#' # Define the Schwartz model parameters
+#' eq_price <- 5.0
+#' vol_at <- 0.01
+#' the_ta <- 0.01
+#' # Simulate Schwartz process using Rcpp
+#' price_s <- HighFreq::sim_schwartz(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
+#' }
+#' 
+#' @export
+sim_schwartz <- function(eq_price, vol_at, the_ta, in_nov) {
+    .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', eq_price, vol_at, the_ta, in_nov)
 }
 
 #' Recursively filter a \emph{vector} of innovations through a \emph{vector} of

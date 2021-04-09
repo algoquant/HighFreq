@@ -36,15 +36,15 @@ The function \code{roll_sum()} calculates the rolling sums over the
 }
 \examples{
 \dontrun{
-# First example
 # Create series of historical returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
-# Calculate rolling sums
+# Calculate rolling sums and compare with rutils::roll_sum()
 c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+# Calculate rolling sums using pure R
 r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 r_sum <- (r_sum - lag_sum)
