@@ -81,6 +81,16 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Rename parameter calc_method to method
+
++ [ ] Merge function calc_mad() into calc_var() - add parameter "method" to calc_var()
+
++ [ ] Modify function roll_var() to calculate the rolling MAD, and other robust estimators - add parameter "method" similar to calc_var() 
+
++ [ ] Create a function called calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create a function called roll_mean() for the rolling centrality (location) estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
 + [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
 + [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
@@ -143,8 +153,6 @@ Calculate running variance efficiently (used by package fromo): https://www.john
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
 + [ ] Modify back_test() add parameter for lagging the weights - for applying the weights with an extra lag
-
-+ [ ] Create a function called roll_mean() for the rolling location estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
 + [ ] Convert all time loops to loops over the end points, using calc_endpoints() and calc_startpoints()
 

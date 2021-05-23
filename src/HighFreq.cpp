@@ -440,21 +440,20 @@ arma::uvec calc_endpoints(arma::uword len_gth, arma::uword ste_p = 1, bool front
 //' Calculate a vector of start points equal to the lag of a vector of end
 //' points.
 //'
-//' @param \code{end_points} An \emph{unsigned integer} vector of end
-//' points.
+//' @param \code{end_p} An \emph{unsigned integer} vector of end points.
 //'   
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   lag applied to the end points.
 //'   
 //' @return An \emph{integer} vector of start points (vector of unsigned
-//'   integers), associated with the vector \code{end_points}.
+//'   integers), associated with the vector \code{end_p}.
 //'
 //' @details The start points are equal to the values of the vector
-//'   \code{end_points} lagged by an amount equal to \code{look_back}. In
+//'   \code{end_p} lagged by an amount equal to \code{look_back}. In
 //'   addition, an extra \code{1} is added to them, to avoid data overlaps.  The
 //'   lag operation requires adding a beginning warmup interval containing
 //'   zeros, so that the vector of start points has the same length as the
-//'   \code{end_points}.
+//'   \code{end_p}.
 //'   
 //'   For example, consider the end points for a vector of length \code{25}
 //'   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
@@ -473,11 +472,11 @@ arma::uvec calc_endpoints(arma::uword len_gth, arma::uword ste_p = 1, bool front
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_startpoints(arma::uvec end_points, arma::uword look_back) {
+arma::uvec calc_startpoints(arma::uvec end_p, arma::uword look_back) {
   
-  arma::uword num_points = end_points.n_elem;
+  arma::uword num_points = end_p.n_elem;
   arma::uvec start_p = arma::join_cols(arma::zeros<uvec>(look_back), 
-                                       end_points.subvec(0, num_points - look_back - 1) + 1);
+                                       end_p.subvec(0, num_points - look_back - 1) + 1);
   
   return start_p;
   
@@ -1551,13 +1550,13 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //' @param \code{se_ries} A \emph{time series} or a \emph{matrix} with multiple
 //'   columns of data.
 //'   
-//' @param \emph{end_points} An \emph{integer vector} of end points.
+//' @param \emph{end_p} An \emph{integer vector} of end points.
 //'
 //' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
-//'   to the number of \emph{end_points} minus one.
+//'   to the number of \emph{end_p} minus one.
 //'   
 //' @details The function \code{roll_ohlc()} performs a loop over the
-//'   \emph{end_points}, along the rows of the \code{se_ries} data. At each
+//'   \emph{end_p}, along the rows of the \code{se_ries} data. At each
 //'   \emph{end_point}, it selects the past rows of \code{se_ries} data,
 //'   starting at the first bar after the previous \emph{end_point}, and then
 //'   calls the function \code{agg_ohlc()} on the selected \code{se_ries} data
@@ -1576,28 +1575,28 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //' # Define matrix of OHLC data
 //' oh_lc <- rutils::etf_env$VTI[, 1:5]
 //' # Define end points at 25 day intervals
-//' end_points <- rutils::calc_endpoints(oh_lc, inter_val=25)
-//' # Aggregate over end_points:
-//' ohlc_agg <- HighFreq::roll_ohlc(se_ries=oh_lc, end_points=(end_points-1))
+//' end_p <- rutils::calc_endpoints(oh_lc, inter_val=25)
+//' # Aggregate over end_p:
+//' ohlc_agg <- HighFreq::roll_ohlc(se_ries=oh_lc, end_p=(end_p-1))
 //' # Compare with xts::to.period()
-//' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_points), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
+//' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 //' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_ohlc(arma::mat& se_ries, arma::uvec& end_points) {
+arma::mat roll_ohlc(arma::mat& se_ries, arma::uvec& end_p) {
   
   // int num_rows = se_ries.n_rows;
   int num_cols = se_ries.n_cols;
-  arma::uword num_points = end_points.size();
+  arma::uword num_points = end_p.size();
   arma::mat ohlc_agg(num_points-1, num_cols);
   
   // Perform loop over the end points
   for (arma::uword it = 1; it < num_points; it++) {
     // cout << "it: " << it << endl;
     // Aggregate the OHLC
-    ohlc_agg.row(it-1) = agg_ohlc(se_ries.rows(end_points(it-1)+1, end_points(it)));
+    ohlc_agg.row(it-1) = agg_ohlc(se_ries.rows(end_p(it-1)+1, end_p(it)));
   }  // end for
   
   // Return the aggregations
@@ -1937,7 +1936,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' @param \code{stu_b} An \emph{integer} value equal to the first stub interval
 //'   for calculating the end points.
 //' 
-//' @param \code{end_points} An \emph{unsigned integer} vector of end
+//' @param \code{end_p} An \emph{unsigned integer} vector of end
 //' points.
 //'   
 //' @param \code{weight_s} A column \emph{vector} of weights.
@@ -1951,13 +1950,13 @@ arma::mat roll_sum(arma::mat& se_ries,
 //'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{se_ries}.
 //' 
-//'   The arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
+//'   The arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
 //'   optional.
 //'   
 //'   If the argument \code{weight_s} is not supplied, then simple sums are
 //'   calculated, not weighted sums.
 //'   
-//'   If either the \code{stu_b} or \code{end_points} arguments are supplied,
+//'   If either the \code{stu_b} or \code{end_p} arguments are supplied,
 //'   then the rolling sums are calculated at the end points. 
 //'   
 //'   If only the argument \code{stu_b} is supplied, then the end points are
@@ -1965,7 +1964,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 //'   end point is equal to \code{stu_b} and the end points are spaced
 //'   \code{look_back} periods apart.
 //'   
-//'   If the arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
+//'   If the arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
 //'   not supplied, then the sums are calculated over a number of data points
 //'   equal to \code{look_back}.
 //'   
@@ -2011,8 +2010,8 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' r_sum <- (r_sum - lag_sum)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
 //' 
-//' # Calculate rolling sums at end points - pass in end_points
-//' c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p)
+//' # Calculate rolling sums at end points - pass in end_p
+//' c_sum <- HighFreq::roll_wsum(re_turns, end_p=end_p)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
 //' 
 //' # Create exponentially decaying weights
@@ -2025,7 +2024,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
-//' c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p, weight_s=weight_s)
+//' c_sum <- HighFreq::roll_wsum(re_turns, end_p=end_p, weight_s=weight_s)
 //' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
@@ -2041,7 +2040,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 arma::mat roll_wsum(arma::mat& se_ries,
                    arma::uword look_back = 1,
                    Rcpp::Nullable<int> stu_b = R_NilValue, 
-                   Rcpp::Nullable<Rcpp::IntegerVector> end_points = R_NilValue, 
+                   Rcpp::Nullable<Rcpp::IntegerVector> end_p = R_NilValue, 
                    Rcpp::Nullable<Rcpp::NumericVector> weight_s = R_NilValue) {
   
   arma::uword num_rows = se_ries.n_rows;
@@ -2067,9 +2066,9 @@ arma::mat roll_wsum(arma::mat& se_ries,
   // Declare empty end points
   arma::uvec end_p;
   // Update end points
-  if (end_points.isNotNull()) {
-    // Copy end_points
-    end_p = Rcpp::as<uvec>(end_points);
+  if (end_p.isNotNull()) {
+    // Copy end_p
+    end_p = Rcpp::as<uvec>(end_p);
   } else if (stu_b.isNotNull()) {
     // Calculate end points with stu_b
     end_p = arma::regspace<uvec>(Rcpp::as<uword>(stu_b), look_back, num_rows + look_back);
@@ -2238,7 +2237,7 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
   arma::uword num_points = end_p.n_elem;
   arma::mat vari_ance = arma::zeros(num_points, se_ries.n_cols);
 
-  // Perform loop over the end_points
+  // Perform loop over the end_p
   for (arma::uword ep = 0; ep < num_points; ep++) {
     // Calculate variance
     if (end_p(ep) > start_p(ep)) {
@@ -2419,7 +2418,7 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
   arma::colvec sub_close;
   arma::colvec sub_index;
   
-  // Perform loop over the end_points
+  // Perform loop over the end_p
   for (arma::uword ep = 0; ep < num_points; ep++) {
     if (end_p(ep) > start_p(ep)) {
       sub_ohlc = oh_lc.rows(start_p(ep), end_p(ep));
@@ -3055,9 +3054,9 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //' @param \code{re_turns} A \emph{time series} or a \emph{matrix} of returns
 //'   data (the returns in excess of the risk-free rate).
 //'   
-//' @param \code{start_points} An \emph{integer vector} of start points.
+//' @param \code{start_p} An \emph{integer vector} of start points.
 //' 
-//' @param \code{end_points} An \emph{integer vector} of end points.
+//' @param \code{end_p} An \emph{integer vector} of end points.
 //' 
 //' @param \code{model_type} A \emph{string} specifying the model type for
 //'   calculating the weights (see Details).  (The default is \code{model_type =
@@ -3092,9 +3091,9 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //'
 //' @details The function \code{back_test()} performs a backtest simulation of a
 //'   rolling portfolio optimization strategy over a \emph{vector} of
-//'   \code{end_points}.
+//'   \code{end_p}.
 //'   
-//'   It performs a loop over the \code{end_points}, and subsets the
+//'   It performs a loop over the \code{end_p}, and subsets the
 //'   \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
 //'   corresponding end point and the start point. It passes the subset matrix
 //'   of excess returns into the function \code{calc_weights()}, which
@@ -3126,19 +3125,19 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //' # risk_free is the daily risk-free rate
 //' risk_free <- 0.03/260
 //' ex_cess <- re_turns - risk_free
-//' # Define monthly end_points without initial warmpup period
-//' end_points <- rutils::calc_endpoints(re_turns, inter_val="months")
-//' end_points <- end_points[end_points>50]
-//' len_gth <- NROW(end_points)
-//' # Define 12-month look_back interval and start_points over sliding window
+//' # Define monthly end_p without initial warmpup period
+//' end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
+//' end_p <- end_p[end_p>50]
+//' len_gth <- NROW(end_p)
+//' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
-//' start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
+//' start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
 //' # Define shrinkage and regularization intensities
 //' al_pha <- 0.5
 //' max_eigen <- 3
 //' # Simulate a monthly rolling portfolio optimization strategy
 //' pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
-//'                             start_points-1, end_points-1, 
+//'                             start_p-1, end_p-1, 
 //'                             max_eigen = max_eigen, 
 //'                             al_pha = al_pha)
 //' pnl_s <- xts::xts(pnl_s, index(re_turns))
@@ -3152,8 +3151,8 @@ arma::vec calc_weights(const arma::mat& re_turns,
 // [[Rcpp::export]]
 arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
                     const arma::mat& re_turns, // Portfolio returns
-                    const arma::uvec& start_points, 
-                    const arma::uvec& end_points, 
+                    const arma::uvec& start_p, 
+                    const arma::uvec& end_p, 
                     const std::string& model_type = "rank_sharpe",
                     double to_l = 0.001,
                     int max_eigen = 0,
@@ -3168,15 +3167,15 @@ arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
   arma::vec weights_past = zeros(re_turns.n_cols);
   arma::vec pnl_s = zeros(re_turns.n_rows);
 
-  // Perform loop over the end_points
-  for (arma::uword it = 1; it < end_points.size(); it++) {
+  // Perform loop over the end_p
+  for (arma::uword it = 1; it < end_p.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate portfolio weights
-    weight_s = co_eff*calc_weights(ex_cess.rows(start_points(it-1), end_points(it-1)), model_type, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l);
+    weight_s = co_eff*calc_weights(ex_cess.rows(start_p(it-1), end_p(it-1)), model_type, to_l, max_eigen, pro_b, al_pha, scal_e, vo_l);
     // Calculate out-of-sample returns
-    pnl_s.subvec(end_points(it-1)+1, end_points(it)) = re_turns.rows(end_points(it-1)+1, end_points(it))*weight_s;
+    pnl_s.subvec(end_p(it-1)+1, end_p(it)) = re_turns.rows(end_p(it-1)+1, end_p(it))*weight_s;
     // Add transaction costs
-    pnl_s.row(end_points(it-1)+1) -= bid_offer*sum(abs(weight_s - weights_past))/2;
+    pnl_s.row(end_p(it-1)+1) -= bid_offer*sum(abs(weight_s - weights_past))/2;
     weights_past = weight_s;
   }  // end for
   
