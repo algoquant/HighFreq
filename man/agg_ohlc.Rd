@@ -20,10 +20,9 @@ A \emph{matrix} containing a single row, with the \emph{open},
 Aggregate a time series of data into a single bar of \emph{OHLC} data.
 }
 \details{
-The function \code{agg_ohlc()} aggregates a time series of data
-  into a single bar of \emph{OHLC} data.
-  It can accept either a single column of data or four columns of
-  \emph{OHLC} data.
+The function \code{agg_ohlc()} aggregates a time series of data into a
+  single bar of \emph{OHLC} data. It can accept either a single column of
+  data or four columns of \emph{OHLC} data.
   It can also accept an additional column containing the trading volume.
   
 The function \code{agg_ohlc()} calculates the \emph{open} value as equal to

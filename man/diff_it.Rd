@@ -27,10 +27,10 @@ Calculate the row differences of a a \emph{time series} or a \emph{matrix}
 using \emph{RcppArmadillo}.
 }
 \details{
-The function \code{diff_it()} calculates the differences between
-  the rows of the input \emph{time series} or \emph{matrix} and its lagged
-  version. The lagged version has its rows shifted down by the number equal
-  to \code{lagg} rows.
+The function \code{diff_it()} calculates the differences between the rows
+  of the input \emph{time series} or \emph{matrix} and its lagged version.
+  The lagged version has its rows shifted down by the number equal to
+  \code{lagg} rows.
   
   The argument \code{lagg} specifies the number of lags applied to the rows
   of the lagged version. For example, if \code{lagg=3} then the lagged

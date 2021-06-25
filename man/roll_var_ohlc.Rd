@@ -10,7 +10,7 @@ roll_var_ohlc(
   oh_lc,
   ste_p = 1L,
   look_back = 1L,
-  calc_method = "yang_zhang",
+  method = "yang_zhang",
   scal_e = TRUE,
   in_dex = 0L
 )
@@ -23,7 +23,7 @@ price data.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
 
-\item{\code{calc_method}}{A \emph{character} string representing the range
+\item{\code{method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,
@@ -51,10 +51,13 @@ interval attached at the end points of a \emph{time series} or a
 \emph{matrix} with \emph{OHLC} price data.
 }
 \details{
-The function \code{roll_var_ohlc()} calculates a \emph{vector} of
-  variance estimates over a rolling look-back interval attached at the end
-  points of the \emph{time series} \code{oh_lc}.
+The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
+  estimates over a rolling look-back interval attached at the end points of
+  the \emph{time series} \code{oh_lc}.
   
+  The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
+  prices.
+
   The end points are calculated along the rows of \code{oh_lc} using the
   function \code{calc_endpoints()}, with the number of time periods between
   the end points equal to \code{ste_p}.
@@ -82,7 +85,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of
   between \emph{OHLC} prices), using several different variance estimation
   methods.
   
-  The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+  The default \code{method} is \emph{"yang_zhang"}, which theoretically
   has the lowest standard error among unbiased estimators.
   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
@@ -109,13 +112,14 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of
 }
 \examples{
 \dontrun{
-# Extract time index of SPY returns
-oh_lc <- HighFreq::SPY
-in_dex <- c(1, diff(xts::.index(oh_lc)))
+# Extract the log OHLC prices of SPY
+sp_y <- log(HighFreq::SPY)
+# Extract the time index of SPY prices
+in_dex <- c(1, diff(xts::.index(sp_y)))
 # Rolling variance at minutely end points, with a 21 minute look-back
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
                               ste_p=1, look_back=21, 
-                              calc_method="yang_zhang", 
+                              method="yang_zhang", 
                               in_dex=in_dex, scal_e=TRUE)
 # Daily OHLC prices
 oh_lc <- rutils::etf_env$VTI
@@ -123,7 +127,7 @@ in_dex <- c(1, diff(xts::.index(oh_lc)))
 # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
                               ste_p=5, look_back=4, 
-                              calc_method="yang_zhang", 
+                              method="yang_zhang", 
                               in_dex=in_dex, scal_e=TRUE)
 # Same calculation in R
 n_rows <- NROW(oh_lc)

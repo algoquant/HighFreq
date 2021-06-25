@@ -23,8 +23,8 @@ A column \emph{vector} representing the \emph{time series} of
 Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 }
 \details{
-The function \code{sim_schwartz()} simulates a \emph{Schwartz}
-  process using fast \emph{Rcpp} \code{C++} code.
+The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
+  using fast \emph{Rcpp} \code{C++} code.
   It returns a column \emph{vector} representing the \emph{time series} of
   prices.
   The function \code{sim_schwartz()} simulates the percentage returns as

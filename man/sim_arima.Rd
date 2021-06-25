@@ -21,8 +21,8 @@ Recursively filter a \emph{vector} of innovations through a \emph{vector} of
 \emph{ARIMA} coefficients.
 }
 \details{
-The function \code{sim_arima()} recursively filters a \emph{vector}
-  of innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
+The function \code{sim_arima()} recursively filters a \emph{vector} of
+  innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
   \code{RcppArmadillo} \code{C++} code.
   It performs the same calculation as the standard \code{R} function
   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over

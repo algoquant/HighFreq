@@ -2,48 +2,75 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var}
 \alias{calc_var}
-\title{Calculate the variance of the columns of a \emph{time series} or a
+\title{Calculate the dispersion of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(se_ries)
+calc_var(se_ries, method = "variance")
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
+
+\item{\code{method}}{A \emph{character} string representing the type of
+measure of dispersion. (The default is the \code{method = "variance"}.)}
 }
 \value{
-A row vector equal to the variance of the columns of \code{se_ries}
-  matrix.
+A row vector equal to the dispersion of the columns of the matrix
+  \code{se_ries}.
 }
 \description{
-Calculate the variance of the columns of a \emph{time series} or a
+Calculate the dispersion of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_var()} calculates the variance of the
+The dispersion is a measure of the variability of the data.  Examples of
+  dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
+
+  The function \code{calc_var()} calculates the dispersion of the
   columns of a \emph{time series} or a \emph{matrix} of data using
   \code{RcppArmadillo} \code{C++} code.
   
-  The function \code{calc_var()} performs the same calculation as the
-  function \code{colVars()} from package
+  The dispersion methods include:
+  \itemize{
+    \item "variance" for the variance,
+    \item "mad" for the Median Absolute Deviation (\emph{MAD}),
+   }
+  
+  If \code{method = "variance"} then \code{calc_var()} performs the same
+  calculation as the function \code{colVars()} from package
   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+
+  If \code{method = "mad"} then \code{calc_var()} performs the same
+  calculation as the function \code{stats::mad()}, but it's much faster
+  because it uses \code{RcppArmadillo} \code{C++} code.
+
+  If the number of rows of \code{se_ries} is less than \code{3} then it
+  returns zeros.
 }
 \examples{
 \dontrun{
-# Create a matrix of random returns
-re_turns <- matrix(rnorm(5e6), nc=5)
+# Calculate VTI and XLF returns
+re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
 # Compare calc_var() with standard var()
 all.equal(drop(HighFreq::calc_var(re_turns)), 
-  apply(re_turns, 2, var))
+  apply(re_turns, 2, var), check.attributes=FALSE)
 # Compare calc_var() with matrixStats
 all.equal(drop(HighFreq::calc_var(re_turns)), 
-  matrixStats::colVars(re_turns))
+  matrixStats::colVars(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::calc_var(re_turns),
   matrixStats=matrixStats::colVars(re_turns),
   Rcode=apply(re_turns, 2, var),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+# Compare calc_var() with stats::mad()
+all.equal(drop(HighFreq::calc_var(re_turns, method="mad")), 
+  sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
+# Compare the speed of RcppArmadillo with stats::mad()
+summary(microbenchmark(
+  Rcpp=HighFreq::calc_var(re_turns, method="mad"),
+  Rcode=sapply(re_turns, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

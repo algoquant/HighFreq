@@ -19,9 +19,9 @@ Count the number of consecutive \code{TRUE} elements in a Boolean vector,
 and reset the count to zero after every \code{FALSE} element.
 }
 \details{
-The function \code{roll_count()} calculates the number of
-  consecutive \code{TRUE} elements in a Boolean vector, and it resets the
-  count to zero after every \code{FALSE} element.  
+The function \code{roll_count()} calculates the number of consecutive
+  \code{TRUE} elements in a Boolean vector, and it resets the count to zero
+  after every \code{FALSE} element.
   
   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},

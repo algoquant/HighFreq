@@ -25,8 +25,8 @@ Multiply in place (without copying) the columns or rows of a \emph{matrix}
 times a \emph{vector}, element-wise.
 }
 \details{
-The function \code{mult_vec_mat()} multiplies the columns or rows
-  of a \emph{matrix} times a \emph{vector}, element-wise.
+The function \code{mult_vec_mat()} multiplies the columns or rows of a
+  \emph{matrix} times a \emph{vector}, element-wise.
 
   If the number of \emph{vector} elements is equal to the number of matrix
   columns, then it multiplies the columns by the \emph{vector}, and returns

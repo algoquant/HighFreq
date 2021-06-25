@@ -21,13 +21,12 @@ Calculate the rolling weighted sums over a single-column \emph{time series}
 or a \emph{vector} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{roll_vecw()} calculates the rolling weighted sums
-  of a \emph{vector} over its past values (a convolution with the
-  \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
-  similar calculation as the standard \code{R} function
-  \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-  sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-  \code{NA} values.
+The function \code{roll_vecw()} calculates the rolling weighted sums of a
+  \emph{vector} over its past values (a convolution with the \emph{vector}
+  of weights), using \code{RcppArmadillo}. It performs a similar calculation
+  as the standard \code{R} function \code{stats::filter(x=se_ries,
+  filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
+  times faster, and it doesn't produce any \code{NA} values.
 }
 \examples{
 \dontrun{

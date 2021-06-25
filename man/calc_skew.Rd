@@ -5,13 +5,13 @@
 \title{Calculate the skewness of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_skew(se_ries, typ_e = "pearson", al_pha = 0.25)
+calc_skew(se_ries, method = "pearson", al_pha = 0.25)
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{typ_e}}{A \emph{string} specifying the type of skewness (see
-Details). (The default is the \code{typ_e = "pearson"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of skewness (see
+Details). (The default is the \code{method = "pearson"}.)}
 
 \item{\code{al_pha}}{The confidence level for calculating the quantiles.
 (the default is \code{al_pha = 0.25}).}
@@ -25,19 +25,22 @@ Calculate the skewness of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_skew()} calculates the skewness of the
-  columns of a \emph{time series} or a \emph{matrix} of data using
-  \code{RcppArmadillo} \code{C++} code.
+The function \code{calc_skew()} calculates the skewness of the columns of
+  a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
+  \code{C++} code.
 
-  If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+  If \code{method = "pearson"} (the default) then \code{calc_skew()}
   calculates the Pearson skewness using the third moment of the data.
 
-  If \code{typ_e = "quantile"} then it calculates the skewness using the
+  If \code{method = "quantile"} then it calculates the skewness using the
   differences between the quantiles of the data.
 
-  If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+  If \code{method = "nonparametric"} then it calculates the skewness as the
   difference between the mean of the data minus its median, divided by the
   standard deviation.
+  
+  If the number of rows of \code{se_ries} is less than \code{3} then it
+  returns zeros.
   
   The code examples below compare the function \code{calc_skew()} with the
   skewness calculated using \code{R} code.
@@ -45,7 +48,7 @@ The function \code{calc_skew()} calculates the skewness of the
 \examples{
 \dontrun{
 # Calculate VTI returns
-re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 # Calculate the Pearson skewness
 HighFreq::calc_skew(re_turns)
 # Compare HighFreq::calc_skew() with Pearson skewness
@@ -62,28 +65,28 @@ summary(microbenchmark(
   Rcode=calc_skewr(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile skewness
-HighFreq::calc_skew(re_turns, typ_e = "quantile", al_pha = 0.1)
+HighFreq::calc_skew(re_turns, method = "quantile", al_pha = 0.1)
 # Compare HighFreq::calc_skew() with quantile skewness
 calc_skewq <- function(x) {
   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
 }  # end calc_skewq
-all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "quantile")), 
+all.equal(drop(HighFreq::calc_skew(re_turns, method = "quantile")), 
   calc_skewq(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_skew(re_turns, typ_e = "quantile"),
+  Rcpp=HighFreq::calc_skew(re_turns, method = "quantile"),
   Rcode=calc_skewq(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the nonparametric skewness
-HighFreq::calc_skew(re_turns, typ_e = "nonparametric")
+HighFreq::calc_skew(re_turns, method = "nonparametric")
 # Compare HighFreq::calc_skew() with R nonparametric skewness
-all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "nonparametric")), 
+all.equal(drop(HighFreq::calc_skew(re_turns, method = "nonparametric")), 
   (mean(re_turns)-median(re_turns))/sd(re_turns), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_skew(re_turns, typ_e = "nonparametric"),
+  Rcpp=HighFreq::calc_skew(re_turns, method = "nonparametric"),
   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

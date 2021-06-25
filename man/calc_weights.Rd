@@ -50,8 +50,8 @@ Calculate the optimal portfolio weights for different model types.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different model types, using \code{RcppArmadillo}
-  \code{C++} code.
+  weights for different model types, using \code{RcppArmadillo} \code{C++}
+  code.
 
   If \code{model_type = "rank_sharpe"} (the default) then it calculates the
   weights as the ranks (order index) of the trailing Sharpe ratios of the

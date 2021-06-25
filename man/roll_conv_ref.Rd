@@ -2,40 +2,40 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_conv_ref}
 \alias{roll_conv_ref}
-\title{Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
-of weights.}
+\title{Calculate by reference the rolling convolutions (weighted sums) of a
+\emph{time series} with a \emph{vector} of weights.}
 \usage{
-roll_conv_ref(mat_rix, weight_s)
+roll_conv_ref(se_ries, weight_s)
 }
 \arguments{
-\item{\code{mat_rix}}{A \emph{matrix} of data.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{weight_s}}{A column \emph{vector} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{mat_rix}.
+  argument \code{se_ries}.
 }
 \description{
-Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
-of weights.
+Calculate by reference the rolling convolutions (weighted sums) of a
+\emph{time series} with a \emph{vector} of weights.
 }
 \details{
-The function \code{roll_conv_ref()} calculates the convolutions of
-  the \emph{matrix} columns with a \emph{vector} of weights.  It performs a
-  loop down over the \emph{matrix} rows and multiplies the past (higher)
-  values by the weights.  It calculates the rolling weighted sums of the past
+The function \code{roll_conv_ref()} calculates the convolutions of the
+  \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
+  down over the \emph{matrix} rows and multiplies the past (higher) values
+  by the weights.  It calculates the rolling weighted sums of the past
   values.
   
   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
-  \code{mat_rix}, and replaces the old \emph{matrix} values with the
+  \code{se_ries}, and replaces the old \emph{matrix} values with the
   weighted sums.
   It performs the calculation in place, without copying the \emph{matrix} in
   memory (which greatly increases the computation speed).
   
   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
-  \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+  \code{R} function \code{filter(x=se_ries, filter=weight_s,
   method="convolution", sides=1)}, but it's over \code{6} times faster, and
   it doesn't produce any leading \code{NA} values.
 }
@@ -43,21 +43,21 @@ The function \code{roll_conv_ref()} calculates the convolutions of
 \dontrun{
 # First example
 # Create matrix from historical prices
-mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+se_ries <- na.omit(rutils::etf_env$re_turns[, 1:2])
 # Create simple weights equal to a 1 value plus zeros
 weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
 # Compare with original
-all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
 # Second example
 # Create exponentially decaying weights
 weight_s <- exp(-0.2*(1:11))
 weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
 # Calculate rolling weighted sums using filter()
-filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
 # Compare both methods
 all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 }

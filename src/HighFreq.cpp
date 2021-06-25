@@ -31,11 +31,12 @@ using namespace arma;
 //' @return A column \emph{vector} with the same number of elements as the input
 //'   time series.
 //'
-//' @details The function \code{lag_vec()} applies a lag to the input \emph{time
-//'   series} \code{se_ries} by shifting its elements by the number equal to
-//'   the argument \code{lagg}.  For positive \code{lagg} values, the elements
-//'   are shifted forward in time (down), and for negative \code{lagg} values
-//'   they are shifted backward (up).
+//' @details 
+//'   The function \code{lag_vec()} applies a lag to the input \emph{time
+//'   series} \code{se_ries} by shifting its elements by the number equal to the
+//'   argument \code{lagg}.  For positive \code{lagg} values, the elements are
+//'   shifted forward in time (down), and for negative \code{lagg} values they
+//'   are shifted backward (up).
 //'   
 //'   The output \emph{vector} is padded with either zeros (the default), or
 //'   with data from \code{se_ries}, so that it has the same number of element
@@ -67,7 +68,7 @@ using namespace arma;
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec lag_vec(arma::vec& se_ries, 
+arma::vec lag_vec(arma::vec se_ries, 
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
   
@@ -115,11 +116,11 @@ arma::vec lag_vec(arma::vec& se_ries,
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{se_ries}.
 //'
-//' @details The function \code{lag_it()} applies a lag to the input
-//'   \emph{matrix} by shifting its rows by the number equal to the argument
-//'   \code{lagg}. For positive \code{lagg} values, the rows are shifted forward
-//'   (down), and for negative \code{lagg} values they are shifted backward
-//'   (up). 
+//' @details 
+//'   The function \code{lag_it()} applies a lag to the input \emph{matrix} by
+//'   shifting its rows by the number equal to the argument \code{lagg}. For
+//'   positive \code{lagg} values, the rows are shifted forward (down), and for
+//'   negative \code{lagg} values they are shifted backward (up).
 //'   
 //'   The output \emph{matrix} is padded with either zeros (the default), or
 //'   with rows of data from \code{se_ries}, so that it has the same dimensions
@@ -151,7 +152,7 @@ arma::vec lag_vec(arma::vec& se_ries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat lag_it(arma::mat& se_ries, 
+arma::mat lag_it(arma::mat se_ries, 
                  arma::sword lagg = 1, 
                  bool pad_zeros = true) {
   
@@ -213,8 +214,9 @@ arma::mat lag_it(arma::mat& se_ries,
 //' @return A column \emph{vector} containing the differences between the
 //'   elements of the input vector.
 //'
-//' @details The function \code{diff_vec()} calculates the differences between
-//'   the input \emph{time series} or \emph{vector} and its lagged version. 
+//' @details 
+//'   The function \code{diff_vec()} calculates the differences between the
+//'   input \emph{time series} or \emph{vector} and its lagged version.
 //'   
 //'   The argument \code{lagg} specifies the number of lags.  For example, if
 //'   \code{lagg=3} then the differences will be taken between each element
@@ -247,7 +249,7 @@ arma::mat lag_it(arma::mat& se_ries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec diff_vec(arma::vec& se_ries, int lagg = 1, bool padd = true) {
+arma::vec diff_vec(arma::vec se_ries, int lagg = 1, bool padd = true) {
   
   int len_gth = (se_ries.n_elem-1);
   
@@ -281,10 +283,11 @@ arma::vec diff_vec(arma::vec& se_ries, int lagg = 1, bool padd = true) {
 //' @return A \emph{matrix} containing the differences between the rows of the
 //'   input \emph{matrix}.
 //'
-//' @details The function \code{diff_it()} calculates the differences between
-//'   the rows of the input \emph{time series} or \emph{matrix} and its lagged
-//'   version. The lagged version has its rows shifted down by the number equal
-//'   to \code{lagg} rows.
+//' @details 
+//'   The function \code{diff_it()} calculates the differences between the rows
+//'   of the input \emph{time series} or \emph{matrix} and its lagged version.
+//'   The lagged version has its rows shifted down by the number equal to
+//'   \code{lagg} rows.
 //'   
 //'   The argument \code{lagg} specifies the number of lags applied to the rows
 //'   of the lagged version. For example, if \code{lagg=3} then the lagged
@@ -319,7 +322,7 @@ arma::vec diff_vec(arma::vec& se_ries, int lagg = 1, bool padd = true) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat diff_it(arma::mat& se_ries, 
+arma::mat diff_it(arma::mat se_ries, 
                   arma::uword lagg = 1, 
                   bool padd = true) {
   
@@ -355,13 +358,18 @@ arma::mat diff_it(arma::mat& se_ries,
 //' @return A vector of equally spaced index values representing the end points
 //'   (a vector of unsigned integers).
 //'
-//' @details The end points are a vector of unsigned integers which divide a
-//'   vector of length equal to \code{len_gth} into equally spaced intervals. If
-//'   a whole number of intervals doesn't fit over the vector, then
+//' @details 
+//'   The end points are a vector of unsigned integers which divide a vector of
+//'   length equal to \code{len_gth} into equally spaced intervals. If a whole
+//'   number of intervals doesn't fit over the vector, then
 //'   \code{calc_endpoints()} adds a stub interval either at the beginning (the
 //'   default) or at the end.
-//'   The end points are shifted by \code{-1} because indexing starts at
-//'   \code{0} in \code{C++} code.
+//'
+//'   The end points are shifted by \code{-1} compared to \code{R} code because
+//'   indexing starts at \code{0} in \code{C++} code, while it starts at
+//'   \code{1} in \code{R} code.
+//'   So if \code{calc_endpoints()} is used in \code{R} code then \code{1}
+//'   should be added to it.
 //'
 //'   The function \code{calc_endpoints()} is similar to the function
 //'   \code{rutils::calc_endpoints()} from package
@@ -448,12 +456,12 @@ arma::uvec calc_endpoints(arma::uword len_gth, arma::uword ste_p = 1, bool front
 //' @return An \emph{integer} vector of start points (vector of unsigned
 //'   integers), associated with the vector \code{end_p}.
 //'
-//' @details The start points are equal to the values of the vector
-//'   \code{end_p} lagged by an amount equal to \code{look_back}. In
-//'   addition, an extra \code{1} is added to them, to avoid data overlaps.  The
-//'   lag operation requires adding a beginning warmup interval containing
-//'   zeros, so that the vector of start points has the same length as the
-//'   \code{end_p}.
+//' @details 
+//'   The start points are equal to the values of the vector \code{end_p} lagged
+//'   by an amount equal to \code{look_back}. In addition, an extra \code{1} is
+//'   added to them, to avoid data overlaps.  The lag operation requires adding
+//'   a beginning warmup interval containing zeros, so that the vector of start
+//'   points has the same length as the \code{end_p}.
 //'   
 //'   For example, consider the end points for a vector of length \code{25}
 //'   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
@@ -483,6 +491,7 @@ arma::uvec calc_startpoints(arma::uvec end_p, arma::uword look_back) {
 }  // end calc_startpoints
 
 
+
 ////////////////////////////////////////////////////////////
 //' Multiply in place (without copying) the columns or rows of a \emph{matrix}
 //' times a \emph{vector}, element-wise.
@@ -498,8 +507,9 @@ arma::uvec calc_startpoints(arma::uvec end_p, arma::uword look_back) {
 //' @return A single \emph{integer} value, equal to either the number of
 //'   \emph{matrix} columns or the number of rows.
 //' 
-//' @details The function \code{mult_vec_mat()} multiplies the columns or rows
-//'   of a \emph{matrix} times a \emph{vector}, element-wise.
+//' @details 
+//'   The function \code{mult_vec_mat()} multiplies the columns or rows of a
+//'   \emph{matrix} times a \emph{vector}, element-wise.
 //'
 //'   If the number of \emph{vector} elements is equal to the number of matrix
 //'   columns, then it multiplies the columns by the \emph{vector}, and returns
@@ -557,9 +567,10 @@ arma::uvec calc_startpoints(arma::uvec end_p, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::uword mult_vec_mat(const arma::vec& vec_tor,
-                   arma::mat& mat_rix,
-                   const bool& by_col = true) {
+arma::uword mult_vec_mat(arma::vec vec_tor,
+                         arma::mat mat_rix,
+                         bool by_col = true) {
+  
   arma::uword num_elem = vec_tor.n_elem;
   arma::uword num_rows = mat_rix.n_rows;
   arma::uword num_cols = mat_rix.n_cols;
@@ -584,8 +595,8 @@ arma::uword mult_vec_mat(const arma::vec& vec_tor,
     return num_cols;
   } else 
     stop("Error: Vector length is neither equal to the number of columns nor rows of the matrix!");
-    // Return NA_INTEGER;
-    
+  // Return NA_INTEGER;
+  
 }  // end mult_vec_mat
 
 
@@ -602,7 +613,8 @@ arma::uword mult_vec_mat(const arma::vec& vec_tor,
 //'   (named "values"), and a \emph{matrix} of eigenvectors (named
 //'   "vectors").
 //'
-//' @details The function \code{calc_eigen()} first calculates the covariance 
+//' @details 
+//'   The function \code{calc_eigen()} first calculates the covariance
 //'   \emph{matrix} of the returns, and then calculates its eigen decomposition.
 //'
 //' @examples
@@ -625,13 +637,15 @@ arma::uword mult_vec_mat(const arma::vec& vec_tor,
 //' 
 //' @export
 // [[Rcpp::export]]
-List calc_eigen(const arma::mat& re_turns) {
+List calc_eigen(arma::mat re_turns) {
+  
   arma::mat eigen_vec;
   arma::vec eigen_val;
   arma::eig_sym(eigen_val, eigen_vec, cov(re_turns));
   // Reverse the order of elements from largest eigenvalue to smallest, similar to R
   return List::create(Named("values") = arma::flipud(eigen_val),
                       Named("vectors") = arma::fliplr(eigen_vec));
+  
 }  // end calc_eigen
 
 
@@ -652,7 +666,8 @@ List calc_eigen(const arma::mat& re_turns) {
 //'
 //' @return A \emph{matrix} equal to the regularized inverse. 
 //'
-//' @details The function calc_inv() calculates the regularized inverse of the
+//' @details 
+//'   The function calc_inv() calculates the regularized inverse of the
 //'   \emph{covariance matrix}, by discarding eigenvectors with small
 //'   eigenvalues less than the tolerance level \code{to_l}.
 //'   The function \code{calc_inv()} first calculates the covariance
@@ -680,7 +695,7 @@ List calc_eigen(const arma::mat& re_turns) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_inv(const arma::mat& re_turns,
+arma::mat calc_inv(arma::mat re_turns,
                    double to_l = 0.001, 
                    int max_eigen = 0) {
   
@@ -708,27 +723,34 @@ arma::mat calc_inv(const arma::mat& re_turns,
 //' Scale (standardize) the columns of a \emph{matrix} of data using
 //' \code{RcppArmadillo}.
 //' 
-//' @param \code{mat_rix} A \emph{matrix} of data.
+//' @param \code{se_ries} A \emph{time series} or \emph{matrix} of data.
+//' 
 //' @param \code{use_median} A \emph{Boolean} argument: if \code{TRUE} then the 
 //'   centrality (central tendency) is calculated as the \emph{median} and the 
 //'   dispersion is calculated as the \emph{median absolute deviation}
 //'   (\emph{MAD}).
-//'   If \code{use_median} is \code{FALSE} then the centrality is calculated as 
-//'   the \emph{mean} and the dispersion is calculated as the \emph{standard
+//'   If \code{use_median = FALSE} then the centrality is calculated as the
+//'   \emph{mean} and the dispersion is calculated as the \emph{standard
 //'   deviation}. (The default is \code{FALSE})
 //'
 //' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{mat_rix}.
+//'   argument \code{se_ries}.
 //'
-//' @details The function \code{calc_scaled()} scales (standardizes) the columns
-//'   of the \code{mat_rix} argument using \code{RcppArmadillo}.
+//' @details 
+//'   The function \code{calc_scaled()} scales (standardizes) the columns of the
+//'   \code{se_ries} argument using \code{RcppArmadillo}.
+//'
 //'   If the argument \code{use_median} is \code{FALSE} (the default), then it
 //'   performs the same calculation as the standard \code{R} function
 //'   \code{scale()}, and it calculates the centrality (central tendency) as the
 //'   \emph{mean} and the dispersion as the \emph{standard deviation}.
+//'
 //'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
 //'   centrality as the \emph{median} and the dispersion as the \emph{median
 //'   absolute deviation} (\emph{MAD}).
+//'
+//'   If the number of rows of \code{se_ries} is less than \code{3} then it
+//'   returns \code{se_ries} unscaled.
 //'   
 //'   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
 //'   code and is about \emph{5} times faster than function \code{scale()}, for
@@ -737,36 +759,41 @@ arma::mat calc_inv(const arma::mat& re_turns,
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random data
-//' mat_rix <- matrix(rnorm(20000), nc=20)
-//' scale_d <- calc_scaled(mat_rix=mat_rix, use_median=FALSE)
-//' scale_d2 <- scale(mat_rix)
+//' se_ries <- matrix(rnorm(20000), nc=20)
+//' scale_d <- calc_scaled(se_ries=se_ries, use_median=FALSE)
+//' scale_d2 <- scale(se_ries)
 //' all.equal(scale_d, scale_d2, check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=calc_scaled(mat_rix=mat_rix, use_median=FALSE),
-//'   Rcode=scale(mat_rix),
+//'   Rcpp=calc_scaled(se_ries=se_ries, use_median=FALSE),
+//'   Rcode=scale(se_ries),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_scaled(const arma::mat& mat_rix, 
-                      const bool use_median=false) {
-  arma::mat scaled_mat(mat_rix.n_rows, mat_rix.n_cols);
-  arma::vec scale_d(mat_rix.n_rows);
+arma::mat calc_scaled(arma::mat se_ries, bool use_median=false) {
+  
+  arma::mat scaled_mat(se_ries.n_rows, se_ries.n_cols, fill::zeros);
+  arma::vec scale_d(se_ries.n_rows, fill::zeros);
   double cen_ter;
   
+  // Return zeros if not enough data
+  if (se_ries.n_rows < 3) {
+    return se_ries;
+  }  // end if
+  
   // Perform a loop over the columns
-  for (arma::uword it=0; it < mat_rix.n_cols; it++) {
+  for (arma::uword it=0; it < se_ries.n_cols; it++) {
     if (use_median) {
-      cen_ter = arma::median(mat_rix.col(it));
-      scale_d = (mat_rix.col(it) - cen_ter);
+      cen_ter = arma::median(se_ries.col(it));
+      scale_d = (se_ries.col(it) - cen_ter);
       scale_d = scale_d/arma::median(arma::abs(scale_d));
       scaled_mat.col(it) = scale_d;
     } else {
-      cen_ter = arma::mean(mat_rix.col(it));
-      scale_d = (mat_rix.col(it) - cen_ter);
+      cen_ter = arma::mean(se_ries.col(it));
+      scale_d = (se_ries.col(it) - cen_ter);
       scale_d = scale_d/arma::stddev(scale_d);
       scaled_mat.col(it) = scale_d;
     }  // end if
@@ -792,7 +819,8 @@ arma::mat calc_scaled(const arma::mat& mat_rix,
 //'
 //' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 //'
-//' @details The function \code{calc_var_vec()} calculates the variance of a
+//' @details 
+//'   The function \code{calc_var_vec()} calculates the variance of a
 //'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
 //'   significantly faster than the \code{R} function \code{var()}.
 //'
@@ -813,41 +841,62 @@ arma::mat calc_scaled(const arma::mat& mat_rix,
 //' 
 //' @export
 // [[Rcpp::export]]
-double calc_var_vec(arma::vec& se_ries) {
+double calc_var_vec(arma::vec se_ries) {
+  
   return arma::var(se_ries);
+  
 }  // end calc_var_vec
 
 
 
-
 ////////////////////////////////////////////////////////////
-//' Calculate the variance of the columns of a \emph{time series} or a
+//' Calculate the dispersion of the columns of a \emph{time series} or a
 //' \emph{matrix} using \code{RcppArmadillo}.
 //' 
 //' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+//'   
+//' @param \code{method} A \emph{character} string representing the type of
+//'   measure of dispersion. (The default is the \code{method = "variance"}.)
+//'    
+//' @return A row vector equal to the dispersion of the columns of the matrix
+//'   \code{se_ries}.
 //'
-//' @return A row vector equal to the variance of the columns of \code{se_ries}
-//'   matrix.
+//' @details 
+//'   The dispersion is a measure of the variability of the data.  Examples of
+//'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
 //'
-//' @details The function \code{calc_var()} calculates the variance of the
+//'   The function \code{calc_var()} calculates the dispersion of the
 //'   columns of a \emph{time series} or a \emph{matrix} of data using
 //'   \code{RcppArmadillo} \code{C++} code.
 //'   
-//'   The function \code{calc_var()} performs the same calculation as the
-//'   function \code{colVars()} from package
+//'   The dispersion methods include:
+//'   \itemize{
+//'     \item "variance" for the variance,
+//'     \item "mad" for the Median Absolute Deviation (\emph{MAD}),
+//'    }
+//'   
+//'   If \code{method = "variance"} then \code{calc_var()} performs the same
+//'   calculation as the function \code{colVars()} from package
 //'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
 //'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 //'
+//'   If \code{method = "mad"} then \code{calc_var()} performs the same
+//'   calculation as the function \code{stats::mad()}, but it's much faster
+//'   because it uses \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If the number of rows of \code{se_ries} is less than \code{3} then it
+//'   returns zeros.
+//'   
 //' @examples
 //' \dontrun{
-//' # Create a matrix of random returns
-//' re_turns <- matrix(rnorm(5e6), nc=5)
+//' # Calculate VTI and XLF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
 //' # Compare calc_var() with standard var()
 //' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   apply(re_turns, 2, var))
+//'   apply(re_turns, 2, var), check.attributes=FALSE)
 //' # Compare calc_var() with matrixStats
 //' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   matrixStats::colVars(re_turns))
+//'   matrixStats::colVars(re_turns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with matrixStats and with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -855,16 +904,34 @@ double calc_var_vec(arma::vec& se_ries) {
 //'   matrixStats=matrixStats::colVars(re_turns),
 //'   Rcode=apply(re_turns, 2, var),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Compare calc_var() with stats::mad()
+//' all.equal(drop(HighFreq::calc_var(re_turns, method="mad")), 
+//'   sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with stats::mad()
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_var(re_turns, method="mad"),
+//'   Rcode=sapply(re_turns, mad),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::rowvec calc_var(arma::mat& se_ries) {
-  
-  return arma::var(se_ries);
+arma::rowvec calc_var(arma::mat se_ries, std::string method="variance") {
+
+  if (se_ries.n_rows < 3) {
+    // Return zeros if not enough data
+    return arma::zeros<rowvec>(se_ries.n_cols);
+  } else if (method == "variance") {
+    return arma::var(se_ries);
+  } else if (method == "mad") {
+    se_ries.each_row() -= arma::median(se_ries, 0);
+    return arma::median(arma::abs(se_ries), 0);
+  } else {
+    cout << "Wrong calc method!" << endl;
+    return arma::zeros<rowvec>(se_ries.n_cols);
+  }  // end if
   
 }  // end calc_var
-
 
 
 
@@ -875,7 +942,7 @@ arma::rowvec calc_var(arma::mat& se_ries) {
 //' @param \code{oh_lc} An \emph{OHLC time series} or a \emph{numeric matrix} of
 //'   prices.
 //'   
-//' @param \code{calc_method} A \emph{character} string representing the range
+//' @param \code{method} A \emph{character} string representing the range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -884,7 +951,7 @@ arma::rowvec calc_var(arma::mat& se_ries) {
 //'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
 //'     \item "yang_zhang" Yang-Zhang estimator,
 //'    }
-//'    (The default is the \code{calc_method = "yang_zhang"}.)
+//'    (The default is the \code{method = "yang_zhang"}.)
 //'    
 //' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
@@ -900,12 +967,16 @@ arma::rowvec calc_var(arma::mat& se_ries) {
 //' @return A single \emph{numeric} value equal to the variance of the
 //'   \emph{OHLC time series}.
 //'
-//' @details The function \code{calc_var_ohlc()} calculates the variance
-//'   from all the different intra-day and day-over-day returns (defined as the
-//'   differences of \emph{OHLC} prices), using several different variance
-//'   estimation methods.
+//' @details 
+//'   The function \code{calc_var_ohlc()} calculates the variance from all the
+//'   different intra-day and day-over-day returns (defined as the differences
+//'   of \emph{OHLC} prices), using several different variance estimation
+//'   methods.
 //'
-//'   The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+//'   The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
+//'   prices.
+//'
+//'   The default \code{method} is \emph{"yang_zhang"}, which theoretically
 //'   has the lowest standard error among unbiased estimators.
 //'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
 //'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
@@ -919,6 +990,9 @@ arma::rowvec calc_var(arma::mat& se_ries) {
 //'   number of seconds decreases the effect of overnight price jumps. If the
 //'   time index is in days, then the variance is equal to the variance per day
 //'   squared.
+//'   
+//'   If the number of rows of \code{oh_lc} is less than \code{3} then it
+//'   returns zero.
 //'   
 //'   The optional argument \code{in_dex} is the time index of the \emph{time
 //'   series} \code{oh_lc}. If the time index is in seconds, then the
@@ -936,41 +1010,48 @@ arma::rowvec calc_var(arma::mat& se_ries) {
 //'
 //' @examples
 //' \dontrun{
-//' # Extract time index of SPY returns
-//' in_dex <- c(1, diff(xts::.index(HighFreq::SPY)))
+//' # Extract the log OHLC prices of SPY
+//' sp_y <- log(HighFreq::SPY)
+//' # Extract the time index of SPY prices
+//' in_dex <- c(1, diff(xts::.index(sp_y)))
 //' # Calculate the variance of SPY returns, with scaling of the returns
-//' HighFreq::calc_var_ohlc(HighFreq::SPY, 
-//'  calc_method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
+//' HighFreq::calc_var_ohlc(sp_y, 
+//'  method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
 //' # Calculate variance without accounting for overnight jumps
-//' HighFreq::calc_var_ohlc(HighFreq::SPY, 
-//'  calc_method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
+//' HighFreq::calc_var_ohlc(sp_y, 
+//'  method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
 //' # Calculate the variance without scaling the returns
-//' HighFreq::calc_var_ohlc(HighFreq::SPY, scal_e=FALSE)
+//' HighFreq::calc_var_ohlc(sp_y, scal_e=FALSE)
 //' # Calculate the variance by passing in the lagged close prices
-//' lag_close <- HighFreq::lag_it(HighFreq::SPY[, 4])
-//' all.equal(HighFreq::calc_var_ohlc(HighFreq::SPY), 
-//'   HighFreq::calc_var_ohlc(HighFreq::SPY, lag_close=lag_close))
+//' lag_close <- HighFreq::lag_it(sp_y[, 4])
+//' all.equal(HighFreq::calc_var_ohlc(sp_y), 
+//'   HighFreq::calc_var_ohlc(sp_y, lag_close=lag_close))
 //' # Compare with HighFreq::calc_var_ohlc_r()
-//' all.equal(HighFreq::calc_var_ohlc(HighFreq::SPY, in_dex=in_dex), 
-//'   HighFreq::calc_var_ohlc_r(HighFreq::SPY))
+//' all.equal(HighFreq::calc_var_ohlc(sp_y, in_dex=in_dex), 
+//'   HighFreq::calc_var_ohlc_r(sp_y))
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
-//'   Rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
+//'   Rcpp=HighFreq::calc_var_ohlc(sp_y),
+//'   Rcode=HighFreq::calc_var_ohlc_r(sp_y),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
-double calc_var_ohlc(arma::mat& oh_lc, 
-                     const std::string& calc_method="yang_zhang", 
+double calc_var_ohlc(arma::mat oh_lc, 
+                     std::string method="yang_zhang", 
                      arma::colvec lag_close=0, 
-                     const bool& scal_e = true, 
+                     bool scal_e = true, 
                      arma::colvec in_dex=0) {
   
   int num_rows = oh_lc.n_rows;
   double co_eff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
   
+  if (num_rows < 3) {
+    // Return zeros if not enough data
+    return 0;
+  }  // end if
+
   if (!scal_e || (in_dex.n_rows == 1)) {
     in_dex = arma::ones(num_rows);
     // cout << "oh_lc.n_rows = " << num_rows << endl;
@@ -994,23 +1075,23 @@ double calc_var_ohlc(arma::mat& oh_lc,
   arma::colvec high_open = (oh_lc.col(1) - oh_lc.col(0))/in_dex;
   arma::colvec low_open = (oh_lc.col(2) - oh_lc.col(0))/in_dex;
   
-  if (calc_method == "close") {
+  if (method == "close") {
     // cout << "Calc method is Close" << endl;
     return arma::var(arma::diff(clo_se));
-  } else if (calc_method == "rogers_satchell") {
+  } else if (method == "rogers_satchell") {
     // cout << "Calc method is Rogers-Satchell" << endl;
     return -(arma::dot(close_high, high_open) +
              arma::dot(close_low, low_open))/num_rows;
-  } else if (calc_method == "garman_klass") {
+  } else if (method == "garman_klass") {
     // cout << "Calc method is Garman-Klass" << endl;
     return (0.5*arma::dot(high_low, high_low) -
             (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows;
-  } else if (calc_method == "garman_klass_yz") {
+  } else if (method == "garman_klass_yz") {
     // cout << "Calc method is Garman-Klass-YZ" << endl;
     return (0.5*arma::dot(high_low, high_low) -
             (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows + 
             arma::var(open_close);
-  } else if (calc_method == "yang_zhang") {
+  } else if (method == "yang_zhang") {
     // cout << "Calc method is Yang-Zhang" << endl;
     return arma::var(open_close) + co_eff*arma::var(close_open) +
       (co_eff-1)*(arma::dot(close_high, high_open) + 
@@ -1020,7 +1101,7 @@ double calc_var_ohlc(arma::mat& oh_lc,
     return 1;
   }  // end if
   
-  // cout << "Calc method is " << calc_method << endl;
+  // cout << "Calc method is " << method << endl;
   
 }  // end calc_var_ohlc
 
@@ -1035,11 +1116,12 @@ double calc_var_ohlc(arma::mat& oh_lc,
 //' @return An \emph{integer vector} with the ranks of the elements of the
 //'   \emph{vector}.
 //'
-//' @details The function \code{calc_ranks()} calculates the ranks of the
-//'   elements of a single-column \emph{time series} or a \emph{vector}.
-//'   It uses the \code{RcppArmadillo} function \code{arma::sort_index()}.
-//'   The function \code{arma::sort_index()} calculates the permutation index to
-//'   sort a given vector into ascending order.
+//' @details 
+//'   The function \code{calc_ranks()} calculates the ranks of the elements of a
+//'   single-column \emph{time series} or a \emph{vector}. It uses the
+//'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
+//'   \code{arma::sort_index()} calculates the permutation index to sort a given
+//'   vector into ascending order.
 //'   
 //'   Applying the function \code{arma::sort_index()} twice:
 //'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
@@ -1075,57 +1157,11 @@ double calc_var_ohlc(arma::mat& oh_lc,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_ranks(const arma::vec& vec_tor) {
+arma::uvec calc_ranks(arma::vec vec_tor) {
   
   return (arma::sort_index(arma::sort_index(vec_tor)) + 1);
   
 }  // end calc_ranks
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the Median Absolute Deviations (\emph{MAD}) of the columns of a
-//' \emph{time series} or a \emph{matrix} using \code{RcppArmadillo}.
-//'
-//' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
-//'
-//' @return A single-row matrix with the Median Absolute Deviations \emph{MAD}
-//'   of the columns of \code{se_ries}.
-//'
-//' @details The function \code{calc_mad()} calculates the Median Absolute
-//'   Deviations \emph{MAD} of the columns of a \emph{time series} or a
-//'   \emph{matrix} of data using \code{RcppArmadillo} \code{C++} code.
-//'
-//'   The function \code{calc_mad()} performs the same calculation as the
-//'   function \code{stats::mad()}, but it's much faster because it uses
-//'   \code{RcppArmadillo} \code{C++} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Calculate VTI returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
-//' # Compare calc_mad() with stats::mad()
-//' all.equal(drop(HighFreq::calc_mad(re_turns)), 
-//'   mad(re_turns)/1.4826)
-//' # Compare the speed of RcppArmadillo with stats::mad()
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mad(re_turns),
-//'   Rcode=mad(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_mad(arma::mat& se_ries) {
-  
-  // De-median the columns of se_ries
-  se_ries.each_row() -= arma::median(se_ries);
-  
-  return arma::median(arma::abs(se_ries));
-  
-}  // end calc_mad
 
 
 
@@ -1134,12 +1170,12 @@ arma::mat calc_mad(arma::mat& se_ries) {
 // This is needed because Rcpp can't map C++ enum type to R variable SEXP.
 enum skew_type {Pearson, Quantile, Nonparametric};
 // Map string to C++ enum type for switch statement.
-skew_type calc_skew_type(const std::string& typ_e) {
-  if (typ_e == "Pearson" || typ_e == "pearson" || typ_e == "p") 
+skew_type calc_skew_type(std::string method) {
+  if (method == "Pearson" || method == "pearson" || method == "p") 
     return skew_type::Pearson;
-  else if (typ_e == "Quantile" || typ_e == "quantile" || typ_e == "q")
+  else if (method == "Quantile" || method == "quantile" || method == "q")
     return skew_type::Quantile;
-  else if (typ_e == "Nonparametric" || typ_e == "nonparametric" || typ_e == "n")
+  else if (method == "Nonparametric" || method == "nonparametric" || method == "n")
     return skew_type::Nonparametric;
   else 
     return skew_type::Pearson;
@@ -1153,8 +1189,8 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //'
 //' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
 //'
-//' @param \code{typ_e} A \emph{string} specifying the type of skewness (see
-//'   Details). (The default is the \code{typ_e = "pearson"}.)
+//' @param \code{method} A \emph{string} specifying the type of skewness (see
+//'   Details). (The default is the \code{method = "pearson"}.)
 //'
 //' @param \code{al_pha} The confidence level for calculating the quantiles.
 //'   (the default is \code{al_pha = 0.25}).
@@ -1162,19 +1198,23 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' @return A single-row matrix with the skewness of the columns of
 //'   \code{se_ries}.
 //'
-//' @details The function \code{calc_skew()} calculates the skewness of the
-//'   columns of a \emph{time series} or a \emph{matrix} of data using
-//'   \code{RcppArmadillo} \code{C++} code.
+//' @details 
+//'   The function \code{calc_skew()} calculates the skewness of the columns of
+//'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
+//'   \code{C++} code.
 //'
-//'   If \code{typ_e = "pearson"} (the default) then \code{calc_skew()}
+//'   If \code{method = "pearson"} (the default) then \code{calc_skew()}
 //'   calculates the Pearson skewness using the third moment of the data.
 //'
-//'   If \code{typ_e = "quantile"} then it calculates the skewness using the
+//'   If \code{method = "quantile"} then it calculates the skewness using the
 //'   differences between the quantiles of the data.
 //'
-//'   If \code{typ_e = "nonparametric"} then it calculates the skewness as the
+//'   If \code{method = "nonparametric"} then it calculates the skewness as the
 //'   difference between the mean of the data minus its median, divided by the
 //'   standard deviation.
+//'   
+//'   If the number of rows of \code{se_ries} is less than \code{3} then it
+//'   returns zeros.
 //'   
 //'   The code examples below compare the function \code{calc_skew()} with the
 //'   skewness calculated using \code{R} code.
@@ -1182,7 +1222,7 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' @examples
 //' \dontrun{
 //' # Calculate VTI returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[ ,"VTI", drop=FALSE])
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 //' # Calculate the Pearson skewness
 //' HighFreq::calc_skew(re_turns)
 //' # Compare HighFreq::calc_skew() with Pearson skewness
@@ -1199,28 +1239,28 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //'   Rcode=calc_skewr(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile skewness
-//' HighFreq::calc_skew(re_turns, typ_e = "quantile", al_pha = 0.1)
+//' HighFreq::calc_skew(re_turns, method = "quantile", al_pha = 0.1)
 //' # Compare HighFreq::calc_skew() with quantile skewness
 //' calc_skewq <- function(x) {
 //'   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
 //'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
 //' }  # end calc_skewq
-//' all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "quantile")), 
+//' all.equal(drop(HighFreq::calc_skew(re_turns, method = "quantile")), 
 //'   calc_skewq(re_turns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, typ_e = "quantile"),
+//'   Rcpp=HighFreq::calc_skew(re_turns, method = "quantile"),
 //'   Rcode=calc_skewq(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the nonparametric skewness
-//' HighFreq::calc_skew(re_turns, typ_e = "nonparametric")
+//' HighFreq::calc_skew(re_turns, method = "nonparametric")
 //' # Compare HighFreq::calc_skew() with R nonparametric skewness
-//' all.equal(drop(HighFreq::calc_skew(re_turns, typ_e = "nonparametric")), 
+//' all.equal(drop(HighFreq::calc_skew(re_turns, method = "nonparametric")), 
 //'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, typ_e = "nonparametric"),
+//'   Rcpp=HighFreq::calc_skew(re_turns, method = "nonparametric"),
 //'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -1228,11 +1268,15 @@ skew_type calc_skew_type(const std::string& typ_e) {
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_skew(arma::mat se_ries,
-                    const std::string& typ_e = "pearson", 
+                    std::string method = "pearson", 
                     double al_pha = 0.25) {
+  // Return zeros if not enough data
+  if (se_ries.n_rows < 3) {
+    return arma::zeros<rowvec>(se_ries.n_cols);
+  }  // end if
   
-  // switch statement for all the different types of skew
-  switch(calc_skew_type(typ_e)) {
+  // Switch statement for all the different methods of skew
+  switch(calc_skew_type(method)) {
   case skew_type::Pearson: {  // Pearson
     double num_rows = se_ries.n_rows;
     arma::mat mean_s = arma::mean(se_ries);
@@ -1250,64 +1294,12 @@ arma::mat calc_skew(arma::mat se_ries,
     return (arma::mean(se_ries) - arma::median(se_ries))/arma::stddev(se_ries);
   }  // end nonparametric
   default : {
-    cout << "Invalid typ_e" << endl;
-    return 0;
+    cout << "Invalid method" << endl;
+    return arma::zeros<rowvec>(se_ries.n_cols);
   }  // end default
   }  // end switch
   
 }  // end calc_skew
-
-
-
-// wippp
-// These below are special cases of calc_skew()
-// These below need documentation
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_skew_pearson(arma::mat& se_ries) {
-  
-  double num_rows = se_ries.n_rows;
-  
-  arma::mat mean_s = arma::mean(se_ries);
-  arma::mat var_s = arma::var(se_ries);
-  
-  // De-mean the columns of se_ries
-  se_ries.each_row() -= mean_s;
-  
-  return (num_rows/(num_rows-1)/(num_rows-2))*arma::sum(arma::pow(se_ries, 3))/arma::pow(var_s, 1.5);
-  
-}  // end calc_skew_pearson
-
-
-
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_skew_quant(arma::mat& se_ries, double al_pha = 0.25) {
-  
-  arma::vec prob_s = {al_pha, 0.5, 1.0 - al_pha};
-  arma::mat quantile_s = quantile(se_ries, prob_s);
-  
-  // arma::mat skew_s = (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
-  // skew_s /= calc_mad(se_ries);
-  // skew_s /= (quantile_s.row(2) - quantile_s.row(0));
-  
-  return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
-  
-}  // end calc_skew_quant
-
-
-
-
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_skew_nonp(arma::mat& se_ries) {
-  
-  return (arma::mean(se_ries) - arma::median(se_ries))/arma::stddev(se_ries);
-  
-}  // end calc_skew_nonp
-
-
-// wippp end
 
 
 
@@ -1325,7 +1317,8 @@ arma::mat calc_skew_nonp(arma::mat& se_ries) {
 //'   coefficients named \emph{"coefficients"} containes the alpha and beta
 //'   coefficients, and their \emph{t-values} and \emph{p-values}.
 //'
-//' @details The function \code{calc_lm()} performs the same calculations as the
+//' @details 
+//'   The function \code{calc_lm()} performs the same calculations as the
 //'   function \code{lm()} from package \emph{stats}. It uses
 //'   \code{RcppArmadillo} \code{C++} code and is about \emph{10} times faster
 //'   than \code{lm()}. The code was inspired by this article (but it's not
@@ -1355,13 +1348,14 @@ arma::mat calc_skew_nonp(arma::mat& se_ries) {
 //' 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign) {
+Rcpp::List calc_lm(arma::vec res_ponse, arma::mat de_sign) {
+  
   // Add column for intercept to explanatory matrix
   arma::mat design_p = join_rows(ones(de_sign.n_rows), de_sign);
   int num_rows = de_sign.n_rows, num_cols = design_p.n_cols;
   int deg_free = (num_rows - num_cols);
   
-  // fit the model res_ponse ~ de_sign, and calculate alpha and beta coefficients
+  // Fit the model res_ponse ~ de_sign, and calculate alpha and beta coefficients
   arma::colvec co_eff = arma::solve(design_p, res_ponse);
   // Calculate residuals
   arma::colvec resid_uals = res_ponse - design_p*co_eff;
@@ -1383,15 +1377,16 @@ Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign) {
   // Calculate standard errors of beta coefficients
   arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(design_p)*design_p)));
   // Calculate t-values and p-values of beta coefficients
-  arma::colvec beta_tvals = co_eff/std_err;
-  arma::colvec beta_pvals = 2*Rcpp::pt(-abs(wrap(beta_tvals)), deg_free);
-  NumericMatrix coeff_mat = wrap(join_rows(join_rows(join_rows(co_eff, std_err), beta_tvals), beta_pvals));
+  arma::colvec t_vals = co_eff/std_err;
+  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(t_vals)), deg_free);
+  NumericMatrix coeff_mat = wrap(join_rows(join_rows(join_rows(co_eff, std_err), t_vals), p_vals));
   Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
   
   return Rcpp::List::create(Named("coefficients") = coeff_mat,
                             // Named("residuals") = resid_uals,
                             Named("z_score") = resid_uals(num_rows-1)/arma::stddev(resid_uals),
                             Named("stats") = stat_s);
+  
 }  // end calc_lm
 
 
@@ -1414,10 +1409,10 @@ Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign) {
 //'   \emph{volume} (if provided as either the second or fifth column of
 //'   \code{se_ries}).
 //'
-//' @details The function \code{agg_ohlc()} aggregates a time series of data
-//'   into a single bar of \emph{OHLC} data.
-//'   It can accept either a single column of data or four columns of
-//'   \emph{OHLC} data.
+//' @details 
+//'   The function \code{agg_ohlc()} aggregates a time series of data into a
+//'   single bar of \emph{OHLC} data. It can accept either a single column of
+//'   data or four columns of \emph{OHLC} data.
 //'   It can also accept an additional column containing the trading volume.
 //'   
 //' The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
@@ -1448,7 +1443,7 @@ Rcpp::List calc_lm(const arma::vec& res_ponse, const arma::mat& de_sign) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat agg_ohlc(const arma::mat& se_ries) {
+arma::mat agg_ohlc(arma::mat se_ries) {
   
   int num_rows = se_ries.n_rows;
   int num_cols = se_ries.n_cols;
@@ -1499,9 +1494,10 @@ arma::mat agg_ohlc(const arma::mat& se_ries) {
 //' @return An \emph{integer vector} of the same length as the argument
 //'   \code{vec_tor}.
 //'
-//' @details The function \code{roll_count()} calculates the number of
-//'   consecutive \code{TRUE} elements in a Boolean vector, and it resets the
-//'   count to zero after every \code{FALSE} element.  
+//' @details 
+//'   The function \code{roll_count()} calculates the number of consecutive
+//'   \code{TRUE} elements in a Boolean vector, and it resets the count to zero
+//'   after every \code{FALSE} element.
 //'   
 //'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
 //'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
@@ -1516,7 +1512,7 @@ arma::mat agg_ohlc(const arma::mat& se_ries) {
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::uvec roll_count(arma::uvec& vec_tor) {
+arma::uvec roll_count(arma::uvec vec_tor) {
   
   arma::uword len_gth = vec_tor.n_elem;
   arma::uvec count_true(len_gth);
@@ -1555,12 +1551,13 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
 //'   to the number of \emph{end_p} minus one.
 //'   
-//' @details The function \code{roll_ohlc()} performs a loop over the
-//'   \emph{end_p}, along the rows of the \code{se_ries} data. At each
-//'   \emph{end_point}, it selects the past rows of \code{se_ries} data,
-//'   starting at the first bar after the previous \emph{end_point}, and then
-//'   calls the function \code{agg_ohlc()} on the selected \code{se_ries} data
-//'   to calculate the aggregations.
+//' @details 
+//'   The function \code{roll_ohlc()} performs a loop over the \emph{end_p},
+//'   along the rows of the \code{se_ries} data. At each \emph{end_point}, it
+//'   selects the past rows of \code{se_ries} data, starting at the first bar
+//'   after the previous \emph{end_point}, and then calls the function
+//'   \code{agg_ohlc()} on the selected \code{se_ries} data to calculate the
+//'   aggregations.
 //'   
 //'   The function \code{roll_ohlc()} can accept either a single column of data
 //'   or four columns of \emph{OHLC} data.
@@ -1585,12 +1582,12 @@ arma::uvec roll_count(arma::uvec& vec_tor) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_ohlc(arma::mat& se_ries, arma::uvec& end_p) {
+arma::mat roll_ohlc(arma::mat se_ries, arma::uvec end_p) {
   
   // int num_rows = se_ries.n_rows;
   int num_cols = se_ries.n_cols;
   arma::uword num_points = end_p.size();
-  arma::mat ohlc_agg(num_points-1, num_cols);
+  arma::mat ohlc_agg(num_points-1, num_cols, fill::zeros);
   
   // Perform loop over the end points
   for (arma::uword it = 1; it < num_points; it++) {
@@ -1607,8 +1604,8 @@ arma::mat roll_ohlc(arma::mat& se_ries, arma::uvec& end_p) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling weighted sums over a single-column \emph{time series}
-//' or a \emph{vector} using \emph{Rcpp}.
+//' Calculate the rolling sums over a single-column \emph{time series} or a
+//' \emph{vector} using \emph{Rcpp}.
 //' 
 //' @param \code{se_ries} A single-column \emph{time series} or a \emph{vector}.
 //' 
@@ -1618,10 +1615,11 @@ arma::mat roll_ohlc(arma::mat& se_ries, arma::uvec& end_p) {
 //' @return A column \emph{vector} of the same length as the argument
 //'   \code{se_ries}.
 //'
-//' @details The function \code{roll_vec()} calculates a \emph{vector} of
-//'   rolling sums, over a \emph{vector} of data, using fast \emph{Rcpp}
-//'   \code{C++} code.  The function \code{roll_vec()} is several times faster
-//'   than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+//' @details 
+//'   The function \code{roll_vec()} calculates a \emph{vector} of rolling sums,
+//'   over a \emph{vector} of data, using fast \emph{Rcpp} \code{C++} code.  The
+//'   function \code{roll_vec()} is several times faster than
+//'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 //'
 //' @examples
 //' \dontrun{
@@ -1646,7 +1644,7 @@ NumericVector roll_vec(NumericVector se_ries, int look_back) {
   
   int len_gth = se_ries.size();
   NumericVector rolling_sum(len_gth);
-
+  
   // Warmup period
   rolling_sum[0] = se_ries[0];
   for (int it = 1; it < look_back; it++) {
@@ -1676,13 +1674,13 @@ NumericVector roll_vec(NumericVector se_ries, int look_back) {
 //' @return A column \emph{vector} of the same length as the argument
 //'   \code{se_ries}.
 //'
-//' @details The function \code{roll_vecw()} calculates the rolling weighted sums
-//'   of a \emph{vector} over its past values (a convolution with the
-//'   \emph{vector} of weights), using \code{RcppArmadillo}. It performs a
-//'   similar calculation as the standard \code{R} function
-//'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-//'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-//'   \code{NA} values.
+//' @details 
+//'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
+//'   \emph{vector} over its past values (a convolution with the \emph{vector}
+//'   of weights), using \code{RcppArmadillo}. It performs a similar calculation
+//'   as the standard \code{R} function \code{stats::filter(x=se_ries,
+//'   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
+//'   times faster, and it doesn't produce any \code{NA} values.
 //'   
 //' @examples
 //' \dontrun{
@@ -1709,11 +1707,11 @@ NumericVector roll_vec(NumericVector se_ries, int look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_vecw(const arma::vec& se_ries, const arma::vec& weight_s) {
+arma::vec roll_vecw(arma::vec se_ries, arma::vec weight_s) {
   
   arma::uword len_gth = se_ries.n_elem;
   arma::uword look_back = weight_s.n_elem;
-  arma::vec rolling_sum(len_gth);
+  arma::vec rolling_sum(len_gth, fill::zeros);
   arma::vec rev_weights = arma::reverse(weight_s);
   // arma::vec rev_weights = weight_s;
   
@@ -1734,16 +1732,18 @@ arma::vec roll_vecw(const arma::vec& se_ries, const arma::vec& weight_s) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
-//' of weights.
+//' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
+//' with a \emph{vector} of weights.
 //' 
-//' @param \code{mat_rix} A \emph{matrix} of data.
+//' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+//' 
 //' @param \code{weight_s} A column \emph{vector} of weights.
 //'
 //' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{mat_rix}.
+//'   argument \code{se_ries}.
 //'
-//' @details The function \code{roll_conv()} calculates the convolutions of the
+//' @details 
+//'   The function \code{roll_conv()} calculates the convolutions of the
 //'   \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
 //'   down over the \emph{matrix} rows and multiplies the past (higher) values
 //'   by the weights.  It calculates the rolling weighted sums of the past
@@ -1751,45 +1751,45 @@ arma::vec roll_vecw(const arma::vec& se_ries, const arma::vec& weight_s) {
 //'   
 //'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
-//'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+//'   \code{R} function \code{filter(x=se_ries, filter=weight_s,
 //'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 //'   it doesn't produce any leading \code{NA} values.
 //'   
 //' @examples
 //' \dontrun{
 //' # First example
-//' # Create matrix from historical prices
-//' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+//' # Calculate a time series of prices
+//' se_ries <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI)])
 //' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
+//' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
 //' # Compare with original
-//' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
 //' # Second example
-//' # Create exponentially decaying weights
+//' # Calculate exponentially decaying weights
 //' weight_s <- exp(-0.2*(1:11))
 //' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(mat_rix, weight_s)
+//' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
+arma::mat roll_conv(arma::mat se_ries, arma::mat weight_s) {
   
   arma::uword look_back = weight_s.n_rows-2;
-  arma::uword num_rows = mat_rix.n_rows-1;
+  arma::uword num_rows = se_ries.n_rows-1;
   
   // Calculate the convolutions
-  arma::mat roll_conv = arma::conv2(mat_rix, weight_s, "full");
+  arma::mat roll_conv = arma::conv2(se_ries, weight_s, "full");
   
   // Copy the warmup period
-  roll_conv.rows(0, look_back) = mat_rix.rows(0, look_back);
+  roll_conv.rows(0, look_back) = se_ries.rows(0, look_back);
   
   return roll_conv.rows(0, num_rows);
   
@@ -1799,30 +1799,32 @@ arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the convolutions of the \emph{matrix} columns with a \emph{vector}
-//' of weights.
+//' Calculate by reference the rolling convolutions (weighted sums) of a
+//' \emph{time series} with a \emph{vector} of weights.
 //' 
-//' @param \code{mat_rix} A \emph{matrix} of data.
+//' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+//' 
 //' @param \code{weight_s} A column \emph{vector} of weights.
 //'
 //' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{mat_rix}.
+//'   argument \code{se_ries}.
 //'
-//' @details The function \code{roll_conv_ref()} calculates the convolutions of
-//'   the \emph{matrix} columns with a \emph{vector} of weights.  It performs a
-//'   loop down over the \emph{matrix} rows and multiplies the past (higher)
-//'   values by the weights.  It calculates the rolling weighted sums of the past
+//' @details 
+//'   The function \code{roll_conv_ref()} calculates the convolutions of the
+//'   \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
+//'   down over the \emph{matrix} rows and multiplies the past (higher) values
+//'   by the weights.  It calculates the rolling weighted sums of the past
 //'   values.
 //'   
 //'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
-//'   \code{mat_rix}, and replaces the old \emph{matrix} values with the
+//'   \code{se_ries}, and replaces the old \emph{matrix} values with the
 //'   weighted sums.
 //'   It performs the calculation in place, without copying the \emph{matrix} in
 //'   memory (which greatly increases the computation speed).
 //'   
 //'   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
-//'   \code{R} function \code{filter(x=mat_rix, filter=weight_s,
+//'   \code{R} function \code{filter(x=se_ries, filter=weight_s,
 //'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 //'   it doesn't produce any leading \code{NA} values.
 //'   
@@ -1830,38 +1832,40 @@ arma::mat roll_conv(arma::mat& mat_rix, arma::mat& weight_s) {
 //' \dontrun{
 //' # First example
 //' # Create matrix from historical prices
-//' mat_rix <- na.omit(rutils::etf_env$re_turns[, 1:2])
+//' se_ries <- na.omit(rutils::etf_env$re_turns[, 1:2])
 //' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+//' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
 //' # Compare with original
-//' all.equal(coredata(mat_rix), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
 //' # Second example
 //' # Create exponentially decaying weights
 //' weight_s <- exp(-0.2*(1:11))
 //' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv_ref(mat_rix, weight_s)
+//' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=mat_rix, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
+arma::mat roll_conv_ref(arma::mat se_ries, arma::mat weight_s) {
+  
   arma::uword look_back = weight_s.n_rows-1;
-  arma::uword num_rows = mat_rix.n_rows-1;
+  arma::uword num_rows = se_ries.n_rows-1;
   
   // Calculate the convolutions
-  arma::mat roll_conv_ref = arma::conv2(mat_rix, weight_s, "full");
+  arma::mat roll_conv_ref = arma::conv2(se_ries, weight_s, "full");
   
   // Copy the convolutions
-  mat_rix.rows(look_back, num_rows) = roll_conv_ref.rows(look_back, num_rows);
+  se_ries.rows(look_back, num_rows) = roll_conv_ref.rows(look_back, num_rows);
   
-  return mat_rix;
+  return se_ries;
+  
 }  // end roll_conv_ref
 
 
@@ -1879,7 +1883,8 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{se_ries}.
 //'
-//' @details The function \code{roll_sum()} calculates the rolling sums over the
+//' @details 
+//'   The function \code{roll_sum()} calculates the rolling sums over the
 //'   columns of the \code{se_ries} data.
 //'   
 //'   The function \code{roll_sum()} returns a \emph{matrix} with the same
@@ -1892,7 +1897,7 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //'   
 //' @examples
 //' \dontrun{
-//' # Create series of historical returns
+//' # Calculate series of historical returns
 //' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 //' # Define parameters
 //' look_back <- 22
@@ -1900,7 +1905,7 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 //' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
-//' # Calculate rolling sums using pure R
+//' # Calculate rolling sums using R code
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 //' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 //' r_sum <- (r_sum - lag_sum)
@@ -1909,7 +1914,7 @@ arma::mat roll_conv_ref(arma::mat& mat_rix, arma::mat& weight_s) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_sum(arma::mat& se_ries, 
+arma::mat roll_sum(arma::mat se_ries, 
                    arma::uword look_back = 1) {
   
   // Calculate the cumulative sum
@@ -1944,8 +1949,9 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{se_ries}.
 //'
-//' @details The function \code{roll_wsum()} calculates the rolling weighted
-//'   sums over the columns of the \code{se_ries} data. 
+//' @details 
+//'   The function \code{roll_wsum()} calculates the rolling weighted sums over
+//'   the columns of the \code{se_ries} data.
 //'   
 //'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{se_ries}.
@@ -1970,12 +1976,12 @@ arma::mat roll_sum(arma::mat& se_ries,
 //'   
 //'   The function \code{roll_wsum()} calculates the rolling weighted sums as
 //'   convolutions of the \code{se_ries} columns with the \emph{vector} of
-//'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}.
-//'   It performs a similar calculation to the standard \code{R} function
+//'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}. It
+//'   performs a similar calculation to the standard \code{R} function
 //'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-//'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-//'   leading \code{NA} values. using fast \emph{RcppArmadillo} \code{C++} code.
-//'   The function \code{roll_wsum()} is several times faster than
+//'   sides=1)}, but it can be over \code{6} times faster, and it doesn't
+//'   produce any leading \code{NA} values.
+//'   The function \code{roll_wsum()} is also several times faster than
 //'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 //'   
 //'   Technical note:
@@ -1985,7 +1991,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' @examples
 //' \dontrun{
 //' # First example
-//' # Create series of historical returns
+//' # Calculate series of historical returns
 //' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 //' # Define parameters
 //' look_back <- 22
@@ -1993,7 +1999,7 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 //' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
-//' # Calculate rolling sums using pure R
+//' # Calculate rolling sums using R code
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 //' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 //' r_sum <- (r_sum - lag_sum)
@@ -2030,22 +2036,23 @@ arma::mat roll_sum(arma::mat& se_ries,
 //' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(re_turns, weight_s)
+//' weight_ed <- HighFreq::roll_wsum(re_turns, weight_s=weight_s)
 //' # Compare with original
 //' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_wsum(arma::mat& se_ries,
-                   arma::uword look_back = 1,
-                   Rcpp::Nullable<int> stu_b = R_NilValue, 
-                   Rcpp::Nullable<Rcpp::IntegerVector> end_p = R_NilValue, 
-                   Rcpp::Nullable<Rcpp::NumericVector> weight_s = R_NilValue) {
+arma::mat roll_wsum(arma::mat se_ries,
+                    arma::uword look_back = 1,
+                    Rcpp::Nullable<int> stu_b = R_NilValue, 
+                    Rcpp::Nullable<Rcpp::IntegerVector> end_p = R_NilValue, 
+                    Rcpp::Nullable<Rcpp::NumericVector> weight_s = R_NilValue) {
   
   arma::uword num_rows = se_ries.n_rows;
   arma::mat cum_sum;
   
+  // Calculate the rolling sums
   if (weight_s.isNotNull()) {
     // Coerce weight_s from Rcpp to Armadillo vector
     arma::vec weights_vec = Rcpp::as<vec>(weight_s);
@@ -2064,32 +2071,32 @@ arma::mat roll_wsum(arma::mat& se_ries,
   
   
   // Declare empty end points
-  arma::uvec end_p;
+  arma::uvec end_parma;
   // Update end points
   if (end_p.isNotNull()) {
     // Copy end_p
-    end_p = Rcpp::as<uvec>(end_p);
+    end_parma = Rcpp::as<uvec>(end_p);
   } else if (stu_b.isNotNull()) {
     // Calculate end points with stu_b
-    end_p = arma::regspace<uvec>(Rcpp::as<uword>(stu_b), look_back, num_rows + look_back);
-    end_p = end_p.elem(find(end_p < num_rows));
+    end_parma = arma::regspace<uvec>(Rcpp::as<uword>(stu_b), look_back, num_rows + look_back);
+    end_parma = end_parma.elem(find(end_parma < num_rows));
   }  // end if
   
   
-  // Calculate the rolling sums
-  if (end_p.is_empty() && weight_s.isNotNull()) {
+  // Subset the rolling sums according the end points
+  if (end_parma.is_empty() && weight_s.isNotNull()) {
     // Do nothing
     // Return the weighted averages (convolutions) at each point
     // return cum_sum;
-  } else if (end_p.is_empty() && !weight_s.isNotNull()) {
+  } else if (end_parma.is_empty() && !weight_s.isNotNull()) {
     // Return unweighted rolling sums at each point
     cum_sum = diff_it(cum_sum, look_back, true);
-  } else if (!end_p.is_empty() && weight_s.isNotNull()) {
+  } else if (!end_parma.is_empty() && weight_s.isNotNull()) {
     // Return the weighted averages (convolutions) at end points
-    cum_sum = cum_sum.rows(end_p);
-  } else if (!end_p.is_empty() && !weight_s.isNotNull()) {
+    cum_sum = cum_sum.rows(end_parma);
+  } else if (!end_parma.is_empty() && !weight_s.isNotNull()) {
     // Return the unweighted rolling sums at end points
-    cum_sum = cum_sum.rows(end_p);
+    cum_sum = cum_sum.rows(end_parma);
     cum_sum = diff_it(cum_sum, 1, true);
   }  // end if
   
@@ -2114,10 +2121,10 @@ arma::mat roll_wsum(arma::mat& se_ries,
 //' @return A column \emph{vector} with the same number of elements as the input
 //'   argument \code{se_ries}.
 //'
-//' @details The function \code{roll_var_vec()} calculates a \emph{vector} of
-//'   variance estimates over a rolling look-back interval for a single-column
-//'   \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}
-//'   \code{C++} code.
+//' @details 
+//'   The function \code{roll_var_vec()} calculates a \emph{vector} of variance
+//'   estimates over a rolling look-back interval for a single-column \emph{time
+//'   series} or a \emph{vector}, using \code{RcppArmadillo} \code{C++} code.
 //'   
 //'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 //'   the initial warmup period, to calculate the same number of elements as the
@@ -2139,15 +2146,16 @@ arma::mat roll_wsum(arma::mat& se_ries,
 //' # Compare the speed of RcppArmadillo with RcppRoll
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   RcppArmadillo=HighFreq::roll_var_vec(re_turns, look_back=11),
+//'   Rcpp=HighFreq::roll_var_vec(re_turns, look_back=11),
 //'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_var_vec(arma::vec& se_ries, arma::uword look_back=11) {
+arma::vec roll_var_vec(arma::vec se_ries, arma::uword look_back=11) {
+  
   arma::uword len_gth = se_ries.n_elem;
-  arma::vec var_vec = arma::zeros(len_gth);
+  arma::vec var_vec = arma::zeros<vec>(len_gth);
   
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
@@ -2166,32 +2174,41 @@ arma::vec roll_var_vec(arma::vec& se_ries, arma::uword look_back=11) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate a \emph{matrix} of variance estimates over a rolling look-back
-//' interval attached at the end points of a \emph{time series} or a
+//' Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
+//' look-back interval attached at the end points of a \emph{time series} or a
 //' \emph{matrix}.
 //'
-//' @param \code{se_ries} A \emph{time series} or a \emph{matrix}.
-//' 
+//' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+//'    
 //' @param \code{ste_p} The number of time periods between the end points.
 //'
 //' @param \code{look_back} The number of end points in the look-back interval.
 //'
+//' @param \code{method} A \emph{character} string representing the type of
+//'   measure of dispersion. (The default is the \code{method = "variance"}.)
+//'
 //' @return A \emph{matrix} with the same number of columns as the input time
 //'   series \code{se_ries}, and the number of rows equal to the number of end
 //'   points.
-//'
-//' @details The function \code{roll_var()} calculates a \emph{matrix} of
-//'   variance estimates over rolling look-back intervals attached at the end
+//'   
+//' @details 
+//'   The function \code{roll_var()} calculates a \emph{matrix} of dispersion
+//'   (variance) estimates over rolling look-back intervals attached at the end
 //'   points of the \emph{time series} \code{se_ries}.
 //'   
-//'   The end points are calculated along the rows of \code{se_ries} using the
-//'   function \code{calc_endpoints()}, with the number of time periods between
-//'   the end points equal to \code{ste_p}.
+//'   It first calculates a vector of end points separated by \code{ste_p} time
+//'   periods. It calculates the end points along the rows of \code{se_ries}
+//'   using the function \code{calc_endpoints()}, with the number of time
+//'   periods between the end points equal to \code{ste_p} time periods.
 //'   
-//'   At each end point, the variance is calculated over a look-back interval
-//'   equal to \code{look_back} number of end points.
-//'   In the initial warmup period, the variance is calculated over an expanding
-//'   look-back interval.
+//'   It then performs a loop over the end points, and at each end point it
+//'   subsets the time series \code{se_ries} over a look-back interval equal
+//'   to \code{look_back} number of end points.
+//'   
+//'   It passes the subset time series to the function \code{calc_var()}, which
+//'   calculates the dispersion.
+//'   See the function \code{calc_var()} for a description of the dispersion
+//'   methods.
 //'   
 //'   For example, the rolling variance at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
@@ -2220,13 +2237,16 @@ arma::vec roll_var_vec(arma::vec& se_ries, arma::uword look_back=11) {
 //' # Compare the speed of RcppArmadillo with RcppRoll
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   RcppArmadillo=HighFreq::roll_var(re_turns, look_back=11),
+//'   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
 //'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_back = 1) {
+arma::mat roll_var(arma::mat se_ries, 
+                   arma::uword ste_p = 1, 
+                   arma::uword look_back = 11, 
+                   std::string method="variance") {
   
   // Calculate end points
   arma::uword num_rows = se_ries.n_rows;
@@ -2235,26 +2255,15 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
   arma::uvec start_p = calc_startpoints(end_p, look_back);
   // Allocate variance matrix
   arma::uword num_points = end_p.n_elem;
-  arma::mat vari_ance = arma::zeros(num_points, se_ries.n_cols);
-
+  arma::mat vari_ance = arma::zeros<mat>(num_points, se_ries.n_cols);
+  
   // Perform loop over the end_p
   for (arma::uword ep = 0; ep < num_points; ep++) {
     // Calculate variance
     if (end_p(ep) > start_p(ep)) {
-      vari_ance.row(ep) = arma::var(se_ries.rows(start_p(ep), end_p(ep)));
+      vari_ance.row(ep) = calc_var(se_ries.rows(start_p(ep), end_p(ep)), method);
     }  // end if
   }  // end for
-
-  // Old code below
-  // Warmup period
-  // for (arma::uword it = 1; it < look_back; it++) {
-  //   vari_ance.row(it) = arma::var(se_ries.rows(0, it));
-  // }  // end for
-  
-  // Remaining period
-  // for (arma::uword it = look_back; it < num_rows; it++) {
-  //   vari_ance.row(it) = arma::var(se_ries.rows(it-look_back+1, it));
-  // }  // end for
   
   return vari_ance;
   
@@ -2274,7 +2283,7 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //'
 //' @param \code{look_back} The number of end points in the look-back interval.
 //'   
-//' @param \code{calc_method} A \emph{character} string representing the range
+//' @param \code{method} A \emph{character} string representing the range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -2295,10 +2304,14 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //' @return A column \emph{vector} of variance estimates, with the number of
 //'   rows equal to the number of end points.
 //'
-//' @details The function \code{roll_var_ohlc()} calculates a \emph{vector} of
-//'   variance estimates over a rolling look-back interval attached at the end
-//'   points of the \emph{time series} \code{oh_lc}.
+//' @details 
+//'   The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
+//'   estimates over a rolling look-back interval attached at the end points of
+//'   the \emph{time series} \code{oh_lc}.
 //'   
+//'   The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
+//'   prices.
+//'
 //'   The end points are calculated along the rows of \code{oh_lc} using the
 //'   function \code{calc_endpoints()}, with the number of time periods between
 //'   the end points equal to \code{ste_p}.
@@ -2326,7 +2339,7 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //'   between \emph{OHLC} prices), using several different variance estimation
 //'   methods.
 //'   
-//'   The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+//'   The default \code{method} is \emph{"yang_zhang"}, which theoretically
 //'   has the lowest standard error among unbiased estimators.
 //'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
 //'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
@@ -2353,13 +2366,14 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //'
 //' @examples
 //' \dontrun{
-//' # Extract time index of SPY returns
-//' oh_lc <- HighFreq::SPY
-//' in_dex <- c(1, diff(xts::.index(oh_lc)))
+//' # Extract the log OHLC prices of SPY
+//' sp_y <- log(HighFreq::SPY)
+//' # Extract the time index of SPY prices
+//' in_dex <- c(1, diff(xts::.index(sp_y)))
 //' # Rolling variance at minutely end points, with a 21 minute look-back
 //' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 //'                               ste_p=1, look_back=21, 
-//'                               calc_method="yang_zhang", 
+//'                               method="yang_zhang", 
 //'                               in_dex=in_dex, scal_e=TRUE)
 //' # Daily OHLC prices
 //' oh_lc <- rutils::etf_env$VTI
@@ -2367,7 +2381,7 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //' # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
 //' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 //'                               ste_p=5, look_back=4, 
-//'                               calc_method="yang_zhang", 
+//'                               method="yang_zhang", 
 //'                               in_dex=in_dex, scal_e=TRUE)
 //' # Same calculation in R
 //' n_rows <- NROW(oh_lc)
@@ -2387,13 +2401,13 @@ arma::mat roll_var(arma::mat& se_ries, arma::uword ste_p = 1, arma::uword look_b
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_var_ohlc(arma::mat& oh_lc, 
+arma::vec roll_var_ohlc(arma::mat oh_lc, 
                         arma::uword ste_p = 1, 
                         arma::uword look_back = 1, 
-                        const std::string& calc_method = "yang_zhang", 
-                        const bool& scal_e = true, 
+                        std::string method = "yang_zhang", 
+                        bool scal_e = true, 
                         arma::colvec in_dex = 0) {
-
+  
   // Calculate end points
   arma::uword num_rows = oh_lc.n_rows;
   arma::uvec end_p = calc_endpoints(num_rows, ste_p);
@@ -2402,17 +2416,17 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
   
   // Allocate variance matrix
   arma::uword num_points = end_p.n_elem;
-  arma::vec vari_ance = arma::zeros(num_points);
+  arma::vec vari_ance = arma::zeros<vec>(num_points);
   
   // Extract OHLC close prices
   arma::colvec clo_se = oh_lc.col(3);
   arma::colvec lag_close = lag_it(clo_se);
-
+  
   // Set the time index to 1 if scal_e = FALSE
   if (!scal_e || (in_dex.n_rows == 1)) {
     in_dex = arma::ones(num_rows);
   }  // end if
-
+  
   // Define data subsets over look-back intervals
   arma::mat sub_ohlc;
   arma::colvec sub_close;
@@ -2425,18 +2439,18 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
       sub_close = lag_close.rows(start_p(ep), end_p(ep));
       sub_index = in_dex.subvec(start_p(ep), end_p(ep));
       // Calculate variance
-      vari_ance.row(ep) = calc_var_ohlc(sub_ohlc, calc_method, sub_close, scal_e, sub_index);
+      vari_ance.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scal_e, sub_index);
     }  // end if
   }  // end for
-
+  
   // Old code below
-
+  
   // Warmup period
   // for (arma::uword it = 1; it < look_back; it++) {
   //   arma::mat sub_ohlc = oh_lc.rows(0, it);
   //   arma::colvec sub_close = lag_close.rows(0, it);
   //   arma::colvec sub_index = in_dex.subvec(0, it);
-  //   vari_ance(it) = calc_var_ohlc(sub_ohlc, calc_method, sub_close, scal_e, sub_index);
+  //   vari_ance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scal_e, sub_index);
   // }  // end for
   
   // Remaining period
@@ -2444,12 +2458,115 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
   //   arma::mat sub_ohlc = oh_lc.rows(it-look_back+1, it);
   //   arma::colvec sub_close = lag_close.rows(it-look_back+1, it);
   //   arma::colvec sub_index = in_dex.subvec(it-look_back+1, it);
-  //   vari_ance(it) = calc_var_ohlc(sub_ohlc, calc_method, sub_close, scal_e, sub_index);
+  //   vari_ance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scal_e, sub_index);
   // }  // end for
   
   return vari_ance;
   
 }  // end roll_var_ohlc
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
+//' interval attached at the end points of a \emph{time series} or a
+//' \emph{matrix}.
+//'
+//' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+//'    
+//' @param \code{ste_p} The number of time periods between the end points.
+//'
+//' @param \code{look_back} The number of end points in the look-back interval.
+//'
+//' @param \code{method} A \emph{string} specifying the type of skewness.  (The
+//'   default is the \code{method = "pearson"}.)
+//'
+//' @param \code{al_pha} The confidence level for calculating the quantiles.
+//'   (the default is \code{al_pha = 0.25}).
+//'
+//' @return A \emph{matrix} with the same number of columns as the input time
+//'   series \code{se_ries}, and the number of rows equal to the number of end
+//'   points.
+//'   
+//' @details 
+//'   The function \code{roll_skew()} calculates a \emph{matrix} of skewness
+//'   estimates over rolling look-back intervals attached at the end points of
+//'   the \emph{time series} \code{se_ries}.
+//'   
+//'   It first calculates a vector of end points separated by \code{ste_p} time
+//'   periods. It calculates the end points along the rows of \code{se_ries}
+//'   using the function \code{calc_endpoints()}, with the number of time
+//'   periods between the end points equal to \code{ste_p} time periods.
+//'   
+//'   It then performs a loop over the end points, and at each end point it
+//'   subsets the time series \code{se_ries} over a look-back interval equal
+//'   to \code{look_back} number of end points.
+//'   
+//'   It passes the subset time series to the function \code{calc_skew()}, which
+//'   calculates the skewness.
+//'   See the function \code{calc_skew()} for a description of the skewness
+//'   methods.
+//'   
+//'   For example, the rolling skewness at \code{25} day end points, with a
+//'   \code{75} day look-back, can be calculated using the parameters
+//'   \code{ste_p = 25} and \code{look_back = 3}.
+//'
+//'   The function \code{roll_skew()} is implemented in \code{RcppArmadillo}
+//'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+//'   code.
+//'
+//' @examples
+//' \dontrun{
+//' # Define time series of returns using package rutils
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' # Define end points and start points
+//' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), ste_p=25)
+//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
+//' skew_ness <- HighFreq::roll_skew(re_turns, ste_p=25, look_back=3)
+//' # Calculate the rolling skewness using R code
+//' skew_r <- sapply(1:NROW(end_p), function(it) {
+//'   HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+//' })  # end sapply
+//' # Compare the skewness estimates
+//' all.equal(drop(skew_ness), skew_r, check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::roll_skew(re_turns, ste_p=25, look_back=3),
+//'   Rcode=sapply(1:NROW(end_p), function(it) {
+//'     HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+//'   }),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' @export
+// [[Rcpp::export]]
+arma::mat roll_skew(arma::mat se_ries, 
+                    arma::uword ste_p = 1, 
+                    arma::uword look_back = 11, 
+                    std::string method = "pearson", 
+                    double al_pha = 0.25) {
+  
+  // Calculate end points
+  arma::uword num_rows = se_ries.n_rows;
+  arma::uvec end_p = calc_endpoints(num_rows, ste_p);
+  // Start points equal to end points lagged by look_back
+  arma::uvec start_p = calc_startpoints(end_p, look_back);
+  // Allocate skewness matrix
+  arma::uword num_points = end_p.n_elem;
+  arma::mat skew_ness = arma::zeros<mat>(num_points, se_ries.n_cols);
+  
+  // Perform loop over the end_p
+  for (arma::uword ep = 0; ep < num_points; ep++) {
+    // Calculate skewness
+    if (end_p(ep) > start_p(ep)) {
+      skew_ness.row(ep) = calc_skew(se_ries.rows(start_p(ep), end_p(ep)), method);
+    }  // end if
+  }  // end for
+  
+  return skew_ness;
+  
+}  // end roll_skew
 
 
 
@@ -2473,7 +2590,8 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{mat_rix}.
 //'
-//' @details The function \code{roll_scale()} performs a rolling scaling
+//' @details 
+//'   The function \code{roll_scale()} performs a rolling scaling
 //'   (standardization) of the columns of the \code{mat_rix} argument using
 //'   \code{RcppArmadillo}.
 //'   The function \code{roll_scale()} performs a loop over the rows of 
@@ -2498,9 +2616,9 @@ arma::vec roll_var_ohlc(arma::mat& oh_lc,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_scale(const arma::mat& mat_rix, 
-                     const arma::uword& look_back,
-                     const bool use_median=false) {
+arma::mat roll_scale(arma::mat mat_rix, 
+                     arma::uword look_back,
+                     bool use_median=false) {
   
   arma::uword num_rows = mat_rix.n_rows;
   arma::mat scaled_mat(num_rows, mat_rix.n_cols);
@@ -2541,9 +2659,10 @@ arma::mat roll_scale(const arma::mat& mat_rix,
 //' @return A column \emph{vector} of the same length as the number of rows of
 //'   \code{de_sign}.
 //'
-//' @details The function \code{roll_zscores()} performs rolling regressions
-//'   along the rows of the design \emph{matrix} \code{de_sign}, using the
-//'   function \code{calc_lm()}.
+//' @details 
+//'   The function \code{roll_zscores()} performs rolling regressions along the
+//'   rows of the design \emph{matrix} \code{de_sign}, using the function
+//'   \code{calc_lm()}.
 //'   
 //'   The function \code{roll_zscores()} performs a loop over the rows of
 //'   \code{de_sign}, and it subsets \code{de_sign} and \code{res_ponse} over a
@@ -2587,15 +2706,15 @@ arma::mat roll_scale(const arma::mat& mat_rix,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_zscores(const arma::vec& res_ponse, 
-                       const arma::mat& de_sign, 
-                       const arma::uword& look_back) {
+arma::vec roll_zscores(arma::vec res_ponse, 
+                       arma::mat de_sign, 
+                       arma::uword look_back) {
   
   arma::uword num_rows = de_sign.n_rows;
-  arma::vec z_scores(num_rows);
+  arma::vec z_scores(num_rows, fill::zeros);
   arma::vec sub_response;
   arma::mat sub_design;
-
+  
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
     sub_response = res_ponse.subvec(0, it);
@@ -2636,8 +2755,9 @@ arma::vec roll_zscores(const arma::vec& res_ponse,
 //'   variance, and with the same number of rows as the length of the argument 
 //'   \code{in_nov}.
 //'
-//' @details The function \code{sim_garch()} simulates a \emph{GARCH} process
-//'   using fast \emph{Rcpp} \code{C++} code.
+//' @details 
+//'   The function \code{sim_garch()} simulates a \emph{GARCH} process using
+//'   fast \emph{Rcpp} \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
@@ -2684,7 +2804,8 @@ NumericMatrix sim_garch(double om_ega,
 //' @return A column \emph{vector} representing the \emph{time series} of
 //'   log prices, with the same length as the argument \code{in_nov}.
 //'
-//' @details The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
+//' @details 
+//'   The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
 //'   process using fast \emph{Rcpp} \code{C++} code.
 //'   It returns a column \emph{vector} representing the \emph{time series} of
 //'   log prices.
@@ -2736,8 +2857,9 @@ NumericVector sim_ou(double eq_price,
 //' @return A column \emph{vector} representing the \emph{time series} of
 //'   prices, with the same length as the argument \code{in_nov}.
 //'
-//' @details The function \code{sim_schwartz()} simulates a \emph{Schwartz}
-//'   process using fast \emph{Rcpp} \code{C++} code.
+//' @details 
+//'   The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
+//'   using fast \emph{Rcpp} \code{C++} code.
 //'   It returns a column \emph{vector} representing the \emph{time series} of
 //'   prices.
 //'   The function \code{sim_schwartz()} simulates the percentage returns as
@@ -2788,8 +2910,9 @@ NumericVector sim_schwartz(double eq_price,
 //' @return A column \emph{vector} of the same length as the argument
 //'   \code{in_nov}.
 //'
-//' @details The function \code{sim_arima()} recursively filters a \emph{vector}
-//'   of innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
+//' @details 
+//'   The function \code{sim_arima()} recursively filters a \emph{vector} of
+//'   innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
 //'   \code{RcppArmadillo} \code{C++} code.
 //'   It performs the same calculation as the standard \code{R} function
 //'   \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
@@ -2811,10 +2934,11 @@ NumericVector sim_schwartz(double eq_price,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
+arma::vec sim_arima(arma::vec in_nov, arma::vec co_eff) {
+  
   arma::uword len_gth = in_nov.n_elem;
   arma::uword look_back = co_eff.n_elem;
-  arma::vec ari_ma(len_gth);
+  arma::vec ari_ma(len_gth, fill::zeros);
   
   // Warmup period
   ari_ma(0) = in_nov(0);
@@ -2869,9 +2993,10 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //' @return A column \emph{vector} of the same length as the number of columns
 //'   of \code{re_turns}.
 //'
-//' @details The function \code{calc_weights()} calculates the optimal portfolio
-//'   weights for different model types, using \code{RcppArmadillo}
-//'   \code{C++} code.
+//' @details 
+//'   The function \code{calc_weights()} calculates the optimal portfolio
+//'   weights for different model types, using \code{RcppArmadillo} \code{C++}
+//'   code.
 //' 
 //'   If \code{model_type = "rank_sharpe"} (the default) then it calculates the
 //'   weights as the ranks (order index) of the trailing Sharpe ratios of the
@@ -2932,13 +3057,13 @@ arma::vec sim_arima(const arma::vec& in_nov, const arma::vec& co_eff) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec calc_weights(const arma::mat& re_turns, 
-                       const std::string& model_type = "rank_sharpe",
+arma::vec calc_weights(arma::mat re_turns, // Portfolio returns
+                       std::string model_type = "rank_sharpe",
                        double to_l = 0.001,
                        int max_eigen = 0,
-                       const double& pro_b = 0.1,
-                       const double& al_pha = 0.0,
-                       const bool scal_e = true,
+                       double pro_b = 0.1,
+                       double al_pha = 0.0,
+                       bool scal_e = true,
                        double vo_l = 0.01) {
   // Initialize
   arma::vec weight_s(re_turns.n_cols);
@@ -3025,7 +3150,7 @@ arma::vec calc_weights(const arma::mat& re_turns,
     cout << "Warning: Incorrect model_type argument: " << model_type << endl;
     return arma::ones(re_turns.n_cols);
   }  // end if
-
+  
   if (scal_e == TRUE) {
     // return weight_s/sqrt(sum(square(weight_s)));
     // return weight_s/sum(weight_s);
@@ -3048,16 +3173,22 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //' Simulate (backtest) a rolling portfolio optimization strategy, using
 //' \code{RcppArmadillo}.
 //' 
-//' @param \code{ex_cess} A \emph{time series} or a \emph{matrix} of excess
-//'   returns data (the returns in excess of the risk-free rate).
-//'   
 //' @param \code{re_turns} A \emph{time series} or a \emph{matrix} of returns
 //'   data (the returns in excess of the risk-free rate).
+//'   
+//' @param \code{ex_cess} A \emph{time series} or a \emph{matrix} of excess
+//'   returns data (the returns in excess of the risk-free rate).
 //'   
 //' @param \code{start_p} An \emph{integer vector} of start points.
 //' 
 //' @param \code{end_p} An \emph{integer vector} of end points.
 //' 
+//' @param \code{co_eff} A \emph{numeric} multiplier of the weights.  (The
+//'   default is \code{1})
+//'   
+//' @param \code{bid_offer} A \emph{numeric} bid-offer spread.  (The default is
+//'   \code{0})
+//'
 //' @param \code{model_type} A \emph{string} specifying the model type for
 //'   calculating the weights (see Details).  (The default is \code{model_type =
 //'   "rank_sharpe"})
@@ -3073,27 +3204,22 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //'   
 //' @param \code{al_pha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
-//'   
+//' 
 //' @param \code{scal_e} A \emph{Boolean} specifying whether the weights should
 //'   be scaled (the default is \code{scal_e = TRUE}).
-//'   
+//'
 //' @param \code{vo_l} A \emph{numeric} volatility target for scaling the
 //'   weights.  (The default is \code{0.001})
 //'   
-//' @param \code{co_eff} A \emph{numeric} multiplier of the weights.  (The
-//'   default is \code{1})
-//'   
-//' @param \code{bid_offer} A \emph{numeric} bid-offer spread.  (The default is
-//'   \code{0})
-//'
 //' @return A column \emph{vector} of strategy returns, with the same length as
 //'   the number of rows of \code{re_turns}.
 //'
-//' @details The function \code{back_test()} performs a backtest simulation of a
+//' @details 
+//'   The function \code{back_test()} performs a backtest simulation of a
 //'   rolling portfolio optimization strategy over a \emph{vector} of
 //'   \code{end_p}.
 //'   
-//'   It performs a loop over the \code{end_p}, and subsets the
+//'   It performs a loop over the end points \code{end_p}, and subsets the
 //'   \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
 //'   corresponding end point and the start point. It passes the subset matrix
 //'   of excess returns into the function \code{calc_weights()}, which
@@ -3149,24 +3275,24 @@ arma::vec calc_weights(const arma::mat& re_turns,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat back_test(const arma::mat& ex_cess, // Portfolio excess returns
-                    const arma::mat& re_turns, // Portfolio returns
-                    const arma::uvec& start_p, 
-                    const arma::uvec& end_p, 
-                    const std::string& model_type = "rank_sharpe",
+arma::mat back_test(arma::mat ex_cess, // Portfolio excess returns
+                    arma::mat re_turns, // Portfolio returns
+                    arma::uvec start_p, 
+                    arma::uvec end_p, 
+                    std::string model_type = "rank_sharpe",
                     double to_l = 0.001,
                     int max_eigen = 0,
-                    const double& pro_b = 0.1,
-                    const double& al_pha = 0,
-                    const bool& scal_e = true,
+                    double pro_b = 0.1,
+                    double al_pha = 0,
+                    bool scal_e = true,
                     double vo_l = 0.01,
-                    const double& co_eff = 1.0,
-                    const double& bid_offer = 0.0) {
+                    double co_eff = 1.0,
+                    double bid_offer = 0.0) {
   
-  arma::vec weight_s(re_turns.n_cols);
+  arma::vec weight_s(re_turns.n_cols, fill::zeros);
   arma::vec weights_past = zeros(re_turns.n_cols);
   arma::vec pnl_s = zeros(re_turns.n_rows);
-
+  
   // Perform loop over the end_p
   for (arma::uword it = 1; it < end_p.size(); it++) {
     // cout << "it: " << it << endl;

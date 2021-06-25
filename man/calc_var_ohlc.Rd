@@ -7,7 +7,7 @@ estimators and \code{RcppArmadillo}.}
 \usage{
 calc_var_ohlc(
   oh_lc,
-  calc_method = "yang_zhang",
+  method = "yang_zhang",
   lag_close = 0L,
   scal_e = TRUE,
   in_dex = 0L
@@ -17,7 +17,7 @@ calc_var_ohlc(
 \item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
 prices.}
 
-\item{\code{calc_method}}{A \emph{character} string representing the range
+\item{\code{method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,
@@ -26,7 +26,7 @@ estimator for calculating the variance.  The estimators include:
   \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
   \item "yang_zhang" Yang-Zhang estimator,
  }
- (The default is the \code{calc_method = "yang_zhang"}.)}
+ (The default is the \code{method = "yang_zhang"}.)}
 
 \item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
@@ -48,12 +48,15 @@ Calculate the variance of an \emph{OHLC time series}, using different range
 estimators and \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_var_ohlc()} calculates the variance
-  from all the different intra-day and day-over-day returns (defined as the
-  differences of \emph{OHLC} prices), using several different variance
-  estimation methods.
+The function \code{calc_var_ohlc()} calculates the variance from all the
+  different intra-day and day-over-day returns (defined as the differences
+  of \emph{OHLC} prices), using several different variance estimation
+  methods.
 
-  The default \code{calc_method} is \emph{"yang_zhang"}, which theoretically
+  The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
+  prices.
+
+  The default \code{method} is \emph{"yang_zhang"}, which theoretically
   has the lowest standard error among unbiased estimators.
   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
@@ -67,6 +70,9 @@ The function \code{calc_var_ohlc()} calculates the variance
   number of seconds decreases the effect of overnight price jumps. If the
   time index is in days, then the variance is equal to the variance per day
   squared.
+  
+  If the number of rows of \code{oh_lc} is less than \code{3} then it
+  returns zero.
   
   The optional argument \code{in_dex} is the time index of the \emph{time
   series} \code{oh_lc}. If the time index is in seconds, then the
@@ -84,28 +90,30 @@ The function \code{calc_var_ohlc()} calculates the variance
 }
 \examples{
 \dontrun{
-# Extract time index of SPY returns
-in_dex <- c(1, diff(xts::.index(HighFreq::SPY)))
+# Extract the log OHLC prices of SPY
+sp_y <- log(HighFreq::SPY)
+# Extract the time index of SPY prices
+in_dex <- c(1, diff(xts::.index(sp_y)))
 # Calculate the variance of SPY returns, with scaling of the returns
-HighFreq::calc_var_ohlc(HighFreq::SPY, 
- calc_method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
+HighFreq::calc_var_ohlc(sp_y, 
+ method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
 # Calculate variance without accounting for overnight jumps
-HighFreq::calc_var_ohlc(HighFreq::SPY, 
- calc_method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
+HighFreq::calc_var_ohlc(sp_y, 
+ method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
 # Calculate the variance without scaling the returns
-HighFreq::calc_var_ohlc(HighFreq::SPY, scal_e=FALSE)
+HighFreq::calc_var_ohlc(sp_y, scal_e=FALSE)
 # Calculate the variance by passing in the lagged close prices
-lag_close <- HighFreq::lag_it(HighFreq::SPY[, 4])
-all.equal(HighFreq::calc_var_ohlc(HighFreq::SPY), 
-  HighFreq::calc_var_ohlc(HighFreq::SPY, lag_close=lag_close))
+lag_close <- HighFreq::lag_it(sp_y[, 4])
+all.equal(HighFreq::calc_var_ohlc(sp_y), 
+  HighFreq::calc_var_ohlc(sp_y, lag_close=lag_close))
 # Compare with HighFreq::calc_var_ohlc_r()
-all.equal(HighFreq::calc_var_ohlc(HighFreq::SPY, in_dex=in_dex), 
-  HighFreq::calc_var_ohlc_r(HighFreq::SPY))
+all.equal(HighFreq::calc_var_ohlc(sp_y, in_dex=in_dex), 
+  HighFreq::calc_var_ohlc_r(sp_y))
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var_ohlc(HighFreq::SPY),
-  Rcode=HighFreq::calc_var_ohlc_r(HighFreq::SPY),
+  Rcpp=HighFreq::calc_var_ohlc(sp_y),
+  Rcode=HighFreq::calc_var_ohlc_r(sp_y),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

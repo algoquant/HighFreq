@@ -8,8 +8,8 @@
 back_test(
   ex_cess,
   re_turns,
-  start_points,
-  end_points,
+  start_p,
+  end_p,
   model_type = "rank_sharpe",
   to_l = 0.001,
   max_eigen = 0L,
@@ -22,15 +22,21 @@ back_test(
 )
 }
 \arguments{
-\item{\code{ex_cess}}{A \emph{time series} or a \emph{matrix} of excess
-returns data (the returns in excess of the risk-free rate).}
-
 \item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{start_points}}{An \emph{integer vector} of start points.}
+\item{\code{ex_cess}}{A \emph{time series} or a \emph{matrix} of excess
+returns data (the returns in excess of the risk-free rate).}
 
-\item{\code{end_points}}{An \emph{integer vector} of end points.}
+\item{\code{start_p}}{An \emph{integer vector} of start points.}
+
+\item{\code{end_p}}{An \emph{integer vector} of end points.}
+
+\item{\code{co_eff}}{A \emph{numeric} multiplier of the weights.  (The
+default is \code{1})}
+
+\item{\code{bid_offer}}{A \emph{numeric} bid-offer spread.  (The default is
+\code{0})}
 
 \item{\code{model_type}}{A \emph{string} specifying the model type for
 calculating the weights (see Details).  (The default is \code{model_type =
@@ -53,12 +59,6 @@ be scaled (the default is \code{scal_e = TRUE}).}
 
 \item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
 weights.  (The default is \code{0.001})}
-
-\item{\code{co_eff}}{A \emph{numeric} multiplier of the weights.  (The
-default is \code{1})}
-
-\item{\code{bid_offer}}{A \emph{numeric} bid-offer spread.  (The default is
-\code{0})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as
@@ -71,9 +71,9 @@ Simulate (backtest) a rolling portfolio optimization strategy, using
 \details{
 The function \code{back_test()} performs a backtest simulation of a
   rolling portfolio optimization strategy over a \emph{vector} of
-  \code{end_points}.
+  \code{end_p}.
   
-  It performs a loop over the \code{end_points}, and subsets the
+  It performs a loop over the end points \code{end_p}, and subsets the
   \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
   corresponding end point and the start point. It passes the subset matrix
   of excess returns into the function \code{calc_weights()}, which
@@ -105,19 +105,19 @@ re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 # risk_free is the daily risk-free rate
 risk_free <- 0.03/260
 ex_cess <- re_turns - risk_free
-# Define monthly end_points without initial warmpup period
-end_points <- rutils::calc_endpoints(re_turns, inter_val="months")
-end_points <- end_points[end_points>50]
-len_gth <- NROW(end_points)
-# Define 12-month look_back interval and start_points over sliding window
+# Define monthly end_p without initial warmpup period
+end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
+end_p <- end_p[end_p>50]
+len_gth <- NROW(end_p)
+# Define 12-month look-back interval and start points over sliding window
 look_back <- 12
-start_points <- c(rep_len(1, look_back-1), end_points[1:(len_gth-look_back+1)])
+start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
 # Define shrinkage and regularization intensities
 al_pha <- 0.5
 max_eigen <- 3
 # Simulate a monthly rolling portfolio optimization strategy
 pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
-                            start_points-1, end_points-1, 
+                            start_p-1, end_p-1, 
                             max_eigen = max_eigen, 
                             al_pha = al_pha)
 pnl_s <- xts::xts(pnl_s, index(re_turns))

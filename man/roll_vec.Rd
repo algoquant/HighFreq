@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_vec}
 \alias{roll_vec}
-\title{Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{vector} using \emph{Rcpp}.}
+\title{Calculate the rolling sums over a single-column \emph{time series} or a
+\emph{vector} using \emph{Rcpp}.}
 \usage{
 roll_vec(se_ries, look_back)
 }
@@ -18,14 +18,14 @@ A column \emph{vector} of the same length as the argument
   \code{se_ries}.
 }
 \description{
-Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{vector} using \emph{Rcpp}.
+Calculate the rolling sums over a single-column \emph{time series} or a
+\emph{vector} using \emph{Rcpp}.
 }
 \details{
-The function \code{roll_vec()} calculates a \emph{vector} of
-  rolling sums, over a \emph{vector} of data, using fast \emph{Rcpp}
-  \code{C++} code.  The function \code{roll_vec()} is several times faster
-  than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+The function \code{roll_vec()} calculates a \emph{vector} of rolling sums,
+  over a \emph{vector} of data, using fast \emph{Rcpp} \code{C++} code.  The
+  function \code{roll_vec()} is several times faster than
+  \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 }
 \examples{
 \dontrun{

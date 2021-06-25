@@ -26,8 +26,8 @@ Calculate the differences between the neighboring elements of a
 single-column \emph{time series} or a \emph{vector}.
 }
 \details{
-The function \code{diff_vec()} calculates the differences between
-  the input \emph{time series} or \emph{vector} and its lagged version. 
+The function \code{diff_vec()} calculates the differences between the
+  input \emph{time series} or \emph{vector} and its lagged version.
   
   The argument \code{lagg} specifies the number of lags.  For example, if
   \code{lagg=3} then the differences will be taken between each element

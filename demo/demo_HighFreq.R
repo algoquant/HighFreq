@@ -119,7 +119,7 @@ look_back <- 10
 ### daily open to close variance and skew
 volume_daily <- xts::apply.daily(x=Vo(SPY), FUN=sum)
 colnames(volume_daily) <- paste0(sym_bol, ".Volume")
-var_daily <- (6.5*60*60)*xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="roll_variance", calc_method="rogers_satchell")
+var_daily <- (6.5*60*60)*xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="roll_variance", method="rogers_satchell")
 colnames(var_daily) <- paste0(sym_bol, ".Var")
 skew_daily <- xts::apply.daily(x=SPY, FUN=agg_stats_r, calc_bars="run_skew")
 skew_daily <- skew_daily/(var_daily)^(1.5)
@@ -174,7 +174,7 @@ returns_rolling <- roll_vwap(oh_lc=SPY, x_ts=returns_running, look_back=look_bac
 returns_rolling <- returns_rolling[end_points, ]
 
 ### calculate rolling SPY variance without overnight jumps
-var_rolling <- (6.5*60*60)*roll_variance(oh_lc=SPY, calc_method="rogers_satchell")
+var_rolling <- (6.5*60*60)*roll_variance(oh_lc=SPY, method="rogers_satchell")
 # calculate rolling SPY variance
 # var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, look_back=look_back)
 var_rolling <- var_rolling[end_points, ]
@@ -275,7 +275,7 @@ colnames(returns_running) <- "returns"
 colnames(returns_rolling) <- "returns.WA5"
 
 var_running <- (6.5*60*60)*run_variance(oh_lc=SPY)
-# var_running <- run_variance(oh_lc=SPY, calc_method="rogers_satchell")
+# var_running <- run_variance(oh_lc=SPY, method="rogers_satchell")
 # var_diff <- rutils::diff_xts(x_ts=var_running)
 var_rolling <- roll_vwap(oh_lc=SPY, x_ts=var_running, look_back=look_back)
 colnames(var_running) <- "variance"
@@ -335,7 +335,7 @@ colnames(volume_seasonal) <- paste0(sym_bol, ".volume_seasonal")
 season_data <- volume_seasonal
 
 # calculate intraday seasonality of variance
-var_seasonal <- season_ality((6.5*60*60)*run_variance(oh_lc=SPY[inter_val, 1:4], calc_method="rogers_satchell"))
+var_seasonal <- season_ality((6.5*60*60)*run_variance(oh_lc=SPY[inter_val, 1:4], method="rogers_satchell"))
 colnames(var_seasonal) <- paste0(sym_bol, ".var_seasonal")
 season_data <- var_seasonal
 
@@ -357,7 +357,7 @@ colnames(season_illiquid) <- paste0(sym_bol, ".season_illiquid")
 season_data <- season_illiquid
 
 # calculate intraday seasonality of skew
-skew_seasonal <- season_ality(run_skew(oh_lc=SPY[inter_val, 1:4], calc_method="rogers_satchell"))
+skew_seasonal <- season_ality(run_skew(oh_lc=SPY[inter_val, 1:4], method="rogers_satchell"))
 # skew_seasonal <- skew_seasonal/(var_seasonal)^(1.5)
 colnames(skew_seasonal) <- paste0(sym_bol, ".skew_seasonal")
 season_data <- skew_seasonal
@@ -485,7 +485,7 @@ sum(var_rolling)
 # calculate variance using all the different estimators in roll_variance()
 meth_ods <- c("close", "garman_klass", "rogers_satchell", "garman_klass_yz", "yang_zhang")
 sapply(meth_ods, function(meth_od) {
-  sum((6.5*60*60)*roll_variance(oh_lc, calc_method=meth_od))
+  sum((6.5*60*60)*roll_variance(oh_lc, method=meth_od))
 })
 
 # calculate secondly returns from TAQ data
@@ -501,7 +501,7 @@ boot_strap <- sapply(1:100, function(x) {
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
 # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum(HighFreq::roll_variance(oh_lc, look_back=look_back, calc_method=meth_od))
+    sum(HighFreq::roll_variance(oh_lc, look_back=look_back, method=meth_od))
   })  # end sapply
 })  # end sapply
 
@@ -535,7 +535,7 @@ boot_strap <- parLapply(clus_ter, 1:1000,
   oh_lc <- xts::to.period(x=x_ts, period="minutes")
   # calculate variance estimates
   sapply(meth_ods, function(meth_od) {
-    sum((6.5*60*60)*HighFreq::roll_variance(oh_lc, calc_method=meth_od))
+    sum((6.5*60*60)*HighFreq::roll_variance(oh_lc, method=meth_od))
   })  # end sapply
 }, re_turns=returns_running, in_dex=in_dex, meth_ods=meth_ods)  # end parLapply
 

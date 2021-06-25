@@ -21,7 +21,7 @@ Calculate the eigen decomposition of the covariance \emph{matrix} of returns
 using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_eigen()} first calculates the covariance 
+The function \code{calc_eigen()} first calculates the covariance
   \emph{matrix} of the returns, and then calculates its eigen decomposition.
 }
 \examples{

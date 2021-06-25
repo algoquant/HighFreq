@@ -25,11 +25,10 @@ Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 \code{RcppArmadillo}.
 }
 \details{
-The function \code{lag_it()} applies a lag to the input
-  \emph{matrix} by shifting its rows by the number equal to the argument
-  \code{lagg}. For positive \code{lagg} values, the rows are shifted forward
-  (down), and for negative \code{lagg} values they are shifted backward
-  (up). 
+The function \code{lag_it()} applies a lag to the input \emph{matrix} by
+  shifting its rows by the number equal to the argument \code{lagg}. For
+  positive \code{lagg} values, the rows are shifted forward (down), and for
+  negative \code{lagg} values they are shifted backward (up).
   
   The output \emph{matrix} is padded with either zeros (the default), or
   with rows of data from \code{se_ries}, so that it has the same dimensions

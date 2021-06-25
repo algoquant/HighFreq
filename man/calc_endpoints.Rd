@@ -25,13 +25,17 @@ A vector of equally spaced index values representing the end points
 Calculate a vector of end points that divides a vector into equal intervals.
 }
 \details{
-The end points are a vector of unsigned integers which divide a
-  vector of length equal to \code{len_gth} into equally spaced intervals. If
-  a whole number of intervals doesn't fit over the vector, then
+The end points are a vector of unsigned integers which divide a vector of
+  length equal to \code{len_gth} into equally spaced intervals. If a whole
+  number of intervals doesn't fit over the vector, then
   \code{calc_endpoints()} adds a stub interval either at the beginning (the
   default) or at the end.
-  The end points are shifted by \code{-1} because indexing starts at
-  \code{0} in \code{C++} code.
+
+  The end points are shifted by \code{-1} compared to \code{R} code because
+  indexing starts at \code{0} in \code{C++} code, while it starts at
+  \code{1} in \code{R} code.
+  So if \code{calc_endpoints()} is used in \code{R} code then \code{1}
+  should be added to it.
 
   The function \code{calc_endpoints()} is similar to the function
   \code{rutils::calc_endpoints()} from package

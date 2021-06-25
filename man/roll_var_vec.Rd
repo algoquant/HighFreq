@@ -25,10 +25,9 @@ interval for a single-column \emph{time series} or a \emph{vector}, using
 \code{RcppArmadillo}.
 }
 \details{
-The function \code{roll_var_vec()} calculates a \emph{vector} of
-  variance estimates over a rolling look-back interval for a single-column
-  \emph{time series} or a \emph{vector}, using \code{RcppArmadillo}
-  \code{C++} code.
+The function \code{roll_var_vec()} calculates a \emph{vector} of variance
+  estimates over a rolling look-back interval for a single-column \emph{time
+  series} or a \emph{vector}, using \code{RcppArmadillo} \code{C++} code.
   
   The function \code{roll_var_vec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the
@@ -50,7 +49,7 @@ all.equal(drop(HighFreq::roll_var_vec(re_turns, look_back=11))[-(1:10)],
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(
-  RcppArmadillo=HighFreq::roll_var_vec(re_turns, look_back=11),
+  Rcpp=HighFreq::roll_var_vec(re_turns, look_back=11),
   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

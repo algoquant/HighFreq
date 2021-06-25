@@ -2,18 +2,21 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_var}
 \alias{roll_var}
-\title{Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval attached at the end points of a \emph{time series} or a
+\title{Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
+look-back interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
-roll_var(se_ries, ste_p = 1L, look_back = 1L)
+roll_var(se_ries, ste_p = 1L, look_back = 11L, method = "variance")
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{ste_p}}{The number of time periods between the end points.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
+
+\item{\code{method}}{A \emph{character} string representing the type of
+measure of dispersion. (The default is the \code{method = "variance"}.)}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
@@ -21,23 +24,28 @@ A \emph{matrix} with the same number of columns as the input time
   points.
 }
 \description{
-Calculate a \emph{matrix} of variance estimates over a rolling look-back
-interval attached at the end points of a \emph{time series} or a
+Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
+look-back interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.
 }
 \details{
-The function \code{roll_var()} calculates a \emph{matrix} of
-  variance estimates over rolling look-back intervals attached at the end
+The function \code{roll_var()} calculates a \emph{matrix} of dispersion
+  (variance) estimates over rolling look-back intervals attached at the end
   points of the \emph{time series} \code{se_ries}.
   
-  The end points are calculated along the rows of \code{se_ries} using the
-  function \code{calc_endpoints()}, with the number of time periods between
-  the end points equal to \code{ste_p}.
+  It first calculates a vector of end points separated by \code{ste_p} time
+  periods. It calculates the end points along the rows of \code{se_ries}
+  using the function \code{calc_endpoints()}, with the number of time
+  periods between the end points equal to \code{ste_p} time periods.
   
-  At each end point, the variance is calculated over a look-back interval
-  equal to \code{look_back} number of end points.
-  In the initial warmup period, the variance is calculated over an expanding
-  look-back interval.
+  It then performs a loop over the end points, and at each end point it
+  subsets the time series \code{se_ries} over a look-back interval equal
+  to \code{look_back} number of end points.
+  
+  It passes the subset time series to the function \code{calc_var()}, which
+  calculates the dispersion.
+  See the function \code{calc_var()} for a description of the dispersion
+  methods.
   
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
@@ -66,7 +74,7 @@ all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ],
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(
-  RcppArmadillo=HighFreq::roll_var(re_turns, look_back=11),
+  Rcpp=HighFreq::roll_var(re_turns, look_back=11),
   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

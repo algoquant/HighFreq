@@ -26,8 +26,8 @@ A \emph{matrix} with two columns: the simulated returns and
 Simulate a \emph{GARCH} process using \emph{Rcpp}.
 }
 \details{
-The function \code{sim_garch()} simulates a \emph{GARCH} process
-  using fast \emph{Rcpp} \code{C++} code.
+The function \code{sim_garch()} simulates a \emph{GARCH} process using
+  fast \emph{Rcpp} \code{C++} code.
 }
 \examples{
 \dontrun{

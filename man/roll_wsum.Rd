@@ -5,13 +5,7 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_wsum(
-  se_ries,
-  look_back = 1L,
-  stu_b = NULL,
-  end_points = NULL,
-  weight_s = NULL
-)
+roll_wsum(se_ries, look_back = 1L, stu_b = NULL, end_p = NULL, weight_s = NULL)
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
@@ -23,7 +17,7 @@ is \code{look_back = 1}).}
 \item{\code{stu_b}}{An \emph{integer} value equal to the first stub interval
 for calculating the end points.}
 
-\item{\code{end_points}}{An \emph{unsigned integer} vector of end
+\item{\code{end_p}}{An \emph{unsigned integer} vector of end
 points.}
 
 \item{\code{weight_s}}{A column \emph{vector} of weights.}
@@ -37,19 +31,19 @@ Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.
 }
 \details{
-The function \code{roll_wsum()} calculates the rolling weighted
-  sums over the columns of the \code{se_ries} data. 
+The function \code{roll_wsum()} calculates the rolling weighted sums over
+  the columns of the \code{se_ries} data.
   
   The function \code{roll_wsum()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{se_ries}.
 
-  The arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
+  The arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
   optional.
   
   If the argument \code{weight_s} is not supplied, then simple sums are
   calculated, not weighted sums.
   
-  If either the \code{stu_b} or \code{end_points} arguments are supplied,
+  If either the \code{stu_b} or \code{end_p} arguments are supplied,
   then the rolling sums are calculated at the end points. 
   
   If only the argument \code{stu_b} is supplied, then the end points are
@@ -57,18 +51,18 @@ The function \code{roll_wsum()} calculates the rolling weighted
   end point is equal to \code{stu_b} and the end points are spaced
   \code{look_back} periods apart.
   
-  If the arguments \code{weight_s}, \code{end_points}, and \code{stu_b} are
+  If the arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
   not supplied, then the sums are calculated over a number of data points
   equal to \code{look_back}.
   
   The function \code{roll_wsum()} calculates the rolling weighted sums as
   convolutions of the \code{se_ries} columns with the \emph{vector} of
-  weights using the \code{RcppArmadillo} function \code{arma::conv2()}.
-  It performs a similar calculation to the standard \code{R} function
+  weights using the \code{RcppArmadillo} function \code{arma::conv2()}. It
+  performs a similar calculation to the standard \code{R} function
   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-  sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-  leading \code{NA} values. using fast \emph{RcppArmadillo} \code{C++} code.
-  The function \code{roll_wsum()} is several times faster than
+  sides=1)}, but it can be over \code{6} times faster, and it doesn't
+  produce any leading \code{NA} values.
+  The function \code{roll_wsum()} is also several times faster than
   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
   
   Technical note:
@@ -78,7 +72,7 @@ The function \code{roll_wsum()} calculates the rolling weighted
 \examples{
 \dontrun{
 # First example
-# Create series of historical returns
+# Calculate series of historical returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
@@ -86,7 +80,7 @@ look_back <- 22
 c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
 r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
 all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
-# Calculate rolling sums using pure R
+# Calculate rolling sums using R code
 r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
 lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 r_sum <- (r_sum - lag_sum)
@@ -103,8 +97,8 @@ lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
 r_sum <- (r_sum - lag_sum)
 all.equal(c_sum, r_sum, check.attributes=FALSE)
 
-# Calculate rolling sums at end points - pass in end_points
-c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p)
+# Calculate rolling sums at end points - pass in end_p
+c_sum <- HighFreq::roll_wsum(re_turns, end_p=end_p)
 all.equal(c_sum, r_sum, check.attributes=FALSE)
 
 # Create exponentially decaying weights
@@ -117,13 +111,13 @@ filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-c_sum <- HighFreq::roll_wsum(re_turns, end_points=end_p, weight_s=weight_s)
+c_sum <- HighFreq::roll_wsum(re_turns, end_p=end_p, weight_s=weight_s)
 all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weight_ed <- HighFreq::roll_wsum(re_turns, weight_s)
+weight_ed <- HighFreq::roll_wsum(re_turns, weight_s=weight_s)
 # Compare with original
 all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
 }

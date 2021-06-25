@@ -20,10 +20,9 @@ export(new_func)
 
 
 ## Steps to fix the NAMESPACE file after adding a new function - sometimes produces a bad NAMESPACE file
-1. Edit the NAMESPACE file and remove all lines
-2. In RStudio run "document package" - sometimes produces a bad NAMESPACE file
-3. Edit the NAMESPACE file again and remove all lines that don't contain export()
-4. Add by hand to top of NAMESPACE file the lines:
+1. In RStudio from Build menu run Document - usually produces a bad NAMESPACE file
+2. Edit the NAMESPACE file again and remove all lines that don't contain export()
+3. Move to top of NAMESPACE file the lines:
 useDynLib(HighFreq)
 importFrom(Rcpp, evalCpp)
 
@@ -81,11 +80,25 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Rename parameter calc_method to method
++ [ ] Rename the function roll_zscores() to roll_reg()
+Rewrite it to return a matrix of alphas, betas, tvals, and zscores.
 
-+ [ ] Merge function calc_mad() into calc_var() - add parameter "method" to calc_var()
++ [ ] Create function roll_reg() for performing rolling PCA and robust regressions
+Add option to perform rolling predictions using the regressions.
+It's already partially implemented in C:/Develop/R/Rcpp/roll_reg.cpp
 
-+ [ ] Modify function roll_var() to calculate the rolling MAD, and other robust estimators - add parameter "method" similar to calc_var() 
++ [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
+
++ [ ] Create function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
+It should return a named vector of coefficients, z-scores, R-squared, etc.
+It should calculate Pearson, Spearman, and Kendall correlations.
+
++ [ ] Modify function calc_lm() by adding Boolean parameter to add intercept column to explanatory matrix
+
++ [ ] Modify function calc_var() to calculate the robust dispersion estimators
+
++ [ ] Modify function roll_var() to use moment update formulas from package fromo: Pebay Fast Moments.pdf
+Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
 
 + [ ] Create a function called calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
@@ -110,9 +123,12 @@ Worker agg_ohlc()
 
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2()
 
++ [ ] Update functions kurtosis_type() and calc_kurtosis() with actual kurtosis methods.
+
 + [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
 + [ ] Deprecate function roll_conv_ref() ?
+Does it actually calculate by reference?
 
 + [ ] Combine functions sim_ou() and sim_schwartz() into a single function?
 
@@ -136,27 +152,11 @@ The H statistic is reminiscent of the difference between the mean asset returns 
 + [ ] Create function calc_ret_stats() for calculating aggregations (statistics) over a vector of returns
 Examples of statistics are the mean, median, Sharpe ratio (t-value), Wilcoxon statistic, etc.
 
-+ [ ] Create function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
-It should return a named vector of coefficients, z-scores, R-squared, etc.
-It should calculate Pearson, Spearman, and Kendall correlations.
-
-+ [ ] Create function roll_reg() for performing rolling PCA and robust regressions  
-Add option to perform rolling predictions using the regressions.
-It's already partially implemented in C:/Develop/R/Rcpp/roll_reg.cpp
-
-+ [ ] Create a function called roll_stdev() for the rolling dispersion estimator (second moment) using RcppArmadillo: rolling standard deviation, MAD, and other unimodal robust estimators
-Use moment update formulas from package fromo: Pebay Fast Moments.pdf
-Calculate running variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
-+ [ ] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators - It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
-
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions
 
 + [ ] Modify back_test() add parameter for lagging the weights - for applying the weights with an extra lag
 
 + [ ] Convert all time loops to loops over the end points, using calc_endpoints() and calc_startpoints()
-
-+ [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 
 + [ ] Create a function called roll_quantile() for the rolling quantile
 
@@ -167,13 +167,28 @@ Apply it to the calculation or rolling quantiles.
 
 + [ ] Modify calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
 
-+ [ ] Add roxygen code for inherited parameters
-Use the example roxygen code:
++ [ ] Add roxygen2 options for inherited parameters - but doesn't wotk in Rcpp
+Use the example roxygen code in R code:
 //' @inheritParams which_extreme
+
++ [ ] Fix the inheritParams Roxygen2 option in HighFreq.cpp
+After installing roxygen2:
+devtools::install_github("r-lib/roxygen2")
+These Roxygen2 options don't work
+@inheritParams calc_var
+@inherit calc_var return params
+https://gallery.rcpp.org/articles/documenting-rcpp-packages
+https://cran.r-project.org/web/packages/roxygen2/news/news.html
+https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html#inheriting-documentation-from-other-topics
+https://stackoverflow.com/questions/65739109/r-r6-inheritance-with-roxygen2-class-parentclass-is-not-exported-by-namespa
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
 + [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
+
++ [ ] Create function roll_fun() that accepts a function pointer argument and rolls it over end points
+Adapt function roll_var() or roll_skew().
+Initial attempts show that it's a very difficult project because the calc_* functions have different arguments.
 
 + [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
 https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
@@ -183,6 +198,8 @@ https://bytes.com/topic/c/answers/561361-string-convert-function-name
 + [ ] Pass a function pointer
 https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
+test_xptr.cpp
+xptr_drivers.R
 
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
@@ -342,6 +359,26 @@ https://cran.r-project.org/web/packages/meboot/index.html
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
++ [x] Create function roll_kurtosis() for the rolling kurtosis estimator (fourth moment) using RcppArmadillo
+It's already copied from C:/Develop/R/Rcpp/roll_kurtosis.cpp
+
++ [x] Create a function called roll_skew() for the rolling skewness estimator (third moment) using RcppArmadillo: include robust estimators
+It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
+
++ [x] In all the calc_* functions, return zero if number of rows is small
+
++ [x] Modify function roll_var() to calculate the rolling variance, MAD, and other robust estimators - add parameter "method" similar to calc_var() 
+
++ [x] Remove unnecessary pointer "&" and "const" attributes from input arguments
+
++ [x] Merge function calc_mad() into calc_var() - add parameter "method" to calc_var()
+
++ [x] In roll_wsum(), fix the naming conflict with the end_p argument, by declaring an internal Armadillo variable end_parma
+
++ [x] Fill new vectors and matrices with zeros using fill::zeros
+
++ [x] Rename parameter calc_method to method
+
 + [x] Create functions sim_ou() and sim_schwartz() to simulate the Ornstein-Uhlenbeck process and the Schwartz process.
 
 + [x] Rename argument t_series to se_ries
@@ -429,7 +466,7 @@ The function roll_wsum() is for vectors and is not the same as roll_conv() which
 
 + [x] Rename roll_var() to roll_var_vec() and update its documentation
 
-+ [x] Create a function called roll_var() in RcppArmadillo which calculates the rolling variance over a matrix
++ [x] Create a function called roll_var() in RcppArmadillo which calculates the rolling dispersion estimator (variance - second moment) over a matrix using RcppArmadillo
 
 + [x] Create the functions called diff_vec() and diff_it() (for matrices), similar to rutils::diff_it(), using the RcppArmadillo function arma::diff()
 
@@ -657,9 +694,9 @@ in roll_hurst() replace TTR::runMax() with RcppRoll::roll_max()
 + [x] Create function calc_variance() which calculates a single variance number from the output of run_variance()
 
 + [x] Create function roll_variance() that replicates TTR::volatility()  
-clone run_variance(), but modify it by subtracting the means
-use functions RcppRoll::roll_var() and rutils::roll_sum()
-add correct coefficient co_eff for yang_zhang method
+Clone run_variance(), but modify it by subtracting the means
+Use functions RcppRoll::roll_var() and rutils::roll_sum()
+Add correct coefficient co_eff for yang_zhang method
 
 + [x] Modify comments for function run_variance() to explain that it's only an indicator, not an estimator
 
@@ -760,6 +797,8 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Create a function called roll_stdev() for the rolling standard deviation, MAD, and other unimodal robust estimators
 
 + [ ] Convert roll_* functions to RcppRoll ?  No, because RcppArmadillo and Rcpp are better
 

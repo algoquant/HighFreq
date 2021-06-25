@@ -19,11 +19,11 @@ Calculate the ranks of the elements of a single-column \emph{time series} or
 a \emph{vector} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_ranks()} calculates the ranks of the
-  elements of a single-column \emph{time series} or a \emph{vector}.
-  It uses the \code{RcppArmadillo} function \code{arma::sort_index()}.
-  The function \code{arma::sort_index()} calculates the permutation index to
-  sort a given vector into ascending order.
+The function \code{calc_ranks()} calculates the ranks of the elements of a
+  single-column \emph{time series} or a \emph{vector}. It uses the
+  \code{RcppArmadillo} function \code{arma::sort_index()}. The function
+  \code{arma::sort_index()} calculates the permutation index to sort a given
+  vector into ascending order.
   
   Applying the function \code{arma::sort_index()} twice:
   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}

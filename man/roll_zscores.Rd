@@ -25,9 +25,9 @@ Perform rolling regressions over the rows of the design matrix, and
 calculate a \emph{vector} of z-scores of the residuals.
 }
 \details{
-The function \code{roll_zscores()} performs rolling regressions
-  along the rows of the design \emph{matrix} \code{de_sign}, using the
-  function \code{calc_lm()}.
+The function \code{roll_zscores()} performs rolling regressions along the
+  rows of the design \emph{matrix} \code{de_sign}, using the function
+  \code{calc_lm()}.
   
   The function \code{roll_zscores()} performs a loop over the rows of
   \code{de_sign}, and it subsets \code{de_sign} and \code{res_ponse} over a

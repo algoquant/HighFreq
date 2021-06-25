@@ -5,30 +5,28 @@
 \title{Calculate a vector of start points equal to the lag of a vector of end
 points.}
 \usage{
-calc_startpoints(end_points, look_back)
+calc_startpoints(end_p, look_back)
 }
 \arguments{
-\item{\code{end_points}}{An \emph{unsigned integer} vector of end
-points.}
+\item{\code{end_p}}{An \emph{unsigned integer} vector of end points.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 lag applied to the end points.}
 }
 \value{
 An \emph{integer} vector of start points (vector of unsigned
-  integers), associated with the vector \code{end_points}.
+  integers), associated with the vector \code{end_p}.
 }
 \description{
 Calculate a vector of start points equal to the lag of a vector of end
 points.
 }
 \details{
-The start points are equal to the values of the vector
-  \code{end_points} lagged by an amount equal to \code{look_back}. In
-  addition, an extra \code{1} is added to them, to avoid data overlaps.  The
-  lag operation requires adding a beginning warmup interval containing
-  zeros, so that the vector of start points has the same length as the
-  \code{end_points}.
+The start points are equal to the values of the vector \code{end_p} lagged
+  by an amount equal to \code{look_back}. In addition, an extra \code{1} is
+  added to them, to avoid data overlaps.  The lag operation requires adding
+  a beginning warmup interval containing zeros, so that the vector of start
+  points has the same length as the \code{end_p}.
   
   For example, consider the end points for a vector of length \code{25}
   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
