@@ -884,6 +884,92 @@ calc_skew <- function(se_ries, method = "pearson", al_pha = 0.25) {
     .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', se_ries, method, al_pha)
 }
 
+#' Calculate the kurtosis of the columns of a \emph{time series} or a
+#' \emph{matrix} using \code{RcppArmadillo}.
+#'
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+#'
+#' @param \code{method} A \emph{string} specifying the type of kurtosis (see
+#'   Details). (The default is the \code{method = "kurt_mom"}.)
+#'
+#' @param \code{al_pha} The confidence level for calculating the quantiles.
+#'   (the default is \code{al_pha = 0.25}).
+#'
+#' @return A single-row matrix with the kurtosis of the columns of
+#'   \code{se_ries}.
+#'
+#' @details 
+#'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
+#'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
+#'   \code{C++} code.
+#'
+#'   If \code{method = "kurt_mom"} (the default) then \code{calc_kurtosis()}
+#'   calculates the kurt_mom kurtosis using the third moment of the data.
+#'
+#'   If \code{method = "kurt_quant"} then it calculates the kurtosis using the
+#'   differences between the quantiles of the data.
+#'
+#'   If \code{method = "kurt_np"} then it calculates the kurtosis as the
+#'   difference between the mean of the data minus its median, divided by the
+#'   standard deviation.
+#'   
+#'   If the number of rows of \code{se_ries} is less than \code{3} then it
+#'   returns zeros.
+#'   
+#'   The code examples below compare the function \code{calc_kurtosis()} with the
+#'   kurtosis calculated using \code{R} code.
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate VTI returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' # Calculate the kurt_mom kurtosis
+#' HighFreq::calc_kurtosis(re_turns)
+#' # Compare HighFreq::calc_kurtosis() with kurt_mom kurtosis
+#' calc_kurtosisr <- function(x) {
+#'   x <- (x-mean(x)); nr <- NROW(x);
+#'   nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
+#' }  # end calc_kurtosisr
+#' all.equal(HighFreq::calc_kurtosis(re_turns), 
+#'   calc_kurtosisr(re_turns), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_kurtosis(re_turns),
+#'   Rcode=calc_kurtosisr(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the kurt_quant kurtosis
+#' HighFreq::calc_kurtosis(re_turns, method = "quantile", al_pha = 0.1)
+#' # Compare HighFreq::calc_kurtosis() with quantile kurtosis
+#' calc_kurtosisq <- function(x) {
+#'   	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
+#'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+#' }  # end calc_kurtosisq
+#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method = "kurt_quant")), 
+#'   calc_kurtosisq(re_turns), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_kurtosis(re_turns, method = "kurt_quant"),
+#'   Rcode=calc_kurtosisq(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the kurt_np kurtosis
+#' HighFreq::calc_kurtosis(re_turns, method = "kurt_np")
+#' # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
+#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method = "kurt_np")), 
+#'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+#'   check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_kurtosis(re_turns, method = "kurt_np"),
+#'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_kurtosis <- function(se_ries, method = "kurt_mom", al_pha = 0.25) {
+    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', se_ries, method, al_pha)
+}
+
 #' Perform multivariate linear regression using \emph{Rcpp}.
 #' 
 #' @param \code{res_ponse} A \emph{vector} of response data.
@@ -1715,8 +1801,8 @@ roll_var_ohlc <- function(oh_lc, ste_p = 1L, look_back = 1L, method = "yang_zhan
 #' # Define time series of returns using package rutils
 #' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 #' # Define end points and start points
-#' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), ste_p)
-#' start_p <- HighFreq::calc_startpoints(end_p, 3)
+#' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), ste_p=25)
+#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
 #' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
 #' skew_ness <- HighFreq::roll_skew(re_turns, ste_p=25, look_back=3)
 #' # Calculate the rolling skewness using R code
@@ -1737,6 +1823,82 @@ roll_var_ohlc <- function(oh_lc, ste_p = 1L, look_back = 1L, method = "yang_zhan
 #' @export
 roll_skew <- function(se_ries, ste_p = 1L, look_back = 11L, method = "pearson", al_pha = 0.25) {
     .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', se_ries, ste_p, look_back, method, al_pha)
+}
+
+#' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
+#' interval attached at the end points of a \emph{time series} or a
+#' \emph{matrix}.
+#'
+#' @param \code{se_ries} A \emph{time series} or a \emph{matrix} of data.
+#'    
+#' @param \code{ste_p} The number of time periods between the end points.
+#'
+#' @param \code{look_back} The number of end points in the look-back interval.
+#'
+#' @param \code{method} A \emph{string} specifying the type of kurtosis.  (The
+#'   default is the \code{method = "pearson"}.)
+#'
+#' @param \code{al_pha} The confidence level for calculating the quantiles.
+#'   (the default is \code{al_pha = 0.25}).
+#'
+#' @return A \emph{matrix} with the same number of columns as the input time
+#'   series \code{se_ries}, and the number of rows equal to the number of end
+#'   points.
+#'   
+#' @details 
+#'   The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
+#'   estimates over rolling look-back intervals attached at the end points of
+#'   the \emph{time series} \code{se_ries}.
+#'   
+#'   It first calculates a vector of end points separated by \code{ste_p} time
+#'   periods. It calculates the end points along the rows of \code{se_ries}
+#'   using the function \code{calc_endpoints()}, with the number of time
+#'   periods between the end points equal to \code{ste_p} time periods.
+#'   
+#'   It then performs a loop over the end points, and at each end point it
+#'   subsets the time series \code{se_ries} over a look-back interval equal
+#'   to \code{look_back} number of end points.
+#'   
+#'   It passes the subset time series to the function \code{calc_kurtosis()}, which
+#'   calculates the kurtosis.
+#'   See the function \code{calc_kurtosis()} for a description of the kurtosis
+#'   methods.
+#'   
+#'   For example, the rolling kurtosis at \code{25} day end points, with a
+#'   \code{75} day look-back, can be calculated using the parameters
+#'   \code{ste_p = 25} and \code{look_back = 3}.
+#'
+#'   The function \code{roll_kurtosis()} is implemented in \code{RcppArmadillo}
+#'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+#'   code.
+#'
+#' @examples
+#' \dontrun{
+#' # Define time series of returns using package rutils
+#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' # Define end points and start points
+#' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), ste_p=25)
+#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
+#' kurto_sis <- HighFreq::roll_kurtosis(re_turns, ste_p=25, look_back=3)
+#' # Calculate the rolling kurtosis using R code
+#' kurto_r <- sapply(1:NROW(end_p), function(it) {
+#'   HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+#' })  # end sapply
+#' # Compare the kurtosis estimates
+#' all.equal(drop(kurto_sis), kurto_r, check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::roll_kurtosis(re_turns, ste_p=25, look_back=3),
+#'   Rcode=sapply(1:NROW(end_p), function(it) {
+#'     HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+#'   }),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' @export
+roll_kurtosis <- function(se_ries, ste_p = 1L, look_back = 11L, method = "pearson", al_pha = 0.25) {
+    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', se_ries, ste_p, look_back, method, al_pha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a

@@ -194,6 +194,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_kurtosis
+arma::mat calc_kurtosis(arma::mat se_ries, std::string method, double al_pha);
+RcppExport SEXP _HighFreq_calc_kurtosis(SEXP se_riesSEXP, SEXP methodSEXP, SEXP al_phaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type se_ries(se_riesSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_kurtosis(se_ries, method, al_pha));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_lm
 Rcpp::List calc_lm(arma::vec res_ponse, arma::mat de_sign);
 RcppExport SEXP _HighFreq_calc_lm(SEXP res_ponseSEXP, SEXP de_signSEXP) {
@@ -372,6 +385,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// roll_kurtosis
+arma::mat roll_kurtosis(arma::mat se_ries, arma::uword ste_p, arma::uword look_back, std::string method, double al_pha);
+RcppExport SEXP _HighFreq_roll_kurtosis(SEXP se_riesSEXP, SEXP ste_pSEXP, SEXP look_backSEXP, SEXP methodSEXP, SEXP al_phaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type se_ries(se_riesSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type ste_p(ste_pSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< double >::type al_pha(al_phaSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_kurtosis(se_ries, ste_p, look_back, method, al_pha));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_scale
 arma::mat roll_scale(arma::mat mat_rix, arma::uword look_back, bool use_median);
 RcppExport SEXP _HighFreq_roll_scale(SEXP mat_rixSEXP, SEXP look_backSEXP, SEXP use_medianSEXP) {
@@ -510,6 +538,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_var_ohlc", (DL_FUNC) &_HighFreq_calc_var_ohlc, 5},
     {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
     {"_HighFreq_calc_skew", (DL_FUNC) &_HighFreq_calc_skew, 3},
+    {"_HighFreq_calc_kurtosis", (DL_FUNC) &_HighFreq_calc_kurtosis, 3},
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},
     {"_HighFreq_agg_ohlc", (DL_FUNC) &_HighFreq_agg_ohlc, 1},
     {"_HighFreq_roll_count", (DL_FUNC) &_HighFreq_roll_count, 1},
@@ -524,6 +553,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_var", (DL_FUNC) &_HighFreq_roll_var, 4},
     {"_HighFreq_roll_var_ohlc", (DL_FUNC) &_HighFreq_roll_var_ohlc, 6},
     {"_HighFreq_roll_skew", (DL_FUNC) &_HighFreq_roll_skew, 5},
+    {"_HighFreq_roll_kurtosis", (DL_FUNC) &_HighFreq_roll_kurtosis, 5},
     {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 3},
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 3},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
