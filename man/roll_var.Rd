@@ -6,17 +6,17 @@
 look-back interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
-roll_var(se_ries, ste_p = 1L, look_back = 11L, method = "variance")
+roll_var(se_ries, step = 1L, look_back = 11L, method = "moment")
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{ste_p}}{The number of time periods between the end points.}
+\item{\code{step}}{The number of time periods between the end points.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
 
 \item{\code{method}}{A \emph{character} string representing the type of
-measure of dispersion. (The default is the \code{method = "variance"}.)}
+measure of dispersion. (The default is the \code{method = "moment"}.)}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
@@ -33,10 +33,10 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   (variance) estimates over rolling look-back intervals attached at the end
   points of the \emph{time series} \code{se_ries}.
   
-  It first calculates a vector of end points separated by \code{ste_p} time
+  It first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{se_ries}
   using the function \code{calc_endpoints()}, with the number of time
-  periods between the end points equal to \code{ste_p} time periods.
+  periods between the end points equal to \code{step} time periods.
   
   It then performs a loop over the end points, and at each end point it
   subsets the time series \code{se_ries} over a look-back interval equal
@@ -49,9 +49,9 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{ste_p = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{look_back = 3}.
 
-  The function \code{roll_var()} with the parameter \code{ste_p = 1}
+  The function \code{roll_var()} with the parameter \code{step = 1}
   performs the same calculation as the function \code{roll_var()} from
   package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
@@ -67,7 +67,7 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
 # Define time series of returns using package rutils
 re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-vari_ance <- HighFreq::roll_var(re_turns, ste_p=25, look_back=3)
+vari_ance <- HighFreq::roll_var(re_turns, step=25, look_back=3)
 # Compare the variance estimates over 11-period lookback intervals
 all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)

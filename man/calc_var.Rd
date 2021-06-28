@@ -2,24 +2,24 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var}
 \alias{calc_var}
-\title{Calculate the dispersion of the columns of a \emph{time series} or a
-\emph{matrix} using \code{RcppArmadillo}.}
+\title{Calculate the dispersion (variance) of the columns of a \emph{time series}
+or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(se_ries, method = "variance")
+calc_var(se_ries, method = "moment")
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{character} string representing the type of
-measure of dispersion. (The default is the \code{method = "variance"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of dispersion model
+(see Details). (The default is the \code{method = "moment"}.)}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix
   \code{se_ries}.
 }
 \description{
-Calculate the dispersion of the columns of a \emph{time series} or a
-\emph{matrix} using \code{RcppArmadillo}.
+Calculate the dispersion (variance) of the columns of a \emph{time series}
+or a \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
 The dispersion is a measure of the variability of the data.  Examples of
@@ -29,18 +29,22 @@ The dispersion is a measure of the variability of the data.  Examples of
   columns of a \emph{time series} or a \emph{matrix} of data using
   \code{RcppArmadillo} \code{C++} code.
   
-  The dispersion methods include:
-  \itemize{
-    \item "variance" for the variance,
-    \item "mad" for the Median Absolute Deviation (\emph{MAD}),
-   }
-  
-  If \code{method = "variance"} then \code{calc_var()} performs the same
+  If \code{method = "moment"} (the default) then \code{calc_var()}
+  calculates the dispersion as the second moment of the data \eqn{\sigma^2}
+  (the variance).
+
+  If \code{method = "quantile"} then it calculates the dispersion as the
+  Median Absolute Deviation (\emph{MAD}):
+  \deqn{
+    MAD = median(abs(x - median(x)))
+  }
+
+  If \code{method = "moment"} then \code{calc_var()} performs the same
   calculation as the function \code{colVars()} from package
   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 
-  If \code{method = "mad"} then \code{calc_var()} performs the same
+  If \code{method = "quantile"} then \code{calc_var()} performs the same
   calculation as the function \code{stats::mad()}, but it's much faster
   because it uses \code{RcppArmadillo} \code{C++} code.
 
@@ -51,10 +55,10 @@ The dispersion is a measure of the variability of the data.  Examples of
 \dontrun{
 # Calculate VTI and XLF returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
-# Compare calc_var() with standard var()
+# Compare HighFreq::calc_var() with standard var()
 all.equal(drop(HighFreq::calc_var(re_turns)), 
   apply(re_turns, 2, var), check.attributes=FALSE)
-# Compare calc_var() with matrixStats
+# Compare HighFreq::calc_var() with matrixStats
 all.equal(drop(HighFreq::calc_var(re_turns)), 
   matrixStats::colVars(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
@@ -64,12 +68,12 @@ summary(microbenchmark(
   matrixStats=matrixStats::colVars(re_turns),
   Rcode=apply(re_turns, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-# Compare calc_var() with stats::mad()
-all.equal(drop(HighFreq::calc_var(re_turns, method="mad")), 
+# Compare HighFreq::calc_var() with stats::mad()
+all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
   sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(re_turns, method="mad"),
+  Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
   Rcode=sapply(re_turns, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

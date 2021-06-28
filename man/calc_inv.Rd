@@ -5,21 +5,22 @@
 \title{Calculate the regularized inverse of the covariance \emph{matrix} of returns
 using \code{RcppArmadillo}.}
 \usage{
-calc_inv(re_turns, to_l = 0.001, max_eigen = 0L)
+calc_inv(re_turns, eigen_thresh = 0.001, eigen_max = 0L)
 }
 \arguments{
 \item{\code{re_turns}}{A \emph{time series} or \emph{matrix} of returns data.}
 
-\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
-eigenvalues in order to regularize the matrix inverse.  (The default is
-\code{0.001})}
+\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+small eigenvalues in order to regularize the matrix inverse.  (The default
+is \code{0.001})}
 
-\item{\code{max_eigen}}{An \emph{integer} equal to the regularization
+\item{\code{eigen_max}}{An \emph{integer} equal to the regularization
 intensity (the number of eigenvalues and eigenvectors used for calculating
 the regularized inverse).}
 }
 \value{
-A \emph{matrix} equal to the regularized inverse.
+A \emph{matrix} equal to the regularized inverse of the covariance
+  matrix of re_turns.
 }
 \description{
 Calculate the regularized inverse of the covariance \emph{matrix} of returns
@@ -28,26 +29,26 @@ using \code{RcppArmadillo}.
 \details{
 The function calc_inv() calculates the regularized inverse of the
   \emph{covariance matrix}, by discarding eigenvectors with small
-  eigenvalues less than the tolerance level \code{to_l}.
+  eigenvalues less than the threshold level \code{eigen_thresh}.
   The function \code{calc_inv()} first calculates the covariance
   \emph{matrix} of the \code{re_turns}, and then it calculates its
   regularized inverse.
-  If \code{max_eigen} is not specified then it calculates the
+  If \code{eigen_max} is not specified then it calculates the
   regularized inverse using the function \code{arma::pinv()}.
-  If \code{max_eigen} is specified then it calculates the regularized
-  inverse using eigen decomposition with only the largest \code{max_eigen}
+  If \code{eigen_max} is specified then it calculates the regularized
+  inverse using eigen decomposition with only the largest \code{eigen_max}
   eigenvalues and their corresponding eigenvectors.
 }
 \examples{
 \dontrun{
 # Create random matrix
 re_turns <- matrix(rnorm(500), nc=5)
-max_eigen <- 3
+eigen_max <- 3
 # Calculate regularized inverse using RcppArmadillo
-in_verse <- HighFreq::calc_inv(re_turns, max_eigen)
+in_verse <- HighFreq::calc_inv(re_turns, eigen_max)
 # Calculate regularized inverse from eigen decomposition in R
 ei_gen <- eigen(cov(re_turns))
-inverse_r <-  ei_gen$vectors[, 1:max_eigen] \%*\% (t(ei_gen$vectors[, 1:max_eigen]) / ei_gen$values[1:max_eigen])
+inverse_r <-  ei_gen$vectors[, 1:eigen_max] \%*\% (t(ei_gen$vectors[, 1:eigen_max]) / ei_gen$values[1:eigen_max])
 # Compare RcppArmadillo with R
 all.equal(in_verse, inverse_r)
 }

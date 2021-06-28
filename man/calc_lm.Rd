@@ -2,54 +2,60 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_lm}
 \alias{calc_lm}
-\title{Perform multivariate linear regression using \emph{Rcpp}.}
+\title{Perform multivariate linear regression using least squares and return a
+named list.}
 \usage{
-calc_lm(res_ponse, de_sign)
+calc_lm(response, design)
 }
 \arguments{
-\item{\code{res_ponse}}{A \emph{vector} of response data.}
+\item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
+of response data.}
 
-\item{\code{de_sign}}{A \emph{matrix} of design (predictor i.e.
-explanatory) data.}
+\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
+(predictor or explanatory data).}
 }
 \value{
 A named list with three elements: a \emph{matrix} of coefficients
   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
-  coefficients named \emph{"coefficients"} containes the alpha and beta
+  coefficients named \emph{"coefficients"} contains the alpha and beta
   coefficients, and their \emph{t-values} and \emph{p-values}.
 }
 \description{
-Perform multivariate linear regression using \emph{Rcpp}.
+Perform multivariate linear regression using least squares and return a
+named list.
 }
 \details{
 The function \code{calc_lm()} performs the same calculations as the
-  function \code{lm()} from package \emph{stats}. It uses
-  \code{RcppArmadillo} \code{C++} code and is about \emph{10} times faster
+  function \code{lm()} from package \emph{stats}. 
+  It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
   than \code{lm()}. The code was inspired by this article (but it's not
   identical to it):
   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
 }
 \examples{
 \dontrun{
-# Define design matrix with explanatory variables
-len_gth <- 100; n_var <- 5
-de_sign <- matrix(rnorm(n_var*len_gth), nc=n_var)
-# Response equals linear form plus error terms
-weight_s <- rnorm(n_var)
-res_ponse <- -3 + de_sign \%*\% weight_s + rnorm(len_gth, sd=0.5)
+# Calculate historical returns
+re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
+# Response equals IEF returns
+res_ponse <- re_turns[, 1]
+# Design matrix equals VTI and XLF returns
+de_sign <- re_turns[, -1]
 # Perform multivariate regression using lm()
 reg_model <- lm(res_ponse ~ de_sign)
 sum_mary <- summary(reg_model)
 # Perform multivariate regression using calc_lm()
-reg_model_arma <- calc_lm(res_ponse=res_ponse, de_sign=de_sign)
-reg_model_arma$coefficients
+reg_arma <- HighFreq::calc_lm(response=res_ponse, design=de_sign)
 # Compare the outputs of both functions
-all.equal(reg_model_arma$coefficients[, "coeff"], unname(coef(reg_model)))
-all.equal(unname(reg_model_arma$coefficients), unname(sum_mary$coefficients))
-all.equal(drop(reg_model_arma$residuals), unname(reg_model$residuals))
-all.equal(unname(reg_model_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
+all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
+all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
+all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
+# Compare the speed of RcppArmadillo with R code
+summary(microbenchmark(
+  Rcpp=HighFreq::calc_lm(response=res_ponse, design=de_sign),
+  Rcode=lm(res_ponse ~ de_sign),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
 }

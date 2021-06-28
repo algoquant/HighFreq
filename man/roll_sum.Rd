@@ -36,7 +36,7 @@ The function \code{roll_sum()} calculates the rolling sums over the
 }
 \examples{
 \dontrun{
-# Calculate series of historical returns
+# Calculate historical returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22

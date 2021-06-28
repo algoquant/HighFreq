@@ -8,10 +8,10 @@ interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_var_ohlc(
   oh_lc,
-  ste_p = 1L,
+  step = 1L,
   look_back = 1L,
   method = "yang_zhang",
-  scal_e = TRUE,
+  scale = TRUE,
   in_dex = 0L
 )
 }
@@ -19,7 +19,7 @@ roll_var_ohlc(
 \item{\code{oh_lc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 price data.}
 
-\item{\code{ste_p}}{The number of time periods between the end points.}
+\item{\code{step}}{The number of time periods between the end points.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
 
@@ -34,9 +34,9 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \emph{"yang_zhang"} estimator.)}
 
-\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
+\item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
-\code{scal_e = TRUE}.)}
+\code{scale = TRUE}.)}
 
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
@@ -60,7 +60,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
 
   The end points are calculated along the rows of \code{oh_lc} using the
   function \code{calc_endpoints()}, with the number of time periods between
-  the end points equal to \code{ste_p}.
+  the end points equal to \code{step}.
   
   The function \code{roll_var_ohlc()} performs a loop over the end points,
   subsets the previous (past) rows of \code{oh_lc}, and passes them into the
@@ -72,13 +72,13 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   look-back interval.
   
   For example, the rolling variance at daily end points with an \code{11}
-  day look-back, can be calculated using the parameters \code{ste_p = 1} and
+  day look-back, can be calculated using the parameters \code{step = 1} and
   \code{look_back = 11} (Assuming the \code{oh_lc} data has daily
   frequency.)
 
   Similarly, the rolling variance at \code{25} day end points with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{ste_p = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
+  \code{step = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
 
   The function \code{roll_var_ohlc()} calculates the variance from all the
   different intra-day and day-over-day returns (defined as the differences
@@ -92,7 +92,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the returns are
+  If \code{scale} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
   the variance from minutely bar data, because dividing returns by the
@@ -118,17 +118,17 @@ sp_y <- log(HighFreq::SPY)
 in_dex <- c(1, diff(xts::.index(sp_y)))
 # Rolling variance at minutely end points, with a 21 minute look-back
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
-                              ste_p=1, look_back=21, 
+                              step=1, look_back=21, 
                               method="yang_zhang", 
-                              in_dex=in_dex, scal_e=TRUE)
+                              in_dex=in_dex, scale=TRUE)
 # Daily OHLC prices
 oh_lc <- rutils::etf_env$VTI
 in_dex <- c(1, diff(xts::.index(oh_lc)))
 # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
-                              ste_p=5, look_back=4, 
+                              step=5, look_back=4, 
                               method="yang_zhang", 
-                              in_dex=in_dex, scal_e=TRUE)
+                              in_dex=in_dex, scale=TRUE)
 # Same calculation in R
 n_rows <- NROW(oh_lc)
 lag_close = HighFreq::lag_it(oh_lc[, 4])
@@ -140,7 +140,7 @@ var_rollingr <- sapply(2:n_pts, function(it) {
   sub_ohlc = oh_lc[ran_ge, ]
   sub_close = lag_close[ran_ge]
   sub_index = in_dex[ran_ge]
-  HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scal_e=TRUE, in_dex=sub_index)
+  HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scale=TRUE, in_dex=sub_index)
 })  # end sapply
 var_rollingr <- c(0, var_rollingr)
 all.equal(drop(var_rolling), var_rollingr)

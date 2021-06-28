@@ -4,23 +4,23 @@
 \alias{sim_garch}
 \title{Simulate a \emph{GARCH} process using \emph{Rcpp}.}
 \usage{
-sim_garch(om_ega, al_pha, be_ta, in_nov)
+sim_garch(omega, alpha, beta, innov)
 }
 \arguments{
-\item{\code{om_ega}}{Parameter proportional to the long-term average level
+\item{\code{omega}}{Parameter proportional to the long-term average level
 of variance.}
 
-\item{\code{al_pha}}{The weight associated with recent realized variance
+\item{\code{alpha}}{The weight associated with recent realized variance
 updates.}
 
-\item{\code{be_ta}}{The weight associated with the past variance estimates.}
+\item{\code{beta}}{The weight associated with the past variance estimates.}
 
-\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
 A \emph{matrix} with two columns: the simulated returns and
   variance, and with the same number of rows as the length of the argument 
-  \code{in_nov}.
+  \code{innov}.
 }
 \description{
 Simulate a \emph{GARCH} process using \emph{Rcpp}.
@@ -32,11 +32,11 @@ The function \code{sim_garch()} simulates a \emph{GARCH} process using
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-om_ega <- 0.01
+ome_ga <- 0.01
 al_pha <- 0.5
 be_ta <- 0.2
 # Simulate the GARCH process using Rcpp
-garch_rcpp <- sim_garch(om_ega=om_ega, al_pha=al_pha, be_ta=be_ta, in_nov=rnorm(10000))
+garch_rcpp <- sim_garch(omega=ome_ga, alpha=al_pha, beta=be_ta, innov=rnorm(10000))
 }
 
 }

@@ -9,7 +9,7 @@ calc_var_ohlc(
   oh_lc,
   method = "yang_zhang",
   lag_close = 0L,
-  scal_e = TRUE,
+  scale = TRUE,
   in_dex = 0L
 )
 }
@@ -32,9 +32,9 @@ estimator for calculating the variance.  The estimators include:
 of the \emph{OHLC time series}.  This is an optional argument. (The
 default is \code{lag_close = 0}.)}
 
-\item{\code{scal_e}}{\emph{Boolean} argument: Should the returns be divided
+\item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
-\code{scal_e = TRUE}.)}
+\code{scale = TRUE}.)}
 
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument. (The default is \code{in_dex = 0}.)}
@@ -63,7 +63,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the returns are
+  If \code{scale} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
   the variance from minutely bar data, because dividing returns by the
@@ -96,12 +96,12 @@ sp_y <- log(HighFreq::SPY)
 in_dex <- c(1, diff(xts::.index(sp_y)))
 # Calculate the variance of SPY returns, with scaling of the returns
 HighFreq::calc_var_ohlc(sp_y, 
- method="yang_zhang", scal_e=TRUE, in_dex=in_dex)
+ method="yang_zhang", scale=TRUE, in_dex=in_dex)
 # Calculate variance without accounting for overnight jumps
 HighFreq::calc_var_ohlc(sp_y, 
- method="rogers_satchell", scal_e=TRUE, in_dex=in_dex)
+ method="rogers_satchell", scale=TRUE, in_dex=in_dex)
 # Calculate the variance without scaling the returns
-HighFreq::calc_var_ohlc(sp_y, scal_e=FALSE)
+HighFreq::calc_var_ohlc(sp_y, scale=FALSE)
 # Calculate the variance by passing in the lagged close prices
 lag_close <- HighFreq::lag_it(sp_y[, 4])
 all.equal(HighFreq::calc_var_ohlc(sp_y), 

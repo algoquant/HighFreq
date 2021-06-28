@@ -5,16 +5,16 @@
 \title{Recursively filter a \emph{vector} of innovations through a \emph{vector} of
 \emph{ARIMA} coefficients.}
 \usage{
-sim_arima(in_nov, co_eff)
+sim_arima(innov, co_eff)
 }
 \arguments{
-\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
 
 \item{\code{co_eff}}{A \emph{vector} of \emph{ARIMA} coefficients.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{in_nov}.
+  \code{innov}.
 }
 \description{
 Recursively filter a \emph{vector} of innovations through a \emph{vector} of
@@ -25,7 +25,7 @@ The function \code{sim_arima()} recursively filters a \emph{vector} of
   innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
   \code{RcppArmadillo} \code{C++} code.
   It performs the same calculation as the standard \code{R} function
-  \code{filter(x=in_nov, filter=co_eff, method="recursive")}, but it's over
+  \code{filter(x=innov, filter=co_eff, method="recursive")}, but it's over
   \code{6} times faster.
 }
 \examples{

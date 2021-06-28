@@ -72,7 +72,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
 \examples{
 \dontrun{
 # First example
-# Calculate series of historical returns
+# Calculate historical returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22

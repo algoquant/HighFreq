@@ -80,24 +80,17 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Rename the function roll_zscores() to roll_reg()
-Rewrite it to return a matrix of alphas, betas, tvals, and zscores.
-
-+ [ ] Create function roll_reg() for performing rolling PCA and robust regressions
-Add option to perform rolling predictions using the regressions.
-It's already partially implemented in C:/Develop/R/Rcpp/roll_reg.cpp
-
-+ [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
-
-+ [ ] Create function calc_reg() for performing different types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
-It should return a named vector of coefficients, z-scores, R-squared, etc.
++ [ ] In function calc_reg() add additional types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
 It should calculate Pearson, Spearman, and Kendall correlations.
+It should return a named vector of coefficients, tvals, and zscore.
 
-+ [ ] Modify function calc_lm() by adding Boolean parameter to add intercept column to explanatory matrix
++ [ ] In function roll_reg() add option to perform rolling predictions using the regressions
 
-+ [ ] Modify function calc_var() to calculate the robust dispersion estimators
++ [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
-+ [ ] Modify function roll_var() to use moment update formulas from package fromo: Pebay Fast Moments.pdf
++ [ ] In function calc_var() add robust dispersion estimators
+
++ [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
 
 + [ ] Create a function called calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
@@ -107,6 +100,9 @@ Calculate rolling variance efficiently (used by package fromo): https://www.john
 + [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
 + [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
+
++ [ ] Create function roll_it() to roll the functions calc_var(), calc_skew() and calc_kurtosis()
+Create an enum variable and switch inside roll_it().
 
 + [ ] Modify function calc_weights(): 
 Rename model_type == "rank" to model_type == "rank_sharpe"
@@ -122,8 +118,6 @@ Add model_type == "rank" for ranking the re_turns directly.
 Worker agg_ohlc()
 
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2()
-
-+ [ ] Update functions kurtosis_type() and calc_kurtosis() with actual kurtosis methods.
 
 + [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
@@ -358,6 +352,16 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Create function calc_reg() for performing different types of regressions
+It should return a vector of coefficients, tvals, and zscore.
+It's already partially implemented in C:/Develop/R/Rcpp/roll_reg.cpp
+
++ [x] Create function roll_reg() for performing rolling PCA and robust regressions
+It should loop over end points using calc_endpoints() and calc_startpoints().
+It should return a matrix of coefficients, tvals, and zscores.
+
++ [x] Update functions kurtosis_type() and calc_kurtosis() with actual kurtosis methods.
 
 + [x] Create function roll_kurtosis() for the rolling kurtosis estimator (fourth moment) using RcppArmadillo
 It's already copied from C:/Develop/R/Rcpp/roll_kurtosis.cpp
@@ -608,8 +612,6 @@ perform simulation to find out
 https://en.wikipedia.org/wiki/First-hitting-time_model  
 https://en.wikipedia.org/wiki/Wiener_process  
 
-+ [ ] Analyze paper: Shen Skew Kurtosis Stock Premiums Forecasting.pdf
-
 + [ ] Add logical arg as option to aggregate data or not
 
 + [ ] Calculate rets from scrubbed data
@@ -797,6 +799,10 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Rename the function roll_zscores() to roll_reg()
+
++ [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 
 + [ ] Create a function called roll_stdev() for the rolling standard deviation, MAD, and other unimodal robust estimators
 

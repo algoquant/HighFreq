@@ -4,20 +4,20 @@
 \alias{sim_schwartz}
 \title{Simulate a \emph{Schwartz} process using \emph{Rcpp}.}
 \usage{
-sim_schwartz(eq_price, vol_at, the_ta, in_nov)
+sim_schwartz(eq_price, vol_at, theta, innov)
 }
 \arguments{
 \item{\code{eq_price}}{The equilibrium price.}
 
 \item{\code{vol_at}}{The volatility of returns.}
 
-\item{\code{the_ta}}{The strength of mean reversion.}
+\item{\code{theta}}{The strength of mean reversion.}
 
-\item{\code{in_nov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
 }
 \value{
 A column \emph{vector} representing the \emph{time series} of
-  prices, with the same length as the argument \code{in_nov}.
+  prices, with the same length as the argument \code{innov}.
 }
 \description{
 Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -29,7 +29,7 @@ The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
   prices.
   The function \code{sim_schwartz()} simulates the percentage returns as
   equal to the difference between the equilibrium price \code{eq_price}
-  minus the latest price, times the mean reversion parameter \code{the_ta},
+  minus the latest price, times the mean reversion parameter \code{theta},
   plus a random innovation.
   The prices are calculated as the exponentially compounded returns, so they
   are never negative. The log prices can be obtained by taking the logarithm
@@ -42,7 +42,7 @@ eq_price <- 5.0
 vol_at <- 0.01
 the_ta <- 0.01
 # Simulate Schwartz process using Rcpp
-price_s <- HighFreq::sim_schwartz(eq_price=eq_price, vol_at=vol_at, the_ta=the_ta, in_nov=rnorm(1000))
+price_s <- HighFreq::sim_schwartz(eq_price=eq_price, vol_at=vol_at, theta=the_ta, innov=rnorm(1000))
 }
 
 }

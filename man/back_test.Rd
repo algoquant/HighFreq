@@ -10,13 +10,13 @@ back_test(
   re_turns,
   start_p,
   end_p,
-  model_type = "rank_sharpe",
-  to_l = 0.001,
-  max_eigen = 0L,
-  pro_b = 0.1,
-  al_pha = 0,
-  scal_e = TRUE,
-  vo_l = 0.01,
+  method = "rank_sharpe",
+  eigen_thresh = 0.001,
+  eigen_max = 0L,
+  confi_level = 0.1,
+  alpha = 0,
+  scale = TRUE,
+  vol_target = 0.01,
   co_eff = 1,
   bid_offer = 0
 )
@@ -38,26 +38,29 @@ default is \code{1})}
 \item{\code{bid_offer}}{A \emph{numeric} bid-offer spread.  (The default is
 \code{0})}
 
-\item{\code{model_type}}{A \emph{string} specifying the model type for
-calculating the weights (see Details).  (The default is \code{model_type =
+\item{\code{method}}{A \emph{string} specifying the objective function for
+calculating the weights (see Details).  (The default is \code{method =
 "rank_sharpe"})}
 
-\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
-eigenvalues in order to regularize the matrix inverse.  (The default is
-\code{0.001})}
+\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+small eigenvalues in order to regularize the matrix inverse.  (The default
+is \code{0.001})}
 
-\item{\code{max_eigen}}{An \emph{integer} equal to the number of
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
 \code{re_turns}).}
 
-\item{\code{al_pha}}{The shrinkage intensity between \code{0} and \code{1}.
+\item{\code{confi_level}}{The confidence level for calculating the
+quantiles. (the default is \code{confi_level = 0.75}).}
+
+\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
 
-\item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scal_e = TRUE}).}
+\item{\code{scale}}{A \emph{Boolean} specifying whether the weights should
+be scaled (the default is \code{scale = TRUE}).}
 
-\item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
+\item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
 weights.  (The default is \code{0.001})}
 }
 \value{
@@ -77,8 +80,8 @@ The function \code{back_test()} performs a backtest simulation of a
   \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
   corresponding end point and the start point. It passes the subset matrix
   of excess returns into the function \code{calc_weights()}, which
-  calculates the optimal portfolio weights. The arguments \code{max_eigen},
-  \code{al_pha}, \code{model_type}, and \code{scal_e} are also passed to the
+  calculates the optimal portfolio weights. The arguments \code{eigen_max},
+  \code{alpha}, \code{method}, and \code{scale} are also passed to the
   function \code{calc_weights()}.
   
   The function \code{back_test()} multiplies the weights by the coefficient
@@ -114,12 +117,12 @@ look_back <- 12
 start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
 # Define shrinkage and regularization intensities
 al_pha <- 0.5
-max_eigen <- 3
+eigen_max <- 3
 # Simulate a monthly rolling portfolio optimization strategy
 pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
                             start_p-1, end_p-1, 
-                            max_eigen = max_eigen, 
-                            al_pha = al_pha)
+                            eigen_max = eigen_max, 
+                            alpha = al_pha)
 pnl_s <- xts::xts(pnl_s, index(re_turns))
 colnames(pnl_s) <- "strat_rets"
 # Plot dygraph of strategy

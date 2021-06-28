@@ -5,16 +5,16 @@
 \title{Calculate the kurtosis of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_kurtosis(se_ries, method = "kurt_mom", al_pha = 0.25)
+calc_kurtosis(se_ries, method = "moment", confi_level = 0.75)
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{string} specifying the type of kurtosis (see
-Details). (The default is the \code{method = "kurt_mom"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of kurtosis model
+(see Details). (The default is the \code{method = "moment"}.)}
 
-\item{\code{al_pha}}{The confidence level for calculating the quantiles.
-(the default is \code{al_pha = 0.25}).}
+\item{\code{confi_level}}{The confidence level for calculating the
+quantiles. (the default is \code{confi_level = 0.75}).}
 }
 \value{
 A single-row matrix with the kurtosis of the columns of
@@ -29,13 +29,18 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
   \code{C++} code.
 
-  If \code{method = "kurt_mom"} (the default) then \code{calc_kurtosis()}
-  calculates the kurt_mom kurtosis using the third moment of the data.
+  If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
+  calculates the fourth moment of the data.
 
-  If \code{method = "kurt_quant"} then it calculates the kurtosis using the
-  differences between the quantiles of the data.
+  If \code{method = "quantile"} then it calculates the skewness
+  \eqn{\kappa} from the differences between the quantiles of the data as
+  follows:
+  \deqn{
+    \kappa = \frac{q_{\alpha} - q_{1-\alpha}}{q_{0.75} - q_{0.25}}
+  }
+  Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 
-  If \code{method = "kurt_np"} then it calculates the kurtosis as the
+  If \code{method = "nonparametric"} then it calculates the kurtosis as the
   difference between the mean of the data minus its median, divided by the
   standard deviation.
   
@@ -49,44 +54,44 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
 \dontrun{
 # Calculate VTI returns
 re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-# Calculate the kurt_mom kurtosis
+# Calculate the moment kurtosis
 HighFreq::calc_kurtosis(re_turns)
-# Compare HighFreq::calc_kurtosis() with kurt_mom kurtosis
-calc_kurtosisr <- function(x) {
-  x <- (x-mean(x)); nr <- NROW(x);
-  nr*sum(x^3)/(var(x))^1.5/(nr-1)/(nr-2)
-}  # end calc_kurtosisr
+# Calculate the moment kurtosis in R
+calc_kurtr <- function(x) {
+  x <- (x-mean(x))
+  sum(x^4)/var(x)^2/NROW(x)
+}  # end calc_kurtr
 all.equal(HighFreq::calc_kurtosis(re_turns), 
-  calc_kurtosisr(re_turns), check.attributes=FALSE)
+  calc_kurtr(re_turns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::calc_kurtosis(re_turns),
-  Rcode=calc_kurtosisr(re_turns),
+  Rcode=calc_kurtr(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-# Calculate the kurt_quant kurtosis
-HighFreq::calc_kurtosis(re_turns, method = "quantile", al_pha = 0.1)
-# Compare HighFreq::calc_kurtosis() with quantile kurtosis
-calc_kurtosisq <- function(x) {
-  	quantile_s <- quantile(x, c(0.25, 0.5, 0.75), type=5)
-  	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
-}  # end calc_kurtosisq
-all.equal(drop(HighFreq::calc_kurtosis(re_turns, method = "kurt_quant")), 
-  calc_kurtosisq(re_turns), check.attributes=FALSE)
+# Calculate the quantile kurtosis
+HighFreq::calc_kurtosis(re_turns, method="quantile", confi_level=0.9)
+# Calculate the quantile kurtosis in R
+calc_kurtq <- function(x, a=0.9) {
+  	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
+  	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
+}  # end calc_kurtq
+all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", confi_level=0.9)), 
+  calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_kurtosis(re_turns, method = "kurt_quant"),
-  Rcode=calc_kurtosisq(re_turns),
+  Rcpp=HighFreq::calc_kurtosis(re_turns, method="quantile"),
+  Rcode=calc_kurtq(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-# Calculate the kurt_np kurtosis
-HighFreq::calc_kurtosis(re_turns, method = "kurt_np")
+# Calculate the nonparametric kurtosis
+HighFreq::calc_kurtosis(re_turns, method="nonparametric")
 # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
-all.equal(drop(HighFreq::calc_kurtosis(re_turns, method = "kurt_np")), 
+all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="nonparametric")), 
   (mean(re_turns)-median(re_turns))/sd(re_turns), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_kurtosis(re_turns, method = "kurt_np"),
+  Rcpp=HighFreq::calc_kurtosis(re_turns, method="nonparametric"),
   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

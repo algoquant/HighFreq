@@ -2,43 +2,47 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_weights}
 \alias{calc_weights}
-\title{Calculate the optimal portfolio weights for different model types.}
+\title{Calculate the optimal portfolio weights for different types of objective
+functions.}
 \usage{
 calc_weights(
   re_turns,
-  model_type = "rank_sharpe",
-  to_l = 0.001,
-  max_eigen = 0L,
-  pro_b = 0.1,
-  al_pha = 0,
-  scal_e = TRUE,
-  vo_l = 0.01
+  method = "rank_sharpe",
+  eigen_thresh = 0.001,
+  eigen_max = 0L,
+  confi_level = 0.1,
+  alpha = 0,
+  scale = TRUE,
+  vol_target = 0.01
 )
 }
 \arguments{
 \item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{model_type}}{A \emph{string} specifying the model type for
-calculating the weights (see Details).  (The default is \code{model_type =
+\item{\code{method}}{A \emph{string} specifying the objective function for
+calculating the weights (see Details).  (The default is \code{method =
 "rank_sharpe"})}
 
-\item{\code{to_l}}{A \emph{numeric} tolerance level for discarding small
-eigenvalues in order to regularize the matrix inverse.  (The default is
-\code{0.001})}
+\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+small eigenvalues in order to regularize the matrix inverse.  (The default
+is \code{0.001})}
 
-\item{\code{max_eigen}}{An \emph{integer} equal to the number of
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
 \code{re_turns}).}
 
-\item{\code{al_pha}}{The shrinkage intensity between \code{0} and \code{1}.
+\item{\code{confi_level}}{The confidence level for calculating the
+quantiles. (the default is \code{confi_level = 0.75}).}
+
+\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
 
-\item{\code{scal_e}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scal_e = TRUE}).}
+\item{\code{scale}}{A \emph{Boolean} specifying whether the weights should
+be scaled (the default is \code{scale = TRUE}).}
 
-\item{\code{vo_l}}{A \emph{numeric} volatility target for scaling the
+\item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
 weights.  (The default is \code{0.001})}
 }
 \value{
@@ -46,44 +50,45 @@ A column \emph{vector} of the same length as the number of columns
   of \code{re_turns}.
 }
 \description{
-Calculate the optimal portfolio weights for different model types.
+Calculate the optimal portfolio weights for different types of objective
+functions.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different model types, using \code{RcppArmadillo} \code{C++}
-  code.
+  weights for different types of objective functions, using
+  \code{RcppArmadillo} \code{C++} code.
 
-  If \code{model_type = "rank_sharpe"} (the default) then it calculates the
+  If \code{method = "rank_sharpe"} (the default) then it calculates the
   weights as the ranks (order index) of the trailing Sharpe ratios of the
   asset \code{re_turns}.
 
-  If \code{model_type = "rank"} then it calculates the weights
-  as the ranks (order index) of the last row of the \code{re_turns}.
+  If \code{method = "rank"} then it calculates the weights as the ranks
+  (order index) of the last row of the \code{re_turns}.
 
-  If \code{model_type = "max_sharpe"} then \code{calc_weights()} calculates
+  If \code{method = "max_sharpe"} then \code{calc_weights()} calculates
   the weights of the maximum Sharpe portfolio, by multiplying the inverse of
   the covariance \emph{matrix} times the mean column returns.
 
-  If \code{model_type = "min_var"} then it calculates the weights of the
+  If \code{method = "min_var"} then it calculates the weights of the
   minimum variance portfolio under linear constraints.
 
-  If \code{model_type = "min_varpca"} then it calculates the weights of the
+  If \code{method = "min_varpca"} then it calculates the weights of the
   minimum variance portfolio under quadratic constraints (which is the
   highest order principal component).
 
-  If \code{scal_e = TRUE} (the default) then the weights are scaled so that
-  the resulting portfolio has a volatility equal to \code{vo_l}.
+  If \code{scale = TRUE} (the default) then the weights are scaled so that
+  the resulting portfolio has a volatility equal to \code{vol_target}.
 
-  \code{calc_weights()} applies dimensional regularization to calculate the
+  \code{calc_weights()} applies dimension regularization to calculate the
   inverse of the covariance \emph{matrix} of returns from its eigen
   decomposition, using the function \code{arma::eig_sym()}.
   
   In addition, it applies shrinkage to the \emph{vector} of mean column
   returns, by shrinking it to its common mean value.
-  The shrinkage intensity \code{al_pha} determines the amount of shrinkage 
-  that is applied, with \code{al_pha = 0} representing no shrinkage (with 
+  The shrinkage intensity \code{alpha} determines the amount of shrinkage 
+  that is applied, with \code{alpha = 0} representing no shrinkage (with 
   the estimator of mean returns equal to the means of the columns of 
-  \code{re_turns}), and \code{al_pha = 1} representing complete shrinkage 
+  \code{re_turns}), and \code{alpha = 1} representing complete shrinkage 
   (with the estimator of mean returns equal to the single mean of all the
   columns of \code{re_turns})
 }
@@ -93,9 +98,9 @@ The function \code{calc_weights()} calculates the optimal portfolio
 re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 ei_gen <- eigen(cov(re_turns))
 # Calculate regularized inverse of covariance matrix
-max_eigen <- 3
-eigen_vec <- ei_gen$vectors[, 1:max_eigen]
-eigen_val <- ei_gen$values[1:max_eigen]
+eigen_max <- 3
+eigen_vec <- ei_gen$vectors[, 1:eigen_max]
+eigen_val <- ei_gen$values[1:eigen_max]
 in_verse <- eigen_vec \%*\% (t(eigen_vec) / eigen_val)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 al_pha <- 0.5
@@ -106,7 +111,7 @@ weight_s <- in_verse \%*\% col_means
 n_col <- NCOL(re_turns)
 weights_r <- weights_r*sd(re_turns \%*\% rep(1/n_col, n_col))/sd(re_turns \%*\% weights_r)
 # Calculate weights using RcppArmadillo
-weight_s <- drop(HighFreq::calc_weights(re_turns, max_eigen=max_eigen, al_pha=al_pha))
+weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max=eigen_max, alpha=al_pha))
 all.equal(weight_s, weights_r)
 }
 

@@ -8,24 +8,24 @@ interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_kurtosis(
   se_ries,
-  ste_p = 1L,
+  step = 1L,
   look_back = 11L,
-  method = "pearson",
-  al_pha = 0.25
+  method = "moment",
+  confi_level = 0.75
 )
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{ste_p}}{The number of time periods between the end points.}
+\item{\code{step}}{The number of time periods between the end points.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
 
-\item{\code{method}}{A \emph{string} specifying the type of kurtosis.  (The
-default is the \code{method = "pearson"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of kurtosis model
+(see Details). (The default is the \code{method = "moment"}.)}
 
-\item{\code{al_pha}}{The confidence level for calculating the quantiles.
-(the default is \code{al_pha = 0.25}).}
+\item{\code{confi_level}}{The confidence level for calculating the
+quantiles. (the default is \code{confi_level = 0.75}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
@@ -42,10 +42,10 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   estimates over rolling look-back intervals attached at the end points of
   the \emph{time series} \code{se_ries}.
   
-  It first calculates a vector of end points separated by \code{ste_p} time
+  It first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{se_ries}
   using the function \code{calc_endpoints()}, with the number of time
-  periods between the end points equal to \code{ste_p} time periods.
+  periods between the end points equal to \code{step} time periods.
   
   It then performs a loop over the end points, and at each end point it
   subsets the time series \code{se_ries} over a look-back interval equal
@@ -58,7 +58,7 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   
   For example, the rolling kurtosis at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{ste_p = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{look_back = 3}.
 
   The function \code{roll_kurtosis()} is implemented in \code{RcppArmadillo}
   \code{C++} code, so it's many times faster than the equivalent \code{R}
@@ -69,20 +69,20 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
 # Define time series of returns using package rutils
 re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 # Define end points and start points
-end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), ste_p=25)
+end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
 start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
 # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-kurto_sis <- HighFreq::roll_kurtosis(re_turns, ste_p=25, look_back=3)
+kurto_sis <- HighFreq::roll_kurtosis(re_turns, step=25, look_back=3)
 # Calculate the rolling kurtosis using R code
-kurto_r <- sapply(1:NROW(end_p), function(it) {
+kurt_r <- sapply(1:NROW(end_p), function(it) {
   HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
 })  # end sapply
 # Compare the kurtosis estimates
-all.equal(drop(kurto_sis), kurto_r, check.attributes=FALSE)
+all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_kurtosis(re_turns, ste_p=25, look_back=3),
+  Rcpp=HighFreq::roll_kurtosis(re_turns, step=25, look_back=3),
   Rcode=sapply(1:NROW(end_p), function(it) {
     HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
   }),

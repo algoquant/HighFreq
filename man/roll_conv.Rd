@@ -33,3 +33,27 @@ The function \code{roll_conv()} calculates the convolutions of the
   method="convolution", sides=1)}, but it's over \code{6} times faster, and
   it doesn't produce any leading \code{NA} values.
 }
+\examples{
+\dontrun{
+# First example
+# Calculate a time series of prices
+se_ries <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+# Create simple weights equal to a 1 value plus zeros
+weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+# Calculate rolling weighted sums
+weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+# Compare with original
+all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
+# Second example
+# Calculate exponentially decaying weights
+weight_s <- exp(-0.2*(1:11))
+weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+# Calculate rolling weighted sums
+weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+# Calculate rolling weighted sums using filter()
+filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
+# Compare both methods
+all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+}
+
+}
