@@ -71,11 +71,16 @@ vari_ance <- HighFreq::roll_var(re_turns, step=25, look_back=3)
 # Compare the variance estimates over 11-period lookback intervals
 all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with RcppRoll
+# Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+# Compare the speed of HighFreq::roll_var() with TTR::runMAD()
+summary(microbenchmark(
+    Rcpp=HighFreq::roll_var(re_turns, look_back=11, method="quantile"),
+    TTR=TTR::runMAD(re_turns, n = 11),
+    times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

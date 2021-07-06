@@ -8,7 +8,7 @@ points.}
 calc_startpoints(end_p, look_back)
 }
 \arguments{
-\item{\code{end_p}}{An \emph{unsigned integer} vector of end points.}
+\item{\code{end_p}}{An \emph{integer} vector of end points.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 lag applied to the end points.}

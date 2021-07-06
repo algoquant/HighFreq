@@ -3,7 +3,7 @@
 \name{calc_reg}
 \alias{calc_reg}
 \title{Perform multivariate regression using different methods, and return a vector
-of regression coefficients, t-values, and the last residual z-score.}
+of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
 calc_reg(
   response,
@@ -41,21 +41,30 @@ quantiles. (the default is \code{confi_level = 0.75}).}
 (the default is \code{0}).}
 }
 \value{
-A vector of regression coefficients, t-values, and the last
-  residual z-score.
-  For example, if the design matrix has \code{2} columns of data, then
-  \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-  regression coefficients (including the intercept coefficient), \code{3}
-  corresponding t-values, and \code{1} z-score.
+A vector with the regression coefficients, their t-values, and the
+  last residual z-score.
 }
 \description{
 Perform multivariate regression using different methods, and return a vector
-of regression coefficients, t-values, and the last residual z-score.
+of regression coefficients, their t-values, and the last residual z-score.
 }
 \details{
 The function \code{calc_reg()} performs multivariate regression using
   different methods, and returns a vector of regression coefficients, their
   t-values, and the last residual z-score.
+
+  The length of the return vector depends on the number of columns of
+  \code{design}.
+  The number of regression coefficients is equal to the number of columns of
+  \code{design} plus \code{1}.  The number of t-values is equal to the
+  number of coefficients.  And there is only \code{1} z-score.
+  So if the number of columns of \code{design} is equal to \code{n}, then
+  the return vector will have \code{2n+3} elements.
+
+  For example, if the design matrix has \code{2} columns of data, then
+  \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
+  regression coefficients (including the intercept coefficient), \code{3}
+  corresponding t-values, and \code{1} z-score.
 
   If \code{method = "least_squares"} (the default) then it performs the
   standard least squares regression, the same as the function

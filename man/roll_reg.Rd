@@ -2,14 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_reg}
 \alias{roll_reg}
-\title{Calculate a \emph{matrix} of regression coefficients, t-values, and z-scores
-at the end points of the design matrix.}
+\title{Calculate a \emph{matrix} of regression coefficients, their t-values, and
+z-scores, at the end points of the design matrix.}
 \usage{
 roll_reg(
   response,
   design,
+  end_p = 0L,
+  start_p = 0L,
   step = 1L,
-  look_back = 11L,
+  look_back = 0L,
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
@@ -24,9 +26,16 @@ of response data.}
 \item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
 (predictor or explanatory data).}
 
+\item{\code{end_p}}{An \emph{integer} vector of end points.}
+
+\item{\code{start_p}}{An \emph{integer} vector of start points.}
+
 \item{\code{step}}{The number of time periods between the end points.}
 
 \item{\code{look_back}}{The number of end points in the look-back interval.}
+
+\item{\code{stub}}{An \emph{integer} value equal to the first end point for
+calculating the end points.}
 
 \item{\code{method}}{A \emph{string} specifying the type of regression model
 (see Details).  (The default is \code{method = "least_squares"})}
@@ -47,19 +56,21 @@ quantiles. (the default is \code{confi_level = 0.75}).}
 (the default is \code{0}).}
 }
 \value{
-A column \emph{vector} of the same length as the number of rows of
-  \code{design}.
+A \emph{matrix} with the same number of rows as \code{design}, and a
+  number of columns equal to \code{2n+3}, where \code{n} is the number of
+  columns of \code{design}.
 }
 \description{
-Calculate a \emph{matrix} of regression coefficients, t-values, and z-scores
-at the end points of the design matrix.
+Calculate a \emph{matrix} of regression coefficients, their t-values, and
+z-scores, at the end points of the design matrix.
 }
 \details{
 The function \code{roll_reg()} calculates a \emph{matrix} of regression
-  coefficients, t-values, and z-scores at the end points of the design
+  coefficients, their t-values, and z-scores at the end points of the design
   matrix.
   
-  It first calculates a vector of end points separated by \code{step} time
+  If the arguments \code{end_p} and \code{start_p} are not given then it
+  first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
@@ -78,27 +89,21 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-# Response equals IEF returns
-res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and XLF returns
-de_sign <- re_turns[, -1]
-# Calculate Z-scores from rolling time series regression using RcppArmadillo
-look_back <- 11
-z_scores <- HighFreq::roll_reg(response=res_ponse, design=de_sign, look_back=look_back)
-# Calculate z-scores in R from rolling multivariate regression using lm()
-z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
-  if (ro_w == 1) return(0)
-  start_point <- max(1, ro_w-look_back+1)
-  sub_response <- res_ponse[start_point:ro_w]
-  sub_design <- de_sign[start_point:ro_w, ]
-  reg_model <- lm(sub_response ~ sub_design)
-  resid_uals <- reg_model$residuals
-  resid_uals[NROW(resid_uals)]/sd(resid_uals)
+re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+# Define monthly end points and start points
+end_p <- xts::endpoints(re_turns, on="months")[-1]
+look_back <- 12
+start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+# Calculate rolling betas using RcppArmadillo
+reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], end_p=(end_p-1), start_p=(start_p-1))
+beta_s <- reg_stats[, 2]
+# Calculate rolling betas in R
+betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
+  da_ta <- re_turns[start_p[ep]:end_p[ep], ]
+  drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
 })  # end sapply
 # Compare the outputs of both functions
-all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
-  check.attributes=FALSE)
+all.equal(beta_s, betas_r, check.attributes=FALSE)
 }
 
 }

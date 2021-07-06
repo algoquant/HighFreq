@@ -80,11 +80,27 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] In function calc_reg() add additional types of regressions: standard lm regression, PCA regression with shrinkage, robust Theil-Sen regression, rank regression, etc.
-It should calculate Pearson, Spearman, and Kendall correlations.
-It should return a named vector of coefficients, tvals, and zscore.
++ [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
+https://stackoverflow.com/questions/2537942/nullable-values-in-c
+https://en.cppreference.com/w/cpp/named_req/NullablePointer
+
++ [ ] Remove underscores from function arguments: rename stu_b to stub
+
++ [x] In function calc_endpoints() add stub argument and remove argument front
+The prototype is in test_temp.cpp
+
++ [ ] In function roll_wsum() add argument start_p
+
++ [ ] Modify the functions which depend on calc_endpoints(): roll_reg(), roll_var(), roll_var_ohlc(), roll_skew(), roll_kurtosis(), roll_zscores()
+Add arguments end_p and start_p and keep arguments step, stu_b, and look_back.
+Add code to use end_p if it's non-zero, else to calculate end points from step, stu_b, and look_back.
+Follow example of roll_wsum().
 
 + [ ] In function roll_reg() add option to perform rolling predictions using the regressions
+
++ [ ] In function calc_reg() add additional types of regressions: robust Theil-Sen regression, rank regression, quantile regression, PCA regression with shrinkage, etc.
+It should calculate Pearson, Spearman, and Kendall correlations.
+It should return a named vector of coefficients, tvals, and zscore.
 
 + [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
@@ -92,6 +108,13 @@ It should return a named vector of coefficients, tvals, and zscore.
 
 + [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
+
++ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
+This avoids calling calc_var() in loop.
+
++ [ ] Explain why TTR::runMAD() is much faster than HighFreq::roll_var()
+ma_d <- TTR::runMAD(clos_e, n=look_back)
+ma_d <- HighFreq::roll_var(clos_e, look_back=look_back, method="quantile")
 
 + [ ] Create a function called calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
@@ -190,28 +213,33 @@ http://bytes.com/forum/thread656124.html
 https://bytes.com/topic/c/answers/561361-string-convert-function-name
 
 + [ ] Pass a function pointer
+http://www.cplusplus.com/forum/beginner/195580/
 https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
 test_xptr.cpp
 xptr_drivers.R
 
-+ [ ] Pass model function and its parameters into back_test() as a vector or a list
++ [ ] Pass a function to a function
 http://gallery.rcpp.org/articles/rcppnt2-introduction/
+
++ [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
 https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
 https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
 https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
 https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
 
-+ [ ] Pass parameters to function back_test() using parameter pack and dots argument to C++ functions
++ [ ] Pass parameters to function back_test() using parameter pack and dots or va_list argument to C++ functions
+https://stackoverflow.com/questions/3530771/passing-variable-arguments-to-another-function-that-accepts-a-variable-argument
+https://stackoverflow.com/questions/20901811/function-with-three-dots-argument
+https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
+https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
+https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
+https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
 https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
 https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
-https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
-https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
-https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
-https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
-https://www.wikihow.com/Use-Function-Template-Parameter-Packs-in-C%2B%2B
 https://en.cppreference.com/w/cpp/language/parameter_pack
+https://stackoverflow.com/questions/3351056/create-va-list-dynamically
 
 + [ ] Convert all loops to STL iterators: iterators are pointers to vector and matrix elements ?
 https://www.geeksforgeeks.org/iterators-c-stl/

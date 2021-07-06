@@ -351,91 +351,104 @@ arma::mat diff_it(arma::mat se_ries,
 //' @param \code{step} The number of elements in each interval between
 //'   neighboring end points.
 //' 
-//' @param \code{front} \emph{Boolean} argument: if \code{TRUE} then add a stub
-//'   interval at the beginning, else add a stub interval at the end.  (default
-//'   is \code{TRUE})
+//' @param \code{stub} An \emph{integer} value equal to the first end point for
+//'   calculating the end points.
 //'
-//' @return A vector of equally spaced index values representing the end points
-//'   (a vector of unsigned integers).
+//' @return A vector of equally spaced \emph{integers} representing the end
+//'   points.
 //'
 //' @details 
-//'   The end points are a vector of unsigned integers which divide a vector of
-//'   length equal to \code{length} into equally spaced intervals. If a whole
-//'   number of intervals doesn't fit over the vector, then
-//'   \code{calc_endpoints()} adds a stub interval either at the beginning (the
-//'   default) or at the end.
+//'   The end points are a vector of integers which divide a vector of length
+//'   equal to \code{length} into equally spaced intervals. If a whole number of
+//'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
+//'   stub interval at the end.
 //'
-//'   The end points are shifted by \code{-1} compared to \code{R} code because
-//'   indexing starts at \code{0} in \code{C++} code, while it starts at
-//'   \code{1} in \code{R} code.
-//'   So if \code{calc_endpoints()} is used in \code{R} code then \code{1}
-//'   should be added to it.
+//'   The first end point is equal to the argument \code{step}, unless the
+//'   argument \code{stub} is provided, and then it becomes the first end point.
+//'
+//'   For example, consider the end points for a vector of length \code{20}
+//'   divided into intervals of length \code{step=5}: \code{0, 5, 10, 15, 20}.
+//'   In order for all the differences between neighboring end points to be
+//'   equal to \code{5}, the first end point is set equal to \code{0}. But
+//'   \code{0} doesn't correspond to any vector element, so
+//'   \code{calc_endpoints()} doesn't include it and it only retains the
+//'   non-zero end points equal to: \code{5, 10, 15, 20}. 
+//'
+//'   Since indexing in \code{C++} code starts at \code{0}, then
+//'   \code{calc_endpoints()} shifts the end points by \code{-1} and returns the
+//'   vector equal to \code{4, 9, 14, 19}.
+//'
+//'   If \code{stub = 1} then the first end point is equal to \code{1} and the
+//'   end points are equal to: \code{1, 6, 11, 16, 20}.
+//'   The extra stub interval at the end is equal to \code{4 = 20 - 16}.
+//'   And \code{calc_endpoints()} returns \code{0, 5, 10, 15, 19}. The first
+//'   value is equal to \code{0} which is the index of the first element in
+//'   \code{C++} code.
+//'
+//'   If \code{stub = 2} then the first end point is equal to \code{2}, with an
+//'   extra stub interval at the end, and the end points are equal to: \code{2,
+//'   7, 12, 17, 20}.
+//'   And \code{calc_endpoints()} returns \code{1, 6, 11, 16, 19}.
 //'
 //'   The function \code{calc_endpoints()} is similar to the function
 //'   \code{rutils::calc_endpoints()} from package
 //'   \href{https://github.com/algoquant/rutils}{rutils}.
 //'   
-//'   The end points produced by \code{calc_endpoints()} don't include the first
-//'   placeholder end point, which is usually equal to zero.
-//'   For example, consider the end points for a vector of length \code{20}
-//'   divided into intervals of length \code{5}: \code{0, 5, 10, 15, 20}.
-//'   In order for all the differences between neighboring end points to be
-//'   equal to \code{5}, the first end point must be equal to \code{0}.
-//'   The first end point is a placeholder and doesn't correspond to any vector
-//'   element.
+//'   But the end points are shifted by \code{-1} compared to \code{R} code
+//'   because indexing starts at \code{0} in \code{C++} code, while it starts at
+//'   \code{1} in \code{R} code. So if \code{calc_endpoints()} is used in
+//'   \code{R} code then \code{1} should be added to it.
 //'   
 //'   This works in \code{R} code because the vector element corresponding to
 //'   index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
 //'   1)]} produces \code{4}.  So in \code{R} we can select vector elements
 //'   using the end points starting at zero.
 //'   
-//'   In \code{C++} the end points must be shifted by \code{-1} because indexing
-//'   starts at \code{0}: \code{-1, 4, 9, 14, 19}.  But there is no vector
-//'   element corresponding to index \code{-1}. So in \code{C++} we cannot
-//'   select vector elements using the end points starting at \code{-1}. The
-//'   solution is to drop the first placeholder end point.
+//'   In \code{C++} the end points must be shifted by \code{-1} compared to
+//'   \code{R} code, because indexing starts at \code{0}: \code{-1, 4, 9, 14,
+//'   19}.  But there is no vector element corresponding to index \code{-1}. So
+//'   in \code{C++} we cannot select vector elements using the end points
+//'   starting at \code{-1}. The solution is to drop the first placeholder end
+//'   point.
 //'   
 //' @examples
 //' # Calculate end points without a stub interval
-//' HighFreq::calc_endpoints(25, 5)
-//' # Calculate end points with initial stub interval
+//' HighFreq::calc_endpoints(20, 5)
+//' # Calculate end points with a final stub interval
 //' HighFreq::calc_endpoints(23, 5)
-//' # Calculate end points with a stub interval at the end
-//' HighFreq::calc_endpoints(23, 5, FALSE)
+//' # Calculate end points with initial and final stub intervals
+//' HighFreq::calc_endpoints(20, 5, 2)
+//' # Calculate end points with initial and final stub intervals
+//' HighFreq::calc_endpoints(20, 5, 4)
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, bool front = true) {
+arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, arma::uword stub = 0) {
   
-  // Calculate number of intervals that fit over length
-  arma::uword num_points = length/step;
+  arma::uword extra = length % step;
   arma::uvec end_p;
   
-  if (length == step*num_points) {
+  if ((stub == 0) & (extra == 0)) {
     // No stub interval
-    // Include the first placeholder end point - legacy code
-    // end_p = arma::cumsum(arma::ones<uvec>(num_points));
-    // end_p = arma::regspace<uvec>(0, step, length);
     end_p = arma::regspace<uvec>(step, step, length);
-  } else {
-    // Need to add stub interval
-    // Include the first placeholder end point - legacy code
-    // end_p = arma::cumsum(arma::ones<uvec>(num_points + 1));
-    // end_p = arma::regspace<uvec>(0, step, length + step);
+  } else if ((stub == 0) & (extra > 0)) {
+    // Add stub interval at end
     end_p = arma::regspace<uvec>(step, step, length + step);
-    if (front) {
-      // Stub interval at beginning
-      end_p = end_p - step + length % step;
-    } else {
-      // Stub interval at end
-      // The last end point must be equal to length
-      end_p(num_points) = length;
-    }  // end if
+    end_p.back() = length;
+  } else if ((stub > 0) & (extra == 0)) {
+    // Add initial stub interval equal to stub
+    end_p = arma::regspace<uvec>(stub, step, length + step);
+    end_p.back() = length;
+  } else if ((stub > 0) & (extra > 0) & (stub == extra)) {
+    // Add initial stub interval equal to stub without stub at end
+    end_p = arma::regspace<uvec>(stub, step, length);
+  } else {
+    // Add initial stub interval equal to stub and with extra stub at end
+    end_p = arma::regspace<uvec>(stub, step, length + step);
+    end_p.back() = length;
   }  // end if
   
-  // Set the first end point to zero - it's a placeholder
-  // end_p(0) = 0;
-  // Subtract 1 from end_p because indexing starts at 0
+  // Subtract 1 from end_p because C++ indexing starts at 0
   end_p = end_p - 1;
   return end_p;
   
@@ -448,7 +461,7 @@ arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, bool front =
 //' Calculate a vector of start points equal to the lag of a vector of end
 //' points.
 //'
-//' @param \code{end_p} An \emph{unsigned integer} vector of end points.
+//' @param \code{end_p} An \emph{integer} vector of end points.
 //'   
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   lag applied to the end points.
@@ -912,16 +925,18 @@ double calc_var_vec(arma::vec se_ries) {
 //'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
 //'   (the variance).
 //'
+//'   If \code{method = "moment"} then \code{calc_var()} performs the same
+//'   calculation as the function \code{colVars()} from package
+//'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
+//'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+//'
 //'   If \code{method = "quantile"} then it calculates the dispersion as the
 //'   Median Absolute Deviation (\emph{MAD}):
 //'   \deqn{
 //'     MAD = median(abs(x - median(x)))
 //'   }
-//'
-//'   If \code{method = "moment"} then \code{calc_var()} performs the same
-//'   calculation as the function \code{colVars()} from package
-//'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-//'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+//'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+//'   comparable to the standard deviation.
 //'
 //'   If \code{method = "quantile"} then \code{calc_var()} performs the same
 //'   calculation as the function \code{stats::mad()}, but it's much faster
@@ -949,7 +964,7 @@ double calc_var_vec(arma::vec se_ries) {
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Compare HighFreq::calc_var() with stats::mad()
 //' all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
-//'   sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
+//'   sapply(re_turns, mad), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with stats::mad()
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
@@ -972,9 +987,9 @@ arma::mat calc_var(arma::mat se_ries,
   case meth_od::moment: {  // moment
     return arma::var(se_ries);
   }  // end moment
-  case meth_od::quantile: {  // quantile
+  case meth_od::quantile: {  // MAD
     se_ries.each_row() -= arma::median(se_ries, 0);
-    return arma::median(arma::abs(se_ries), 0);
+    return 1.4826*arma::median(arma::abs(se_ries), 0);
   }  // end quantile
   case meth_od::nonparametric: {  // nonparametric
     return (arma::mean(se_ries) - arma::median(se_ries))/arma::stddev(se_ries);
@@ -1568,7 +1583,7 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
 
 ////////////////////////////////////////////////////////////
 //' Perform multivariate regression using different methods, and return a vector
-//' of regression coefficients, t-values, and the last residual z-score.
+//' of regression coefficients, their t-values, and the last residual z-score.
 //' 
 //' @param \code{response} A single-column \emph{time series} or a \emph{vector}
 //'   of response data.
@@ -1594,18 +1609,27 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @return A vector of regression coefficients, t-values, and the last
-//'   residual z-score.
-//'   For example, if the design matrix has \code{2} columns of data, then
-//'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-//'   regression coefficients (including the intercept coefficient), \code{3}
-//'   corresponding t-values, and \code{1} z-score.
+//' @return A vector with the regression coefficients, their t-values, and the
+//'   last residual z-score.
 //'
 //' @details 
 //'   The function \code{calc_reg()} performs multivariate regression using
 //'   different methods, and returns a vector of regression coefficients, their
 //'   t-values, and the last residual z-score.
 //' 
+//'   The length of the return vector depends on the number of columns of
+//'   \code{design}.
+//'   The number of regression coefficients is equal to the number of columns of
+//'   \code{design} plus \code{1}.  The number of t-values is equal to the
+//'   number of coefficients.  And there is only \code{1} z-score.
+//'   So if the number of columns of \code{design} is equal to \code{n}, then
+//'   the return vector will have \code{2n+3} elements.
+//' 
+//'   For example, if the design matrix has \code{2} columns of data, then
+//'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
+//'   regression coefficients (including the intercept coefficient), \code{3}
+//'   corresponding t-values, and \code{1} z-score.
+//'
 //'   If \code{method = "least_squares"} (the default) then it performs the
 //'   standard least squares regression, the same as the function
 //'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
@@ -2262,13 +2286,12 @@ arma::mat roll_sum(arma::mat se_ries,
 //'   number of data points included in calculating the rolling sum (the default
 //'   is \code{look_back = 1}).
 //'   
-//' @param \code{stu_b} An \emph{integer} value equal to the first stub interval
-//'   for calculating the end points.
+//' @param \code{stub} An \emph{integer} value equal to the first end point for
+//'   calculating the end points.
 //' 
-//' @param \code{end_p} An \emph{unsigned integer} vector of end
-//' points.
+//' @param \code{end_p} An \emph{integer} vector of end points.
 //'   
-//' @param \code{weight_s} A column \emph{vector} of weights.
+//' @param \code{weight_s} A \emph{column vector} of weights.
 //'
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{se_ries}.
@@ -2276,35 +2299,36 @@ arma::mat roll_sum(arma::mat se_ries,
 //' @details 
 //'   The function \code{roll_wsum()} calculates the rolling weighted sums over
 //'   the columns of the \code{se_ries} data.
+//' 
+//'   The function \code{roll_wsum()} calculates the rolling weighted sums as
+//'   convolutions of the columns of \code{se_ries} with the \emph{column
+//'   vector} of weights using the \code{RcppArmadillo} function
+//'   \code{arma::conv2()}.  It performs a similar calculation to the standard
+//'   \code{R} function \code{stats::filter(x=se_ries, filter=weight_s,
+//'   method="convolution", sides=1)}, but it can be many times faster, and it
+//'   doesn't produce any leading \code{NA} values.
 //'   
 //'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{se_ries}.
 //' 
-//'   The arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+//'   The arguments \code{weight_s}, \code{end_p}, and \code{stub} are
 //'   optional.
 //'   
 //'   If the argument \code{weight_s} is not supplied, then simple sums are
 //'   calculated, not weighted sums.
 //'   
-//'   If either the \code{stu_b} or \code{end_p} arguments are supplied,
+//'   If either the \code{stub} or \code{end_p} arguments are supplied,
 //'   then the rolling sums are calculated at the end points. 
 //'   
-//'   If only the argument \code{stu_b} is supplied, then the end points are
-//'   calculated from the \code{stu_b} and \code{look_back} arguments. The first
-//'   end point is equal to \code{stu_b} and the end points are spaced
+//'   If only the argument \code{stub} is supplied, then the end points are
+//'   calculated from the \code{stub} and \code{look_back} arguments. The first
+//'   end point is equal to \code{stub} and the end points are spaced
 //'   \code{look_back} periods apart.
 //'   
-//'   If the arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+//'   If the arguments \code{weight_s}, \code{end_p}, and \code{stub} are
 //'   not supplied, then the sums are calculated over a number of data points
 //'   equal to \code{look_back}.
 //'   
-//'   The function \code{roll_wsum()} calculates the rolling weighted sums as
-//'   convolutions of the \code{se_ries} columns with the \emph{vector} of
-//'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}. It
-//'   performs a similar calculation to the standard \code{R} function
-//'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-//'   sides=1)}, but it can be over \code{6} times faster, and it doesn't
-//'   produce any leading \code{NA} values.
 //'   The function \code{roll_wsum()} is also several times faster than
 //'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 //'   
@@ -2331,7 +2355,7 @@ arma::mat roll_sum(arma::mat se_ries,
 //' 
 //' # Calculate rolling sums at end points
 //' stu_b <- 21
-//' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stu_b=stu_b)
+//' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stub=stu_b)
 //' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
 //' end_p <- end_p[end_p < NROW(re_turns)]
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -2369,7 +2393,7 @@ arma::mat roll_sum(arma::mat se_ries,
 // [[Rcpp::export]]
 arma::mat roll_wsum(arma::mat se_ries,
                     arma::uword look_back = 1,
-                    Rcpp::Nullable<int> stu_b = R_NilValue, 
+                    Rcpp::Nullable<int> stub = R_NilValue, 
                     Rcpp::Nullable<Rcpp::IntegerVector> end_p = R_NilValue, 
                     Rcpp::Nullable<Rcpp::NumericVector> weight_s = R_NilValue) {
   
@@ -2395,32 +2419,32 @@ arma::mat roll_wsum(arma::mat se_ries,
   
   
   // Declare empty end points
-  arma::uvec end_parma;
+  arma::uvec end_pts;
   // Update end points
   if (end_p.isNotNull()) {
     // Copy end_p
-    end_parma = Rcpp::as<uvec>(end_p);
-  } else if (stu_b.isNotNull()) {
-    // Calculate end points with stu_b
-    end_parma = arma::regspace<uvec>(Rcpp::as<uword>(stu_b), look_back, num_rows + look_back);
-    end_parma = end_parma.elem(find(end_parma < num_rows));
+    end_pts = Rcpp::as<uvec>(end_p);
+  } else if (stub.isNotNull()) {
+    // Calculate end points with stub
+    end_pts = arma::regspace<uvec>(Rcpp::as<uword>(stub), look_back, num_rows + look_back);
+    end_pts = end_pts.elem(find(end_pts < num_rows));
   }  // end if
   
   
   // Subset the rolling sums according the end points
-  if (end_parma.is_empty() && weight_s.isNotNull()) {
+  if (end_pts.is_empty() && weight_s.isNotNull()) {
     // Do nothing
     // Return the weighted averages (convolutions) at each point
     // return cum_sum;
-  } else if (end_parma.is_empty() && !weight_s.isNotNull()) {
+  } else if (end_pts.is_empty() && !weight_s.isNotNull()) {
     // Return unweighted rolling sums at each point
     cum_sum = diff_it(cum_sum, look_back, true);
-  } else if (!end_parma.is_empty() && weight_s.isNotNull()) {
+  } else if (!end_pts.is_empty() && weight_s.isNotNull()) {
     // Return the weighted averages (convolutions) at end points
-    cum_sum = cum_sum.rows(end_parma);
-  } else if (!end_parma.is_empty() && !weight_s.isNotNull()) {
+    cum_sum = cum_sum.rows(end_pts);
+  } else if (!end_pts.is_empty() && !weight_s.isNotNull()) {
     // Return the unweighted rolling sums at end points
-    cum_sum = cum_sum.rows(end_parma);
+    cum_sum = cum_sum.rows(end_pts);
     cum_sum = diff_it(cum_sum, 1, true);
   }  // end if
   
@@ -2558,12 +2582,17 @@ arma::vec roll_var_vec(arma::vec se_ries, arma::uword look_back=11) {
 //' # Compare the variance estimates over 11-period lookback intervals
 //' all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
 //'   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with RcppRoll
+//' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
 //'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
+//' summary(microbenchmark(
+//'     Rcpp=HighFreq::roll_var(re_turns, look_back=11, method="quantile"),
+//'     TTR=TTR::runMAD(re_turns, n = 11),
+//'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
@@ -2998,8 +3027,8 @@ arma::mat roll_kurtosis(arma::mat se_ries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate a \emph{matrix} of regression coefficients, t-values, and z-scores
-//' at the end points of the design matrix.
+//' Calculate a \emph{matrix} of regression coefficients, their t-values, and
+//' z-scores, at the end points of the design matrix.
 //' 
 //' @param \code{response} A single-column \emph{time series} or a \emph{vector}
 //'   of response data.
@@ -3007,10 +3036,17 @@ arma::mat roll_kurtosis(arma::mat se_ries,
 //' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
 //'   (predictor or explanatory data).
 //'   
+//' @param \code{end_p} An \emph{integer} vector of end points.
+//' 
+//' @param \code{start_p} An \emph{integer} vector of start points.
+//' 
 //' @param \code{step} The number of time periods between the end points.
 //'
 //' @param \code{look_back} The number of end points in the look-back interval.
 //'
+//' @param \code{stub} An \emph{integer} value equal to the first end point for
+//'   calculating the end points.
+//' 
 //' @param \code{method} A \emph{string} specifying the type of regression model
 //'   (see Details).  (The default is \code{method = "least_squares"})
 //'   
@@ -3029,15 +3065,17 @@ arma::mat roll_kurtosis(arma::mat se_ries,
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @return A column \emph{vector} of the same length as the number of rows of
-//'   \code{design}.
+//' @return A \emph{matrix} with the same number of rows as \code{design}, and a
+//'   number of columns equal to \code{2n+3}, where \code{n} is the number of
+//'   columns of \code{design}.
 //'
 //' @details 
 //'   The function \code{roll_reg()} calculates a \emph{matrix} of regression
-//'   coefficients, t-values, and z-scores at the end points of the design
+//'   coefficients, their t-values, and z-scores at the end points of the design
 //'   matrix.
 //'   
-//'   It first calculates a vector of end points separated by \code{step} time
+//'   If the arguments \code{end_p} and \code{start_p} are not given then it
+//'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{design}
 //'   using the function \code{calc_endpoints()}, with the number of time
 //'   periods between the end points equal to \code{step} time periods.
@@ -3056,62 +3094,74 @@ arma::mat roll_kurtosis(arma::mat se_ries,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
-//' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
-//' de_sign <- re_turns[, -1]
-//' # Calculate Z-scores from rolling time series regression using RcppArmadillo
-//' look_back <- 11
-//' z_scores <- HighFreq::roll_reg(response=res_ponse, design=de_sign, look_back=look_back)
-//' # Calculate z-scores in R from rolling multivariate regression using lm()
-//' z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
-//'   if (ro_w == 1) return(0)
-//'   start_point <- max(1, ro_w-look_back+1)
-//'   sub_response <- res_ponse[start_point:ro_w]
-//'   sub_design <- de_sign[start_point:ro_w, ]
-//'   reg_model <- lm(sub_response ~ sub_design)
-//'   resid_uals <- reg_model$residuals
-//'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+//' # Define monthly end points and start points
+//' end_p <- xts::endpoints(re_turns, on="months")[-1]
+//' look_back <- 12
+//' start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+//' # Calculate rolling betas using RcppArmadillo
+//' reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], end_p=(end_p-1), start_p=(start_p-1))
+//' beta_s <- reg_stats[, 2]
+//' # Calculate rolling betas in R
+//' betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
+//'   da_ta <- re_turns[start_p[ep]:end_p[ep], ]
+//'   drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
 //' })  # end sapply
 //' # Compare the outputs of both functions
-//' all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
-//'   check.attributes=FALSE)
+//' all.equal(beta_s, betas_r, check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_reg(arma::vec response, 
                    arma::mat design, 
+                   arma::uvec end_p = 0, 
+                   arma::uvec start_p = 0, 
                    arma::uword step = 1, 
-                   arma::uword look_back = 11,
+                   arma::uword look_back = 0,
                    std::string method = "least_squares",
                    double eigen_thresh = 0.001,
                    int eigen_max = 0,
                    double confi_level = 0.1,
                    double alpha = 0.0) {
   
-  // Calculate end points
   arma::uword num_rows = design.n_rows;
-  arma::uvec end_p = calc_endpoints(num_rows, step);
-  // Start points equal to end points lagged by look_back
-  arma::uvec start_p = calc_startpoints(end_p, look_back);
+  arma::uvec end_pts;
+  arma::uvec start_pts;
+  
+  // Calculate end points if missing
+  if (sum(end_p) == 0) {
+    end_pts = calc_endpoints(num_rows, step);
+  } else {
+    // Copy end points
+    end_pts = end_p;
+  }  // end if
+  
+  // Calculate start points if missing
+  if (sum(start_p) == 0) {
+    // Start points equal to end points lagged by look_back
+    start_pts = calc_startpoints(end_pts, look_back);
+  } else {
+    // Copy start points
+    start_pts = start_p;
+  }  // end if
+  
   
   // Allocate regression matrix
   arma::vec sub_response;
   arma::mat sub_design;
   arma::colvec reg_data;
   arma::uword num_cols = design.n_cols;
-  arma::uword num_points = end_p.n_elem;
+  arma::uword num_points = end_pts.n_elem;
   arma::mat reg_stats(num_points, (2*(num_cols + 1) + 1), fill::zeros);
   
   
-  // Perform loop over the end_p
+  // Perform loop over the end_pts
   for (arma::uword ep = 0; ep < num_points; ep++) {
-    // Calculate skewness
-    if (end_p(ep) > start_p(ep)) {
-      sub_response = response.subvec(start_p(ep), end_p(ep));
-      sub_design = design.rows(start_p(ep), end_p(ep));
+    // Calculate regression coefficients
+    if (end_pts(ep) > start_pts(ep)) {
+      sub_response = response.subvec(start_pts(ep), end_pts(ep));
+      sub_design = design.rows(start_pts(ep), end_pts(ep));
       reg_data = calc_reg(sub_response, sub_design, method=method, eigen_thresh=eigen_thresh, eigen_max=eigen_max, confi_level=confi_level, alpha=alpha);
       reg_stats.row(ep) = conv_to< rowvec >::from(reg_data);
     }  // end if

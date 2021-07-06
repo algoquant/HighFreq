@@ -5,7 +5,7 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_wsum(se_ries, look_back = 1L, stu_b = NULL, end_p = NULL, weight_s = NULL)
+roll_wsum(se_ries, look_back = 1L, stub = NULL, end_p = NULL, weight_s = NULL)
 }
 \arguments{
 \item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
@@ -14,13 +14,12 @@ roll_wsum(se_ries, look_back = 1L, stu_b = NULL, end_p = NULL, weight_s = NULL)
 number of data points included in calculating the rolling sum (the default
 is \code{look_back = 1}).}
 
-\item{\code{stu_b}}{An \emph{integer} value equal to the first stub interval
-for calculating the end points.}
+\item{\code{stub}}{An \emph{integer} value equal to the first end point for
+calculating the end points.}
 
-\item{\code{end_p}}{An \emph{unsigned integer} vector of end
-points.}
+\item{\code{end_p}}{An \emph{integer} vector of end points.}
 
-\item{\code{weight_s}}{A column \emph{vector} of weights.}
+\item{\code{weight_s}}{A \emph{column vector} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
@@ -33,35 +32,36 @@ Calculate the rolling weighted sums over a \emph{time series} or a
 \details{
 The function \code{roll_wsum()} calculates the rolling weighted sums over
   the columns of the \code{se_ries} data.
+
+  The function \code{roll_wsum()} calculates the rolling weighted sums as
+  convolutions of the columns of \code{se_ries} with the \emph{column
+  vector} of weights using the \code{RcppArmadillo} function
+  \code{arma::conv2()}.  It performs a similar calculation to the standard
+  \code{R} function \code{stats::filter(x=se_ries, filter=weight_s,
+  method="convolution", sides=1)}, but it can be many times faster, and it
+  doesn't produce any leading \code{NA} values.
   
   The function \code{roll_wsum()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{se_ries}.
 
-  The arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+  The arguments \code{weight_s}, \code{end_p}, and \code{stub} are
   optional.
   
   If the argument \code{weight_s} is not supplied, then simple sums are
   calculated, not weighted sums.
   
-  If either the \code{stu_b} or \code{end_p} arguments are supplied,
+  If either the \code{stub} or \code{end_p} arguments are supplied,
   then the rolling sums are calculated at the end points. 
   
-  If only the argument \code{stu_b} is supplied, then the end points are
-  calculated from the \code{stu_b} and \code{look_back} arguments. The first
-  end point is equal to \code{stu_b} and the end points are spaced
+  If only the argument \code{stub} is supplied, then the end points are
+  calculated from the \code{stub} and \code{look_back} arguments. The first
+  end point is equal to \code{stub} and the end points are spaced
   \code{look_back} periods apart.
   
-  If the arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+  If the arguments \code{weight_s}, \code{end_p}, and \code{stub} are
   not supplied, then the sums are calculated over a number of data points
   equal to \code{look_back}.
   
-  The function \code{roll_wsum()} calculates the rolling weighted sums as
-  convolutions of the \code{se_ries} columns with the \emph{vector} of
-  weights using the \code{RcppArmadillo} function \code{arma::conv2()}. It
-  performs a similar calculation to the standard \code{R} function
-  \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-  sides=1)}, but it can be over \code{6} times faster, and it doesn't
-  produce any leading \code{NA} values.
   The function \code{roll_wsum()} is also several times faster than
   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
   
@@ -88,7 +88,7 @@ all.equal(c_sum, r_sum, check.attributes=FALSE)
 
 # Calculate rolling sums at end points
 stu_b <- 21
-c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stu_b=stu_b)
+c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stub=stu_b)
 end_p <- (stu_b + look_back*(0:(NROW(re_turns) \%/\% look_back)))
 end_p <- end_p[end_p < NROW(re_turns)]
 r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)

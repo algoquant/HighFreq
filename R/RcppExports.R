@@ -228,67 +228,85 @@ diff_it <- function(se_ries, lagg = 1L, padd = TRUE) {
 #' @param \code{step} The number of elements in each interval between
 #'   neighboring end points.
 #' 
-#' @param \code{front} \emph{Boolean} argument: if \code{TRUE} then add a stub
-#'   interval at the beginning, else add a stub interval at the end.  (default
-#'   is \code{TRUE})
+#' @param \code{stub} An \emph{integer} value equal to the first end point for
+#'   calculating the end points.
 #'
-#' @return A vector of equally spaced index values representing the end points
-#'   (a vector of unsigned integers).
+#' @return A vector of equally spaced \emph{integers} representing the end
+#'   points.
 #'
 #' @details 
-#'   The end points are a vector of unsigned integers which divide a vector of
-#'   length equal to \code{length} into equally spaced intervals. If a whole
-#'   number of intervals doesn't fit over the vector, then
-#'   \code{calc_endpoints()} adds a stub interval either at the beginning (the
-#'   default) or at the end.
+#'   The end points are a vector of integers which divide a vector of length
+#'   equal to \code{length} into equally spaced intervals. If a whole number of
+#'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
+#'   stub interval at the end.
 #'
-#'   The end points are shifted by \code{-1} compared to \code{R} code because
-#'   indexing starts at \code{0} in \code{C++} code, while it starts at
-#'   \code{1} in \code{R} code.
-#'   So if \code{calc_endpoints()} is used in \code{R} code then \code{1}
-#'   should be added to it.
+#'   The first end point is equal to the argument \code{step}, unless the
+#'   argument \code{stub} is provided, and then it becomes the first end point.
+#'
+#'   For example, consider the end points for a vector of length \code{20}
+#'   divided into intervals of length \code{step=5}: \code{0, 5, 10, 15, 20}.
+#'   In order for all the differences between neighboring end points to be
+#'   equal to \code{5}, the first end point is set equal to \code{0}. But
+#'   \code{0} doesn't correspond to any vector element, so
+#'   \code{calc_endpoints()} doesn't include it and it only retains the
+#'   non-zero end points equal to: \code{5, 10, 15, 20}. 
+#'
+#'   Since indexing in \code{C++} code starts at \code{0}, then
+#'   \code{calc_endpoints()} shifts the end points by \code{-1} and returns the
+#'   vector equal to \code{4, 9, 14, 19}.
+#'
+#'   If \code{stub = 1} then the first end point is equal to \code{1} and the
+#'   end points are equal to: \code{1, 6, 11, 16, 20}.
+#'   The extra stub interval at the end is equal to \code{4 = 20 - 16}.
+#'   And \code{calc_endpoints()} returns \code{0, 5, 10, 15, 19}. The first
+#'   value is equal to \code{0} which is the index of the first element in
+#'   \code{C++} code.
+#'
+#'   If \code{stub = 2} then the first end point is equal to \code{2}, with an
+#'   extra stub interval at the end, and the end points are equal to: \code{2,
+#'   7, 12, 17, 20}.
+#'   And \code{calc_endpoints()} returns \code{1, 6, 11, 16, 19}.
 #'
 #'   The function \code{calc_endpoints()} is similar to the function
 #'   \code{rutils::calc_endpoints()} from package
 #'   \href{https://github.com/algoquant/rutils}{rutils}.
 #'   
-#'   The end points produced by \code{calc_endpoints()} don't include the first
-#'   placeholder end point, which is usually equal to zero.
-#'   For example, consider the end points for a vector of length \code{20}
-#'   divided into intervals of length \code{5}: \code{0, 5, 10, 15, 20}.
-#'   In order for all the differences between neighboring end points to be
-#'   equal to \code{5}, the first end point must be equal to \code{0}.
-#'   The first end point is a placeholder and doesn't correspond to any vector
-#'   element.
+#'   But the end points are shifted by \code{-1} compared to \code{R} code
+#'   because indexing starts at \code{0} in \code{C++} code, while it starts at
+#'   \code{1} in \code{R} code. So if \code{calc_endpoints()} is used in
+#'   \code{R} code then \code{1} should be added to it.
 #'   
 #'   This works in \code{R} code because the vector element corresponding to
 #'   index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
 #'   1)]} produces \code{4}.  So in \code{R} we can select vector elements
 #'   using the end points starting at zero.
 #'   
-#'   In \code{C++} the end points must be shifted by \code{-1} because indexing
-#'   starts at \code{0}: \code{-1, 4, 9, 14, 19}.  But there is no vector
-#'   element corresponding to index \code{-1}. So in \code{C++} we cannot
-#'   select vector elements using the end points starting at \code{-1}. The
-#'   solution is to drop the first placeholder end point.
+#'   In \code{C++} the end points must be shifted by \code{-1} compared to
+#'   \code{R} code, because indexing starts at \code{0}: \code{-1, 4, 9, 14,
+#'   19}.  But there is no vector element corresponding to index \code{-1}. So
+#'   in \code{C++} we cannot select vector elements using the end points
+#'   starting at \code{-1}. The solution is to drop the first placeholder end
+#'   point.
 #'   
 #' @examples
 #' # Calculate end points without a stub interval
-#' HighFreq::calc_endpoints(25, 5)
-#' # Calculate end points with initial stub interval
+#' HighFreq::calc_endpoints(20, 5)
+#' # Calculate end points with a final stub interval
 #' HighFreq::calc_endpoints(23, 5)
-#' # Calculate end points with a stub interval at the end
-#' HighFreq::calc_endpoints(23, 5, FALSE)
+#' # Calculate end points with initial and final stub intervals
+#' HighFreq::calc_endpoints(20, 5, 2)
+#' # Calculate end points with initial and final stub intervals
+#' HighFreq::calc_endpoints(20, 5, 4)
 #'
 #' @export
-calc_endpoints <- function(length, step = 1L, front = TRUE) {
-    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, front)
+calc_endpoints <- function(length, step = 1L, stub = 0L) {
+    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub)
 }
 
 #' Calculate a vector of start points equal to the lag of a vector of end
 #' points.
 #'
-#' @param \code{end_p} An \emph{unsigned integer} vector of end points.
+#' @param \code{end_p} An \emph{integer} vector of end points.
 #'   
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   lag applied to the end points.
@@ -596,16 +614,18 @@ calc_var_vec <- function(se_ries) {
 #'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
 #'   (the variance).
 #'
+#'   If \code{method = "moment"} then \code{calc_var()} performs the same
+#'   calculation as the function \code{colVars()} from package
+#'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
+#'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+#'
 #'   If \code{method = "quantile"} then it calculates the dispersion as the
 #'   Median Absolute Deviation (\emph{MAD}):
 #'   \deqn{
 #'     MAD = median(abs(x - median(x)))
 #'   }
-#'
-#'   If \code{method = "moment"} then \code{calc_var()} performs the same
-#'   calculation as the function \code{colVars()} from package
-#'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-#'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+#'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+#'   comparable to the standard deviation.
 #'
 #'   If \code{method = "quantile"} then \code{calc_var()} performs the same
 #'   calculation as the function \code{stats::mad()}, but it's much faster
@@ -633,7 +653,7 @@ calc_var_vec <- function(se_ries) {
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Compare HighFreq::calc_var() with stats::mad()
 #' all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
-#'   sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
+#'   sapply(re_turns, mad), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with stats::mad()
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
@@ -1039,7 +1059,7 @@ calc_lm <- function(response, design) {
 }
 
 #' Perform multivariate regression using different methods, and return a vector
-#' of regression coefficients, t-values, and the last residual z-score.
+#' of regression coefficients, their t-values, and the last residual z-score.
 #' 
 #' @param \code{response} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
@@ -1065,18 +1085,27 @@ calc_lm <- function(response, design) {
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
 #' 
-#' @return A vector of regression coefficients, t-values, and the last
-#'   residual z-score.
-#'   For example, if the design matrix has \code{2} columns of data, then
-#'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-#'   regression coefficients (including the intercept coefficient), \code{3}
-#'   corresponding t-values, and \code{1} z-score.
+#' @return A vector with the regression coefficients, their t-values, and the
+#'   last residual z-score.
 #'
 #' @details 
 #'   The function \code{calc_reg()} performs multivariate regression using
 #'   different methods, and returns a vector of regression coefficients, their
 #'   t-values, and the last residual z-score.
 #' 
+#'   The length of the return vector depends on the number of columns of
+#'   \code{design}.
+#'   The number of regression coefficients is equal to the number of columns of
+#'   \code{design} plus \code{1}.  The number of t-values is equal to the
+#'   number of coefficients.  And there is only \code{1} z-score.
+#'   So if the number of columns of \code{design} is equal to \code{n}, then
+#'   the return vector will have \code{2n+3} elements.
+#' 
+#'   For example, if the design matrix has \code{2} columns of data, then
+#'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
+#'   regression coefficients (including the intercept coefficient), \code{3}
+#'   corresponding t-values, and \code{1} z-score.
+#'
 #'   If \code{method = "least_squares"} (the default) then it performs the
 #'   standard least squares regression, the same as the function
 #'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
@@ -1502,13 +1531,12 @@ roll_sum <- function(se_ries, look_back = 1L) {
 #'   number of data points included in calculating the rolling sum (the default
 #'   is \code{look_back = 1}).
 #'   
-#' @param \code{stu_b} An \emph{integer} value equal to the first stub interval
-#'   for calculating the end points.
+#' @param \code{stub} An \emph{integer} value equal to the first end point for
+#'   calculating the end points.
 #' 
-#' @param \code{end_p} An \emph{unsigned integer} vector of end
-#' points.
+#' @param \code{end_p} An \emph{integer} vector of end points.
 #'   
-#' @param \code{weight_s} A column \emph{vector} of weights.
+#' @param \code{weight_s} A \emph{column vector} of weights.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input
 #'   argument \code{se_ries}.
@@ -1516,35 +1544,36 @@ roll_sum <- function(se_ries, look_back = 1L) {
 #' @details 
 #'   The function \code{roll_wsum()} calculates the rolling weighted sums over
 #'   the columns of the \code{se_ries} data.
+#' 
+#'   The function \code{roll_wsum()} calculates the rolling weighted sums as
+#'   convolutions of the columns of \code{se_ries} with the \emph{column
+#'   vector} of weights using the \code{RcppArmadillo} function
+#'   \code{arma::conv2()}.  It performs a similar calculation to the standard
+#'   \code{R} function \code{stats::filter(x=se_ries, filter=weight_s,
+#'   method="convolution", sides=1)}, but it can be many times faster, and it
+#'   doesn't produce any leading \code{NA} values.
 #'   
 #'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{se_ries}.
 #' 
-#'   The arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+#'   The arguments \code{weight_s}, \code{end_p}, and \code{stub} are
 #'   optional.
 #'   
 #'   If the argument \code{weight_s} is not supplied, then simple sums are
 #'   calculated, not weighted sums.
 #'   
-#'   If either the \code{stu_b} or \code{end_p} arguments are supplied,
+#'   If either the \code{stub} or \code{end_p} arguments are supplied,
 #'   then the rolling sums are calculated at the end points. 
 #'   
-#'   If only the argument \code{stu_b} is supplied, then the end points are
-#'   calculated from the \code{stu_b} and \code{look_back} arguments. The first
-#'   end point is equal to \code{stu_b} and the end points are spaced
+#'   If only the argument \code{stub} is supplied, then the end points are
+#'   calculated from the \code{stub} and \code{look_back} arguments. The first
+#'   end point is equal to \code{stub} and the end points are spaced
 #'   \code{look_back} periods apart.
 #'   
-#'   If the arguments \code{weight_s}, \code{end_p}, and \code{stu_b} are
+#'   If the arguments \code{weight_s}, \code{end_p}, and \code{stub} are
 #'   not supplied, then the sums are calculated over a number of data points
 #'   equal to \code{look_back}.
 #'   
-#'   The function \code{roll_wsum()} calculates the rolling weighted sums as
-#'   convolutions of the \code{se_ries} columns with the \emph{vector} of
-#'   weights using the \code{RcppArmadillo} function \code{arma::conv2()}. It
-#'   performs a similar calculation to the standard \code{R} function
-#'   \code{stats::filter(x=se_ries, filter=weight_s, method="convolution",
-#'   sides=1)}, but it can be over \code{6} times faster, and it doesn't
-#'   produce any leading \code{NA} values.
 #'   The function \code{roll_wsum()} is also several times faster than
 #'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 #'   
@@ -1571,7 +1600,7 @@ roll_sum <- function(se_ries, look_back = 1L) {
 #' 
 #' # Calculate rolling sums at end points
 #' stu_b <- 21
-#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stu_b=stu_b)
+#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stub=stu_b)
 #' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
 #' end_p <- end_p[end_p < NROW(re_turns)]
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1606,8 +1635,8 @@ roll_sum <- function(se_ries, look_back = 1L) {
 #' }
 #' 
 #' @export
-roll_wsum <- function(se_ries, look_back = 1L, stu_b = NULL, end_p = NULL, weight_s = NULL) {
-    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', se_ries, look_back, stu_b, end_p, weight_s)
+roll_wsum <- function(se_ries, look_back = 1L, stub = NULL, end_p = NULL, weight_s = NULL) {
+    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', se_ries, look_back, stub, end_p, weight_s)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -1717,12 +1746,17 @@ roll_var_vec <- function(se_ries, look_back = 11L) {
 #' # Compare the variance estimates over 11-period lookback intervals
 #' all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
 #'   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
-#' # Compare the speed of RcppArmadillo with RcppRoll
+#' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
 #'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
+#' summary(microbenchmark(
+#'     Rcpp=HighFreq::roll_var(re_turns, look_back=11, method="quantile"),
+#'     TTR=TTR::runMAD(re_turns, n = 11),
+#'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
 roll_var <- function(se_ries, step = 1L, look_back = 11L, method = "moment") {
@@ -2013,8 +2047,8 @@ roll_kurtosis <- function(se_ries, step = 1L, look_back = 11L, method = "moment"
     .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', se_ries, step, look_back, method, confi_level)
 }
 
-#' Calculate a \emph{matrix} of regression coefficients, t-values, and z-scores
-#' at the end points of the design matrix.
+#' Calculate a \emph{matrix} of regression coefficients, their t-values, and
+#' z-scores, at the end points of the design matrix.
 #' 
 #' @param \code{response} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
@@ -2022,10 +2056,17 @@ roll_kurtosis <- function(se_ries, step = 1L, look_back = 11L, method = "moment"
 #' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
 #'   (predictor or explanatory data).
 #'   
+#' @param \code{end_p} An \emph{integer} vector of end points.
+#' 
+#' @param \code{start_p} An \emph{integer} vector of start points.
+#' 
 #' @param \code{step} The number of time periods between the end points.
 #'
 #' @param \code{look_back} The number of end points in the look-back interval.
 #'
+#' @param \code{stub} An \emph{integer} value equal to the first end point for
+#'   calculating the end points.
+#' 
 #' @param \code{method} A \emph{string} specifying the type of regression model
 #'   (see Details).  (The default is \code{method = "least_squares"})
 #'   
@@ -2044,15 +2085,17 @@ roll_kurtosis <- function(se_ries, step = 1L, look_back = 11L, method = "moment"
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
 #' 
-#' @return A column \emph{vector} of the same length as the number of rows of
-#'   \code{design}.
+#' @return A \emph{matrix} with the same number of rows as \code{design}, and a
+#'   number of columns equal to \code{2n+3}, where \code{n} is the number of
+#'   columns of \code{design}.
 #'
 #' @details 
 #'   The function \code{roll_reg()} calculates a \emph{matrix} of regression
-#'   coefficients, t-values, and z-scores at the end points of the design
+#'   coefficients, their t-values, and z-scores at the end points of the design
 #'   matrix.
 #'   
-#'   It first calculates a vector of end points separated by \code{step} time
+#'   If the arguments \code{end_p} and \code{start_p} are not given then it
+#'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{design}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
@@ -2071,32 +2114,26 @@ roll_kurtosis <- function(se_ries, step = 1L, look_back = 11L, method = "moment"
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-#' # Response equals IEF returns
-#' res_ponse <- re_turns[, 1]
-#' # Design matrix equals VTI and XLF returns
-#' de_sign <- re_turns[, -1]
-#' # Calculate Z-scores from rolling time series regression using RcppArmadillo
-#' look_back <- 11
-#' z_scores <- HighFreq::roll_reg(response=res_ponse, design=de_sign, look_back=look_back)
-#' # Calculate z-scores in R from rolling multivariate regression using lm()
-#' z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
-#'   if (ro_w == 1) return(0)
-#'   start_point <- max(1, ro_w-look_back+1)
-#'   sub_response <- res_ponse[start_point:ro_w]
-#'   sub_design <- de_sign[start_point:ro_w, ]
-#'   reg_model <- lm(sub_response ~ sub_design)
-#'   resid_uals <- reg_model$residuals
-#'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+#' # Define monthly end points and start points
+#' end_p <- xts::endpoints(re_turns, on="months")[-1]
+#' look_back <- 12
+#' start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+#' # Calculate rolling betas using RcppArmadillo
+#' reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], end_p=(end_p-1), start_p=(start_p-1))
+#' beta_s <- reg_stats[, 2]
+#' # Calculate rolling betas in R
+#' betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
+#'   da_ta <- re_turns[start_p[ep]:end_p[ep], ]
+#'   drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
-#' all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
-#'   check.attributes=FALSE)
+#' all.equal(beta_s, betas_r, check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_reg <- function(response, design, step = 1L, look_back = 11L, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, design, step, look_back, method, eigen_thresh, eigen_max, confi_level, alpha)
+roll_reg <- function(response, design, end_p = 0L, start_p = 0L, step = 1L, look_back = 0L, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, design, end_p, start_p, step, look_back, method, eigen_thresh, eigen_max, confi_level, alpha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a

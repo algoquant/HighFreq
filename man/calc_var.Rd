@@ -33,16 +33,18 @@ The dispersion is a measure of the variability of the data.  Examples of
   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
   (the variance).
 
+  If \code{method = "moment"} then \code{calc_var()} performs the same
+  calculation as the function \code{colVars()} from package
+  \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
+  but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+
   If \code{method = "quantile"} then it calculates the dispersion as the
   Median Absolute Deviation (\emph{MAD}):
   \deqn{
     MAD = median(abs(x - median(x)))
   }
-
-  If \code{method = "moment"} then \code{calc_var()} performs the same
-  calculation as the function \code{colVars()} from package
-  \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-  but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+  It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+  comparable to the standard deviation.
 
   If \code{method = "quantile"} then \code{calc_var()} performs the same
   calculation as the function \code{stats::mad()}, but it's much faster
@@ -70,7 +72,7 @@ summary(microbenchmark(
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_var() with stats::mad()
 all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
-  sapply(re_turns, mad)/1.4826, check.attributes=FALSE)
+  sapply(re_turns, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
   Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
