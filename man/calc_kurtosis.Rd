@@ -5,10 +5,10 @@
 \title{Calculate the kurtosis of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_kurtosis(se_ries, method = "moment", confi_level = 0.75)
+calc_kurtosis(tseries, method = "moment", confi_level = 0.75)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{method}}{A \emph{string} specifying the type of kurtosis model
 (see Details). (The default is the \code{method = "moment"}.)}
@@ -18,7 +18,7 @@ quantiles. (the default is \code{confi_level = 0.75}).}
 }
 \value{
 A single-row matrix with the kurtosis of the columns of
-  \code{se_ries}.
+  \code{tseries}.
 }
 \description{
 Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -44,7 +44,7 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
   difference between the mean of the data minus its median, divided by the
   standard deviation.
   
-  If the number of rows of \code{se_ries} is less than \code{3} then it
+  If the number of rows of \code{tseries} is less than \code{3} then it
   returns zeros.
   
   The code examples below compare the function \code{calc_kurtosis()} with the

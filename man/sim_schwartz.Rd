@@ -4,12 +4,12 @@
 \alias{sim_schwartz}
 \title{Simulate a \emph{Schwartz} process using \emph{Rcpp}.}
 \usage{
-sim_schwartz(eq_price, vol_at, theta, innov)
+sim_schwartz(eq_price, volat, theta, innov)
 }
 \arguments{
 \item{\code{eq_price}}{The equilibrium price.}
 
-\item{\code{vol_at}}{The volatility of returns.}
+\item{\code{volat}}{The volatility of returns.}
 
 \item{\code{theta}}{The strength of mean reversion.}
 
@@ -42,7 +42,7 @@ eq_price <- 5.0
 vol_at <- 0.01
 the_ta <- 0.01
 # Simulate Schwartz process using Rcpp
-price_s <- HighFreq::sim_schwartz(eq_price=eq_price, vol_at=vol_at, theta=the_ta, innov=rnorm(1000))
+price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, theta=the_ta, innov=rnorm(1000))
 }
 
 }

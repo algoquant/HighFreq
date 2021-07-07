@@ -5,10 +5,10 @@
 \title{Calculate the regularized inverse of the covariance \emph{matrix} of returns
 using \code{RcppArmadillo}.}
 \usage{
-calc_inv(re_turns, eigen_thresh = 0.001, eigen_max = 0L)
+calc_inv(returns, eigen_thresh = 0.001, eigen_max = 0L)
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{time series} or \emph{matrix} of returns data.}
+\item{\code{returns}}{A \emph{time series} or \emph{matrix} of returns data.}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small eigenvalues in order to regularize the matrix inverse.  (The default
@@ -20,7 +20,7 @@ the regularized inverse).}
 }
 \value{
 A \emph{matrix} equal to the regularized inverse of the covariance
-  matrix of re_turns.
+  matrix of \code{returns}.
 }
 \description{
 Calculate the regularized inverse of the covariance \emph{matrix} of returns
@@ -31,7 +31,7 @@ The function calc_inv() calculates the regularized inverse of the
   \emph{covariance matrix}, by discarding eigenvectors with small
   eigenvalues less than the threshold level \code{eigen_thresh}.
   The function \code{calc_inv()} first calculates the covariance
-  \emph{matrix} of the \code{re_turns}, and then it calculates its
+  \emph{matrix} of the \code{returns}, and then it calculates its
   regularized inverse.
   If \code{eigen_max} is not specified then it calculates the
   regularized inverse using the function \code{arma::pinv()}.

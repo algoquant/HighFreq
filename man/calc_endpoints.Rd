@@ -4,10 +4,10 @@
 \alias{calc_endpoints}
 \title{Calculate a vector of end points that divides a vector into equal intervals.}
 \usage{
-calc_endpoints(length, step = 1L, stub = 0L)
+calc_endpoints(numel, step = 1L, stub = 0L)
 }
 \arguments{
-\item{\code{length}}{An \emph{integer} equal to the length of the vector to
+\item{\code{numel}}{An \emph{integer} equal to the length of the vector to
 be divided into equal intervals.}
 
 \item{\code{step}}{The number of elements in each interval between
@@ -25,7 +25,7 @@ Calculate a vector of end points that divides a vector into equal intervals.
 }
 \details{
 The end points are a vector of integers which divide a vector of length
-  equal to \code{length} into equally spaced intervals. If a whole number of
+  equal to \code{numel} into equally spaced intervals. If a whole number of
   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
   stub interval at the end.
 
@@ -79,12 +79,12 @@ The end points are a vector of integers which divide a vector of length
 }
 \examples{
 # Calculate end points without a stub interval
-HighFreq::calc_endpoints(20, 5)
+HighFreq::calc_endpoints(numel=20, step=5)
 # Calculate end points with a final stub interval
-HighFreq::calc_endpoints(23, 5)
+HighFreq::calc_endpoints(numel=23, step=5)
 # Calculate end points with initial and final stub intervals
-HighFreq::calc_endpoints(20, 5, 2)
+HighFreq::calc_endpoints(numel=20, step=5, stub=2)
 # Calculate end points with initial and final stub intervals
-HighFreq::calc_endpoints(20, 5, 4)
+HighFreq::calc_endpoints(numel=20, step=5, stub=24)
 
 }

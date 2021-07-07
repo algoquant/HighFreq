@@ -80,21 +80,18 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create function calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create function roll_mean() for the rolling centrality (location) estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
+
++ [ ] Create function roll_it() to roll the functions calc_var(), calc_skew() and calc_kurtosis()
+Create an enum variable and switch inside roll_it().
+
 + [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
 https://stackoverflow.com/questions/2537942/nullable-values-in-c
 https://en.cppreference.com/w/cpp/named_req/NullablePointer
 
-+ [ ] Remove underscores from function arguments: rename stu_b to stub
-
-+ [x] In function calc_endpoints() add stub argument and remove argument front
-The prototype is in test_temp.cpp
-
 + [ ] In function roll_wsum() add argument start_p
-
-+ [ ] Modify the functions which depend on calc_endpoints(): roll_reg(), roll_var(), roll_var_ohlc(), roll_skew(), roll_kurtosis(), roll_zscores()
-Add arguments end_p and start_p and keep arguments step, stu_b, and look_back.
-Add code to use end_p if it's non-zero, else to calculate end points from step, stu_b, and look_back.
-Follow example of roll_wsum().
 
 + [ ] In function roll_reg() add option to perform rolling predictions using the regressions
 
@@ -106,26 +103,9 @@ It should return a named vector of coefficients, tvals, and zscore.
 
 + [ ] In function calc_var() add robust dispersion estimators
 
-+ [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
-Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
-+ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
-This avoids calling calc_var() in loop.
-
-+ [ ] Explain why TTR::runMAD() is much faster than HighFreq::roll_var()
-ma_d <- TTR::runMAD(clos_e, n=look_back)
-ma_d <- HighFreq::roll_var(clos_e, look_back=look_back, method="quantile")
-
-+ [ ] Create a function called calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
-+ [ ] Create a function called roll_mean() for the rolling centrality (location) estimator (first moment) using RcppArmadillo: rolling mean, median, Hodges-Lehmann, and other unimodal robust estimators
-
 + [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
 + [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
-
-+ [ ] Create function roll_it() to roll the functions calc_var(), calc_skew() and calc_kurtosis()
-Create an enum variable and switch inside roll_it().
 
 + [ ] Modify function calc_weights(): 
 Rename model_type == "rank" to model_type == "rank_sharpe"
@@ -134,6 +114,16 @@ Add model_type == "rank" for ranking the re_turns directly.
 + [ ] Modify function diff_it() to pad with zeros
 
 + [ ] Modify function calc_endpoints(): call function xts::endpoints() if argument is an xts series
+
++ [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
+Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
+
++ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
+This avoids calling calc_var() in loop.
+
++ [ ] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
+ma_d <- TTR::runMAD(clos_e, n=look_back)
+ma_d <- HighFreq::roll_var(clos_e, look_back=look_back, method="quantile")
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
@@ -380,6 +370,16 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Modify the functions which depend on calc_endpoints(): roll_reg(), roll_var(), roll_var_ohlc(), roll_skew(), roll_kurtosis(), roll_zscores()
+Add arguments end_p and start_p and keep arguments step, stu_b, and look_back.
+Add code to use end_p if it's non-zero, else to calculate end points from step, stu_b, and look_back.
+Follow example of roll_wsum().
+
++ [x] Remove underscores from function arguments: rename stu_b to stub, oh_lc, weight_s, re_turns, se_ries, end_p, start_p
+
++ [x] In function calc_endpoints() add stub argument and remove argument front
+The prototype is in test_temp.cpp
 
 + [x] Create function calc_reg() for performing different types of regressions
 It should return a vector of coefficients, tvals, and zscore.

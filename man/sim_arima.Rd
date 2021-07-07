@@ -5,12 +5,12 @@
 \title{Recursively filter a \emph{vector} of innovations through a \emph{vector} of
 \emph{ARIMA} coefficients.}
 \usage{
-sim_arima(innov, co_eff)
+sim_arima(innov, coeff)
 }
 \arguments{
 \item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
 
-\item{\code{co_eff}}{A \emph{vector} of \emph{ARIMA} coefficients.}
+\item{\code{coeff}}{A \emph{vector} of \emph{ARIMA} coefficients.}
 }
 \value{
 A column \emph{vector} of the same length as the argument

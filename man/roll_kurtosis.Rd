@@ -7,19 +7,33 @@ interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
 roll_kurtosis(
-  se_ries,
+  tseries,
+  startp = 0L,
+  endp = 0L,
   step = 1L,
-  look_back = 11L,
+  look_back = 1L,
+  stub = 0L,
   method = "moment",
   confi_level = 0.75
 )
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{step}}{The number of time periods between the end points.}
+\item{\code{startp}}{An \emph{integer} vector of start points (the default
+is \code{startp = 0}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval.}
+\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
+\code{endp = 0}).}
+
+\item{\code{step}}{The number of time periods between the end points (the
+default is \code{step = 1}).}
+
+\item{\code{look_back}}{The number of end points in the look-back interval
+(the default is \code{look_back = 1}).}
+
+\item{\code{stub}}{An \emph{integer} value equal to the first end point for
+calculating the end points. (the default is \code{stub = 0}).}
 
 \item{\code{method}}{A \emph{string} specifying the type of kurtosis model
 (see Details). (The default is the \code{method = "moment"}.)}
@@ -29,7 +43,7 @@ quantiles. (the default is \code{confi_level = 0.75}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
-  series \code{se_ries}, and the number of rows equal to the number of end
+  series \code{tseries}, and the number of rows equal to the number of end
   points.
 }
 \description{
@@ -40,15 +54,16 @@ interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   estimates over rolling look-back intervals attached at the end points of
-  the \emph{time series} \code{se_ries}.
+  the \emph{time series} \code{tseries}.
   
-  It first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{se_ries}
+  If the arguments \code{endp} and \code{startp} are not given then it
+  first calculates a vector of end points separated by \code{step} time
+  periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
-  
+
   It then performs a loop over the end points, and at each end point it
-  subsets the time series \code{se_ries} over a look-back interval equal
+  subsets the time series \code{tseries} over a look-back interval equal
   to \code{look_back} number of end points.
   
   It passes the subset time series to the function \code{calc_kurtosis()}, which

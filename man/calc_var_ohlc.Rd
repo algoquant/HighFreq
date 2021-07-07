@@ -6,7 +6,7 @@
 estimators and \code{RcppArmadillo}.}
 \usage{
 calc_var_ohlc(
-  oh_lc,
+  ohlc,
   method = "yang_zhang",
   lag_close = 0L,
   scale = TRUE,
@@ -14,7 +14,7 @@ calc_var_ohlc(
 )
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
+\item{\code{ohlc}}{An \emph{OHLC time series} or a \emph{numeric matrix} of
 prices.}
 
 \item{\code{method}}{A \emph{character} string representing the range
@@ -53,7 +53,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   of \emph{OHLC} prices), using several different variance estimation
   methods.
 
-  The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
+  The input \emph{OHLC time series} \code{ohlc} is assumed to be the log
   prices.
 
   The default \code{method} is \emph{"yang_zhang"}, which theoretically
@@ -71,11 +71,11 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   time index is in days, then the variance is equal to the variance per day
   squared.
   
-  If the number of rows of \code{oh_lc} is less than \code{3} then it
+  If the number of rows of \code{ohlc} is less than \code{3} then it
   returns zero.
   
   The optional argument \code{in_dex} is the time index of the \emph{time
-  series} \code{oh_lc}. If the time index is in seconds, then the
+  series} \code{ohlc}. If the time index is in seconds, then the
   differences of the index are equal to the number of seconds in each time
   period.  If the time index is in days, then the differences are equal to
   the number of days in each time period.

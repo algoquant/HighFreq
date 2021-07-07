@@ -5,12 +5,12 @@
 \title{Multiply in place (without copying) the columns or rows of a \emph{matrix}
 times a \emph{vector}, element-wise.}
 \usage{
-mult_vec_mat(vec_tor, mat_rix, by_col = TRUE)
+mult_vec_mat(vector, matrix, by_col = TRUE)
 }
 \arguments{
-\item{\code{vec_tor}}{A \emph{vector}.}
+\item{\code{vector}}{A \emph{vector}.}
 
-\item{\code{mat_rix}}{A \emph{matrix}.}
+\item{\code{matrix}}{A \emph{matrix}.}
 
 \item{\code{by_col}}{A \emph{Boolean} argument: if \code{TRUE} then multiply
 the columns, otherwise multiply the rows. (The default is

@@ -7,21 +7,35 @@ interval attached at the end points of a \emph{time series} or a
 \emph{matrix} with \emph{OHLC} price data.}
 \usage{
 roll_var_ohlc(
-  oh_lc,
+  ohlc,
+  startp = 0L,
+  endp = 0L,
   step = 1L,
   look_back = 1L,
+  stub = 0L,
   method = "yang_zhang",
   scale = TRUE,
   in_dex = 0L
 )
 }
 \arguments{
-\item{\code{oh_lc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
+\item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 price data.}
 
-\item{\code{step}}{The number of time periods between the end points.}
+\item{\code{startp}}{An \emph{integer} vector of start points (the default
+is \code{startp = 0}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval.}
+\item{\code{endp}}{An \emph{integer} vector of end points (the default is
+\code{endp = 0}).}
+
+\item{\code{step}}{The number of time periods between the end points (the
+default is \code{step = 1}).}
+
+\item{\code{look_back}}{The number of end points in the look-back interval
+(the default is \code{look_back = 1}).}
+
+\item{\code{stub}}{An \emph{integer} value equal to the first end point for
+calculating the end points. (the default is \code{stub = 0}).}
 
 \item{\code{method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
@@ -53,17 +67,19 @@ interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   estimates over a rolling look-back interval attached at the end points of
-  the \emph{time series} \code{oh_lc}.
+  the \emph{time series} \code{ohlc}.
   
-  The input \emph{OHLC time series} \code{oh_lc} is assumed to be the log
-  prices.
+  The input \emph{OHLC time series} \code{ohlc} is assumed to contain the
+  log prices.
 
-  The end points are calculated along the rows of \code{oh_lc} using the
-  function \code{calc_endpoints()}, with the number of time periods between
-  the end points equal to \code{step}.
-  
+  If the arguments \code{endp} and \code{startp} are not given then it
+  first calculates a vector of end points separated by \code{step} time
+  periods. It calculates the end points along the rows of \code{ohlc}
+  using the function \code{calc_endpoints()}, with the number of time
+  periods between the end points equal to \code{step} time periods.
+
   The function \code{roll_var_ohlc()} performs a loop over the end points,
-  subsets the previous (past) rows of \code{oh_lc}, and passes them into the
+  subsets the previous (past) rows of \code{ohlc}, and passes them into the
   function \code{calc_var_ohlc()}.
 
   At each end point, the variance is calculated over a look-back interval
@@ -73,7 +89,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   
   For example, the rolling variance at daily end points with an \code{11}
   day look-back, can be calculated using the parameters \code{step = 1} and
-  \code{look_back = 11} (Assuming the \code{oh_lc} data has daily
+  \code{look_back = 1} (Assuming the \code{ohlc} data has daily
   frequency.)
 
   Similarly, the rolling variance at \code{25} day end points with a
@@ -101,7 +117,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   squared.
   
   The optional argument \code{in_dex} is the time index of the \emph{time
-  series} \code{oh_lc}. If the time index is in seconds, then the
+  series} \code{ohlc}. If the time index is in seconds, then the
   differences of the index are equal to the number of seconds in each time
   period.  If the time index is in days, then the differences are equal to
   the number of days in each time period.

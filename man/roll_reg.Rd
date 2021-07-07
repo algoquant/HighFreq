@@ -8,10 +8,11 @@ z-scores, at the end points of the design matrix.}
 roll_reg(
   response,
   design,
-  end_p = 0L,
-  start_p = 0L,
+  startp = 0L,
+  endp = 0L,
   step = 1L,
-  look_back = 0L,
+  look_back = 1L,
+  stub = 0L,
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
@@ -26,16 +27,20 @@ of response data.}
 \item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
 (predictor or explanatory data).}
 
-\item{\code{end_p}}{An \emph{integer} vector of end points.}
+\item{\code{startp}}{An \emph{integer} vector of start points (the default
+is \code{startp = 0}).}
 
-\item{\code{start_p}}{An \emph{integer} vector of start points.}
+\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
+\code{endp = 0}).}
 
-\item{\code{step}}{The number of time periods between the end points.}
+\item{\code{step}}{The number of time periods between the end points (the
+default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval.}
+\item{\code{look_back}}{The number of end points in the look-back interval
+(the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points.}
+calculating the end points. (the default is \code{stub = 0}).}
 
 \item{\code{method}}{A \emph{string} specifying the type of regression model
 (see Details).  (The default is \code{method = "least_squares"})}
@@ -47,7 +52,7 @@ is \code{0.001})}
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
-\code{re_turns}).}
+\code{returns}).}
 
 \item{\code{confi_level}}{The confidence level for calculating the
 quantiles. (the default is \code{confi_level = 0.75}).}
@@ -69,7 +74,7 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   coefficients, their t-values, and z-scores at the end points of the design
   matrix.
   
-  If the arguments \code{end_p} and \code{start_p} are not given then it
+  If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
@@ -95,7 +100,7 @@ end_p <- xts::endpoints(re_turns, on="months")[-1]
 look_back <- 12
 start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], end_p=(end_p-1), start_p=(start_p-1))
+reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
 beta_s <- reg_stats[, 2]
 # Calculate rolling betas in R
 betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {

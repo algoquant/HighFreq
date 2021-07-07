@@ -32,7 +32,7 @@ is \code{0.001})}
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
-\code{re_turns}).}
+\code{returns}).}
 
 \item{\code{confi_level}}{The confidence level for calculating the
 quantiles. (the default is \code{confi_level = 0.75}).}
@@ -84,9 +84,9 @@ The function \code{calc_reg()} performs multivariate regression using
   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
   that is applied, with \code{alpha = 0} representing no shrinkage (with 
   the estimator of mean returns equal to the means of the columns of 
-  \code{re_turns}), and \code{alpha = 1} representing complete shrinkage 
+  \code{returns}), and \code{alpha = 1} representing complete shrinkage 
   (with the estimator of mean returns equal to the single mean of all the
-  columns of \code{re_turns})
+  columns of \code{returns})
 }
 \examples{
 \dontrun{

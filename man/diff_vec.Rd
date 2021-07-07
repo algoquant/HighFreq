@@ -5,10 +5,10 @@
 \title{Calculate the differences between the neighboring elements of a
 single-column \emph{time series} or a \emph{vector}.}
 \usage{
-diff_vec(se_ries, lagg = 1L, padd = TRUE)
+diff_vec(tseries, lagg = 1L, padd = TRUE)
 }
 \arguments{
-\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of time periods to
 lag when calculating the differences (the default is \code{lagg = 1}).}

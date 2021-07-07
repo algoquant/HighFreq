@@ -5,10 +5,10 @@
 \title{Scale (standardize) the columns of a \emph{matrix} of data using
 \code{RcppArmadillo}.}
 \usage{
-calc_scaled(se_ries, use_median = FALSE)
+calc_scaled(tseries, use_median = FALSE)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
 
 \item{\code{use_median}}{A \emph{Boolean} argument: if \code{TRUE} then the 
 centrality (central tendency) is calculated as the \emph{median} and the 
@@ -20,7 +20,7 @@ deviation}. (The default is \code{FALSE})}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{se_ries}.
+  argument \code{tseries}.
 }
 \description{
 Scale (standardize) the columns of a \emph{matrix} of data using
@@ -28,7 +28,7 @@ Scale (standardize) the columns of a \emph{matrix} of data using
 }
 \details{
 The function \code{calc_scaled()} scales (standardizes) the columns of the
-  \code{se_ries} argument using \code{RcppArmadillo}.
+  \code{tseries} argument using \code{RcppArmadillo}.
 
   If the argument \code{use_median} is \code{FALSE} (the default), then it
   performs the same calculation as the standard \code{R} function
@@ -39,8 +39,8 @@ The function \code{calc_scaled()} scales (standardizes) the columns of the
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
 
-  If the number of rows of \code{se_ries} is less than \code{3} then it
-  returns \code{se_ries} unscaled.
+  If the number of rows of \code{tseries} is less than \code{3} then it
+  returns \code{tseries} unscaled.
   
   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
   code and is about \emph{5} times faster than function \code{scale()}, for
@@ -50,13 +50,13 @@ The function \code{calc_scaled()} scales (standardizes) the columns of the
 \dontrun{
 # Create a matrix of random data
 se_ries <- matrix(rnorm(20000), nc=20)
-scale_d <- calc_scaled(se_ries=se_ries, use_median=FALSE)
+scale_d <- calc_scaled(tseries=se_ries, use_median=FALSE)
 scale_d2 <- scale(se_ries)
 all.equal(scale_d, scale_d2, check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=calc_scaled(se_ries=se_ries, use_median=FALSE),
+  Rcpp=calc_scaled(tseries=se_ries, use_median=FALSE),
   Rcode=scale(se_ries),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }

@@ -6,10 +6,10 @@
 \code{RcppArmadillo}.}
 \usage{
 back_test(
-  ex_cess,
-  re_turns,
-  start_p,
-  end_p,
+  excess,
+  returns,
+  startp,
+  endp,
   method = "rank_sharpe",
   eigen_thresh = 0.001,
   eigen_max = 0L,
@@ -17,22 +17,22 @@ back_test(
   alpha = 0,
   scale = TRUE,
   vol_target = 0.01,
-  co_eff = 1,
+  coeff = 1,
   bid_offer = 0
 )
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
+\item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{ex_cess}}{A \emph{time series} or a \emph{matrix} of excess
+\item{\code{excess}}{A \emph{time series} or a \emph{matrix} of excess
 returns data (the returns in excess of the risk-free rate).}
 
-\item{\code{start_p}}{An \emph{integer vector} of start points.}
+\item{\code{startp}}{An \emph{integer vector} of start points.}
 
-\item{\code{end_p}}{An \emph{integer vector} of end points.}
+\item{\code{endp}}{An \emph{integer vector} of end points.}
 
-\item{\code{co_eff}}{A \emph{numeric} multiplier of the weights.  (The
+\item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
 
 \item{\code{bid_offer}}{A \emph{numeric} bid-offer spread.  (The default is
@@ -49,7 +49,7 @@ is \code{0.001})}
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
-\code{re_turns}).}
+\code{returns}).}
 
 \item{\code{confi_level}}{The confidence level for calculating the
 quantiles. (the default is \code{confi_level = 0.75}).}
@@ -65,7 +65,7 @@ weights.  (The default is \code{0.001})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as
-  the number of rows of \code{re_turns}.
+  the number of rows of \code{returns}.
 }
 \description{
 Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -74,10 +74,10 @@ Simulate (backtest) a rolling portfolio optimization strategy, using
 \details{
 The function \code{back_test()} performs a backtest simulation of a
   rolling portfolio optimization strategy over a \emph{vector} of
-  \code{end_p}.
+  \code{endp}.
   
-  It performs a loop over the end points \code{end_p}, and subsets the
-  \emph{matrix} of excess returns \code{ex_cess} along its rows, between the
+  It performs a loop over the end points \code{endp}, and subsets the
+  \emph{matrix} of excess returns \code{excess} along its rows, between the
   corresponding end point and the start point. It passes the subset matrix
   of excess returns into the function \code{calc_weights()}, which
   calculates the optimal portfolio weights. The arguments \code{eigen_max},
@@ -85,7 +85,7 @@ The function \code{back_test()} performs a backtest simulation of a
   function \code{calc_weights()}.
   
   The function \code{back_test()} multiplies the weights by the coefficient
-  \code{co_eff} (with default equal to \code{1}), which allows reverting a
+  \code{coeff} (with default equal to \code{1}), which allows reverting a
   strategy if \code{co_eff = -1}.
   
   The function \code{back_test()} then multiplies the weights times the
@@ -99,7 +99,7 @@ The function \code{back_test()} performs a backtest simulation of a
   
   The function \code{back_test()} returns a \emph{time series} (column
   \emph{vector}) of strategy returns, of the same length as the number of
-  rows of \code{re_turns}.
+  rows of \code{returns}.
 }
 \examples{
 \dontrun{

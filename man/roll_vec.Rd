@@ -5,17 +5,17 @@
 \title{Calculate the rolling sums over a single-column \emph{time series} or a
 \emph{vector} using \emph{Rcpp}.}
 \usage{
-roll_vec(se_ries, look_back)
+roll_vec(tseries, look_back)
 }
 \arguments{
-\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of elements of data used for calculating the sum.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{se_ries}.
+  \code{tseries}.
 }
 \description{
 Calculate the rolling sums over a single-column \emph{time series} or a

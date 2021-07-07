@@ -6,18 +6,18 @@
 interval for a single-column \emph{time series} or a \emph{vector}, using
 \code{RcppArmadillo}.}
 \usage{
-roll_var_vec(se_ries, look_back = 11L)
+roll_var_vec(tseries, look_back = 1L)
 }
 \arguments{
-\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of \emph{vector} elements used for calculating a single variance
-estimate.}
+estimate. (the default is \code{look_back = 1}).}
 }
 \value{
 A column \emph{vector} with the same number of elements as the input
-  argument \code{se_ries}.
+  argument \code{tseries}.
 }
 \description{
 Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -31,7 +31,7 @@ The function \code{roll_var_vec()} calculates a \emph{vector} of variance
   
   The function \code{roll_var_vec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the
-  input argument \code{se_ries}.
+  input argument \code{tseries}.
 
   The function \code{roll_var_vec()} performs the same calculation as the
   function \code{roll_var()} from package

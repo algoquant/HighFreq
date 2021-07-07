@@ -5,7 +5,15 @@
 \title{Calculate a \emph{vector} of z-scores of the residuals of rolling
 regressions at the end points of the design matrix.}
 \usage{
-roll_zscores(response, design, step = 1L, look_back = 11L)
+roll_zscores(
+  response,
+  design,
+  startp = 0L,
+  endp = 0L,
+  step = 1L,
+  look_back = 1L,
+  stub = 0L
+)
 }
 \arguments{
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
@@ -14,9 +22,20 @@ of response data.}
 \item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
 (predictor or explanatory data).}
 
-\item{\code{step}}{The number of time periods between the end points.}
+\item{\code{startp}}{An \emph{integer} vector of start points (the default
+is \code{startp = 0}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval.}
+\item{\code{endp}}{An \emph{integer} vector of end points (the default is
+\code{endp = 0}).}
+
+\item{\code{step}}{The number of time periods between the end points (the
+default is \code{step = 1}).}
+
+\item{\code{look_back}}{The number of end points in the look-back interval
+(the default is \code{look_back = 1}).}
+
+\item{\code{stub}}{An \emph{integer} value equal to the first end point for
+calculating the end points. (the default is \code{stub = 0}).}
 }
 \value{
 A column \emph{vector} of the same length as the number of rows of
@@ -31,7 +50,8 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   of the residuals of rolling regressions at the end points of the
   \emph{time series} \code{design}.
   
-  It first calculates a vector of end points separated by \code{step} time
+  If the arguments \code{endp} and \code{startp} are not given then it
+  first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.

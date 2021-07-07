@@ -5,28 +5,28 @@
 \title{Aggregate a time series to an \emph{OHLC} time series with lower
 periodicity.}
 \usage{
-roll_ohlc(se_ries, end_p)
+roll_ohlc(tseries, endp)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} with multiple
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 
-\item{\emph{end_p}}{An \emph{integer vector} of end points.}
+\item{\emph{endp}}{An \emph{integer vector} of end points.}
 }
 \value{
 A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
-  to the number of \emph{end_p} minus one.
+  to the number of \emph{endp} minus one.
 }
 \description{
 Given a time series of prices at a higher periodicity (say seconds), it
 calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 }
 \details{
-The function \code{roll_ohlc()} performs a loop over the \emph{end_p},
-  along the rows of the \code{se_ries} data. At each \emph{end_point}, it
-  selects the past rows of \code{se_ries} data, starting at the first bar
-  after the previous \emph{end_point}, and then calls the function
-  \code{agg_ohlc()} on the selected \code{se_ries} data to calculate the
+The function \code{roll_ohlc()} performs a loop over the end points
+  \emph{endp}, along the rows of the data \code{tseries}. At each end point,
+  it selects the past rows of the data \code{tseries}, starting at the first
+  bar after the previous end point, and then calls the function
+  \code{agg_ohlc()} on the selected data \code{tseries} to calculate the
   aggregations.
   
   The function \code{roll_ohlc()} can accept either a single column of data
@@ -44,7 +44,7 @@ oh_lc <- rutils::etf_env$VTI[, 1:5]
 # Define end points at 25 day intervals
 end_p <- rutils::calc_endpoints(oh_lc, inter_val=25)
 # Aggregate over end_p:
-ohlc_agg <- HighFreq::roll_ohlc(se_ries=oh_lc, end_p=(end_p-1))
+ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p-1))
 # Compare with xts::to.period()
 ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)

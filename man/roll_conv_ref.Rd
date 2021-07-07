@@ -5,16 +5,16 @@
 \title{Calculate by reference the rolling convolutions (weighted sums) of a
 \emph{time series} with a \emph{vector} of weights.}
 \usage{
-roll_conv_ref(se_ries, weight_s)
+roll_conv_ref(tseries, weights)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{weight_s}}{A column \emph{vector} of weights.}
+\item{\code{weights}}{A column \emph{vector} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{se_ries}.
+  argument \code{tseries}.
 }
 \description{
 Calculate by reference the rolling convolutions (weighted sums) of a
@@ -28,7 +28,7 @@ The function \code{roll_conv_ref()} calculates the convolutions of the
   values.
   
   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
-  \code{se_ries}, and replaces the old \emph{matrix} values with the
+  \code{tseries}, and replaces the old \emph{matrix} values with the
   weighted sums.
   It performs the calculation in place, without copying the \emph{matrix} in
   memory (which greatly increases the computation speed).

@@ -5,10 +5,10 @@
 \title{Calculate the row differences of a a \emph{time series} or a \emph{matrix}
 using \emph{RcppArmadillo}.}
 \usage{
-diff_it(se_ries, lagg = 1L, padd = TRUE)
+diff_it(tseries, lagg = 1L, padd = TRUE)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of rows (time
 periods) to lag when calculating the differences (the default is

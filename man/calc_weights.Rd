@@ -6,7 +6,7 @@
 functions.}
 \usage{
 calc_weights(
-  re_turns,
+  returns,
   method = "rank_sharpe",
   eigen_thresh = 0.001,
   eigen_max = 0L,
@@ -17,7 +17,7 @@ calc_weights(
 )
 }
 \arguments{
-\item{\code{re_turns}}{A \emph{time series} or a \emph{matrix} of returns
+\item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
 \item{\code{method}}{A \emph{string} specifying the objective function for
@@ -31,7 +31,7 @@ is \code{0.001})}
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
 eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
-\code{re_turns}).}
+\code{returns}).}
 
 \item{\code{confi_level}}{The confidence level for calculating the
 quantiles. (the default is \code{confi_level = 0.75}).}
@@ -47,7 +47,7 @@ weights.  (The default is \code{0.001})}
 }
 \value{
 A column \emph{vector} of the same length as the number of columns
-  of \code{re_turns}.
+  of \code{returns}.
 }
 \description{
 Calculate the optimal portfolio weights for different types of objective
@@ -60,10 +60,10 @@ The function \code{calc_weights()} calculates the optimal portfolio
 
   If \code{method = "rank_sharpe"} (the default) then it calculates the
   weights as the ranks (order index) of the trailing Sharpe ratios of the
-  asset \code{re_turns}.
+  asset \code{returns}.
 
   If \code{method = "rank"} then it calculates the weights as the ranks
-  (order index) of the last row of the \code{re_turns}.
+  (order index) of the last row of the \code{returns}.
 
   If \code{method = "max_sharpe"} then \code{calc_weights()} calculates
   the weights of the maximum Sharpe portfolio, by multiplying the inverse of
@@ -88,9 +88,9 @@ The function \code{calc_weights()} calculates the optimal portfolio
   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
   that is applied, with \code{alpha = 0} representing no shrinkage (with 
   the estimator of mean returns equal to the means of the columns of 
-  \code{re_turns}), and \code{alpha = 1} representing complete shrinkage 
+  \code{returns}), and \code{alpha = 1} representing complete shrinkage 
   (with the estimator of mean returns equal to the single mean of all the
-  columns of \code{re_turns})
+  columns of \code{returns})
 }
 \examples{
 \dontrun{

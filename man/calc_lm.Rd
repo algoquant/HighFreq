@@ -3,7 +3,7 @@
 \name{calc_lm}
 \alias{calc_lm}
 \title{Perform multivariate linear regression using least squares and return a
-named list.}
+named list of regression coefficients, their t-values, and p-values.}
 \usage{
 calc_lm(response, design)
 }
@@ -24,7 +24,7 @@ A named list with three elements: a \emph{matrix} of coefficients
 }
 \description{
 Perform multivariate linear regression using least squares and return a
-named list.
+named list of regression coefficients, their t-values, and p-values.
 }
 \details{
 The function \code{calc_lm()} performs the same calculations as the

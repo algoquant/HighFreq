@@ -5,10 +5,10 @@
 \title{Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 using \emph{Rcpp}.}
 \usage{
-roll_sum(se_ries, look_back = 1L)
+roll_sum(tseries, look_back = 1L)
 }
 \arguments{
-\item{\code{se_ries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
@@ -16,7 +16,7 @@ is \code{look_back = 1}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
-  argument \code{se_ries}.
+  argument \code{tseries}.
 }
 \description{
 Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -24,10 +24,10 @@ using \emph{Rcpp}.
 }
 \details{
 The function \code{roll_sum()} calculates the rolling sums over the
-  columns of the \code{se_ries} data.
+  columns of the data \code{tseries}.
   
   The function \code{roll_sum()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{se_ries}.
+  dimensions as the input argument \code{tseries}.
 
   The function \code{roll_sum()} uses the fast \code{RcppArmadillo} function
   \code{arma::cumsum()}, without explicit loops.

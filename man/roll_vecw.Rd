@@ -5,16 +5,16 @@
 \title{Calculate the rolling weighted sums over a single-column \emph{time series}
 or a \emph{vector} using \code{RcppArmadillo}.}
 \usage{
-roll_vecw(se_ries, weight_s)
+roll_vecw(tseries, weights)
 }
 \arguments{
-\item{\code{se_ries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
 
-\item{\code{weight_s}}{A \emph{vector} of weights.}
+\item{\code{weights}}{A \emph{vector} of weights.}
 }
 \value{
 A column \emph{vector} of the same length as the argument
-  \code{se_ries}.
+  \code{tseries}.
 }
 \description{
 Calculate the rolling weighted sums over a single-column \emph{time series}
@@ -24,7 +24,7 @@ or a \emph{vector} using \code{RcppArmadillo}.
 The function \code{roll_vecw()} calculates the rolling weighted sums of a
   \emph{vector} over its past values (a convolution with the \emph{vector}
   of weights), using \code{RcppArmadillo}. It performs a similar calculation
-  as the standard \code{R} function \code{stats::filter(x=se_ries,
+  as the standard \code{R} function \code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
   times faster, and it doesn't produce any \code{NA} values.
 }
@@ -36,7 +36,7 @@ re_turns <- as.numeric(rutils::etf_env$VTI[, 6])
 # Create simple weights
 weight_s <- c(1, rep(0, 10))
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(se_ries=re_turns, weight_s=weight_s)
+weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
 # Compare with original
 all.equal(re_turns, as.numeric(weight_ed))
 # Second example
@@ -44,7 +44,7 @@ all.equal(re_turns, as.numeric(weight_ed))
 weight_s <- exp(-0.2*1:11)
 weight_s <- weight_s/sum(weight_s)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(se_ries=re_turns, weight_s=weight_s)
+weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
 # Calculate rolling weighted sums using filter()
 filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 # Compare both methods
