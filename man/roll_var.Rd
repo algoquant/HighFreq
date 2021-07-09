@@ -13,7 +13,8 @@ roll_var(
   step = 1L,
   look_back = 1L,
   stub = 0L,
-  method = "moment"
+  method = "moment",
+  con_fi = 0.75
 )
 }
 \arguments{
@@ -32,10 +33,10 @@ default is \code{step = 1}).}
 (the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points. (the default is \code{stub = 0}).}
+calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{character} string representing the type of
-measure of dispersion. (The default is the \code{method = "moment"}.)}
+\item{\code{method}}{A \emph{character} string representing the type of the
+measure of dispersion (the default is \code{method = "moment"}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
@@ -52,21 +53,21 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   (variance) estimates over rolling look-back intervals attached at the end
   points of the \emph{time series} \code{tseries}.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
-  first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{tseries}
-  using the function \code{calc_endpoints()}, with the number of time
-  periods between the end points equal to \code{step} time periods.
-
-  It then performs a loop over the end points, and at each end point it
-  subsets the time series \code{tseries} over a look-back interval equal
-  to \code{look_back} number of end points.
+  The function \code{roll_var()} performs a loop over the end points, and at
+  each end point it subsets the time series \code{tseries} over a look-back
+  interval equal to \code{look_back} number of end points.
   
   It passes the subset time series to the function \code{calc_var()}, which
   calculates the dispersion.
   See the function \code{calc_var()} for a description of the dispersion
   methods.
   
+  If the arguments \code{endp} and \code{startp} are not given then it
+  first calculates a vector of end points separated by \code{step} time
+  periods. It calculates the end points along the rows of \code{tseries}
+  using the function \code{calc_endpoints()}, with the number of time
+  periods between the end points equal to \code{step} time periods.
+
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
   \code{step = 25} and \code{look_back = 3}.

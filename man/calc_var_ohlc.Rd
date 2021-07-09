@@ -30,14 +30,14 @@ estimator for calculating the variance.  The estimators include:
 
 \item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{lag_close = 0}.)}
+default is \code{lag_close = 0}).}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
-\code{scale = TRUE}.)}
+\code{scale = TRUE}).}
 
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument. (The default is \code{in_dex = 0}.)}
+series}.  This is an optional argument (the default is \code{in_dex = 0}).}
 }
 \value{
 A single \emph{numeric} value equal to the variance of the
@@ -65,7 +65,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
 
   If \code{scale} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
-  the units of variance per second squared.) This is useful when calculating
+  the units of variance per second squared). This is useful when calculating
   the variance from minutely bar data, because dividing returns by the
   number of seconds decreases the effect of overnight price jumps. If the
   time index is in days, then the variance is equal to the variance per day

@@ -35,7 +35,7 @@ default is \code{step = 1}).}
 (the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points. (the default is \code{stub = 0}).}
+calculating the end points (the default is \code{stub = 0}).}
 
 \item{\code{method}}{A \emph{character} string representing the range
 estimator for calculating the variance.  The estimators include:
@@ -49,11 +49,11 @@ estimator for calculating the variance.  The estimators include:
  (The default is the \emph{"yang_zhang"} estimator.)}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
-by the time index, the number of seconds in each period? (The default is
+by the time index, the number of seconds in each period?  (The default is
 \code{scale = TRUE}.)}
 
 \item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument. (The default is \code{in_dex=0}.)}
+series}.  This is an optional argument (the default is \code{in_dex=0}).}
 }
 \value{
 A column \emph{vector} of variance estimates, with the number of
@@ -72,12 +72,6 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   The input \emph{OHLC time series} \code{ohlc} is assumed to contain the
   log prices.
 
-  If the arguments \code{endp} and \code{startp} are not given then it
-  first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{ohlc}
-  using the function \code{calc_endpoints()}, with the number of time
-  periods between the end points equal to \code{step} time periods.
-
   The function \code{roll_var_ohlc()} performs a loop over the end points,
   subsets the previous (past) rows of \code{ohlc}, and passes them into the
   function \code{calc_var_ohlc()}.
@@ -87,6 +81,12 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   In the initial warmup period, the variance is calculated over an expanding
   look-back interval.
   
+  If the arguments \code{endp} and \code{startp} are not given then it
+  first calculates a vector of end points separated by \code{step} time
+  periods. It calculates the end points along the rows of \code{ohlc}
+  using the function \code{calc_endpoints()}, with the number of time
+  periods between the end points equal to \code{step} time periods.
+
   For example, the rolling variance at daily end points with an \code{11}
   day look-back, can be calculated using the parameters \code{step = 1} and
   \code{look_back = 1} (Assuming the \code{ohlc} data has daily

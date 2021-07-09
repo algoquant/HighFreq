@@ -13,7 +13,7 @@ roll_var_vec(tseries, look_back = 1L)
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of \emph{vector} elements used for calculating a single variance
-estimate. (the default is \code{look_back = 1}).}
+estimate (the default is \code{look_back = 1}).}
 }
 \value{
 A column \emph{vector} with the same number of elements as the input

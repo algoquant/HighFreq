@@ -10,7 +10,7 @@ calc_weights(
   method = "rank_sharpe",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  confi_level = 0.1,
+  con_fi = 0.1,
   alpha = 0,
   scale = TRUE,
   vol_target = 0.01
@@ -21,11 +21,11 @@ calc_weights(
 data (the returns in excess of the risk-free rate).}
 
 \item{\code{method}}{A \emph{string} specifying the objective function for
-calculating the weights (see Details).  (The default is \code{method =
+calculating the weights (see Details) (the default is \code{method =
 "rank_sharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse.  (The default
+small eigenvalues in order to regularize the matrix inverse (the default
 is \code{0.001})}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
@@ -33,8 +33,8 @@ eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
 \code{returns}).}
 
-\item{\code{confi_level}}{The confidence level for calculating the
-quantiles. (the default is \code{confi_level = 0.75}).}
+\item{\code{con_fi}}{The confidence level for calculating the
+quantiles (the default is \code{con_fi = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -43,7 +43,7 @@ quantiles. (the default is \code{confi_level = 0.75}).}
 be scaled (the default is \code{scale = TRUE}).}
 
 \item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
-weights.  (The default is \code{0.001})}
+weights (the default is \code{0.001})}
 }
 \value{
 A column \emph{vector} of the same length as the number of columns

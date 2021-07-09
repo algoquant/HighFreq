@@ -14,7 +14,7 @@ roll_kurtosis(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  confi_level = 0.75
+  con_fi = 0.75
 )
 }
 \arguments{
@@ -33,13 +33,13 @@ default is \code{step = 1}).}
 (the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points. (the default is \code{stub = 0}).}
+calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{string} specifying the type of kurtosis model
-(see Details). (The default is the \code{method = "moment"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of the kurtosis
+model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{confi_level}}{The confidence level for calculating the
-quantiles. (the default is \code{confi_level = 0.75}).}
+\item{\code{con_fi}}{The confidence level for calculating the
+quantiles (the default is \code{con_fi = 0.75}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
@@ -56,21 +56,20 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   estimates over rolling look-back intervals attached at the end points of
   the \emph{time series} \code{tseries}.
   
+  The function \code{roll_kurtosis()} performs a loop over the end points,
+  and at each end point it subsets the time series \code{tseries} over a
+  look-back interval equal to \code{look_back} number of end points.
+  
+  It passes the subset time series to the function \code{calc_kurtosis()},
+  which calculates the kurtosis. See the function \code{calc_kurtosis()} for
+  a description of the kurtosis methods.
+  
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
 
-  It then performs a loop over the end points, and at each end point it
-  subsets the time series \code{tseries} over a look-back interval equal
-  to \code{look_back} number of end points.
-  
-  It passes the subset time series to the function \code{calc_kurtosis()}, which
-  calculates the kurtosis.
-  See the function \code{calc_kurtosis()} for a description of the kurtosis
-  methods.
-  
   For example, the rolling kurtosis at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
   \code{step = 25} and \code{look_back = 3}.

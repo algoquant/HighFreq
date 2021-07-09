@@ -5,13 +5,13 @@
 \title{Calculate the dispersion (variance) of the columns of a \emph{time series}
 or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(tseries, method = "moment")
+calc_var(tseries, method = "moment", con_fi = 0.75)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{string} specifying the type of dispersion model
-(see Details). (The default is the \code{method = "moment"}.)}
+\item{\code{method}}{A \emph{string} specifying the type of the dispersion model
+(the default is \code{method = "moment"} - see Details).}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix
@@ -39,6 +39,13 @@ The dispersion is a measure of the variability of the data.  Examples of
   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 
   If \code{method = "quantile"} then it calculates the dispersion as the
+  difference between the quantiles as follows:
+  \deqn{
+    \mu = q_{\alpha} - q_{1-\alpha}
+  }
+  Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+  
+  If \code{method = "nonparametric"} then it calculates the dispersion as the
   Median Absolute Deviation (\emph{MAD}):
   \deqn{
     MAD = median(abs(x - median(x)))
@@ -46,8 +53,8 @@ The dispersion is a measure of the variability of the data.  Examples of
   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
   comparable to the standard deviation.
 
-  If \code{method = "quantile"} then \code{calc_var()} performs the same
-  calculation as the function \code{stats::mad()}, but it's much faster
+  If \code{method = "nonparametric"} then \code{calc_var()} performs the
+  same calculation as the function \code{stats::mad()}, but it's much faster
   because it uses \code{RcppArmadillo} \code{C++} code.
 
   If the number of rows of \code{tseries} is less than \code{3} then it
@@ -71,11 +78,11 @@ summary(microbenchmark(
   Rcode=apply(re_turns, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_var() with stats::mad()
-all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
+all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
   sapply(re_turns, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
+  Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
   Rcode=sapply(re_turns, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

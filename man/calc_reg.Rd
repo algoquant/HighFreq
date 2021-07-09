@@ -11,7 +11,7 @@ calc_reg(
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  confi_level = 0.1,
+  con_fi = 0.1,
   alpha = 0
 )
 }
@@ -22,11 +22,11 @@ of response data.}
 \item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
 (predictor or explanatory data).}
 
-\item{\code{method}}{A \emph{string} specifying the type of regression model
-(see Details).  (The default is \code{method = "least_squares"})}
+\item{\code{method}}{A \emph{string} specifying the type of the regression
+model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse.  (The default
+small eigenvalues in order to regularize the matrix inverse (the default
 is \code{0.001})}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
@@ -34,8 +34,8 @@ eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
 \code{returns}).}
 
-\item{\code{confi_level}}{The confidence level for calculating the
-quantiles. (the default is \code{confi_level = 0.75}).}
+\item{\code{con_fi}}{The confidence level for calculating the
+quantiles (the default is \code{con_fi = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}

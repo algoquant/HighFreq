@@ -16,7 +16,7 @@ roll_reg(
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  confi_level = 0.1,
+  con_fi = 0.1,
   alpha = 0
 )
 }
@@ -40,13 +40,13 @@ default is \code{step = 1}).}
 (the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points. (the default is \code{stub = 0}).}
+calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{string} specifying the type of regression model
-(see Details).  (The default is \code{method = "least_squares"})}
+\item{\code{method}}{A \emph{string} specifying the type of the regression
+model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse.  (The default
+small eigenvalues in order to regularize the matrix inverse (the default
 is \code{0.001})}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of
@@ -54,8 +54,8 @@ eigenvectors used for calculating the regularized inverse of the
 covariance \emph{matrix} (the default is the number of columns of
 \code{returns}).}
 
-\item{\code{confi_level}}{The confidence level for calculating the
-quantiles. (the default is \code{confi_level = 0.75}).}
+\item{\code{con_fi}}{The confidence level for calculating the
+quantiles (the default is \code{con_fi = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -74,18 +74,18 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   coefficients, their t-values, and z-scores at the end points of the design
   matrix.
   
+  The function \code{roll_reg()} performs a loop over the end points, and at
+  each end point it subsets the time series \code{design} over a look-back
+  interval equal to \code{look_back} number of end points.
+  
+  It passes the subset time series to the function \code{calc_reg()}, which
+  calculates the regression data.
+  
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
-  
-  It then performs a loop over the end points, and at each end point it
-  subsets the time series \code{design} over a look-back interval equal
-  to \code{look_back} number of end points.
-  
-  It passes the subset time series to the function \code{calc_reg()}, which
-  calculates the regression data.
   
   For example, the rolling regression at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters

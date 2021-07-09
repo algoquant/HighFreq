@@ -349,7 +349,7 @@ calc_startpoints <- function(endp, look_back) {
 #' @param \code{matrix} A \emph{matrix}.
 #' 
 #' @param \code{by_col} A \emph{Boolean} argument: if \code{TRUE} then multiply
-#'   the columns, otherwise multiply the rows. (The default is
+#'   the columns, otherwise multiply the rows (the default is
 #'   \code{by_col = TRUE}.)
 #' 
 #' @return A single \emph{integer} value, equal to either the number of
@@ -461,7 +461,7 @@ calc_eigen <- function(returns) {
 #' @param \code{returns} A \emph{time series} or \emph{matrix} of returns data.
 #' 
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse.  (The default
+#'   small eigenvalues in order to regularize the matrix inverse (the default
 #'   is \code{0.001})
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the regularization
@@ -514,7 +514,7 @@ calc_inv <- function(returns, eigen_thresh = 0.001, eigen_max = 0L) {
 #'   (\emph{MAD}).
 #'   If \code{use_median = FALSE} then the centrality is calculated as the
 #'   \emph{mean} and the dispersion is calculated as the \emph{standard
-#'   deviation}. (The default is \code{FALSE})
+#'   deviation} (the default is \code{FALSE})
 #'
 #' @return A \emph{matrix} with the same dimensions as the input
 #'   argument \code{tseries}.
@@ -559,6 +559,90 @@ calc_scaled <- function(tseries, use_median = FALSE) {
     .Call('_HighFreq_calc_scaled', PACKAGE = 'HighFreq', tseries, use_median)
 }
 
+#' Calculate the mean (location) of the columns of a \emph{time series} or a
+#' \emph{matrix} using \code{RcppArmadillo}.
+#'
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#'
+#' @param \code{method} A \emph{string} specifying the type of the mean
+#'   (location) model (the default is \code{method = "moment"} - see Details).
+#'
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
+#'
+#' @return A single-row matrix with the mean (location) of the columns of
+#'   \code{tseries}.
+#'
+#' @details 
+#'   The function \code{calc_mean()} calculates the mean (location) of the
+#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   \code{RcppArmadillo} \code{C++} code.
+#'
+#'   If \code{method = "moment"} (the default) then \code{calc_mean()}
+#'   calculates the location as the mean - the first moment of the data.
+#'
+#'   If \code{method = "quantile"} then it calculates the location \eqn{\mu} as
+#'   the sum of the quantiles as follows:
+#'   \deqn{
+#'     \mu = q_{\alpha} + q_{1-\alpha}
+#'   }
+#'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+#'
+#'   If \code{method = "nonparametric"} then it calculates the location as the
+#'   median.
+#'   
+#'   The code examples below compare the function \code{calc_mean()} with the
+#'   mean (location) calculated using \code{R} code.
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+#' # Calculate the column means in RcppArmadillo
+#' HighFreq::calc_mean(re_turns)
+#' # Calculate the column means in R
+#' sapply(re_turns, mean)
+#' # Compare the values
+#' all.equal(drop(HighFreq::calc_mean(re_turns)), 
+#'   sapply(re_turns, mean), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_mean(re_turns),
+#'   Rcode=sapply(re_turns, mean),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the quantile mean (location)
+#' HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)
+#' # Calculate the quantile mean (location) in R
+#' colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
+#' # Compare the values
+#' all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)), 
+#'   colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
+#'   check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9),
+#'   Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Calculate the column medians in RcppArmadillo
+#' HighFreq::calc_mean(re_turns, method="nonparametric")
+#' # Calculate the column medians in R
+#' sapply(re_turns, median)
+#' # Compare the values
+#' all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
+#'   sapply(re_turns, median), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
+#'   Rcode=sapply(re_turns, median),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_mean <- function(tseries, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, con_fi)
+}
+
 #' Calculate the variance of a a single-column \emph{time series} or a
 #' \emph{vector} using \code{RcppArmadillo}.
 #' 
@@ -596,8 +680,8 @@ calc_var_vec <- function(tseries) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'   
-#' @param \code{method} A \emph{string} specifying the type of dispersion model
-#'   (see Details). (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{string} specifying the type of the dispersion model
+#'   (the default is \code{method = "moment"} - see Details).
 #'    
 #' @return A row vector equal to the dispersion of the columns of the matrix
 #'   \code{tseries}.
@@ -620,6 +704,13 @@ calc_var_vec <- function(tseries) {
 #'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 #'
 #'   If \code{method = "quantile"} then it calculates the dispersion as the
+#'   difference between the quantiles as follows:
+#'   \deqn{
+#'     \mu = q_{\alpha} - q_{1-\alpha}
+#'   }
+#'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+#'   
+#'   If \code{method = "nonparametric"} then it calculates the dispersion as the
 #'   Median Absolute Deviation (\emph{MAD}):
 #'   \deqn{
 #'     MAD = median(abs(x - median(x)))
@@ -627,8 +718,8 @@ calc_var_vec <- function(tseries) {
 #'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
 #'   comparable to the standard deviation.
 #'
-#'   If \code{method = "quantile"} then \code{calc_var()} performs the same
-#'   calculation as the function \code{stats::mad()}, but it's much faster
+#'   If \code{method = "nonparametric"} then \code{calc_var()} performs the
+#'   same calculation as the function \code{stats::mad()}, but it's much faster
 #'   because it uses \code{RcppArmadillo} \code{C++} code.
 #'
 #'   If the number of rows of \code{tseries} is less than \code{3} then it
@@ -652,18 +743,18 @@ calc_var_vec <- function(tseries) {
 #'   Rcode=apply(re_turns, 2, var),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Compare HighFreq::calc_var() with stats::mad()
-#' all.equal(drop(HighFreq::calc_var(re_turns, method="quantile")), 
+#' all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
 #'   sapply(re_turns, mad), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with stats::mad()
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_var(re_turns, method="quantile"),
+#'   Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
 #'   Rcode=sapply(re_turns, mad),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_var <- function(tseries, method = "moment") {
-    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method)
+calc_var <- function(tseries, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, con_fi)
 }
 
 #' Calculate the variance of an \emph{OHLC time series}, using different range
@@ -685,14 +776,14 @@ calc_var <- function(tseries, method = "moment") {
 #'    
 #' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
-#'   default is \code{lag_close = 0}.)
+#'   default is \code{lag_close = 0}).
 #'   
 #' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
-#'   \code{scale = TRUE}.)
+#'   \code{scale = TRUE}).
 #'
 #' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument. (The default is \code{in_dex = 0}.)
+#'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
 #'   
 #' @return A single \emph{numeric} value equal to the variance of the
 #'   \emph{OHLC time series}.
@@ -715,7 +806,7 @@ calc_var <- function(tseries, method = "moment") {
 #'
 #'   If \code{scale} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
-#'   the units of variance per second squared.) This is useful when calculating
+#'   the units of variance per second squared). This is useful when calculating
 #'   the variance from minutely bar data, because dividing returns by the
 #'   number of seconds decreases the effect of overnight price jumps. If the
 #'   time index is in days, then the variance is equal to the variance per day
@@ -774,10 +865,10 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = T
 #' Calculate the ranks of the elements of a single-column \emph{time series} or
 #' a \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{vector} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
 #'
 #' @return An \emph{integer vector} with the ranks of the elements of the
-#'   \emph{vector}.
+#'   \code{tseries}.
 #'
 #' @details 
 #'   The function \code{calc_ranks()} calculates the ranks of the elements of a
@@ -819,8 +910,8 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = T
 #' }
 #' 
 #' @export
-calc_ranks <- function(vector) {
-    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', vector)
+calc_ranks <- function(tseries) {
+    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
@@ -828,11 +919,11 @@ calc_ranks <- function(vector) {
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @param \code{method} A \emph{string} specifying the type of skewness model
-#'   (see Details). (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{string} specifying the type of the skewness
+#'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @return A single-row matrix with the skewness of the columns of
 #'   \code{tseries}.
@@ -883,13 +974,13 @@ calc_ranks <- function(vector) {
 #'   Rcode=calc_skewr(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile skewness
-#' HighFreq::calc_skew(re_turns, method="quantile", confi_level=0.9)
+#' HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)
 #' # Calculate the quantile skewness in R
 #' calc_skewq <- function(x, a = 0.75) {
 #'   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
 #'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
 #' }  # end calc_skewq
-#' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", confi_level=0.9)), 
+#' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)), 
 #'   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
@@ -910,8 +1001,8 @@ calc_ranks <- function(vector) {
 #' }
 #' 
 #' @export
-calc_skew <- function(tseries, method = "moment", confi_level = 0.75) {
-    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, confi_level)
+calc_skew <- function(tseries, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, con_fi)
 }
 
 #' Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -919,11 +1010,11 @@ calc_skew <- function(tseries, method = "moment", confi_level = 0.75) {
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'
-#' @param \code{method} A \emph{string} specifying the type of kurtosis model
-#'   (see Details). (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{string} specifying the type of the kurtosis
+#'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @return A single-row matrix with the kurtosis of the columns of
 #'   \code{tseries}.
@@ -974,13 +1065,13 @@ calc_skew <- function(tseries, method = "moment", confi_level = 0.75) {
 #'   Rcode=calc_kurtr(re_turns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile kurtosis
-#' HighFreq::calc_kurtosis(re_turns, method="quantile", confi_level=0.9)
+#' HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)
 #' # Calculate the quantile kurtosis in R
 #' calc_kurtq <- function(x, a=0.9) {
 #'   	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
 #'   	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
 #' }  # end calc_kurtq
-#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", confi_level=0.9)), 
+#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)), 
 #'   calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
@@ -1001,8 +1092,8 @@ calc_skew <- function(tseries, method = "moment", confi_level = 0.75) {
 #' }
 #' 
 #' @export
-calc_kurtosis <- function(tseries, method = "moment", confi_level = 0.75) {
-    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, confi_level)
+calc_kurtosis <- function(tseries, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, con_fi)
 }
 
 #' Perform multivariate linear regression using least squares and return a
@@ -1067,11 +1158,11 @@ calc_lm <- function(response, design) {
 #' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
 #'   (predictor or explanatory data).
 #' 
-#' @param \code{method} A \emph{string} specifying the type of regression model
-#'   (see Details).  (The default is \code{method = "least_squares"})
+#' @param \code{method} A \emph{string} specifying the type of the regression
+#'   model the default is \code{method = "least_squares"} - see Details).
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse.  (The default
+#'   small eigenvalues in order to regularize the matrix inverse (the default
 #'   is \code{0.001})
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of
@@ -1079,8 +1170,8 @@ calc_lm <- function(response, design) {
 #'   covariance \emph{matrix} (the default is the number of columns of
 #'   \code{returns}).
 #'   
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -1154,8 +1245,8 @@ calc_lm <- function(response, design) {
 #' }
 #' 
 #' @export
-calc_reg <- function(response, design, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, design, method, eigen_thresh, eigen_max, confi_level, alpha)
+calc_reg <- function(response, design, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, con_fi = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, design, method, eigen_thresh, eigen_max, con_fi, alpha)
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -1209,10 +1300,10 @@ agg_ohlc <- function(tseries) {
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
 #' and reset the count to zero after every \code{FALSE} element.
 #' 
-#' @param \code{vector} A \emph{Boolean vector} of data.
+#' @param \code{tseries} A \emph{Boolean vector} of data.
 #'
 #' @return An \emph{integer vector} of the same length as the argument
-#'   \code{vector}.
+#'   \code{tseries}.
 #'
 #' @details 
 #'   The function \code{roll_count()} calculates the number of consecutive
@@ -1231,8 +1322,8 @@ agg_ohlc <- function(tseries) {
 #' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
 #' }
 #' @export
-roll_count <- function(vector) {
-    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', vector)
+roll_count <- function(tseries) {
+    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Aggregate a time series to an \emph{OHLC} time series with lower
@@ -1649,7 +1740,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of \emph{vector} elements used for calculating a single variance
-#'   estimate. (the default is \code{look_back = 1}).
+#'   estimate (the default is \code{look_back = 1}).
 #'
 #' @return A column \emph{vector} with the same number of elements as the input
 #'   argument \code{tseries}.
@@ -1707,10 +1798,10 @@ roll_var_vec <- function(tseries, look_back = 1L) {
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
-#' @param \code{method} A \emph{character} string representing the type of
-#'   measure of dispersion. (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{character} string representing the type of the
+#'   measure of dispersion (the default is \code{method = "moment"}).
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
 #'   series \code{tseries}, and the number of rows equal to the number of end
@@ -1721,21 +1812,21 @@ roll_var_vec <- function(tseries, look_back = 1L) {
 #'   (variance) estimates over rolling look-back intervals attached at the end
 #'   points of the \emph{time series} \code{tseries}.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
-#'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
-#'   using the function \code{calc_endpoints()}, with the number of time
-#'   periods between the end points equal to \code{step} time periods.
-#' 
-#'   It then performs a loop over the end points, and at each end point it
-#'   subsets the time series \code{tseries} over a look-back interval equal
-#'   to \code{look_back} number of end points.
+#'   The function \code{roll_var()} performs a loop over the end points, and at
+#'   each end point it subsets the time series \code{tseries} over a look-back
+#'   interval equal to \code{look_back} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_var()}, which
 #'   calculates the dispersion.
 #'   See the function \code{calc_var()} for a description of the dispersion
 #'   methods.
 #'   
+#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   first calculates a vector of end points separated by \code{step} time
+#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   using the function \code{calc_endpoints()}, with the number of time
+#'   periods between the end points equal to \code{step} time periods.
+#' 
 #'   For example, the rolling variance at \code{25} day end points, with a
 #'   \code{75} day look-back, can be calculated using the parameters
 #'   \code{step = 25} and \code{look_back = 3}.
@@ -1773,8 +1864,8 @@ roll_var_vec <- function(tseries, look_back = 1L) {
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment") {
-    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method)
+roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, con_fi)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -1797,7 +1888,7 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
 #' @param \code{method} A \emph{character} string representing the range
 #'   estimator for calculating the variance.  The estimators include:
@@ -1811,11 +1902,11 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'    (The default is the \emph{"yang_zhang"} estimator.)
 #'    
 #' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
-#'   by the time index, the number of seconds in each period? (The default is
+#'   by the time index, the number of seconds in each period?  (The default is
 #'   \code{scale = TRUE}.)
 #'   
 #' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument. (The default is \code{in_dex=0}.)
+#'   series}.  This is an optional argument (the default is \code{in_dex=0}).
 #'
 #' @return A column \emph{vector} of variance estimates, with the number of
 #'   rows equal to the number of end points.
@@ -1828,12 +1919,6 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'   The input \emph{OHLC time series} \code{ohlc} is assumed to contain the
 #'   log prices.
 #'
-#'   If the arguments \code{endp} and \code{startp} are not given then it
-#'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{ohlc}
-#'   using the function \code{calc_endpoints()}, with the number of time
-#'   periods between the end points equal to \code{step} time periods.
-#' 
 #'   The function \code{roll_var_ohlc()} performs a loop over the end points,
 #'   subsets the previous (past) rows of \code{ohlc}, and passes them into the
 #'   function \code{calc_var_ohlc()}.
@@ -1843,6 +1928,12 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'   In the initial warmup period, the variance is calculated over an expanding
 #'   look-back interval.
 #'   
+#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   first calculates a vector of end points separated by \code{step} time
+#'   periods. It calculates the end points along the rows of \code{ohlc}
+#'   using the function \code{calc_endpoints()}, with the number of time
+#'   periods between the end points equal to \code{step} time periods.
+#' 
 #'   For example, the rolling variance at daily end points with an \code{11}
 #'   day look-back, can be calculated using the parameters \code{step = 1} and
 #'   \code{look_back = 1} (Assuming the \code{ohlc} data has daily
@@ -1941,13 +2032,13 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
-#' @param \code{method} A \emph{string} specifying the type of skewness model
-#'   (see Details). (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{string} specifying the type of the skewness
+#'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
 #'   series \code{tseries}, and the number of rows equal to the number of end
@@ -1958,21 +2049,21 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   estimates over rolling look-back intervals attached at the end points of
 #'   the \emph{time series} \code{tseries}.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
-#'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
-#'   using the function \code{calc_endpoints()}, with the number of time
-#'   periods between the end points equal to \code{step} time periods.
-#' 
-#'   It then performs a loop over the end points, and at each end point it
-#'   subsets the time series \code{tseries} over a look-back interval equal
-#'   to \code{look_back} number of end points.
+#'   The function \code{roll_skew()} performs a loop over the end points, and
+#'   at each end point it subsets the time series \code{tseries} over a
+#'   look-back interval equal to \code{look_back} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_skew()}, which
 #'   calculates the skewness.
 #'   See the function \code{calc_skew()} for a description of the skewness
 #'   methods.
 #'   
+#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   first calculates a vector of end points separated by \code{step} time
+#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   using the function \code{calc_endpoints()}, with the number of time
+#'   periods between the end points equal to \code{step} time periods.
+#' 
 #'   For example, the rolling skewness at \code{25} day end points, with a
 #'   \code{75} day look-back, can be calculated using the parameters
 #'   \code{step = 25} and \code{look_back = 3}.
@@ -2006,8 +2097,8 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confi_level = 0.75) {
-    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confi_level)
+roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, con_fi)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
@@ -2029,13 +2120,13 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
-#' @param \code{method} A \emph{string} specifying the type of kurtosis model
-#'   (see Details). (The default is the \code{method = "moment"}.)
+#' @param \code{method} A \emph{string} specifying the type of the kurtosis
+#'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
 #'   series \code{tseries}, and the number of rows equal to the number of end
@@ -2046,21 +2137,20 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   estimates over rolling look-back intervals attached at the end points of
 #'   the \emph{time series} \code{tseries}.
 #'   
+#'   The function \code{roll_kurtosis()} performs a loop over the end points,
+#'   and at each end point it subsets the time series \code{tseries} over a
+#'   look-back interval equal to \code{look_back} number of end points.
+#'   
+#'   It passes the subset time series to the function \code{calc_kurtosis()},
+#'   which calculates the kurtosis. See the function \code{calc_kurtosis()} for
+#'   a description of the kurtosis methods.
+#'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{design}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
-#'   It then performs a loop over the end points, and at each end point it
-#'   subsets the time series \code{tseries} over a look-back interval equal
-#'   to \code{look_back} number of end points.
-#'   
-#'   It passes the subset time series to the function \code{calc_kurtosis()}, which
-#'   calculates the kurtosis.
-#'   See the function \code{calc_kurtosis()} for a description of the kurtosis
-#'   methods.
-#'   
 #'   For example, the rolling kurtosis at \code{25} day end points, with a
 #'   \code{75} day look-back, can be calculated using the parameters
 #'   \code{step = 25} and \code{look_back = 3}.
@@ -2094,8 +2184,8 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confi_level = 0.75) {
-    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confi_level)
+roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, con_fi)
 }
 
 #' Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -2120,13 +2210,13 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
-#' @param \code{method} A \emph{string} specifying the type of regression model
-#'   (see Details).  (The default is \code{method = "least_squares"})
+#' @param \code{method} A \emph{string} specifying the type of the regression
+#'   model the default is \code{method = "least_squares"} - see Details).
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse.  (The default
+#'   small eigenvalues in order to regularize the matrix inverse (the default
 #'   is \code{0.001})
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of
@@ -2134,8 +2224,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   covariance \emph{matrix} (the default is the number of columns of
 #'   \code{returns}).
 #'   
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -2149,18 +2239,18 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   coefficients, their t-values, and z-scores at the end points of the design
 #'   matrix.
 #'   
+#'   The function \code{roll_reg()} performs a loop over the end points, and at
+#'   each end point it subsets the time series \code{design} over a look-back
+#'   interval equal to \code{look_back} number of end points.
+#'   
+#'   It passes the subset time series to the function \code{calc_reg()}, which
+#'   calculates the regression data.
+#'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{design}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
-#'   
-#'   It then performs a loop over the end points, and at each end point it
-#'   subsets the time series \code{design} over a look-back interval equal
-#'   to \code{look_back} number of end points.
-#'   
-#'   It passes the subset time series to the function \code{calc_reg()}, which
-#'   calculates the regression data.
 #'   
 #'   For example, the rolling regression at \code{25} day end points, with a
 #'   \code{75} day look-back, can be calculated using the parameters
@@ -2187,8 +2277,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' }
 #' 
 #' @export
-roll_reg <- function(response, design, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, design, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, confi_level, alpha)
+roll_reg <- function(response, design, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 0.001, eigen_max = 0L, con_fi = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, design, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, con_fi, alpha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a
@@ -2205,7 +2295,7 @@ roll_reg <- function(response, design, startp = 0L, endp = 0L, step = 1L, look_b
 #'   (\emph{MAD}).
 #'   If \code{use_median} is \code{FALSE} then the centrality is calculated as 
 #'   the \emph{mean} and the dispersion is calculated as the \emph{standard
-#'   deviation}. (The default is \code{use_median = FALSE})
+#'   deviation} (the default is \code{use_median = FALSE})
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{matrix}.
@@ -2261,7 +2351,7 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #'   (the default is \code{look_back = 1}).
 #'   
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points. (the default is \code{stub = 0}).
+#'   calculating the end points (the default is \code{stub = 0}).
 #' 
 #' @return A column \emph{vector} of the same length as the number of rows of
 #'   \code{design}.
@@ -2271,18 +2361,18 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #'   of the residuals of rolling regressions at the end points of the
 #'   \emph{time series} \code{design}.
 #'   
+#'   The function \code{roll_zscores()} performs a loop over the end points,
+#'   and at each end point it subsets the time series \code{design} over a
+#'   look-back interval equal to \code{look_back} number of end points.
+#'   
+#'   It passes the subset time series to the function \code{calc_lm()}, which
+#'   calculates the regression data.
+#'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{design}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
-#'   
-#'   It then performs a loop over the end points, and at each end point it
-#'   subsets the time series \code{design} over a look-back interval equal
-#'   to \code{look_back} number of end points.
-#'   
-#'   It passes the subset time series to the function \code{calc_lm()}, which
-#'   calculates the regression data.
 #'   
 #'   For example, the rolling variance at \code{25} day end points, with a
 #'   \code{75} day look-back, can be calculated using the parameters
@@ -2317,6 +2407,103 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #' @export
 roll_zscores <- function(response, design, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
     .Call('_HighFreq_roll_zscores', PACKAGE = 'HighFreq', response, design, startp, endp, step, look_back, stub)
+}
+
+#' Calculate a \emph{matrix} of estimator values over a rolling look-back
+#' interval attached at the end points of a \emph{time series} or a
+#' \emph{matrix}.
+#'
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#'    
+#' @param \code{fun} A \emph{string} specifying the estimator function (the
+#'   default is \code{fun = "calc_var"}.)
+#'
+#' @param \code{startp} An \emph{integer} vector of start points (the default
+#'   is \code{startp = 0}).
+#' 
+#' @param \code{endp} An \emph{integer} vector of end points (the default is 
+#'   \code{endp = 0}).
+#' 
+#' @param \code{step} The number of time periods between the end points (the
+#'   default is \code{step = 1}).
+#'
+#' @param \code{look_back} The number of end points in the look-back interval
+#'   (the default is \code{look_back = 1}).
+#'   
+#' @param \code{stub} An \emph{integer} value equal to the first end point for
+#'   calculating the end points (the default is \code{stub = 0}).
+#' 
+#' @param \code{method} A \emph{string} specifying the type of the model for the
+#'   estimator (the default is \code{method = "moment"}.)
+#'
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
+#'
+#' @return A \emph{matrix} with the same number of columns as the input time
+#'   series \code{tseries}, and the number of rows equal to the number of end
+#'   points.
+#'   
+#' @details 
+#'   The function \code{roll_fun()} calculates a \emph{matrix} of estimator
+#'   values, over rolling look-back intervals attached at the end points of the
+#'   \emph{time series} \code{tseries}.
+#'   
+#'   The function \code{roll_fun()} performs a loop over the end points, and at
+#'   each end point it subsets the time series \code{tseries} over a look-back
+#'   interval equal to \code{look_back} number of end points.
+#'   
+#'   It passes the subset time series to the function specified by the argument
+#'   \code{fun}, which calculates the statistic.
+#'   See the functions \code{calc_*()} for a description of the different
+#'   methods.
+#'   
+#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   first calculates a vector of end points separated by \code{step} time
+#'   periods. It calculates the end points along the rows of \code{design}
+#'   using the function \code{calc_endpoints()}, with the number of time
+#'   periods between the end points equal to \code{step} time periods.
+#' 
+#'   For example, the rolling variance at \code{25} day end points, with a
+#'   \code{75} day look-back, can be calculated using the parameters
+#'   \code{step = 25} and \code{look_back = 3}.
+#'
+#'   The function \code{roll_fun()} is implemented in \code{RcppArmadillo}
+#'   \code{C++} code, so it's many times faster than the equivalent \code{R}
+#'   code.
+#'
+#' @examples
+#' \dontrun{
+#' # Define time series of returns using package rutils
+#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
+#' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", step=25, look_back=3)
+#' # Calculate the rolling variance using roll_var()
+#' var_roll <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+#' # Compare the two methods
+#' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
+#' # Define end points and start points
+#' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
+#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' # Calculate the rolling variance using RcppArmadillo
+#' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p)
+#' # Calculate the rolling variance using R code
+#' var_roll <- sapply(1:NROW(end_p), function(it) {
+#'   var(re_turns[start_p[it]:end_p[it]+1, ])
+#' })  # end sapply
+#' # Compare the two methods
+#' all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p),
+#'   Rcode=sapply(1:NROW(end_p), function(it) {
+#'     var(re_turns[start_p[it]:end_p[it]+1, ])
+#'   }),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' @export
+roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", con_fi = 0.75) {
+    .Call('_HighFreq_roll_fun', PACKAGE = 'HighFreq', tseries, fun, startp, endp, step, look_back, stub, method, con_fi)
 }
 
 #' Simulate a \emph{GARCH} process using \emph{Rcpp}.
@@ -2479,11 +2666,11 @@ sim_arima <- function(innov, coeff) {
 #'   data (the returns in excess of the risk-free rate).
 #'   
 #' @param \code{method} A \emph{string} specifying the objective function for
-#'   calculating the weights (see Details).  (The default is \code{method =
+#'   calculating the weights (see Details) (the default is \code{method =
 #'   "rank_sharpe"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse.  (The default
+#'   small eigenvalues in order to regularize the matrix inverse (the default
 #'   is \code{0.001})
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of
@@ -2491,8 +2678,8 @@ sim_arima <- function(innov, coeff) {
 #'   covariance \emph{matrix} (the default is the number of columns of
 #'   \code{returns}).
 #'   
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -2501,7 +2688,7 @@ sim_arima <- function(innov, coeff) {
 #'   be scaled (the default is \code{scale = TRUE}).
 #'
 #' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-#'   weights.  (The default is \code{0.001})
+#'   weights (the default is \code{0.001})
 #'   
 #' @return A column \emph{vector} of the same length as the number of columns
 #'   of \code{returns}.
@@ -2569,8 +2756,8 @@ sim_arima <- function(innov, coeff) {
 #' }
 #' 
 #' @export
-calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, eigen_max, confi_level, alpha, scale, vol_target)
+calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, eigen_max = 0L, con_fi = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, eigen_max, con_fi, alpha, scale, vol_target)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -2589,15 +2776,15 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 #'   default is \code{1})
 #'   
-#' @param \code{bid_offer} A \emph{numeric} bid-offer spread.  (The default is
+#' @param \code{bid_offer} A \emph{numeric} bid-offer spread (the default is
 #'   \code{0})
 #'
 #' @param \code{method} A \emph{string} specifying the objective function for
-#'   calculating the weights (see Details).  (The default is \code{method =
+#'   calculating the weights (see Details) (the default is \code{method =
 #'   "rank_sharpe"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse.  (The default
+#'   small eigenvalues in order to regularize the matrix inverse (the default
 #'   is \code{0.001})
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of
@@ -2605,8 +2792,8 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #'   covariance \emph{matrix} (the default is the number of columns of
 #'   \code{returns}).
 #'   
-#' @param \code{confi_level} The confidence level for calculating the
-#'   quantiles. (the default is \code{confi_level = 0.75}).
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -2615,7 +2802,7 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #'   be scaled (the default is \code{scale = TRUE}).
 #'
 #' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-#'   weights.  (The default is \code{0.001})
+#'   weights (the default is \code{0.001})
 #'   
 #' @return A column \emph{vector} of strategy returns, with the same length as
 #'   the number of rows of \code{returns}.
@@ -2680,7 +2867,7 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #' }
 #' 
 #' @export
-back_test <- function(excess, returns, startp, endp, method = "rank_sharpe", eigen_thresh = 0.001, eigen_max = 0L, confi_level = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, method, eigen_thresh, eigen_max, confi_level, alpha, scale, vol_target, coeff, bid_offer)
+back_test <- function(excess, returns, startp, endp, method = "rank_sharpe", eigen_thresh = 0.001, eigen_max = 0L, con_fi = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, method, eigen_thresh, eigen_max, con_fi, alpha, scale, vol_target, coeff, bid_offer)
 }
 

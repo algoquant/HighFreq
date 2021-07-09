@@ -5,14 +5,14 @@
 \title{Calculate the ranks of the elements of a single-column \emph{time series} or
 a \emph{vector} using \code{RcppArmadillo}.}
 \usage{
-calc_ranks(vector)
+calc_ranks(tseries)
 }
 \arguments{
-\item{\code{vector}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
 }
 \value{
 An \emph{integer vector} with the ranks of the elements of the
-  \emph{vector}.
+  \code{tseries}.
 }
 \description{
 Calculate the ranks of the elements of a single-column \emph{time series} or

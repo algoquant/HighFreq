@@ -16,7 +16,7 @@ dispersion is calculated as the \emph{median absolute deviation}
 (\emph{MAD}).
 If \code{use_median = FALSE} then the centrality is calculated as the
 \emph{mean} and the dispersion is calculated as the \emph{standard
-deviation}. (The default is \code{FALSE})}
+deviation} (the default is \code{FALSE})}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input

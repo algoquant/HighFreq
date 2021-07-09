@@ -13,7 +13,7 @@ mult_vec_mat(vector, matrix, by_col = TRUE)
 \item{\code{matrix}}{A \emph{matrix}.}
 
 \item{\code{by_col}}{A \emph{Boolean} argument: if \code{TRUE} then multiply
-the columns, otherwise multiply the rows. (The default is
+the columns, otherwise multiply the rows (the default is
 \code{by_col = TRUE}.)}
 }
 \value{

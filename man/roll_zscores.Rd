@@ -35,7 +35,7 @@ default is \code{step = 1}).}
 (the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points. (the default is \code{stub = 0}).}
+calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A column \emph{vector} of the same length as the number of rows of
@@ -50,18 +50,18 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   of the residuals of rolling regressions at the end points of the
   \emph{time series} \code{design}.
   
+  The function \code{roll_zscores()} performs a loop over the end points,
+  and at each end point it subsets the time series \code{design} over a
+  look-back interval equal to \code{look_back} number of end points.
+  
+  It passes the subset time series to the function \code{calc_lm()}, which
+  calculates the regression data.
+  
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{design}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
-  
-  It then performs a loop over the end points, and at each end point it
-  subsets the time series \code{design} over a look-back interval equal
-  to \code{look_back} number of end points.
-  
-  It passes the subset time series to the function \code{calc_lm()}, which
-  calculates the regression data.
   
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters

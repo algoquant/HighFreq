@@ -11,7 +11,7 @@ calc_inv(returns, eigen_thresh = 0.001, eigen_max = 0L)
 \item{\code{returns}}{A \emph{time series} or \emph{matrix} of returns data.}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse.  (The default
+small eigenvalues in order to regularize the matrix inverse (the default
 is \code{0.001})}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the regularization
