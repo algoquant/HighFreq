@@ -26,13 +26,13 @@ of response data.}
 model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse (the default
-is \code{0.001})}
+small singular values in order to regularize the inverse of the
+\code{design} matrix (the default is \code{0.001}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of
-eigenvectors used for calculating the regularized inverse of the
-covariance \emph{matrix} (the default is the number of columns of
-\code{returns}).}
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+values used for calculating the regularized inverse of the \code{design}
+matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+the number of columns of \code{design}).}
 
 \item{\code{con_fi}}{The confidence level for calculating the
 quantiles (the default is \code{con_fi = 0.75}).}
@@ -72,21 +72,14 @@ The function \code{calc_reg()} performs multivariate regression using
   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
   than \code{lm()}.
 
+  If \code{method = "regular"} then it performs regularized regression.  It
+  calculates the regularized inverse of the \code{design} matrix from its
+  singular value decomposition.  It applies dimension regularization by
+  selecting only the largest singular values equal in number to
+  \code{eigen_max}.
+  
   If \code{method = "quantile"} then it performs quantile regression (not
   implemented yet).
-
-  \code{calc_weights()} applies dimension regularization to calculate the
-  inverse of the covariance \emph{matrix} of returns from its eigen
-  decomposition, using the function \code{arma::eig_sym()}.
-  
-  In addition, it applies shrinkage to the \emph{vector} of mean column
-  returns, by shrinking it to its common mean value.
-  The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-  that is applied, with \code{alpha = 0} representing no shrinkage (with 
-  the estimator of mean returns equal to the means of the columns of 
-  \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-  (with the estimator of mean returns equal to the single mean of all the
-  columns of \code{returns})
 }
 \examples{
 \dontrun{

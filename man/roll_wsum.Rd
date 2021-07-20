@@ -24,8 +24,8 @@ calculating the end points (the default is \code{stub = NULL}).}
 \code{weights = NULL}).}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input
-  argument \code{tseries}.
+A \emph{matrix} with the same dimensions as the input argument
+  \code{tseries}.
 }
 \description{
 Calculate the rolling weighted sums over a \emph{time series} or a

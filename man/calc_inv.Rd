@@ -2,53 +2,58 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_inv}
 \alias{calc_inv}
-\title{Calculate the regularized inverse of the covariance \emph{matrix} of returns
-using \code{RcppArmadillo}.}
+\title{Calculate the regularized inverse of a rectangular \emph{matrix} of data
+using Singular Value Decomposition (\emph{SVD}).}
 \usage{
-calc_inv(returns, eigen_thresh = 0.001, eigen_max = 0L)
+calc_inv(tseries, eigen_thresh = 0.001, eigen_max = 0L)
 }
 \arguments{
-\item{\code{returns}}{A \emph{time series} or \emph{matrix} of returns data.}
+\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of returns data.}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse (the default
-is \code{0.001})}
+small singular values in order to regularize the inverse of the
+matrix \code{tseries} (the default is \code{0.001}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the regularization
-intensity (the number of eigenvalues and eigenvectors used for calculating
-the regularized inverse).}
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+values used for calculating the regularized inverse of the matrix
+\code{tseries} (the default is \code{0} - equivalent to \code{eigen_max}
+equal to the number of columns of \code{tseries}).}
 }
 \value{
-A \emph{matrix} equal to the regularized inverse of the covariance
-  matrix of \code{returns}.
+A \emph{matrix} equal to the regularized inverse of the matrix
+  \code{tseries}.
 }
 \description{
-Calculate the regularized inverse of the covariance \emph{matrix} of returns
-using \code{RcppArmadillo}.
+Calculate the regularized inverse of a rectangular \emph{matrix} of data
+using Singular Value Decomposition (\emph{SVD}).
 }
 \details{
-The function calc_inv() calculates the regularized inverse of the
-  \emph{covariance matrix}, by discarding eigenvectors with small
-  eigenvalues less than the threshold level \code{eigen_thresh}.
-  The function \code{calc_inv()} first calculates the covariance
-  \emph{matrix} of the \code{returns}, and then it calculates its
-  regularized inverse.
-  If \code{eigen_max} is not specified then it calculates the
-  regularized inverse using the function \code{arma::pinv()}.
-  If \code{eigen_max} is specified then it calculates the regularized
-  inverse using eigen decomposition with only the largest \code{eigen_max}
-  eigenvalues and their corresponding eigenvectors.
+The function calc_inv() calculates the regularized inverse of
+  \code{tseries} using Singular Value Decomposition (\emph{SVD}).
+  
+  If \code{eigen_max} is given, then it calculates the regularized inverse
+  from the \\emph{SVD} using the first \code{eigen_max} largest
+  singular values.  For example, if \code{eigen_max = 3} then it only
+  uses the \code{3} largest singular values.
+  If \code{eigen_max} is set equal to the number of columns of
+  \code{tseries} then it uses all the singular values without any
+  regularization.
+
+  If \code{eigen_max} is not given then it calculates the regularized
+  inverse using the function \code{arma::pinv()}. It then discards small
+  singular values that are less than the threshold level
+  \code{eigen_thresh}.
 }
 \examples{
 \dontrun{
-# Create random matrix
-re_turns <- matrix(rnorm(500), nc=5)
-eigen_max <- 3
+# Calculate ETF returns
+re_turns <- na.omit(rutils::etf_env$re_turns)
 # Calculate regularized inverse using RcppArmadillo
-in_verse <- HighFreq::calc_inv(re_turns, eigen_max)
-# Calculate regularized inverse from eigen decomposition in R
-ei_gen <- eigen(cov(re_turns))
-inverse_r <-  ei_gen$vectors[, 1:eigen_max] \%*\% (t(ei_gen$vectors[, 1:eigen_max]) / ei_gen$values[1:eigen_max])
+in_verse <- HighFreq::calc_inv(re_turns, eigen_max=3)
+# Calculate regularized inverse from SVD in R
+s_vd <- svd(re_turns)
+eigen_max <- 1:3
+inverse_r <-  s_vd$v[, eigen_max] \%*\% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 # Compare RcppArmadillo with R
 all.equal(in_verse, inverse_r)
 }

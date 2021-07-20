@@ -46,13 +46,13 @@ calculating the end points (the default is \code{stub = 0}).}
 model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse (the default
-is \code{0.001})}
+small singular values in order to regularize the inverse of the
+\code{design} matrix (the default is \code{0.001}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of
-eigenvectors used for calculating the regularized inverse of the
-covariance \emph{matrix} (the default is the number of columns of
-\code{returns}).}
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+values used for calculating the regularized inverse of the \code{design}
+matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+the number of columns of \code{design}).}
 
 \item{\code{con_fi}}{The confidence level for calculating the
 quantiles (the default is \code{con_fi = 0.75}).}

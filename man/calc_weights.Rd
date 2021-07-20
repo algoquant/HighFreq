@@ -25,13 +25,13 @@ calculating the weights (see Details) (the default is \code{method =
 "rank_sharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small eigenvalues in order to regularize the matrix inverse (the default
-is \code{0.001})}
+small singular values in order to regularize the inverse of the
+\code{returns} matrix (the default is \code{0.001}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of
-eigenvectors used for calculating the regularized inverse of the
-covariance \emph{matrix} (the default is the number of columns of
-\code{returns}).}
+\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+values used for calculating the regularized inverse of the \code{returns}
+matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+the number of columns of \code{returns}).}
 
 \item{\code{con_fi}}{The confidence level for calculating the
 quantiles (the default is \code{con_fi = 0.75}).}
@@ -79,18 +79,18 @@ The function \code{calc_weights()} calculates the optimal portfolio
   If \code{scale = TRUE} (the default) then the weights are scaled so that
   the resulting portfolio has a volatility equal to \code{vol_target}.
 
-  \code{calc_weights()} applies dimension regularization to calculate the
-  inverse of the covariance \emph{matrix} of returns from its eigen
-  decomposition, using the function \code{arma::eig_sym()}.
+  \code{calc_weights()} calculates the regularized inverse of the covariance
+  \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
+  dimension regularization by selecting only the largest eigenvalues equal
+  in number to \code{eigen_max}. 
   
-  In addition, it applies shrinkage to the \emph{vector} of mean column
-  returns, by shrinking it to its common mean value.
-  The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-  that is applied, with \code{alpha = 0} representing no shrinkage (with 
-  the estimator of mean returns equal to the means of the columns of 
-  \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-  (with the estimator of mean returns equal to the single mean of all the
-  columns of \code{returns})
+  In addition, \code{calc_weights()} applies shrinkage to the columns of
+  \code{returns}, by shrinking their means to their common mean value. The
+  shrinkage intensity \code{alpha} determines the amount of shrinkage that
+  is applied, with \code{alpha = 0} representing no shrinkage (with the
+  column means of \code{returns} unchanged), and \code{alpha = 1}
+  representing complete shrinkage (with the column means of \code{returns}
+  all equal to the single mean of all the columns).
 }
 \examples{
 \dontrun{

@@ -67,8 +67,8 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
 #'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 #'   
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{tseries}.
 #'
 #' @details 
 #'   The function \code{lag_it()} applies a lag to the input \emph{matrix} by
@@ -455,52 +455,57 @@ calc_eigen <- function(returns) {
     .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', returns)
 }
 
-#' Calculate the regularized inverse of the covariance \emph{matrix} of returns
-#' using \code{RcppArmadillo}.
+#' Calculate the regularized inverse of a rectangular \emph{matrix} of data
+#' using Singular Value Decomposition (\emph{SVD}).
 #' 
-#' @param \code{returns} A \emph{time series} or \emph{matrix} of returns data.
+#' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns data.
 #' 
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse (the default
-#'   is \code{0.001})
+#'   small singular values in order to regularize the inverse of the
+#'   matrix \code{tseries} (the default is \code{0.001}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the regularization
-#'   intensity (the number of eigenvalues and eigenvectors used for calculating
-#'   the regularized inverse).
+#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#'   values used for calculating the regularized inverse of the matrix
+#'   \code{tseries} (the default is \code{0} - equivalent to \code{eigen_max}
+#'   equal to the number of columns of \code{tseries}).
 #'
-#' @return A \emph{matrix} equal to the regularized inverse of the covariance
-#'   matrix of \code{returns}.
+#' @return A \emph{matrix} equal to the regularized inverse of the matrix
+#'   \code{tseries}.
 #'
 #' @details 
-#'   The function calc_inv() calculates the regularized inverse of the
-#'   \emph{covariance matrix}, by discarding eigenvectors with small
-#'   eigenvalues less than the threshold level \code{eigen_thresh}.
-#'   The function \code{calc_inv()} first calculates the covariance
-#'   \emph{matrix} of the \code{returns}, and then it calculates its
-#'   regularized inverse.
-#'   If \code{eigen_max} is not specified then it calculates the
-#'   regularized inverse using the function \code{arma::pinv()}.
-#'   If \code{eigen_max} is specified then it calculates the regularized
-#'   inverse using eigen decomposition with only the largest \code{eigen_max}
-#'   eigenvalues and their corresponding eigenvectors.
+#'   The function calc_inv() calculates the regularized inverse of
+#'   \code{tseries} using Singular Value Decomposition (\emph{SVD}).
+#'   
+#'   If \code{eigen_max} is given, then it calculates the regularized inverse
+#'   from the \\emph{SVD} using the first \code{eigen_max} largest
+#'   singular values.  For example, if \code{eigen_max = 3} then it only
+#'   uses the \code{3} largest singular values.
+#'   If \code{eigen_max} is set equal to the number of columns of
+#'   \code{tseries} then it uses all the singular values without any
+#'   regularization.
 #'
+#'   If \code{eigen_max} is not given then it calculates the regularized
+#'   inverse using the function \code{arma::pinv()}. It then discards small
+#'   singular values that are less than the threshold level
+#'   \code{eigen_thresh}.
+#'   
 #' @examples
 #' \dontrun{
-#' # Create random matrix
-#' re_turns <- matrix(rnorm(500), nc=5)
-#' eigen_max <- 3
+#' # Calculate ETF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns)
 #' # Calculate regularized inverse using RcppArmadillo
-#' in_verse <- HighFreq::calc_inv(re_turns, eigen_max)
-#' # Calculate regularized inverse from eigen decomposition in R
-#' ei_gen <- eigen(cov(re_turns))
-#' inverse_r <-  ei_gen$vectors[, 1:eigen_max] %*% (t(ei_gen$vectors[, 1:eigen_max]) / ei_gen$values[1:eigen_max])
+#' in_verse <- HighFreq::calc_inv(re_turns, eigen_max=3)
+#' # Calculate regularized inverse from SVD in R
+#' s_vd <- svd(re_turns)
+#' eigen_max <- 1:3
+#' inverse_r <-  s_vd$v[, eigen_max] %*% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 #' # Compare RcppArmadillo with R
 #' all.equal(in_verse, inverse_r)
 #' }
 #' 
 #' @export
-calc_inv <- function(returns, eigen_thresh = 0.001, eigen_max = 0L) {
-    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', returns, eigen_thresh, eigen_max)
+calc_inv <- function(tseries, eigen_thresh = 0.001, eigen_max = 0L) {
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', tseries, eigen_thresh, eigen_max)
 }
 
 #' Scale (standardize) the columns of a \emph{matrix} of data using
@@ -1162,13 +1167,13 @@ calc_lm <- function(response, design) {
 #'   model the default is \code{method = "least_squares"} - see Details).
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse (the default
-#'   is \code{0.001})
+#'   small singular values in order to regularize the inverse of the
+#'   \code{design} matrix (the default is \code{0.001}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of
-#'   eigenvectors used for calculating the regularized inverse of the
-#'   covariance \emph{matrix} (the default is the number of columns of
-#'   \code{returns}).
+#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#'   values used for calculating the regularized inverse of the \code{design}
+#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   the number of columns of \code{design}).
 #'   
 #' @param \code{con_fi} The confidence level for calculating the
 #'   quantiles (the default is \code{con_fi = 0.75}).
@@ -1203,22 +1208,15 @@ calc_lm <- function(response, design) {
 #'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
 #'   than \code{lm()}.
 #'
+#'   If \code{method = "regular"} then it performs regularized regression.  It
+#'   calculates the regularized inverse of the \code{design} matrix from its
+#'   singular value decomposition.  It applies dimension regularization by
+#'   selecting only the largest singular values equal in number to
+#'   \code{eigen_max}.
+#'   
 #'   If \code{method = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
 #'
-#'   \code{calc_weights()} applies dimension regularization to calculate the
-#'   inverse of the covariance \emph{matrix} of returns from its eigen
-#'   decomposition, using the function \code{arma::eig_sym()}.
-#'   
-#'   In addition, it applies shrinkage to the \emph{vector} of mean column
-#'   returns, by shrinking it to its common mean value.
-#'   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-#'   that is applied, with \code{alpha = 0} representing no shrinkage (with 
-#'   the estimator of mean returns equal to the means of the columns of 
-#'   \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-#'   (with the estimator of mean returns equal to the single mean of all the
-#'   columns of \code{returns})
-#' 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
@@ -1576,8 +1574,8 @@ roll_conv_ref <- function(tseries, weights) {
 #'   number of data points included in calculating the rolling sum (the default
 #'   is \code{look_back = 1}).
 #'   
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{tseries}.
 #'
 #' @details 
 #'   The function \code{roll_sum()} calculates the rolling sums over the
@@ -1631,8 +1629,8 @@ roll_sum <- function(tseries, look_back = 1L) {
 #' @param \code{weights} A \emph{column vector} of weights (the default is
 #'   \code{weights = NULL}).
 #'
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{tseries}.
 #'
 #' @details 
 #'   The function \code{roll_wsum()} calculates the rolling weighted sums over
@@ -2216,13 +2214,13 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   model the default is \code{method = "least_squares"} - see Details).
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse (the default
-#'   is \code{0.001})
+#'   small singular values in order to regularize the inverse of the
+#'   \code{design} matrix (the default is \code{0.001}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of
-#'   eigenvectors used for calculating the regularized inverse of the
-#'   covariance \emph{matrix} (the default is the number of columns of
-#'   \code{returns}).
+#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#'   values used for calculating the regularized inverse of the \code{design}
+#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   the number of columns of \code{design}).
 #'   
 #' @param \code{con_fi} The confidence level for calculating the
 #'   quantiles (the default is \code{con_fi = 0.75}).
@@ -2455,7 +2453,7 @@ roll_zscores <- function(response, design, startp = 0L, endp = 0L, step = 1L, lo
 #'   It passes the subset time series to the function specified by the argument
 #'   \code{fun}, which calculates the statistic.
 #'   See the functions \code{calc_*()} for a description of the different
-#'   methods.
+#'   estimators.
 #'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
@@ -2670,13 +2668,13 @@ sim_arima <- function(innov, coeff) {
 #'   "rank_sharpe"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse (the default
-#'   is \code{0.001})
+#'   small singular values in order to regularize the inverse of the
+#'   \code{returns} matrix (the default is \code{0.001}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of
-#'   eigenvectors used for calculating the regularized inverse of the
-#'   covariance \emph{matrix} (the default is the number of columns of
-#'   \code{returns}).
+#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#'   values used for calculating the regularized inverse of the \code{returns}
+#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   the number of columns of \code{returns}).
 #'   
 #' @param \code{con_fi} The confidence level for calculating the
 #'   quantiles (the default is \code{con_fi = 0.75}).
@@ -2719,18 +2717,18 @@ sim_arima <- function(innov, coeff) {
 #'   If \code{scale = TRUE} (the default) then the weights are scaled so that
 #'   the resulting portfolio has a volatility equal to \code{vol_target}.
 #'
-#'   \code{calc_weights()} applies dimension regularization to calculate the
-#'   inverse of the covariance \emph{matrix} of returns from its eigen
-#'   decomposition, using the function \code{arma::eig_sym()}.
+#'   \code{calc_weights()} calculates the regularized inverse of the covariance
+#'   \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
+#'   dimension regularization by selecting only the largest eigenvalues equal
+#'   in number to \code{eigen_max}. 
 #'   
-#'   In addition, it applies shrinkage to the \emph{vector} of mean column
-#'   returns, by shrinking it to its common mean value.
-#'   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-#'   that is applied, with \code{alpha = 0} representing no shrinkage (with 
-#'   the estimator of mean returns equal to the means of the columns of 
-#'   \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-#'   (with the estimator of mean returns equal to the single mean of all the
-#'   columns of \code{returns})
+#'   In addition, \code{calc_weights()} applies shrinkage to the columns of
+#'   \code{returns}, by shrinking their means to their common mean value. The
+#'   shrinkage intensity \code{alpha} determines the amount of shrinkage that
+#'   is applied, with \code{alpha = 0} representing no shrinkage (with the
+#'   column means of \code{returns} unchanged), and \code{alpha = 1}
+#'   representing complete shrinkage (with the column means of \code{returns}
+#'   all equal to the single mean of all the columns).
 #' 
 #' @examples
 #' \dontrun{
@@ -2784,13 +2782,13 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #'   "rank_sharpe"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small eigenvalues in order to regularize the matrix inverse (the default
-#'   is \code{0.001})
+#'   small singular values in order to regularize the inverse of the
+#'   \code{returns} matrix (the default is \code{0.001}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of
-#'   eigenvectors used for calculating the regularized inverse of the
-#'   covariance \emph{matrix} (the default is the number of columns of
-#'   \code{returns}).
+#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#'   values used for calculating the regularized inverse of the \code{returns}
+#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   the number of columns of \code{returns}).
 #'   
 #' @param \code{con_fi} The confidence level for calculating the
 #'   quantiles (the default is \code{con_fi = 0.75}).

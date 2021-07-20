@@ -15,8 +15,8 @@ number of data points included in calculating the rolling sum (the default
 is \code{look_back = 1}).}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input
-  argument \code{tseries}.
+A \emph{matrix} with the same dimensions as the input argument
+  \code{tseries}.
 }
 \description{
 Calculate the rolling sums over a \emph{time series} or a \emph{matrix}

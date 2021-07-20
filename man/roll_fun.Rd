@@ -67,7 +67,7 @@ The function \code{roll_fun()} calculates a \emph{matrix} of estimator
   It passes the subset time series to the function specified by the argument
   \code{fun}, which calculates the statistic.
   See the functions \code{calc_*()} for a description of the different
-  methods.
+  estimators.
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time

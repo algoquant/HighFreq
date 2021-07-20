@@ -17,8 +17,8 @@ lag_it(tseries, lagg = 1L, pad_zeros = TRUE)
 with zeros? (The default is \code{pad_zeros = TRUE}.)}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input
-  argument \code{tseries}.
+A \emph{matrix} with the same dimensions as the input argument
+  \code{tseries}.
 }
 \description{
 Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using

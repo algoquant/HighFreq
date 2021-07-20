@@ -113,8 +113,8 @@ arma::vec lag_vec(arma::vec tseries,
 //' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
 //'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 //'   
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
 //'
 //' @details 
 //'   The function \code{lag_it()} applies a lag to the input \emph{matrix} by
@@ -249,9 +249,9 @@ arma::mat lag_it(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec diff_vec(arma::vec tseries, int lagg = 1, bool padd = true) {
+arma::vec diff_vec(arma::vec tseries, arma::uword lagg = 1, bool padd = true) {
   
-  int numel = (tseries.n_elem-1);
+  arma::uword numel = (tseries.n_elem-1);
   
   if (padd)
     // Pad the output with zeros at the beginning
@@ -664,72 +664,86 @@ List calc_eigen(arma::mat returns) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the regularized inverse of the covariance \emph{matrix} of returns
-//' using \code{RcppArmadillo}.
+//' Calculate the regularized inverse of a rectangular \emph{matrix} of data
+//' using Singular Value Decomposition (\emph{SVD}).
 //' 
-//' @param \code{returns} A \emph{time series} or \emph{matrix} of returns data.
+//' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns data.
 //' 
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small eigenvalues in order to regularize the matrix inverse (the default
-//'   is \code{0.001})
+//'   small singular values in order to regularize the inverse of the
+//'   matrix \code{tseries} (the default is \code{0.001}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the regularization
-//'   intensity (the number of eigenvalues and eigenvectors used for calculating
-//'   the regularized inverse).
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the matrix
+//'   \code{tseries} (the default is \code{0} - equivalent to \code{eigen_max}
+//'   equal to the number of columns of \code{tseries}).
 //'
-//' @return A \emph{matrix} equal to the regularized inverse of the covariance
-//'   matrix of \code{returns}.
+//' @return A \emph{matrix} equal to the regularized inverse of the matrix
+//'   \code{tseries}.
 //'
 //' @details 
-//'   The function calc_inv() calculates the regularized inverse of the
-//'   \emph{covariance matrix}, by discarding eigenvectors with small
-//'   eigenvalues less than the threshold level \code{eigen_thresh}.
-//'   The function \code{calc_inv()} first calculates the covariance
-//'   \emph{matrix} of the \code{returns}, and then it calculates its
-//'   regularized inverse.
-//'   If \code{eigen_max} is not specified then it calculates the
-//'   regularized inverse using the function \code{arma::pinv()}.
-//'   If \code{eigen_max} is specified then it calculates the regularized
-//'   inverse using eigen decomposition with only the largest \code{eigen_max}
-//'   eigenvalues and their corresponding eigenvectors.
+//'   The function calc_inv() calculates the regularized inverse of
+//'   \code{tseries} using Singular Value Decomposition (\emph{SVD}).
+//'   
+//'   If \code{eigen_max} is given, then it calculates the regularized inverse
+//'   from the \\emph{SVD} using the first \code{eigen_max} largest
+//'   singular values.  For example, if \code{eigen_max = 3} then it only
+//'   uses the \code{3} largest singular values.
+//'   If \code{eigen_max} is set equal to the number of columns of
+//'   \code{tseries} then it uses all the singular values without any
+//'   regularization.
 //'
+//'   If \code{eigen_max} is not given then it calculates the regularized
+//'   inverse using the function \code{arma::pinv()}. It then discards small
+//'   singular values that are less than the threshold level
+//'   \code{eigen_thresh}.
+//'   
 //' @examples
 //' \dontrun{
-//' # Create random matrix
-//' re_turns <- matrix(rnorm(500), nc=5)
-//' eigen_max <- 3
+//' # Calculate ETF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns)
 //' # Calculate regularized inverse using RcppArmadillo
-//' in_verse <- HighFreq::calc_inv(re_turns, eigen_max)
-//' # Calculate regularized inverse from eigen decomposition in R
-//' ei_gen <- eigen(cov(re_turns))
-//' inverse_r <-  ei_gen$vectors[, 1:eigen_max] %*% (t(ei_gen$vectors[, 1:eigen_max]) / ei_gen$values[1:eigen_max])
+//' in_verse <- HighFreq::calc_inv(re_turns, eigen_max=3)
+//' # Calculate regularized inverse from SVD in R
+//' s_vd <- svd(re_turns)
+//' eigen_max <- 1:3
+//' inverse_r <-  s_vd$v[, eigen_max] %*% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 //' # Compare RcppArmadillo with R
 //' all.equal(in_verse, inverse_r)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_inv(arma::mat returns,
+arma::mat calc_inv(arma::mat tseries,
                    double eigen_thresh = 0.001, 
-                   int eigen_max = 0) {
-  
-  arma::mat cov_mat = arma::cov(returns);
+                   arma::uword eigen_max = 0) {
   
   if (eigen_max == 0) {
     // Calculate the inverse using arma::pinv()
-    return arma::pinv(cov_mat, eigen_thresh);
+    return arma::pinv(tseries, eigen_thresh);
   } else {
-    // Calculate the inverse using eigen decomposition
-    arma::mat eigen_vec;
-    arma::vec eigen_val;
-    arma::eig_sym(eigen_val, eigen_vec, cov_mat);
-    eigen_vec = eigen_vec.cols(eigen_vec.n_cols-eigen_max, eigen_vec.n_cols-1);
-    eigen_val = 1/eigen_val.subvec(eigen_val.n_elem-eigen_max, eigen_val.n_elem-1);
-    return eigen_vec*diagmat(eigen_val)*eigen_vec.t();
+    // Calculate the regularized inverse using SVD decomposition
+    
+    // Allocate SVD
+    arma::vec svd_val;
+    arma::mat svd_u, svd_v;
+    
+    // Calculate the SVD
+    arma::svd(svd_u, svd_val, svd_v, tseries);
+    
+    // Subset the SVD
+    eigen_max = eigen_max - 1;
+    // For no regularization: eigen_max = tseries.n_cols
+    svd_u = svd_u.cols(0, eigen_max);
+    svd_v = svd_v.cols(0, eigen_max);
+    svd_val = svd_val.subvec(0, eigen_max);
+    
+    // Calculate the inverse from the SVD
+    return svd_v*arma::diagmat(1/svd_val)*svd_u.t();
+    
   }  // end if
   
 }  // end calc_inv
-
 
 
 
@@ -829,7 +843,7 @@ arma::mat calc_scaled(arma::mat tseries, bool use_median=false) {
 // Define C++ enum type for the different methods for regularization,
 // calculating variance, skewness, kurtosis, covariance, regression, 
 // and matrix inverse.
-enum meth_od {moment, least_squares, quantile, nonparametric, rank_sharpe, 
+enum meth_od {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
               max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
 
 // Map string to C++ enum type for switch statement.
@@ -843,6 +857,8 @@ meth_od calc_method(std::string method) {
     return meth_od::quantile;
   else if (method == "nonparametric" || method == "n")
     return meth_od::nonparametric;
+  else if (method == "regular")
+    return meth_od::regular;
   else if (method == "rank_sharpe")
     return meth_od::rank_sharpe;
   else if (method == "max_sharpe")
@@ -1231,7 +1247,7 @@ double calc_var_ohlc(arma::mat ohlc,
                      bool scale = true, 
                      arma::colvec in_dex = 0) {
   
-  int num_rows = ohlc.n_rows;
+  arma::uword num_rows = ohlc.n_rows;
   double coeff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
   
   if (num_rows < 3) {
@@ -1658,10 +1674,10 @@ arma::mat calc_kurtosis(arma::mat tseries,
 Rcpp::List calc_lm(arma::vec response, arma::mat design) {
   
   // Add column for intercept to explanatory matrix
-  int num_rows = design.n_rows;
+  arma::uword num_rows = design.n_rows;
   arma::mat design_p = join_rows(ones(num_rows), design);
-  int num_cols = design_p.n_cols;
-  int deg_free = (num_rows - num_cols);
+  arma::uword num_cols = design_p.n_cols;
+  arma::uword deg_free = (num_rows - num_cols);
   
   // Calculate alpha and beta coefficients for the model response ~ design
   arma::colvec coeff = arma::solve(design_p, response);
@@ -1687,7 +1703,7 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
   // Calculate t-values and p-values of beta coefficients
   arma::colvec t_vals = coeff/std_err;
   arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(t_vals)), deg_free);
-  NumericMatrix coeff_mat = wrap(join_rows(join_rows(join_rows(coeff, std_err), t_vals), p_vals));
+  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), t_vals), p_vals));
   Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
   
   return Rcpp::List::create(Named("coefficients") = coeff_mat,
@@ -1713,13 +1729,13 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
 //'   model the default is \code{method = "least_squares"} - see Details).
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small eigenvalues in order to regularize the matrix inverse (the default
-//'   is \code{0.001})
+//'   small singular values in order to regularize the inverse of the
+//'   \code{design} matrix (the default is \code{0.001}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of
-//'   eigenvectors used for calculating the regularized inverse of the
-//'   covariance \emph{matrix} (the default is the number of columns of
-//'   \code{returns}).
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the \code{design}
+//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   the number of columns of \code{design}).
 //'   
 //' @param \code{con_fi} The confidence level for calculating the
 //'   quantiles (the default is \code{con_fi = 0.75}).
@@ -1754,22 +1770,15 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
 //'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
 //'   than \code{lm()}.
 //'
+//'   If \code{method = "regular"} then it performs regularized regression.  It
+//'   calculates the regularized inverse of the \code{design} matrix from its
+//'   singular value decomposition.  It applies dimension regularization by
+//'   selecting only the largest singular values equal in number to
+//'   \code{eigen_max}.
+//'   
 //'   If \code{method = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
 //'
-//'   \code{calc_weights()} applies dimension regularization to calculate the
-//'   inverse of the covariance \emph{matrix} of returns from its eigen
-//'   decomposition, using the function \code{arma::eig_sym()}.
-//'   
-//'   In addition, it applies shrinkage to the \emph{vector} of mean column
-//'   returns, by shrinking it to its common mean value.
-//'   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-//'   that is applied, with \code{alpha = 0} representing no shrinkage (with 
-//'   the estimator of mean returns equal to the means of the columns of 
-//'   \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-//'   (with the estimator of mean returns equal to the single mean of all the
-//'   columns of \code{returns})
-//' 
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
@@ -1801,25 +1810,30 @@ arma::colvec calc_reg(arma::vec response,
                       arma::mat design,
                       std::string method = "least_squares",
                       double eigen_thresh = 0.001,
-                      int eigen_max = 0,
+                      arma::uword eigen_max = 0,
                       double con_fi = 0.1,
                       double alpha = 0.0) {
   
   // Add column for intercept to explanatory matrix
-  int num_rows = design.n_rows;
+  arma::uword num_rows = design.n_rows;
   arma::mat design_p = join_rows(ones(num_rows), design);
-  int num_cols = design_p.n_cols;
-  int deg_free = (num_rows - num_cols);
+  arma::uword num_cols = design_p.n_cols;
+  arma::uword deg_free = (num_rows - num_cols);
   arma::colvec coeff(num_cols, fill::zeros);
   arma::colvec reg_data(2*num_cols+1, fill::zeros);
   
   // Switch for the different methods for weights
   switch(calc_method(method)) {
   case meth_od::least_squares: {
-    // Calculate alpha and beta coefficients for the model response ~ design
+    // Calculate regression coefficients for the model response ~ design
     coeff = arma::solve(design_p, response);
     break;
   }  // end least_squares
+  case meth_od::regular: {
+    // Calculate regularized regression coefficients
+    coeff = calc_inv(design_p, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*response;
+    break;
+  }  // end regular
   case meth_od::quantile: {
     // Not implemented yet
     break;
@@ -1911,11 +1925,11 @@ arma::colvec calc_reg(arma::vec response,
 // [[Rcpp::export]]
 arma::mat agg_ohlc(arma::mat tseries) {
   
-  int num_rows = tseries.n_rows;
-  int num_cols = tseries.n_cols;
+  arma::uword num_rows = tseries.n_rows;
+  arma::uword num_cols = tseries.n_cols;
   
   // Number of output columns
-  int num_ohlc = num_cols;
+  arma::uword num_ohlc = num_cols;
   if (num_cols < 4)
     // Add volume column for non-OHLC data
     num_ohlc = 4 + num_cols - 1;
@@ -2050,8 +2064,8 @@ arma::uvec roll_count(arma::uvec tseries) {
 // [[Rcpp::export]]
 arma::mat roll_ohlc(arma::mat tseries, arma::uvec endp) {
   
-  // int num_rows = tseries.n_rows;
-  int num_cols = tseries.n_cols;
+  // arma::uword num_rows = tseries.n_rows;
+  arma::uword num_cols = tseries.n_cols;
   arma::uword num_pts = endp.size();
   arma::mat ohlc_agg(num_pts-1, num_cols, fill::zeros);
   
@@ -2106,19 +2120,19 @@ arma::mat roll_ohlc(arma::mat tseries, arma::uvec endp) {
 //' 
 //' @export
 // [[Rcpp::export]]
-NumericVector roll_vec(NumericVector tseries, int look_back) {
+arma::vec roll_vec(arma::vec tseries, arma::uword look_back) {
   
-  int numel = tseries.size();
-  NumericVector rolling_sum(numel);
+  arma::uword numel = tseries.size();
+  arma::vec rolling_sum(numel);
   
   // Warmup period
   rolling_sum[0] = tseries[0];
-  for (int it = 1; it < look_back; it++) {
+  for (arma::uword it = 1; it < look_back; it++) {
     rolling_sum[it] = rolling_sum[it-1] + tseries[it];
   }  // end for
   
   // Remaining period
-  for (int it = look_back; it < numel; it++) {
+  for (arma::uword it = look_back; it < numel; it++) {
     rolling_sum[it] = rolling_sum[it-1] + tseries[it] - tseries[it-look_back];
   }  // end for
   
@@ -2346,8 +2360,8 @@ arma::mat roll_conv_ref(arma::mat tseries, arma::mat weights) {
 //'   number of data points included in calculating the rolling sum (the default
 //'   is \code{look_back = 1}).
 //'   
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
 //'
 //' @details 
 //'   The function \code{roll_sum()} calculates the rolling sums over the
@@ -2412,8 +2426,8 @@ arma::mat roll_sum(arma::mat tseries, arma::uword look_back = 1) {
 //' @param \code{weights} A \emph{column vector} of weights (the default is
 //'   \code{weights = NULL}).
 //'
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
 //'
 //' @details 
 //'   The function \code{roll_wsum()} calculates the rolling weighted sums over
@@ -3303,13 +3317,13 @@ arma::mat roll_kurtosis(arma::mat tseries,
 //'   model the default is \code{method = "least_squares"} - see Details).
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small eigenvalues in order to regularize the matrix inverse (the default
-//'   is \code{0.001})
+//'   small singular values in order to regularize the inverse of the
+//'   \code{design} matrix (the default is \code{0.001}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of
-//'   eigenvectors used for calculating the regularized inverse of the
-//'   covariance \emph{matrix} (the default is the number of columns of
-//'   \code{returns}).
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the \code{design}
+//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   the number of columns of \code{design}).
 //'   
 //' @param \code{con_fi} The confidence level for calculating the
 //'   quantiles (the default is \code{con_fi = 0.75}).
@@ -3374,7 +3388,7 @@ arma::mat roll_reg(arma::vec response,
                    arma::uword stub = 0,
                    std::string method = "least_squares",
                    double eigen_thresh = 0.001,
-                   int eigen_max = 0,
+                   arma::uword eigen_max = 0,
                    double con_fi = 0.1,
                    double alpha = 0.0) {
   
@@ -3879,23 +3893,23 @@ arma::mat roll_fun(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-NumericMatrix sim_garch(double omega, 
-                        double alpha, 
-                        double beta, 
-                        NumericVector innov) {
+arma::mat sim_garch(double omega, 
+                    double alpha, 
+                    double beta, 
+                    arma::vec innov) {
   
-  int siz_e = innov.size();
-  NumericVector variance(siz_e);
-  NumericVector returns(siz_e);
+  arma::uword siz_e = innov.size();
+  arma::vec variance(siz_e);
+  arma::vec returns(siz_e);
   variance[0] = omega/(1-alpha-beta);
   returns[0] = sqrt(variance[0])*innov[0];
   
-  for (int it = 1; it < siz_e; it++) {
+  for (arma::uword it = 1; it < siz_e; it++) {
     returns[it] = sqrt(variance[it-1])*innov[it];
     variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
   }  // end for
   
-  return cbind(returns, variance);
+  return join_rows(returns, variance);
   
 }  // end sim_garch
 
@@ -3939,20 +3953,22 @@ NumericMatrix sim_garch(double omega,
 //' 
 //' @export
 // [[Rcpp::export]]
-NumericVector sim_ou(double eq_price, 
-                     double volat, 
-                     double theta, 
-                     NumericVector innov) {
-  int numel = innov.size();
-  NumericVector price_s(numel);
-  NumericVector returns(numel);
+arma::vec sim_ou(double eq_price, 
+                 double volat, 
+                 double theta, 
+                 arma::vec innov) {
+  
+  arma::uword numel = innov.size();
+  arma::vec price_s(numel);
+  arma::vec returns(numel);
   
   price_s[0] = eq_price;
-  for (int it = 1; it < numel; it++) {
+  for (arma::uword it = 1; it < numel; it++) {
     returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
     price_s[it] = price_s[it-1] + returns[it];
   }  // end for
   return price_s;
+  
 }  // end sim_ou
 
 
@@ -3996,20 +4012,22 @@ NumericVector sim_ou(double eq_price,
 //' 
 //' @export
 // [[Rcpp::export]]
-NumericVector sim_schwartz(double eq_price, 
-                           double volat, 
-                           double theta, 
-                           NumericVector innov) {
-  int numel = innov.size();
-  NumericVector price_s(numel);
-  NumericVector returns(numel);
+arma::vec sim_schwartz(double eq_price, 
+                       double volat, 
+                       double theta, 
+                       arma::vec innov) {
+  
+  arma::uword numel = innov.size();
+  arma::vec price_s(numel);
+  arma::vec returns(numel);
   
   price_s[0] = eq_price;
-  for (int it = 1; it < numel; it++) {
+  for (arma::uword it = 1; it < numel; it++) {
     returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
     price_s[it] = price_s[it-1] * exp(returns[it]);
   }  // end for
   return price_s;
+  
 }  // end sim_schwartz
 
 
@@ -4089,13 +4107,13 @@ arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
 //'   "rank_sharpe"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small eigenvalues in order to regularize the matrix inverse (the default
-//'   is \code{0.001})
+//'   small singular values in order to regularize the inverse of the
+//'   \code{returns} matrix (the default is \code{0.001}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of
-//'   eigenvectors used for calculating the regularized inverse of the
-//'   covariance \emph{matrix} (the default is the number of columns of
-//'   \code{returns}).
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the \code{returns}
+//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   the number of columns of \code{returns}).
 //'   
 //' @param \code{con_fi} The confidence level for calculating the
 //'   quantiles (the default is \code{con_fi = 0.75}).
@@ -4138,18 +4156,18 @@ arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
 //'   If \code{scale = TRUE} (the default) then the weights are scaled so that
 //'   the resulting portfolio has a volatility equal to \code{vol_target}.
 //'
-//'   \code{calc_weights()} applies dimension regularization to calculate the
-//'   inverse of the covariance \emph{matrix} of returns from its eigen
-//'   decomposition, using the function \code{arma::eig_sym()}.
+//'   \code{calc_weights()} calculates the regularized inverse of the covariance
+//'   \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
+//'   dimension regularization by selecting only the largest eigenvalues equal
+//'   in number to \code{eigen_max}. 
 //'   
-//'   In addition, it applies shrinkage to the \emph{vector} of mean column
-//'   returns, by shrinking it to its common mean value.
-//'   The shrinkage intensity \code{alpha} determines the amount of shrinkage 
-//'   that is applied, with \code{alpha = 0} representing no shrinkage (with 
-//'   the estimator of mean returns equal to the means of the columns of 
-//'   \code{returns}), and \code{alpha = 1} representing complete shrinkage 
-//'   (with the estimator of mean returns equal to the single mean of all the
-//'   columns of \code{returns})
+//'   In addition, \code{calc_weights()} applies shrinkage to the columns of
+//'   \code{returns}, by shrinking their means to their common mean value. The
+//'   shrinkage intensity \code{alpha} determines the amount of shrinkage that
+//'   is applied, with \code{alpha = 0} representing no shrinkage (with the
+//'   column means of \code{returns} unchanged), and \code{alpha = 1}
+//'   representing complete shrinkage (with the column means of \code{returns}
+//'   all equal to the single mean of all the columns).
 //' 
 //' @examples
 //' \dontrun{
@@ -4179,7 +4197,7 @@ arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
 arma::vec calc_weights(arma::mat returns, // Portfolio returns
                        std::string method = "rank_sharpe",
                        double eigen_thresh = 0.001,
-                       int eigen_max = 0,
+                       arma::uword eigen_max = 0,
                        double con_fi = 0.1,
                        double alpha = 0.0,
                        bool scale = true,
@@ -4208,9 +4226,9 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
     // Shrink mean_cols to the mean of returns
     mean_cols = ((1-alpha)*mean_cols + alpha*arma::mean(mean_cols));
     // Apply regularized inverse
-    // arma::mat in_verse = calc_inv(returns, eigen_max);
-    // weights = calc_inv(returns, eigen_max=eigen_max)*mean_cols;
-    weights = calc_inv(returns, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
+    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    // weights = calc_inv(cov(returns), eigen_max=eigen_max)*mean_cols;
+    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
     break;
   }  // end max_sharpe
   case meth_od::max_sharpe_median: {
@@ -4219,13 +4237,13 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
     // Shrink mean_cols to the mean of returns
     mean_cols = ((1-alpha)*mean_cols + alpha*arma::median(mean_cols));
     // Apply regularized inverse
-    // arma::mat in_verse = calc_inv(returns, eigen_max);
-    weights = calc_inv(returns, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
+    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
     break;
   }  // end max_sharpe_median
   case meth_od::min_var: {
     // Apply regularized inverse to unit vector
-    weights = calc_inv(returns, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*arma::ones(returns.n_cols);
+    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*arma::ones(returns.n_cols);
     break;
   }  // end min_var
   case meth_od::min_varpca: {
@@ -4257,9 +4275,9 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
     sd_cols.replace(0, 1);
     mean_cols = mean_cols/sd_cols;
     // Apply regularized inverse
-    // arma::mat in_verse = calc_inv(returns, eigen_max);
-    // weights = calc_inv(returns, eigen_max)*mean_cols;
-    // weights = calc_inv(returns, eigen_max)*mean_cols;
+    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
+    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
     // // Standard deviation by columns
     // arma::vec sd_cols = mean_cols;
     // for (arma::uword it=0; it < returns.n_cols; it++) {
@@ -4332,13 +4350,13 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
 //'   "rank_sharpe"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small eigenvalues in order to regularize the matrix inverse (the default
-//'   is \code{0.001})
+//'   small singular values in order to regularize the inverse of the
+//'   \code{returns} matrix (the default is \code{0.001}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of
-//'   eigenvectors used for calculating the regularized inverse of the
-//'   covariance \emph{matrix} (the default is the number of columns of
-//'   \code{returns}).
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the \code{returns}
+//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   the number of columns of \code{returns}).
 //'   
 //' @param \code{con_fi} The confidence level for calculating the
 //'   quantiles (the default is \code{con_fi = 0.75}).
@@ -4422,7 +4440,7 @@ arma::mat back_test(arma::mat excess, // Portfolio excess returns
                     arma::uvec endp, 
                     std::string method = "rank_sharpe",
                     double eigen_thresh = 0.001,
-                    int eigen_max = 0,
+                    arma::uword eigen_max = 0,
                     double con_fi = 0.1,
                     double alpha = 0.0,
                     bool scale = true,

@@ -80,6 +80,8 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Modify function diff_it() to handle negative lags
+
 + [ ] Create function roll_mean() for the rolling calc_mean() the centrality (location) estimator (first moment) using RcppArmadillo
 
 + [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
@@ -369,6 +371,10 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
+
++ [x] Modify function calc_inv() so it calculates the regularized inverse of a matrix, not the inverse of its covariance matrix
+
++ [x] Modify functions calc_reg() and roll_reg() to add method for regularized regression
 
 + [x] Create function calc_mean() for the centrality (location) estimator (first moment) using RcppArmadillo: mean, median, Hodges-Lehmann, and other unimodal robust estimators
 
