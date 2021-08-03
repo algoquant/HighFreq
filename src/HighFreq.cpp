@@ -251,15 +251,15 @@ arma::mat lag_it(arma::mat tseries,
 // [[Rcpp::export]]
 arma::vec diff_vec(arma::vec tseries, arma::uword lagg = 1, bool padd = true) {
   
-  arma::uword numel = (tseries.n_elem-1);
+  arma::uword length = (tseries.n_elem-1);
   
   if (padd)
     // Pad the output with zeros at the beginning
     return (tseries - arma::join_cols(tseries.subvec(0, lagg - 1), 
-                                      tseries.subvec(0, numel - lagg)));
+                                      tseries.subvec(0, length - lagg)));
   else
     // Don't pad the output
-    return (tseries.subvec(lagg, numel) - tseries.subvec(0, numel - lagg));
+    return (tseries.subvec(lagg, length) - tseries.subvec(0, length - lagg));
   
 }  // end diff_vec
 
@@ -345,7 +345,7 @@ arma::mat diff_it(arma::mat tseries,
 ////////////////////////////////////////////////////////////
 //' Calculate a vector of end points that divides a vector into equal intervals.
 //'
-//' @param \code{numel} An \emph{integer} equal to the length of the vector to
+//' @param \code{length} An \emph{integer} equal to the length of the vector to
 //'   be divided into equal intervals.
 //'   
 //' @param \code{step} The number of elements in each interval between
@@ -359,7 +359,7 @@ arma::mat diff_it(arma::mat tseries,
 //'
 //' @details 
 //'   The end points are a vector of integers which divide a vector of length
-//'   equal to \code{numel} into equally spaced intervals. If a whole number of
+//'   equal to \code{length} into equally spaced intervals. If a whole number of
 //'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
 //'   stub interval at the end.
 //'
@@ -413,39 +413,39 @@ arma::mat diff_it(arma::mat tseries,
 //'   
 //' @examples
 //' # Calculate end points without a stub interval
-//' HighFreq::calc_endpoints(numel=20, step=5)
+//' HighFreq::calc_endpoints(length=20, step=5)
 //' # Calculate end points with a final stub interval
-//' HighFreq::calc_endpoints(numel=23, step=5)
+//' HighFreq::calc_endpoints(length=23, step=5)
 //' # Calculate end points with initial and final stub intervals
-//' HighFreq::calc_endpoints(numel=20, step=5, stub=2)
+//' HighFreq::calc_endpoints(length=20, step=5, stub=2)
 //' # Calculate end points with initial and final stub intervals
-//' HighFreq::calc_endpoints(numel=20, step=5, stub=24)
+//' HighFreq::calc_endpoints(length=20, step=5, stub=24)
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_endpoints(arma::uword numel, arma::uword step = 1, arma::uword stub = 0) {
+arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, arma::uword stub = 0) {
   
-  arma::uword extra = numel % step;
+  arma::uword extra = length % step;
   arma::uvec endp;
   
   if ((stub == 0) & (extra == 0)) {
     // No stub interval
-    endp = arma::regspace<uvec>(step, step, numel);
+    endp = arma::regspace<uvec>(step, step, length);
   } else if ((stub == 0) & (extra > 0)) {
     // Add stub interval at end
-    endp = arma::regspace<uvec>(step, step, numel + step);
-    endp.back() = numel;
+    endp = arma::regspace<uvec>(step, step, length + step);
+    endp.back() = length;
   } else if ((stub > 0) & (extra == 0)) {
     // Add initial stub interval equal to stub
-    endp = arma::regspace<uvec>(stub, step, numel + step);
-    endp.back() = numel;
+    endp = arma::regspace<uvec>(stub, step, length + step);
+    endp.back() = length;
   } else if ((stub > 0) & (extra > 0) & (stub == extra)) {
     // Add initial stub interval equal to stub without stub at end
-    endp = arma::regspace<uvec>(stub, step, numel);
+    endp = arma::regspace<uvec>(stub, step, length);
   } else {
     // Add initial stub interval equal to stub and with extra stub at end
-    endp = arma::regspace<uvec>(stub, step, numel + step);
-    endp.back() = numel;
+    endp = arma::regspace<uvec>(stub, step, length + step);
+    endp.back() = length;
   }  // end if
   
   // Subtract 1 from endp because C++ indexing starts at 0
@@ -1994,13 +1994,13 @@ arma::mat agg_ohlc(arma::mat tseries) {
 // [[Rcpp::export]]
 arma::uvec roll_count(arma::uvec tseries) {
   
-  arma::uword numel = tseries.n_elem;
-  arma::uvec count_true(numel);
+  arma::uword length = tseries.n_elem;
+  arma::uvec count_true(length);
   
   // Initialize count
   count_true[0] = tseries[0];
   // Loop over tseries
-  for (arma::uword it = 1; it < numel; it++) {
+  for (arma::uword it = 1; it < length; it++) {
     if (tseries[it])
       // Add count number
       count_true[it] = count_true[it-1] + 1;
@@ -2122,8 +2122,8 @@ arma::mat roll_ohlc(arma::mat tseries, arma::uvec endp) {
 // [[Rcpp::export]]
 arma::vec roll_vec(arma::vec tseries, arma::uword look_back) {
   
-  arma::uword numel = tseries.size();
-  arma::vec rolling_sum(numel);
+  arma::uword length = tseries.size();
+  arma::vec rolling_sum(length);
   
   // Warmup period
   rolling_sum[0] = tseries[0];
@@ -2132,7 +2132,7 @@ arma::vec roll_vec(arma::vec tseries, arma::uword look_back) {
   }  // end for
   
   // Remaining period
-  for (arma::uword it = look_back; it < numel; it++) {
+  for (arma::uword it = look_back; it < length; it++) {
     rolling_sum[it] = rolling_sum[it-1] + tseries[it] - tseries[it-look_back];
   }  // end for
   
@@ -2189,9 +2189,9 @@ arma::vec roll_vec(arma::vec tseries, arma::uword look_back) {
 // [[Rcpp::export]]
 arma::vec roll_vecw(arma::vec tseries, arma::vec weights) {
   
-  arma::uword numel = tseries.n_elem;
+  arma::uword length = tseries.n_elem;
   arma::uword look_back = weights.n_elem;
-  arma::vec rolling_sum(numel, fill::zeros);
+  arma::vec rolling_sum(length, fill::zeros);
   arma::vec rev_weights = arma::reverse(weights);
   // arma::vec rev_weights = weights;
   
@@ -2199,7 +2199,7 @@ arma::vec roll_vecw(arma::vec tseries, arma::vec weights) {
   rolling_sum.subvec(0, look_back-2) = tseries.subvec(0, look_back-2);
   
   // Remaining periods
-  for (arma::uword it = look_back-1; it < numel; it++) {
+  for (arma::uword it = look_back-1; it < length; it++) {
     rolling_sum(it) = arma::dot(rev_weights, tseries.subvec(it-look_back+1, it));
   }  // end for
   
@@ -2635,8 +2635,8 @@ arma::mat roll_wsum(arma::mat tseries,
 // [[Rcpp::export]]
 arma::vec roll_var_vec(arma::vec tseries, arma::uword look_back = 1) {
   
-  arma::uword numel = tseries.n_elem;
-  arma::vec var_vec = arma::zeros<vec>(numel);
+  arma::uword length = tseries.n_elem;
+  arma::vec var_vec = arma::zeros<vec>(length);
   
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
@@ -2644,7 +2644,7 @@ arma::vec roll_var_vec(arma::vec tseries, arma::uword look_back = 1) {
   }  // end for
   
   // Remaining period
-  for (arma::uword it = look_back; it < numel; it++) {
+  for (arma::uword it = look_back; it < length; it++) {
     var_vec(it) = arma::var(tseries.subvec(it-look_back+1, it));
   }  // end for
   
@@ -3902,10 +3902,10 @@ arma::mat sim_garch(double omega,
   arma::vec variance(siz_e);
   arma::vec returns(siz_e);
   variance[0] = omega/(1-alpha-beta);
-  returns[0] = sqrt(variance[0])*innov[0];
+  returns[0] = std::sqrt(variance[0])*innov[0];
   
   for (arma::uword it = 1; it < siz_e; it++) {
-    returns[it] = sqrt(variance[it-1])*innov[it];
+    returns[it] = std::sqrt(variance[it-1])*innov[it];
     variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
   }  // end for
   
@@ -3958,12 +3958,12 @@ arma::vec sim_ou(double eq_price,
                  double theta, 
                  arma::vec innov) {
   
-  arma::uword numel = innov.size();
-  arma::vec price_s(numel);
-  arma::vec returns(numel);
+  arma::uword length = innov.size();
+  arma::vec price_s(length);
+  arma::vec returns(length);
   
   price_s[0] = eq_price;
-  for (arma::uword it = 1; it < numel; it++) {
+  for (arma::uword it = 1; it < length; it++) {
     returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
     price_s[it] = price_s[it-1] + returns[it];
   }  // end for
@@ -4017,12 +4017,12 @@ arma::vec sim_schwartz(double eq_price,
                        double theta, 
                        arma::vec innov) {
   
-  arma::uword numel = innov.size();
-  arma::vec price_s(numel);
-  arma::vec returns(numel);
+  arma::uword length = innov.size();
+  arma::vec price_s(length);
+  arma::vec returns(length);
   
   price_s[0] = eq_price;
-  for (arma::uword it = 1; it < numel; it++) {
+  for (arma::uword it = 1; it < length; it++) {
     returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
     price_s[it] = price_s[it-1] * exp(returns[it]);
   }  // end for
@@ -4069,9 +4069,9 @@ arma::vec sim_schwartz(double eq_price,
 // [[Rcpp::export]]
 arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
   
-  arma::uword numel = innov.n_elem;
+  arma::uword length = innov.n_elem;
   arma::uword look_back = coeff.n_elem;
-  arma::vec ari_ma(numel, fill::zeros);
+  arma::vec ari_ma(length, fill::zeros);
   
   // Warmup period
   ari_ma(0) = innov(0);
@@ -4081,7 +4081,7 @@ arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < numel; it++) {
+  for (arma::uword it = look_back; it < length; it++) {
     ari_ma(it) = innov(it) + arma::dot(coeff, ari_ma.subvec(it-look_back, it-1));
   }  // end for
   
@@ -4307,7 +4307,7 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
   }  // end switch
   
   if (scale == TRUE) {
-    // return weights/sqrt(sum(square(weights)));
+    // return weights/std::sqrt(sum(square(weights)));
     // return weights/sum(weights);
     // Returns of equally weighted portfolio
     // arma::vec mean_rows = arma::mean(returns, 1);

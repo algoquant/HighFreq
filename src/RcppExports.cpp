@@ -59,15 +59,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_endpoints
-arma::uvec calc_endpoints(arma::uword numel, arma::uword step, arma::uword stub);
-RcppExport SEXP _HighFreq_calc_endpoints(SEXP numelSEXP, SEXP stepSEXP, SEXP stubSEXP) {
+arma::uvec calc_endpoints(arma::uword length, arma::uword step, arma::uword stub);
+RcppExport SEXP _HighFreq_calc_endpoints(SEXP lengthSEXP, SEXP stepSEXP, SEXP stubSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::uword >::type numel(numelSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type length(lengthSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_endpoints(numel, step, stub));
+    rcpp_result_gen = Rcpp::wrap(calc_endpoints(length, step, stub));
     return rcpp_result_gen;
 END_RCPP
 }

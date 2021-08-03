@@ -222,7 +222,7 @@ diff_it <- function(tseries, lagg = 1L, padd = TRUE) {
 
 #' Calculate a vector of end points that divides a vector into equal intervals.
 #'
-#' @param \code{numel} An \emph{integer} equal to the length of the vector to
+#' @param \code{length} An \emph{integer} equal to the length of the vector to
 #'   be divided into equal intervals.
 #'   
 #' @param \code{step} The number of elements in each interval between
@@ -236,7 +236,7 @@ diff_it <- function(tseries, lagg = 1L, padd = TRUE) {
 #'
 #' @details 
 #'   The end points are a vector of integers which divide a vector of length
-#'   equal to \code{numel} into equally spaced intervals. If a whole number of
+#'   equal to \code{length} into equally spaced intervals. If a whole number of
 #'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
 #'   stub interval at the end.
 #'
@@ -290,17 +290,17 @@ diff_it <- function(tseries, lagg = 1L, padd = TRUE) {
 #'   
 #' @examples
 #' # Calculate end points without a stub interval
-#' HighFreq::calc_endpoints(numel=20, step=5)
+#' HighFreq::calc_endpoints(length=20, step=5)
 #' # Calculate end points with a final stub interval
-#' HighFreq::calc_endpoints(numel=23, step=5)
+#' HighFreq::calc_endpoints(length=23, step=5)
 #' # Calculate end points with initial and final stub intervals
-#' HighFreq::calc_endpoints(numel=20, step=5, stub=2)
+#' HighFreq::calc_endpoints(length=20, step=5, stub=2)
 #' # Calculate end points with initial and final stub intervals
-#' HighFreq::calc_endpoints(numel=20, step=5, stub=24)
+#' HighFreq::calc_endpoints(length=20, step=5, stub=24)
 #'
 #' @export
-calc_endpoints <- function(numel, step = 1L, stub = 0L) {
-    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', numel, step, stub)
+calc_endpoints <- function(length, step = 1L, stub = 0L) {
+    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub)
 }
 
 #' Calculate a vector of start points by lagging (shifting) a vector of end

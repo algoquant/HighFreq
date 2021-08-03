@@ -80,6 +80,11 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
+run_mean(), run_var(), run_maxmin(), run_covar(), run_zscore(), 
+
++ [ ] Create functions roll_max() and roll_min()
+
 + [ ] Modify function diff_it() to handle negative lags
 
 + [ ] Create function roll_mean() for the rolling calc_mean() the centrality (location) estimator (first moment) using RcppArmadillo
@@ -232,7 +237,10 @@ https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-te
 https://en.cppreference.com/w/cpp/language/parameter_pack
 https://stackoverflow.com/questions/3351056/create-va-list-dynamically
 
-+ [ ] Convert all loops to STL iterators: iterators are pointers to vector and matrix elements ?
++ [ ] Adapt STL code from test_stl.cpp
+
++ [ ] Convert some loops to STL iterators: iterators are pointers to vector and matrix elements
+It may be simpler to use std::accumulate().
 https://www.geeksforgeeks.org/iterators-c-stl/
 
 + [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
