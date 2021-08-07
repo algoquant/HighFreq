@@ -5,7 +5,7 @@
 \title{Calculate the row differences of a a \emph{time series} or a \emph{matrix}
 using \emph{RcppArmadillo}.}
 \usage{
-diff_it(tseries, lagg = 1L, padd = TRUE)
+diff_it(tseries, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -14,9 +14,10 @@ diff_it(tseries, lagg = 1L, padd = TRUE)
 periods) to lag when calculating the differences (the default is
 \code{lagg = 1}).}
 
-\item{\code{padd}}{\emph{Boolean} argument: Should the output \emph{matrix}
-be padded (extended) with zeros, in order to return a \emph{matrix} with
-the same number of rows as the input? (the default is \code{padd = TRUE})}
+\item{\code{pad_zeros}}{\emph{Boolean} argument: Should the output
+\emph{matrix} be padded (extended) with zeros, in order to return a
+\emph{matrix} with the same number of rows as the input? (the default is
+\code{pad_zeros = TRUE})}
 }
 \value{
 A \emph{matrix} containing the differences between the rows of the
@@ -29,37 +30,45 @@ using \emph{RcppArmadillo}.
 \details{
 The function \code{diff_it()} calculates the differences between the rows
   of the input \emph{time series} or \emph{matrix} and its lagged version.
-  The lagged version has its rows shifted down by the number equal to
-  \code{lagg} rows.
   
   The argument \code{lagg} specifies the number of lags applied to the rows
-  of the lagged version. For example, if \code{lagg=3} then the lagged
-  version will have its rows shifted down by \code{3} rows, and the
-  differences will be taken between each row minus the row three time
-  periods before it (in the past). The default is \code{lagg = 1}.
+  of the lagged version. 
+  For positive \code{lagg}, the lagged version of \code{tseries} has its
+  rows shifted \emph{forward} (down) by the number equal to \code{lagg}
+  rows. For negative \code{lagg}, the lagged version of \code{tseries} has
+  its rows shifted \emph{backward} (up) by the number equal to \code{-lagg}
+  rows.  
+  For example, if \code{lagg=3} then the lagged version will have its rows
+  shifted down by \code{3} rows, and the differences will be taken between
+  each row minus the row three time periods before it (in the past). The
+  default is \code{lagg = 1}.
 
-  The argument \code{padd} specifies whether the output \emph{matrix} should
-  be padded (extended) with the rows of the initial (warmup) period at the
-  beginning, in order to return a \emph{matrix} with the same number of rows
-  as the input.  The default is \code{padd = TRUE}. The padding operation
-  can be time-consuming, because it requires the copying of data.
+  The argument \code{pad_zeros} specifies whether the output \emph{matrix}
+  should be padded (extended) with the rows of the initial (warmup) period
+  at the front, in order to return a \emph{matrix} with the same number
+  of rows as the input.  The default is \code{pad_zeros = TRUE}. The padding
+  operation can be time-consuming, because it requires the copying of data.
   
   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{
-# Create a matrix of random returns
-re_turns <- matrix(rnorm(5e6), nc=5)
-# Compare diff_it() with rutils::diff_it()
-all.equal(HighFreq::diff_it(re_turns, lagg=3, padd=TRUE), 
-  zoo::coredata(rutils::diff_it(re_turns, lagg=3)), 
+# Create a matrix of random data
+da_ta <- matrix(sample(15), nc=3)
+# Calculate differences with lagged rows
+HighFreq::diff_it(da_ta, lagg=2)
+# Calculate differences with advanced rows
+HighFreq::diff_it(da_ta, lagg=-2)
+# Compare HighFreq::diff_it() with rutils::diff_it()
+all.equal(HighFreq::diff_it(da_ta, lagg=2), 
+  rutils::diff_it(da_ta, lagg=2), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::diff_it(re_turns, lagg=3, padd=TRUE),
-  Rcode=rutils::diff_it(re_turns, lagg=3),
+  Rcpp=HighFreq::diff_it(da_ta, lagg=2),
+  Rcode=rutils::diff_it(da_ta, lagg=2),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

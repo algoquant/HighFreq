@@ -80,22 +80,28 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Replace passing large data by value passing by reference (pointer) to improve performance
+
 + [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
 run_mean(), run_var(), run_maxmin(), run_covar(), run_zscore(), 
 
 + [ ] Create functions roll_max() and roll_min()
 
-+ [ ] Modify function diff_it() to handle negative lags
++ [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
-+ [ ] Create function roll_mean() for the rolling calc_mean() the centrality (location) estimator (first moment) using RcppArmadillo
++ [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
+
++ [ ] Modify function calc_weights(): 
+Rename model_type == "rank" to model_type == "rank_sharpe"
+Add model_type == "rank" for ranking the re_turns directly.
+
++ [ ] Modify function calc_endpoints(): call function xts::endpoints() if argument is an xts series
 
 + [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
 https://stackoverflow.com/questions/2537942/nullable-values-in-c
 https://en.cppreference.com/w/cpp/named_req/NullablePointer
 
 + [ ] In function calc_kurtosis() update the method nonparametric
-
-+ [ ] In function roll_wsum() add argument start_p
 
 + [ ] In function roll_reg() add option to perform rolling predictions using the regressions
 
@@ -106,18 +112,6 @@ It should return a named vector of coefficients, tvals, and zscore.
 + [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
 + [ ] In function calc_var() add robust dispersion estimators
-
-+ [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
-
-+ [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
-
-+ [ ] Modify function calc_weights(): 
-Rename model_type == "rank" to model_type == "rank_sharpe"
-Add model_type == "rank" for ranking the re_turns directly.
-
-+ [ ] Modify function diff_it() to pad with zeros
-
-+ [ ] Modify function calc_endpoints(): call function xts::endpoints() if argument is an xts series
 
 + [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
@@ -380,6 +374,64 @@ https://cran.r-project.org/web/packages/meboot/index.html
 + [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
++ [ ] Create function sea_son() for calculating time of day (year) as fraction
+The time of day can be used as an input into a seasonal model
+
++ [ ] Create volume-weighted Hurst and density plots  
+https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
+
++ [ ] Modify function season_ality() to discard elements corresponding to infrequent observations ?
+
++ [ ] Create Rcpp function for fast rolling aggregations over endpoints
+
++ [ ] Aggregate data to 10-second bars (?)  
+
++ [ ] Add wiki  
+
++ [ ] Run on travis, add .travis.yml file, add Build Status tag to README.Rmd
+
++ [ ] Introduce unit testing using testthat and devtools: create /tests directory
+
++ [ ] Modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
+add argument "open_to_close" with default value TRUE  
+
++ [ ] Prove that OHLC skew formula is an estimator of skew  
+Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
+perform simulation to find out  
+https://en.wikipedia.org/wiki/First-hitting-time_model  
+https://en.wikipedia.org/wiki/Wiener_process  
+
++ [ ] Add logical arg as option to aggregate data or not
+
++ [ ] Calculate rets from scrubbed data
+
++ [ ] Calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
+
++ [ ] Create function to estimate beta from HFreq data
+
++ [ ] Create function to forecast skewness
+Show that variance is predictable over time 
+Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
+so variables other than lagged skewness are required to forecast skewness.
+Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
+
+
+
+
+### Tasks finished
+
++ [x] Add vignette and automatically build vignette  
+
++ [x] Create function roll_mean() for the rolling calc_mean() the centrality (location) estimator (first moment) using RcppArmadillo
+
++ [x] In functions roll_vec() and roll_vecw() convert arguments from arma::vec to arma::mat
+
++ [x] Modify function diff_it() to handle negative lags
+
++ [x] Modify function diff_it() to pad with zeros as in rutils::diff_it()
+
++ [x] In functions diff_vec() and diff_it(), rename argument padd to pad_zeros, as in lag_it()
+
 + [x] Modify function calc_inv() so it calculates the regularized inverse of a matrix, not the inverse of its covariance matrix
 
 + [x] Modify functions calc_reg() and roll_reg() to add method for regularized regression
@@ -417,8 +469,6 @@ It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 + [x] In all the calc_* functions, return zero if number of rows is small
 
 + [x] Modify function roll_var() to calculate the rolling variance, MAD, and other robust estimators - add parameter "method" similar to calc_var() 
-
-+ [x] Remove unnecessary pointer "&" and "const" attributes from input arguments
 
 + [x] Merge function calc_mad() into calc_var() - add parameter "method" to calc_var()
 
@@ -628,84 +678,6 @@ Run random data through model to test if there is data snooping.
 
 + [x] Modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
 
-+ [ ] Create function sea_son() for calculating time of day (year) as fraction
-The time of day can be used as an input into a seasonal model
-
-+ [ ] Create volume-weighted Hurst and density plots  
-https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
-
-+ [ ] Modify function season_ality() to discard elements corresponding to infrequent observations ?
-
-+ [ ] Create Rcpp function for fast rolling aggregations over endpoints
-
-+ [ ] Aggregate data to 10-second bars (?)  
-
-+ [ ] Add wiki  
-
-+ [ ] Run on travis, add .travis.yml file, add Build Status tag to README.Rmd
-
-+ [x] Add vignette and automatically build vignette  
-
-+ [ ] Introduce unit testing using testthat and devtools: create /tests directory
-
-+ [ ] Modify function skew_ohlc() to accomodate case when open price isn't equal to previous close price.  
-add argument "open_to_close" with default value TRUE  
-
-+ [ ] Prove that OHLC skew formula is an estimator of skew  
-Do Garman-Klass and Rogers-Satchell estimators work for processes that are not Gaussian?  
-perform simulation to find out  
-https://en.wikipedia.org/wiki/First-hitting-time_model  
-https://en.wikipedia.org/wiki/Wiener_process  
-
-+ [ ] Add logical arg as option to aggregate data or not
-
-+ [ ] Calculate rets from scrubbed data
-
-+ [ ] Calculate statistics (moments, quantiles) on tick and OHLC data and save them in files
-
-+ [ ] Create function to estimate beta from HFreq data
-
-+ [ ] Create function to forecast skewness
-Show that variance is predictable over time 
-Show that skewness is not predictable over time (Harvey and Siddique, 1999), 
-so variables other than lagged skewness are required to forecast skewness.
-Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewness.
-
-+ [x] Rename functions calc_returns(), vari_ance(), skew_ohlc(), sharpe_ohlc() to run_returns(), run_variance(), run_skew(), run_sharpe()  
-
-+ [x] Rename function v_wap() to roll_vwap()  
-
-+ [x] Modify function roll_hurst() using TTR::runMax()  
-
-+ [x] Rename function hurst_ohlc() to sharpe_ohlc()  
-
-+ [x] Rename and modify function calc_rets() to calc_returns(): 
-return single column with name "SPY.returns"
-will break save_rets() and save_rets_ohlc()
-
-+ [x] Modify function v_wap() to accept argument x_ts  
-
-+ [x] Remove .Rproj.user directory from GitHub repository
-steps:
-- open Windows PowerShell from GitHub Desktop
-- run: git filter-branch --tree-filter 'rm -f -R .Rproj.user' HEAD
-- run: git push origin master -f
-http://stackoverflow.com/questions/32228841/github-gitignore-adds-folder-previously-not-on-gitignore
-
-+ [x] Create project website for HighFreq on GitHub Pages using R Markdown  
-
-+ [x] Rename README.md to .Rmd and add more detailed description similar this to README.md:  
-https://github.com/RcppCore/rcpp-gallery/blob/gh-pages/src/2016-05-27-HRP.Rmd
-use rmarkdown templates
-https://rud.is/b/2016/02/04/alternate-r-markdown-templates/
-https://github.com/hrbrmstr/markdowntemplates
-http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
-
-
-
-
-### Tasks finished
-
 + [x] Create a function called sim_arima() in RcppArmadillo which replicates the function stats::filter() with method="recursive"
 Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
 
@@ -757,6 +729,36 @@ update the documentation to reflect that HighFreq already uses Hampel median fil
 use apply_rolling() from utilLib
 
 + [x] Rename function roll_agg() to roll_moment(), and its argument esti_mator to mo_ment  
+
++ [x] Rename functions calc_returns(), vari_ance(), skew_ohlc(), sharpe_ohlc() to run_returns(), run_variance(), run_skew(), run_sharpe()  
+
++ [x] Rename function v_wap() to roll_vwap()  
+
++ [x] Modify function roll_hurst() using TTR::runMax()  
+
++ [x] Rename function hurst_ohlc() to sharpe_ohlc()  
+
++ [x] Rename and modify function calc_rets() to calc_returns(): 
+return single column with name "SPY.returns"
+will break save_rets() and save_rets_ohlc()
+
++ [x] Modify function v_wap() to accept argument x_ts  
+
++ [x] Remove .Rproj.user directory from GitHub repository
+steps:
+- open Windows PowerShell from GitHub Desktop
+- run: git filter-branch --tree-filter 'rm -f -R .Rproj.user' HEAD
+- run: git push origin master -f
+http://stackoverflow.com/questions/32228841/github-gitignore-adds-folder-previously-not-on-gitignore
+
++ [x] Create project website for HighFreq on GitHub Pages using R Markdown  
+
++ [x] Rename README.md to .Rmd and add more detailed description similar this to README.md:  
+https://github.com/RcppCore/rcpp-gallery/blob/gh-pages/src/2016-05-27-HRP.Rmd
+use rmarkdown templates
+https://rud.is/b/2016/02/04/alternate-r-markdown-templates/
+https://github.com/hrbrmstr/markdowntemplates
+http://svmiller.com/blog/2016/02/svm-r-markdown-manuscript/
 
 + [x] Modify function hurst_ohlc() to calculate (C-O)/(H-L)
 
@@ -844,6 +846,11 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Remove unnecessary pointer "&" and "const" attributes from input arguments - No!
+Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.
+
++ [ ] In function roll_wsum() add argument start_p - it's not needed because the length of weights determines the start points
 
 + [ ] Rename the function roll_zscores() to roll_reg()
 

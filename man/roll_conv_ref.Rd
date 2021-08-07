@@ -3,14 +3,14 @@
 \name{roll_conv_ref}
 \alias{roll_conv_ref}
 \title{Calculate by reference the rolling convolutions (weighted sums) of a
-\emph{time series} with a \emph{vector} of weights.}
+\emph{time series} with a \emph{column vector} of weights.}
 \usage{
 roll_conv_ref(tseries, weights)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{weights}}{A column \emph{vector} of weights.}
+\item{\code{weights}}{A \emph{column vector} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input
@@ -18,11 +18,11 @@ A \emph{matrix} with the same dimensions as the input
 }
 \description{
 Calculate by reference the rolling convolutions (weighted sums) of a
-\emph{time series} with a \emph{vector} of weights.
+\emph{time series} with a \emph{column vector} of weights.
 }
 \details{
 The function \code{roll_conv_ref()} calculates the convolutions of the
-  \emph{matrix} columns with a \emph{vector} of weights.  It performs a loop
+  \emph{matrix} columns with a \emph{column vector} of weights.  It performs a loop
   down over the \emph{matrix} rows and multiplies the past (higher) values
   by the weights.  It calculates the rolling weighted sums of the past
   values.

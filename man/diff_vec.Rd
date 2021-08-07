@@ -5,7 +5,7 @@
 \title{Calculate the differences between the neighboring elements of a
 single-column \emph{time series} or a \emph{vector}.}
 \usage{
-diff_vec(tseries, lagg = 1L, padd = TRUE)
+diff_vec(tseries, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
 \item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
@@ -13,9 +13,10 @@ diff_vec(tseries, lagg = 1L, padd = TRUE)
 \item{\code{lagg}}{An \emph{integer} equal to the number of time periods to
 lag when calculating the differences (the default is \code{lagg = 1}).}
 
-\item{\code{padd}}{\emph{Boolean} argument: Should the output \emph{vector}
-be padded (extended) with zeros, in order to return a \emph{vector} of the
-same length as the input? (the default is \code{padd = TRUE})}
+\item{\code{pad_zeros}}{\emph{Boolean} argument: Should the output
+\emph{vector} be padded (extended) with zeros, in order to return a
+\emph{vector} of the same length as the input? (the default is
+\code{pad_zeros = TRUE})}
 }
 \value{
 A column \emph{vector} containing the differences between the
@@ -34,11 +35,11 @@ The function \code{diff_vec()} calculates the differences between the
   minus the element three time periods before it (in the past).  The default
   is \code{lagg = 1}.
 
-  The argument \code{padd} specifies whether the output \emph{vector} should
-  be padded (extended) with zeros at the beginning, in order to return a
-  \emph{vector} of the same length as the input.  The default is
-  \code{padd = TRUE}. The padding operation can be time-consuming, because it
-  requires the copying of data.
+  The argument \code{pad_zeros} specifies whether the output \emph{vector}
+  should be padded (extended) with zeros at the front, in order to
+  return a \emph{vector} of the same length as the input.  The default is
+  \code{pad_zeros = TRUE}. The padding operation can be time-consuming,
+  because it requires the copying of data.
   
   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.
@@ -48,12 +49,12 @@ The function \code{diff_vec()} calculates the differences between the
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
 # Compare diff_vec() with rutils::diff_it()
-all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE)),
+all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE)),
   rutils::diff_it(re_turns, lagg=3))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::diff_vec(re_turns, lagg=3, padd=TRUE),
+  Rcpp=HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE),
   Rcode=rutils::diff_it(re_turns, lagg=3),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

@@ -42,11 +42,11 @@ The function \code{roll_ohlc()} performs a loop over the end points
 # Define matrix of OHLC data
 oh_lc <- rutils::etf_env$VTI[, 1:5]
 # Define end points at 25 day intervals
-end_p <- rutils::calc_endpoints(oh_lc, inter_val=25)
+end_p <- HighFreq::calc_endpoints(oh_lc, inter_val=25)
 # Aggregate over end_p:
-ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p-1))
+ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p))
 # Compare with xts::to.period()
-ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
+ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p+1), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
 }
 

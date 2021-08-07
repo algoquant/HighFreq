@@ -39,9 +39,9 @@ calculating the end points (the default is \code{stub = 0}).}
 measure of dispersion (the default is \code{method = "moment"}).}
 }
 \value{
-A \emph{matrix} with the same number of columns as the input time
-  series \code{tseries}, and the number of rows equal to the number of end
-  points.
+A \emph{matrix} dispersion (variance) estimates with the same number
+  of columns as the input time series \code{tseries}, and the number of rows
+  equal to the number of end points.
 }
 \description{
 Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling

@@ -3,26 +3,27 @@
 \name{roll_vecw}
 \alias{roll_vecw}
 \title{Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{vector} using \code{RcppArmadillo}.}
+or a \emph{column vector} using \code{RcppArmadillo}.}
 \usage{
 roll_vecw(tseries, weights)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{column
+vector} (a single-column matrix).}
 
-\item{\code{weights}}{A \emph{vector} of weights.}
+\item{\code{weights}}{A \emph{column vector} of weights.}
 }
 \value{
-A column \emph{vector} of the same length as the argument
+A \emph{column vector} of the same length as the argument
   \code{tseries}.
 }
 \description{
 Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{vector} using \code{RcppArmadillo}.
+or a \emph{column vector} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_vecw()} calculates the rolling weighted sums of a
-  \emph{vector} over its past values (a convolution with the \emph{vector}
+  \emph{column vector} over its past values (a convolution with the \emph{column vector}
   of weights), using \code{RcppArmadillo}. It performs a similar calculation
   as the standard \code{R} function \code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
@@ -31,17 +32,17 @@ The function \code{roll_vecw()} calculates the rolling weighted sums of a
 \examples{
 \dontrun{
 # First example
-# Create vector from historical prices
-re_turns <- as.numeric(rutils::etf_env$VTI[, 6])
+# Define a single-column matrix of returns
+re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
 # Create simple weights
-weight_s <- c(1, rep(0, 10))
+weight_s <- matrix(c(1, rep(0, 10)))
 # Calculate rolling weighted sums
 weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
 # Compare with original
-all.equal(re_turns, as.numeric(weight_ed))
+all.equal(zoo::coredata(re_turns), weight_ed, check.attributes=FALSE)
 # Second example
 # Create exponentially decaying weights
-weight_s <- exp(-0.2*1:11)
+weight_s <- matrix(exp(-0.2*1:11))
 weight_s <- weight_s/sum(weight_s)
 # Calculate rolling weighted sums
 weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
@@ -49,6 +50,12 @@ weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
 filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 # Compare both methods
 all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
+# Compare the speed of Rcpp with R code
+library(microbenchmark)
+summary(microbenchmark(
+  Rcpp=HighFreq::roll_vecw(tseries=re_turns, weights=weight_s),
+  Rcode=stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1),
+  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
 }

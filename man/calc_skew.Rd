@@ -52,7 +52,7 @@ The function \code{calc_skew()} calculates the skewness of the columns of
 }
 \examples{
 \dontrun{
-# Calculate VTI returns
+# Define a single-column time series of returns
 re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 # Calculate the moment skewness
 HighFreq::calc_skew(re_turns)

@@ -42,9 +42,9 @@ model (the default is \code{method = "moment"} - see Details).}
 quantiles (the default is \code{con_fi = 0.75}).}
 }
 \value{
-A \emph{matrix} with the same number of columns as the input time
-  series \code{tseries}, and the number of rows equal to the number of end
-  points.
+A \emph{matrix} of kurtosis estimates with the same number of
+  columns as the input time series \code{tseries}, and the number of rows
+  equal to the number of end points.
 }
 \description{
 Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back

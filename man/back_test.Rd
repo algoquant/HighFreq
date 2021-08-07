@@ -109,7 +109,7 @@ re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 risk_free <- 0.03/260
 ex_cess <- re_turns - risk_free
 # Define monthly end_p without initial warmpup period
-end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
+end_p <- HighFreq::calc_endpoints(re_turns, inter_val="months")
 end_p <- end_p[end_p>50]
 len_gth <- NROW(end_p)
 # Define 12-month look-back interval and start points over sliding window

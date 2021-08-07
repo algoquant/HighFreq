@@ -3,39 +3,41 @@
 \name{roll_vec}
 \alias{roll_vec}
 \title{Calculate the rolling sums over a single-column \emph{time series} or a
-\emph{vector} using \emph{Rcpp}.}
+\emph{column vector} using \emph{Rcpp}.}
 \usage{
 roll_vec(tseries, look_back)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a \emph{column
+vector} (a single-column matrix).}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of elements of data used for calculating the sum.}
 }
 \value{
-A column \emph{vector} of the same length as the argument
+A \emph{column vector} of the same length as the argument
   \code{tseries}.
 }
 \description{
 Calculate the rolling sums over a single-column \emph{time series} or a
-\emph{vector} using \emph{Rcpp}.
+\emph{column vector} using \emph{Rcpp}.
 }
 \details{
-The function \code{roll_vec()} calculates a \emph{vector} of rolling sums,
-  over a \emph{vector} of data, using fast \emph{Rcpp} \code{C++} code.  The
-  function \code{roll_vec()} is several times faster than
-  \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+The function \code{roll_vec()} calculates a \emph{column vector} of
+  rolling sums, over a \emph{column vector} of data, using fast \emph{Rcpp}
+  \code{C++} code.  The function \code{roll_vec()} is several times faster
+  than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 }
 \examples{
 \dontrun{
-# Create a vector of random returns
-re_turns <- rnorm(1e6)
+# Define a single-column matrix of returns
+re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
 # Calculate rolling sums over 11-period lookback intervals
 sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
 # Compare HighFreq::roll_vec() with rutils::roll_sum()
 all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
-         rutils::roll_sum(re_turns, look_back=11))
+         rutils::roll_sum(re_turns, look_back=11), 
+         check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
