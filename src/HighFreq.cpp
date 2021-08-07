@@ -1,3 +1,10 @@
+////////////////////////////
+// File for testing HighFreq C++ functions
+////////////////////////////
+
+// Compile this file in R by running this command:
+// Rcpp::sourceCpp(file="C:/Develop/R/Rcpp/HighFreq_2021.cpp")
+
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 #include <vector>
@@ -68,7 +75,7 @@ using namespace arma;
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec lag_vec(arma::vec tseries, 
+arma::vec lag_vec(const arma::vec& tseries, 
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
   
@@ -152,7 +159,7 @@ arma::vec lag_vec(arma::vec tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat lag_it(arma::mat tseries, 
+arma::mat lag_it(const arma::mat& tseries, 
                  arma::sword lagg = 1, 
                  bool pad_zeros = true) {
   
@@ -250,7 +257,7 @@ arma::mat lag_it(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec diff_vec(arma::vec tseries, arma::uword lagg = 1, bool pad_zeros = true) {
+arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zeros = true) {
   
   arma::uword length = (tseries.n_elem-1);
   
@@ -333,7 +340,7 @@ arma::vec diff_vec(arma::vec tseries, arma::uword lagg = 1, bool pad_zeros = tru
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat diff_it(arma::mat tseries, 
+arma::mat diff_it(const arma::mat& tseries, 
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
 
@@ -607,8 +614,8 @@ arma::uvec calc_startpoints(arma::uvec endp, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::uword mult_vec_mat(arma::vec vector,
-                         arma::mat matrix,
+arma::uword mult_vec_mat(arma::vec& vector,
+                         arma::mat& matrix,
                          bool by_col = true) {
   
   arma::uword num_elem = vector.n_elem;
@@ -644,9 +651,9 @@ arma::uword mult_vec_mat(arma::vec vector,
 
 ////////////////////////////////////////////////////////////
 //' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
-//' using \code{RcppArmadillo}.
+//' data using \code{RcppArmadillo}.
 //' 
-//' @param \code{returns} A \emph{time series} or \emph{matrix} of returns
+//' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns
 //'   data.
 //'
 //' @return A list with two elements: a \emph{vector} of eigenvalues 
@@ -655,7 +662,8 @@ arma::uword mult_vec_mat(arma::vec vector,
 //'
 //' @details 
 //'   The function \code{calc_eigen()} first calculates the covariance
-//'   \emph{matrix} of the returns, and then calculates its eigen decomposition.
+//'   \emph{matrix} of \code{tseries}, and then calculates the eigen
+//'   decomposition of the covariance \emph{matrix}.
 //'
 //' @examples
 //' \dontrun{
@@ -677,14 +685,15 @@ arma::uword mult_vec_mat(arma::vec vector,
 //' 
 //' @export
 // [[Rcpp::export]]
-List calc_eigen(arma::mat returns) {
+Rcpp::List calc_eigen(const arma::mat& tseries) {
   
   arma::mat eigen_vec;
   arma::vec eigen_val;
-  arma::eig_sym(eigen_val, eigen_vec, arma::cov(returns));
+  arma::eig_sym(eigen_val, eigen_vec, arma::cov(tseries));
+  
   // Reverse the order of elements from largest eigenvalue to smallest, similar to R
-  return List::create(Named("values") = arma::flipud(eigen_val),
-                      Named("vectors") = arma::fliplr(eigen_vec));
+  return Rcpp::List::create(Named("values") = arma::flipud(eigen_val),
+                            Named("vectors") = arma::fliplr(eigen_vec));
   
 }  // end calc_eigen
 
@@ -713,9 +722,9 @@ List calc_eigen(arma::mat returns) {
 //'   \code{tseries} using Singular Value Decomposition (\emph{SVD}).
 //'   
 //'   If \code{eigen_max} is given, then it calculates the regularized inverse
-//'   from the \\emph{SVD} using the first \code{eigen_max} largest
-//'   singular values.  For example, if \code{eigen_max = 3} then it only
-//'   uses the \code{3} largest singular values.
+//'   from the \emph{SVD} using the first \code{eigen_max} largest singular
+//'   values.  For example, if \code{eigen_max = 3} then it only uses the
+//'   \code{3} largest singular values.
 //'   If \code{eigen_max} is set equal to the number of columns of
 //'   \code{tseries} then it uses all the singular values without any
 //'   regularization.
@@ -741,7 +750,7 @@ List calc_eigen(arma::mat returns) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_inv(arma::mat tseries,
+arma::mat calc_inv(const arma::mat& tseries,
                    double eigen_thresh = 0.001, 
                    arma::uword eigen_max = 0) {
   
@@ -814,33 +823,35 @@ arma::mat calc_inv(arma::mat tseries,
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random data
-//' se_ries <- matrix(rnorm(20000), nc=20)
-//' scale_d <- calc_scaled(tseries=se_ries, use_median=FALSE)
-//' scale_d2 <- scale(se_ries)
+//' re_turns <- matrix(rnorm(20000), nc=20)
+//' scale_d <- calc_scaled(tseries=re_turns, use_median=FALSE)
+//' scale_d2 <- scale(re_turns)
 //' all.equal(scale_d, scale_d2, check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=calc_scaled(tseries=se_ries, use_median=FALSE),
-//'   Rcode=scale(se_ries),
+//'   Rcpp=calc_scaled(tseries=re_turns, use_median=FALSE),
+//'   Rcode=scale(re_turns),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_scaled(arma::mat tseries, bool use_median=false) {
+arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
   
-  arma::mat scaled_mat(tseries.n_rows, tseries.n_cols, fill::zeros);
-  arma::vec scale_d(tseries.n_rows, fill::zeros);
+  arma::uword num_rows = tseries.n_rows;
+  arma::uword num_cols = tseries.n_cols;
+  arma::mat scaled_mat(num_rows, num_cols, fill::zeros);
+  arma::vec scale_d(num_rows, fill::zeros);
   double cen_ter;
   
   // Return zeros if not enough data
-  if (tseries.n_rows < 3) {
+  if (num_rows < 3) {
     return tseries;
   }  // end if
   
   // Perform a loop over the columns
-  for (arma::uword it=0; it < tseries.n_cols; it++) {
+  for (arma::uword it=0; it < num_cols; it++) {
     if (use_median) {
       cen_ter = arma::median(tseries.col(it));
       scale_d = (tseries.col(it) - cen_ter);
@@ -989,7 +1000,7 @@ meth_od calc_method(std::string method) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_mean(arma::mat tseries,
+arma::mat calc_mean(const arma::mat& tseries,
                     std::string method = "moment", 
                     double con_fi = 0.75) {
   
@@ -1046,7 +1057,7 @@ arma::mat calc_mean(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-double calc_var_vec(arma::vec tseries) {
+double calc_var_vec(const arma::vec& tseries) {
   
   return arma::var(tseries);
   
@@ -1134,7 +1145,7 @@ double calc_var_vec(arma::vec tseries) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_var(arma::mat tseries,
+arma::mat calc_var(const arma::mat& tseries,
                    std::string method = "moment", 
                    double con_fi = 0.75) {
   
@@ -1149,8 +1160,16 @@ arma::mat calc_var(arma::mat tseries,
     return arma::var(tseries);
   }  // end moment
   case meth_od::quantile: {  // MAD
-    tseries.each_row() -= arma::median(tseries, 0);
-    return 1.4826*arma::median(arma::abs(tseries), 0);
+    double num_cols = tseries.n_cols;
+    arma::mat medians = arma::median(tseries);
+    arma::mat mads(1, num_cols);
+    // Loop over columns of tseries
+    for (arma::uword it = 0; it < num_cols; it++) {
+      mads.col(it) = arma::median(arma::abs(tseries.col(it) - arma::as_scalar(medians.col(it))));
+    }  // end for
+    // tseries.each_row() -= arma::median(tseries, 0);
+    // return 1.4826*arma::median(arma::abs(tseries), 0);
+    return 1.4826*mads;
   }  // end quantile
   case meth_od::nonparametric: {  // nonparametric
     return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
@@ -1268,7 +1287,7 @@ arma::mat calc_var(arma::mat tseries,
 //' }
 //' @export
 // [[Rcpp::export]]
-double calc_var_ohlc(arma::mat ohlc, 
+double calc_var_ohlc(const arma::mat& ohlc, 
                      std::string method = "yang_zhang", 
                      arma::colvec lag_close = 0, 
                      bool scale = true, 
@@ -1387,7 +1406,7 @@ double calc_var_ohlc(arma::mat ohlc,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_ranks(arma::vec tseries) {
+arma::uvec calc_ranks(const arma::vec& tseries) {
   
   return (arma::sort_index(arma::sort_index(tseries)) + 1);
   
@@ -1484,7 +1503,7 @@ arma::uvec calc_ranks(arma::vec tseries) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_skew(arma::mat tseries,
+arma::mat calc_skew(const arma::mat& tseries,
                     std::string method = "moment", 
                     double con_fi = 0.75) {
   
@@ -1497,11 +1516,17 @@ arma::mat calc_skew(arma::mat tseries,
   switch(calc_method(method)) {
   case meth_od::moment: {  // moment
     double num_rows = tseries.n_rows;
-    arma::mat mean_s = arma::mean(tseries);
+    double num_cols = tseries.n_cols;
+    arma::mat means = arma::mean(tseries);
     arma::mat var_s = arma::var(tseries);
+    arma::mat skewness(1, num_cols);
     // De-mean the columns of tseries
-    tseries.each_row() -= mean_s;
-    return arma::sum(arma::pow(tseries, 3))/arma::pow(var_s, 1.5)/num_rows;
+    // tseries.each_row() -= means;
+    // return arma::sum(arma::pow(tseries, 3))/arma::pow(var_s, 1.5)/num_rows;
+    for (arma::uword it = 0; it < num_cols; it++) {
+      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(var_s.col(it), 1.5)/num_rows;
+    }  // end for
+    return skewness;
   }  // end moment
   case meth_od::quantile: {  // quantile
     arma::vec level_s = {1-con_fi, 0.5, con_fi};
@@ -1537,12 +1562,14 @@ arma::mat calc_skew(arma::mat tseries,
 //'   \code{tseries}.
 //'
 //' @details 
-//'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
-//'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
-//'   \code{C++} code.
+//'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns
+//'   of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
+//'   code.
 //'
 //'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
 //'   calculates the fourth moment of the data.
+//'   But it doesn't de-mean the columns of \code{tseries} because that requires
+//'   copying the matrix \code{tseries}, so it's time-consuming.
 //'
 //'   If \code{method = "quantile"} then it calculates the skewness
 //'   \eqn{\kappa} from the differences between the quantiles of the data as
@@ -1610,7 +1637,7 @@ arma::mat calc_skew(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_kurtosis(arma::mat tseries,
+arma::mat calc_kurtosis(const arma::mat& tseries,
                         std::string method = "moment", 
                         double con_fi = 0.75) {
   
@@ -1623,11 +1650,18 @@ arma::mat calc_kurtosis(arma::mat tseries,
   switch(calc_method(method)) {
   case meth_od::moment: {  // Fourth moment
     double num_rows = tseries.n_rows;
-    arma::mat mean_s = arma::mean(tseries);
+    double num_cols = tseries.n_cols;
+    arma::mat means = arma::mean(tseries);
     arma::mat var_s = arma::var(tseries);
-    // De-mean the columns of tseries
-    tseries.each_row() -= mean_s;
-    return arma::sum(arma::pow(tseries, 4))/arma::pow(var_s, 2)/num_rows;
+    arma::mat kurtosis(1, num_cols);
+    // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
+    // Loop over columns of tseries
+    for (arma::uword it = 0; it < num_cols; it++) {
+      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(var_s.col(it), 2)/num_rows;
+    }  // end for
+    // tseries.each_row() -= means;
+    // return arma::sum(arma::pow(tseries, 4))/arma::pow(var_s, 2)/num_rows;
+    return kurtosis;
   }  // end moment
   case meth_od::quantile: {  // quantile
     arma::vec level_s = {1-con_fi, 0.25, 0.75, con_fi};
@@ -1698,7 +1732,7 @@ arma::mat calc_kurtosis(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List calc_lm(arma::vec response, arma::mat design) {
+Rcpp::List calc_lm(const arma::vec& response, const arma::mat& design) {
   
   // Add column for intercept to explanatory matrix
   arma::uword num_rows = design.n_rows;
@@ -1833,8 +1867,8 @@ Rcpp::List calc_lm(arma::vec response, arma::mat design) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::colvec calc_reg(arma::vec response, 
-                      arma::mat design,
+arma::colvec calc_reg(const arma::vec& response, 
+                      const arma::mat& design,
                       std::string method = "least_squares",
                       double eigen_thresh = 0.001,
                       arma::uword eigen_max = 0,
@@ -1950,7 +1984,7 @@ arma::colvec calc_reg(arma::vec response,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat agg_ohlc(arma::mat tseries) {
+arma::mat agg_ohlc(const arma::mat& tseries) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::uword num_cols = tseries.n_cols;
@@ -2019,7 +2053,7 @@ arma::mat agg_ohlc(arma::mat tseries) {
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::uvec roll_count(arma::uvec tseries) {
+arma::uvec roll_count(const arma::uvec& tseries) {
   
   arma::uword length = tseries.n_elem;
   arma::uvec count_true(length);
@@ -2079,7 +2113,7 @@ arma::uvec roll_count(arma::uvec tseries) {
 //' # Define matrix of OHLC data
 //' oh_lc <- rutils::etf_env$VTI[, 1:5]
 //' # Define end points at 25 day intervals
-//' end_p <- HighFreq::calc_endpoints(oh_lc, inter_val=25)
+//' end_p <- HighFreq::calc_endpoints(oh_lc, step=25)
 //' # Aggregate over end_p:
 //' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p))
 //' # Compare with xts::to.period()
@@ -2089,7 +2123,7 @@ arma::uvec roll_count(arma::uvec tseries) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_ohlc(arma::mat tseries, arma::uvec endp) {
+arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
   
   // arma::uword num_rows = tseries.n_rows;
   arma::uword num_cols = tseries.n_cols;
@@ -2149,7 +2183,7 @@ arma::mat roll_ohlc(arma::mat tseries, arma::uvec endp) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_vec(arma::mat tseries, arma::uword look_back) {
+arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat rolling_sum(num_rows, 1);
@@ -2223,7 +2257,7 @@ arma::mat roll_vec(arma::mat tseries, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_vecw(arma::mat tseries, arma::mat weights) {
+arma::mat roll_vecw(const arma::mat& tseries, arma::mat weights) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::uword look_back = weights.n_rows;
@@ -2274,114 +2308,41 @@ arma::mat roll_vecw(arma::mat tseries, arma::mat weights) {
 //' \dontrun{
 //' # First example
 //' # Calculate a time series of prices
-//' se_ries <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
 //' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+//' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
 //' # Compare with original
-//' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
 //' # Second example
 //' # Calculate exponentially decaying weights
 //' weight_s <- exp(-0.2*(1:11))
 //' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+//' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_conv(arma::mat tseries, arma::mat weights) {
+arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
   
   arma::uword look_back = weights.n_rows-2;
   arma::uword num_rows = tseries.n_rows-1;
   
   // Calculate the convolutions
-  arma::mat roll_conv = arma::conv2(tseries, weights, "full");
+  arma::mat convmat = arma::conv2(tseries, weights, "full");
   
   // Copy the warmup period
-  roll_conv.rows(0, look_back) = tseries.rows(0, look_back);
+  convmat.rows(0, look_back) = tseries.rows(0, look_back);
   
-  return roll_conv.rows(0, num_rows);
+  return convmat.rows(0, num_rows);
   
 }  // end roll_conv
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate by reference the rolling convolutions (weighted sums) of a
-//' \emph{time series} with a \emph{column vector} of weights.
-//' 
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-//' 
-//' @param \code{weights} A \emph{column vector} of weights.
-//'
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
-//'
-//' @details 
-//'   The function \code{roll_conv_ref()} calculates the convolutions of the
-//'   \emph{matrix} columns with a \emph{column vector} of weights.  It performs a loop
-//'   down over the \emph{matrix} rows and multiplies the past (higher) values
-//'   by the weights.  It calculates the rolling weighted sums of the past
-//'   values.
-//'   
-//'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
-//'   \code{tseries}, and replaces the old \emph{matrix} values with the
-//'   weighted sums.
-//'   It performs the calculation in place, without copying the \emph{matrix} in
-//'   memory (which greatly increases the computation speed).
-//'   
-//'   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
-//'   \code{arma::conv2()}. It performs a similar calculation to the standard
-//'   \code{R} function \code{filter(x=se_ries, filter=weight_s,
-//'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
-//'   it doesn't produce any leading \code{NA} values.
-//'   
-//' @examples
-//' \dontrun{
-//' # First example
-//' # Create matrix from historical prices
-//' se_ries <- na.omit(rutils::etf_env$re_turns[, 1:2])
-//' # Create simple weights equal to a 1 value plus zeros
-//' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
-//' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
-//' # Compare with original
-//' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
-//' # Second example
-//' # Create exponentially decaying weights
-//' weight_s <- exp(-0.2*(1:11))
-//' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
-//' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
-//' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
-//' # Compare both methods
-//' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat roll_conv_ref(arma::mat tseries, arma::mat weights) {
-  
-  arma::uword look_back = weights.n_rows-1;
-  arma::uword num_rows = tseries.n_rows-1;
-  
-  // Calculate the convolutions
-  arma::mat roll_conv_ref = arma::conv2(tseries, weights, "full");
-  
-  // Copy the convolutions
-  tseries.rows(look_back, num_rows) = roll_conv_ref.rows(look_back, num_rows);
-  
-  return tseries;
-  
-}  // end roll_conv_ref
 
 
 
@@ -2430,7 +2391,7 @@ arma::mat roll_conv_ref(arma::mat tseries, arma::mat weights) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_sum(arma::mat tseries, arma::uword look_back = 1) {
+arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
   
   // Calculate the cumulative sum
   arma::mat cum_sum = arma::cumsum(tseries, 0);
@@ -2473,7 +2434,7 @@ arma::mat roll_sum(arma::mat tseries, arma::uword look_back = 1) {
 //'   convolutions of the columns of \code{tseries} with the \emph{column
 //'   vector} of weights using the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}.  It performs a similar calculation to the standard
-//'   \code{R} function \code{stats::filter(x=se_ries, filter=weight_s,
+//'   \code{R} function \code{stats::filter(x=re_turns, filter=weight_s,
 //'   method="convolution", sides=1)}, but it can be many times faster, and it
 //'   doesn't produce any leading \code{NA} values.
 //'   
@@ -2560,7 +2521,7 @@ arma::mat roll_sum(arma::mat tseries, arma::uword look_back = 1) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_wsum(arma::mat tseries,
+arma::mat roll_wsum(const arma::mat& tseries,
                     Rcpp::Nullable<Rcpp::IntegerVector> endp = R_NilValue, 
                     arma::uword look_back = 1,
                     Rcpp::Nullable<int> stub = R_NilValue, 
@@ -2719,7 +2680,7 @@ arma::mat roll_wsum(arma::mat tseries,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_mean(arma::mat tseries, 
+arma::mat roll_mean(const arma::mat& tseries, 
                     arma::uvec startp = 0, 
                     arma::uvec endp = 0, 
                     arma::uword step = 1, 
@@ -2815,7 +2776,7 @@ arma::mat roll_mean(arma::mat tseries,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_var_vec(arma::vec tseries, arma::uword look_back = 1) {
+arma::vec roll_var_vec(const arma::vec& tseries, arma::uword look_back = 1) {
   
   arma::uword length = tseries.n_elem;
   arma::vec var_vec = arma::zeros<vec>(length);
@@ -2924,7 +2885,7 @@ arma::vec roll_var_vec(arma::vec tseries, arma::uword look_back = 1) {
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_var(arma::mat tseries, 
+arma::mat roll_var(const arma::mat& tseries, 
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
                    arma::uword step = 1, 
@@ -3118,7 +3079,7 @@ arma::mat roll_var(arma::mat tseries,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_var_ohlc(arma::mat ohlc, 
+arma::vec roll_var_ohlc(const arma::mat& ohlc, 
                         arma::uvec startp = 0, 
                         arma::uvec endp = 0, 
                         arma::uword step = 1, 
@@ -3289,7 +3250,7 @@ arma::vec roll_var_ohlc(arma::mat ohlc,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_skew(arma::mat tseries, 
+arma::mat roll_skew(const arma::mat& tseries, 
                     arma::uvec startp = 0, 
                     arma::uvec endp = 0, 
                     arma::uword step = 1, 
@@ -3423,7 +3384,7 @@ arma::mat roll_skew(arma::mat tseries,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_kurtosis(arma::mat tseries, 
+arma::mat roll_kurtosis(const arma::mat& tseries, 
                         arma::uvec startp = 0, 
                         arma::uvec endp = 0, 
                         arma::uword step = 1, 
@@ -3563,8 +3524,8 @@ arma::mat roll_kurtosis(arma::mat tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_reg(arma::vec response, 
-                   arma::mat design, 
+arma::mat roll_reg(const arma::vec& response, 
+                   const arma::mat& design, 
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
                    arma::uword step = 1, 
@@ -3688,7 +3649,7 @@ arma::mat roll_reg(arma::vec response,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_scale(arma::mat matrix, 
+arma::mat roll_scale(const arma::mat& matrix, 
                      arma::uword look_back,
                      bool use_median=false) {
   
@@ -3794,8 +3755,8 @@ arma::mat roll_scale(arma::mat matrix,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_zscores(arma::vec response, 
-                       arma::mat design, 
+arma::vec roll_zscores(const arma::vec& response, 
+                       const arma::mat& design, 
                        arma::uvec startp = 0, 
                        arma::uvec endp = 0, 
                        arma::uword step = 1, 
@@ -3957,7 +3918,7 @@ arma::vec roll_zscores(arma::vec response,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_fun(arma::mat tseries, 
+arma::mat roll_fun(const arma::mat& tseries, 
                    std::string fun = "calc_var", 
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
@@ -4251,7 +4212,7 @@ arma::vec sim_schwartz(double eq_price,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
+arma::vec sim_arima(const arma::vec& innov, arma::vec coeff) {
   
   arma::uword length = innov.n_elem;
   arma::uword look_back = coeff.n_elem;
@@ -4378,7 +4339,7 @@ arma::vec sim_arima(arma::vec innov, arma::vec coeff) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec calc_weights(arma::mat returns, // Portfolio returns
+arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
                        std::string method = "rank_sharpe",
                        double eigen_thresh = 0.001,
                        arma::uword eigen_max = 0,
@@ -4594,9 +4555,9 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
 //' # risk_free is the daily risk-free rate
 //' risk_free <- 0.03/260
 //' ex_cess <- re_turns - risk_free
-//' # Define monthly end_p without initial warmpup period
-//' end_p <- HighFreq::calc_endpoints(re_turns, inter_val="months")
-//' end_p <- end_p[end_p>50]
+//' # Define monthly end points without initial warmpup period
+//' end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
+//' end_p <- end_p[end_p > 0]
 //' len_gth <- NROW(end_p)
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
@@ -4618,8 +4579,8 @@ arma::vec calc_weights(arma::mat returns, // Portfolio returns
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat back_test(arma::mat excess, // Portfolio excess returns
-                    arma::mat returns, // Portfolio returns
+arma::mat back_test(const arma::mat& excess, // Portfolio excess returns
+                    const arma::mat& returns, // Portfolio returns
                     arma::uvec startp, 
                     arma::uvec endp, 
                     std::string method = "rank_sharpe",
@@ -4652,3 +4613,4 @@ arma::mat back_test(arma::mat excess, // Portfolio excess returns
   return pnl_s;
   
 }  // end back_test
+

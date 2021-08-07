@@ -178,19 +178,19 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   \code{pad_zeros = TRUE})
 #'
 #' @return A \emph{matrix} containing the differences between the rows of the
-#'   input \emph{matrix}.
+#'   input \emph{matrix} \code{tseries}.
 #'
 #' @details 
 #'   The function \code{diff_it()} calculates the differences between the rows
-#'   of the input \emph{time series} or \emph{matrix} and its lagged version.
+#'   of the input \emph{matrix} \code{tseries} and its lagged version.
 #'   
 #'   The argument \code{lagg} specifies the number of lags applied to the rows
-#'   of the lagged version. 
-#'   For positive \code{lagg}, the lagged version of \code{tseries} has its
-#'   rows shifted \emph{forward} (down) by the number equal to \code{lagg}
-#'   rows. For negative \code{lagg}, the lagged version of \code{tseries} has
-#'   its rows shifted \emph{backward} (up) by the number equal to \code{-lagg}
-#'   rows.  
+#'   of the lagged version of \code{tseries}. 
+#'   For positive \code{lagg} values, the lagged version of \code{tseries} has
+#'   its rows shifted \emph{forward} (down) by the number equal to \code{lagg}
+#'   rows. For negative \code{lagg} values, the lagged version of
+#'   \code{tseries} has its rows shifted \emph{backward} (up) by the number
+#'   equal to \code{-lagg} rows.
 #'   For example, if \code{lagg=3} then the lagged version will have its rows
 #'   shifted down by \code{3} rows, and the differences will be taken between
 #'   each row minus the row three time periods before it (in the past). The
@@ -198,12 +198,13 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #'   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
 #'   should be padded (extended) with the rows of the initial (warmup) period
-#'   at the front, in order to return a \emph{matrix} with the same number
-#'   of rows as the input.  The default is \code{pad_zeros = TRUE}. The padding
-#'   operation can be time-consuming, because it requires the copying of data.
+#'   at the front, in order to return a \emph{matrix} with the same number of
+#'   rows as the input \code{tseries}.  The default is \code{pad_zeros = TRUE}.
+#'   The padding operation can be time-consuming, because it requires the
+#'   copying of data.
 #'   
 #'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-#'   \code{C++} code, which makes it several times faster than \code{R} code.
+#'   \code{C++} code, which makes it much faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
@@ -429,9 +430,9 @@ mult_vec_mat <- function(vector, matrix, by_col = TRUE) {
 }
 
 #' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
-#' using \code{RcppArmadillo}.
+#' data using \code{RcppArmadillo}.
 #' 
-#' @param \code{returns} A \emph{time series} or \emph{matrix} of returns
+#' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns
 #'   data.
 #'
 #' @return A list with two elements: a \emph{vector} of eigenvalues 
@@ -440,7 +441,8 @@ mult_vec_mat <- function(vector, matrix, by_col = TRUE) {
 #'
 #' @details 
 #'   The function \code{calc_eigen()} first calculates the covariance
-#'   \emph{matrix} of the returns, and then calculates its eigen decomposition.
+#'   \emph{matrix} of \code{tseries}, and then calculates the eigen
+#'   decomposition of the covariance \emph{matrix}.
 #'
 #' @examples
 #' \dontrun{
@@ -461,8 +463,8 @@ mult_vec_mat <- function(vector, matrix, by_col = TRUE) {
 #' }
 #' 
 #' @export
-calc_eigen <- function(returns) {
-    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', returns)
+calc_eigen <- function(tseries) {
+    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the regularized inverse of a rectangular \emph{matrix} of data
@@ -487,9 +489,9 @@ calc_eigen <- function(returns) {
 #'   \code{tseries} using Singular Value Decomposition (\emph{SVD}).
 #'   
 #'   If \code{eigen_max} is given, then it calculates the regularized inverse
-#'   from the \\emph{SVD} using the first \code{eigen_max} largest
-#'   singular values.  For example, if \code{eigen_max = 3} then it only
-#'   uses the \code{3} largest singular values.
+#'   from the \emph{SVD} using the first \code{eigen_max} largest singular
+#'   values.  For example, if \code{eigen_max = 3} then it only uses the
+#'   \code{3} largest singular values.
 #'   If \code{eigen_max} is set equal to the number of columns of
 #'   \code{tseries} then it uses all the singular values without any
 #'   regularization.
@@ -557,15 +559,15 @@ calc_inv <- function(tseries, eigen_thresh = 0.001, eigen_max = 0L) {
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random data
-#' se_ries <- matrix(rnorm(20000), nc=20)
-#' scale_d <- calc_scaled(tseries=se_ries, use_median=FALSE)
-#' scale_d2 <- scale(se_ries)
+#' re_turns <- matrix(rnorm(20000), nc=20)
+#' scale_d <- calc_scaled(tseries=re_turns, use_median=FALSE)
+#' scale_d2 <- scale(re_turns)
 #' all.equal(scale_d, scale_d2, check.attributes=FALSE)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=calc_scaled(tseries=se_ries, use_median=FALSE),
-#'   Rcode=scale(se_ries),
+#'   Rcpp=calc_scaled(tseries=re_turns, use_median=FALSE),
+#'   Rcode=scale(re_turns),
 #'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -1035,12 +1037,14 @@ calc_skew <- function(tseries, method = "moment", con_fi = 0.75) {
 #'   \code{tseries}.
 #'
 #' @details 
-#'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns of
-#'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
-#'   \code{C++} code.
+#'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns
+#'   of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
+#'   code.
 #'
 #'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
 #'   calculates the fourth moment of the data.
+#'   But it doesn't de-mean the columns of \code{tseries} because that requires
+#'   copying the matrix \code{tseries}, so it's time-consuming.
 #'
 #'   If \code{method = "quantile"} then it calculates the skewness
 #'   \eqn{\kappa} from the differences between the quantiles of the data as
@@ -1369,7 +1373,7 @@ roll_count <- function(tseries) {
 #' # Define matrix of OHLC data
 #' oh_lc <- rutils::etf_env$VTI[, 1:5]
 #' # Define end points at 25 day intervals
-#' end_p <- HighFreq::calc_endpoints(oh_lc, inter_val=25)
+#' end_p <- HighFreq::calc_endpoints(oh_lc, step=25)
 #' # Aggregate over end_p:
 #' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p))
 #' # Compare with xts::to.period()
@@ -1503,21 +1507,21 @@ roll_vecw <- function(tseries, weights) {
 #' \dontrun{
 #' # First example
 #' # Calculate a time series of prices
-#' se_ries <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
 #' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+#' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
 #' # Compare with original
-#' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
+#' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
 #' # Second example
 #' # Calculate exponentially decaying weights
 #' weight_s <- exp(-0.2*(1:11))
 #' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv(se_ries, weight_s)
+#' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
 #' # Calculate rolling weighted sums using filter()
-#' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 #' }
@@ -1525,63 +1529,6 @@ roll_vecw <- function(tseries, weights) {
 #' @export
 roll_conv <- function(tseries, weights) {
     .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', tseries, weights)
-}
-
-#' Calculate by reference the rolling convolutions (weighted sums) of a
-#' \emph{time series} with a \emph{column vector} of weights.
-#' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-#' 
-#' @param \code{weights} A \emph{column vector} of weights.
-#'
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
-#'
-#' @details 
-#'   The function \code{roll_conv_ref()} calculates the convolutions of the
-#'   \emph{matrix} columns with a \emph{column vector} of weights.  It performs a loop
-#'   down over the \emph{matrix} rows and multiplies the past (higher) values
-#'   by the weights.  It calculates the rolling weighted sums of the past
-#'   values.
-#'   
-#'   The function \code{roll_conv_ref()} accepts a \emph{pointer} to the argument
-#'   \code{tseries}, and replaces the old \emph{matrix} values with the
-#'   weighted sums.
-#'   It performs the calculation in place, without copying the \emph{matrix} in
-#'   memory (which greatly increases the computation speed).
-#'   
-#'   The function \code{roll_conv_ref()} uses the \code{RcppArmadillo} function
-#'   \code{arma::conv2()}. It performs a similar calculation to the standard
-#'   \code{R} function \code{filter(x=se_ries, filter=weight_s,
-#'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
-#'   it doesn't produce any leading \code{NA} values.
-#'   
-#' @examples
-#' \dontrun{
-#' # First example
-#' # Create matrix from historical prices
-#' se_ries <- na.omit(rutils::etf_env$re_turns[, 1:2])
-#' # Create simple weights equal to a 1 value plus zeros
-#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
-#' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
-#' # Compare with original
-#' all.equal(coredata(se_ries), weight_ed, check.attributes=FALSE)
-#' # Second example
-#' # Create exponentially decaying weights
-#' weight_s <- exp(-0.2*(1:11))
-#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
-#' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv_ref(se_ries, weight_s)
-#' # Calculate rolling weighted sums using filter()
-#' filter_ed <- filter(x=se_ries, filter=weight_s, method="convolution", sides=1)
-#' # Compare both methods
-#' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
-#' }
-#' 
-#' @export
-roll_conv_ref <- function(tseries, weights) {
-    .Call('_HighFreq_roll_conv_ref', PACKAGE = 'HighFreq', tseries, weights)
 }
 
 #' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -1659,7 +1606,7 @@ roll_sum <- function(tseries, look_back = 1L) {
 #'   convolutions of the columns of \code{tseries} with the \emph{column
 #'   vector} of weights using the \code{RcppArmadillo} function
 #'   \code{arma::conv2()}.  It performs a similar calculation to the standard
-#'   \code{R} function \code{stats::filter(x=se_ries, filter=weight_s,
+#'   \code{R} function \code{stats::filter(x=re_turns, filter=weight_s,
 #'   method="convolution", sides=1)}, but it can be many times faster, and it
 #'   doesn't produce any leading \code{NA} values.
 #'   
@@ -2959,9 +2906,9 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 0.001, 
 #' # risk_free is the daily risk-free rate
 #' risk_free <- 0.03/260
 #' ex_cess <- re_turns - risk_free
-#' # Define monthly end_p without initial warmpup period
-#' end_p <- HighFreq::calc_endpoints(re_turns, inter_val="months")
-#' end_p <- end_p[end_p>50]
+#' # Define monthly end points without initial warmpup period
+#' end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
+#' end_p <- end_p[end_p > 0]
 #' len_gth <- NROW(end_p)
 #' # Define 12-month look-back interval and start points over sliding window
 #' look_back <- 12

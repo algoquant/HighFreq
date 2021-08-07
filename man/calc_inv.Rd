@@ -32,9 +32,9 @@ The function calc_inv() calculates the regularized inverse of
   \code{tseries} using Singular Value Decomposition (\emph{SVD}).
   
   If \code{eigen_max} is given, then it calculates the regularized inverse
-  from the \\emph{SVD} using the first \code{eigen_max} largest
-  singular values.  For example, if \code{eigen_max = 3} then it only
-  uses the \code{3} largest singular values.
+  from the \emph{SVD} using the first \code{eigen_max} largest singular
+  values.  For example, if \code{eigen_max = 3} then it only uses the
+  \code{3} largest singular values.
   If \code{eigen_max} is set equal to the number of columns of
   \code{tseries} then it uses all the singular values without any
   regularization.

@@ -80,8 +80,6 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Replace passing large data by value passing by reference (pointer) to improve performance
-
 + [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
 run_mean(), run_var(), run_maxmin(), run_covar(), run_zscore(), 
 
@@ -419,6 +417,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Replace the passing of large data by value with passing by reference (pointer) to improve performance (restore passing by reference which was removed)
 
 + [x] Add vignette and automatically build vignette  
 

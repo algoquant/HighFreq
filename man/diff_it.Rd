@@ -21,7 +21,7 @@ periods) to lag when calculating the differences (the default is
 }
 \value{
 A \emph{matrix} containing the differences between the rows of the
-  input \emph{matrix}.
+  input \emph{matrix} \code{tseries}.
 }
 \description{
 Calculate the row differences of a a \emph{time series} or a \emph{matrix}
@@ -29,15 +29,15 @@ using \emph{RcppArmadillo}.
 }
 \details{
 The function \code{diff_it()} calculates the differences between the rows
-  of the input \emph{time series} or \emph{matrix} and its lagged version.
+  of the input \emph{matrix} \code{tseries} and its lagged version.
   
   The argument \code{lagg} specifies the number of lags applied to the rows
-  of the lagged version. 
-  For positive \code{lagg}, the lagged version of \code{tseries} has its
-  rows shifted \emph{forward} (down) by the number equal to \code{lagg}
-  rows. For negative \code{lagg}, the lagged version of \code{tseries} has
-  its rows shifted \emph{backward} (up) by the number equal to \code{-lagg}
-  rows.  
+  of the lagged version of \code{tseries}. 
+  For positive \code{lagg} values, the lagged version of \code{tseries} has
+  its rows shifted \emph{forward} (down) by the number equal to \code{lagg}
+  rows. For negative \code{lagg} values, the lagged version of
+  \code{tseries} has its rows shifted \emph{backward} (up) by the number
+  equal to \code{-lagg} rows.
   For example, if \code{lagg=3} then the lagged version will have its rows
   shifted down by \code{3} rows, and the differences will be taken between
   each row minus the row three time periods before it (in the past). The
@@ -45,12 +45,13 @@ The function \code{diff_it()} calculates the differences between the rows
 
   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
   should be padded (extended) with the rows of the initial (warmup) period
-  at the front, in order to return a \emph{matrix} with the same number
-  of rows as the input.  The default is \code{pad_zeros = TRUE}. The padding
-  operation can be time-consuming, because it requires the copying of data.
+  at the front, in order to return a \emph{matrix} with the same number of
+  rows as the input \code{tseries}.  The default is \code{pad_zeros = TRUE}.
+  The padding operation can be time-consuming, because it requires the
+  copying of data.
   
   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
-  \code{C++} code, which makes it several times faster than \code{R} code.
+  \code{C++} code, which makes it much faster than \code{R} code.
 }
 \examples{
 \dontrun{

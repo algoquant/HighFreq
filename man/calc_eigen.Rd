@@ -3,12 +3,12 @@
 \name{calc_eigen}
 \alias{calc_eigen}
 \title{Calculate the eigen decomposition of the covariance \emph{matrix} of returns
-using \code{RcppArmadillo}.}
+data using \code{RcppArmadillo}.}
 \usage{
-calc_eigen(returns)
+calc_eigen(tseries)
 }
 \arguments{
-\item{\code{returns}}{A \emph{time series} or \emph{matrix} of returns
+\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of returns
 data.}
 }
 \value{
@@ -18,11 +18,12 @@ A list with two elements: a \emph{vector} of eigenvalues
 }
 \description{
 Calculate the eigen decomposition of the covariance \emph{matrix} of returns
-using \code{RcppArmadillo}.
+data using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_eigen()} first calculates the covariance
-  \emph{matrix} of the returns, and then calculates its eigen decomposition.
+  \emph{matrix} of \code{tseries}, and then calculates the eigen
+  decomposition of the covariance \emph{matrix}.
 }
 \examples{
 \dontrun{
