@@ -83,6 +83,14 @@ Therefore 1-second bar returns carry almost no information.
 + [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
 run_mean(), run_var(), run_maxmin(), run_covar(), run_zscore(), 
 
++ [x] Create function calc_var_ag() for the calculating variance of returns aggregated over end points
+
++ [x] Create function calc_hurst() for calculating the Hurst exponent from the ratios of variance of aggregated returns
+
++ [ ] Create function calc_var_ohlc_ag() for the calculating variance of OHLC prices aggregated over end points
+
++ [ ] Create function calc_hurst_ohlc() for calculating the Hurst exponent from the rescaled range of OHLC prices
+
 + [ ] Create functions roll_max() and roll_min()
 
 + [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra

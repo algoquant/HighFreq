@@ -576,6 +576,58 @@ calc_scaled <- function(tseries, use_median = FALSE) {
     .Call('_HighFreq_calc_scaled', PACKAGE = 'HighFreq', tseries, use_median)
 }
 
+#' Calculate the ranks of the elements of a single-column \emph{time series} or
+#' a \emph{vector} using \code{RcppArmadillo}.
+#' 
+#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
+#'
+#' @return An \emph{integer vector} with the ranks of the elements of the
+#'   \code{tseries}.
+#'
+#' @details 
+#'   The function \code{calc_ranks()} calculates the ranks of the elements of a
+#'   single-column \emph{time series} or a \emph{vector}. It uses the
+#'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
+#'   \code{arma::sort_index()} calculates the permutation index to sort a given
+#'   vector into ascending order.
+#'   
+#'   Applying the function \code{arma::sort_index()} twice:
+#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+#'   permutation index to sort the vector from ascending order back into its
+#'   original unsorted order.
+#'   The permutation index produced by:
+#'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
+#'   permutation index produced by: \code{arma::sort_index()}.
+#'   
+#'   The ranks of the elements are equal to the \emph{reverse} permutation
+#'   index.
+#'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
+#'   index.
+#'
+#' @examples
+#' \dontrun{
+#' # Create a vector of random data
+#' da_ta <- round(runif(7), 2)
+#' # Calculate the ranks of the elements in two ways
+#' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+#' # Create a time series of random data
+#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+#' # Calculate the ranks of the elements in two ways
+#' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+#' # Compare the speed of RcppArmadillo with R code
+#' da_ta <- runif(7)
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=calc_ranks(da_ta),
+#'   Rcode=rank(da_ta),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_ranks <- function(tseries) {
+    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
+}
+
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #'
@@ -774,6 +826,111 @@ calc_var <- function(tseries, method = "moment", con_fi = 0.75) {
     .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, con_fi)
 }
 
+#' Calculate the variance of returns aggregated over end points. 
+#'
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+#'
+#' @param \code{step} The number of periods in each interval between
+#'   neighboring end points.
+#' 
+#' @return The variance of aggregated returns.
+#'
+#' @details 
+#'   The function \code{calc_var_ag()} calculates the variance of returns
+#'   aggregated over end points.
+#'
+#'   It first calculates the end points spaced apart by the number of periods
+#'   equal to the argument \code{step}.  It then calculates the aggregated
+#'   returns by differencing the prices \code{tseries} calculated at the end
+#'   points. Finally it calculates the variance of the returns.
+#'
+#'   If there are extra periods that don't fit over the length of
+#'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
+#'   intervals, it then calculates all the corresponding variance values, and
+#'   averages them.
+#'
+#'   For example, if the length of \code{tseries} is equal to \code{20}, and
+#'   \code{step=3} then \code{6} end points fit over the length of
+#'   \code{tseries}, and there are \code{2} extra periods that must fit into
+#'   stubs, either at the beginning or at the end (or both).
+#' 
+#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+#'   the \emph{Hurst exponent} \eqn{H}:
+#'     \deqn{
+#'       \sigma_t = \sigma {\Delta t}^H
+#'     }
+#'   Where \eqn{\sigma} is the daily return volatility.
+#' 
+#'   The function \code{calc_var_ag()} can therefore be used to calculate the
+#'   \emph{Hurst exponent} from the volatility ratio.
+#'
+#' @examples
+#' \dontrun{
+#' # Calculate the log prices
+#' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+#' price_s <- log(price_s)
+#' # Calculate the daily variance of percentage returns
+#' calc_var_ag(price_s, step=1)
+#' # Calculate the daily variance using R
+#' sapply(rutils::diff_it(price_s), var)
+#' # Calculate the variance of returns aggregated over 21 days
+#' calc_var_ag(price_s, step=21)
+#' # The variance over 21 days is approximately 21 times the daily variance
+#' 21*calc_var_ag(price_s, step=1)
+#' }
+#' 
+#' @export
+calc_var_ag <- function(tseries, step = 1L) {
+    .Call('_HighFreq_calc_var_ag', PACKAGE = 'HighFreq', tseries, step)
+}
+
+#' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
+#'
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+#'
+#' @param \code{step} The number of periods in each interval between
+#'   neighboring end points.
+#' 
+#' @return The Hurst exponent calculated from the variance of aggregated
+#'   returns.
+#'
+#' @details 
+#'   The function \code{calc_hurst()} calculates the Hurst exponent from the
+#'   ratios of the volatilities of aggregated returns.
+#'
+#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+#'   the \emph{Hurst exponent} \eqn{H}:
+#'     \deqn{
+#'       \sigma_t = \sigma {\Delta t}^H
+#'     }
+#'   Where \eqn{\sigma} is the daily return volatility.
+#' 
+#'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
+#'   of the volatilities divided by the logarithm of the time interval
+#'   \eqn{\Delta t}:
+#'     \deqn{
+#'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+#'     }
+#' 
+#'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
+#'   to calculate the aggregated volatility \eqn{\sigma_t}.
+#' 
+#' @examples
+#' \dontrun{
+#' # Calculate the log prices
+#' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+#' price_s <- log(price_s)
+#' # Calculate the Hurst exponent from 21 day aggregations
+#' calc_hurst(price_s, step=21)
+#' }
+#' 
+#' @export
+calc_hurst <- function(tseries, step = 1L) {
+    .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, step)
+}
+
 #' Calculate the variance of an \emph{OHLC time series}, using different range
 #' estimators and \code{RcppArmadillo}.
 #'
@@ -877,58 +1034,6 @@ calc_var <- function(tseries, method = "moment", con_fi = 0.75) {
 #' @export
 calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = TRUE, in_dex = 0L) {
     .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', ohlc, method, lag_close, scale, in_dex)
-}
-
-#' Calculate the ranks of the elements of a single-column \emph{time series} or
-#' a \emph{vector} using \code{RcppArmadillo}.
-#' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
-#'
-#' @return An \emph{integer vector} with the ranks of the elements of the
-#'   \code{tseries}.
-#'
-#' @details 
-#'   The function \code{calc_ranks()} calculates the ranks of the elements of a
-#'   single-column \emph{time series} or a \emph{vector}. It uses the
-#'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
-#'   \code{arma::sort_index()} calculates the permutation index to sort a given
-#'   vector into ascending order.
-#'   
-#'   Applying the function \code{arma::sort_index()} twice:
-#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-#'   permutation index to sort the vector from ascending order back into its
-#'   original unsorted order.
-#'   The permutation index produced by:
-#'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
-#'   permutation index produced by: \code{arma::sort_index()}.
-#'   
-#'   The ranks of the elements are equal to the \emph{reverse} permutation
-#'   index.
-#'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
-#'   index.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a vector of random data
-#' da_ta <- round(runif(7), 2)
-#' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
-#' # Create a time series of random data
-#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
-#' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
-#' # Compare the speed of RcppArmadillo with R code
-#' da_ta <- runif(7)
-#' library(microbenchmark)
-#' summary(microbenchmark(
-#'   Rcpp=calc_ranks(da_ta),
-#'   Rcode=rank(da_ta),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-calc_ranks <- function(tseries) {
-    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a

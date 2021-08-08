@@ -132,6 +132,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_ranks
+arma::uvec calc_ranks(const arma::vec& tseries);
+RcppExport SEXP _HighFreq_calc_ranks(SEXP tseriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type tseries(tseriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_ranks(tseries));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_mean
 arma::mat calc_mean(const arma::mat& tseries, std::string method, double con_fi);
 RcppExport SEXP _HighFreq_calc_mean(SEXP tseriesSEXP, SEXP methodSEXP, SEXP con_fiSEXP) {
@@ -169,6 +180,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_var_ag
+arma::mat calc_var_ag(const arma::mat& tseries, arma::uword step);
+RcppExport SEXP _HighFreq_calc_var_ag(SEXP tseriesSEXP, SEXP stepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_var_ag(tseries, step));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_hurst
+arma::mat calc_hurst(const arma::mat& tseries, arma::uword step);
+RcppExport SEXP _HighFreq_calc_hurst(SEXP tseriesSEXP, SEXP stepSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_hurst(tseries, step));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_var_ohlc
 double calc_var_ohlc(const arma::mat& ohlc, std::string method, arma::colvec lag_close, bool scale, arma::colvec in_dex);
 RcppExport SEXP _HighFreq_calc_var_ohlc(SEXP ohlcSEXP, SEXP methodSEXP, SEXP lag_closeSEXP, SEXP scaleSEXP, SEXP in_dexSEXP) {
@@ -181,17 +216,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type in_dex(in_dexSEXP);
     rcpp_result_gen = Rcpp::wrap(calc_var_ohlc(ohlc, method, lag_close, scale, in_dex));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calc_ranks
-arma::uvec calc_ranks(const arma::vec& tseries);
-RcppExport SEXP _HighFreq_calc_ranks(SEXP tseriesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type tseries(tseriesSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_ranks(tseries));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -628,11 +652,13 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_eigen", (DL_FUNC) &_HighFreq_calc_eigen, 1},
     {"_HighFreq_calc_inv", (DL_FUNC) &_HighFreq_calc_inv, 3},
     {"_HighFreq_calc_scaled", (DL_FUNC) &_HighFreq_calc_scaled, 2},
+    {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},
     {"_HighFreq_calc_var", (DL_FUNC) &_HighFreq_calc_var, 3},
+    {"_HighFreq_calc_var_ag", (DL_FUNC) &_HighFreq_calc_var_ag, 2},
+    {"_HighFreq_calc_hurst", (DL_FUNC) &_HighFreq_calc_hurst, 2},
     {"_HighFreq_calc_var_ohlc", (DL_FUNC) &_HighFreq_calc_var_ohlc, 5},
-    {"_HighFreq_calc_ranks", (DL_FUNC) &_HighFreq_calc_ranks, 1},
     {"_HighFreq_calc_skew", (DL_FUNC) &_HighFreq_calc_skew, 3},
     {"_HighFreq_calc_kurtosis", (DL_FUNC) &_HighFreq_calc_kurtosis, 3},
     {"_HighFreq_calc_lm", (DL_FUNC) &_HighFreq_calc_lm, 2},

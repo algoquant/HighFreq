@@ -1,10 +1,3 @@
-////////////////////////////
-// File for testing HighFreq C++ functions
-////////////////////////////
-
-// Compile this file in R by running this command:
-// Rcpp::sourceCpp(file="C:/Develop/R/Rcpp/HighFreq_2021.cpp")
-
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 #include <vector>
@@ -343,10 +336,10 @@ arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zero
 arma::mat diff_it(const arma::mat& tseries, 
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
-
+  
   arma::uword num_rows = (tseries.n_rows-1);
   arma::uword num_cols = tseries.n_cols;
-
+  
   if (lagg > 0) {
     // Positive lag
     // Matrix difference without padding
@@ -370,7 +363,7 @@ arma::mat diff_it(const arma::mat& tseries,
       return diff_mat;
     }  // end if pad_zeros
   }  // end if lagg
-
+  
 }  // end diff_it
 
 
@@ -873,6 +866,65 @@ arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
 
 
 ////////////////////////////////////////////////////////////
+//' Calculate the ranks of the elements of a single-column \emph{time series} or
+//' a \emph{vector} using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
+//'
+//' @return An \emph{integer vector} with the ranks of the elements of the
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{calc_ranks()} calculates the ranks of the elements of a
+//'   single-column \emph{time series} or a \emph{vector}. It uses the
+//'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
+//'   \code{arma::sort_index()} calculates the permutation index to sort a given
+//'   vector into ascending order.
+//'   
+//'   Applying the function \code{arma::sort_index()} twice:
+//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+//'   permutation index to sort the vector from ascending order back into its
+//'   original unsorted order.
+//'   The permutation index produced by:
+//'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
+//'   permutation index produced by: \code{arma::sort_index()}.
+//'   
+//'   The ranks of the elements are equal to the \emph{reverse} permutation
+//'   index.
+//'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
+//'   index.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a vector of random data
+//' da_ta <- round(runif(7), 2)
+//' # Calculate the ranks of the elements in two ways
+//' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+//' # Create a time series of random data
+//' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+//' # Calculate the ranks of the elements in two ways
+//' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+//' # Compare the speed of RcppArmadillo with R code
+//' da_ta <- runif(7)
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=calc_ranks(da_ta),
+//'   Rcode=rank(da_ta),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::uvec calc_ranks(const arma::vec& tseries) {
+  
+  return (arma::sort_index(arma::sort_index(tseries)) + 1);
+  
+}  // end calc_ranks
+
+
+
+
+////////////////////////////////////////////////////////////
 // Functions for statistics
 ////////////////////////////////////////////////////////////
 
@@ -1027,6 +1079,7 @@ arma::mat calc_mean(const arma::mat& tseries,
 
 
 
+
 ////////////////////////////////////////////////////////////
 //' Calculate the variance of a a single-column \emph{time series} or a
 //' \emph{vector} using \code{RcppArmadillo}.
@@ -1062,6 +1115,7 @@ double calc_var_vec(const arma::vec& tseries) {
   return arma::var(tseries);
   
 }  // end calc_var_vec
+
 
 
 
@@ -1184,6 +1238,148 @@ arma::mat calc_var(const arma::mat& tseries,
 
 
 
+
+////////////////////////////////////////////////////////////
+//' Calculate the variance of returns aggregated over end points. 
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @return The variance of aggregated returns.
+//'
+//' @details 
+//'   The function \code{calc_var_ag()} calculates the variance of returns
+//'   aggregated over end points.
+//'
+//'   It first calculates the end points spaced apart by the number of periods
+//'   equal to the argument \code{step}.  It then calculates the aggregated
+//'   returns by differencing the prices \code{tseries} calculated at the end
+//'   points. Finally it calculates the variance of the returns.
+//'
+//'   If there are extra periods that don't fit over the length of
+//'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
+//'   intervals, it then calculates all the corresponding variance values, and
+//'   averages them.
+//'
+//'   For example, if the length of \code{tseries} is equal to \code{20}, and
+//'   \code{step=3} then \code{6} end points fit over the length of
+//'   \code{tseries}, and there are \code{2} extra periods that must fit into
+//'   stubs, either at the beginning or at the end (or both).
+//' 
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The function \code{calc_var_ag()} can therefore be used to calculate the
+//'   \emph{Hurst exponent} from the volatility ratio.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate the log prices
+//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+//' price_s <- log(price_s)
+//' # Calculate the daily variance of percentage returns
+//' calc_var_ag(price_s, step=1)
+//' # Calculate the daily variance using R
+//' sapply(rutils::diff_it(price_s), var)
+//' # Calculate the variance of returns aggregated over 21 days
+//' calc_var_ag(price_s, step=21)
+//' # The variance over 21 days is approximately 21 times the daily variance
+//' 21*calc_var_ag(price_s, step=1)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_var_ag(const arma::mat& tseries, 
+                      arma::uword step = 1) {
+  
+  if (step == 1)
+    // Calculate the variance without aggregations.
+    return arma::var(diff_it(tseries, 1, false));
+  else {
+    arma::uword num_rows = tseries.n_rows;
+    // Calculate the number of extra periods that don't fit over num_rows.
+    arma::uword remainder = num_rows % step;
+    
+    // Perform loop over the stubs
+    arma::mat aggs;
+    arma::uvec end_p;
+    arma::mat var_s(remainder, tseries.n_cols);
+    for (arma::uword stub = 0; stub < remainder; stub++) {
+      end_p = calc_endpoints(tseries.n_rows, step=step, stub=stub);
+      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
+      // end_p = end_p.elem(find(end_p < num_rows));
+      aggs = tseries.rows(end_p);
+      var_s.row(stub) = arma::var(diff_it(aggs, 1, false));
+    }  // end for
+    return mean(var_s);
+  }  // end if
+  
+}  // end calc_var_ag
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @return The Hurst exponent calculated from the variance of aggregated
+//'   returns.
+//'
+//' @details 
+//'   The function \code{calc_hurst()} calculates the Hurst exponent from the
+//'   ratios of the volatilities of aggregated returns.
+//'
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
+//'   of the volatilities divided by the logarithm of the time interval
+//'   \eqn{\Delta t}:
+//'     \deqn{
+//'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+//'     }
+//' 
+//'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
+//'   to calculate the aggregated volatility \eqn{\sigma_t}.
+//' 
+//' @examples
+//' \dontrun{
+//' # Calculate the log prices
+//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+//' price_s <- log(price_s)
+//' # Calculate the Hurst exponent from 21 day aggregations
+//' calc_hurst(price_s, step=21)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_hurst(const arma::mat& tseries, 
+                     arma::uword step = 1) {
+  
+  return 0.5*arma::log(calc_var_ag(tseries, step)/calc_var_ag(tseries, 1))/log(step);
+  
+}  // end calc_hurst
+
+
+
+
 ////////////////////////////////////////////////////////////
 //' Calculate the variance of an \emph{OHLC time series}, using different range
 //' estimators and \code{RcppArmadillo}.
@@ -1300,7 +1496,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
     // Return zero if not enough data
     return 0;
   }  // end if
-
+  
   if (!scale || (in_dex.n_rows == 1)) {
     in_dex = arma::ones(num_rows);
     // cout << "ohlc.n_rows = " << num_rows << endl;
@@ -1354,63 +1550,6 @@ double calc_var_ohlc(const arma::mat& ohlc,
   
 }  // end calc_var_ohlc
 
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the ranks of the elements of a single-column \emph{time series} or
-//' a \emph{vector} using \code{RcppArmadillo}.
-//' 
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
-//'
-//' @return An \emph{integer vector} with the ranks of the elements of the
-//'   \code{tseries}.
-//'
-//' @details 
-//'   The function \code{calc_ranks()} calculates the ranks of the elements of a
-//'   single-column \emph{time series} or a \emph{vector}. It uses the
-//'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
-//'   \code{arma::sort_index()} calculates the permutation index to sort a given
-//'   vector into ascending order.
-//'   
-//'   Applying the function \code{arma::sort_index()} twice:
-//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-//'   permutation index to sort the vector from ascending order back into its
-//'   original unsorted order.
-//'   The permutation index produced by:
-//'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
-//'   permutation index produced by: \code{arma::sort_index()}.
-//'   
-//'   The ranks of the elements are equal to the \emph{reverse} permutation
-//'   index.
-//'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
-//'   index.
-//'
-//' @examples
-//' \dontrun{
-//' # Create a vector of random data
-//' da_ta <- round(runif(7), 2)
-//' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
-//' # Create a time series of random data
-//' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
-//' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
-//' # Compare the speed of RcppArmadillo with R code
-//' da_ta <- runif(7)
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=calc_ranks(da_ta),
-//'   Rcode=rank(da_ta),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::uvec calc_ranks(const arma::vec& tseries) {
-  
-  return (arma::sort_index(arma::sort_index(tseries)) + 1);
-  
-}  // end calc_ranks
 
 
 
@@ -2915,8 +3054,8 @@ arma::mat roll_var(const arma::mat& tseries,
     // Copy start points
     start_pts = startp;
   }  // end if
-
-
+  
+  
   // Allocate variance matrix
   arma::uword num_pts = end_pts.n_elem;
   arma::mat variance = arma::zeros<mat>(num_pts, tseries.n_cols);
@@ -3762,7 +3901,7 @@ arma::vec roll_zscores(const arma::vec& response,
                        arma::uword step = 1, 
                        arma::uword look_back = 1,
                        arma::uword stub = 0) {
-
+  
   // Allocate end points
   arma::uword num_rows = design.n_rows;
   arma::uvec end_pts;
