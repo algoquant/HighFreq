@@ -23,18 +23,18 @@ The function \code{calc_var_ag()} calculates the variance of returns
   aggregated over end points.
 
   It first calculates the end points spaced apart by the number of periods
-  equal to the argument \code{step}.  It then calculates the aggregated
+  equal to the argument \code{step}.  Then it calculates the aggregated
   returns by differencing the prices \code{tseries} calculated at the end
   points. Finally it calculates the variance of the returns.
 
   If there are extra periods that don't fit over the length of
   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
-  intervals, it then calculates all the corresponding variance values, and
+  intervals, then it calculates all the corresponding variance values, and
   averages them.
 
-  For example, if the length of \code{tseries} is equal to \code{20}, and
-  \code{step=3} then \code{6} end points fit over the length of
-  \code{tseries}, and there are \code{2} extra periods that must fit into
+  For example, if the number of rows of \code{tseries} is equal to
+  \code{20}, and \code{step=3} then \code{6} end points fit over the length
+  of \code{tseries}, and there are \code{2} extra periods that must fit into
   stubs, either at the beginning or at the end (or both).
 
   The aggregated volatility \eqn{\sigma_t} scales (increases) with the

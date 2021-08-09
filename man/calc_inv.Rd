@@ -40,7 +40,7 @@ The function calc_inv() calculates the regularized inverse of
   regularization.
 
   If \code{eigen_max} is not given then it calculates the regularized
-  inverse using the function \code{arma::pinv()}. It then discards small
+  inverse using the function \code{arma::pinv()}. Then it discards small
   singular values that are less than the threshold level
   \code{eigen_thresh}.
 }

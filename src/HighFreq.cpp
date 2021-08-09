@@ -723,7 +723,7 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //'   regularization.
 //'
 //'   If \code{eigen_max} is not given then it calculates the regularized
-//'   inverse using the function \code{arma::pinv()}. It then discards small
+//'   inverse using the function \code{arma::pinv()}. Then it discards small
 //'   singular values that are less than the threshold level
 //'   \code{eigen_thresh}.
 //'   
@@ -925,1156 +925,8 @@ arma::uvec calc_ranks(const arma::vec& tseries) {
 
 
 ////////////////////////////////////////////////////////////
-// Functions for statistics
+// Functions for rolling aggregations
 ////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////
-// Define C++ enum type for the different methods for regularization,
-// calculating variance, skewness, kurtosis, covariance, regression, 
-// and matrix inverse.
-enum meth_od {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
-              max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
-
-// Map string to C++ enum type for switch statement.
-// This is needed because Rcpp can't map C++ enum type to R variable SEXP.
-meth_od calc_method(std::string method) {
-  if (method == "moment" || method == "m") 
-    return meth_od::moment;
-  else if (method == "least_squares" || method == "l")
-    return meth_od::least_squares;
-  else if (method == "quantile" || method == "q")
-    return meth_od::quantile;
-  else if (method == "nonparametric" || method == "n")
-    return meth_od::nonparametric;
-  else if (method == "regular")
-    return meth_od::regular;
-  else if (method == "rank_sharpe")
-    return meth_od::rank_sharpe;
-  else if (method == "max_sharpe")
-    return meth_od::max_sharpe;
-  else if (method == "max_sharpe_median")
-    return meth_od::max_sharpe_median;
-  else if (method == "min_var")
-    return meth_od::min_var;
-  else if (method == "min_varpca")
-    return meth_od::min_varpca;
-  else if (method == "rank")
-    return meth_od::rank;
-  else if (method == "rankrob")
-    return meth_od::rankrob;
-  else 
-    return meth_od::moment;
-}  // end calc_method
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the mean (location) of the columns of a \emph{time series} or a
-//' \emph{matrix} using \code{RcppArmadillo}.
-//'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-//'
-//' @param \code{method} A \emph{string} specifying the type of the mean
-//'   (location) model (the default is \code{method = "moment"} - see Details).
-//'
-//' @param \code{con_fi} The confidence level for calculating the
-//'   quantiles (the default is \code{con_fi = 0.75}).
-//'
-//' @return A single-row matrix with the mean (location) of the columns of
-//'   \code{tseries}.
-//'
-//' @details 
-//'   The function \code{calc_mean()} calculates the mean (location) of the
-//'   columns of a \emph{time series} or a \emph{matrix} of data using
-//'   \code{RcppArmadillo} \code{C++} code.
-//'
-//'   If \code{method = "moment"} (the default) then \code{calc_mean()}
-//'   calculates the location as the mean - the first moment of the data.
-//'
-//'   If \code{method = "quantile"} then it calculates the location \eqn{\mu} as
-//'   the sum of the quantiles as follows:
-//'   \deqn{
-//'     \mu = q_{\alpha} + q_{1-\alpha}
-//'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
-//'
-//'   If \code{method = "nonparametric"} then it calculates the location as the
-//'   median.
-//'   
-//'   The code examples below compare the function \code{calc_mean()} with the
-//'   mean (location) calculated using \code{R} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
-//' # Calculate the column means in RcppArmadillo
-//' HighFreq::calc_mean(re_turns)
-//' # Calculate the column means in R
-//' sapply(re_turns, mean)
-//' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns)), 
-//'   sapply(re_turns, mean), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns),
-//'   Rcode=sapply(re_turns, mean),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the quantile mean (location)
-//' HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)
-//' # Calculate the quantile mean (location) in R
-//' colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
-//' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)), 
-//'   colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
-//'   check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9),
-//'   Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the column medians in RcppArmadillo
-//' HighFreq::calc_mean(re_turns, method="nonparametric")
-//' # Calculate the column medians in R
-//' sapply(re_turns, median)
-//' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
-//'   sapply(re_turns, median), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
-//'   Rcode=sapply(re_turns, median),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_mean(const arma::mat& tseries,
-                    std::string method = "moment", 
-                    double con_fi = 0.75) {
-  
-  // Switch for the different methods of location
-  switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
-    return arma::mean(tseries);
-  }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-con_fi, con_fi};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(0) + quantile_s.row(1));
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return arma::median(tseries);
-  }  // end nonparametric
-  default : {
-    cout << "Warning: Invalid method parameter" << endl;
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end default
-  }  // end switch
-  
-}  // end calc_mean
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the variance of a a single-column \emph{time series} or a
-//' \emph{vector} using \code{RcppArmadillo}.
-//' 
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
-//'
-//' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
-//'
-//' @details 
-//'   The function \code{calc_var_vec()} calculates the variance of a
-//'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
-//'   significantly faster than the \code{R} function \code{var()}.
-//'
-//' @examples
-//' \dontrun{
-//' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' # Compare calc_var_vec() with standard var()
-//' all.equal(HighFreq::calc_var_vec(re_turns), 
-//'   var(re_turns))
-//' # Compare the speed of RcppArmadillo with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var_vec(re_turns),
-//'   Rcode=var(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-double calc_var_vec(const arma::vec& tseries) {
-  
-  return arma::var(tseries);
-  
-}  // end calc_var_vec
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the dispersion (variance) of the columns of a \emph{time series}
-//' or a \emph{matrix} using \code{RcppArmadillo}.
-//' 
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-//'   
-//' @param \code{method} A \emph{string} specifying the type of the dispersion model
-//'   (the default is \code{method = "moment"} - see Details).
-//'    
-//' @return A row vector equal to the dispersion of the columns of the matrix
-//'   \code{tseries}.
-//'
-//' @details 
-//'   The dispersion is a measure of the variability of the data.  Examples of
-//'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
-//'
-//'   The function \code{calc_var()} calculates the dispersion of the
-//'   columns of a \emph{time series} or a \emph{matrix} of data using
-//'   \code{RcppArmadillo} \code{C++} code.
-//'   
-//'   If \code{method = "moment"} (the default) then \code{calc_var()}
-//'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
-//'   (the variance).
-//'
-//'   If \code{method = "moment"} then \code{calc_var()} performs the same
-//'   calculation as the function \code{colVars()} from package
-//'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
-//'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
-//'
-//'   If \code{method = "quantile"} then it calculates the dispersion as the
-//'   difference between the quantiles as follows:
-//'   \deqn{
-//'     \mu = q_{\alpha} - q_{1-\alpha}
-//'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
-//'   
-//'   If \code{method = "nonparametric"} then it calculates the dispersion as the
-//'   Median Absolute Deviation (\emph{MAD}):
-//'   \deqn{
-//'     MAD = median(abs(x - median(x)))
-//'   }
-//'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
-//'   comparable to the standard deviation.
-//'
-//'   If \code{method = "nonparametric"} then \code{calc_var()} performs the
-//'   same calculation as the function \code{stats::mad()}, but it's much faster
-//'   because it uses \code{RcppArmadillo} \code{C++} code.
-//'
-//'   If the number of rows of \code{tseries} is less than \code{3} then it
-//'   returns zeros.
-//'   
-//' @examples
-//' \dontrun{
-//' # Calculate VTI and XLF returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
-//' # Compare HighFreq::calc_var() with standard var()
-//' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   apply(re_turns, 2, var), check.attributes=FALSE)
-//' # Compare HighFreq::calc_var() with matrixStats
-//' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   matrixStats::colVars(re_turns), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with matrixStats and with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var(re_turns),
-//'   matrixStats=matrixStats::colVars(re_turns),
-//'   Rcode=apply(re_turns, 2, var),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Compare HighFreq::calc_var() with stats::mad()
-//' all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
-//'   sapply(re_turns, mad), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with stats::mad()
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
-//'   Rcode=sapply(re_turns, mad),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_var(const arma::mat& tseries,
-                   std::string method = "moment", 
-                   double con_fi = 0.75) {
-  
-  // Return zeros if not enough data
-  if (tseries.n_rows < 3) {
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end if
-  
-  // Switch for the different methods of dispersion
-  switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
-    return arma::var(tseries);
-  }  // end moment
-  case meth_od::quantile: {  // MAD
-    double num_cols = tseries.n_cols;
-    arma::mat medians = arma::median(tseries);
-    arma::mat mads(1, num_cols);
-    // Loop over columns of tseries
-    for (arma::uword it = 0; it < num_cols; it++) {
-      mads.col(it) = arma::median(arma::abs(tseries.col(it) - arma::as_scalar(medians.col(it))));
-    }  // end for
-    // tseries.each_row() -= arma::median(tseries, 0);
-    // return 1.4826*arma::median(arma::abs(tseries), 0);
-    return 1.4826*mads;
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
-  }  // end nonparametric
-  default : {
-    cout << "Warning: Invalid method parameter" << endl;
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end default
-  }  // end switch
-  
-}  // end calc_var
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the variance of returns aggregated over end points. 
-//'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
-//'
-//' @param \code{step} The number of periods in each interval between
-//'   neighboring end points.
-//' 
-//' @return The variance of aggregated returns.
-//'
-//' @details 
-//'   The function \code{calc_var_ag()} calculates the variance of returns
-//'   aggregated over end points.
-//'
-//'   It first calculates the end points spaced apart by the number of periods
-//'   equal to the argument \code{step}.  It then calculates the aggregated
-//'   returns by differencing the prices \code{tseries} calculated at the end
-//'   points. Finally it calculates the variance of the returns.
-//'
-//'   If there are extra periods that don't fit over the length of
-//'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
-//'   intervals, it then calculates all the corresponding variance values, and
-//'   averages them.
-//'
-//'   For example, if the length of \code{tseries} is equal to \code{20}, and
-//'   \code{step=3} then \code{6} end points fit over the length of
-//'   \code{tseries}, and there are \code{2} extra periods that must fit into
-//'   stubs, either at the beginning or at the end (or both).
-//' 
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
-//'     \deqn{
-//'       \sigma_t = \sigma {\Delta t}^H
-//'     }
-//'   Where \eqn{\sigma} is the daily return volatility.
-//' 
-//'   The function \code{calc_var_ag()} can therefore be used to calculate the
-//'   \emph{Hurst exponent} from the volatility ratio.
-//'
-//' @examples
-//' \dontrun{
-//' # Calculate the log prices
-//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-//' price_s <- log(price_s)
-//' # Calculate the daily variance of percentage returns
-//' calc_var_ag(price_s, step=1)
-//' # Calculate the daily variance using R
-//' sapply(rutils::diff_it(price_s), var)
-//' # Calculate the variance of returns aggregated over 21 days
-//' calc_var_ag(price_s, step=21)
-//' # The variance over 21 days is approximately 21 times the daily variance
-//' 21*calc_var_ag(price_s, step=1)
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_var_ag(const arma::mat& tseries, 
-                      arma::uword step = 1) {
-  
-  if (step == 1)
-    // Calculate the variance without aggregations.
-    return arma::var(diff_it(tseries, 1, false));
-  else {
-    arma::uword num_rows = tseries.n_rows;
-    // Calculate the number of extra periods that don't fit over num_rows.
-    arma::uword remainder = num_rows % step;
-    
-    // Perform loop over the stubs
-    arma::mat aggs;
-    arma::uvec end_p;
-    arma::mat var_s(remainder, tseries.n_cols);
-    for (arma::uword stub = 0; stub < remainder; stub++) {
-      end_p = calc_endpoints(tseries.n_rows, step=step, stub=stub);
-      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
-      // end_p = end_p.elem(find(end_p < num_rows));
-      aggs = tseries.rows(end_p);
-      var_s.row(stub) = arma::var(diff_it(aggs, 1, false));
-    }  // end for
-    return mean(var_s);
-  }  // end if
-  
-}  // end calc_var_ag
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
-//'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
-//'
-//' @param \code{step} The number of periods in each interval between
-//'   neighboring end points.
-//' 
-//' @return The Hurst exponent calculated from the variance of aggregated
-//'   returns.
-//'
-//' @details 
-//'   The function \code{calc_hurst()} calculates the Hurst exponent from the
-//'   ratios of the volatilities of aggregated returns.
-//'
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
-//'     \deqn{
-//'       \sigma_t = \sigma {\Delta t}^H
-//'     }
-//'   Where \eqn{\sigma} is the daily return volatility.
-//' 
-//'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
-//'   of the volatilities divided by the logarithm of the time interval
-//'   \eqn{\Delta t}:
-//'     \deqn{
-//'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
-//'     }
-//' 
-//'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-//'   to calculate the aggregated volatility \eqn{\sigma_t}.
-//' 
-//' @examples
-//' \dontrun{
-//' # Calculate the log prices
-//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-//' price_s <- log(price_s)
-//' # Calculate the Hurst exponent from 21 day aggregations
-//' calc_hurst(price_s, step=21)
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_hurst(const arma::mat& tseries, 
-                     arma::uword step = 1) {
-  
-  return 0.5*arma::log(calc_var_ag(tseries, step)/calc_var_ag(tseries, 1))/log(step);
-  
-}  // end calc_hurst
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the variance of an \emph{OHLC time series}, using different range
-//' estimators and \code{RcppArmadillo}.
-//'
-//' @param \code{ohlc} An \emph{OHLC time series} or a \emph{numeric matrix} of
-//'   prices.
-//'   
-//' @param \code{method} A \emph{character} string representing the range
-//'   estimator for calculating the variance.  The estimators include:
-//'   \itemize{
-//'     \item "close" close-to-close estimator,
-//'     \item "rogers_satchell" Rogers-Satchell estimator,
-//'     \item "garman_klass" Garman-Klass estimator,
-//'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
-//'     \item "yang_zhang" Yang-Zhang estimator,
-//'    }
-//'    (The default is the \code{method = "yang_zhang"}.)
-//'    
-//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
-//'   of the \emph{OHLC time series}.  This is an optional argument. (The
-//'   default is \code{lag_close = 0}).
-//'   
-//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
-//'   by the time index, the number of seconds in each period? (The default is
-//'   \code{scale = TRUE}).
-//'
-//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
-//'   
-//' @return A single \emph{numeric} value equal to the variance of the
-//'   \emph{OHLC time series}.
-//'
-//' @details 
-//'   The function \code{calc_var_ohlc()} calculates the variance from all the
-//'   different intra-day and day-over-day returns (defined as the differences
-//'   of \emph{OHLC} prices), using several different variance estimation
-//'   methods.
-//'
-//'   The input \emph{OHLC time series} \code{ohlc} is assumed to be the log
-//'   prices.
-//'
-//'   The default \code{method} is \emph{"yang_zhang"}, which theoretically
-//'   has the lowest standard error among unbiased estimators.
-//'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
-//'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
-//'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
-//'   account for \emph{close-to-open} price jumps.
-//'
-//'   If \code{scale} is \code{TRUE} (the default), then the returns are
-//'   divided by the differences of the time index (which scales the variance to
-//'   the units of variance per second squared). This is useful when calculating
-//'   the variance from minutely bar data, because dividing returns by the
-//'   number of seconds decreases the effect of overnight price jumps. If the
-//'   time index is in days, then the variance is equal to the variance per day
-//'   squared.
-//'   
-//'   If the number of rows of \code{ohlc} is less than \code{3} then it
-//'   returns zero.
-//'   
-//'   The optional argument \code{in_dex} is the time index of the \emph{time
-//'   series} \code{ohlc}. If the time index is in seconds, then the
-//'   differences of the index are equal to the number of seconds in each time
-//'   period.  If the time index is in days, then the differences are equal to
-//'   the number of days in each time period.
-//'   
-//'   The optional argument \code{lag_close} are the lagged \emph{close} prices
-//'   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
-//'   speeds up the calculation, so it's useful for rolling calculations.
-//'   
-//'   The function \code{calc_var_ohlc()} is implemented in \code{RcppArmadillo}
-//'   \code{C++} code, and it's over \code{10} times faster than
-//'   \code{calc_var_ohlc_r()}, which is implemented in \code{R} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Extract the log OHLC prices of SPY
-//' sp_y <- log(HighFreq::SPY)
-//' # Extract the time index of SPY prices
-//' in_dex <- c(1, diff(xts::.index(sp_y)))
-//' # Calculate the variance of SPY returns, with scaling of the returns
-//' HighFreq::calc_var_ohlc(sp_y, 
-//'  method="yang_zhang", scale=TRUE, in_dex=in_dex)
-//' # Calculate variance without accounting for overnight jumps
-//' HighFreq::calc_var_ohlc(sp_y, 
-//'  method="rogers_satchell", scale=TRUE, in_dex=in_dex)
-//' # Calculate the variance without scaling the returns
-//' HighFreq::calc_var_ohlc(sp_y, scale=FALSE)
-//' # Calculate the variance by passing in the lagged close prices
-//' lag_close <- HighFreq::lag_it(sp_y[, 4])
-//' all.equal(HighFreq::calc_var_ohlc(sp_y), 
-//'   HighFreq::calc_var_ohlc(sp_y, lag_close=lag_close))
-//' # Compare with HighFreq::calc_var_ohlc_r()
-//' all.equal(HighFreq::calc_var_ohlc(sp_y, in_dex=in_dex), 
-//'   HighFreq::calc_var_ohlc_r(sp_y))
-//' # Compare the speed of Rcpp with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var_ohlc(sp_y),
-//'   Rcode=HighFreq::calc_var_ohlc_r(sp_y),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' @export
-// [[Rcpp::export]]
-double calc_var_ohlc(const arma::mat& ohlc, 
-                     std::string method = "yang_zhang", 
-                     arma::colvec lag_close = 0, 
-                     bool scale = true, 
-                     arma::colvec in_dex = 0) {
-  
-  arma::uword num_rows = ohlc.n_rows;
-  double coeff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
-  
-  if (num_rows < 3) {
-    // Return zero if not enough data
-    return 0;
-  }  // end if
-  
-  if (!scale || (in_dex.n_rows == 1)) {
-    in_dex = arma::ones(num_rows);
-    // cout << "ohlc.n_rows = " << num_rows << endl;
-    // cout << "in_dex.n_rows = " << in_dex.n_rows << endl;
-  }  // end if
-  
-  // Calculate all the different intra-day and day-over-day returns 
-  // (differences of OHLC prices)
-  arma::colvec clo_se = ohlc.col(3);
-  arma::colvec open_close(clo_se.n_rows);
-  if (lag_close.n_rows == 1) {
-    open_close = arma::join_cols(clo_se.subvec(0, 0), clo_se.subvec(0, clo_se.n_elem-2));
-    open_close = (ohlc.col(0) - open_close)/in_dex;
-  } else {
-    open_close = (ohlc.col(0) - lag_close)/in_dex;
-  }  // end if
-  arma::colvec close_open = (clo_se - ohlc.col(0))/in_dex;
-  arma::colvec close_high = (clo_se - ohlc.col(1))/in_dex;
-  arma::colvec close_low = (clo_se - ohlc.col(2))/in_dex;
-  arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/in_dex;
-  arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/in_dex;
-  arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/in_dex;
-  
-  if (method == "close") {
-    // cout << "Calc method is Close" << endl;
-    return arma::var(arma::diff(clo_se));
-  } else if (method == "rogers_satchell") {
-    // cout << "Calc method is Rogers-Satchell" << endl;
-    return -(arma::dot(close_high, high_open) +
-             arma::dot(close_low, low_open))/num_rows;
-  } else if (method == "garman_klass") {
-    // cout << "Calc method is Garman-Klass" << endl;
-    return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows;
-  } else if (method == "garman_klass_yz") {
-    // cout << "Calc method is Garman-Klass-YZ" << endl;
-    return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows + 
-            arma::var(open_close);
-  } else if (method == "yang_zhang") {
-    // cout << "Calc method is Yang-Zhang" << endl;
-    return arma::var(open_close) + coeff*arma::var(close_open) +
-      (coeff-1)*(arma::dot(close_high, high_open) + 
-      arma::dot(close_low, low_open))/num_rows;
-  } else {
-    cout << "Wrong calc method!" << endl;
-    return 1;
-  }  // end if
-  
-  // cout << "Calc method is " << method << endl;
-  
-}  // end calc_var_ohlc
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the skewness of the columns of a \emph{time series} or a
-//' \emph{matrix} using \code{RcppArmadillo}.
-//'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-//'
-//' @param \code{method} A \emph{string} specifying the type of the skewness
-//'   model (the default is \code{method = "moment"} - see Details).
-//'
-//' @param \code{con_fi} The confidence level for calculating the
-//'   quantiles (the default is \code{con_fi = 0.75}).
-//'
-//' @return A single-row matrix with the skewness of the columns of
-//'   \code{tseries}.
-//'
-//' @details 
-//'   The function \code{calc_skew()} calculates the skewness of the columns of
-//'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
-//'   \code{C++} code.
-//'
-//'   If \code{method = "moment"} (the default) then \code{calc_skew()}
-//'   calculates the skewness as the third moment of the data.
-//'
-//'   If \code{method = "quantile"} then it calculates the skewness
-//'   \eqn{\varsigma} from the differences between the quantiles of the data as
-//'   follows:
-//'   \deqn{
-//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2*q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
-//'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
-//'
-//'   If \code{method = "nonparametric"} then it calculates the skewness as the
-//'   difference between the mean of the data minus its median, divided by the
-//'   standard deviation.
-//'   
-//'   If the number of rows of \code{tseries} is less than \code{3} then it
-//'   returns zeros.
-//'   
-//'   The code examples below compare the function \code{calc_skew()} with the
-//'   skewness calculated using \code{R} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Define a single-column time series of returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-//' # Calculate the moment skewness
-//' HighFreq::calc_skew(re_turns)
-//' # Calculate the moment skewness in R
-//' calc_skewr <- function(x) {
-//'   x <- (x-mean(x))
-//'   sum(x^3)/var(x)^1.5/NROW(x)
-//' }  # end calc_skewr
-//' all.equal(HighFreq::calc_skew(re_turns), 
-//'   calc_skewr(re_turns), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns),
-//'   Rcode=calc_skewr(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the quantile skewness
-//' HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)
-//' # Calculate the quantile skewness in R
-//' calc_skewq <- function(x, a = 0.75) {
-//'   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
-//'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
-//' }  # end calc_skewq
-//' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)), 
-//'   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, method="quantile"),
-//'   Rcode=calc_skewq(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the nonparametric skewness
-//' HighFreq::calc_skew(re_turns, method="nonparametric")
-//' # Compare HighFreq::calc_skew() with R nonparametric skewness
-//' all.equal(drop(HighFreq::calc_skew(re_turns, method="nonparametric")), 
-//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
-//'   check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, method="nonparametric"),
-//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_skew(const arma::mat& tseries,
-                    std::string method = "moment", 
-                    double con_fi = 0.75) {
-  
-  // Return zeros if not enough data
-  if (tseries.n_rows < 3) {
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end if
-  
-  // Switch for the different methods of skew
-  switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
-    double num_rows = tseries.n_rows;
-    double num_cols = tseries.n_cols;
-    arma::mat means = arma::mean(tseries);
-    arma::mat var_s = arma::var(tseries);
-    arma::mat skewness(1, num_cols);
-    // De-mean the columns of tseries
-    // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 3))/arma::pow(var_s, 1.5)/num_rows;
-    for (arma::uword it = 0; it < num_cols; it++) {
-      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(var_s.col(it), 1.5)/num_rows;
-    }  // end for
-    return skewness;
-  }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-con_fi, 0.5, con_fi};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
-  }  // end nonparametric
-  default : {
-    cout << "Warning: Invalid method parameter" << endl;
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end default
-  }  // end switch
-  
-}  // end calc_skew
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the kurtosis of the columns of a \emph{time series} or a
-//' \emph{matrix} using \code{RcppArmadillo}.
-//'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
-//'
-//' @param \code{method} A \emph{string} specifying the type of the kurtosis
-//'   model (the default is \code{method = "moment"} - see Details).
-//'
-//' @param \code{con_fi} The confidence level for calculating the
-//'   quantiles (the default is \code{con_fi = 0.75}).
-//'
-//' @return A single-row matrix with the kurtosis of the columns of
-//'   \code{tseries}.
-//'
-//' @details 
-//'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns
-//'   of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
-//'   code.
-//'
-//'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
-//'   calculates the fourth moment of the data.
-//'   But it doesn't de-mean the columns of \code{tseries} because that requires
-//'   copying the matrix \code{tseries}, so it's time-consuming.
-//'
-//'   If \code{method = "quantile"} then it calculates the skewness
-//'   \eqn{\kappa} from the differences between the quantiles of the data as
-//'   follows:
-//'   \deqn{
-//'     \kappa = \frac{q_{\alpha} - q_{1-\alpha}}{q_{0.75} - q_{0.25}}
-//'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
-//'
-//'   If \code{method = "nonparametric"} then it calculates the kurtosis as the
-//'   difference between the mean of the data minus its median, divided by the
-//'   standard deviation.
-//'   
-//'   If the number of rows of \code{tseries} is less than \code{3} then it
-//'   returns zeros.
-//'   
-//'   The code examples below compare the function \code{calc_kurtosis()} with the
-//'   kurtosis calculated using \code{R} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Define a single-column time series of returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-//' # Calculate the moment kurtosis
-//' HighFreq::calc_kurtosis(re_turns)
-//' # Calculate the moment kurtosis in R
-//' calc_kurtr <- function(x) {
-//'   x <- (x-mean(x))
-//'   sum(x^4)/var(x)^2/NROW(x)
-//' }  # end calc_kurtr
-//' all.equal(HighFreq::calc_kurtosis(re_turns), 
-//'   calc_kurtr(re_turns), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns),
-//'   Rcode=calc_kurtr(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the quantile kurtosis
-//' HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)
-//' # Calculate the quantile kurtosis in R
-//' calc_kurtq <- function(x, a=0.9) {
-//'   	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
-//'   	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
-//' }  # end calc_kurtq
-//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)), 
-//'   calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="quantile"),
-//'   Rcode=calc_kurtq(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' # Calculate the nonparametric kurtosis
-//' HighFreq::calc_kurtosis(re_turns, method="nonparametric")
-//' # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
-//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="nonparametric")), 
-//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
-//'   check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="nonparametric"),
-//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_kurtosis(const arma::mat& tseries,
-                        std::string method = "moment", 
-                        double con_fi = 0.75) {
-  
-  // Return zeros if not enough data
-  if (tseries.n_rows < 3) {
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end if
-  
-  // Switch for the different methods of kurtosis
-  switch(calc_method(method)) {
-  case meth_od::moment: {  // Fourth moment
-    double num_rows = tseries.n_rows;
-    double num_cols = tseries.n_cols;
-    arma::mat means = arma::mean(tseries);
-    arma::mat var_s = arma::var(tseries);
-    arma::mat kurtosis(1, num_cols);
-    // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
-    // Loop over columns of tseries
-    for (arma::uword it = 0; it < num_cols; it++) {
-      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(var_s.col(it), 2)/num_rows;
-    }  // end for
-    // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 4))/arma::pow(var_s, 2)/num_rows;
-    return kurtosis;
-  }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-con_fi, 0.25, 0.75, con_fi};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(3) - quantile_s.row(0))/(quantile_s.row(2) - quantile_s.row(1));
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
-  }  // end nonparametric
-  default : {
-    cout << "Warning: Invalid method parameter" << endl;
-    return arma::zeros<rowvec>(tseries.n_cols);
-  }  // end default
-  }  // end switch
-  
-}  // end calc_kurtosis
-
-
-
-////////////////////////////////////////////////////////////
-//' Perform multivariate linear regression using least squares and return a
-//' named list of regression coefficients, their t-values, and p-values.
-//' 
-//' @param \code{response} A single-column \emph{time series} or a \emph{vector}
-//'   of response data.
-//' 
-//' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
-//'   (predictor or explanatory data).
-//' 
-//' @return A named list with three elements: a \emph{matrix} of coefficients
-//'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
-//'   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
-//'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
-//'   coefficients named \emph{"coefficients"} contains the alpha and beta
-//'   coefficients, and their \emph{t-values} and \emph{p-values}.
-//'
-//' @details 
-//'   The function \code{calc_lm()} performs the same calculations as the
-//'   function \code{lm()} from package \emph{stats}. 
-//'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
-//'   than \code{lm()}. The code was inspired by this article (but it's not
-//'   identical to it):
-//'   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
-//'
-//' @examples
-//' \dontrun{
-//' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
-//' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
-//' de_sign <- re_turns[, -1]
-//' # Perform multivariate regression using lm()
-//' reg_model <- lm(res_ponse ~ de_sign)
-//' sum_mary <- summary(reg_model)
-//' # Perform multivariate regression using calc_lm()
-//' reg_arma <- HighFreq::calc_lm(response=res_ponse, design=de_sign)
-//' # Compare the outputs of both functions
-//' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
-//' all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
-//' all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
-//' # Compare the speed of RcppArmadillo with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_lm(response=res_ponse, design=de_sign),
-//'   Rcode=lm(res_ponse ~ de_sign),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-Rcpp::List calc_lm(const arma::vec& response, const arma::mat& design) {
-  
-  // Add column for intercept to explanatory matrix
-  arma::uword num_rows = design.n_rows;
-  arma::mat design_p = join_rows(ones(num_rows), design);
-  arma::uword num_cols = design_p.n_cols;
-  arma::uword deg_free = (num_rows - num_cols);
-  
-  // Calculate alpha and beta coefficients for the model response ~ design
-  arma::colvec coeff = arma::solve(design_p, response);
-  // Calculate residuals
-  arma::colvec resid_uals = response - design_p*coeff;
-  
-  // Calculate TSS, RSS, and ESS
-  double tot_sumsq = (num_rows-1)*arma::var(response);
-  double res_sumsq = arma::dot(resid_uals, resid_uals);
-  double exp_sumsq = tot_sumsq - res_sumsq;
-  
-  // Calculate R-squared and F-statistic
-  double r_squared = exp_sumsq/tot_sumsq;
-  double f_stat = (exp_sumsq*deg_free)/(res_sumsq*(num_cols-1));
-  // arma::rowvec stat_s=join_horiz(r_squared, f_stat);
-  Rcpp::NumericVector stat_s(2);
-  stat_s(0) = r_squared;
-  stat_s(1) = f_stat;
-  stat_s.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
-  
-  // Calculate standard errors of beta coefficients
-  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(design_p)*design_p)));
-  // Calculate t-values and p-values of beta coefficients
-  arma::colvec t_vals = coeff/std_err;
-  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(t_vals)), deg_free);
-  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), t_vals), p_vals));
-  Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
-  
-  return Rcpp::List::create(Named("coefficients") = coeff_mat,
-                            // Named("residuals") = resid_uals,
-                            Named("z_score") = resid_uals(num_rows-1)/arma::stddev(resid_uals),
-                            Named("stats") = stat_s);
-  
-}  // end calc_lm
-
-
-
-////////////////////////////////////////////////////////////
-//' Perform multivariate regression using different methods, and return a vector
-//' of regression coefficients, their t-values, and the last residual z-score.
-//' 
-//' @param \code{response} A single-column \emph{time series} or a \emph{vector}
-//'   of response data.
-//' 
-//' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
-//'   (predictor or explanatory data).
-//' 
-//' @param \code{method} A \emph{string} specifying the type of the regression
-//'   model the default is \code{method = "least_squares"} - see Details).
-//'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{design} matrix (the default is \code{0.001}).
-//'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the \code{design}
-//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-//'   the number of columns of \code{design}).
-//'   
-//' @param \code{con_fi} The confidence level for calculating the
-//'   quantiles (the default is \code{con_fi = 0.75}).
-//'
-//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-//'   (the default is \code{0}).
-//' 
-//' @return A vector with the regression coefficients, their t-values, and the
-//'   last residual z-score.
-//'
-//' @details 
-//'   The function \code{calc_reg()} performs multivariate regression using
-//'   different methods, and returns a vector of regression coefficients, their
-//'   t-values, and the last residual z-score.
-//' 
-//'   The length of the return vector depends on the number of columns of
-//'   \code{design}.
-//'   The number of regression coefficients is equal to the number of columns of
-//'   \code{design} plus \code{1}.  The number of t-values is equal to the
-//'   number of coefficients.  And there is only \code{1} z-score.
-//'   So if the number of columns of \code{design} is equal to \code{n}, then
-//'   the return vector will have \code{2n+3} elements.
-//' 
-//'   For example, if the design matrix has \code{2} columns of data, then
-//'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-//'   regression coefficients (including the intercept coefficient), \code{3}
-//'   corresponding t-values, and \code{1} z-score.
-//'
-//'   If \code{method = "least_squares"} (the default) then it performs the
-//'   standard least squares regression, the same as the function
-//'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
-//'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
-//'   than \code{lm()}.
-//'
-//'   If \code{method = "regular"} then it performs regularized regression.  It
-//'   calculates the regularized inverse of the \code{design} matrix from its
-//'   singular value decomposition.  It applies dimension regularization by
-//'   selecting only the largest singular values equal in number to
-//'   \code{eigen_max}.
-//'   
-//'   If \code{method = "quantile"} then it performs quantile regression (not
-//'   implemented yet).
-//'
-//' @examples
-//' \dontrun{
-//' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
-//' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
-//' de_sign <- re_turns[, -1]
-//' # Perform multivariate regression using lm()
-//' reg_model <- lm(res_ponse ~ de_sign)
-//' sum_mary <- summary(reg_model)
-//' co_eff <- sum_mary$coefficients
-//' # Perform multivariate regression using calc_reg()
-//' reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, design=de_sign))
-//' # Compare the outputs of both functions
-//' all.equal(reg_arma[1:(2*(1+NCOL(de_sign)))], 
-//'   c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
-//' # Compare the speed of RcppArmadillo with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_reg(response=res_ponse, design=de_sign),
-//'   Rcode=lm(res_ponse ~ de_sign),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::colvec calc_reg(const arma::vec& response, 
-                      const arma::mat& design,
-                      std::string method = "least_squares",
-                      double eigen_thresh = 0.001,
-                      arma::uword eigen_max = 0,
-                      double con_fi = 0.1,
-                      double alpha = 0.0) {
-  
-  // Add column for intercept to explanatory matrix
-  arma::uword num_rows = design.n_rows;
-  arma::mat design_p = join_rows(ones(num_rows), design);
-  arma::uword num_cols = design_p.n_cols;
-  arma::uword deg_free = (num_rows - num_cols);
-  arma::colvec coeff(num_cols, fill::zeros);
-  arma::colvec reg_data(2*num_cols+1, fill::zeros);
-  
-  // Switch for the different methods for weights
-  switch(calc_method(method)) {
-  case meth_od::least_squares: {
-    // Calculate regression coefficients for the model response ~ design
-    coeff = arma::solve(design_p, response);
-    break;
-  }  // end least_squares
-  case meth_od::regular: {
-    // Calculate regularized regression coefficients
-    coeff = calc_inv(design_p, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*response;
-    break;
-  }  // end regular
-  case meth_od::quantile: {
-    // Not implemented yet
-    break;
-  }  // end quantile
-  default : {
-    cout << "Warning: Invalid method parameter: " << method << endl;
-    return reg_data;
-  }  // end default
-  }  // end switch
-  
-  // Calculate residuals
-  arma::colvec resid_uals = response - design_p*coeff;
-  
-  // Calculate TSS, RSS, and ESS
-  // double tot_sumsq = (num_rows-1)*arma::var(response);
-  double res_sumsq = arma::dot(resid_uals, resid_uals);
-  // double exp_sumsq = tot_sumsq - res_sumsq;
-  
-  // Calculate standard errors of beta coefficients
-  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(design_p)*design_p)));
-  // Calculate t-values and p-values of beta coefficients
-  arma::colvec t_vals = coeff/std_err;
-  
-  // Calculate z-score
-  double z_score = resid_uals(num_rows-1)/arma::stddev(resid_uals);
-  
-  // Combine regression data
-  reg_data.subvec(0, num_cols-1) = coeff;
-  reg_data.subvec(num_cols, 2*num_cols-1) = t_vals;
-  reg_data(2*num_cols) = z_score;
-  
-  return reg_data;
-  
-}  // end calc_reg
-
-
-
-
-////////////////////////////
-// Functions for rolling statistics
-////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
@@ -2254,7 +1106,7 @@ arma::uvec roll_count(const arma::uvec& tseries) {
 //' # Define end points at 25 day intervals
 //' end_p <- HighFreq::calc_endpoints(oh_lc, step=25)
 //' # Aggregate over end_p:
-//' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=(end_p))
+//' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
 //' # Compare with xts::to.period()
 //' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p+1), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
 //' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
@@ -2280,6 +1132,7 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
   return ohlc_agg;
   
 }  // end roll_ohlc
+
 
 
 
@@ -2723,6 +1576,1357 @@ arma::mat roll_wsum(const arma::mat& tseries,
 
 
 
+
+////////////////////////////////////////////////////////////
+// Functions for statistics
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Define C++ enum type for the different methods for regularization,
+// calculating variance, skewness, kurtosis, covariance, regression, 
+// and matrix inverse.
+enum meth_od {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
+              max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
+
+// Map string to C++ enum type for switch statement.
+// This is needed because Rcpp can't map C++ enum type to R variable SEXP.
+meth_od calc_method(std::string method) {
+  if (method == "moment" || method == "m") 
+    return meth_od::moment;
+  else if (method == "least_squares" || method == "l")
+    return meth_od::least_squares;
+  else if (method == "quantile" || method == "q")
+    return meth_od::quantile;
+  else if (method == "nonparametric" || method == "n")
+    return meth_od::nonparametric;
+  else if (method == "regular")
+    return meth_od::regular;
+  else if (method == "rank_sharpe")
+    return meth_od::rank_sharpe;
+  else if (method == "max_sharpe")
+    return meth_od::max_sharpe;
+  else if (method == "max_sharpe_median")
+    return meth_od::max_sharpe_median;
+  else if (method == "min_var")
+    return meth_od::min_var;
+  else if (method == "min_varpca")
+    return meth_od::min_varpca;
+  else if (method == "rank")
+    return meth_od::rank;
+  else if (method == "rankrob")
+    return meth_od::rankrob;
+  else 
+    return meth_od::moment;
+}  // end calc_method
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the mean (location) of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{method} A \emph{string} specifying the type of the mean
+//'   (location) model (the default is \code{method = "moment"} - see Details).
+//'
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
+//' @return A single-row matrix with the mean (location) of the columns of
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{calc_mean()} calculates the mean (location) of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If \code{method = "moment"} (the default) then \code{calc_mean()}
+//'   calculates the location as the mean - the first moment of the data.
+//'
+//'   If \code{method = "quantile"} then it calculates the location \eqn{\mu} as
+//'   the sum of the quantiles as follows:
+//'   \deqn{
+//'     \mu = q_{\alpha} + q_{1-\alpha}
+//'   }
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'
+//'   If \code{method = "nonparametric"} then it calculates the location as the
+//'   median.
+//'   
+//'   The code examples below compare the function \code{calc_mean()} with the
+//'   mean (location) calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+//' # Calculate the column means in RcppArmadillo
+//' HighFreq::calc_mean(re_turns)
+//' # Calculate the column means in R
+//' sapply(re_turns, mean)
+//' # Compare the values
+//' all.equal(drop(HighFreq::calc_mean(re_turns)), 
+//'   sapply(re_turns, mean), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_mean(re_turns),
+//'   Rcode=sapply(re_turns, mean),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the quantile mean (location)
+//' HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)
+//' # Calculate the quantile mean (location) in R
+//' colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
+//' # Compare the values
+//' all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9)), 
+//'   colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
+//'   check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_mean(re_turns, method="quantile", con_fi=0.9),
+//'   Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the column medians in RcppArmadillo
+//' HighFreq::calc_mean(re_turns, method="nonparametric")
+//' # Calculate the column medians in R
+//' sapply(re_turns, median)
+//' # Compare the values
+//' all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
+//'   sapply(re_turns, median), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
+//'   Rcode=sapply(re_turns, median),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_mean(const arma::mat& tseries,
+                    std::string method = "moment", 
+                    double con_fi = 0.75) {
+  
+  // Switch for the different methods of location
+  switch(calc_method(method)) {
+  case meth_od::moment: {  // moment
+    return arma::mean(tseries);
+  }  // end moment
+  case meth_od::quantile: {  // quantile
+    arma::vec level_s = {1-con_fi, con_fi};
+    arma::mat quantile_s = arma::quantile(tseries, level_s);
+    return (quantile_s.row(0) + quantile_s.row(1));
+  }  // end quantile
+  case meth_od::nonparametric: {  // nonparametric
+    return arma::median(tseries);
+  }  // end nonparametric
+  default : {
+    cout << "Warning: Invalid method parameter" << endl;
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end default
+  }  // end switch
+  
+}  // end calc_mean
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the variance of a a single-column \emph{time series} or a
+//' \emph{vector} using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
+//'
+//' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
+//'
+//' @details 
+//'   The function \code{calc_var_vec()} calculates the variance of a
+//'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
+//'   significantly faster than the \code{R} function \code{var()}.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a vector of random returns
+//' re_turns <- rnorm(1e6)
+//' # Compare calc_var_vec() with standard var()
+//' all.equal(HighFreq::calc_var_vec(re_turns), 
+//'   var(re_turns))
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_var_vec(re_turns),
+//'   Rcode=var(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+double calc_var_vec(const arma::vec& tseries) {
+  
+  return arma::var(tseries);
+  
+}  // end calc_var_vec
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the dispersion (variance) of the columns of a \emph{time series}
+//' or a \emph{matrix} using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+//'   
+//' @param \code{method} A \emph{string} specifying the type of the dispersion model
+//'   (the default is \code{method = "moment"} - see Details).
+//'    
+//' @return A row vector equal to the dispersion of the columns of the matrix
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The dispersion is a measure of the variability of the data.  Examples of
+//'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
+//'
+//'   The function \code{calc_var()} calculates the dispersion of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
+//'   
+//'   If \code{method = "moment"} (the default) then \code{calc_var()}
+//'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
+//'   (the variance).
+//'
+//'   If \code{method = "moment"} then \code{calc_var()} performs the same
+//'   calculation as the function \code{colVars()} from package
+//'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
+//'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If \code{method = "quantile"} then it calculates the dispersion as the
+//'   difference between the quantiles as follows:
+//'   \deqn{
+//'     \mu = q_{\alpha} - q_{1-\alpha}
+//'   }
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   
+//'   If \code{method = "nonparametric"} then it calculates the dispersion as the
+//'   Median Absolute Deviation (\emph{MAD}):
+//'   \deqn{
+//'     MAD = median(abs(x - median(x)))
+//'   }
+//'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+//'   comparable to the standard deviation.
+//'
+//'   If \code{method = "nonparametric"} then \code{calc_var()} performs the
+//'   same calculation as the function \code{stats::mad()}, but it's much faster
+//'   because it uses \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If the number of rows of \code{tseries} is less than \code{3} then it
+//'   returns zeros.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate VTI and XLF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+//' # Compare HighFreq::calc_var() with standard var()
+//' all.equal(drop(HighFreq::calc_var(re_turns)), 
+//'   apply(re_turns, 2, var), check.attributes=FALSE)
+//' # Compare HighFreq::calc_var() with matrixStats
+//' all.equal(drop(HighFreq::calc_var(re_turns)), 
+//'   matrixStats::colVars(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with matrixStats and with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_var(re_turns),
+//'   matrixStats=matrixStats::colVars(re_turns),
+//'   Rcode=apply(re_turns, 2, var),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Compare HighFreq::calc_var() with stats::mad()
+//' all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
+//'   sapply(re_turns, mad), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with stats::mad()
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
+//'   Rcode=sapply(re_turns, mad),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_var(const arma::mat& tseries,
+                   std::string method = "moment", 
+                   double con_fi = 0.75) {
+  
+  // Return zeros if not enough data
+  if (tseries.n_rows < 3) {
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end if
+  
+  // Switch for the different methods of dispersion
+  switch(calc_method(method)) {
+  case meth_od::moment: {  // moment
+    return arma::var(tseries);
+  }  // end moment
+  case meth_od::quantile: {  // MAD
+    double num_cols = tseries.n_cols;
+    arma::mat medians = arma::median(tseries);
+    arma::mat mads(1, num_cols);
+    // Loop over columns of tseries
+    for (arma::uword it = 0; it < num_cols; it++) {
+      mads.col(it) = arma::median(arma::abs(tseries.col(it) - arma::as_scalar(medians.col(it))));
+    }  // end for
+    // tseries.each_row() -= arma::median(tseries, 0);
+    // return 1.4826*arma::median(arma::abs(tseries), 0);
+    return 1.4826*mads;
+  }  // end quantile
+  case meth_od::nonparametric: {  // nonparametric
+    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
+  }  // end nonparametric
+  default : {
+    cout << "Warning: Invalid method parameter" << endl;
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end default
+  }  // end switch
+  
+}  // end calc_var
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the variance of returns aggregated over end points. 
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @return The variance of aggregated returns.
+//'
+//' @details 
+//'   The function \code{calc_var_ag()} calculates the variance of returns
+//'   aggregated over end points.
+//'
+//'   It first calculates the end points spaced apart by the number of periods
+//'   equal to the argument \code{step}.  Then it calculates the aggregated
+//'   returns by differencing the prices \code{tseries} calculated at the end
+//'   points. Finally it calculates the variance of the returns.
+//'
+//'   If there are extra periods that don't fit over the length of
+//'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
+//'   intervals, then it calculates all the corresponding variance values, and
+//'   averages them.
+//'
+//'   For example, if the number of rows of \code{tseries} is equal to
+//'   \code{20}, and \code{step=3} then \code{6} end points fit over the length
+//'   of \code{tseries}, and there are \code{2} extra periods that must fit into
+//'   stubs, either at the beginning or at the end (or both).
+//' 
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The function \code{calc_var_ag()} can therefore be used to calculate the
+//'   \emph{Hurst exponent} from the volatility ratio.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate the log prices
+//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+//' price_s <- log(price_s)
+//' # Calculate the daily variance of percentage returns
+//' calc_var_ag(price_s, step=1)
+//' # Calculate the daily variance using R
+//' sapply(rutils::diff_it(price_s), var)
+//' # Calculate the variance of returns aggregated over 21 days
+//' calc_var_ag(price_s, step=21)
+//' # The variance over 21 days is approximately 21 times the daily variance
+//' 21*calc_var_ag(price_s, step=1)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_var_ag(const arma::mat& tseries, 
+                      arma::uword step = 1) {
+  
+  if (step == 1)
+    // Calculate the variance without aggregations.
+    return arma::var(diff_it(tseries, 1, false));
+  else {
+    // Calculate the number of extra periods that don't fit over num_rows.
+    arma::uword num_rows = tseries.n_rows;
+    arma::uword remainder = num_rows % step;
+    // Allocate aggregations, end points, and variance.
+    arma::mat aggs;
+    arma::uvec end_p;
+    arma::mat var_s(remainder, tseries.n_cols);
+    // Perform loop over the stubs
+    for (arma::uword stub = 0; stub < remainder; stub++) {
+      end_p = calc_endpoints(tseries.n_rows, step=step, stub=stub);
+      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
+      // end_p = end_p.elem(find(end_p < num_rows));
+      aggs = tseries.rows(end_p);
+      var_s.row(stub) = arma::var(diff_it(aggs, 1, false));
+    }  // end for
+    return mean(var_s);
+  }  // end if
+  
+}  // end calc_var_ag
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the variance of \emph{OHLC} prices using different price range
+//' estimators.
+//'
+//' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
+//'   prices.
+//'   
+//' @param \code{method} A \emph{character} string representing the price range
+//'   estimator for calculating the variance.  The estimators include:
+//'   \itemize{
+//'     \item "close" close-to-close estimator,
+//'     \item "rogers_satchell" Rogers-Satchell estimator,
+//'     \item "garman_klass" Garman-Klass estimator,
+//'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+//'     \item "yang_zhang" Yang-Zhang estimator,
+//'    }
+//'    (The default is the \code{method = "yang_zhang"}.)
+//'    
+//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//'   of the \emph{OHLC time series}.  This is an optional argument. (The
+//'   default is \code{lag_close = 0}).
+//'   
+//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//'   by the time index, the number of seconds in each period? (The default is
+//'   \code{scale = TRUE}).
+//'
+//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//'   
+//' @return A single \emph{numeric} value equal to the variance of the
+//'   \emph{OHLC time series}.
+//'
+//' @details 
+//'   The function \code{calc_var_ohlc()} calculates the variance from all the
+//'   different intra-day and day-over-day returns (defined as the differences
+//'   of \emph{OHLC} prices), using several different variance estimation
+//'   methods.
+//'
+//'   The input \emph{OHLC time series} \code{ohlc} is assumed to be the log
+//'   prices.
+//'
+//'   The default \code{method} is \emph{"yang_zhang"}, which theoretically
+//'   has the lowest standard error among unbiased estimators.
+//'   The methods \emph{"close"}, \emph{"garman_klass_yz"}, and
+//'   \emph{"yang_zhang"} do account for \emph{close-to-open} price jumps, while
+//'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
+//'   account for \emph{close-to-open} price jumps.
+//'
+//'   If \code{scale} is \code{TRUE} (the default), then the returns are
+//'   divided by the differences of the time index (which scales the variance to
+//'   the units of variance per second squared). This is useful when calculating
+//'   the variance from minutely bar data, because dividing returns by the
+//'   number of seconds decreases the effect of overnight price jumps. If the
+//'   time index is in days, then the variance is equal to the variance per day
+//'   squared.
+//'   
+//'   If the number of rows of \code{ohlc} is less than \code{3} then it
+//'   returns zero.
+//'   
+//'   The optional argument \code{in_dex} is the time index of the \emph{time
+//'   series} \code{ohlc}. If the time index is in seconds, then the
+//'   differences of the index are equal to the number of seconds in each time
+//'   period.  If the time index is in days, then the differences are equal to
+//'   the number of days in each time period.
+//'   
+//'   The optional argument \code{lag_close} are the lagged \emph{close} prices
+//'   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
+//'   speeds up the calculation, so it's useful for rolling calculations.
+//'   
+//'   The function \code{calc_var_ohlc()} is implemented in \code{RcppArmadillo}
+//'   \code{C++} code, and it's over \code{10} times faster than
+//'   \code{calc_var_ohlc_r()}, which is implemented in \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Extract the log OHLC prices of SPY
+//' oh_lc <- log(HighFreq::SPY)
+//' # Extract the time index of SPY prices
+//' in_dex <- c(1, diff(xts::.index(oh_lc)))
+//' # Calculate the variance of SPY returns, with scaling of the returns
+//' HighFreq::calc_var_ohlc(oh_lc, 
+//'  method="yang_zhang", scale=TRUE, in_dex=in_dex)
+//' # Calculate variance without accounting for overnight jumps
+//' HighFreq::calc_var_ohlc(oh_lc, 
+//'  method="rogers_satchell", scale=TRUE, in_dex=in_dex)
+//' # Calculate the variance without scaling the returns
+//' HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
+//' # Calculate the variance by passing in the lagged close prices
+//' lag_close <- HighFreq::lag_it(oh_lc[, 4])
+//' all.equal(HighFreq::calc_var_ohlc(oh_lc), 
+//'   HighFreq::calc_var_ohlc(oh_lc, lag_close=lag_close))
+//' # Compare with HighFreq::calc_var_ohlc_r()
+//' all.equal(HighFreq::calc_var_ohlc(oh_lc, in_dex=in_dex), 
+//'   HighFreq::calc_var_ohlc_r(oh_lc))
+//' # Compare the speed of Rcpp with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_var_ohlc(oh_lc),
+//'   Rcode=HighFreq::calc_var_ohlc_r(oh_lc),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' @export
+// [[Rcpp::export]]
+double calc_var_ohlc(const arma::mat& ohlc, 
+                     std::string method = "yang_zhang", 
+                     arma::colvec lag_close = 0, 
+                     bool scale = true, 
+                     arma::colvec in_dex = 0) {
+  
+  arma::uword num_rows = ohlc.n_rows;
+  double coeff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
+  
+  if (num_rows < 3) {
+    // Return zero if not enough data
+    return 0;
+  }  // end if
+  
+  if (!scale || (in_dex.n_rows == 1)) {
+    in_dex = arma::ones(num_rows);
+    // cout << "ohlc.n_rows = " << num_rows << endl;
+    // cout << "in_dex.n_rows = " << in_dex.n_rows << endl;
+  }  // end if
+  
+  // Calculate all the different intra-day and day-over-day returns 
+  // (differences of OHLC prices)
+  arma::colvec clo_se = ohlc.col(3);
+  arma::colvec open_close(clo_se.n_rows);
+  if (lag_close.n_rows == 1) {
+    open_close = arma::join_cols(clo_se.subvec(0, 0), clo_se.subvec(0, clo_se.n_elem-2));
+    open_close = (ohlc.col(0) - open_close)/in_dex;
+  } else {
+    open_close = (ohlc.col(0) - lag_close)/in_dex;
+  }  // end if
+  arma::colvec close_open = (clo_se - ohlc.col(0))/in_dex;
+  arma::colvec close_high = (clo_se - ohlc.col(1))/in_dex;
+  arma::colvec close_low = (clo_se - ohlc.col(2))/in_dex;
+  arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/in_dex;
+  arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/in_dex;
+  arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/in_dex;
+  
+  if (method == "close") {
+    // cout << "Calc method is Close" << endl;
+    return arma::var(arma::diff(clo_se));
+  } else if (method == "rogers_satchell") {
+    // cout << "Calc method is Rogers-Satchell" << endl;
+    return -(arma::dot(close_high, high_open) +
+             arma::dot(close_low, low_open))/num_rows;
+  } else if (method == "garman_klass") {
+    // cout << "Calc method is Garman-Klass" << endl;
+    return (0.5*arma::dot(high_low, high_low) -
+            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows;
+  } else if (method == "garman_klass_yz") {
+    // cout << "Calc method is Garman-Klass-YZ" << endl;
+    return (0.5*arma::dot(high_low, high_low) -
+            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows + 
+            arma::var(open_close);
+  } else if (method == "yang_zhang") {
+    // cout << "Calc method is Yang-Zhang" << endl;
+    return arma::var(open_close) + coeff*arma::var(close_open) +
+      (coeff-1)*(arma::dot(close_high, high_open) + 
+      arma::dot(close_low, low_open))/num_rows;
+  } else {
+    cout << "Wrong calc method!" << endl;
+    return 1;
+  }  // end if
+  
+  // cout << "Calc method is " << method << endl;
+  
+}  // end calc_var_ohlc
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the variance of aggregated \emph{OHLC} prices using different
+//' price range estimators.
+//'
+//' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
+//'   prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @param \code{method} A \emph{character} string representing the price range
+//'   estimator for calculating the variance.  The estimators include:
+//'   \itemize{
+//'     \item "close" close-to-close estimator,
+//'     \item "rogers_satchell" Rogers-Satchell estimator,
+//'     \item "garman_klass" Garman-Klass estimator,
+//'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+//'     \item "yang_zhang" Yang-Zhang estimator,
+//'    }
+//'    (The default is the \code{method = "yang_zhang"}.)
+//'    
+//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//'   of the \emph{OHLC time series}.  This is an optional argument. (The
+//'   default is \code{lag_close = 0}).
+//'   
+//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//'   by the time index, the number of seconds in each period? (The default is
+//'   \code{scale = TRUE}).
+//'
+//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//'   
+//' @return The variance of aggregated \emph{OHLC} prices.
+//'
+//' @details 
+//'   The function \code{calc_var_ohlc_ag()} calculates the variance of
+//'   \emph{OHLC} prices aggregated over end points.
+//'
+//'   It first calculates the end points spaced apart by the number of periods
+//'   equal to the argument \code{step}.  Then it aggregates the \emph{OHLC}
+//'   prices to the end points. Finally it calculates the variance of the
+//'   aggregated \emph{OHLC} prices.
+//'
+//'   If there are extra periods that don't fit over the length of \code{ohlc},
+//'   then \code{calc_var_ohlc_ag()} loops over all possible stub intervals,
+//'   it calculates all the corresponding variance values, and it averages
+//'   them.
+//'
+//'   For example, if the number of rows of \code{ohlc} is equal to \code{20},
+//'   and \code{step=3} then \code{6} end points fit over the length of
+//'   \code{ohlc}, and there are \code{2} extra periods that must fit into
+//'   stubs, either at the beginning or at the end (or both).
+//' 
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The function \code{calc_var_ohlc_ag()} can therefore be used to calculate the
+//'   \emph{Hurst exponent} from the volatility ratio.
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate the log ohlc prices
+//' oh_lc <- log(rutils::etf_env$VTI)
+//' # Calculate the daily variance of percentage returns
+//' calc_var_ohlc_ag(oh_lc, step=1)
+//' # Calculate the variance of returns aggregated over 21 days
+//' calc_var_ohlc_ag(oh_lc, step=21)
+//' # The variance over 21 days is approximately 21 times the daily variance
+//' 21*calc_var_ohlc_ag(oh_lc, step=1)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+double calc_var_ohlc_ag(const arma::mat& ohlc,
+                        arma::uword step = 1, 
+                        std::string method = "yang_zhang", 
+                        arma::colvec lag_close = 0, 
+                        bool scale = true, 
+                        arma::colvec in_dex = 0) {
+  
+  if (step == 1)
+    // Calculate the variance without aggregations.
+    return calc_var_ohlc(ohlc, method, lag_close, scale, in_dex);
+  else {
+    // Calculate the number of extra periods that don't fit over num_rows.
+    arma::uword num_rows = ohlc.n_rows;
+    arma::uword remainder = num_rows % step;
+    // Allocate aggregations, end points, and variance.
+    arma::mat aggs;
+    arma::uvec end_p;
+    arma::mat var_s(remainder, 1);
+    // Perform loop over the stubs
+    for (arma::uword stub = 0; stub < remainder; stub++) {
+      end_p = calc_endpoints(num_rows, step=step, stub=stub);
+      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
+      // end_p = end_p.elem(find(end_p < num_rows));
+      // roll_ohlc
+      aggs = roll_ohlc(ohlc, end_p);
+      var_s.row(stub) = calc_var_ohlc(aggs, method, lag_close, scale, in_dex);
+    }  // end for
+    return arma::as_scalar(mean(var_s));
+  }  // end if
+  
+}  // end calc_var_ohlc_ag
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the skewness of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{method} A \emph{string} specifying the type of the skewness
+//'   model (the default is \code{method = "moment"} - see Details).
+//'
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
+//' @return A single-row matrix with the skewness of the columns of
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{calc_skew()} calculates the skewness of the columns of
+//'   a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
+//'   \code{C++} code.
+//'
+//'   If \code{method = "moment"} (the default) then \code{calc_skew()}
+//'   calculates the skewness as the third moment of the data.
+//'
+//'   If \code{method = "quantile"} then it calculates the skewness
+//'   \eqn{\varsigma} from the differences between the quantiles of the data as
+//'   follows:
+//'   \deqn{
+//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2*q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
+//'   }
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'
+//'   If \code{method = "nonparametric"} then it calculates the skewness as the
+//'   difference between the mean of the data minus its median, divided by the
+//'   standard deviation.
+//'   
+//'   If the number of rows of \code{tseries} is less than \code{3} then it
+//'   returns zeros.
+//'   
+//'   The code examples below compare the function \code{calc_skew()} with the
+//'   skewness calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Define a single-column time series of returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' # Calculate the moment skewness
+//' HighFreq::calc_skew(re_turns)
+//' # Calculate the moment skewness in R
+//' calc_skewr <- function(x) {
+//'   x <- (x-mean(x))
+//'   sum(x^3)/var(x)^1.5/NROW(x)
+//' }  # end calc_skewr
+//' all.equal(HighFreq::calc_skew(re_turns), 
+//'   calc_skewr(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns),
+//'   Rcode=calc_skewr(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the quantile skewness
+//' HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)
+//' # Calculate the quantile skewness in R
+//' calc_skewq <- function(x, a = 0.75) {
+//'   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
+//'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+//' }  # end calc_skewq
+//' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)), 
+//'   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns, method="quantile"),
+//'   Rcode=calc_skewq(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the nonparametric skewness
+//' HighFreq::calc_skew(re_turns, method="nonparametric")
+//' # Compare HighFreq::calc_skew() with R nonparametric skewness
+//' all.equal(drop(HighFreq::calc_skew(re_turns, method="nonparametric")), 
+//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//'   check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_skew(re_turns, method="nonparametric"),
+//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_skew(const arma::mat& tseries,
+                    std::string method = "moment", 
+                    double con_fi = 0.75) {
+  
+  // Return zeros if not enough data
+  if (tseries.n_rows < 3) {
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end if
+  
+  // Switch for the different methods of skew
+  switch(calc_method(method)) {
+  case meth_od::moment: {  // moment
+    double num_rows = tseries.n_rows;
+    double num_cols = tseries.n_cols;
+    arma::mat means = arma::mean(tseries);
+    arma::mat var_s = arma::var(tseries);
+    arma::mat skewness(1, num_cols);
+    // De-mean the columns of tseries
+    // tseries.each_row() -= means;
+    // return arma::sum(arma::pow(tseries, 3))/arma::pow(var_s, 1.5)/num_rows;
+    for (arma::uword it = 0; it < num_cols; it++) {
+      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(var_s.col(it), 1.5)/num_rows;
+    }  // end for
+    return skewness;
+  }  // end moment
+  case meth_od::quantile: {  // quantile
+    arma::vec level_s = {1-con_fi, 0.5, con_fi};
+    arma::mat quantile_s = arma::quantile(tseries, level_s);
+    return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  }  // end quantile
+  case meth_od::nonparametric: {  // nonparametric
+    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
+  }  // end nonparametric
+  default : {
+    cout << "Warning: Invalid method parameter" << endl;
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end default
+  }  // end switch
+  
+}  // end calc_skew
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the kurtosis of the columns of a \emph{time series} or a
+//' \emph{matrix} using \code{RcppArmadillo}.
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+//'
+//' @param \code{method} A \emph{string} specifying the type of the kurtosis
+//'   model (the default is \code{method = "moment"} - see Details).
+//'
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
+//' @return A single-row matrix with the kurtosis of the columns of
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns
+//'   of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
+//'   code.
+//'
+//'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
+//'   calculates the fourth moment of the data.
+//'   But it doesn't de-mean the columns of \code{tseries} because that requires
+//'   copying the matrix \code{tseries}, so it's time-consuming.
+//'
+//'   If \code{method = "quantile"} then it calculates the skewness
+//'   \eqn{\kappa} from the differences between the quantiles of the data as
+//'   follows:
+//'   \deqn{
+//'     \kappa = \frac{q_{\alpha} - q_{1-\alpha}}{q_{0.75} - q_{0.25}}
+//'   }
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'
+//'   If \code{method = "nonparametric"} then it calculates the kurtosis as the
+//'   difference between the mean of the data minus its median, divided by the
+//'   standard deviation.
+//'   
+//'   If the number of rows of \code{tseries} is less than \code{3} then it
+//'   returns zeros.
+//'   
+//'   The code examples below compare the function \code{calc_kurtosis()} with the
+//'   kurtosis calculated using \code{R} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Define a single-column time series of returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' # Calculate the moment kurtosis
+//' HighFreq::calc_kurtosis(re_turns)
+//' # Calculate the moment kurtosis in R
+//' calc_kurtr <- function(x) {
+//'   x <- (x-mean(x))
+//'   sum(x^4)/var(x)^2/NROW(x)
+//' }  # end calc_kurtr
+//' all.equal(HighFreq::calc_kurtosis(re_turns), 
+//'   calc_kurtr(re_turns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_kurtosis(re_turns),
+//'   Rcode=calc_kurtr(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the quantile kurtosis
+//' HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)
+//' # Calculate the quantile kurtosis in R
+//' calc_kurtq <- function(x, a=0.9) {
+//'   	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
+//'   	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
+//' }  # end calc_kurtq
+//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", con_fi=0.9)), 
+//'   calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="quantile"),
+//'   Rcode=calc_kurtq(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Calculate the nonparametric kurtosis
+//' HighFreq::calc_kurtosis(re_turns, method="nonparametric")
+//' # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
+//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="nonparametric")), 
+//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//'   check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="nonparametric"),
+//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_kurtosis(const arma::mat& tseries,
+                        std::string method = "moment", 
+                        double con_fi = 0.75) {
+  
+  // Return zeros if not enough data
+  if (tseries.n_rows < 3) {
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end if
+  
+  // Switch for the different methods of kurtosis
+  switch(calc_method(method)) {
+  case meth_od::moment: {  // Fourth moment
+    double num_rows = tseries.n_rows;
+    double num_cols = tseries.n_cols;
+    arma::mat means = arma::mean(tseries);
+    arma::mat var_s = arma::var(tseries);
+    arma::mat kurtosis(1, num_cols);
+    // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
+    // Loop over columns of tseries
+    for (arma::uword it = 0; it < num_cols; it++) {
+      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(var_s.col(it), 2)/num_rows;
+    }  // end for
+    // tseries.each_row() -= means;
+    // return arma::sum(arma::pow(tseries, 4))/arma::pow(var_s, 2)/num_rows;
+    return kurtosis;
+  }  // end moment
+  case meth_od::quantile: {  // quantile
+    arma::vec level_s = {1-con_fi, 0.25, 0.75, con_fi};
+    arma::mat quantile_s = arma::quantile(tseries, level_s);
+    return (quantile_s.row(3) - quantile_s.row(0))/(quantile_s.row(2) - quantile_s.row(1));
+  }  // end quantile
+  case meth_od::nonparametric: {  // nonparametric
+    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
+  }  // end nonparametric
+  default : {
+    cout << "Warning: Invalid method parameter" << endl;
+    return arma::zeros<rowvec>(tseries.n_cols);
+  }  // end default
+  }  // end switch
+  
+}  // end calc_kurtosis
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
+//'
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @return The Hurst exponent calculated from the variance of aggregated
+//'   returns.
+//'
+//' @details 
+//'   The function \code{calc_hurst()} calculates the Hurst exponent from the
+//'   ratios of the volatilities of aggregated returns.
+//'
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
+//'   of the volatilities divided by the logarithm of the time interval
+//'   \eqn{\Delta t}:
+//'     \deqn{
+//'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+//'     }
+//' 
+//'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
+//'   to calculate the aggregated volatility \eqn{\sigma_t}.
+//' 
+//' @examples
+//' \dontrun{
+//' # Calculate the log prices
+//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
+//' price_s <- log(price_s)
+//' # Calculate the Hurst exponent from 21 day aggregations
+//' calc_hurst(price_s, step=21)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_hurst(const arma::mat& tseries, 
+                     arma::uword step = 1) {
+  
+  return 0.5*arma::log(calc_var_ag(tseries, step)/calc_var_ag(tseries, 1))/log(step);
+  
+}  // end calc_hurst
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the Hurst exponent from the volatility ratio of aggregated
+//' \emph{OHLC} prices.
+//'
+//' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
+//'   prices.
+//'
+//' @param \code{step} The number of periods in each interval between
+//'   neighboring end points.
+//' 
+//' @param \code{method} A \emph{character} string representing the price range
+//'   estimator for calculating the variance.  The estimators include:
+//'   \itemize{
+//'     \item "close" close-to-close estimator,
+//'     \item "rogers_satchell" Rogers-Satchell estimator,
+//'     \item "garman_klass" Garman-Klass estimator,
+//'     \item "garman_klass_yz" Garman-Klass with account for close-to-open price jumps,
+//'     \item "yang_zhang" Yang-Zhang estimator,
+//'    }
+//'    (The default is the \code{method = "yang_zhang"}.)
+//'    
+//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//'   of the \emph{OHLC time series}.  This is an optional argument. (The
+//'   default is \code{lag_close = 0}).
+//'   
+//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//'   by the time index, the number of seconds in each period? (The default is
+//'   \code{scale = TRUE}).
+//'
+//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//'   
+//' @return The Hurst exponent calculated from the variance ratio of aggregated
+//' \emph{OHLC} prices.
+//'
+//' @details 
+//' The function \code{calc_hurst_ohlc()} calculates the Hurst exponent from the
+//' ratios of the volatilities of aggregated \emph{OHLC} prices.
+//'
+//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
+//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
+//'   the \emph{Hurst exponent} \eqn{H}:
+//'     \deqn{
+//'       \sigma_t = \sigma {\Delta t}^H
+//'     }
+//'   Where \eqn{\sigma} is the daily return volatility.
+//' 
+//'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
+//'   of the volatilities divided by the logarithm of the time interval
+//'   \eqn{\Delta t}:
+//'     \deqn{
+//'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+//'     }
+//' 
+//'   The function \code{calc_hurst_ohlc()} calls the function
+//'   \code{calc_var_ohlc_ag()} to calculate the aggregated volatility
+//'   \eqn{\sigma_t}.
+//' 
+//' @examples
+//' \dontrun{
+//' # Calculate the log ohlc prices
+//' oh_lc <- log(rutils::etf_env$VTI)
+//' # Calculate the Hurst exponent from 21 day aggregations
+//' calc_hurst_ohlc(oh_lc, step=21)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+double calc_hurst_ohlc(const arma::mat& ohlc,
+                       arma::uword step = 1, 
+                       std::string method = "yang_zhang", 
+                       arma::colvec lag_close = 0, 
+                       bool scale = true, 
+                       arma::colvec in_dex = 0) {
+  
+  return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, lag_close, scale, in_dex)/
+                 calc_var_ohlc_ag(ohlc, 1, method, lag_close, scale, in_dex))/log(step);
+  
+}  // end calc_hurst_ohlc
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Perform multivariate linear regression using least squares and return a
+//' named list of regression coefficients, their t-values, and p-values.
+//' 
+//' @param \code{response} A single-column \emph{time series} or a \emph{vector}
+//'   of response data.
+//' 
+//' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
+//'   (predictor or explanatory data).
+//' 
+//' @return A named list with three elements: a \emph{matrix} of coefficients
+//'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
+//'   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+//'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
+//'   coefficients named \emph{"coefficients"} contains the alpha and beta
+//'   coefficients, and their \emph{t-values} and \emph{p-values}.
+//'
+//' @details 
+//'   The function \code{calc_lm()} performs the same calculations as the
+//'   function \code{lm()} from package \emph{stats}. 
+//'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
+//'   than \code{lm()}. The code was inspired by this article (but it's not
+//'   identical to it):
+//'   http://gallery.rcpp.org/articles/fast-linear-model-with-armadillo/
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
+//' # Response equals IEF returns
+//' res_ponse <- re_turns[, 1]
+//' # Design matrix equals VTI and XLF returns
+//' de_sign <- re_turns[, -1]
+//' # Perform multivariate regression using lm()
+//' reg_model <- lm(res_ponse ~ de_sign)
+//' sum_mary <- summary(reg_model)
+//' # Perform multivariate regression using calc_lm()
+//' reg_arma <- HighFreq::calc_lm(response=res_ponse, design=de_sign)
+//' # Compare the outputs of both functions
+//' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
+//' all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
+//' all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
+//' # Compare the speed of RcppArmadillo with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_lm(response=res_ponse, design=de_sign),
+//'   Rcode=lm(res_ponse ~ de_sign),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::List calc_lm(const arma::vec& response, const arma::mat& design) {
+  
+  // Add column for intercept to explanatory matrix
+  arma::uword num_rows = design.n_rows;
+  arma::mat design_p = join_rows(ones(num_rows), design);
+  arma::uword num_cols = design_p.n_cols;
+  arma::uword deg_free = (num_rows - num_cols);
+  
+  // Calculate alpha and beta coefficients for the model response ~ design
+  arma::colvec coeff = arma::solve(design_p, response);
+  // Calculate residuals
+  arma::colvec resid_uals = response - design_p*coeff;
+  
+  // Calculate TSS, RSS, and ESS
+  double tot_sumsq = (num_rows-1)*arma::var(response);
+  double res_sumsq = arma::dot(resid_uals, resid_uals);
+  double exp_sumsq = tot_sumsq - res_sumsq;
+  
+  // Calculate R-squared and F-statistic
+  double r_squared = exp_sumsq/tot_sumsq;
+  double f_stat = (exp_sumsq*deg_free)/(res_sumsq*(num_cols-1));
+  // arma::rowvec stat_s=join_horiz(r_squared, f_stat);
+  Rcpp::NumericVector stat_s(2);
+  stat_s(0) = r_squared;
+  stat_s(1) = f_stat;
+  stat_s.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
+  
+  // Calculate standard errors of beta coefficients
+  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(design_p)*design_p)));
+  // Calculate t-values and p-values of beta coefficients
+  arma::colvec t_vals = coeff/std_err;
+  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(t_vals)), deg_free);
+  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), t_vals), p_vals));
+  Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
+  
+  return Rcpp::List::create(Named("coefficients") = coeff_mat,
+                            // Named("residuals") = resid_uals,
+                            Named("z_score") = resid_uals(num_rows-1)/arma::stddev(resid_uals),
+                            Named("stats") = stat_s);
+  
+}  // end calc_lm
+
+
+
+////////////////////////////////////////////////////////////
+//' Perform multivariate regression using different methods, and return a vector
+//' of regression coefficients, their t-values, and the last residual z-score.
+//' 
+//' @param \code{response} A single-column \emph{time series} or a \emph{vector}
+//'   of response data.
+//' 
+//' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
+//'   (predictor or explanatory data).
+//' 
+//' @param \code{method} A \emph{string} specifying the type of the regression
+//'   model the default is \code{method = "least_squares"} - see Details).
+//'   
+//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//'   small singular values in order to regularize the inverse of the
+//'   \code{design} matrix (the default is \code{0.001}).
+//'   
+//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the \code{design}
+//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   the number of columns of \code{design}).
+//'   
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
+//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
+//'   (the default is \code{0}).
+//' 
+//' @return A vector with the regression coefficients, their t-values, and the
+//'   last residual z-score.
+//'
+//' @details 
+//'   The function \code{calc_reg()} performs multivariate regression using
+//'   different methods, and returns a vector of regression coefficients, their
+//'   t-values, and the last residual z-score.
+//' 
+//'   The length of the return vector depends on the number of columns of
+//'   \code{design}.
+//'   The number of regression coefficients is equal to the number of columns of
+//'   \code{design} plus \code{1}.  The number of t-values is equal to the
+//'   number of coefficients.  And there is only \code{1} z-score.
+//'   So if the number of columns of \code{design} is equal to \code{n}, then
+//'   the return vector will have \code{2n+3} elements.
+//' 
+//'   For example, if the design matrix has \code{2} columns of data, then
+//'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
+//'   regression coefficients (including the intercept coefficient), \code{3}
+//'   corresponding t-values, and \code{1} z-score.
+//'
+//'   If \code{method = "least_squares"} (the default) then it performs the
+//'   standard least squares regression, the same as the function
+//'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
+//'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
+//'   than \code{lm()}.
+//'
+//'   If \code{method = "regular"} then it performs regularized regression.  It
+//'   calculates the regularized inverse of the \code{design} matrix from its
+//'   singular value decomposition.  It applies dimension regularization by
+//'   selecting only the largest singular values equal in number to
+//'   \code{eigen_max}.
+//'   
+//'   If \code{method = "quantile"} then it performs quantile regression (not
+//'   implemented yet).
+//'
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
+//' # Response equals IEF returns
+//' res_ponse <- re_turns[, 1]
+//' # Design matrix equals VTI and XLF returns
+//' de_sign <- re_turns[, -1]
+//' # Perform multivariate regression using lm()
+//' reg_model <- lm(res_ponse ~ de_sign)
+//' sum_mary <- summary(reg_model)
+//' co_eff <- sum_mary$coefficients
+//' # Perform multivariate regression using calc_reg()
+//' reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, design=de_sign))
+//' # Compare the outputs of both functions
+//' all.equal(reg_arma[1:(2*(1+NCOL(de_sign)))], 
+//'   c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_reg(response=res_ponse, design=de_sign),
+//'   Rcode=lm(res_ponse ~ de_sign),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::colvec calc_reg(const arma::vec& response, 
+                      const arma::mat& design,
+                      std::string method = "least_squares",
+                      double eigen_thresh = 0.001,
+                      arma::uword eigen_max = 0,
+                      double con_fi = 0.1,
+                      double alpha = 0.0) {
+  
+  // Add column for intercept to explanatory matrix
+  arma::uword num_rows = design.n_rows;
+  arma::mat design_p = join_rows(ones(num_rows), design);
+  arma::uword num_cols = design_p.n_cols;
+  arma::uword deg_free = (num_rows - num_cols);
+  arma::colvec coeff(num_cols, fill::zeros);
+  arma::colvec reg_data(2*num_cols+1, fill::zeros);
+  
+  // Switch for the different methods for weights
+  switch(calc_method(method)) {
+  case meth_od::least_squares: {
+    // Calculate regression coefficients for the model response ~ design
+    coeff = arma::solve(design_p, response);
+    break;
+  }  // end least_squares
+  case meth_od::regular: {
+    // Calculate regularized regression coefficients
+    coeff = calc_inv(design_p, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*response;
+    break;
+  }  // end regular
+  case meth_od::quantile: {
+    // Not implemented yet
+    break;
+  }  // end quantile
+  default : {
+    cout << "Warning: Invalid method parameter: " << method << endl;
+    return reg_data;
+  }  // end default
+  }  // end switch
+  
+  // Calculate residuals
+  arma::colvec resid_uals = response - design_p*coeff;
+  
+  // Calculate TSS, RSS, and ESS
+  // double tot_sumsq = (num_rows-1)*arma::var(response);
+  double res_sumsq = arma::dot(resid_uals, resid_uals);
+  // double exp_sumsq = tot_sumsq - res_sumsq;
+  
+  // Calculate standard errors of beta coefficients
+  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(design_p)*design_p)));
+  // Calculate t-values and p-values of beta coefficients
+  arma::colvec t_vals = coeff/std_err;
+  
+  // Calculate z-score
+  double z_score = resid_uals(num_rows-1)/arma::stddev(resid_uals);
+  
+  // Combine regression data
+  reg_data.subvec(0, num_cols-1) = coeff;
+  reg_data.subvec(num_cols, 2*num_cols-1) = t_vals;
+  reg_data(2*num_cols) = z_score;
+  
+  return reg_data;
+  
+}  // end calc_reg
+
+
+
+
+////////////////////////////////////////////////////////////
+// Functions for rolling statistics
+////////////////////////////////////////////////////////////
+
+
 ////////////////////////////////////////////////////////////
 //' Calculate a \emph{matrix} of mean (location) estimates over a rolling
 //' look-back interval attached at the end points of a \emph{time series} or a
@@ -3098,7 +3302,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{character} string representing the range
+//' @param \code{method} A \emph{character} string representing the price range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -3184,9 +3388,9 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Extract the log OHLC prices of SPY
-//' sp_y <- log(HighFreq::SPY)
+//' oh_lc <- log(HighFreq::SPY)
 //' # Extract the time index of SPY prices
-//' in_dex <- c(1, diff(xts::.index(sp_y)))
+//' in_dex <- c(1, diff(xts::.index(oh_lc)))
 //' # Rolling variance at minutely end points, with a 21 minute look-back
 //' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 //'                               step=1, look_back=21, 
@@ -3300,6 +3504,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   return variance;
   
 }  // end roll_var_ohlc
+
 
 
 
@@ -4138,9 +4343,9 @@ arma::mat roll_fun(const arma::mat& tseries,
 
 
 
-////////////////////////////
+////////////////////////////////////////////////////////////
 // Functions for simulation
-////////////////////////////
+////////////////////////////////////////////////////////////
 
 
 
@@ -4374,9 +4579,10 @@ arma::vec sim_arima(const arma::vec& innov, arma::vec coeff) {
 
 
 
-////////////////////////////
+
+////////////////////////////////////////////////////////////
 // Functions for backtests
-////////////////////////////
+////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
@@ -4680,7 +4886,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   The function \code{back_test()} calculates the transaction costs by
 //'   multiplying the bid-offer spread \code{bid_offer} times the absolute
 //'   difference between the current weights minus the weights from the previous
-//'   period. It then subtracts the transaction costs from the out-of-sample
+//'   period. Then it subtracts the transaction costs from the out-of-sample
 //'   strategy returns.
 //'   
 //'   The function \code{back_test()} returns a \emph{time series} (column

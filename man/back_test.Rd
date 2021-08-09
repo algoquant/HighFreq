@@ -94,7 +94,7 @@ The function \code{back_test()} performs a backtest simulation of a
   The function \code{back_test()} calculates the transaction costs by
   multiplying the bid-offer spread \code{bid_offer} times the absolute
   difference between the current weights minus the weights from the previous
-  period. It then subtracts the transaction costs from the out-of-sample
+  period. Then it subtracts the transaction costs from the out-of-sample
   strategy returns.
   
   The function \code{back_test()} returns a \emph{time series} (column

@@ -37,7 +37,7 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{character} string representing the range
+\item{\code{method}}{A \emph{character} string representing the price range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,
@@ -129,9 +129,9 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
 \examples{
 \dontrun{
 # Extract the log OHLC prices of SPY
-sp_y <- log(HighFreq::SPY)
+oh_lc <- log(HighFreq::SPY)
 # Extract the time index of SPY prices
-in_dex <- c(1, diff(xts::.index(sp_y)))
+in_dex <- c(1, diff(xts::.index(oh_lc)))
 # Rolling variance at minutely end points, with a 21 minute look-back
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
                               step=1, look_back=21, 
