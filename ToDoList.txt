@@ -418,6 +418,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] Create function roll_sumep() for calculating the rolling sums at the end points
+
 + [x] Create function calc_var_ag() for calculating the variance of returns aggregated over end points
 
 + [x] Create function calc_hurst() for calculating the Hurst exponent from the ratios of variance of aggregated returns

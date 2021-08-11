@@ -740,7 +740,7 @@ roll_count <- function(tseries) {
 #' # Define matrix of OHLC data
 #' oh_lc <- rutils::etf_env$VTI[, 1:5]
 #' # Define end points at 25 day intervals
-#' end_p <- HighFreq::calc_endpoints(oh_lc, step=25)
+#' end_p <- HighFreq::calc_endpoints(NROW(oh_lc), step=25)
 #' # Aggregate over end_p:
 #' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
 #' # Compare with xts::to.period()
@@ -944,6 +944,60 @@ roll_sum <- function(tseries, look_back = 1L) {
     .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', tseries, look_back)
 }
 
+#' Calculate the rolling sums at the end points of a \emph{time series} or a
+#' \emph{matrix}.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' 
+#' @param \code{startp} An \emph{integer} vector of start points (the default
+#'   is \code{startp = 0}).
+#' 
+#' @param \code{endp} An \emph{integer} vector of end points (the default is
+#'   \code{endp = 0}).
+#' 
+#' @param \code{step} The number of time periods between the end points (the
+#'   default is \code{step = 1}).
+#'
+#' @param \code{look_back} The number of end points in the look-back interval
+#'   (the default is \code{look_back = 1}).
+#'   
+#' @param \code{stub} An \emph{integer} value equal to the first end point for
+#'   calculating the end points.
+#'
+#' @return A \emph{matrix} with the same number of columns as the input time
+#'   series \code{tseries}, and the number of rows equal to the number of end
+#'   points.
+#'   
+#' @details 
+#'   The function \code{roll_sumep()} calculates the rolling sums at the end
+#'   points of the \emph{time series} \code{tseries}.
+#'   
+#'   The function \code{roll_sumep()} is implemented in \code{RcppArmadillo}
+#'   \code{C++} code, which makes it several times faster than \code{R} code.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' # Define end points at 25 day intervals
+#' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
+#' # Define start points as 75 day lag of end points
+#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' # Calculate rolling sums using Rcpp
+#' c_sum <- HighFreq::roll_sumep(re_turns, startp=start_p, endp=end_p)
+#' # Calculate rolling sums using R code
+#' r_sum <- sapply(1:NROW(end_p), function(ep) {
+#' colSums(re_turns[(start_p[ep]+1):(end_p[ep]+1), ])
+#'   })  # end sapply
+#' r_sum <- t(r_sum)
+#' all.equal(c_sum, r_sum, check.attributes=FALSE)
+#' }
+#' 
+#' @export
+roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call('_HighFreq_roll_sumep', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub)
+}
+
 #' Calculate the rolling weighted sums over a \emph{time series} or a
 #' \emph{matrix} using \emph{Rcpp}.
 #' 
@@ -1078,8 +1132,8 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   \code{tseries}.
 #'
 #' @details 
-#'   The function \code{calc_mean()} calculates the mean (location) of the
-#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   The function \code{calc_mean()} calculates the mean (location) values of
+#'   the columns of the \emph{time series} \code{tseries} using
 #'   \code{RcppArmadillo} \code{C++} code.
 #'
 #'   If \code{method = "moment"} (the default) then \code{calc_mean()}

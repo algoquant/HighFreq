@@ -1104,7 +1104,7 @@ arma::uvec roll_count(const arma::uvec& tseries) {
 //' # Define matrix of OHLC data
 //' oh_lc <- rutils::etf_env$VTI[, 1:5]
 //' # Define end points at 25 day intervals
-//' end_p <- HighFreq::calc_endpoints(oh_lc, step=25)
+//' end_p <- HighFreq::calc_endpoints(NROW(oh_lc), step=25)
 //' # Aggregate over end_p:
 //' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
 //' # Compare with xts::to.period()
@@ -1397,6 +1397,121 @@ arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
 
 
 ////////////////////////////////////////////////////////////
+//' Calculate the rolling sums at the end points of a \emph{time series} or a
+//' \emph{matrix}.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+//' 
+//' @param \code{startp} An \emph{integer} vector of start points (the default
+//'   is \code{startp = 0}).
+//' 
+//' @param \code{endp} An \emph{integer} vector of end points (the default is
+//'   \code{endp = 0}).
+//' 
+//' @param \code{step} The number of time periods between the end points (the
+//'   default is \code{step = 1}).
+//'
+//' @param \code{look_back} The number of end points in the look-back interval
+//'   (the default is \code{look_back = 1}).
+//'   
+//' @param \code{stub} An \emph{integer} value equal to the first end point for
+//'   calculating the end points.
+//'
+//' @return A \emph{matrix} with the same number of columns as the input time
+//'   series \code{tseries}, and the number of rows equal to the number of end
+//'   points.
+//'   
+//' @details 
+//'   The function \code{roll_sumep()} calculates the rolling sums at the end
+//'   points of the \emph{time series} \code{tseries}.
+//'   
+//'   The function \code{roll_sumep()} is implemented in \code{RcppArmadillo}
+//'   \code{C++} code, which makes it several times faster than \code{R} code.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+//' # Define end points at 25 day intervals
+//' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
+//' # Define start points as 75 day lag of end points
+//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' # Calculate rolling sums using Rcpp
+//' c_sum <- HighFreq::roll_sumep(re_turns, startp=start_p, endp=end_p)
+//' # Calculate rolling sums using R code
+//' r_sum <- sapply(1:NROW(end_p), function(ep) {
+//' colSums(re_turns[(start_p[ep]+1):(end_p[ep]+1), ])
+//'   })  # end sapply
+//' r_sum <- t(r_sum)
+//' all.equal(c_sum, r_sum, check.attributes=FALSE)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat roll_sumep(arma::mat tseries, 
+                     arma::uvec startp = 0, 
+                     arma::uvec endp = 0, 
+                     arma::uword step = 1, 
+                     arma::uword look_back = 1, 
+                     arma::uword stub = 0) {
+  
+  // Allocate end points
+  arma::uword num_rows = tseries.n_rows;
+  arma::uvec end_pts;
+  arma::uvec start_pts;
+  
+  // Calculate end points if missing
+  if (sum(endp) == 0) {
+    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+  } else {
+    // Copy end points
+    end_pts = endp;
+  }  // end if
+  
+  // Calculate start points if missing
+  if (sum(startp) == 0) {
+    // Start points equal to end points lagged by look_back
+    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    // Old code for start_pts
+    // Start points equal to end points lagged by look_back - without adding +1
+    // arma::uword num_pts = end_pts.n_elem;
+    // arma::uvec start_pts = arma::join_cols(arma::zeros<uvec>(look_back), 
+    //                                        end_pts.subvec(0, num_pts - look_back - 1));
+  } else {
+    // Copy start points
+    start_pts = startp;
+  }  // end if
+  
+  // Allocate sums matrix
+  arma::uword num_pts = end_pts.n_elem;
+  arma::mat sums = arma::zeros<mat>(num_pts, tseries.n_cols);
+  
+  // Perform loop over the end points
+  for (arma::uword ep = 0; ep < num_pts; ep++) {
+    // Calculate sums
+    if (end_pts(ep) > start_pts(ep)) {
+      sums.row(ep) = arma::sum(tseries.rows(start_pts(ep), end_pts(ep)));
+    }  // end if
+  }  // end for
+  
+  return sums;
+  
+  // Old code using arma::cumsum() - sums exclude start_pts
+  // Calculate cumulative sums at end points.
+  // arma::mat cum_sum = arma::cumsum(tseries, 0);
+  // arma::mat cum_start = cum_sum.rows(start_pts);
+  // arma::mat cum_end = cum_sum.rows(end_pts);
+  
+  // Return the differences of the cumulative returns
+  // return diff_it(cum_sum, 1, true);
+  // return (cum_end - cum_start);
+  
+}  // end roll_sumep
+
+
+
+
+////////////////////////////////////////////////////////////
 //' Calculate the rolling weighted sums over a \emph{time series} or a
 //' \emph{matrix} using \emph{Rcpp}.
 //' 
@@ -1639,8 +1754,8 @@ meth_od calc_method(std::string method) {
 //'   \code{tseries}.
 //'
 //' @details 
-//'   The function \code{calc_mean()} calculates the mean (location) of the
-//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   The function \code{calc_mean()} calculates the mean (location) values of
+//'   the columns of the \emph{time series} \code{tseries} using
 //'   \code{RcppArmadillo} \code{C++} code.
 //'
 //'   If \code{method = "moment"} (the default) then \code{calc_mean()}

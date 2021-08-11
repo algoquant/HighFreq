@@ -225,6 +225,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// roll_sumep
+arma::mat roll_sumep(arma::mat tseries, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub);
+RcppExport SEXP _HighFreq_roll_sumep(SEXP tseriesSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< arma::uvec >::type startp(startpSEXP);
+    Rcpp::traits::input_parameter< arma::uvec >::type endp(endpSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_sumep(tseries, startp, endp, step, look_back, stub));
+    return rcpp_result_gen;
+END_RCPP
+}
 // roll_wsum
 arma::mat roll_wsum(const arma::mat& tseries, Rcpp::Nullable<Rcpp::IntegerVector> endp, arma::uword look_back, Rcpp::Nullable<int> stub, Rcpp::Nullable<Rcpp::NumericVector> weights);
 RcppExport SEXP _HighFreq_roll_wsum(SEXP tseriesSEXP, SEXP endpSEXP, SEXP look_backSEXP, SEXP stubSEXP, SEXP weightsSEXP) {
@@ -692,6 +708,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_vecw", (DL_FUNC) &_HighFreq_roll_vecw, 2},
     {"_HighFreq_roll_conv", (DL_FUNC) &_HighFreq_roll_conv, 2},
     {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
+    {"_HighFreq_roll_sumep", (DL_FUNC) &_HighFreq_roll_sumep, 6},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 5},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},

@@ -25,8 +25,8 @@ Calculate the mean (location) of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_mean()} calculates the mean (location) of the
-  columns of a \emph{time series} or a \emph{matrix} of data using
+The function \code{calc_mean()} calculates the mean (location) values of
+  the columns of the \emph{time series} \code{tseries} using
   \code{RcppArmadillo} \code{C++} code.
 
   If \code{method = "moment"} (the default) then \code{calc_mean()}
