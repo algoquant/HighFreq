@@ -256,6 +256,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_mean
+arma::mat run_mean(arma::mat tseries, double lambda);
+RcppExport SEXP _HighFreq_run_mean(SEXP tseriesSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_mean(tseries, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_mean
 arma::mat calc_mean(const arma::mat& tseries, std::string method, double con_fi);
 RcppExport SEXP _HighFreq_calc_mean(SEXP tseriesSEXP, SEXP methodSEXP, SEXP con_fiSEXP) {
@@ -710,6 +722,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_sum", (DL_FUNC) &_HighFreq_roll_sum, 2},
     {"_HighFreq_roll_sumep", (DL_FUNC) &_HighFreq_roll_sumep, 6},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 5},
+    {"_HighFreq_run_mean", (DL_FUNC) &_HighFreq_run_mean, 2},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},
     {"_HighFreq_calc_var", (DL_FUNC) &_HighFreq_calc_var, 3},

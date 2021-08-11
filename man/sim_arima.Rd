@@ -30,14 +30,14 @@ The function \code{sim_arima()} recursively filters a \emph{vector} of
 }
 \examples{
 \dontrun{
-# Create vector of innovations
-in_nov <- rnorm(100)
+# Calculate vector of prices
+price_s <- drop(zoo::coredata(quantmod::Cl(rutils::etf_env$VTI)))
 # Create ARIMA coefficients
 co_eff <- c(-0.8, 0.2)
 # Calculate recursive filter using filter()
-filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
+filter_ed <- filter(price_s, filter=co_eff, method="recursive")
 # Calculate recursive filter using RcppArmadillo
-ari_ma <- HighFreq::sim_arima(in_nov, rev(co_eff))
+ari_ma <- HighFreq::sim_arima(price_s, rev(co_eff))
 # Compare the two methods
 all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
 }

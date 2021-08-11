@@ -1693,6 +1693,79 @@ arma::mat roll_wsum(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
+// Functions for rolling aggregations of streaming data
+////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the rolling mean of streaming \emph{time series} data.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor.
+//'   
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{run_mean()} calculates the rolling mean of streaming
+//'   \emph{time series} data by recursively weighing present and past values
+//'   using the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+//'   }
+//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
+//'   streaming data.
+//' 
+//'   The function \code{run_mean()} performs the same calculation
+//'   as the standard \code{R} function \code{stats::filter(x=series,
+//'   filter=weight_s, method="convolution", sides=1)}, but it's several
+//'   times faster.
+//' 
+//'   The function \code{run_mean()} returns a \emph{matrix} with the same
+//'   dimensions as the input argument \code{tseries}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical prices
+//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+//' # Calculate the rolling means
+//' lamb_da <- 0.9
+//' means <- HighFreq::run_mean(re_turns, lambda=lamb_da)
+//' # Calculate rolling means using R code
+//' filter_ed <- (1-lamb_da)*filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive")
+//' all.equal(means, unclass(filter_ed), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
+//'   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_mean(arma::mat tseries, double lambda) {
+  
+  arma::uword num_rows = tseries.n_rows;
+  arma::mat means = tseries;
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over rows
+  for (arma::uword it = 1; it < num_rows; it++) {
+    // Calculate the mean as a weighted sum
+    means.row(it) = lambda1*means.row(it) + lambda*means.row(it-1);
+  }  // end for
+  
+  return means;
+  
+}  // end run_mean
+
+
+
+
+////////////////////////////////////////////////////////////
 // Functions for statistics
 ////////////////////////////////////////////////////////////
 
@@ -4657,14 +4730,14 @@ arma::vec sim_schwartz(double eq_price,
 //'   
 //' @examples
 //' \dontrun{
-//' # Create vector of innovations
-//' in_nov <- rnorm(100)
+//' # Calculate vector of prices
+//' price_s <- drop(zoo::coredata(quantmod::Cl(rutils::etf_env$VTI)))
 //' # Create ARIMA coefficients
 //' co_eff <- c(-0.8, 0.2)
 //' # Calculate recursive filter using filter()
-//' filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
+//' filter_ed <- filter(price_s, filter=co_eff, method="recursive")
 //' # Calculate recursive filter using RcppArmadillo
-//' ari_ma <- HighFreq::sim_arima(in_nov, rev(co_eff))
+//' ari_ma <- HighFreq::sim_arima(price_s, rev(co_eff))
 //' # Compare the two methods
 //' all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
 //' }
