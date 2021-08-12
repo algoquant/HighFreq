@@ -32,7 +32,7 @@ The function \code{roll_vec()} calculates a \emph{column vector} of
 \dontrun{
 # Define a single-column matrix of returns
 re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
-# Calculate rolling sums over 11-period lookback intervals
+# Calculate rolling sums over 11-period look-back intervals
 sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
 # Compare HighFreq::roll_vec() with rutils::roll_sum()
 all.equal(HighFreq::roll_vec(re_turns, look_back=11), 

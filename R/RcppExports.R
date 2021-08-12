@@ -775,7 +775,7 @@ roll_ohlc <- function(tseries, endp) {
 #' \dontrun{
 #' # Define a single-column matrix of returns
 #' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
-#' # Calculate rolling sums over 11-period lookback intervals
+#' # Calculate rolling sums over 11-period look-back intervals
 #' sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
 #' # Compare HighFreq::roll_vec() with rutils::roll_sum()
 #' all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
@@ -1136,13 +1136,24 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 #'   streaming data.
 #' 
+#'   The value of the decay factor \eqn{\lambda} should be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the rolling mean values have a stronger
+#'   dependence on past values.  This is equivalent to a long look-back
+#'   interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the rolling mean values have a
+#'   weaker dependence on past values.  This is equivalent to a short look-back
+#'   interval.
+#' 
 #'   The above recursive formula is convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster.
 #' 
 #'   The function \code{run_mean()} performs the same calculation
-#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+#'   as the standard \code{R} function\cr\code{stats::filter(x=series,
 #'   filter=weight_s, method="convolution", sides=1)}, but it's several
 #'   times faster.
 #' 
@@ -1192,6 +1203,17 @@ run_mean <- function(tseries, lambda) {
 #'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 #'   \eqn{r_t} are the streaming returns data.
 #' 
+#'   The value of the decay factor \eqn{\lambda} should be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the rolling variance values have a
+#'   stronger dependence on past values.  This is equivalent to a long
+#'   look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the rolling variance values have a
+#'   weaker dependence on past values.  This is equivalent to a short look-back
+#'   interval.
+#' 
 #'   The above formula slightly overestimates the variance because it doesn't
 #'   subtract the mean returns.
 #' 
@@ -1201,7 +1223,7 @@ run_mean <- function(tseries, lambda) {
 #'   weights, but it's faster.
 #' 
 #'   The function \code{run_var()} performs the same calculation
-#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+#'   as the standard \code{R} function\cr\code{stats::filter(x=series,
 #'   filter=weight_s, method="convolution", sides=1)}, but it's several
 #'   times faster.
 #' 
@@ -1248,10 +1270,21 @@ run_var <- function(tseries, lambda) {
 #'   products of their present returns with past covariance estimates, using
 #'   the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \sigma^2_t = (1-\lambda) r1_t r2_t + \lambda \sigma^2_{t-1}
+#'     \sigma^{12}_t = (1-\lambda) r^1_t r^2_t + \lambda \sigma^{12}_{t-1}
 #'   }
-#'   Where \eqn{\sigma^2_t} is the covariance estimate at time \eqn{t}, and
-#'   \eqn{r1_t} and \eqn{r2_t} are the streaming returns data.
+#'   Where \eqn{\sigma^{12}_t} is the covariance estimate at time \eqn{t}, and
+#'   \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
+#' 
+#'   The value of the decay factor \eqn{\lambda} should be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the rolling covariance values have a
+#'   stronger dependence on past values.  This is equivalent to a long
+#'   look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the rolling covariance values have
+#'   a weaker dependence on past values.  This is equivalent to a short
+#'   look-back interval.
 #' 
 #'   The above formula slightly overestimates the covariance because it doesn't
 #'   subtract the mean returns.
@@ -1266,7 +1299,7 @@ run_var <- function(tseries, lambda) {
 #'   \code{tseries}.  This allows calculating the rolling correlation.
 #' 
 #'   The function \code{run_covar()} performs the same calculation
-#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+#'   as the standard \code{R} function\cr\code{stats::filter(x=series,
 #'   filter=weight_s, method="convolution", sides=1)}, but it's several
 #'   times faster.
 #' 
@@ -1287,6 +1320,77 @@ run_var <- function(tseries, lambda) {
 #' @export
 run_covar <- function(tseries, lambda) {
     .Call('_HighFreq_run_covar', PACKAGE = 'HighFreq', tseries, lambda)
+}
+
+#' Calculate the rolling z-scores of two streaming \emph{time series} of
+#' returns.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
+#'   columns of returns data.
+#' 
+#' @param \code{lambda} A \emph{numeric} decay factor.
+#'   
+#' @return A \emph{matrix} with four columns of data: the z-scores, the betas,
+#'   and the variances of the two columns of the argument \code{tseries}.
+#'
+#' @details 
+#'   The function \code{run_zscore()} calculates the rolling z-score of 
+#'   two streaming \emph{time series} of returns by recursively weighing the
+#'   products of their present returns with past z-score estimates, using
+#'   the decay factor \eqn{\lambda}:
+#'   \deqn{
+#'     \beta_t = (1-\lambda) \frac{\sigma^{12}_t}{\sigma^2_{2t}} + \lambda \beta_{t-1}
+#'   }
+#'   \deqn{
+#'     z_t = (1-\lambda) (r^1_t - \beta_t r^2_t) + \lambda z_{t-1}
+#'   }
+#'   Where \eqn{z_t} is the z-score estimate at time \eqn{t},
+#'   \eqn{\sigma^{12}_t} is the covariance, \eqn{\beta_t} is the \emph{beta},
+#'   and \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
+#' 
+#'   The value of the decay factor \eqn{\lambda} should be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the rolling z-score values have a
+#'   stronger dependence on past values.  This is equivalent to a long
+#'   look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the rolling z-score values have
+#'   a weaker dependence on past values.  This is equivalent to a short
+#'   look-back interval.
+#' 
+#'   The above formula is approximate because it doesn't subtract the mean
+#'   returns.
+#' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
+#'   The function \code{run_zscore()} returns four columns of data: the
+#'   z-score and the variances of the two columns of the argument
+#'   \code{tseries}.  This allows calculating the rolling correlation.
+#' 
+#'   The function \code{run_zscore()} performs the same calculation
+#'   as the standard \code{R} function\cr\code{stats::filter(x=series,
+#'   filter=weight_s, method="convolution", sides=1)}, but it's several
+#'   times faster.
+#' 
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
+#' # Calculate the rolling z-scores
+#' lamb_da <- 0.9
+#' zscores <- HighFreq::run_zscore(re_turns, lambda=lamb_da)
+#' # Plot the rolling z-scores
+#' x11(width=6, height=5)
+#' plot(zscores[, 1], t="l")
+#' }
+#' 
+#' @export
+run_zscore <- function(tseries, lambda) {
+    .Call('_HighFreq_run_zscore', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -2248,7 +2352,7 @@ calc_reg <- function(response, design, method = "least_squares", eigen_thresh = 
 #' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 #' # Calculate the rolling means at 25 day end points, with a 75 day look-back
 #' means <- HighFreq::roll_mean(re_turns, step=25, look_back=3)
-#' # Compare the mean estimates over 11-period lookback intervals
+#' # Compare the mean estimates over 11-period look-back intervals
 #' all.equal(HighFreq::roll_mean(re_turns, look_back=11)[-(1:10), ], 
 #'   drop(RcppRoll::roll_mean(re_turns, n=11)), check.attributes=FALSE)
 #' # Define end points and start points
@@ -2307,7 +2411,7 @@ roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' \dontrun{
 #' # Create a vector of random returns
 #' re_turns <- rnorm(1e6)
-#' # Compare the variance estimates over 11-period lookback intervals
+#' # Compare the variance estimates over 11-period look-back intervals
 #' all.equal(drop(HighFreq::roll_var_vec(re_turns, look_back=11))[-(1:10)], 
 #'   RcppRoll::roll_var(re_turns, n=11))
 #' # Compare the speed of RcppArmadillo with RcppRoll
@@ -2391,7 +2495,7 @@ roll_var_vec <- function(tseries, look_back = 1L) {
 #' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 #' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
 #' vari_ance <- HighFreq::roll_var(re_turns, step=25, look_back=3)
-#' # Compare the variance estimates over 11-period lookback intervals
+#' # Compare the variance estimates over 11-period look-back intervals
 #' all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
 #'   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
 #' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()

@@ -29,6 +29,17 @@ The function \code{run_var()} calculates the rolling variance of a
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
 
+  The value of the decay factor \eqn{\lambda} should be in the range between
+  \code{0} and \code{1}.  
+  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+  values have a greater weight, and the rolling variance values have a
+  stronger dependence on past values.  This is equivalent to a long
+  look-back interval.
+  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+  past values have a smaller weight, and the rolling variance values have a
+  weaker dependence on past values.  This is equivalent to a short look-back
+  interval.
+
   The above formula slightly overestimates the variance because it doesn't
   subtract the mean returns.
 
@@ -38,7 +49,7 @@ The function \code{run_var()} calculates the rolling variance of a
   weights, but it's faster.
 
   The function \code{run_var()} performs the same calculation
-  as the standard \code{R} function <br>\code{stats::filter(x=series,
+  as the standard \code{R} function\cr\code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's several
   times faster.
 

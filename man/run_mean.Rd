@@ -28,13 +28,24 @@ The function \code{run_mean()} calculates the rolling mean of streaming
   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
   streaming data.
 
+  The value of the decay factor \eqn{\lambda} should be in the range between
+  \code{0} and \code{1}.  
+  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+  values have a greater weight, and the rolling mean values have a stronger
+  dependence on past values.  This is equivalent to a long look-back
+  interval.
+  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+  past values have a smaller weight, and the rolling mean values have a
+  weaker dependence on past values.  This is equivalent to a short look-back
+  interval.
+
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
 
   The function \code{run_mean()} performs the same calculation
-  as the standard \code{R} function <br>\code{stats::filter(x=series,
+  as the standard \code{R} function\cr\code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's several
   times faster.
 

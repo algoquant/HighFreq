@@ -43,7 +43,7 @@ The function \code{roll_var_vec()} calculates a \emph{vector} of variance
 \dontrun{
 # Create a vector of random returns
 re_turns <- rnorm(1e6)
-# Compare the variance estimates over 11-period lookback intervals
+# Compare the variance estimates over 11-period look-back intervals
 all.equal(drop(HighFreq::roll_var_vec(re_turns, look_back=11))[-(1:10)], 
   RcppRoll::roll_var(re_turns, n=11))
 # Compare the speed of RcppArmadillo with RcppRoll

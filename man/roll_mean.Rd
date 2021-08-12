@@ -91,7 +91,7 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
 re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
 # Calculate the rolling means at 25 day end points, with a 75 day look-back
 means <- HighFreq::roll_mean(re_turns, step=25, look_back=3)
-# Compare the mean estimates over 11-period lookback intervals
+# Compare the mean estimates over 11-period look-back intervals
 all.equal(HighFreq::roll_mean(re_turns, look_back=11)[-(1:10), ], 
   drop(RcppRoll::roll_mean(re_turns, n=11)), check.attributes=FALSE)
 # Define end points and start points

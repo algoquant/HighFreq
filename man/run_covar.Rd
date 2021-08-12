@@ -27,10 +27,21 @@ The function \code{run_covar()} calculates the rolling covariance of
   products of their present returns with past covariance estimates, using
   the decay factor \eqn{\lambda}:
   \deqn{
-    \sigma^2_t = (1-\lambda) r1_t r2_t + \lambda \sigma^2_{t-1}
+    \sigma^{12}_t = (1-\lambda) r^1_t r^2_t + \lambda \sigma^{12}_{t-1}
   }
-  Where \eqn{\sigma^2_t} is the covariance estimate at time \eqn{t}, and
-  \eqn{r1_t} and \eqn{r2_t} are the streaming returns data.
+  Where \eqn{\sigma^{12}_t} is the covariance estimate at time \eqn{t}, and
+  \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
+
+  The value of the decay factor \eqn{\lambda} should be in the range between
+  \code{0} and \code{1}.  
+  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+  values have a greater weight, and the rolling covariance values have a
+  stronger dependence on past values.  This is equivalent to a long
+  look-back interval.
+  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+  past values have a smaller weight, and the rolling covariance values have
+  a weaker dependence on past values.  This is equivalent to a short
+  look-back interval.
 
   The above formula slightly overestimates the covariance because it doesn't
   subtract the mean returns.
@@ -45,7 +56,7 @@ The function \code{run_covar()} calculates the rolling covariance of
   \code{tseries}.  This allows calculating the rolling correlation.
 
   The function \code{run_covar()} performs the same calculation
-  as the standard \code{R} function <br>\code{stats::filter(x=series,
+  as the standard \code{R} function\cr\code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's several
   times faster.
 }
