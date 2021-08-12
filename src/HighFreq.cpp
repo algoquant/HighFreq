@@ -1718,8 +1718,13 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 //'   streaming data.
 //' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//' 
 //'   The function \code{run_mean()} performs the same calculation
-//'   as the standard \code{R} function \code{stats::filter(x=series,
+//'   as the standard \code{R} function <br>\code{stats::filter(x=series,
 //'   filter=weight_s, method="convolution", sides=1)}, but it's several
 //'   times faster.
 //' 
@@ -1754,13 +1759,168 @@ arma::mat run_mean(arma::mat tseries, double lambda) {
   
   // Perform loop over rows
   for (arma::uword it = 1; it < num_rows; it++) {
-    // Calculate the mean as a weighted sum
+    // Calculate the mean as the weighted sum
     means.row(it) = lambda1*means.row(it) + lambda*means.row(it-1);
   }  // end for
   
   return means;
   
 }  // end run_mean
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the rolling variance of streaming \emph{time series} of returns.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor.
+//'   
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{run_var()} calculates the rolling variance of a
+//'   streaming \emph{time series} of returns by recursively weighing the
+//'   squared present returns with past variance estimates, using the decay
+//'   factor \eqn{\lambda}:
+//'   \deqn{
+//'     \sigma^2_t = (1-\lambda) r^2_t + \lambda \sigma^2_{t-1}
+//'   }
+//'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
+//'   \eqn{r_t} are the streaming returns data.
+//' 
+//'   The above formula slightly overestimates the variance because it doesn't
+//'   subtract the mean returns.
+//' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//' 
+//'   The function \code{run_var()} performs the same calculation
+//'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+//'   filter=weight_s, method="convolution", sides=1)}, but it's several
+//'   times faster.
+//' 
+//'   The function \code{run_var()} returns a \emph{matrix} with the same
+//'   dimensions as the input argument \code{tseries}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+//' # Calculate the rolling variance
+//' lamb_da <- 0.9
+//' vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
+//' # Calculate rolling variance using R code
+//' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive")
+//' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::run_var(re_turns, lambda=lamb_da),
+//'   Rcode=filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive"),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_var(arma::mat tseries, double lambda) {
+  
+  arma::uword num_rows = tseries.size();
+  arma::mat vars = arma::square(tseries);
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over rows
+  for (arma::uword it = 1; it < num_rows; it++) {
+    // Calculate the variance as the weighted sum of squared returns
+    vars[it] = lambda1*vars[it] + lambda*vars[it-1];
+  }  // end for
+  
+  return vars;
+  
+}  // end run_var
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the rolling covariance of two streaming \emph{time series} of
+//' returns.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
+//'   columns of returns data.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor.
+//'   
+//' @return A \emph{matrix} with three columns of data: the covariance and the
+//'   variances of the two columns of the argument \code{tseries}.
+//'
+//' @details 
+//'   The function \code{run_covar()} calculates the rolling covariance of 
+//'   two streaming \emph{time series} of returns by recursively weighing the
+//'   products of their present returns with past covariance estimates, using
+//'   the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \sigma^2_t = (1-\lambda) r1_t r2_t + \lambda \sigma^2_{t-1}
+//'   }
+//'   Where \eqn{\sigma^2_t} is the covariance estimate at time \eqn{t}, and
+//'   \eqn{r1_t} and \eqn{r2_t} are the streaming returns data.
+//' 
+//'   The above formula slightly overestimates the covariance because it doesn't
+//'   subtract the mean returns.
+//' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//' 
+//'   The function \code{run_covar()} returns three columns of data: the
+//'   covariance and the variances of the two columns of the argument
+//'   \code{tseries}.  This allows calculating the rolling correlation.
+//' 
+//'   The function \code{run_covar()} performs the same calculation
+//'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+//'   filter=weight_s, method="convolution", sides=1)}, but it's several
+//'   times faster.
+//' 
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
+//' # Calculate the rolling covariance
+//' lamb_da <- 0.9
+//' covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
+//' # Calculate rolling covariance using R code
+//' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), method="recursive")
+//' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
+//' # Calculate the rolling correlation
+//' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_covar(arma::mat tseries, double lambda) {
+  
+  arma::uword num_rows = tseries.n_rows;
+  arma::mat var1 = arma::square(tseries.col(0));
+  arma::mat var2 = arma::square(tseries.col(1));
+  arma::mat covar = tseries.col(0) % tseries.col(1);
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over rows
+  for (arma::uword it = 1; it < num_rows; it++) {
+    // Calculate the covariance as the weighted sum of products of returns
+    var1[it] = lambda1*var1[it] + lambda*var1[it-1];
+    var2[it] = lambda1*var2[it] + lambda*var2[it-1];
+    covar[it] = lambda1*covar[it] + lambda*covar[it-1];
+  }  // end for
+  
+  return arma::join_rows(covar, var1, var2);
+  
+}  // end run_covar
 
 
 

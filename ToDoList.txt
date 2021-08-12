@@ -81,7 +81,7 @@ Therefore 1-second bar returns carry almost no information.
 ### Tasks to-do
 
 + [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
-run_mean(), run_var(), run_maxmin(), run_covar(), run_zscore(), 
+run_mean(), run_var(), run_covar(), run_zscore(), run_maxmin()
 
 + [ ] Create functions roll_max() and roll_min()
 

@@ -28,8 +28,13 @@ The function \code{run_mean()} calculates the rolling mean of streaming
   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
   streaming data.
 
+  The above recursive formula is convenient for processing live streaming
+  data because it doesn't require maintaining a buffer of past data.
+  The formula is equivalent to a convolution with exponentially decaying
+  weights, but it's faster.
+
   The function \code{run_mean()} performs the same calculation
-  as the standard \code{R} function \code{stats::filter(x=series,
+  as the standard \code{R} function <br>\code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's several
   times faster.
 

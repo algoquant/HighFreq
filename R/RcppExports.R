@@ -1136,8 +1136,13 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 #'   streaming data.
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
 #'   The function \code{run_mean()} performs the same calculation
-#'   as the standard \code{R} function \code{stats::filter(x=series,
+#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
 #'   filter=weight_s, method="convolution", sides=1)}, but it's several
 #'   times faster.
 #' 
@@ -1165,6 +1170,123 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' @export
 run_mean <- function(tseries, lambda) {
     .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda)
+}
+
+#' Calculate the rolling variance of streaming \emph{time series} of returns.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
+#' 
+#' @param \code{lambda} A \emph{numeric} decay factor.
+#'   
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{tseries}.
+#'
+#' @details 
+#'   The function \code{run_var()} calculates the rolling variance of a
+#'   streaming \emph{time series} of returns by recursively weighing the
+#'   squared present returns with past variance estimates, using the decay
+#'   factor \eqn{\lambda}:
+#'   \deqn{
+#'     \sigma^2_t = (1-\lambda) r^2_t + \lambda \sigma^2_{t-1}
+#'   }
+#'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
+#'   \eqn{r_t} are the streaming returns data.
+#' 
+#'   The above formula slightly overestimates the variance because it doesn't
+#'   subtract the mean returns.
+#' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
+#'   The function \code{run_var()} performs the same calculation
+#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+#'   filter=weight_s, method="convolution", sides=1)}, but it's several
+#'   times faster.
+#' 
+#'   The function \code{run_var()} returns a \emph{matrix} with the same
+#'   dimensions as the input argument \code{tseries}.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+#' # Calculate the rolling variance
+#' lamb_da <- 0.9
+#' vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
+#' # Calculate rolling variance using R code
+#' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive")
+#' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::run_var(re_turns, lambda=lamb_da),
+#'   Rcode=filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive"),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+run_var <- function(tseries, lambda) {
+    .Call('_HighFreq_run_var', PACKAGE = 'HighFreq', tseries, lambda)
+}
+
+#' Calculate the rolling covariance of two streaming \emph{time series} of
+#' returns.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
+#'   columns of returns data.
+#' 
+#' @param \code{lambda} A \emph{numeric} decay factor.
+#'   
+#' @return A \emph{matrix} with three columns of data: the covariance and the
+#'   variances of the two columns of the argument \code{tseries}.
+#'
+#' @details 
+#'   The function \code{run_covar()} calculates the rolling covariance of 
+#'   two streaming \emph{time series} of returns by recursively weighing the
+#'   products of their present returns with past covariance estimates, using
+#'   the decay factor \eqn{\lambda}:
+#'   \deqn{
+#'     \sigma^2_t = (1-\lambda) r1_t r2_t + \lambda \sigma^2_{t-1}
+#'   }
+#'   Where \eqn{\sigma^2_t} is the covariance estimate at time \eqn{t}, and
+#'   \eqn{r1_t} and \eqn{r2_t} are the streaming returns data.
+#' 
+#'   The above formula slightly overestimates the covariance because it doesn't
+#'   subtract the mean returns.
+#' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
+#'   The function \code{run_covar()} returns three columns of data: the
+#'   covariance and the variances of the two columns of the argument
+#'   \code{tseries}.  This allows calculating the rolling correlation.
+#' 
+#'   The function \code{run_covar()} performs the same calculation
+#'   as the standard \code{R} function <br>\code{stats::filter(x=series,
+#'   filter=weight_s, method="convolution", sides=1)}, but it's several
+#'   times faster.
+#' 
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
+#' # Calculate the rolling covariance
+#' lamb_da <- 0.9
+#' covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
+#' # Calculate rolling covariance using R code
+#' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), method="recursive")
+#' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
+#' # Calculate the rolling correlation
+#' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+#' }
+#' 
+#' @export
+run_covar <- function(tseries, lambda) {
+    .Call('_HighFreq_run_covar', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
