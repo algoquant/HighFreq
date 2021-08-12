@@ -268,6 +268,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_max
+arma::mat run_max(arma::mat tseries, double lambda);
+RcppExport SEXP _HighFreq_run_max(SEXP tseriesSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_max(tseries, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_min
+arma::mat run_min(arma::mat tseries, double lambda);
+RcppExport SEXP _HighFreq_run_min(SEXP tseriesSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_min(tseries, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_var
 arma::mat run_var(arma::mat tseries, double lambda);
 RcppExport SEXP _HighFreq_run_var(SEXP tseriesSEXP, SEXP lambdaSEXP) {
@@ -759,6 +783,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_sumep", (DL_FUNC) &_HighFreq_roll_sumep, 6},
     {"_HighFreq_roll_wsum", (DL_FUNC) &_HighFreq_roll_wsum, 5},
     {"_HighFreq_run_mean", (DL_FUNC) &_HighFreq_run_mean, 2},
+    {"_HighFreq_run_max", (DL_FUNC) &_HighFreq_run_max, 2},
+    {"_HighFreq_run_min", (DL_FUNC) &_HighFreq_run_min, 2},
     {"_HighFreq_run_var", (DL_FUNC) &_HighFreq_run_var, 2},
     {"_HighFreq_run_covar", (DL_FUNC) &_HighFreq_run_covar, 2},
     {"_HighFreq_run_zscore", (DL_FUNC) &_HighFreq_run_zscore, 2},

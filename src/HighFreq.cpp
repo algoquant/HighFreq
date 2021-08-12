@@ -1698,6 +1698,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 
 
 
+
 ////////////////////////////////////////////////////////////
 //' Calculate the rolling mean of streaming \emph{time series} data.
 //' 
@@ -1748,7 +1749,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
 //' # Calculate the rolling means
 //' lamb_da <- 0.9
-//' means <- HighFreq::run_mean(re_turns, lambda=lamb_da)
+//' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
 //' # Calculate rolling means using R code
 //' filter_ed <- (1-lamb_da)*filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive")
 //' all.equal(means, unclass(filter_ed), check.attributes=FALSE)
@@ -1771,12 +1772,186 @@ arma::mat run_mean(arma::mat tseries, double lambda) {
   // Perform loop over rows
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the mean as the weighted sum
-    means.row(it) = lambda1*means.row(it) + lambda*means.row(it-1);
+    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
   }  // end for
   
   return means;
   
 }  // end run_mean
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the rolling maximum of streaming \emph{time series} data.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor.
+//'   
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{run_max()} calculates the rolling maximum of streaming
+//'   \emph{time series} data by recursively weighing present and past values
+//'   using the decay factor \eqn{\lambda}.
+//'
+//'   It first calculates the rolling mean of streaming data:
+//'   \deqn{
+//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+//'   }
+//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
+//'   streaming data.
+//'
+//'   It then calculates the rolling maximums of streaming data, \eqn{p^{max}_t}:
+//'   \deqn{
+//'     p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
+//'   }
+//' 
+//'   The second term pulls the maximum value down to the mean value, allowing
+//'   it to gradually "forget" the maximum value from the more distant past.
+//' 
+//'   The value of the decay factor \eqn{\lambda} should be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the rolling maximum values have a stronger
+//'   dependence on past values.  This is equivalent to a long look-back
+//'   interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the rolling maximum values have a
+//'   weaker dependence on past values.  This is equivalent to a short look-back
+//'   interval.
+//' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//' 
+//'   The function \code{run_max()} returns a \emph{matrix} with the same
+//'   dimensions as the input argument \code{tseries}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical prices
+//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+//' # Calculate the rolling maximums
+//' lamb_da <- 0.9
+//' maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
+//' # Plot dygraph of VTI prices and rolling maximums
+//' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
+//' colnames(da_ta) <- c("prices", "max")
+//' col_names <- colnames(da_ta)
+//' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Maximums") %>%
+//'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
+//'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_max(arma::mat tseries, double lambda) {
+  
+  arma::uword num_rows = tseries.n_rows;
+  arma::mat maxs = tseries;
+  arma::mat means = tseries;
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over rows
+  for (arma::uword it = 1; it < num_rows; it++) {
+    // Calculate the mean as a weighted sum
+    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
+    // Calculate the max from a weighted sum
+    maxs.row(it) = arma::max(tseries.row(it), maxs.row(it-1) + lambda1*(means.row(it-1) - maxs.row(it-1)));
+  }  // end for
+  
+  return maxs;
+  
+}  // end run_max
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the rolling minimum of streaming \emph{time series} data.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor.
+//'   
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
+//'
+//' @details 
+//'   The function \code{run_min()} calculates the rolling minimum of streaming
+//'   \emph{time series} data by recursively weighing present and past values
+//'   using the decay factor \eqn{\lambda}.
+//'
+//'   It first calculates the rolling mean of streaming data:
+//'   \deqn{
+//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+//'   }
+//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
+//'   streaming data.
+//'
+//'   It then calculates the rolling minimums of streaming data, \eqn{p^{min}_t}:
+//'   \deqn{
+//'     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
+//'   }
+//' 
+//'   The second term pulls the minimum value up to the mean value, allowing
+//'   it to gradually "forget" the minimum value from the more distant past.
+//' 
+//'   The value of the decay factor \eqn{\lambda} should be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the rolling minimum values have a stronger
+//'   dependence on past values.  This is equivalent to a long look-back
+//'   interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the rolling minimum values have a
+//'   weaker dependence on past values.  This is equivalent to a short look-back
+//'   interval.
+//' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//' 
+//'   The function \code{run_min()} returns a \emph{matrix} with the same
+//'   dimensions as the input argument \code{tseries}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical prices
+//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+//' # Calculate the rolling minimums
+//' lamb_da <- 0.9
+//' mins <- HighFreq::run_min(price_s, lambda=lamb_da)
+//' # Plot dygraph of VTI prices and rolling minimums
+//' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
+//' colnames(da_ta) <- c("prices", "min")
+//' col_names <- colnames(da_ta)
+//' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Minimums") %>%
+//'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
+//'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_min(arma::mat tseries, double lambda) {
+  
+  arma::uword num_rows = tseries.n_rows;
+  arma::mat mins = tseries;
+  arma::mat means = tseries;
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over rows
+  for (arma::uword it = 1; it < num_rows; it++) {
+    // Calculate the mean as a weighted sum
+    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
+    // Calculate the min from a weighted sum
+    mins.row(it) = arma::min(tseries.row(it), mins.row(it-1) + lambda1*(means.row(it-1) - mins.row(it-1)));
+  }  // end for
+  
+  return mins;
+  
+}  // end run_min
 
 
 
@@ -1851,7 +2026,7 @@ arma::mat run_mean(arma::mat tseries, double lambda) {
 // [[Rcpp::export]]
 arma::mat run_var(arma::mat tseries, double lambda) {
   
-  arma::uword num_rows = tseries.size();
+  arma::uword num_rows = tseries.n_rows;
   arma::mat vars = arma::square(tseries);
   double lambda1 = 1-lambda;
   

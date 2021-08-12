@@ -80,10 +80,7 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
-run_mean(), run_var(), run_covar(), run_zscore(), run_maxmin()
-
-+ [ ] Create functions roll_max() and roll_min()
++ [ ] Create functions roll_max() and roll_min() using a look-back interval
 
 + [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
@@ -417,6 +414,9 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
+run_mean(), run_var(), run_covar(), run_zscore(), run_max(), run_min()
 
 + [x] Create function roll_sumep() for calculating the rolling sums at the end points
 

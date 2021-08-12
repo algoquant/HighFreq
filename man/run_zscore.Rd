@@ -36,8 +36,12 @@ The function \code{run_zscore()} calculates the rolling z-score of
   \eqn{\sigma^{12}_t} is the covariance, \eqn{\beta_t} is the \emph{beta},
   and \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
 
+  The z-score \eqn{z_t} is equal to the residual of the rolling regression.
+  The above formula is approximate because it doesn't subtract the mean
+  returns.
+
   The value of the decay factor \eqn{\lambda} should be in the range between
-  \code{0} and \code{1}.  
+  \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the rolling z-score values have a
   stronger dependence on past values.  This is equivalent to a long
@@ -46,9 +50,6 @@ The function \code{run_zscore()} calculates the rolling z-score of
   past values have a smaller weight, and the rolling z-score values have
   a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
-
-  The above formula is approximate because it doesn't subtract the mean
-  returns.
 
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
