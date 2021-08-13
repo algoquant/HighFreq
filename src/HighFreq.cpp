@@ -1766,10 +1766,11 @@ arma::mat roll_wsum(const arma::mat& tseries,
 arma::mat run_mean(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
-  arma::mat means = tseries;
+  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over rows
+  means.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the mean as the weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
@@ -1850,11 +1851,13 @@ arma::mat run_mean(const arma::mat& tseries, double lambda) {
 arma::mat run_max(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
-  arma::mat maxs = tseries;
-  arma::mat means = tseries;
+  arma::mat maxs = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over rows
+  means.row(0) = tseries.row(0);
+  maxs.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the mean as a weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
@@ -1937,11 +1940,13 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 arma::mat run_min(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
-  arma::mat mins = tseries;
-  arma::mat means = tseries;
+  arma::mat mins = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over rows
+  means.row(0) = tseries.row(0);
+  mins.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the mean as a weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
