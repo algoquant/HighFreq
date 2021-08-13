@@ -1225,8 +1225,6 @@ run_mean <- function(tseries, lambda) {
 #' 
 #'   The above recursive formula is convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster.
 #' 
 #'   The function \code{run_max()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1294,8 +1292,6 @@ run_max <- function(tseries, lambda) {
 #' 
 #'   The above recursive formula is convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster.
 #' 
 #'   The function \code{run_min()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1311,7 +1307,7 @@ run_max <- function(tseries, lambda) {
 #' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
 #' colnames(da_ta) <- c("prices", "min")
 #' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling minimums") %>%
+#' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Minimums") %>%
 #'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
 #'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 #' }

@@ -1448,7 +1448,7 @@ arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_sumep(arma::mat tseries, 
+arma::mat roll_sumep(const arma::mat& tseries, 
                      arma::uvec startp = 0, 
                      arma::uvec endp = 0, 
                      arma::uword step = 1, 
@@ -1763,7 +1763,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_mean(arma::mat tseries, double lambda) {
+arma::mat run_mean(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat means = tseries;
@@ -1847,7 +1847,7 @@ arma::mat run_mean(arma::mat tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_max(arma::mat tseries, double lambda) {
+arma::mat run_max(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat maxs = tseries;
@@ -1934,7 +1934,7 @@ arma::mat run_max(arma::mat tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_min(arma::mat tseries, double lambda) {
+arma::mat run_min(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat mins = tseries;
@@ -2024,7 +2024,7 @@ arma::mat run_min(arma::mat tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_var(arma::mat tseries, double lambda) {
+arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat vars = arma::square(tseries);
@@ -2110,7 +2110,7 @@ arma::mat run_var(arma::mat tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_covar(arma::mat tseries, double lambda) {
+arma::mat run_covar(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat var1 = arma::square(tseries.col(0));
@@ -2203,7 +2203,7 @@ arma::mat run_covar(arma::mat tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_zscore(arma::mat tseries, double lambda) {
+arma::mat run_zscore(const arma::mat& tseries, double lambda) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::mat var1 = arma::square(tseries.col(0));

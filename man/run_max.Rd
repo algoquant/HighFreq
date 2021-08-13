@@ -51,8 +51,6 @@ The function \code{run_max()} calculates the rolling maximum of streaming
 
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster.
 
   The function \code{run_max()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.

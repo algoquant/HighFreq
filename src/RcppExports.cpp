@@ -226,12 +226,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_sumep
-arma::mat roll_sumep(arma::mat tseries, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub);
+arma::mat roll_sumep(const arma::mat& tseries, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub);
 RcppExport SEXP _HighFreq_roll_sumep(SEXP tseriesSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type startp(startpSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type endp(endpSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
@@ -257,72 +257,72 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_mean
-arma::mat run_mean(arma::mat tseries, double lambda);
+arma::mat run_mean(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_mean(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_mean(tseries, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // run_max
-arma::mat run_max(arma::mat tseries, double lambda);
+arma::mat run_max(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_max(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_max(tseries, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // run_min
-arma::mat run_min(arma::mat tseries, double lambda);
+arma::mat run_min(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_min(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_min(tseries, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // run_var
-arma::mat run_var(arma::mat tseries, double lambda);
+arma::mat run_var(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_var(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_var(tseries, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // run_covar
-arma::mat run_covar(arma::mat tseries, double lambda);
+arma::mat run_covar(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_covar(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_covar(tseries, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // run_zscore
-arma::mat run_zscore(arma::mat tseries, double lambda);
+arma::mat run_zscore(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_zscore(SEXP tseriesSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_zscore(tseries, lambda));
     return rcpp_result_gen;
