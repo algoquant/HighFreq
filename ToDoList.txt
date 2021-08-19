@@ -41,7 +41,7 @@ devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
 # Document the package - run R command
 devtools::document()
 # Build vignette package reference manual from *.Rd files
-system("R CMD Rd2pdf C:/Develop/R/HighFreq")
+system("R CMD Rd2pdf /Users/jerzy/Develop/HighFreq")
 cd C:\Develop\R\HighFreq\vignettes
 R CMD Rd2pdf C:\Develop\R\HighFreq\
 
@@ -79,6 +79,12 @@ Therefore 1-second bar returns carry almost no information.
 
 
 ### Tasks to-do
+
++ [x] Replace call-by-name syntax in C++ code
+
++ [x] Modify run_zscore() to allow multivariate regression
+Rename to run_scores()
+Split tseries argument into response and design arguments, with design containing multiple columns of returns data.
 
 + [ ] Create functions roll_max() and roll_min() using a look-back interval
 

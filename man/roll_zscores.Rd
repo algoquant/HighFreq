@@ -70,14 +70,14 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-# Response equals IEF returns
+re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+# Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and XLF returns
+# Design matrix equals VTI and IEF returns
 de_sign <- re_turns[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back=look_back)
+z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
 z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
   if (ro_w == 1) return(0)

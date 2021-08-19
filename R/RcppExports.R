@@ -929,8 +929,8 @@ roll_conv <- function(tseries, weights) {
 #' # Define parameters
 #' look_back <- 22
 #' # Calculate rolling sums and compare with rutils::roll_sum()
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
-#' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back)
+#' r_sum <- rutils::roll_sum(re_turns, look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 #' # Calculate rolling sums using R code
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1067,8 +1067,8 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' # Define parameters
 #' look_back <- 22
 #' # Calculate rolling sums and compare with rutils::roll_sum()
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
-#' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+#' c_sum <- HighFreq::roll_sum(re_turns, look_back)
+#' r_sum <- rutils::roll_sum(re_turns, look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 #' # Calculate rolling sums using R code
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1078,7 +1078,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' 
 #' # Calculate rolling sums at end points
 #' stu_b <- 21
-#' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stub=stu_b)
+#' c_sum <- HighFreq::roll_wsum(re_turns, look_back, stub=stu_b)
 #' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
 #' end_p <- end_p[end_p < NROW(re_turns)]
 #' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1456,35 +1456,47 @@ run_covar <- function(tseries, lambda) {
     .Call('_HighFreq_run_covar', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
-#' Calculate the rolling z-scores of two streaming \emph{time series} of
-#' returns.
+#' Calculate the z-scores of rolling regressions of streaming \emph{time
+#' series} of returns.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
-#'   columns of returns data.
+#' @param \code{response} A single-column \emph{time series} or a \emph{vector}
+#'   of response data.
+#' 
+#' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
+#'   (predictor or explanatory data).
 #' 
 #' @param \code{lambda} A \emph{numeric} decay factor.
 #'   
-#' @return A \emph{matrix} with four columns of data: the z-scores, the betas,
-#'   and the variances of the two columns of the argument \code{tseries}.
+#' @return A single-column \emph{matrix} with the z-scores.
 #'
 #' @details 
-#'   The function \code{run_zscore()} calculates the rolling z-score of 
-#'   two streaming \emph{time series} of returns by recursively weighing the
-#'   products of their present returns with past z-score estimates, using
-#'   the decay factor \eqn{\lambda}:
+#'   The function \code{run_zscores()} calculates the vectors of \emph{betas}
+#'   \eqn{\beta_t} and the residuals \eqn{\epsilon_t} of rolling regressions by
+#'   recursively weighing the current estimates with past estimates, using the
+#'   decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \beta_t = (1-\lambda) \frac{\sigma^{12}_t}{\sigma^2_{2t}} + \lambda \beta_{t-1}
+#'     \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
 #'   }
 #'   \deqn{
-#'     z_t = (1-\lambda) (r^1_t - \beta_t r^2_t) + \lambda z_{t-1}
+#'     \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^d_t) + \lambda \epsilon_{t-1}
 #'   }
-#'   Where \eqn{z_t} is the z-score estimate at time \eqn{t},
-#'   \eqn{\sigma^{12}_t} is the covariance, \eqn{\beta_t} is the \emph{beta},
-#'   and \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
+#'   Where \eqn{\sigma^{cov}_t} is the vector of covariances at time \eqn{t},
+#'   between the response and design returns; 
+#'   \eqn{\sigma^2_t} is the vector of design variances,
+#'   and \eqn{r^r_t} and \eqn{r^2_t} are the streaming returns of the response
+#'   and design data.
 #' 
-#'   The z-score \eqn{z_t} is equal to the residual of the rolling regression.
+#'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
+#'   dimensions as the input argument \code{design}.
+#'
 #'   The above formula is approximate because it doesn't subtract the mean
 #'   returns.
+#' 
+#'   The z-score \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
+#'   volatility \eqn{\sigma^{\epsilon}_t}: 
+#'   \deqn{
+#'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
+#'   }
 #' 
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.
@@ -1502,11 +1514,11 @@ run_covar <- function(tseries, lambda) {
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster.
 #' 
-#'   The function \code{run_zscore()} returns four columns of data: the
+#'   The function \code{run_zscores()} returns four columns of data: the
 #'   z-score and the variances of the two columns of the argument
 #'   \code{tseries}.  This allows calculating the rolling correlation.
 #' 
-#'   The function \code{run_zscore()} performs the same calculation
+#'   The function \code{run_zscores()} performs the same calculation
 #'   as the standard \code{R} function\cr\code{stats::filter(x=series,
 #'   filter=weight_s, method="convolution", sides=1)}, but it's several
 #'   times faster.
@@ -1514,18 +1526,29 @@ run_covar <- function(tseries, lambda) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
-#' # Calculate the rolling z-scores
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' # Response equals XLF returns
+#' res_ponse <- re_turns[, 1]
+#' # Design matrix equals VTI and IEF returns
+#' de_sign <- re_turns[, -1]
+#' run_zscores(re_turns[, 1, drop=FALSE], re_turns[, 2, drop=FALSE], lambda=lamb_da)
+#' # Calculate the running z-scores
 #' lamb_da <- 0.9
-#' zscores <- HighFreq::run_zscore(re_turns, lambda=lamb_da)
-#' # Plot the rolling z-scores
-#' x11(width=6, height=5)
-#' plot(zscores[, 1], t="l")
+#' zscores <- HighFreq::run_zscores(response=res_ponse, design=de_sign, lambda=lamb_da)
+#' # Plot the running z-scores
+#' da_ta <- cbind(cumsum(res_ponse), zscores)
+#' colnames(da_ta) <- c("XLF", "zscores")
+#' col_names <- colnames(da_ta)
+#' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%
+#'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
+#'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
+#'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
+#'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
 #' }
 #' 
 #' @export
-run_zscore <- function(tseries, lambda) {
-    .Call('_HighFreq_run_zscore', PACKAGE = 'HighFreq', tseries, lambda)
+run_zscores <- function(response, design, lambda) {
+    .Call('_HighFreq_run_zscores', PACKAGE = 'HighFreq', response, design, lambda)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -2297,10 +2320,10 @@ calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", lag_close = 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-#' # Response equals IEF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' # Response equals XLF returns
 #' res_ponse <- re_turns[, 1]
-#' # Design matrix equals VTI and XLF returns
+#' # Design matrix equals VTI and IEF returns
 #' de_sign <- re_turns[, -1]
 #' # Perform multivariate regression using lm()
 #' reg_model <- lm(res_ponse ~ de_sign)
@@ -2389,10 +2412,10 @@ calc_lm <- function(response, design) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-#' # Response equals IEF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' # Response equals XLF returns
 #' res_ponse <- re_turns[, 1]
-#' # Design matrix equals VTI and XLF returns
+#' # Design matrix equals VTI and IEF returns
 #' de_sign <- re_turns[, -1]
 #' # Perform multivariate regression using lm()
 #' reg_model <- lm(res_ponse ~ de_sign)
@@ -3163,14 +3186,14 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-#' # Response equals IEF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' # Response equals XLF returns
 #' res_ponse <- re_turns[, 1]
-#' # Design matrix equals VTI and XLF returns
+#' # Design matrix equals VTI and IEF returns
 #' de_sign <- re_turns[, -1]
 #' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 #' look_back <- 11
-#' z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back=look_back)
+#' z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back)
 #' # Calculate z-scores in R from rolling multivariate regression using lm()
 #' z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
 #'   if (ro_w == 1) return(0)
@@ -3533,7 +3556,7 @@ sim_arima <- function(innov, coeff) {
 #' n_col <- NCOL(re_turns)
 #' weights_r <- weights_r*sd(re_turns %*% rep(1/n_col, n_col))/sd(re_turns %*% weights_r)
 #' # Calculate weights using RcppArmadillo
-#' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max=eigen_max, alpha=al_pha))
+#' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
 #' all.equal(weight_s, weights_r)
 #' }
 #' 

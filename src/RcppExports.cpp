@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // lag_vec
 arma::vec lag_vec(const arma::vec& tseries, arma::sword lagg, bool pad_zeros);
 RcppExport SEXP _HighFreq_lag_vec(SEXP tseriesSEXP, SEXP laggSEXP, SEXP pad_zerosSEXP) {
@@ -316,15 +321,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// run_zscore
-arma::mat run_zscore(const arma::mat& tseries, double lambda);
-RcppExport SEXP _HighFreq_run_zscore(SEXP tseriesSEXP, SEXP lambdaSEXP) {
+// run_zscores
+arma::mat run_zscores(const arma::mat& response, const arma::mat& design, double lambda);
+RcppExport SEXP _HighFreq_run_zscores(SEXP responseSEXP, SEXP designSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type design(designSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_zscore(tseries, lambda));
+    rcpp_result_gen = Rcpp::wrap(run_zscores(response, design, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -787,7 +793,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_run_min", (DL_FUNC) &_HighFreq_run_min, 2},
     {"_HighFreq_run_var", (DL_FUNC) &_HighFreq_run_var, 2},
     {"_HighFreq_run_covar", (DL_FUNC) &_HighFreq_run_covar, 2},
-    {"_HighFreq_run_zscore", (DL_FUNC) &_HighFreq_run_zscore, 2},
+    {"_HighFreq_run_zscores", (DL_FUNC) &_HighFreq_run_zscores, 3},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},
     {"_HighFreq_calc_var", (DL_FUNC) &_HighFreq_calc_var, 3},

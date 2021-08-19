@@ -84,10 +84,10 @@ The function \code{calc_reg()} performs multivariate regression using
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-# Response equals IEF returns
+re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+# Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and XLF returns
+# Design matrix equals VTI and IEF returns
 de_sign <- re_turns[, -1]
 # Perform multivariate regression using lm()
 reg_model <- lm(res_ponse ~ de_sign)

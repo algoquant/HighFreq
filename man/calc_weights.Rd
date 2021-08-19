@@ -111,7 +111,7 @@ weight_s <- in_verse \%*\% col_means
 n_col <- NCOL(re_turns)
 weights_r <- weights_r*sd(re_turns \%*\% rep(1/n_col, n_col))/sd(re_turns \%*\% weights_r)
 # Calculate weights using RcppArmadillo
-weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max=eigen_max, alpha=al_pha))
+weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
 all.equal(weight_s, weights_r)
 }
 

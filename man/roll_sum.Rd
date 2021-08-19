@@ -41,8 +41,8 @@ re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
 # Calculate rolling sums and compare with rutils::roll_sum()
-c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
-r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+c_sum <- HighFreq::roll_sum(re_turns, look_back)
+r_sum <- rutils::roll_sum(re_turns, look_back)
 all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 # Calculate rolling sums using R code
 r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)

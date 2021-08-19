@@ -1371,8 +1371,8 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
 //' # Define parameters
 //' look_back <- 22
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
-//' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+//' c_sum <- HighFreq::roll_sum(re_turns, look_back)
+//' r_sum <- rutils::roll_sum(re_turns, look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1462,7 +1462,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -1471,7 +1471,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
     // Old code for start_pts
     // Start points equal to end points lagged by look_back - without adding +1
     // arma::uword num_pts = end_pts.n_elem;
@@ -1581,8 +1581,8 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Define parameters
 //' look_back <- 22
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' c_sum <- HighFreq::roll_sum(re_turns, look_back=look_back)
-//' r_sum <- rutils::roll_sum(re_turns, look_back=look_back)
+//' c_sum <- HighFreq::roll_sum(re_turns, look_back)
+//' r_sum <- rutils::roll_sum(re_turns, look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -1592,7 +1592,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' 
 //' # Calculate rolling sums at end points
 //' stu_b <- 21
-//' c_sum <- HighFreq::roll_wsum(re_turns, look_back=look_back, stub=stu_b)
+//' c_sum <- HighFreq::roll_wsum(re_turns, look_back, stub=stu_b)
 //' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
 //' end_p <- end_p[end_p < NROW(re_turns)]
 //' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
@@ -2139,35 +2139,47 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling z-scores of two streaming \emph{time series} of
-//' returns.
+//' Calculate the z-scores of rolling regressions of streaming \emph{time
+//' series} of returns.
 //' 
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
-//'   columns of returns data.
+//' @param \code{response} A single-column \emph{time series} or a \emph{vector}
+//'   of response data.
+//' 
+//' @param \code{design} A \emph{time series} or a \emph{matrix} of design data
+//'   (predictor or explanatory data).
 //' 
 //' @param \code{lambda} A \emph{numeric} decay factor.
 //'   
-//' @return A \emph{matrix} with four columns of data: the z-scores, the betas,
-//'   and the variances of the two columns of the argument \code{tseries}.
+//' @return A single-column \emph{matrix} with the z-scores.
 //'
 //' @details 
-//'   The function \code{run_zscore()} calculates the rolling z-score of 
-//'   two streaming \emph{time series} of returns by recursively weighing the
-//'   products of their present returns with past z-score estimates, using
-//'   the decay factor \eqn{\lambda}:
+//'   The function \code{run_zscores()} calculates the vectors of \emph{betas}
+//'   \eqn{\beta_t} and the residuals \eqn{\epsilon_t} of rolling regressions by
+//'   recursively weighing the current estimates with past estimates, using the
+//'   decay factor \eqn{\lambda}:
 //'   \deqn{
-//'     \beta_t = (1-\lambda) \frac{\sigma^{12}_t}{\sigma^2_{2t}} + \lambda \beta_{t-1}
+//'     \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
 //'   }
 //'   \deqn{
-//'     z_t = (1-\lambda) (r^1_t - \beta_t r^2_t) + \lambda z_{t-1}
+//'     \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^d_t) + \lambda \epsilon_{t-1}
 //'   }
-//'   Where \eqn{z_t} is the z-score estimate at time \eqn{t},
-//'   \eqn{\sigma^{12}_t} is the covariance, \eqn{\beta_t} is the \emph{beta},
-//'   and \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
+//'   Where \eqn{\sigma^{cov}_t} is the vector of covariances between the
+//'   response and design returns, at time \eqn{t};
+//'   \eqn{\sigma^2_t} is the vector of design variances,
+//'   and \eqn{r^r_t} and \eqn{r^d_t} are the streaming returns of the response
+//'   and design data.
 //' 
-//'   The z-score \eqn{z_t} is equal to the residual of the rolling regression.
+//'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
+//'   dimensions as the input argument \code{design}.
+//'
 //'   The above formula is approximate because it doesn't subtract the mean
 //'   returns.
+//' 
+//'   The z-score \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
+//'   its volatility \eqn{\sigma^{\epsilon}_t}: 
+//'   \deqn{
+//'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
+//'   }
 //' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
@@ -2185,11 +2197,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   The formula is equivalent to a convolution with exponentially decaying
 //'   weights, but it's faster.
 //' 
-//'   The function \code{run_zscore()} returns four columns of data: the
+//'   The function \code{run_zscores()} returns four columns of data: the
 //'   z-score and the variances of the two columns of the argument
 //'   \code{tseries}.  This allows calculating the rolling correlation.
 //' 
-//'   The function \code{run_zscore()} performs the same calculation
+//'   The function \code{run_zscores()} performs the same calculation
 //'   as the standard \code{R} function\cr\code{stats::filter(x=series,
 //'   filter=weight_s, method="convolution", sides=1)}, but it's several
 //'   times faster.
@@ -2197,40 +2209,63 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
-//' # Calculate the rolling z-scores
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' # Response equals XLF returns
+//' res_ponse <- re_turns[, 1]
+//' # Design matrix equals VTI and IEF returns
+//' de_sign <- re_turns[, -1]
+//' run_zscores(re_turns[, 1, drop=FALSE], re_turns[, 2, drop=FALSE], lambda=lamb_da)
+//' # Calculate the running z-scores
 //' lamb_da <- 0.9
-//' zscores <- HighFreq::run_zscore(re_turns, lambda=lamb_da)
-//' # Plot the rolling z-scores
-//' x11(width=6, height=5)
-//' plot(zscores[, 1], t="l")
+//' zscores <- HighFreq::run_zscores(response=res_ponse, design=de_sign, lambda=lamb_da)
+//' # Plot the running z-scores
+//' da_ta <- cbind(cumsum(res_ponse), zscores)
+//' colnames(da_ta) <- c("XLF", "zscores")
+//' col_names <- colnames(da_ta)
+//' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%
+//'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
+//'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
+//'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
+//'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_zscore(const arma::mat& tseries, double lambda) {
+arma::mat run_zscores(const arma::mat& response, 
+                      const arma::mat& design, 
+                      double lambda) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::mat var1 = arma::square(tseries.col(0));
-  arma::mat var2 = arma::square(tseries.col(1));
-  arma::mat covar = tseries.col(0) % tseries.col(1);
-  arma::mat beta = arma::zeros<mat>(num_rows, 1);
-  arma::mat zscore = arma::zeros<mat>(num_rows, 1);
+  arma::uword num_rows = design.n_rows;
+  arma::uword num_cols = design.n_cols;
+  // arma::mat var1 = arma::square(tseries.col(0));
+  arma::mat vars = arma::square(design);
+  arma::mat betas = arma::ones<mat>(num_rows, num_cols);
+  arma::mat zscores = arma::ones<mat>(num_rows, 1);
+  arma::mat varz = arma::ones<mat>(num_rows, 1);
   double lambda1 = 1-lambda;
+  
+  // Multiply each column of design by the response.
+  arma::mat covars = design;
+  covars.each_col() %= response;
   
   // Perform loop over rows
   for (arma::uword it = 1; it < num_rows; it++) {
-    // Calculate the z-score as the weighted sum of products of returns
-    var1[it] = lambda1*var1[it] + lambda*var1[it-1];
-    var2[it] = lambda1*var2[it] + lambda*var2[it-1];
-    covar[it] = lambda1*covar[it] + lambda*covar[it-1];
-    beta[it] = lambda1*covar[it]/var2[it] + lambda*beta[it-1];
-    zscore[it] = lambda1*(tseries(it, 0) - beta[it]*tseries(it, 1)) + lambda*zscore[it-1];
+    // Calculate the z-score as the weighted sum of products of returns.
+    // cout << "Calculating vars: " << it << endl;
+    vars.row(it) = lambda1*vars.row(it) + lambda*vars.row(it-1);
+    // cout << "Calculating covars: " << it << endl;
+    covars.row(it) = lambda1*covars.row(it) + lambda*covars.row(it-1);
+    // cout << "Calculating betas: " << it << endl;
+    betas.row(it) = lambda1*covars.row(it)/vars.row(it) + lambda*betas.row(it-1);
+    // cout << "Calculating zscores: " << it << endl;
+    zscores.row(it) = lambda1*(response.row(it) - arma::dot(betas.row(it), design.row(it))) + lambda*zscores.row(it-1);
+    // Calculate the variance of the z-scores.
+    varz.row(it) = lambda1*arma::square(zscores.row(it) - zscores.row(it-1)) + lambda*varz.row(it-1);
   }  // end for
   
-  return arma::join_rows(zscore, beta, var1, var2);
+  return zscores/sqrt(varz);
   
-}  // end run_zscore
+}  // end run_zscores
 
 
 
@@ -2624,7 +2659,7 @@ arma::mat calc_var_ag(const arma::mat& tseries,
     arma::mat var_s(remainder, tseries.n_cols);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < remainder; stub++) {
-      end_p = calc_endpoints(tseries.n_rows, step=step, stub=stub);
+      end_p = calc_endpoints(tseries.n_rows, step, stub);
       // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
       // end_p = end_p.elem(find(end_p < num_rows));
       aggs = tseries.rows(end_p);
@@ -2909,7 +2944,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     arma::mat var_s(remainder, 1);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < remainder; stub++) {
-      end_p = calc_endpoints(num_rows, step=step, stub=stub);
+      end_p = calc_endpoints(num_rows, step, stub);
       // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
       // end_p = end_p.elem(find(end_p < num_rows));
       // roll_ohlc
@@ -3357,10 +3392,10 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' # Response equals XLF returns
 //' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
+//' # Design matrix equals VTI and IEF returns
 //' de_sign <- re_turns[, -1]
 //' # Perform multivariate regression using lm()
 //' reg_model <- lm(res_ponse ~ de_sign)
@@ -3491,10 +3526,10 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& design) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' # Response equals XLF returns
 //' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
+//' # Design matrix equals VTI and IEF returns
 //' de_sign <- re_turns[, -1]
 //' # Perform multivariate regression using lm()
 //' reg_model <- lm(res_ponse ~ de_sign)
@@ -3540,7 +3575,7 @@ arma::colvec calc_reg(const arma::vec& response,
   }  // end least_squares
   case meth_od::regular: {
     // Calculate regularized regression coefficients
-    coeff = calc_inv(design_p, eigen_thresh=eigen_thresh, eigen_max=eigen_max)*response;
+    coeff = calc_inv(design_p, eigen_thresh, eigen_max)*response;
     break;
   }  // end regular
   case meth_od::quantile: {
@@ -3698,7 +3733,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -3707,7 +3742,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -3722,7 +3757,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate means
     if (end_pts(ep) > start_pts(ep)) {
-      means.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+      means.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
     }  // end if
   }  // end for
   
@@ -3903,7 +3938,7 @@ arma::mat roll_var(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -3912,7 +3947,7 @@ arma::mat roll_var(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -3927,7 +3962,7 @@ arma::mat roll_var(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate variance
     if (end_pts(ep) > start_pts(ep)) {
-      variance.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+      variance.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
     }  // end if
   }  // end for
   
@@ -4098,7 +4133,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4107,7 +4142,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4269,7 +4304,7 @@ arma::mat roll_skew(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4278,7 +4313,7 @@ arma::mat roll_skew(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4292,7 +4327,7 @@ arma::mat roll_skew(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate skewness
     if (end_pts(ep) > start_pts(ep)) {
-      skew_ness.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+      skew_ness.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
     }  // end if
   }  // end for
   
@@ -4403,7 +4438,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4412,7 +4447,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4426,7 +4461,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate kurtosis
     if (end_pts(ep) > start_pts(ep)) {
-      kurto_sis.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+      kurto_sis.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
     }  // end if
   }  // end for
   
@@ -4547,7 +4582,7 @@ arma::mat roll_reg(const arma::vec& response,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4556,7 +4591,7 @@ arma::mat roll_reg(const arma::vec& response,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4578,7 +4613,7 @@ arma::mat roll_reg(const arma::vec& response,
     if (end_pts(ep) > start_pts(ep)) {
       sub_response = response.subvec(start_pts(ep), end_pts(ep));
       sub_design = design.rows(start_pts(ep), end_pts(ep));
-      reg_data = calc_reg(sub_response, sub_design, method=method, eigen_thresh=eigen_thresh, eigen_max=eigen_max, con_fi=con_fi, alpha=alpha);
+      reg_data = calc_reg(sub_response, sub_design, method, eigen_thresh, eigen_max, con_fi, alpha);
       reg_stats.row(ep) = conv_to< rowvec >::from(reg_data);
     }  // end if
   }  // end for
@@ -4596,7 +4631,7 @@ arma::mat roll_reg(const arma::vec& response,
   // for (arma::uword it = look_back; it < num_rows; it++) {
   //   sub_response = response.subvec(it-look_back+1, it);
   //   sub_design = design.rows(it-look_back+1, it);
-  //   reg_data = calc_reg(sub_response, sub_design, method=method, eigen_thresh=eigen_thresh, eigen_max=eigen_max, con_fi=con_fi, alpha=alpha);
+  //   reg_data = calc_reg(sub_response, sub_design, method, eigen_thresh, eigen_max, con_fi, alpha);
   //   reg_stats.row(it) = conv_to< rowvec >::from(reg_data);
   // }  // end for
   
@@ -4733,14 +4768,14 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI", "XLF")])
-//' # Response equals IEF returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' # Response equals XLF returns
 //' res_ponse <- re_turns[, 1]
-//' # Design matrix equals VTI and XLF returns
+//' # Design matrix equals VTI and IEF returns
 //' de_sign <- re_turns[, -1]
 //' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 //' look_back <- 11
-//' z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back=look_back)
+//' z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back)
 //' # Calculate z-scores in R from rolling multivariate regression using lm()
 //' z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
 //'   if (ro_w == 1) return(0)
@@ -4773,7 +4808,7 @@ arma::vec roll_zscores(const arma::vec& response,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4782,7 +4817,7 @@ arma::vec roll_zscores(const arma::vec& response,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4938,7 +4973,7 @@ arma::mat roll_fun(const arma::mat& tseries,
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step=step, stub=stub);
+    end_pts = calc_endpoints(num_rows, step, stub);
   } else {
     // Copy end points
     end_pts = endp;
@@ -4947,7 +4982,7 @@ arma::mat roll_fun(const arma::mat& tseries,
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(endp=end_pts, look_back=look_back);
+    start_pts = calc_startpoints(end_pts, look_back);
   } else {
     // Copy start points
     start_pts = startp;
@@ -4963,7 +4998,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < num_pts; ep++) {
       // Calculate kurtosis
       if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+        stats.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
       }  // end if
     }  // end for
   } else if (fun == "calc_var") {
@@ -4971,7 +5006,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < num_pts; ep++) {
       // Calculate kurtosis
       if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+        stats.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
       }  // end if
     }  // end for
   } else if (fun == "calc_skew") {
@@ -4979,7 +5014,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < num_pts; ep++) {
       // Calculate kurtosis
       if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+        stats.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
       }  // end if
     }  // end for
   } else if (fun == "calc_kurtosis") {
@@ -4987,7 +5022,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < num_pts; ep++) {
       // Calculate kurtosis
       if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method=method, con_fi=con_fi);
+        stats.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method, con_fi);
       }  // end if
     }  // end for
   } else {
@@ -5337,7 +5372,7 @@ arma::vec sim_arima(const arma::vec& innov, arma::vec coeff) {
 //' n_col <- NCOL(re_turns)
 //' weights_r <- weights_r*sd(re_turns %*% rep(1/n_col, n_col))/sd(re_turns %*% weights_r)
 //' # Calculate weights using RcppArmadillo
-//' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max=eigen_max, alpha=al_pha))
+//' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
 //' all.equal(weight_s, weights_r)
 //' }
 //' 
@@ -5376,8 +5411,8 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     mean_cols = ((1-alpha)*mean_cols + alpha*arma::mean(mean_cols));
     // Apply regularized inverse
     // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
-    // weights = calc_inv(cov(returns), eigen_max=eigen_max)*mean_cols;
-    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
+    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
+    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*mean_cols;
     break;
   }  // end max_sharpe
   case meth_od::max_sharpe_median: {
@@ -5387,12 +5422,12 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     mean_cols = ((1-alpha)*mean_cols + alpha*arma::median(mean_cols));
     // Apply regularized inverse
     // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
-    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*mean_cols;
+    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*mean_cols;
     break;
   }  // end max_sharpe_median
   case meth_od::min_var: {
     // Apply regularized inverse to unit vector
-    weights = calc_inv(cov(returns), eigen_thresh=eigen_thresh, eigen_max=eigen_max)*arma::ones(returns.n_cols);
+    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*arma::ones(returns.n_cols);
     break;
   }  // end min_var
   case meth_od::min_varpca: {
@@ -5599,7 +5634,7 @@ arma::mat back_test(const arma::mat& excess, // Portfolio excess returns
   
   arma::vec weights(returns.n_cols, fill::zeros);
   arma::vec weights_past = zeros(returns.n_cols);
-  arma::vec pnl_s = zeros(returns.n_rows);
+  arma::mat pnl_s = zeros(returns.n_rows, 1);
   
   // Perform loop over the end points
   for (arma::uword it = 1; it < endp.size(); it++) {
@@ -5607,7 +5642,7 @@ arma::mat back_test(const arma::mat& excess, // Portfolio excess returns
     // Calculate portfolio weights
     weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, eigen_max, con_fi, alpha, scale, vol_target);
     // Calculate out-of-sample returns
-    pnl_s.subvec(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weights;
+    pnl_s.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weights;
     // Add transaction costs
     pnl_s.row(endp(it-1)+1) -= bid_offer*sum(abs(weights - weights_past))/2;
     weights_past = weights;
