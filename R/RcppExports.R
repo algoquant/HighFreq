@@ -1467,7 +1467,8 @@ run_covar <- function(tseries, lambda) {
 #' 
 #' @param \code{lambda} A \emph{numeric} decay factor.
 #'   
-#' @return A single-column \emph{matrix} with the z-scores.
+#' @return A \emph{matrix} with the z-scores, betas, and variances of the
+#'   design data.
 #'
 #' @details 
 #'   The function \code{run_zscores()} calculates the vectors of \emph{betas}
@@ -1480,10 +1481,10 @@ run_covar <- function(tseries, lambda) {
 #'   \deqn{
 #'     \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^d_t) + \lambda \epsilon_{t-1}
 #'   }
-#'   Where \eqn{\sigma^{cov}_t} is the vector of covariances at time \eqn{t},
-#'   between the response and design returns; 
+#'   Where \eqn{\sigma^{cov}_t} is the vector of covariances between the
+#'   response and design returns, at time \eqn{t};
 #'   \eqn{\sigma^2_t} is the vector of design variances,
-#'   and \eqn{r^r_t} and \eqn{r^2_t} are the streaming returns of the response
+#'   and \eqn{r^r_t} and \eqn{r^d_t} are the streaming returns of the response
 #'   and design data.
 #' 
 #'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
@@ -1493,7 +1494,7 @@ run_covar <- function(tseries, lambda) {
 #'   returns.
 #' 
 #'   The z-score \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
-#'   volatility \eqn{\sigma^{\epsilon}_t}: 
+#'   its volatility \eqn{\sigma^{\epsilon}_t}: 
 #'   \deqn{
 #'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
 #'   }
@@ -1531,12 +1532,11 @@ run_covar <- function(tseries, lambda) {
 #' res_ponse <- re_turns[, 1]
 #' # Design matrix equals VTI and IEF returns
 #' de_sign <- re_turns[, -1]
-#' run_zscores(re_turns[, 1, drop=FALSE], re_turns[, 2, drop=FALSE], lambda=lamb_da)
 #' # Calculate the running z-scores
 #' lamb_da <- 0.9
 #' zscores <- HighFreq::run_zscores(response=res_ponse, design=de_sign, lambda=lamb_da)
 #' # Plot the running z-scores
-#' da_ta <- cbind(cumsum(res_ponse), zscores)
+#' da_ta <- cbind(cumsum(res_ponse), zscores[, 1])
 #' colnames(da_ta) <- c("XLF", "zscores")
 #' col_names <- colnames(da_ta)
 #' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%

@@ -2150,7 +2150,8 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' 
 //' @param \code{lambda} A \emph{numeric} decay factor.
 //'   
-//' @return A single-column \emph{matrix} with the z-scores.
+//' @return A \emph{matrix} with the z-scores, betas, and variances of the
+//'   design data.
 //'
 //' @details 
 //'   The function \code{run_zscores()} calculates the vectors of \emph{betas}
@@ -2214,12 +2215,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' res_ponse <- re_turns[, 1]
 //' # Design matrix equals VTI and IEF returns
 //' de_sign <- re_turns[, -1]
-//' run_zscores(re_turns[, 1, drop=FALSE], re_turns[, 2, drop=FALSE], lambda=lamb_da)
 //' # Calculate the running z-scores
 //' lamb_da <- 0.9
 //' zscores <- HighFreq::run_zscores(response=res_ponse, design=de_sign, lambda=lamb_da)
 //' # Plot the running z-scores
-//' da_ta <- cbind(cumsum(res_ponse), zscores)
+//' da_ta <- cbind(cumsum(res_ponse), zscores[, 1])
 //' colnames(da_ta) <- c("XLF", "zscores")
 //' col_names <- colnames(da_ta)
 //' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%
@@ -2263,8 +2263,8 @@ arma::mat run_zscores(const arma::mat& response,
     varz.row(it) = lambda1*arma::square(zscores.row(it) - zscores.row(it-1)) + lambda*varz.row(it-1);
   }  // end for
   
-  return zscores/sqrt(varz);
-  
+  return join_rows(zscores/sqrt(varz), betas, vars);
+
 }  // end run_zscores
 
 

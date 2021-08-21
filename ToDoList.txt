@@ -83,7 +83,7 @@ Therefore 1-second bar returns carry almost no information.
 + [x] Replace call-by-name syntax in C++ code
 
 + [x] Modify run_zscore() to allow multivariate regression
-Rename to run_scores()
+Rename to run_zscores()
 Split tseries argument into response and design arguments, with design containing multiple columns of returns data.
 
 + [ ] Create functions roll_max() and roll_min() using a look-back interval
