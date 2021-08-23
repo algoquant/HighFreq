@@ -15,18 +15,37 @@ updates.}
 
 \item{\code{beta}}{The weight associated with the past variance estimates.}
 
-\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A single-column \emph{matrix} of innovations (random
+numbers).}
 }
 \value{
-A \emph{matrix} with two columns: the simulated returns and
-  variance, and with the same number of rows as the length of the argument 
-  \code{innov}.
+A \emph{matrix} with two columns: the simulated returns and the 
+  variance, and with the same number of rows as the argument \code{innov}.
 }
 \description{
 Simulate a \emph{GARCH} process using \emph{Rcpp}.
 }
 \details{
-The function \code{sim_garch()} simulates a \emph{GARCH} process using
+The function \code{sim_garch()} simulates the following \emph{GARCH}
+  process:
+  \deqn{
+    r_i = \mu + \sigma_{i-1} \xi_i
+  }
+  \deqn{
+    \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+  }
+  Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
+  variance, \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
+  parameters, and \eqn{\xi_i} are the \emph{innovations}.
+
+  The long-term average level of the simulated variance is given by:
+  \deqn{
+    \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
+  }
+  So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
+  otherwise the volatility is explosive.
+
+  The function \code{sim_garch()} simulates a \emph{GARCH} process using
   fast \emph{Rcpp} \code{C++} code.
 }
 \examples{
@@ -36,7 +55,8 @@ ome_ga <- 0.01
 al_pha <- 0.5
 be_ta <- 0.2
 # Simulate the GARCH process using Rcpp
-garch_rcpp <- sim_garch(omega=ome_ga, alpha=al_pha, beta=be_ta, innov=rnorm(10000))
+garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=matrix(rnorm(1e4)))
+plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns")
 }
 
 }

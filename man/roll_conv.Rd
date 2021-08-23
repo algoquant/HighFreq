@@ -29,7 +29,7 @@ The function \code{roll_conv()} calculates the convolutions of the
   
   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
-  \code{R} function \code{filter(x=tseries, filter=weight_s,
+  \code{R} function \cr\code{filter(x=tseries, filter=weight_s,
   method="convolution", sides=1)}, but it's over \code{6} times faster, and
   it doesn't produce any leading \code{NA} values.
 }

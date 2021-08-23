@@ -80,6 +80,13 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create function calc_adf() to calculate the ADF test statistic using matrix algebra
+
++ [x] Update sim_arima() to accept matrix not vector - rename sim_arima() to sim_ar()
+
++ [x] Update sim_garch(), sim_ou(), and sim_schwartz() to accept matrix not vector
+Add formulas to the documentation.
+
 + [x] Replace call-by-name syntax in C++ code
 
 + [x] Modify run_zscore() to allow multivariate regression
@@ -87,8 +94,6 @@ Rename to run_zscores()
 Split tseries argument into response and design arguments, with design containing multiple columns of returns data.
 
 + [ ] Create functions roll_max() and roll_min() using a look-back interval
-
-+ [ ] Create function adf_test() to calculate the ADF coefficients using matrix algebra
 
 + [ ] Modify functions calc_weights() and back_test() to perform rolling portfolio optimization in the simplified case of orthogonal Forecastable Component Analysis (FCA)
 

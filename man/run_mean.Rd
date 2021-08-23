@@ -44,10 +44,9 @@ The function \code{run_mean()} calculates the rolling mean of streaming
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
 
-  The function \code{run_mean()} performs the same calculation
-  as the standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weight_s, method="convolution", sides=1)}, but it's several
-  times faster.
+  The function \code{run_mean()} performs the same calculation as the
+  standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
+  method="recursive")}, but it's several times faster.
 
   The function \code{run_mean()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -60,7 +59,9 @@ price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
 lamb_da <- 0.9
 means <- HighFreq::run_mean(price_s, lambda=lamb_da)
 # Calculate rolling means using R code
-filter_ed <- (1-lamb_da)*filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive")
+filter_ed <- (1-lamb_da)*filter(price_s, 
+  filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
+  method="recursive")
 all.equal(means, unclass(filter_ed), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)

@@ -13,11 +13,12 @@ sim_schwartz(eq_price, volat, theta, innov)
 
 \item{\code{theta}}{The strength of mean reversion.}
 
-\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A single-column \emph{matrix} of innovations (random
+numbers).}
 }
 \value{
-A column \emph{vector} representing the \emph{time series} of
-  prices, with the same length as the argument \code{innov}.
+A single-column \emph{matrix} of the \emph{time series} of
+  prices, with the same number of rows as the argument \code{innov}.
 }
 \description{
 Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -25,15 +26,21 @@ Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 \details{
 The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
   using fast \emph{Rcpp} \code{C++} code.
-  It returns a column \emph{vector} representing the \emph{time series} of
-  prices.
-  The function \code{sim_schwartz()} simulates the percentage returns as
-  equal to the difference between the equilibrium price \code{eq_price}
-  minus the latest price, times the mean reversion parameter \code{theta},
-  plus a random innovation.
+  
+  The \emph{Schwartz} process is the exponential of the
+  \emph{Ornstein-Uhlenbeck} process, and similar comments apply to it.
   The prices are calculated as the exponentially compounded returns, so they
   are never negative. The log prices can be obtained by taking the logarithm
   of the prices.
+  
+  The function \code{sim_schwartz()} simulates the percentage returns as
+  equal to the difference between the equilibrium price \eqn{\mu} minus the
+  latest price \eqn{p_{i-1}}, times the mean reversion parameter
+  \eqn{\theta}, plus a random innovation proportional to the volatility
+  \eqn{\sigma}.
+
+  The function \code{sim_schwartz()} returns a single-column \emph{matrix}
+  representing the \emph{time series} of prices.
 }
 \examples{
 \dontrun{
@@ -42,7 +49,9 @@ eq_price <- 5.0
 vol_at <- 0.01
 the_ta <- 0.01
 # Simulate Schwartz process using Rcpp
-price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, theta=the_ta, innov=rnorm(1000))
+price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, 
+  theta=the_ta, innov=matrix(rnorm(1e3)))
+plot(price_s, t="l", main="Simulated Schwartz Prices")
 }
 
 }

@@ -13,26 +13,42 @@ sim_ou(eq_price, volat, theta, innov)
 
 \item{\code{theta}}{The strength of mean reversion.}
 
-\item{\code{innov}}{A \emph{vector} of innovations (random numbers).}
+\item{\code{innov}}{A single-column \emph{matrix} of innovations (random
+numbers).}
 }
 \value{
-A column \emph{vector} representing the \emph{time series} of
-  log prices, with the same length as the argument \code{innov}.
+A single-column \emph{matrix} of the \emph{time series} of log
+  prices, with the same number of rows as the argument \code{innov}.
 }
 \description{
 Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 }
 \details{
-The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-  process using fast \emph{Rcpp} \code{C++} code.
-  It returns a column \emph{vector} representing the \emph{time series} of
-  log prices.
+The function \code{sim_ou()} simulates the following
+  \emph{Ornstein-Uhlenbeck} process:
+  \deqn{
+    r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \sigma \, \xi_i
+  }
+  \deqn{
+    p_i = p_{i-1} + r_i
+  }
+  Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
+  \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
+  \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the
+  \emph{innovations}.
+
   The function \code{sim_ou()} simulates the percentage returns as equal to
-  the difference between the equilibrium price \code{eq_price} minus the
-  latest price, times the mean reversion parameter \code{theta}, plus a
-  random innovation.
-  The log prices are calculated as the sum of returns (not compounded), so
-  they can become negative.
+  the difference between the equilibrium price \eqn{\mu} minus the latest
+  price \eqn{p_{i-1}}, times the mean reversion parameter \eqn{\theta}, plus
+  a random innovation proportional to the volatility \eqn{\sigma}. The log
+  prices are calculated as the sum of returns (not compounded), so they can
+  become negative.
+
+  The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
+  process using fast \emph{Rcpp} \code{C++} code.
+
+  The function \code{sim_ou()} returns a single-column \emph{matrix}
+  representing the \emph{time series} of log prices.
 }
 \examples{
 \dontrun{
@@ -41,7 +57,9 @@ eq_price <- 5.0
 vol_at <- 0.01
 the_ta <- 0.01
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-price_s <- HighFreq::sim_ou(eq_price=eq_price, volat=vol_at, theta=the_ta, innov=rnorm(1000))
+price_s <- HighFreq::sim_ou(eq_price=eq_price, volat=vol_at, 
+  theta=the_ta, innov=matrix(rnorm(1e3)))
+plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices")
 }
 
 }

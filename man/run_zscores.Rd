@@ -47,7 +47,7 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   The above formula is approximate because it doesn't subtract the mean
   returns.
 
-  The z-score \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
+  The \emph{z-score} \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
   its volatility \eqn{\sigma^{\epsilon}_t}: 
   \deqn{
     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
@@ -56,11 +56,11 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the rolling z-score values have a
+  values have a greater weight, and the rolling \emph{z-score} values have a
   stronger dependence on past values.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the rolling z-score values have
+  past values have a smaller weight, and the rolling \emph{z-score} values have
   a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
 
@@ -69,14 +69,11 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
 
-  The function \code{run_zscores()} returns four columns of data: the
-  z-score and the variances of the two columns of the argument
-  \code{tseries}.  This allows calculating the rolling correlation.
-
-  The function \code{run_zscores()} performs the same calculation
-  as the standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weight_s, method="convolution", sides=1)}, but it's several
-  times faster.
+  The function \code{run_zscores()} returns multiple columns of data. 
+  If the matrix \code{design} has \code{n} columns then \code{run_zscores()}
+  returns a matrix with \code{2n+1} columns.  The first column contains the
+  \emph{z-scores}, and the remaining columns contain the \emph{betas} and
+  the \emph{variances} of the design data.
 }
 \examples{
 \dontrun{

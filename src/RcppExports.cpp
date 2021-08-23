@@ -195,13 +195,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_vecw
-arma::mat roll_vecw(const arma::mat& tseries, arma::mat weights);
+arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights);
 RcppExport SEXP _HighFreq_roll_vecw(SEXP tseriesSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type weights(weightsSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_vecw(tseries, weights));
     return rcpp_result_gen;
 END_RCPP
@@ -672,7 +672,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_garch
-arma::mat sim_garch(double omega, double alpha, double beta, arma::vec innov);
+arma::mat sim_garch(double omega, double alpha, double beta, arma::mat& innov);
 RcppExport SEXP _HighFreq_sim_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -680,13 +680,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type innov(innovSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_garch(omega, alpha, beta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
 // sim_ou
-arma::vec sim_ou(double eq_price, double volat, double theta, arma::vec innov);
+arma::mat sim_ou(double eq_price, double volat, double theta, arma::mat& innov);
 RcppExport SEXP _HighFreq_sim_ou(SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -694,13 +694,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
     Rcpp::traits::input_parameter< double >::type volat(volatSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type innov(innovSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_ou(eq_price, volat, theta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
 // sim_schwartz
-arma::vec sim_schwartz(double eq_price, double volat, double theta, arma::vec innov);
+arma::vec sim_schwartz(double eq_price, double volat, double theta, arma::mat& innov);
 RcppExport SEXP _HighFreq_sim_schwartz(SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -708,20 +708,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
     Rcpp::traits::input_parameter< double >::type volat(volatSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type innov(innovSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_schwartz(eq_price, volat, theta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
-// sim_arima
-arma::vec sim_arima(const arma::vec& innov, arma::vec coeff);
-RcppExport SEXP _HighFreq_sim_arima(SEXP innovSEXP, SEXP coeffSEXP) {
+// sim_ar
+arma::mat sim_ar(const arma::mat& innov, arma::mat& coeff);
+RcppExport SEXP _HighFreq_sim_ar(SEXP innovSEXP, SEXP coeffSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type innov(innovSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type coeff(coeffSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_arima(innov, coeff));
+    Rcpp::traits::input_parameter< const arma::mat& >::type innov(innovSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type coeff(coeffSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_ar(innov, coeff));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -819,7 +819,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
     {"_HighFreq_sim_schwartz", (DL_FUNC) &_HighFreq_sim_schwartz, 4},
-    {"_HighFreq_sim_arima", (DL_FUNC) &_HighFreq_sim_arima, 2},
+    {"_HighFreq_sim_ar", (DL_FUNC) &_HighFreq_sim_ar, 2},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 8},
     {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 13},
     {NULL, NULL, 0}

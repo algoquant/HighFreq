@@ -55,10 +55,9 @@ The function \code{run_covar()} calculates the rolling covariance of
   covariance and the variances of the two columns of the argument
   \code{tseries}.  This allows calculating the rolling correlation.
 
-  The function \code{run_covar()} performs the same calculation
-  as the standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weight_s, method="convolution", sides=1)}, but it's several
-  times faster.
+  The function \code{run_covar()} performs the same calculation as the
+  standard \code{R} function\cr\code{stats::filter(x=series,
+  filter=weight_s, method="recursive")}, but it's several times faster.
 }
 \examples{
 \dontrun{
@@ -68,7 +67,9 @@ re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
 lamb_da <- 0.9
 covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
 # Calculate rolling covariance using R code
-filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), method="recursive")
+filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], 
+  filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), 
+  method="recursive")
 all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
 # Calculate the rolling correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])

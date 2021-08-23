@@ -1214,7 +1214,7 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
 //'   \emph{column vector} over its past values (a convolution with the \emph{column vector}
 //'   of weights), using \code{RcppArmadillo}. It performs a similar calculation
-//'   as the standard \code{R} function \code{stats::filter(x=series,
+//'   as the standard \code{R} function \cr\code{stats::filter(x=series,
 //'   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
 //'   times faster, and it doesn't produce any \code{NA} values.
 //'   
@@ -1249,7 +1249,7 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_vecw(const arma::mat& tseries, arma::mat weights) {
+arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
   
   arma::uword num_rows = tseries.n_rows;
   arma::uword look_back = weights.n_rows;
@@ -1292,7 +1292,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat weights) {
 //'   
 //'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
-//'   \code{R} function \code{filter(x=tseries, filter=weight_s,
+//'   \code{R} function \cr\code{filter(x=tseries, filter=weight_s,
 //'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 //'   it doesn't produce any leading \code{NA} values.
 //'   
@@ -1541,7 +1541,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   convolutions of the columns of \code{tseries} with the \emph{column
 //'   vector} of weights using the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}.  It performs a similar calculation to the standard
-//'   \code{R} function \code{stats::filter(x=re_turns, filter=weight_s,
+//'   \code{R} function \cr\code{stats::filter(x=re_turns, filter=weight_s,
 //'   method="convolution", sides=1)}, but it can be many times faster, and it
 //'   doesn't produce any leading \code{NA} values.
 //'   
@@ -1735,10 +1735,9 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   The formula is equivalent to a convolution with exponentially decaying
 //'   weights, but it's faster.
 //' 
-//'   The function \code{run_mean()} performs the same calculation
-//'   as the standard \code{R} function\cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="convolution", sides=1)}, but it's several
-//'   times faster.
+//'   The function \code{run_mean()} performs the same calculation as the
+//'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
+//'   method="recursive")}, but it's several times faster.
 //' 
 //'   The function \code{run_mean()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -1751,7 +1750,9 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' lamb_da <- 0.9
 //' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
 //' # Calculate rolling means using R code
-//' filter_ed <- (1-lamb_da)*filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive")
+//' filter_ed <- (1-lamb_da)*filter(price_s, 
+//'   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
+//'   method="recursive")
 //' all.equal(means, unclass(filter_ed), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
@@ -2001,10 +2002,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   The formula is equivalent to a convolution with exponentially decaying
 //'   weights, but it's faster.
 //' 
-//'   The function \code{run_var()} performs the same calculation
-//'   as the standard \code{R} function\cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="convolution", sides=1)}, but it's several
-//'   times faster.
+//'   The function \code{run_var()} performs the same calculation as the
+//'   standard \code{R} function\cr\code{stats::filter(x=series,
+//'   filter=weight_s, method="recursive")}, but it's several times faster.
 //' 
 //'   The function \code{run_var()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -2017,7 +2017,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' lamb_da <- 0.9
 //' vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
 //' # Calculate rolling variance using R code
-//' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive")
+//' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
+//'   init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
+//'   method="recursive")
 //' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
@@ -2038,7 +2040,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   // Perform loop over rows
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the variance as the weighted sum of squared returns
-    vars[it] = lambda1*vars[it] + lambda*vars[it-1];
+    vars.row(it) = lambda1*vars.row(it) + lambda*vars.row(it-1);
   }  // end for
   
   return vars;
@@ -2094,10 +2096,9 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //'   covariance and the variances of the two columns of the argument
 //'   \code{tseries}.  This allows calculating the rolling correlation.
 //' 
-//'   The function \code{run_covar()} performs the same calculation
-//'   as the standard \code{R} function\cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="convolution", sides=1)}, but it's several
-//'   times faster.
+//'   The function \code{run_covar()} performs the same calculation as the
+//'   standard \code{R} function\cr\code{stats::filter(x=series,
+//'   filter=weight_s, method="recursive")}, but it's several times faster.
 //' 
 //' @examples
 //' \dontrun{
@@ -2107,7 +2108,9 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' lamb_da <- 0.9
 //' covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
 //' # Calculate rolling covariance using R code
-//' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), method="recursive")
+//' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], 
+//'   filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), 
+//'   method="recursive")
 //' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
 //' # Calculate the rolling correlation
 //' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
@@ -2126,9 +2129,9 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   // Perform loop over rows
   for (arma::uword it = 1; it < num_rows; it++) {
     // Calculate the covariance as the weighted sum of products of returns
-    var1[it] = lambda1*var1[it] + lambda*var1[it-1];
-    var2[it] = lambda1*var2[it] + lambda*var2[it-1];
-    covar[it] = lambda1*covar[it] + lambda*covar[it-1];
+    var1.row(it) = lambda1*var1.row(it) + lambda*var1.row(it-1);
+    var2.row(it) = lambda1*var2.row(it) + lambda*var2.row(it-1);
+    covar.row(it) = lambda1*covar.row(it) + lambda*covar.row(it-1);
   }  // end for
   
   return arma::join_rows(covar, var1, var2);
@@ -2176,7 +2179,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   The above formula is approximate because it doesn't subtract the mean
 //'   returns.
 //' 
-//'   The z-score \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
+//'   The \emph{z-score} \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
 //'   its volatility \eqn{\sigma^{\epsilon}_t}: 
 //'   \deqn{
 //'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
@@ -2185,11 +2188,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the rolling z-score values have a
+//'   values have a greater weight, and the rolling \emph{z-score} values have a
 //'   stronger dependence on past values.  This is equivalent to a long
 //'   look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the rolling z-score values have
+//'   past values have a smaller weight, and the rolling \emph{z-score} values have
 //'   a weaker dependence on past values.  This is equivalent to a short
 //'   look-back interval.
 //' 
@@ -2198,14 +2201,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   The formula is equivalent to a convolution with exponentially decaying
 //'   weights, but it's faster.
 //' 
-//'   The function \code{run_zscores()} returns four columns of data: the
-//'   z-score and the variances of the two columns of the argument
-//'   \code{tseries}.  This allows calculating the rolling correlation.
-//' 
-//'   The function \code{run_zscores()} performs the same calculation
-//'   as the standard \code{R} function\cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="convolution", sides=1)}, but it's several
-//'   times faster.
+//'   The function \code{run_zscores()} returns multiple columns of data. 
+//'   If the matrix \code{design} has \code{n} columns then \code{run_zscores()}
+//'   returns a matrix with \code{2n+1} columns.  The first column contains the
+//'   \emph{z-scores}, and the remaining columns contain the \emph{betas} and
+//'   the \emph{variances} of the design data.
 //' 
 //' @examples
 //' \dontrun{
@@ -5054,14 +5054,33 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' 
 //' @param \code{beta} The weight associated with the past variance estimates.
 //' 
-//' @param \code{innov} A \emph{vector} of innovations (random numbers).
+//' @param \code{innov} A single-column \emph{matrix} of innovations (random
+//'   numbers).
 //' 
-//' @return A \emph{matrix} with two columns: the simulated returns and
-//'   variance, and with the same number of rows as the length of the argument 
-//'   \code{innov}.
+//' @return A \emph{matrix} with two columns: the simulated returns and the 
+//'   variance, and with the same number of rows as the argument \code{innov}.
 //'
 //' @details 
-//'   The function \code{sim_garch()} simulates a \emph{GARCH} process using
+//'   The function \code{sim_garch()} simulates the following \emph{GARCH}
+//'   process:
+//'   \deqn{
+//'     r_i = \mu + \sigma_{i-1} \xi_i
+//'   }
+//'   \deqn{
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'   }
+//'   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
+//'   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
+//'   \emph{GARCH} parameters, and \eqn{\xi_i} are the \emph{innovations}.
+//'
+//'   The long-term average level of the simulated variance is given by:
+//'   \deqn{
+//'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
+//'   }
+//'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
+//'   otherwise the volatility is explosive.
+//'
+//'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 //'   fast \emph{Rcpp} \code{C++} code.
 //'
 //' @examples
@@ -5071,7 +5090,8 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' al_pha <- 0.5
 //' be_ta <- 0.2
 //' # Simulate the GARCH process using Rcpp
-//' garch_rcpp <- sim_garch(omega=ome_ga, alpha=al_pha, beta=be_ta, innov=rnorm(10000))
+//' garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=matrix(rnorm(1e4)))
+//' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns")
 //' }
 //' 
 //' @export
@@ -5079,15 +5099,15 @@ arma::mat roll_fun(const arma::mat& tseries,
 arma::mat sim_garch(double omega, 
                     double alpha, 
                     double beta, 
-                    arma::vec innov) {
+                    arma::mat& innov) {
   
-  arma::uword siz_e = innov.size();
-  arma::vec variance(siz_e);
-  arma::vec returns(siz_e);
+  arma::uword num_rows = innov.n_rows;
+  arma::vec variance(num_rows);
+  arma::vec returns(num_rows);
   variance[0] = omega/(1-alpha-beta);
   returns[0] = std::sqrt(variance[0])*innov[0];
   
-  for (arma::uword it = 1; it < siz_e; it++) {
+  for (arma::uword it = 1; it < num_rows; it++) {
     returns[it] = std::sqrt(variance[it-1])*innov[it];
     variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
   }  // end for
@@ -5107,22 +5127,38 @@ arma::mat sim_garch(double omega,
 //' 
 //' @param \code{theta} The strength of mean reversion.
 //' 
-//' @param \code{innov} A \emph{vector} of innovations (random numbers).
+//' @param \code{innov} A single-column \emph{matrix} of innovations (random
+//'   numbers).
 //' 
-//' @return A column \emph{vector} representing the \emph{time series} of
-//'   log prices, with the same length as the argument \code{innov}.
+//' @return A single-column \emph{matrix} of the \emph{time series} of log
+//'   prices, with the same number of rows as the argument \code{innov}.
 //'
 //' @details 
-//'   The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
-//'   process using fast \emph{Rcpp} \code{C++} code.
-//'   It returns a column \emph{vector} representing the \emph{time series} of
-//'   log prices.
+//'   The function \code{sim_ou()} simulates the following
+//'   \emph{Ornstein-Uhlenbeck} process:
+//'   \deqn{
+//'     r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \sigma \, \xi_i
+//'   }
+//'   \deqn{
+//'     p_i = p_{i-1} + r_i
+//'   }
+//'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
+//'   \eqn{\theta}, and \eqn{\mu}, and \eqn{\sigma} are the
+//'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the
+//'   \emph{innovations}.
+//'
 //'   The function \code{sim_ou()} simulates the percentage returns as equal to
-//'   the difference between the equilibrium price \code{eq_price} minus the
-//'   latest price, times the mean reversion parameter \code{theta}, plus a
-//'   random innovation.
-//'   The log prices are calculated as the sum of returns (not compounded), so
-//'   they can become negative.
+//'   the difference between the equilibrium price \eqn{\mu} minus the latest
+//'   price \eqn{p_{i-1}}, times the mean reversion parameter \eqn{\theta}, plus
+//'   a random innovation proportional to the volatility \eqn{\sigma}. The log
+//'   prices are calculated as the sum of returns (not compounded), so they can
+//'   become negative.
+//'
+//'   The function \code{sim_ou()} simulates the \emph{Ornstein-Uhlenbeck}
+//'   process using fast \emph{Rcpp} \code{C++} code.
+//'
+//'   The function \code{sim_ou()} returns a single-column \emph{matrix}
+//'   representing the \emph{time series} of log prices.
 //'
 //' @examples
 //' \dontrun{
@@ -5131,25 +5167,28 @@ arma::mat sim_garch(double omega,
 //' vol_at <- 0.01
 //' the_ta <- 0.01
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' price_s <- HighFreq::sim_ou(eq_price=eq_price, volat=vol_at, theta=the_ta, innov=rnorm(1000))
+//' price_s <- HighFreq::sim_ou(eq_price=eq_price, volat=vol_at, 
+//'   theta=the_ta, innov=matrix(rnorm(1e3)))
+//' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec sim_ou(double eq_price, 
+arma::mat sim_ou(double eq_price, 
                  double volat, 
                  double theta, 
-                 arma::vec innov) {
+                 arma::mat& innov) {
   
-  arma::uword length = innov.size();
-  arma::vec price_s(length);
-  arma::vec returns(length);
+  arma::uword num_rows = innov.n_rows;
+  arma::mat price_s = arma::zeros<mat>(num_rows, 1);
+  arma::mat returns = arma::zeros<mat>(num_rows, 1);
   
-  price_s[0] = eq_price;
-  for (arma::uword it = 1; it < length; it++) {
-    returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
-    price_s[it] = price_s[it-1] + returns[it];
+  price_s.row(0) = eq_price;
+  for (arma::uword it = 1; it < num_rows; it++) {
+    returns.row(it) = theta*(eq_price - price_s.row(it-1)) + volat*innov.row(it-1);
+    price_s.row(it) = price_s.row(it-1) + returns.row(it);
   }  // end for
+  
   return price_s;
   
 }  // end sim_ou
@@ -5165,23 +5204,30 @@ arma::vec sim_ou(double eq_price,
 //' 
 //' @param \code{theta} The strength of mean reversion.
 //' 
-//' @param \code{innov} A \emph{vector} of innovations (random numbers).
+//' @param \code{innov} A single-column \emph{matrix} of innovations (random
+//'   numbers).
 //' 
-//' @return A column \emph{vector} representing the \emph{time series} of
-//'   prices, with the same length as the argument \code{innov}.
+//' @return A single-column \emph{matrix} of the \emph{time series} of
+//'   prices, with the same number of rows as the argument \code{innov}.
 //'
 //' @details 
 //'   The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
 //'   using fast \emph{Rcpp} \code{C++} code.
-//'   It returns a column \emph{vector} representing the \emph{time series} of
-//'   prices.
-//'   The function \code{sim_schwartz()} simulates the percentage returns as
-//'   equal to the difference between the equilibrium price \code{eq_price}
-//'   minus the latest price, times the mean reversion parameter \code{theta},
-//'   plus a random innovation.
+//'   
+//'   The \emph{Schwartz} process is the exponential of the
+//'   \emph{Ornstein-Uhlenbeck} process, and similar comments apply to it.
 //'   The prices are calculated as the exponentially compounded returns, so they
 //'   are never negative. The log prices can be obtained by taking the logarithm
 //'   of the prices.
+//'   
+//'   The function \code{sim_schwartz()} simulates the percentage returns as
+//'   equal to the difference between the equilibrium price \eqn{\mu} minus the
+//'   latest price \eqn{p_{i-1}}, times the mean reversion parameter
+//'   \eqn{\theta}, plus a random innovation proportional to the volatility
+//'   \eqn{\sigma}.
+//'
+//'   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
+//'   representing the \emph{time series} of prices.
 //'
 //' @examples
 //' \dontrun{
@@ -5190,7 +5236,9 @@ arma::vec sim_ou(double eq_price,
 //' vol_at <- 0.01
 //' the_ta <- 0.01
 //' # Simulate Schwartz process using Rcpp
-//' price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, theta=the_ta, innov=rnorm(1000))
+//' price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, 
+//'   theta=the_ta, innov=matrix(rnorm(1e3)))
+//' plot(price_s, t="l", main="Simulated Schwartz Prices")
 //' }
 //' 
 //' @export
@@ -5198,16 +5246,16 @@ arma::vec sim_ou(double eq_price,
 arma::vec sim_schwartz(double eq_price, 
                        double volat, 
                        double theta, 
-                       arma::vec innov) {
+                       arma::mat& innov) {
   
-  arma::uword length = innov.size();
-  arma::vec price_s(length);
-  arma::vec returns(length);
+  arma::uword num_rows = innov.n_rows;
+  arma::mat price_s = arma::zeros<mat>(num_rows, 1);
+  arma::mat returns = arma::zeros<mat>(num_rows, 1);
   
-  price_s[0] = eq_price;
-  for (arma::uword it = 1; it < length; it++) {
-    returns[it] = theta*(eq_price - price_s[it-1]) + volat*innov[it-1];
-    price_s[it] = price_s[it-1] * exp(returns[it]);
+  price_s.row(0) = eq_price;
+  for (arma::uword it = 1; it < num_rows; it++) {
+    returns.row(it) = theta*(eq_price - price_s.row(it-1)) + volat*innov.row(it-1);
+    price_s.row(it) = price_s.row(it-1) * exp(returns.row(it));
   }  // end for
   return price_s;
   
@@ -5216,60 +5264,84 @@ arma::vec sim_schwartz(double eq_price,
 
 
 ////////////////////////////////////////////////////////////
-//' Recursively filter a \emph{vector} of innovations through a \emph{vector} of
-//' \emph{ARIMA} coefficients.
+//' Recursively filter a \emph{matrix} of innovations through a \emph{matrix} of
+//' \emph{autoregressive} coefficients.
 //' 
-//' @param \code{innov} A \emph{vector} of innovations (random numbers).
+//' @param \code{innov} A single-column \emph{matrix} of innovations.
 //' 
-//' @param \code{coeff} A \emph{vector} of \emph{ARIMA} coefficients.
+//' @param \code{coeff} A single-column \emph{matrix} of \emph{autoregressive}
+//'   coefficients.
 //'
-//' @return A column \emph{vector} of the same length as the argument
-//'   \code{innov}.
+//' @return A single-column \emph{matrix} with the same number of rows as the
+//'   argument \code{innov}.
 //'
 //' @details 
-//'   The function \code{sim_arima()} recursively filters a \emph{vector} of
-//'   innovations through a \emph{vector} of \emph{ARIMA} coefficients, using
+//'   The function \code{sim_ar()} recursively filters the \emph{matrix} of
+//'   innovations \code{innov} through the \emph{matrix} of
+//'   \emph{autoregressive} coefficients \code{coeff}, using fast
 //'   \code{RcppArmadillo} \code{C++} code.
-//'   It performs the same calculation as the standard \code{R} function
-//'   \code{filter(x=innov, filter=co_eff, method="recursive")}, but it's over
-//'   \code{6} times faster.
+//'
+//'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
+//'   \eqn{AR(p)} of order \eqn{p}:
+//'   \deqn{
+//'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
+//'   }
+//'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
+//'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the
+//'   \emph{innovations}.
+//'
+//'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+//'   equal to the number of rows of the \emph{autoregressive} coefficients
+//'   \code{coeff}.
+//'
+//'   The function \code{sim_ar()} performs the same calculation as the standard
+//'   \code{R} function \cr\code{filter(x=innov, filter=co_eff,
+//'   method="recursive")}, but it's several times faster.
 //'   
 //' @examples
 //' \dontrun{
-//' # Calculate vector of prices
-//' price_s <- drop(zoo::coredata(quantmod::Cl(rutils::etf_env$VTI)))
+//' # Calculate matrix of innovations
+//' in_nov <- matrix(rnorm(1e4, sd=0.01))
 //' # Create ARIMA coefficients
-//' co_eff <- c(-0.8, 0.2)
+//' co_eff <- matrix(c(0.2, 0.2))
 //' # Calculate recursive filter using filter()
-//' filter_ed <- filter(price_s, filter=co_eff, method="recursive")
+//' filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
 //' # Calculate recursive filter using RcppArmadillo
-//' ari_ma <- HighFreq::sim_arima(price_s, rev(co_eff))
+//' ari_ma <- HighFreq::sim_ar(in_nov, co_eff)
 //' # Compare the two methods
 //' all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::sim_ar(in_nov, co_eff),
+//'   Rcode=filter(in_nov, filter=co_eff, method="recursive"),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec sim_arima(const arma::vec& innov, arma::vec coeff) {
+arma::mat sim_ar(const arma::mat& innov, arma::mat& coeff) {
   
-  arma::uword length = innov.n_elem;
-  arma::uword look_back = coeff.n_elem;
-  arma::vec ari_ma(length, fill::zeros);
-  
+  arma::uword num_rows = innov.n_rows;
+  arma::uword look_back = coeff.n_rows;
+  arma::mat rev_coeff = arma::reverse(coeff);
+  arma::mat ari_ma = zeros(num_rows, 1);
+
   // Warmup period
-  ari_ma(0) = innov(0);
-  ari_ma(1) = innov(1) + coeff(look_back-1) * ari_ma(0);
+  ari_ma.row(0) = innov.row(0);
+  ari_ma.row(1) = innov.row(1) + rev_coeff.row(look_back-1) * ari_ma.row(0);
   for (arma::uword it=2; it < look_back-1; it++) {
-    ari_ma(it) = innov(it) + arma::dot(coeff.subvec(look_back-it, look_back-1), ari_ma.subvec(0, it-1));
+    ari_ma.row(it) = innov.row(it) + arma::dot(rev_coeff.rows(look_back-it, look_back-1), ari_ma.rows(0, it-1));
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < length; it++) {
-    ari_ma(it) = innov(it) + arma::dot(coeff, ari_ma.subvec(it-look_back, it-1));
+  for (arma::uword it = look_back; it < num_rows; it++) {
+    ari_ma.row(it) = innov.row(it) + arma::dot(rev_coeff, ari_ma.rows(it-look_back, it-1));
   }  // end for
   
   return ari_ma;
-}  // end sim_arima
+  
+}  // end sim_ar
 
 
 

@@ -25,7 +25,7 @@ or a \emph{column vector} using \code{RcppArmadillo}.
 The function \code{roll_vecw()} calculates the rolling weighted sums of a
   \emph{column vector} over its past values (a convolution with the \emph{column vector}
   of weights), using \code{RcppArmadillo}. It performs a similar calculation
-  as the standard \code{R} function \code{stats::filter(x=series,
+  as the standard \code{R} function \cr\code{stats::filter(x=series,
   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
   times faster, and it doesn't produce any \code{NA} values.
 }

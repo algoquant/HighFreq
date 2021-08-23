@@ -48,10 +48,9 @@ The function \code{run_var()} calculates the rolling variance of a
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
 
-  The function \code{run_var()} performs the same calculation
-  as the standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weight_s, method="convolution", sides=1)}, but it's several
-  times faster.
+  The function \code{run_var()} performs the same calculation as the
+  standard \code{R} function\cr\code{stats::filter(x=series,
+  filter=weight_s, method="recursive")}, but it's several times faster.
 
   The function \code{run_var()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -64,7 +63,9 @@ re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
 lamb_da <- 0.9
 vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
 # Calculate rolling variance using R code
-filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive")
+filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
+  init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
+  method="recursive")
 all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)

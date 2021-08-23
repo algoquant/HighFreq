@@ -39,7 +39,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
   convolutions of the columns of \code{tseries} with the \emph{column
   vector} of weights using the \code{RcppArmadillo} function
   \code{arma::conv2()}.  It performs a similar calculation to the standard
-  \code{R} function \code{stats::filter(x=re_turns, filter=weight_s,
+  \code{R} function \cr\code{stats::filter(x=re_turns, filter=weight_s,
   method="convolution", sides=1)}, but it can be many times faster, and it
   doesn't produce any leading \code{NA} values.
   
