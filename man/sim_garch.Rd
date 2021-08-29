@@ -19,8 +19,9 @@ updates.}
 numbers).}
 }
 \value{
-A \emph{matrix} with two columns: the simulated returns and the 
-  variance, and with the same number of rows as the argument \code{innov}.
+A \emph{matrix} with two columns and with the same number of rows as
+  the argument \code{innov}.  The first column are the simulated returns and
+  the second column is the variance.
 }
 \description{
 Simulate a \emph{GARCH} process using \emph{Rcpp}.
@@ -35,17 +36,18 @@ The function \code{sim_garch()} simulates the following \emph{GARCH}
     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
   }
   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
-  variance, \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
-  parameters, and \eqn{\xi_i} are the \emph{innovations}.
+  variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
+  \emph{GARCH} parameters, and \eqn{\xi_i} are the standard normal
+  \emph{innovations}.
 
   The long-term average level of the simulated variance is given by:
   \deqn{
     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
   }
   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
-  otherwise the volatility is explosive.
+  otherwise the volatility becomes explosive.
 
-  The function \code{sim_garch()} simulates a \emph{GARCH} process using
+  The function \code{sim_garch()} simulates the \emph{GARCH} process using
   fast \emph{Rcpp} \code{C++} code.
 }
 \examples{
@@ -54,9 +56,13 @@ The function \code{sim_garch()} simulates the following \emph{GARCH}
 ome_ga <- 0.01
 al_pha <- 0.5
 be_ta <- 0.2
+# Calculate matrix of innovations
+in_nov <- matrix(rnorm(1e3))
 # Simulate the GARCH process using Rcpp
-garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=matrix(rnorm(1e4)))
-plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns")
+garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=in_nov)
+# Plot the GARCH volatility and cumulative returns
+plot(garch_data[, 2], t="l", main="Simulated GARCH Volatility", ylab="volatility")
+plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 }
 
 }

@@ -700,7 +700,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_schwartz
-arma::vec sim_schwartz(double eq_price, double volat, double theta, arma::mat& innov);
+arma::mat sim_schwartz(double eq_price, double volat, double theta, arma::mat& innov);
 RcppExport SEXP _HighFreq_sim_schwartz(SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -714,14 +714,29 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_ar
-arma::mat sim_ar(const arma::mat& innov, arma::mat& coeff);
-RcppExport SEXP _HighFreq_sim_ar(SEXP innovSEXP, SEXP coeffSEXP) {
+arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_ar(SEXP coeffSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type innov(innovSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type coeff(coeffSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_ar(innov, coeff));
+    Rcpp::traits::input_parameter< const arma::mat& >::type innov(innovSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_ar(coeff, innov));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sim_df
+arma::mat sim_df(double eq_price, double volat, double theta, arma::mat& coeff, arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_df(SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP coeffSEXP, SEXP innovSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
+    Rcpp::traits::input_parameter< double >::type volat(volatSEXP);
+    Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type coeff(coeffSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_df(eq_price, volat, theta, coeff, innov));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -820,6 +835,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
     {"_HighFreq_sim_schwartz", (DL_FUNC) &_HighFreq_sim_schwartz, 4},
     {"_HighFreq_sim_ar", (DL_FUNC) &_HighFreq_sim_ar, 2},
+    {"_HighFreq_sim_df", (DL_FUNC) &_HighFreq_sim_df, 5},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 8},
     {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 13},
     {NULL, NULL, 0}

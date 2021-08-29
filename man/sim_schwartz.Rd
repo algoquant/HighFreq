@@ -7,9 +7,9 @@
 sim_schwartz(eq_price, volat, theta, innov)
 }
 \arguments{
-\item{\code{eq_price}}{The equilibrium price.}
-
 \item{\code{volat}}{The volatility of returns.}
+
+\item{\code{eq_price}}{The equilibrium price.}
 
 \item{\code{theta}}{The strength of mean reversion.}
 
@@ -17,8 +17,8 @@ sim_schwartz(eq_price, volat, theta, innov)
 numbers).}
 }
 \value{
-A single-column \emph{matrix} of the \emph{time series} of
-  prices, with the same number of rows as the argument \code{innov}.
+A single-column \emph{matrix} of simulated returns, with the same
+  number of rows as the argument \code{innov}.
 }
 \description{
 Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -40,18 +40,19 @@ The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
   \eqn{\sigma}.
 
   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
-  representing the \emph{time series} of prices.
+  representing the \emph{time series} of simulated returns.
 }
 \examples{
 \dontrun{
 # Define the Schwartz model parameters
-eq_price <- 5.0
-vol_at <- 0.01
+eq_price <- 2.0
+sig_ma <- 0.01
 the_ta <- 0.01
+in_nov <- matrix(rnorm(1e3))
 # Simulate Schwartz process using Rcpp
-price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, 
-  theta=the_ta, innov=matrix(rnorm(1e3)))
-plot(price_s, t="l", main="Simulated Schwartz Prices")
+re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, 
+  theta=the_ta, innov=in_nov)
+plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 
 }

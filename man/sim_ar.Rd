@@ -2,10 +2,11 @@
 % Please edit documentation in R/RcppExports.R
 \name{sim_ar}
 \alias{sim_ar}
-\title{Recursively filter a \emph{matrix} of innovations through a \emph{matrix} of
+\title{Simulate \emph{autoregressive} returns by recursively filtering a
+\emph{matrix} of innovations through a \emph{matrix} of
 \emph{autoregressive} coefficients.}
 \usage{
-sim_ar(innov, coeff)
+sim_ar(coeff, innov)
 }
 \arguments{
 \item{\code{innov}}{A single-column \emph{matrix} of innovations.}
@@ -14,11 +15,12 @@ sim_ar(innov, coeff)
 coefficients.}
 }
 \value{
-A single-column \emph{matrix} with the same number of rows as the
-  argument \code{innov}.
+A single-column \emph{matrix} of simulated returns, with the same
+  number of rows as the argument \code{innov}.
 }
 \description{
-Recursively filter a \emph{matrix} of innovations through a \emph{matrix} of
+Simulate \emph{autoregressive} returns by recursively filtering a
+\emph{matrix} of innovations through a \emph{matrix} of
 \emph{autoregressive} coefficients.
 }
 \details{
@@ -33,8 +35,8 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
   }
   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
-  the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the
-  \emph{innovations}.
+  the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
+  normal \emph{innovations}.
 
   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
   equal to the number of rows of the \emph{autoregressive} coefficients
@@ -46,20 +48,20 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
 }
 \examples{
 \dontrun{
+# Define AR coefficients
+co_eff <- matrix(c(0.2, 0.2))
 # Calculate matrix of innovations
 in_nov <- matrix(rnorm(1e4, sd=0.01))
-# Create ARIMA coefficients
-co_eff <- matrix(c(0.2, 0.2))
 # Calculate recursive filter using filter()
 filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
 # Calculate recursive filter using RcppArmadillo
-ari_ma <- HighFreq::sim_ar(in_nov, co_eff)
+re_turns <- HighFreq::sim_ar(co_eff, in_nov)
 # Compare the two methods
-all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
+all.equal(as.numeric(re_turns), as.numeric(filter_ed))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::sim_ar(in_nov, co_eff),
+  Rcpp=HighFreq::sim_ar(co_eff, in_nov),
   Rcode=filter(in_nov, filter=co_eff, method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

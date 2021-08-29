@@ -80,18 +80,19 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Create function calc_adf() to calculate the ADF test statistic using matrix algebra
++ [ ] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as returns
 
-+ [x] Update sim_arima() to accept matrix not vector - rename sim_arima() to sim_ar()
++ [ ] Create function sim_df() to simulate a Dickey-Fuller process
 
-+ [x] Update sim_garch(), sim_ou(), and sim_schwartz() to accept matrix not vector
-Add formulas to the documentation.
++ [ ] Create function fit_ar() to fit an AR process using matrix algebra
 
-+ [x] Replace call-by-name syntax in C++ code
++ [ ] Create function fit_ou() to fit an OU process using matrix algebra
 
-+ [x] Modify run_zscore() to allow multivariate regression
-Rename to run_zscores()
-Split tseries argument into response and design arguments, with design containing multiple columns of returns data.
++ [ ] Create function fit_adf() to calculate the ADF test statistic using matrix algebra
+
++ [ ] Create function fit_garch() to fit a GARCH process using a solver
+
++ [ ] Rename calc_lm() to fit_lm(), and calc_reg() to fit_reg()
 
 + [ ] Create functions roll_max() and roll_min() using a look-back interval
 
@@ -425,6 +426,17 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Update sim_arima() to accept matrix not vector - rename sim_arima() to sim_ar()
+
++ [x] Update sim_garch(), sim_ou(), and sim_schwartz() to accept matrix not vector
+Add formulas to the documentation.
+
++ [x] Replace call-by-name syntax in C++ code
+
++ [x] Modify run_zscore() to allow multivariate regression
+Rename to run_zscores()
+Split tseries argument into response and design arguments, with design containing multiple columns of returns data.
 
 + [x] Create functions for calculating rolling aggregations of streaming data using a recursive filter with a lambda decay factor, instead of a convolution filter over a look-back interval
 run_mean(), run_var(), run_covar(), run_zscore(), run_max(), run_min()

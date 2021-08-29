@@ -3324,8 +3324,9 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A \emph{matrix} with two columns: the simulated returns and the 
-#'   variance, and with the same number of rows as the argument \code{innov}.
+#' @return A \emph{matrix} with two columns and with the same number of rows as
+#'   the argument \code{innov}.  The first column are the simulated returns and
+#'   the second column is the variance.
 #'
 #' @details 
 #'   The function \code{sim_garch()} simulates the following \emph{GARCH}
@@ -3337,17 +3338,18 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
 #'   }
 #'   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
-#'   variance, \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
-#'   parameters, and \eqn{\xi_i} are the \emph{innovations}.
+#'   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
+#'   \emph{GARCH} parameters, and \eqn{\xi_i} are the standard normal
+#'   \emph{innovations}.
 #'
 #'   The long-term average level of the simulated variance is given by:
 #'   \deqn{
 #'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
 #'   }
 #'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
-#'   otherwise the volatility is explosive.
+#'   otherwise the volatility becomes explosive.
 #'
-#'   The function \code{sim_garch()} simulates a \emph{GARCH} process using
+#'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 #'   fast \emph{Rcpp} \code{C++} code.
 #'
 #' @examples
@@ -3356,9 +3358,13 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' ome_ga <- 0.01
 #' al_pha <- 0.5
 #' be_ta <- 0.2
+#' # Calculate matrix of innovations
+#' in_nov <- matrix(rnorm(1e3))
 #' # Simulate the GARCH process using Rcpp
-#' garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=matrix(rnorm(1e4)))
-#' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns")
+#' garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=in_nov)
+#' # Plot the GARCH volatility and cumulative returns
+#' plot(garch_data[, 2], t="l", main="Simulated GARCH Volatility", ylab="volatility")
+#' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 #' }
 #' 
 #' @export
@@ -3368,17 +3374,17 @@ sim_garch <- function(omega, alpha, beta, innov) {
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 #' 
-#' @param \code{eq_price} The equilibrium price. 
-#' 
 #' @param \code{volat} The volatility of returns.
+#' 
+#' @param \code{eq_price} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
 #' 
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A single-column \emph{matrix} of the \emph{time series} of log
-#'   prices, with the same number of rows as the argument \code{innov}.
+#' @return A single-column \emph{matrix} of simulated returns, with the same
+#'   number of rows as the argument \code{innov}.
 #'
 #' @details 
 #'   The function \code{sim_ou()} simulates the following
@@ -3391,8 +3397,9 @@ sim_garch <- function(omega, alpha, beta, innov) {
 #'   }
 #'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
 #'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
-#'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the
-#'   \emph{innovations}.
+#'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
+#'   normal \emph{innovations}.
+#'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
 #'
 #'   The function \code{sim_ou()} simulates the percentage returns as equal to
 #'   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -3401,22 +3408,23 @@ sim_garch <- function(omega, alpha, beta, innov) {
 #'   prices are calculated as the sum of returns (not compounded), so they can
 #'   become negative.
 #'
-#'   The function \code{sim_ou()} simulates an \emph{Ornstein-Uhlenbeck}
+#'   The function \code{sim_ou()} simulates the \emph{Ornstein-Uhlenbeck}
 #'   process using fast \emph{Rcpp} \code{C++} code.
 #'
 #'   The function \code{sim_ou()} returns a single-column \emph{matrix}
-#'   representing the \emph{time series} of log prices.
+#'   representing the \emph{time series} of simulated returns.
 #'
 #' @examples
 #' \dontrun{
 #' # Define the Ornstein-Uhlenbeck model parameters
-#' eq_price <- 5.0
-#' vol_at <- 0.01
+#' eq_price <- 1.0
+#' sig_ma <- 0.01
 #' the_ta <- 0.01
+#' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' price_s <- HighFreq::sim_ou(eq_price=eq_price, volat=vol_at, 
-#'   theta=the_ta, innov=matrix(rnorm(1e3)))
-#' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices")
+#' re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, 
+#'   theta=the_ta, innov=in_nov)
+#' plot(cumsum(re_turns), t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -3426,17 +3434,17 @@ sim_ou <- function(eq_price, volat, theta, innov) {
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 #' 
-#' @param \code{eq_price} The equilibrium price. 
-#' 
 #' @param \code{volat} The volatility of returns.
+#' 
+#' @param \code{eq_price} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
 #' 
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A single-column \emph{matrix} of the \emph{time series} of
-#'   prices, with the same number of rows as the argument \code{innov}.
+#' @return A single-column \emph{matrix} of simulated returns, with the same
+#'   number of rows as the argument \code{innov}.
 #'
 #' @details 
 #'   The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
@@ -3455,18 +3463,19 @@ sim_ou <- function(eq_price, volat, theta, innov) {
 #'   \eqn{\sigma}.
 #'
 #'   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
-#'   representing the \emph{time series} of prices.
+#'   representing the \emph{time series} of simulated returns.
 #'
 #' @examples
 #' \dontrun{
 #' # Define the Schwartz model parameters
-#' eq_price <- 5.0
-#' vol_at <- 0.01
+#' eq_price <- 2.0
+#' sig_ma <- 0.01
 #' the_ta <- 0.01
+#' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Schwartz process using Rcpp
-#' price_s <- HighFreq::sim_schwartz(eq_price=eq_price, volat=vol_at, 
-#'   theta=the_ta, innov=matrix(rnorm(1e3)))
-#' plot(price_s, t="l", main="Simulated Schwartz Prices")
+#' re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, 
+#'   theta=the_ta, innov=in_nov)
+#' plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -3474,7 +3483,8 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
     .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', eq_price, volat, theta, innov)
 }
 
-#' Recursively filter a \emph{matrix} of innovations through a \emph{matrix} of
+#' Simulate \emph{autoregressive} returns by recursively filtering a
+#' \emph{matrix} of innovations through a \emph{matrix} of
 #' \emph{autoregressive} coefficients.
 #' 
 #' @param \code{innov} A single-column \emph{matrix} of innovations.
@@ -3482,8 +3492,8 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #' @param \code{coeff} A single-column \emph{matrix} of \emph{autoregressive}
 #'   coefficients.
 #'
-#' @return A single-column \emph{matrix} with the same number of rows as the
-#'   argument \code{innov}.
+#' @return A single-column \emph{matrix} of simulated returns, with the same
+#'   number of rows as the argument \code{innov}.
 #'
 #' @details 
 #'   The function \code{sim_ar()} recursively filters the \emph{matrix} of
@@ -3497,8 +3507,8 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
 #'   }
 #'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
-#'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the
-#'   \emph{innovations}.
+#'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
+#'   normal \emph{innovations}.
 #'
 #'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
 #'   equal to the number of rows of the \emph{autoregressive} coefficients
@@ -3510,27 +3520,93 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'   
 #' @examples
 #' \dontrun{
+#' # Define AR coefficients
+#' co_eff <- matrix(c(0.2, 0.2))
 #' # Calculate matrix of innovations
 #' in_nov <- matrix(rnorm(1e4, sd=0.01))
-#' # Create ARIMA coefficients
-#' co_eff <- matrix(c(0.2, 0.2))
 #' # Calculate recursive filter using filter()
 #' filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
 #' # Calculate recursive filter using RcppArmadillo
-#' ari_ma <- HighFreq::sim_ar(in_nov, co_eff)
+#' re_turns <- HighFreq::sim_ar(co_eff, in_nov)
 #' # Compare the two methods
-#' all.equal(as.numeric(ari_ma), as.numeric(filter_ed))
+#' all.equal(as.numeric(re_turns), as.numeric(filter_ed))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::sim_ar(in_nov, co_eff),
+#'   Rcpp=HighFreq::sim_ar(co_eff, in_nov),
 #'   Rcode=filter(in_nov, filter=co_eff, method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-sim_ar <- function(innov, coeff) {
-    .Call('_HighFreq_sim_ar', PACKAGE = 'HighFreq', innov, coeff)
+sim_ar <- function(coeff, innov) {
+    .Call('_HighFreq_sim_ar', PACKAGE = 'HighFreq', coeff, innov)
+}
+
+#' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
+#' 
+#' @param \code{volat} The volatility of returns.
+#' 
+#' @param \code{eq_price} The equilibrium price. 
+#' 
+#' @param \code{theta} The strength of mean reversion.
+#' 
+#' @param \code{coeff} A single-column \emph{matrix} of \emph{autoregressive}
+#'   coefficients.
+#'
+#' @param \code{innov} A single-column \emph{matrix} of innovations (random
+#'   numbers).
+#' 
+#' @return A single-column \emph{matrix} of simulated returns, with the same
+#'   number of rows as the argument \code{innov}.
+#'
+#' @details 
+#'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
+#'   process:
+#'   \deqn{
+#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_p r_{i-p} + \sigma \, \xi_i
+#'   }
+#'   \deqn{
+#'     p_i = p_{i-1} + r_i
+#'   }
+#'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
+#'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
+#'   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
+#'   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
+#'   normal \emph{innovations}.
+#'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+#'
+#'   The \emph{Dickey-Fuller} process is a combination of an
+#'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
+#'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+#'   equal to the number of rows of the \emph{autoregressive} coefficients
+#'   \code{coeff}.
+#'
+#'   The function \code{sim_df()} simulates the \emph{Dickey-Fuller}
+#'   process using fast \emph{Rcpp} \code{C++} code.
+#'
+#'   The function \code{sim_df()} returns a single-column \emph{matrix}
+#'   representing the \emph{time series} of returns.
+#'
+#' @examples
+#' \dontrun{
+#' # Define the Ornstein-Uhlenbeck model parameters
+#' eq_price <- 1.0
+#' sig_ma <- 0.01
+#' the_ta <- 0.01
+#' # Define AR coefficients
+#' co_eff <- matrix(c(0.2, 0.2))
+#' # Calculate matrix of innovations
+#' in_nov <- matrix(rnorm(1e3))
+#' # Simulate Dickey-Fuller process using Rcpp
+#' re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, 
+#'   theta=the_ta, co_eff, innov=in_nov)
+#' plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
+#' }
+#' 
+#' @export
+sim_df <- function(eq_price, volat, theta, coeff, innov) {
+    .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', eq_price, volat, theta, coeff, innov)
 }
 
 #' Calculate the optimal portfolio weights for different types of objective
