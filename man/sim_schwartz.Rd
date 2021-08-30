@@ -50,8 +50,7 @@ sig_ma <- 0.01
 the_ta <- 0.01
 in_nov <- matrix(rnorm(1e3))
 # Simulate Schwartz process using Rcpp
-re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, 
-  theta=the_ta, innov=in_nov)
+re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
 plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 

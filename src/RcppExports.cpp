@@ -672,8 +672,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_garch
-arma::mat sim_garch(double omega, double alpha, double beta, arma::mat& innov);
-RcppExport SEXP _HighFreq_sim_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP innovSEXP) {
+arma::mat sim_garch(double omega, double alpha, double beta, arma::mat& innov, bool is_random);
+RcppExport SEXP _HighFreq_sim_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP innovSEXP, SEXP is_randomSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -681,7 +681,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_garch(omega, alpha, beta, innov));
+    Rcpp::traits::input_parameter< bool >::type is_random(is_randomSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_garch(omega, alpha, beta, innov, is_random));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -737,6 +738,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat& >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
     rcpp_result_gen = Rcpp::wrap(sim_df(eq_price, volat, theta, coeff, innov));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lik_garch
+double lik_garch(double omega, double alpha, double beta, arma::mat& returns, double minval);
+RcppExport SEXP _HighFreq_lik_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP returnsSEXP, SEXP minvalSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type returns(returnsSEXP);
+    Rcpp::traits::input_parameter< double >::type minval(minvalSEXP);
+    rcpp_result_gen = Rcpp::wrap(lik_garch(omega, alpha, beta, returns, minval));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -831,11 +847,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 3},
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 7},
     {"_HighFreq_roll_fun", (DL_FUNC) &_HighFreq_roll_fun, 9},
-    {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 4},
+    {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 5},
     {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
     {"_HighFreq_sim_schwartz", (DL_FUNC) &_HighFreq_sim_schwartz, 4},
     {"_HighFreq_sim_ar", (DL_FUNC) &_HighFreq_sim_ar, 2},
     {"_HighFreq_sim_df", (DL_FUNC) &_HighFreq_sim_df, 5},
+    {"_HighFreq_lik_garch", (DL_FUNC) &_HighFreq_lik_garch, 5},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 8},
     {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 13},
     {NULL, NULL, 0}

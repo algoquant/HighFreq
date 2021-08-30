@@ -7,8 +7,8 @@
 #' @param \code{tseries} A single-column \emph{time series} or a
 #'   \emph{vector}.
 #'
-#' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-#'   (the default is \code{lagg = 1}).
+#' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
+#'   (The default is \code{lagg = 1}.)
 #'
 #' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
 #'   with zeros? (The default is \code{pad_zeros = TRUE}.)
@@ -873,7 +873,7 @@ roll_vecw <- function(tseries, weights) {
 #' @examples
 #' \dontrun{
 #' # First example
-#' # Calculate a time series of prices
+#' # Calculate a time series of returns
 #' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
 #' # Create simple weights equal to a 1 value plus zeros
 #' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
@@ -3311,7 +3311,8 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
     .Call('_HighFreq_roll_fun', PACKAGE = 'HighFreq', tseries, fun, startp, endp, step, look_back, stub, method, con_fi)
 }
 
-#' Simulate a \emph{GARCH} process using \emph{Rcpp}.
+#' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
+#' using \emph{Rcpp}.
 #' 
 #' @param \code{omega} Parameter proportional to the long-term average level
 #'   of variance.
@@ -3321,33 +3322,54 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' 
 #' @param \code{beta} The weight associated with the past variance estimates.
 #' 
-#' @param \code{innov} A single-column \emph{matrix} of innovations (random
-#'   numbers).
+#' @param \code{innov} A single-column \emph{matrix} of innovations.
 #' 
+#' @param \code{is_random} \emph{Boolean} argument: Are the innovations random
+#'   numbers or historical returns? (The default is \code{is_random = TRUE}.)
+#'
 #' @return A \emph{matrix} with two columns and with the same number of rows as
 #'   the argument \code{innov}.  The first column are the simulated returns and
 #'   the second column is the variance.
 #'
 #' @details 
-#'   The function \code{sim_garch()} simulates the following \emph{GARCH}
-#'   process:
+#'   The function \code{sim_garch()} simulates or estimates the rolling variance
+#'   under a \emph{GARCH(1,1)} process using \emph{Rcpp}.
+#'
+#'   If \code{is_random = TRUE} (the default) then the innovations \code{innov}
+#'   are treated as random numbers \eqn{\xi_i} and the \emph{GARCH(1,1)}
+#'   process is given by:
 #'   \deqn{
-#'     r_i = \mu + \sigma_{i-1} \xi_i
+#'     r_i = \sigma_{i-1} \xi_i
 #'   }
 #'   \deqn{
 #'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
 #'   }
 #'   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
 #'   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
-#'   \emph{GARCH} parameters, and \eqn{\xi_i} are the standard normal
+#'   \emph{GARCH} parameters, and \eqn{\xi_i} are standard normal
 #'   \emph{innovations}.
 #'
-#'   The long-term average level of the simulated variance is given by:
+#'   The long-term equilibrium level of the simulated variance is proportional
+#'   to the parameter \eqn{\omega}:
 #'   \deqn{
 #'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
 #'   }
 #'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
 #'   otherwise the volatility becomes explosive.
+#'   
+#'   If \code{is_random = FALSE} then the function \code{sim_garch()}
+#'   \emph{estimates} the rolling variance from the historical returns. The
+#'   innovations \code{innov} are equal to the historical returns \eqn{r_i} and
+#'   the \emph{GARCH(1,1)} process is simply:
+#'   \deqn{
+#'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+#'   }
+#'   Where \eqn{\sigma^2_i} is the rolling variance.
+#'   
+#'   The above should be viewed as a formula for \emph{estimating} the rolling
+#'   rolling variance from the historical returns, rather than simulating them.
+#'   It represents exponential smoothing of the squared returns with a decay
+#'   factor equal to \eqn{\beta}.
 #'
 #'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 #'   fast \emph{Rcpp} \code{C++} code.
@@ -3355,21 +3377,29 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' @examples
 #' \dontrun{
 #' # Define the GARCH model parameters
-#' ome_ga <- 0.01
-#' al_pha <- 0.5
+#' al_pha <- 0.79
 #' be_ta <- 0.2
-#' # Calculate matrix of innovations
+#' om_ega <- 1e-4*(1-al_pha-be_ta)
+#' # Calculate matrix of standard normal innovations
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate the GARCH process using Rcpp
-#' garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=in_nov)
-#' # Plot the GARCH volatility and cumulative returns
-#' plot(garch_data[, 2], t="l", main="Simulated GARCH Volatility", ylab="volatility")
+#' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov=in_nov)
+#' # Plot the GARCH rolling volatility and cumulative returns
+#' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 #' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
+#' # Calculate historical VTI returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' # Estimate the volatility of VTI returns
+#' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
+#'   innov=re_turns, is_random=FALSE)
+#' # Plot dygraph of the estimated GARCH volatility
+#' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+#'   main="Estimated GARCH Volatility of VTI")
 #' }
 #' 
 #' @export
-sim_garch <- function(omega, alpha, beta, innov) {
-    .Call('_HighFreq_sim_garch', PACKAGE = 'HighFreq', omega, alpha, beta, innov)
+sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
+    .Call('_HighFreq_sim_garch', PACKAGE = 'HighFreq', omega, alpha, beta, innov, is_random)
 }
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
@@ -3422,8 +3452,7 @@ sim_garch <- function(omega, alpha, beta, innov) {
 #' the_ta <- 0.01
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, 
-#'   theta=the_ta, innov=in_nov)
+#' re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
 #' plot(cumsum(re_turns), t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
@@ -3473,8 +3502,7 @@ sim_ou <- function(eq_price, volat, theta, innov) {
 #' the_ta <- 0.01
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Schwartz process using Rcpp
-#' re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, 
-#'   theta=the_ta, innov=in_nov)
+#' re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
 #' plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
@@ -3596,17 +3624,73 @@ sim_ar <- function(coeff, innov) {
 #' the_ta <- 0.01
 #' # Define AR coefficients
 #' co_eff <- matrix(c(0.2, 0.2))
-#' # Calculate matrix of innovations
+#' # Calculate matrix of standard normal innovations
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Dickey-Fuller process using Rcpp
-#' re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, 
-#'   theta=the_ta, co_eff, innov=in_nov)
+#' re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, co_eff, innov=in_nov)
 #' plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
 #' }
 #' 
 #' @export
 sim_df <- function(eq_price, volat, theta, coeff, innov) {
     .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', eq_price, volat, theta, coeff, innov)
+}
+
+#' Calculate the log-likelihood of a time series of returns assuming a
+#' \emph{GARCH(1,1)} process.
+#' 
+#' @param \code{omega} Parameter proportional to the long-term average level
+#'   of variance.
+#' 
+#' @param \code{alpha} The weight associated with recent realized variance
+#'   updates.
+#' 
+#' @param \code{beta} The weight associated with the past variance estimates.
+#' 
+#' @param \code{minval} The floor value applied to the variance, to avoid zero
+#'   values. (The default is \code{minval = 0.000001}.)
+#' 
+#' @param \code{returns} A single-column \emph{matrix} of returns.
+#' 
+#' @return The log-likelihood value.
+#'
+#' @details 
+#'   The function \code{lik_garch()} calculates the log-likelihood of a time
+#'   series of returns assuming a \emph{GARCH(1,1)} process.
+#'   
+#'   It first estimates the rolling variance of the \code{returns} argument
+#'   using function \code{sim_garch()}:
+#'   \deqn{
+#'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+#'   }
+#'   Where \eqn{r_i} is the time series of returns, and \eqn{\sigma^2_i} is the
+#'   estimated rolling variance.
+#'   And \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
+#'   parameters.
+#'   It applies the floor value \code{minval} to the variance, to avoid zero
+#'   values.  So the minimum value of the variance is equal to \code{minval}.
+#'
+#'   The function \code{lik_garch()} calculates the log-likelihood assuming a
+#'   normal distribution of returns as follows:
+#'   \deqn{
+#'     likelihood = - \sum_{i=1}^n {\frac{r^2_i}{\sigma^2_i} + \log(\sigma^2_i)}
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' # Define the GARCH model parameters
+#' al_pha <- 0.79
+#' be_ta <- 0.2
+#' om_ega <- 1e-4*(1-al_pha-be_ta)
+#' # Calculate historical VTI returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
+#' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=re_turns)
+#' }
+#' 
+#' @export
+lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
+    .Call('_HighFreq_lik_garch', PACKAGE = 'HighFreq', omega, alpha, beta, returns, minval)
 }
 
 #' Calculate the optimal portfolio weights for different types of objective

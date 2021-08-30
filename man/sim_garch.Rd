@@ -2,9 +2,10 @@
 % Please edit documentation in R/RcppExports.R
 \name{sim_garch}
 \alias{sim_garch}
-\title{Simulate a \emph{GARCH} process using \emph{Rcpp}.}
+\title{Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
+using \emph{Rcpp}.}
 \usage{
-sim_garch(omega, alpha, beta, innov)
+sim_garch(omega, alpha, beta, innov, is_random = TRUE)
 }
 \arguments{
 \item{\code{omega}}{Parameter proportional to the long-term average level
@@ -15,8 +16,10 @@ updates.}
 
 \item{\code{beta}}{The weight associated with the past variance estimates.}
 
-\item{\code{innov}}{A single-column \emph{matrix} of innovations (random
-numbers).}
+\item{\code{innov}}{A single-column \emph{matrix} of innovations.}
+
+\item{\code{is_random}}{\emph{Boolean} argument: Are the innovations random
+numbers or historical returns? (The default is \code{is_random = TRUE}.)}
 }
 \value{
 A \emph{matrix} with two columns and with the same number of rows as
@@ -24,28 +27,48 @@ A \emph{matrix} with two columns and with the same number of rows as
   the second column is the variance.
 }
 \description{
-Simulate a \emph{GARCH} process using \emph{Rcpp}.
+Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
+using \emph{Rcpp}.
 }
 \details{
-The function \code{sim_garch()} simulates the following \emph{GARCH}
-  process:
+The function \code{sim_garch()} simulates or estimates the rolling variance
+  under a \emph{GARCH(1,1)} process using \emph{Rcpp}.
+
+  If \code{is_random = TRUE} (the default) then the innovations \code{innov}
+  are treated as random numbers \eqn{\xi_i} and the \emph{GARCH(1,1)}
+  process is given by:
   \deqn{
-    r_i = \mu + \sigma_{i-1} \xi_i
+    r_i = \sigma_{i-1} \xi_i
   }
   \deqn{
     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
   }
   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
-  \emph{GARCH} parameters, and \eqn{\xi_i} are the standard normal
+  \emph{GARCH} parameters, and \eqn{\xi_i} are standard normal
   \emph{innovations}.
 
-  The long-term average level of the simulated variance is given by:
+  The long-term equilibrium level of the simulated variance is proportional
+  to the parameter \eqn{\omega}:
   \deqn{
     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
   }
   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
   otherwise the volatility becomes explosive.
+  
+  If \code{is_random = FALSE} then the function \code{sim_garch()}
+  \emph{estimates} the rolling variance from the historical returns. The
+  innovations \code{innov} are equal to the historical returns \eqn{r_i} and
+  the \emph{GARCH(1,1)} process is simply:
+  \deqn{
+    \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+  }
+  Where \eqn{\sigma^2_i} is the rolling variance.
+  
+  The above should be viewed as a formula for \emph{estimating} the rolling
+  rolling variance from the historical returns, rather than simulating them.
+  It represents exponential smoothing of the squared returns with a decay
+  factor equal to \eqn{\beta}.
 
   The function \code{sim_garch()} simulates the \emph{GARCH} process using
   fast \emph{Rcpp} \code{C++} code.
@@ -53,16 +76,24 @@ The function \code{sim_garch()} simulates the following \emph{GARCH}
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-ome_ga <- 0.01
-al_pha <- 0.5
+al_pha <- 0.79
 be_ta <- 0.2
-# Calculate matrix of innovations
+om_ega <- 1e-4*(1-al_pha-be_ta)
+# Calculate matrix of standard normal innovations
 in_nov <- matrix(rnorm(1e3))
 # Simulate the GARCH process using Rcpp
-garch_data <- sim_garch(omega=ome_ga, alpha=al_pha,  beta=be_ta, innov=in_nov)
-# Plot the GARCH volatility and cumulative returns
-plot(garch_data[, 2], t="l", main="Simulated GARCH Volatility", ylab="volatility")
+garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov=in_nov)
+# Plot the GARCH rolling volatility and cumulative returns
+plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
+# Calculate historical VTI returns
+re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+# Estimate the volatility of VTI returns
+garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
+  innov=re_turns, is_random=FALSE)
+# Plot dygraph of the estimated GARCH volatility
+dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+  main="Estimated GARCH Volatility of VTI")
 }
 
 }

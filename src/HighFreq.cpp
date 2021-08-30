@@ -22,8 +22,8 @@ using namespace arma;
 //' @param \code{tseries} A single-column \emph{time series} or a
 //'   \emph{vector}.
 //'
-//' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
-//'   (the default is \code{lagg = 1}).
+//' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
+//'   (The default is \code{lagg = 1}.)
 //'
 //' @param \code{pad_zeros} \emph{Boolean} argument: Should the output be padded
 //'   with zeros? (The default is \code{pad_zeros = TRUE}.)
@@ -622,7 +622,7 @@ arma::uword mult_vec_mat(arma::vec& vector,
       return num_rows;
     } else {
       // Multiply each row of matrix by vector
-      matrix.each_row() %= conv_to< rowvec >::from(vector);
+      matrix.each_row() %= conv_to<rowvec>::from(vector);
       return num_cols;
     }
   } else if (num_elem == num_rows) {
@@ -631,7 +631,7 @@ arma::uword mult_vec_mat(arma::vec& vector,
     return num_rows;
   } else if (num_elem == num_cols) {
     // Multiply each row of matrix by vector
-    matrix.each_row() %= conv_to< rowvec >::from(vector);
+    matrix.each_row() %= conv_to<rowvec>::from(vector);
     return num_cols;
   } else 
     stop("Error: Vector length is neither equal to the number of columns nor rows of the matrix!");
@@ -1299,7 +1299,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' @examples
 //' \dontrun{
 //' # First example
-//' # Calculate a time series of prices
+//' # Calculate a time series of returns
 //' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
 //' # Create simple weights equal to a 1 value plus zeros
 //' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
@@ -4614,7 +4614,7 @@ arma::mat roll_reg(const arma::vec& response,
       sub_response = response.subvec(start_pts(ep), end_pts(ep));
       sub_design = design.rows(start_pts(ep), end_pts(ep));
       reg_data = calc_reg(sub_response, sub_design, method, eigen_thresh, eigen_max, con_fi, alpha);
-      reg_stats.row(ep) = conv_to< rowvec >::from(reg_data);
+      reg_stats.row(ep) = conv_to<rowvec>::from(reg_data);
     }  // end if
   }  // end for
   
@@ -4624,7 +4624,7 @@ arma::mat roll_reg(const arma::vec& response,
   //   sub_response = response.subvec(0, it);
   //   sub_design = design.rows(0, it);
   //   reg_data = calc_reg(sub_response, sub_design);
-  //   reg_stats.row(it) = conv_to< rowvec >::from(reg_data);
+  //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
   // Remaining periods
@@ -4632,7 +4632,7 @@ arma::mat roll_reg(const arma::vec& response,
   //   sub_response = response.subvec(it-look_back+1, it);
   //   sub_design = design.rows(it-look_back+1, it);
   //   reg_data = calc_reg(sub_response, sub_design, method, eigen_thresh, eigen_max, con_fi, alpha);
-  //   reg_stats.row(it) = conv_to< rowvec >::from(reg_data);
+  //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
   return reg_stats;
@@ -5044,7 +5044,8 @@ arma::mat roll_fun(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Simulate a \emph{GARCH(1, 1)} process using \emph{Rcpp}.
+//' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
+//' using \emph{Rcpp}.
 //' 
 //' @param \code{omega} Parameter proportional to the long-term average level
 //'   of variance.
@@ -5054,16 +5055,22 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' 
 //' @param \code{beta} The weight associated with the past variance estimates.
 //' 
-//' @param \code{innov} A single-column \emph{matrix} of innovations (random
-//'   numbers).
+//' @param \code{innov} A single-column \emph{matrix} of innovations.
 //' 
+//' @param \code{is_random} \emph{Boolean} argument: Are the innovations random
+//'   numbers or historical returns? (The default is \code{is_random = TRUE}.)
+//'
 //' @return A \emph{matrix} with two columns and with the same number of rows as
 //'   the argument \code{innov}.  The first column are the simulated returns and
 //'   the second column is the variance.
 //'
 //' @details 
-//'   The function \code{sim_garch()} simulates the following \emph{GARCH(1, 1)}
-//'   process:
+//'   The function \code{sim_garch()} simulates or estimates the rolling variance
+//'   under a \emph{GARCH(1,1)} process using \emph{Rcpp}.
+//'
+//'   If \code{is_random = TRUE} (the default) then the innovations \code{innov}
+//'   are treated as random numbers \eqn{\xi_i} and the \emph{GARCH(1,1)}
+//'   process is given by:
 //'   \deqn{
 //'     r_i = \sigma_{i-1} \xi_i
 //'   }
@@ -5075,13 +5082,27 @@ arma::mat roll_fun(const arma::mat& tseries,
 //'   \emph{GARCH} parameters, and \eqn{\xi_i} are standard normal
 //'   \emph{innovations}.
 //'
-//'   The long-term average level of the simulated variance is proportional to
-//'   the parameter \eqn{\omega}:
+//'   The long-term equilibrium level of the simulated variance is proportional
+//'   to the parameter \eqn{\omega}:
 //'   \deqn{
 //'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
 //'   }
 //'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
 //'   otherwise the volatility becomes explosive.
+//'   
+//'   If \code{is_random = FALSE} then the function \code{sim_garch()}
+//'   \emph{estimates} the rolling variance from the historical returns. The
+//'   innovations \code{innov} are equal to the historical returns \eqn{r_i} and
+//'   the \emph{GARCH(1,1)} process is simply:
+//'   \deqn{
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'   }
+//'   Where \eqn{\sigma^2_i} is the rolling variance.
+//'   
+//'   The above should be viewed as a formula for \emph{estimating} the rolling
+//'   rolling variance from the historical returns, rather than simulating them.
+//'   It represents exponential smoothing of the squared returns with a decay
+//'   factor equal to \eqn{\beta}.
 //'
 //'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 //'   fast \emph{Rcpp} \code{C++} code.
@@ -5096,9 +5117,17 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' in_nov <- matrix(rnorm(1e3))
 //' # Simulate the GARCH process using Rcpp
 //' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov=in_nov)
-//' # Plot the GARCH volatility and cumulative returns
-//' plot(garch_data[, 2], t="l", main="Simulated GARCH Volatility", ylab="volatility")
+//' # Plot the GARCH rolling volatility and cumulative returns
+//' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
+//' # Calculate historical VTI returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' # Estimate the volatility of VTI returns
+//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
+//'   innov=re_turns, is_random=FALSE)
+//' # Plot dygraph of the estimated GARCH volatility
+//' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+//'   main="Estimated GARCH Volatility of VTI")
 //' }
 //' 
 //' @export
@@ -5106,20 +5135,30 @@ arma::mat roll_fun(const arma::mat& tseries,
 arma::mat sim_garch(double omega, 
                     double alpha, 
                     double beta, 
-                    arma::mat& innov) {
+                    arma::mat& innov,
+                    bool is_random = true) {
   
   arma::uword num_rows = innov.n_rows;
   arma::vec variance(num_rows);
-  arma::vec returns(num_rows);
-  variance[0] = omega/(1-alpha-beta);
-  returns[0] = std::sqrt(variance[0])*innov[0];
   
-  for (arma::uword it = 1; it < num_rows; it++) {
-    returns[it] = std::sqrt(variance[it-1])*innov[it];
-    variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
-  }  // end for
-  
-  return join_rows(returns, variance);
+  if (is_random) {
+    // The innovations are random numbers
+    arma::vec returns(num_rows);
+    variance[0] = omega/(1-alpha-beta);
+    returns[0] = std::sqrt(variance[0])*innov[0];
+    
+    for (arma::uword it = 1; it < num_rows; it++) {
+      returns[it] = std::sqrt(variance[it-1])*innov[it];
+      variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
+    }  // end for
+    return join_rows(returns, variance);
+  } else {
+    // The innovations are historical returns
+    for (arma::uword it = 1; it < num_rows; it++) {
+      variance[it] = omega + alpha*pow(innov[it], 2) + beta*variance[it-1];
+    }  // end for
+    return join_rows(innov, variance);
+  }  // end if
   
 }  // end sim_garch
 
@@ -5451,6 +5490,81 @@ arma::mat sim_df(double eq_price,
 
 
 
+////////////////////////////////////////////////////////////
+//' Calculate the log-likelihood of a time series of returns assuming a
+//' \emph{GARCH(1,1)} process.
+//' 
+//' @param \code{omega} Parameter proportional to the long-term average level
+//'   of variance.
+//' 
+//' @param \code{alpha} The weight associated with recent realized variance
+//'   updates.
+//' 
+//' @param \code{beta} The weight associated with the past variance estimates.
+//' 
+//' @param \code{returns} A single-column \emph{matrix} of returns.
+//' 
+//' @param \code{minval} The floor value applied to the variance, to avoid zero
+//'   values. (The default is \code{minval = 0.000001}.)
+//' 
+//' @return The log-likelihood value.
+//'
+//' @details 
+//'   The function \code{lik_garch()} calculates the log-likelihood of a time
+//'   series of returns assuming a \emph{GARCH(1,1)} process.
+//'   
+//'   It first estimates the rolling variance of the \code{returns} argument
+//'   using function \code{sim_garch()}:
+//'   \deqn{
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'   }
+//'   Where \eqn{r_i} is the time series of returns, and \eqn{\sigma^2_i} is the
+//'   estimated rolling variance.
+//'   And \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
+//'   parameters.
+//'   It applies the floor value \code{minval} to the variance, to avoid zero
+//'   values.  So the minimum value of the variance is equal to \code{minval}.
+//'
+//'   The function \code{lik_garch()} calculates the log-likelihood assuming a
+//'   normal distribution of returns as follows:
+//'   \deqn{
+//'     likelihood = - \sum_{i=1}^n (\frac{r^2_i}{\sigma^2_i} + \log(\sigma^2_i))
+//'   }
+//'
+//' @examples
+//' \dontrun{
+//' # Define the GARCH model parameters
+//' al_pha <- 0.79
+//' be_ta <- 0.2
+//' om_ega <- 1e-4*(1-al_pha-be_ta)
+//' # Calculate historical VTI returns
+//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
+//' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=re_turns)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+double lik_garch(double omega, 
+                 double alpha, 
+                 double beta,
+                 arma::mat& returns, 
+                 double minval = 0.000001) {
+  
+  // Calculate the rolling volatility of returns using function sim_garch()
+  arma::mat garch_data = sim_garch(omega, alpha,  beta, returns, FALSE);
+  // Select the second column containing the volatility of returns
+  arma::mat variance = garch_data.col(1);
+  // Apply floor to volatility
+  variance.transform([&minval](double x) {return max(x, minval);});
+  // Calculate the log-likelihood
+  double likelihood = -conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
+  
+  return likelihood;
+  
+}  // end lik_garch
+
+
 
 ////////////////////////////////////////////////////////////
 // Functions for backtests
@@ -5578,7 +5692,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     sd_cols.replace(0, 1);
     mean_cols = mean_cols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
     weights = (weights - arma::mean(weights));
     break;
   }  // end rank_sharpe
@@ -5624,7 +5738,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     sd_cols.replace(0, 1);
     mean_cols = mean_cols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
     weights = (weights - arma::mean(weights));
     break;
   }  // end rank
@@ -5648,7 +5762,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     // sd_cols.replace(0, 1);
     // mean_cols = mean_cols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to< vec >::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
     // level;
     weights = (weights - arma::mean(weights));
     break;
@@ -5656,9 +5770,9 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
   case meth_od::quantile: {
     // Sum of quantiles for columns
     arma::vec level_s = {con_fi, 1-con_fi};
-    weights = conv_to< vec >::from(arma::sum(arma::quantile(returns, level_s, 0), 0));
+    weights = conv_to<vec>::from(arma::sum(arma::quantile(returns, level_s, 0), 0));
     // Weights equal to ranks
-    weights = conv_to< vec >::from(arma::sort_index(arma::sort_index(weights)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(weights)));
     weights = (weights - arma::mean(weights));
     break;
   }  // end quantile

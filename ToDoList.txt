@@ -80,7 +80,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as returns
++ [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
+
++ [x] Create function lik_garch() to calculate the GARCH log-likelihood
 
 + [ ] Create function sim_df() to simulate a Dickey-Fuller process
 

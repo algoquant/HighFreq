@@ -11,8 +11,8 @@ lag_vec(tseries, lagg = 1L, pad_zeros = TRUE)
 \item{\code{tseries}}{A single-column \emph{time series} or a
 \emph{vector}.}
 
-\item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
-(the default is \code{lagg = 1}).}
+\item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag.
+(The default is \code{lagg = 1}.)}
 
 \item{\code{pad_zeros}}{\emph{Boolean} argument: Should the output be padded
 with zeros? (The default is \code{pad_zeros = TRUE}.)}

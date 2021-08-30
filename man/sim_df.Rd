@@ -62,11 +62,10 @@ sig_ma <- 0.01
 the_ta <- 0.01
 # Define AR coefficients
 co_eff <- matrix(c(0.2, 0.2))
-# Calculate matrix of innovations
+# Calculate matrix of standard normal innovations
 in_nov <- matrix(rnorm(1e3))
 # Simulate Dickey-Fuller process using Rcpp
-re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, 
-  theta=the_ta, co_eff, innov=in_nov)
+re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, co_eff, innov=in_nov)
 plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
 }
 

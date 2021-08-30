@@ -36,7 +36,7 @@ The function \code{roll_conv()} calculates the convolutions of the
 \examples{
 \dontrun{
 # First example
-# Calculate a time series of prices
+# Calculate a time series of returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
 # Create simple weights equal to a 1 value plus zeros
 weight_s <- matrix(c(1, rep(0, 10)), nc=1)
