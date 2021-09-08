@@ -94,8 +94,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' # Create a matrix of random returns
 #' re_turns <- matrix(rnorm(5e6), nc=5)
 #' # Compare lag_it() with rutils::lag_it()
-#' all.equal(HighFreq::lag_it(re_turns), 
-#'   rutils::lag_it(re_turns))
+#' all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -3647,10 +3646,10 @@ sim_df <- function(eq_price, volat, theta, coeff, innov) {
 #' 
 #' @param \code{beta} The weight associated with the past variance estimates.
 #' 
+#' @param \code{returns} A single-column \emph{matrix} of returns.
+#' 
 #' @param \code{minval} The floor value applied to the variance, to avoid zero
 #'   values. (The default is \code{minval = 0.000001}.)
-#' 
-#' @param \code{returns} A single-column \emph{matrix} of returns.
 #' 
 #' @return The log-likelihood value.
 #'
@@ -3671,9 +3670,10 @@ sim_df <- function(eq_price, volat, theta, coeff, innov) {
 #'   values.  So the minimum value of the variance is equal to \code{minval}.
 #'
 #'   The function \code{lik_garch()} calculates the log-likelihood assuming a
-#'   normal distribution of returns as follows:
+#'   normal distribution of returns conditional on the variance
+#'   \eqn{\sigma^2_{i-1}} in the previous period, as follows:
 #'   \deqn{
-#'     likelihood = - \sum_{i=1}^n {\frac{r^2_i}{\sigma^2_i} + \log(\sigma^2_i)}
+#'     likelihood = - \sum_{i=1}^n (\frac{r^2_i}{\sigma^2_{i-1}} + \log(\sigma^2_{i-1}))
 #'   }
 #'
 #' @examples

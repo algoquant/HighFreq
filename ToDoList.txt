@@ -80,6 +80,10 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
+
++ [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
+
 + [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
 
 + [x] Create function lik_garch() to calculate the GARCH log-likelihood
