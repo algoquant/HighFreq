@@ -44,6 +44,7 @@ devtools::document()
 system("R CMD Rd2pdf /Users/jerzy/Develop/HighFreq")
 cd C:\Develop\R\HighFreq\vignettes
 R CMD Rd2pdf C:\Develop\R\HighFreq\
+R CMD Rd2pdf /Users/jerzy/Develop/HighFreq/
 
 
 
@@ -80,9 +81,19 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Create function calc_cvar() for calculating the Value at Risk (VaR) and conditional VaR (CVaR) in R code
+
++ [ ] Create function calc_drawd() for calculating the drawdown in R code
+
++ [ ] Create function calc_sharpe() for calculating the Sharpe, Sortino, Calmar, and ratios in R code
+
++ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
+This avoids calling calc_var() in loop.
+
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
 + [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
+Rename run_var() to roll_var_garch() ?
 
 + [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
 
@@ -114,6 +125,8 @@ Add model_type == "rank" for ranking the re_turns directly.
 https://stackoverflow.com/questions/2537942/nullable-values-in-c
 https://en.cppreference.com/w/cpp/named_req/NullablePointer
 
++ [ ] In function calc_var() add robust dispersion estimators
+
 + [ ] In function calc_kurtosis() update the method nonparametric
 
 + [ ] In function roll_reg() add option to perform rolling predictions using the regressions
@@ -124,13 +137,8 @@ It should return a named vector of coefficients, tvals, and zscore.
 
 + [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
-+ [ ] In function calc_var() add robust dispersion estimators
-
 + [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate rolling variance efficiently (used by package fromo): https://www.johndcook.com/blog/standard_deviation/
-
-+ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
-This avoids calling calc_var() in loop.
 
 + [ ] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
 ma_d <- TTR::runMAD(clos_e, n=look_back)

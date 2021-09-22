@@ -2471,9 +2471,12 @@ double calc_var_vec(const arma::vec& tseries) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'   
-//' @param \code{method} A \emph{string} specifying the type of the dispersion model
-//'   (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{string} specifying the type of the dispersion
+//'   model (the default is \code{method = "moment"} - see Details).
 //'    
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
 //' @return A row vector equal to the dispersion of the columns of the matrix
 //'   \code{tseries}.
 //'
@@ -2559,7 +2562,12 @@ arma::mat calc_var(const arma::mat& tseries,
   case meth_od::moment: {  // moment
     return arma::var(tseries);
   }  // end moment
-  case meth_od::quantile: {  // MAD
+  case meth_od::quantile: {  // quantile
+    arma::vec level_s = {1-con_fi, con_fi};
+    arma::mat quantile_s = arma::quantile(tseries, level_s);
+    return (quantile_s.row(1) - quantile_s.row(0));
+  }  // end quantile
+  case meth_od::nonparametric: {  // MAD
     double num_cols = tseries.n_cols;
     arma::mat medians = arma::median(tseries);
     arma::mat mads(1, num_cols);
@@ -2570,9 +2578,6 @@ arma::mat calc_var(const arma::mat& tseries,
     // tseries.each_row() -= arma::median(tseries, 0);
     // return 1.4826*arma::median(arma::abs(tseries), 0);
     return 1.4826*mads;
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
   }  // end nonparametric
   default : {
     cout << "Warning: Invalid method parameter" << endl;
@@ -5121,7 +5126,7 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 //' # Calculate historical VTI returns
 //' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-//' # Estimate the volatility of VTI returns
+//' # Estimate the GARCH volatility of VTI returns
 //' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
 //'   innov=re_turns, is_random=FALSE)
 //' # Plot dygraph of the estimated GARCH volatility

@@ -1671,9 +1671,12 @@ calc_var_vec <- function(tseries) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'   
-#' @param \code{method} A \emph{string} specifying the type of the dispersion model
-#'   (the default is \code{method = "moment"} - see Details).
+#' @param \code{method} A \emph{string} specifying the type of the dispersion
+#'   model (the default is \code{method = "moment"} - see Details).
 #'    
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
+#'
 #' @return A row vector equal to the dispersion of the columns of the matrix
 #'   \code{tseries}.
 #'

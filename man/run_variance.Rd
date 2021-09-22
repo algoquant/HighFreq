@@ -5,12 +5,12 @@
 \title{Calculate a time series of point estimates of variance for an \emph{OHLC}
 time series, using different range estimators for variance.}
 \usage{
-run_variance(oh_lc, calc_method = "yang_zhang", scal_e = TRUE)
+run_variance(oh_lc, method = "yang_zhang", scal_e = TRUE)
 }
 \arguments{
 \item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{\code{calc_method}}{A \emph{character} string representing the method for
+\item{\code{method}}{A \emph{character} string representing the method for
 estimating variance.  The methods include:
 \itemize{
   \item "close" close to close,
@@ -92,7 +92,7 @@ oh_lc <- HighFreq::random_ohlc()
 # Calculate variance estimates for oh_lc
 var_running <- HighFreq::run_variance(oh_lc)
 # Calculate variance estimates for SPY
-var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="yang_zhang")
+var_running <- HighFreq::run_variance(HighFreq::SPY, method="yang_zhang")
 # Calculate SPY variance without overnight jumps
-var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
+var_running <- HighFreq::run_variance(HighFreq::SPY, method="rogers_satchell")
 }

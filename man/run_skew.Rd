@@ -5,12 +5,12 @@
 \title{Calculate time series of point skew estimates from a \emph{OHLC} time series,
 assuming zero drift.}
 \usage{
-run_skew(oh_lc, calc_method = "rogers_satchell")
+run_skew(oh_lc, method = "rogers_satchell")
 }
 \arguments{
 \item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{\code{calc_method}}{A \emph{character} string representing method for
+\item{\code{method}}{A \emph{character} string representing method for
 estimating skew.}
 }
 \value{
