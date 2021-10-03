@@ -1,8 +1,3 @@
-#' @useDynLib HighFreq
-#' @importFrom Rcpp evalCpp
-#' @exportPattern "^[[:alpha:]]+"
-
-
 ##########################################################################
 #' Calculate a random \emph{TAQ} time series of prices and trading volumes, in
 #' \emph{xts} format.
@@ -808,6 +803,78 @@ save_rets_ohlc <- function(sym_bol,
 
 
 ##########################################################################
+#' Calculate the Value at Risk (\emph{VaR}) or the Conditional Value at Risk
+#' (\emph{CVaR}) of an \emph{xts} \emph{time series} of returns, using \code{R}
+#' code.
+#' 
+#' @param \code{tseries} An \emph{xts} \emph{time series} of returns with
+#'   multiple columns.
+#'   
+#' @param \code{method} A \emph{string} specifying the type of risk measure
+#'   (the default is \code{method = "var"} - see Details).
+#'    
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantile (the default is \code{con_fi = pnorm(-2) = 0.02275}).
+#'
+#' @return A vector with the risk measures of the columns of the input
+#'   \emph{time series} \code{tseries}.
+#'
+#' @details 
+#'   The function \code{calc_cvar()} calculates the Value at Risk (\emph{VaR})
+#'   or the Conditional Value at Risk (\emph{CVaR}) of an \emph{xts} \emph{time
+#'   series} of returns, using \code{R}
+#'   
+#'   The Value at Risk (\emph{VaR}) and the Conditional Value at Risk
+#'   (\emph{CVaR}) are measures of the tail risk of returns.
+#'
+#'   If \code{method = "var"} then \code{calc_cvar()} calculates the Value at
+#'   Risk (\emph{VaR}) as the quantile of the returns as follows:
+#'   \deqn{
+#'     \alpha = \int_{-\infty}^{\mathrm{VaR}(\alpha)} \mathrm{f}(r) \, \mathrm{d}r
+#'   }
+#'   Where \eqn{\alpha} is the confidence level for calculating the quantile,
+#'   and \eqn{\mathrm{f}(r)} is the probability density (distribution) of
+#'   returns.
+#'   
+#'   If \code{method = "cvar"} then \code{calc_cvar()} calculates the Value at
+#'   Risk (\emph{VaR}) as the Expected Tail Loss (\emph{ETL}) of the returns as
+#'   follows:
+#'   \deqn{
+#'     \mathrm{CVaR} = \frac{1}{\alpha} \int_{0}^\alpha \mathrm{VaR}(p) \, \mathrm{d}p
+#'   }
+#'   Where \eqn{\alpha} is the confidence level for calculating the quantile.
+#'   
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate VTI and XLF returns
+#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+#' # Calculate VaR
+#' all.equal(HighFreq::calc_cvar(re_turns), 
+#'   sapply(re_turns, quantile, probs=pnorm(-2)), check.attributes=FALSE)
+#' # Calculate CVaR
+#' all.equal(HighFreq::calc_cvar(re_turns, method="cvar", con_fi=0.02), 
+#'   sapply(re_turns, function(x) mean(x[x < quantile(x, 0.02)])), 
+#'   check.attributes=FALSE)
+#' }
+#' 
+calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
+
+  # Switch for the different risk methods
+  risk <- switch(method,
+                 "var"={sapply(tseries, quantile, probs=con_fi)},
+                 # Calculate CVaR as expected loss
+                 "cvar"={sapply(tseries, function(x) mean(x[x < quantile(x, con_fi)]))}
+  )  # end switch
+  
+  risk
+  
+}  # end calc_cvar
+
+
+
+
+##########################################################################
 #' Calculate a time series of point estimates of variance for an \emph{OHLC}
 #' time series, using different range estimators for variance.
 #'
@@ -818,7 +885,7 @@ save_rets_ohlc <- function(sym_bol,
 #' @export
 #' @param \code{oh_lc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{calc_method} A \emph{character} string representing the method for
+#' @param \code{method} A \emph{character} string representing the method for
 #'   estimating variance.  The methods include:
 #'   \itemize{
 #'     \item "close" close to close,
@@ -892,14 +959,14 @@ save_rets_ohlc <- function(sym_bol,
 #' # Calculate variance estimates for oh_lc
 #' var_running <- HighFreq::run_variance(oh_lc)
 #' # Calculate variance estimates for SPY
-#' var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="yang_zhang")
+#' var_running <- HighFreq::run_variance(HighFreq::SPY, method="yang_zhang")
 #' # Calculate SPY variance without overnight jumps
-#' var_running <- HighFreq::run_variance(HighFreq::SPY, calc_method="rogers_satchell")
+#' var_running <- HighFreq::run_variance(HighFreq::SPY, method="rogers_satchell")
 
-run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
+run_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
-  vari_ance <- switch(calc_method,
+  vari_ance <- switch(method,
          "close"={rutils::diff_it(oh_lc[, 4])^2},
          "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^2 -
                          (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^2},
@@ -932,7 +999,7 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 #' @export
 #' @param \code{oh_lc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{calc_method} A \emph{character} string representing method for
+#' @param \code{method} A \emph{character} string representing method for
 #'   estimating skew.
 #'
 #' @return A time series of point skew estimates.
@@ -954,10 +1021,10 @@ run_variance <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
 #' # Calculate time series of skew estimates for SPY
 #' sk_ew <- HighFreq::run_skew(HighFreq::SPY)
 
-run_skew <- function(oh_lc, calc_method="rogers_satchell") {
+run_skew <- function(oh_lc, method="rogers_satchell") {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
-  sk_ew <- switch(calc_method,
+  sk_ew <- switch(method,
                   "close"={rutils::diff_it(oh_lc[, 4])^3},
                   "garman_klass"={0.5*(oh_lc[, 2]-oh_lc[, 3])^3 -
                       (2*log(2)-1)*(oh_lc[, 4]-oh_lc[, 1])^3},
@@ -991,7 +1058,7 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 #' @export
 #' @param \code{oh_lc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{calc_method} A \emph{character} string representing method for
+#' @param \code{method} A \emph{character} string representing method for
 #'   estimating the Sharpe-like exponent.
 #'
 #' @return An \emph{xts} time series with the same number of rows as the
@@ -1012,8 +1079,8 @@ run_skew <- function(oh_lc, calc_method="rogers_satchell") {
 #' # Calculate time series of running Sharpe ratios for SPY
 #' sharpe_running <- run_sharpe(HighFreq::SPY)
 
-run_sharpe <- function(oh_lc, calc_method="close") {
-  sharpe_ratio <- switch(calc_method,
+run_sharpe <- function(oh_lc, method="close") {
+  sharpe_ratio <- switch(method,
                    "close"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])},
                    "method2"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])}
   )  # end switch
@@ -1089,13 +1156,13 @@ agg_stats_r <- function(oh_lc, calc_bars="run_variance", weight_ed=TRUE, ...) {
 #' over a rolling look-back interval.
 #'
 #' Performs the same operation as function \code{VWAP()} from package
-#' \href{https://cran.r-project.org/web/packages/TTR/index.html}{VWAP},
+#' \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
 #' but using vectorized functions, so it's a little faster.
 #'
 #' @export
 #' @param \code{oh_lc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{x_ts} A single-column \emph{xts} time series.
+#' @param \code{close} A time series of close prices.
 #' 
 #' @param \code{look_back} The size of the look-back interval, equal to the number of 
 #'   rows of data used for calculating the average price.
@@ -1106,7 +1173,7 @@ agg_stats_r <- function(oh_lc, calc_bars="run_variance", weight_ed=TRUE, ...) {
 #' @details The function \code{roll_vwap()} calculates the volume-weighted
 #'   average closing price, defined as the sum of the prices multiplied by
 #'   trading volumes in the look-back interval, divided by the sum of trading
-#'   volumes in the interval. If the argument \code{x_ts} is passed in explicitly,
+#'   volumes in the interval. If the argument \code{close} is passed in explicitly,
 #'   then its volume-weighted average value over time is calculated.
 #'
 #' @examples
@@ -1120,13 +1187,15 @@ agg_stats_r <- function(oh_lc, calc_bars="run_variance", weight_ed=TRUE, ...) {
 #' # Calculate running returns
 #' returns_running <- run_returns(x_ts=HighFreq::SPY)
 #' # Calculate the rolling volume-weighted average returns
-#' roll_vwap(oh_lc=HighFreq::SPY, x_ts=returns_running, look_back=11)
+#' roll_vwap(oh_lc=HighFreq::SPY, close=returns_running, look_back=11)
 
-roll_vwap <- function(oh_lc, x_ts=oh_lc[, 4], look_back) {
-  roll_vwap <- rutils::roll_sum(x_ts=x_ts*oh_lc[, 5], look_back=look_back)
-  volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5], look_back=look_back)
-  roll_vwap <- roll_vwap/volume_rolling
-  roll_vwap[is.na(roll_vwap)] <- 0
+roll_vwap <- function(oh_lc, close=oh_lc[, 4, drop=FALSE], look_back) {
+  roll_vwap <- rutils::roll_sum(x_ts=close*oh_lc[, 5, drop=FALSE], look_back=look_back)
+  volume_rolling <- rutils::roll_sum(x_ts=oh_lc[, 5, drop=FALSE], look_back=look_back)
+  # roll_vwap <- HighFreq::roll_sum(tseries=close*oh_lc[, 5, drop=FALSE], look_back=look_back)
+  # volume_rolling <- HighFreq::roll_sum(tseries=oh_lc[, 5, drop=FALSE], look_back=look_back)
+  roll_vwap <- ifelse(volume_rolling > 0, roll_vwap/volume_rolling, 0)
+  # roll_vwap[is.na(roll_vwap)] <- 0
   # Colnames(roll_vwap) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".VWAP")
   # Colnames(roll_vwap) <- colnames(oh_lc)
   roll_vwap
@@ -1204,7 +1273,7 @@ roll_stats <- function(oh_lc, calc_stats="run_variance", look_back=11, weight_ed
 #' @export
 #' @param \code{oh_lc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{calc_method} A \emph{character} string representing the method for
+#' @param \code{method} A \emph{character} string representing the method for
 #'   estimating variance.  The methods include:
 #'   \itemize{
 #'     \item "close" close to close,
@@ -1243,13 +1312,13 @@ roll_stats <- function(oh_lc, calc_stats="run_variance", look_back=11, weight_ed
 #'
 #' @examples
 #' # Calculate the variance of SPY returns
-#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, calc_method="yang_zhang")
+#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="yang_zhang")
 #' # Calculate variance without accounting for overnight jumps
-#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, calc_method="rogers_satchell")
+#' HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="rogers_satchell")
 #' # Calculate the variance without scaling the returns
 #' HighFreq::calc_var_ohlc_r(HighFreq::SPY, scal_e=FALSE)
 
-calc_var_ohlc_r <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
+calc_var_ohlc_r <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
   
   # oh_lc <- log(oh_lc[, 1:4])
   num_rows <- NROW(oh_lc)
@@ -1275,7 +1344,7 @@ calc_var_ohlc_r <- function(oh_lc, calc_method="yang_zhang", scal_e=TRUE) {
   high_open <- (oh_lc[, 2]-oh_lc[, 1])/in_dex
   low_open <- (oh_lc[, 3]-oh_lc[, 1])/in_dex
   
-  switch(calc_method,
+  switch(method,
          "close"={var(close_close)},
          "rogers_satchell"={-sum(close_high*high_open + close_low*low_open)/num_rows},
          "garman_klass"={sum(0.5*high_low^2 - (2*log(2)-1)*close_open^2)/num_rows},

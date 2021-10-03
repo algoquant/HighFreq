@@ -48,8 +48,7 @@ The function \code{lag_it()} applies a lag to the input \emph{matrix} by
 # Create a matrix of random returns
 re_turns <- matrix(rnorm(5e6), nc=5)
 # Compare lag_it() with rutils::lag_it()
-all.equal(HighFreq::lag_it(re_turns), 
-  rutils::lag_it(re_turns))
+all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

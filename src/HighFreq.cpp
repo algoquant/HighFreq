@@ -140,8 +140,7 @@ arma::vec lag_vec(const arma::vec& tseries,
 //' # Create a matrix of random returns
 //' re_turns <- matrix(rnorm(5e6), nc=5)
 //' # Compare lag_it() with rutils::lag_it()
-//' all.equal(HighFreq::lag_it(re_turns), 
-//'   rutils::lag_it(re_turns))
+//' all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -2472,9 +2471,12 @@ double calc_var_vec(const arma::vec& tseries) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'   
-//' @param \code{method} A \emph{string} specifying the type of the dispersion model
-//'   (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{string} specifying the type of the dispersion
+//'   model (the default is \code{method = "moment"} - see Details).
 //'    
+//' @param \code{con_fi} The confidence level for calculating the
+//'   quantiles (the default is \code{con_fi = 0.75}).
+//'
 //' @return A row vector equal to the dispersion of the columns of the matrix
 //'   \code{tseries}.
 //'
@@ -2560,7 +2562,12 @@ arma::mat calc_var(const arma::mat& tseries,
   case meth_od::moment: {  // moment
     return arma::var(tseries);
   }  // end moment
-  case meth_od::quantile: {  // MAD
+  case meth_od::quantile: {  // quantile
+    arma::vec level_s = {1-con_fi, con_fi};
+    arma::mat quantile_s = arma::quantile(tseries, level_s);
+    return (quantile_s.row(1) - quantile_s.row(0));
+  }  // end quantile
+  case meth_od::nonparametric: {  // MAD
     double num_cols = tseries.n_cols;
     arma::mat medians = arma::median(tseries);
     arma::mat mads(1, num_cols);
@@ -2571,9 +2578,6 @@ arma::mat calc_var(const arma::mat& tseries,
     // tseries.each_row() -= arma::median(tseries, 0);
     // return 1.4826*arma::median(arma::abs(tseries), 0);
     return 1.4826*mads;
-  }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
-    return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
   }  // end nonparametric
   default : {
     cout << "Warning: Invalid method parameter" << endl;
@@ -5122,7 +5126,7 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 //' # Calculate historical VTI returns
 //' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-//' # Estimate the volatility of VTI returns
+//' # Estimate the GARCH volatility of VTI returns
 //' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
 //'   innov=re_turns, is_random=FALSE)
 //' # Plot dygraph of the estimated GARCH volatility
@@ -5154,6 +5158,7 @@ arma::mat sim_garch(double omega,
     return join_rows(returns, variance);
   } else {
     // The innovations are historical returns
+    variance[0] = omega/(1-alpha-beta);
     for (arma::uword it = 1; it < num_rows; it++) {
       variance[it] = omega + alpha*pow(innov[it], 2) + beta*variance[it-1];
     }  // end for
@@ -5526,9 +5531,10 @@ arma::mat sim_df(double eq_price,
 //'   values.  So the minimum value of the variance is equal to \code{minval}.
 //'
 //'   The function \code{lik_garch()} calculates the log-likelihood assuming a
-//'   normal distribution of returns as follows:
+//'   normal distribution of returns conditional on the variance
+//'   \eqn{\sigma^2_{i-1}} in the previous period, as follows:
 //'   \deqn{
-//'     likelihood = - \sum_{i=1}^n (\frac{r^2_i}{\sigma^2_i} + \log(\sigma^2_i))
+//'     likelihood = - \sum_{i=1}^n (\frac{r^2_i}{\sigma^2_{i-1}} + \log(\sigma^2_{i-1}))
 //'   }
 //'
 //' @examples
@@ -5551,12 +5557,14 @@ double lik_garch(double omega,
                  arma::mat& returns, 
                  double minval = 0.000001) {
   
-  // Calculate the rolling volatility of returns using function sim_garch()
-  arma::mat garch_data = sim_garch(omega, alpha,  beta, returns, FALSE);
-  // Select the second column containing the volatility of returns
+  // Calculate the rolling variance of returns using function sim_garch()
+  arma::mat garch_data = sim_garch(omega, alpha,  beta, returns, false);
+  // Select the second column containing the variance of returns
   arma::mat variance = garch_data.col(1);
-  // Apply floor to volatility
+  // Apply floor to variance
   variance.transform([&minval](double x) {return max(x, minval);});
+  // Lag the variance
+  variance = lag_it(variance, 1, false);
   // Calculate the log-likelihood
   double likelihood = -conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
   

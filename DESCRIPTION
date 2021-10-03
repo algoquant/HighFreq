@@ -28,5 +28,5 @@ LazyData: true
 ByteCompile: true
 Repository: GitHub
 URL: https://github.com/algoquant/HighFreq
-RoxygenNote: 7.1.1.9001
+RoxygenNote: 7.1.2
 Encoding: UTF-8

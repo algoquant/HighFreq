@@ -94,8 +94,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' # Create a matrix of random returns
 #' re_turns <- matrix(rnorm(5e6), nc=5)
 #' # Compare lag_it() with rutils::lag_it()
-#' all.equal(HighFreq::lag_it(re_turns), 
-#'   rutils::lag_it(re_turns))
+#' all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -1672,9 +1671,12 @@ calc_var_vec <- function(tseries) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'   
-#' @param \code{method} A \emph{string} specifying the type of the dispersion model
-#'   (the default is \code{method = "moment"} - see Details).
+#' @param \code{method} A \emph{string} specifying the type of the dispersion
+#'   model (the default is \code{method = "moment"} - see Details).
 #'    
+#' @param \code{con_fi} The confidence level for calculating the
+#'   quantiles (the default is \code{con_fi = 0.75}).
+#'
 #' @return A row vector equal to the dispersion of the columns of the matrix
 #'   \code{tseries}.
 #'
@@ -3389,7 +3391,7 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 #' # Calculate historical VTI returns
 #' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
-#' # Estimate the volatility of VTI returns
+#' # Estimate the GARCH volatility of VTI returns
 #' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
 #'   innov=re_turns, is_random=FALSE)
 #' # Plot dygraph of the estimated GARCH volatility
@@ -3647,10 +3649,10 @@ sim_df <- function(eq_price, volat, theta, coeff, innov) {
 #' 
 #' @param \code{beta} The weight associated with the past variance estimates.
 #' 
+#' @param \code{returns} A single-column \emph{matrix} of returns.
+#' 
 #' @param \code{minval} The floor value applied to the variance, to avoid zero
 #'   values. (The default is \code{minval = 0.000001}.)
-#' 
-#' @param \code{returns} A single-column \emph{matrix} of returns.
 #' 
 #' @return The log-likelihood value.
 #'
@@ -3671,9 +3673,10 @@ sim_df <- function(eq_price, volat, theta, coeff, innov) {
 #'   values.  So the minimum value of the variance is equal to \code{minval}.
 #'
 #'   The function \code{lik_garch()} calculates the log-likelihood assuming a
-#'   normal distribution of returns as follows:
+#'   normal distribution of returns conditional on the variance
+#'   \eqn{\sigma^2_{i-1}} in the previous period, as follows:
 #'   \deqn{
-#'     likelihood = - \sum_{i=1}^n {\frac{r^2_i}{\sigma^2_i} + \log(\sigma^2_i)}
+#'     likelihood = - \sum_{i=1}^n (\frac{r^2_i}{\sigma^2_{i-1}} + \log(\sigma^2_{i-1}))
 #'   }
 #'
 #' @examples
