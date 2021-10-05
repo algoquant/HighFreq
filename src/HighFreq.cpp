@@ -5174,6 +5174,8 @@ arma::mat sim_garch(double omega,
 //' 
 //' @param \code{volat} The volatility of returns.
 //' 
+//' @param \code{init_price} The initial price. 
+//' 
 //' @param \code{eq_price} The equilibrium price. 
 //' 
 //' @param \code{theta} The strength of mean reversion.
@@ -5181,7 +5183,7 @@ arma::mat sim_garch(double omega,
 //' @param \code{innov} A single-column \emph{matrix} of innovations (random
 //'   numbers).
 //' 
-//' @return A single-column \emph{matrix} of simulated returns, with the same
+//' @return A single-column \emph{matrix} of simulated prices, with the same
 //'   number of rows as the argument \code{innov}.
 //'
 //' @details 
@@ -5197,7 +5199,7 @@ arma::mat sim_garch(double omega,
 //'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 //'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
 //'   normal \emph{innovations}.
-//'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+//'   The recursion starts with the initial price: \eqn{p_1 = init\_price}.
 //'
 //'   The function \code{sim_ou()} simulates the percentage returns as equal to
 //'   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -5220,13 +5222,14 @@ arma::mat sim_garch(double omega,
 //' the_ta <- 0.01
 //' in_nov <- matrix(rnorm(1e3))
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-//' plot(cumsum(re_turns), t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+//' price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+//' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_ou(double eq_price, 
+arma::mat sim_ou(double init_price, 
+                 double eq_price,
                  double volat, 
                  double theta, 
                  arma::mat& innov) {
@@ -5235,13 +5238,13 @@ arma::mat sim_ou(double eq_price,
   arma::mat prices = arma::zeros<mat>(num_rows, 1);
   arma::mat returns = arma::zeros<mat>(num_rows, 1);
   
-  prices.row(0) = volat*innov.row(0);
+  prices.row(0) = init_price;
   for (arma::uword it = 1; it < num_rows; it++) {
     returns.row(it) = theta*(eq_price - prices.row(it-1)) + volat*innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
-  return returns;
+  return prices;
   
 }  // end sim_ou
 
@@ -5336,15 +5339,15 @@ arma::mat sim_schwartz(double eq_price,
 //'   \code{RcppArmadillo} \code{C++} code.
 //'
 //'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
-//'   \eqn{AR(p)} of order \eqn{p}:
+//'   \eqn{AR(n)} of order \eqn{n}:
 //'   \deqn{
-//'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
+//'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 //'   }
 //'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 //'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
 //'   normal \emph{innovations}.
 //'
-//'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+//'   The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
 //'   equal to the number of rows of the \emph{autoregressive} coefficients
 //'   \code{coeff}.
 //'
@@ -5421,7 +5424,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 //'   process:
 //'   \deqn{
-//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_p r_{i-p} + \sigma \, \xi_i
+//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
 //'   }
 //'   \deqn{
 //'     p_i = p_{i-1} + r_i
@@ -5435,7 +5438,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //'
 //'   The \emph{Dickey-Fuller} process is a combination of an
 //'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
-//'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+//'   The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
 //'   equal to the number of rows of the \emph{autoregressive} coefficients
 //'   \code{coeff}.
 //'

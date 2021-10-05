@@ -30,7 +30,7 @@ Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
   process:
   \deqn{
-    r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_p r_{i-p} + \sigma \, \xi_i
+    r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
   }
   \deqn{
     p_i = p_{i-1} + r_i
@@ -44,7 +44,7 @@ The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 
   The \emph{Dickey-Fuller} process is a combination of an
   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
-  The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+  The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
   equal to the number of rows of the \emph{autoregressive} coefficients
   \code{coeff}.
 

@@ -81,7 +81,7 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Update function sim_ou() - add starting equity price and return the equity price - not the returns
++ [x] Update function sim_ou() - add initial equity price and return the equity price - not the returns
 
 + [x] Create function calc_cvar() for calculating the Value at Risk (VaR) and conditional VaR (CVaR) in R code
 

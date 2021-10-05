@@ -3408,6 +3408,8 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' 
 #' @param \code{volat} The volatility of returns.
 #' 
+#' @param \code{init_price} The initial price. 
+#' 
 #' @param \code{eq_price} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
@@ -3415,7 +3417,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A single-column \emph{matrix} of simulated returns, with the same
+#' @return A single-column \emph{matrix} of simulated prices, with the same
 #'   number of rows as the argument \code{innov}.
 #'
 #' @details 
@@ -3431,7 +3433,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 #'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
 #'   normal \emph{innovations}.
-#'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+#'   The recursion starts with the initial price: \eqn{p_1 = init\_price}.
 #'
 #'   The function \code{sim_ou()} simulates the percentage returns as equal to
 #'   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -3454,13 +3456,13 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' the_ta <- 0.01
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-#' plot(cumsum(re_turns), t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+#' price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+#' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
-sim_ou <- function(eq_price, volat, theta, innov) {
-    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', eq_price, volat, theta, innov)
+sim_ou <- function(init_price, eq_price, volat, theta, innov) {
+    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', init_price, eq_price, volat, theta, innov)
 }
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -3532,15 +3534,15 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'   \code{RcppArmadillo} \code{C++} code.
 #'
 #'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
-#'   \eqn{AR(p)} of order \eqn{p}:
+#'   \eqn{AR(n)} of order \eqn{n}:
 #'   \deqn{
-#'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
+#'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 #'   }
 #'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 #'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
 #'   normal \emph{innovations}.
 #'
-#'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+#'   The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
 #'   equal to the number of rows of the \emph{autoregressive} coefficients
 #'   \code{coeff}.
 #'
@@ -3594,7 +3596,7 @@ sim_ar <- function(coeff, innov) {
 #'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 #'   process:
 #'   \deqn{
-#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_p r_{i-p} + \sigma \, \xi_i
+#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
 #'   }
 #'   \deqn{
 #'     p_i = p_{i-1} + r_i
@@ -3608,7 +3610,7 @@ sim_ar <- function(coeff, innov) {
 #'
 #'   The \emph{Dickey-Fuller} process is a combination of an
 #'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
-#'   The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+#'   The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
 #'   equal to the number of rows of the \emph{autoregressive} coefficients
 #'   \code{coeff}.
 #'

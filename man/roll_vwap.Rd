@@ -5,12 +5,12 @@
 \title{Calculate the volume-weighted average price of an \emph{OHLC} time series
 over a rolling look-back interval.}
 \usage{
-roll_vwap(oh_lc, x_ts = oh_lc[, 4], look_back)
+roll_vwap(oh_lc, close = oh_lc[, 4, drop = FALSE], look_back)
 }
 \arguments{
 \item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{\code{x_ts}}{A single-column \emph{xts} time series.}
+\item{\code{close}}{A time series of close prices.}
 
 \item{\code{look_back}}{The size of the look-back interval, equal to the number of 
 rows of data used for calculating the average price.}
@@ -21,14 +21,14 @@ An \emph{xts} time series with a single column and the same number of
 }
 \description{
 Performs the same operation as function \code{VWAP()} from package
-\href{https://cran.r-project.org/web/packages/TTR/index.html}{VWAP},
+\href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
 but using vectorized functions, so it's a little faster.
 }
 \details{
 The function \code{roll_vwap()} calculates the volume-weighted
   average closing price, defined as the sum of the prices multiplied by
   trading volumes in the look-back interval, divided by the sum of trading
-  volumes in the interval. If the argument \code{x_ts} is passed in explicitly,
+  volumes in the interval. If the argument \code{close} is passed in explicitly,
   then its volume-weighted average value over time is calculated.
 }
 \examples{
@@ -42,5 +42,5 @@ col=c("black", "red"), bty="n")
 # Calculate running returns
 returns_running <- run_returns(x_ts=HighFreq::SPY)
 # Calculate the rolling volume-weighted average returns
-roll_vwap(oh_lc=HighFreq::SPY, x_ts=returns_running, look_back=11)
+roll_vwap(oh_lc=HighFreq::SPY, close=returns_running, look_back=11)
 }

@@ -4,10 +4,12 @@
 \alias{sim_ou}
 \title{Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.}
 \usage{
-sim_ou(eq_price, volat, theta, innov)
+sim_ou(init_price, eq_price, volat, theta, innov)
 }
 \arguments{
 \item{\code{volat}}{The volatility of returns.}
+
+\item{\code{init_price}}{The initial price.}
 
 \item{\code{eq_price}}{The equilibrium price.}
 
@@ -17,7 +19,7 @@ sim_ou(eq_price, volat, theta, innov)
 numbers).}
 }
 \value{
-A single-column \emph{matrix} of simulated returns, with the same
+A single-column \emph{matrix} of simulated prices, with the same
   number of rows as the argument \code{innov}.
 }
 \description{
@@ -36,7 +38,7 @@ The function \code{sim_ou()} simulates the following
   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
   normal \emph{innovations}.
-  The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+  The recursion starts with the initial price: \eqn{p_1 = init\_price}.
 
   The function \code{sim_ou()} simulates the percentage returns as equal to
   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -59,8 +61,8 @@ sig_ma <- 0.01
 the_ta <- 0.01
 in_nov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-re_turns <- HighFreq::sim_ou(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-plot(cumsum(re_turns), t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 }
 
 }

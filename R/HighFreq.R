@@ -858,6 +858,7 @@ save_rets_ohlc <- function(sym_bol,
 #'   check.attributes=FALSE)
 #' }
 #' 
+#' @export
 calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
 
   # Switch for the different risk methods

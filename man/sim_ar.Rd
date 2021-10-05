@@ -30,15 +30,15 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
   \code{RcppArmadillo} \code{C++} code.
 
   The function \code{sim_ar()} simulates an \emph{autoregressive} process
-  \eqn{AR(p)} of order \eqn{p}:
+  \eqn{AR(n)} of order \eqn{n}:
   \deqn{
-    r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_p r_{i-p} + \xi_i
+    r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
   }
   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
   normal \emph{innovations}.
 
-  The order \eqn{p} of the \emph{autoregressive} process \eqn{AR(p)}, is
+  The order \eqn{n} of the \emph{autoregressive} process \eqn{AR(n)}, is
   equal to the number of rows of the \emph{autoregressive} coefficients
   \code{coeff}.
 

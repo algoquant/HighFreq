@@ -687,16 +687,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_ou
-arma::mat sim_ou(double eq_price, double volat, double theta, arma::mat& innov);
-RcppExport SEXP _HighFreq_sim_ou(SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
+arma::mat sim_ou(double init_price, double eq_price, double volat, double theta, arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_ou(SEXP init_priceSEXP, SEXP eq_priceSEXP, SEXP volatSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type init_price(init_priceSEXP);
     Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
     Rcpp::traits::input_parameter< double >::type volat(volatSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_ou(eq_price, volat, theta, innov));
+    rcpp_result_gen = Rcpp::wrap(sim_ou(init_price, eq_price, volat, theta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -848,7 +849,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 7},
     {"_HighFreq_roll_fun", (DL_FUNC) &_HighFreq_roll_fun, 9},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 5},
-    {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 4},
+    {"_HighFreq_sim_ou", (DL_FUNC) &_HighFreq_sim_ou, 5},
     {"_HighFreq_sim_schwartz", (DL_FUNC) &_HighFreq_sim_schwartz, 4},
     {"_HighFreq_sim_ar", (DL_FUNC) &_HighFreq_sim_ar, 2},
     {"_HighFreq_sim_df", (DL_FUNC) &_HighFreq_sim_df, 5},
