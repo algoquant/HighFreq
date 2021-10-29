@@ -81,11 +81,19 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Fix function calc_var_ag() so that it works for remainder=0
+
++ [ ] Explain why roll_wsum() is slower than filter()
+
++ [ ] Explain why roll_wsum() output is different from roll_conv()
+
 + [x] Update function sim_ou() - add initial equity price and return the equity price - not the returns
 
 + [x] Create function calc_cvar() for calculating the Value at Risk (VaR) and conditional VaR (CVaR) in R code
 
 + [ ] Create function calc_drawd() for calculating the drawdown in R code
+
++ [ ] Create function calc_alpha() for calculating the alpha and beta, and their t-values and p-values
 
 + [ ] Create function calc_sharpe() for calculating the Sharpe, Sortino, Calmar, and ratios in R code
 
@@ -145,9 +153,11 @@ Calculate rolling variance efficiently (used by package fromo): https://www.john
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
 
-+ [ ] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
-ma_d <- TTR::runMAD(clos_e, n=look_back)
-ma_d <- HighFreq::roll_var(clos_e, look_back=look_back, method="quantile")
++ [x] Change calls from HighFreq::roll_var(method="quantile") to HighFreq::roll_var(method="nonparametric")
+
++ [x] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
+Answer: Because HighFreq::roll_var(method="quantile") is not MAD - use method="nonparametric" instead.
+HighFreq::roll_var(method="nonparametric") is slightly faster than TTR::runMAD().
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 

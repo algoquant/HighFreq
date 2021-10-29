@@ -2660,9 +2660,10 @@ arma::mat calc_var_ag(const arma::mat& tseries,
     // Allocate aggregations, end points, and variance.
     arma::mat aggs;
     arma::uvec end_p;
-    arma::mat var_s(remainder, tseries.n_cols);
+    // The number of rows is (remainder+1) so that it works for remainder=0
+    arma::mat var_s(remainder+1, tseries.n_cols);
     // Perform loop over the stubs
-    for (arma::uword stub = 0; stub < remainder; stub++) {
+    for (arma::uword stub = 0; stub <= remainder; stub++) {
       end_p = calc_endpoints(tseries.n_rows, step, stub);
       // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
       // end_p = end_p.elem(find(end_p < num_rows));
