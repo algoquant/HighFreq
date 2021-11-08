@@ -5,14 +5,14 @@
 \title{Perform multivariate linear regression using least squares and return a
 named list of regression coefficients, their t-values, and p-values.}
 \usage{
-calc_lm(response, design)
+calc_lm(response, predictor)
 }
 \arguments{
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
-(predictor or explanatory data).}
+\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+data.}
 }
 \value{
 A named list with three elements: a \emph{matrix} of coefficients
@@ -40,21 +40,21 @@ The function \code{calc_lm()} performs the same calculations as the
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and IEF returns
-de_sign <- re_turns[, -1]
+# Predictor matrix equals VTI and IEF returns
+predic_tor <- re_turns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(res_ponse ~ de_sign)
+reg_model <- lm(res_ponse ~ predic_tor)
 sum_mary <- summary(reg_model)
 # Perform multivariate regression using calc_lm()
-reg_arma <- HighFreq::calc_lm(response=res_ponse, design=de_sign)
+reg_arma <- HighFreq::calc_lm(response=res_ponse, predictor=predic_tor)
 # Compare the outputs of both functions
 all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
 all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
 all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_lm(response=res_ponse, design=de_sign),
-  Rcode=lm(res_ponse ~ de_sign),
+  Rcpp=HighFreq::calc_lm(response=res_ponse, predictor=predic_tor),
+  Rcode=lm(res_ponse ~ predic_tor),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

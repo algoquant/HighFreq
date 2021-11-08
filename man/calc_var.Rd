@@ -5,7 +5,7 @@
 \title{Calculate the dispersion (variance) of the columns of a \emph{time series}
 or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(tseries, method = "moment", con_fi = 0.75)
+calc_var(tseries, method = "moment", conf_lev = 0.75)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
@@ -13,8 +13,8 @@ calc_var(tseries, method = "moment", con_fi = 0.75)
 \item{\code{method}}{A \emph{string} specifying the type of the dispersion
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix

@@ -42,8 +42,7 @@ devtools::install_github(repo="algoquant/HighFreq", force=TRUE)
 devtools::document()
 # Build vignette package reference manual from *.Rd files
 system("R CMD Rd2pdf /Users/jerzy/Develop/HighFreq")
-cd C:\Develop\R\HighFreq\vignettes
-R CMD Rd2pdf C:\Develop\R\HighFreq\
+cd /Users/jerzy/Develop/HighFreq
 R CMD Rd2pdf /Users/jerzy/Develop/HighFreq/
 
 
@@ -81,15 +80,11 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [x] Fix function calc_var_ag() so that it works for remainder=0
++ [ ] Fix scaling in calc_weights() ?
 
 + [ ] Explain why roll_wsum() is slower than filter()
 
 + [ ] Explain why roll_wsum() output is different from roll_conv()
-
-+ [x] Update function sim_ou() - add initial equity price and return the equity price - not the returns
-
-+ [x] Create function calc_cvar() for calculating the Value at Risk (VaR) and conditional VaR (CVaR) in R code
 
 + [ ] Create function calc_drawd() for calculating the drawdown in R code
 
@@ -104,10 +99,6 @@ This avoids calling calc_var() in loop.
 
 + [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
 Rename run_var() to roll_var_garch() ?
-
-+ [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
-
-+ [x] Create function lik_garch() to calculate the GARCH log-likelihood
 
 + [ ] Create function sim_df() to simulate a Dickey-Fuller process
 
@@ -152,12 +143,6 @@ Calculate rolling variance efficiently (used by package fromo): https://www.john
 
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
-
-+ [x] Change calls from HighFreq::roll_var(method="quantile") to HighFreq::roll_var(method="nonparametric")
-
-+ [x] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
-Answer: Because HighFreq::roll_var(method="quantile") is not MAD - use method="nonparametric" instead.
-HighFreq::roll_var(method="nonparametric") is slightly faster than TTR::runMAD().
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
@@ -455,6 +440,32 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Fix the regularization in calc_inv(): Check for zeros in the singular values svd_val to remove the zero singular values
+Use the tolerance argument eigen_thresh.  If svd_val is less than eigen_thresh then remove it by adjusting eigen_max.
+
++ [x] In function back_test(), add the decay factor lambda for averaging the portfolio weights
+This is equivalent to extending the holding period beyond the rebalancing period.
+
++ [x] Rename the argument "design" to "predictor"
+
++ [x] In function run_zscores() - de-mean the zscores when scaling them - introduce Boolean argument
+
++ [x] Fix function calc_var_ag() so that it works for remainder=0
+
++ [x] Update function sim_ou() - add initial equity price and return the equity price - not the returns
+
++ [x] Create function calc_cvar() for calculating the Value at Risk (VaR) and conditional VaR (CVaR) in R code
+
++ [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
+
++ [x] Change calls from HighFreq::roll_var(method="quantile") to HighFreq::roll_var(method="nonparametric")
+
++ [x] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
+Answer: Because HighFreq::roll_var(method="quantile") is not MAD - use method="nonparametric" instead.
+HighFreq::roll_var(method="nonparametric") is slightly faster than TTR::runMAD().
+
++ [x] Create function lik_garch() to calculate the GARCH log-likelihood
 
 + [x] Update sim_arima() to accept matrix not vector - rename sim_arima() to sim_ar()
 

@@ -3,11 +3,11 @@
 \name{roll_reg}
 \alias{roll_reg}
 \title{Calculate a \emph{matrix} of regression coefficients, their t-values, and
-z-scores, at the end points of the design matrix.}
+z-scores, at the end points of the predictor matrix.}
 \usage{
 roll_reg(
   response,
-  design,
+  predictor,
   startp = 0L,
   endp = 0L,
   step = 1L,
@@ -16,7 +16,7 @@ roll_reg(
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  con_fi = 0.1,
+  conf_lev = 0.1,
   alpha = 0
 )
 }
@@ -24,8 +24,8 @@ roll_reg(
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
-(predictor or explanatory data).}
+\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+data.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -47,35 +47,35 @@ model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{design} matrix (the default is \code{0.001}).}
+\code{predictor} matrix (the default is \code{0.001}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{design}
+values used for calculating the shrinkage inverse of the \code{predictor}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-the number of columns of \code{design}).}
+the number of columns of \code{predictor}).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
 }
 \value{
-A \emph{matrix} with the same number of rows as \code{design}, and a
+A \emph{matrix} with the same number of rows as \code{predictor}, and a
   number of columns equal to \code{2n+3}, where \code{n} is the number of
-  columns of \code{design}.
+  columns of \code{predictor}.
 }
 \description{
 Calculate a \emph{matrix} of regression coefficients, their t-values, and
-z-scores, at the end points of the design matrix.
+z-scores, at the end points of the predictor matrix.
 }
 \details{
 The function \code{roll_reg()} calculates a \emph{matrix} of regression
-  coefficients, their t-values, and z-scores at the end points of the design
+  coefficients, their t-values, and z-scores at the end points of the predictor
   matrix.
   
   The function \code{roll_reg()} performs a loop over the end points, and at
-  each end point it subsets the time series \code{design} over a look-back
+  each end point it subsets the time series \code{predictor} over a look-back
   interval equal to \code{look_back} number of end points.
   
   It passes the subset time series to the function \code{calc_reg()}, which
@@ -83,7 +83,7 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{design}
+  periods. It calculates the end points along the rows of \code{predictor}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
   
@@ -100,7 +100,7 @@ end_p <- xts::endpoints(re_turns, on="months")[-1]
 look_back <- 12
 start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], design=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
+reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], predictor=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
 beta_s <- reg_stats[, 2]
 # Calculate rolling betas in R
 betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {

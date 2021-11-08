@@ -3,11 +3,11 @@
 \name{roll_zscores}
 \alias{roll_zscores}
 \title{Calculate a \emph{vector} of z-scores of the residuals of rolling
-regressions at the end points of the design matrix.}
+regressions at the end points of the predictor matrix.}
 \usage{
 roll_zscores(
   response,
-  design,
+  predictor,
   startp = 0L,
   endp = 0L,
   step = 1L,
@@ -19,8 +19,8 @@ roll_zscores(
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
-(predictor or explanatory data).}
+\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+data.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -39,19 +39,19 @@ calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A column \emph{vector} of the same length as the number of rows of
-  \code{design}.
+  \code{predictor}.
 }
 \description{
 Calculate a \emph{vector} of z-scores of the residuals of rolling
-regressions at the end points of the design matrix.
+regressions at the end points of the predictor matrix.
 }
 \details{
 The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   of the residuals of rolling regressions at the end points of the
-  \emph{time series} \code{design}.
+  \emph{time series} \code{predictor}.
   
   The function \code{roll_zscores()} performs a loop over the end points,
-  and at each end point it subsets the time series \code{design} over a
+  and at each end point it subsets the time series \code{predictor} over a
   look-back interval equal to \code{look_back} number of end points.
   
   It passes the subset time series to the function \code{calc_lm()}, which
@@ -59,7 +59,7 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{design}
+  periods. It calculates the end points along the rows of \code{predictor}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
   
@@ -73,18 +73,18 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and IEF returns
-de_sign <- re_turns[, -1]
+# Predictor matrix equals VTI and IEF returns
+predic_tor <- re_turns[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-z_scores <- HighFreq::roll_zscores(response=res_ponse, design=de_sign, look_back)
+z_scores <- HighFreq::roll_zscores(response=res_ponse, predictor=predic_tor, look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
-z_scoresr <- sapply(1:NROW(de_sign), function(ro_w) {
+z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
   if (ro_w == 1) return(0)
   start_point <- max(1, ro_w-look_back+1)
   sub_response <- res_ponse[start_point:ro_w]
-  sub_design <- de_sign[start_point:ro_w, ]
-  reg_model <- lm(sub_response ~ sub_design)
+  sub_predictor <- predic_tor[start_point:ro_w, ]
+  reg_model <- lm(sub_response ~ sub_predictor)
   resid_uals <- reg_model$residuals
   resid_uals[NROW(resid_uals)]/sd(resid_uals)
 })  # end sapply

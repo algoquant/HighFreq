@@ -10,7 +10,7 @@ calc_weights(
   method = "rank_sharpe",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  con_fi = 0.1,
+  conf_lev = 0.1,
   alpha = 0,
   scale = TRUE,
   vol_target = 0.01
@@ -20,7 +20,7 @@ calc_weights(
 \item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{method}}{A \emph{string} specifying the objective function for
+\item{\code{method}}{A \emph{string} specifying the method for
 calculating the weights (see Details) (the default is \code{method =
 "rank_sharpe"})}
 
@@ -29,12 +29,12 @@ small singular values in order to regularize the inverse of the
 \code{returns} matrix (the default is \code{0.001}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{returns}
+values used for calculating the shrinkage inverse of the \code{returns}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 the number of columns of \code{returns}).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -55,8 +55,8 @@ functions.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different types of objective functions, using
-  \code{RcppArmadillo} \code{C++} code.
+  weights for different types of methods, using \code{RcppArmadillo}
+  \code{C++} code.
 
   If \code{method = "rank_sharpe"} (the default) then it calculates the
   weights as the ranks (order index) of the trailing Sharpe ratios of the
@@ -79,7 +79,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   If \code{scale = TRUE} (the default) then the weights are scaled so that
   the resulting portfolio has a volatility equal to \code{vol_target}.
 
-  \code{calc_weights()} calculates the regularized inverse of the covariance
+  \code{calc_weights()} calculates the shrinkage inverse of the covariance
   \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
   dimension regularization by selecting only the largest eigenvalues equal
   in number to \code{eigen_max}. 
@@ -97,7 +97,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
 # Calculate covariance matrix of ETF returns
 re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
 ei_gen <- eigen(cov(re_turns))
-# Calculate regularized inverse of covariance matrix
+# Calculate shrinkage inverse of covariance matrix
 eigen_max <- 3
 eigen_vec <- ei_gen$vectors[, 1:eigen_max]
 eigen_val <- ei_gen$values[1:eigen_max]

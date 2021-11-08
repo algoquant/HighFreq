@@ -2,56 +2,86 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_inv}
 \alias{calc_inv}
-\title{Calculate the regularized inverse of a rectangular \emph{matrix} of data
-using Singular Value Decomposition (\emph{SVD}).}
+\title{Calculate the shrinkage inverse of a \emph{matrix} of data using Singular
+Value Decomposition (\emph{SVD}).}
 \usage{
-calc_inv(tseries, eigen_thresh = 0.001, eigen_max = 0L)
+calc_inv(tseries, eigen_thresh = 0.01, eigen_max = 0L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of returns data.}
+\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-matrix \code{tseries} (the default is \code{0.001}).}
+matrix \code{tseries} (the default is \code{0.01}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the matrix
-\code{tseries} (the default is \code{0} - equivalent to \code{eigen_max}
-equal to the number of columns of \code{tseries}).}
+values used for calculating the shrinkage inverse of the matrix
+\code{tseries} (the default is \code{eigen_max = 0} - equivalent to
+\code{eigen_max} equal to the number of columns of \code{tseries}).}
 }
 \value{
-A \emph{matrix} equal to the regularized inverse of the matrix
+A \emph{matrix} equal to the shrinkage inverse of the matrix
   \code{tseries}.
 }
 \description{
-Calculate the regularized inverse of a rectangular \emph{matrix} of data
-using Singular Value Decomposition (\emph{SVD}).
+Calculate the shrinkage inverse of a \emph{matrix} of data using Singular
+Value Decomposition (\emph{SVD}).
 }
 \details{
-The function calc_inv() calculates the regularized inverse of
-  \code{tseries} using Singular Value Decomposition (\emph{SVD}).
+The function \code{calc_inv()} calculates the shrinkage inverse of the
+  matrix \code{tseries} using Singular Value Decomposition (\emph{SVD}).
   
-  If \code{eigen_max} is given, then it calculates the regularized inverse
-  from the \emph{SVD} using the first \code{eigen_max} largest singular
-  values.  For example, if \code{eigen_max = 3} then it only uses the
-  \code{3} largest singular values.
-  If \code{eigen_max} is set equal to the number of columns of
-  \code{tseries} then it uses all the singular values without any
-  regularization.
-
-  If \code{eigen_max} is not given then it calculates the regularized
-  inverse using the function \code{arma::pinv()}. Then it discards small
-  singular values that are less than the threshold level
-  \code{eigen_thresh}.
+  The function \code{calc_inv()} first performs Singular Value Decomposition
+  (\emph{SVD}) of the matrix \code{tseries}.  
+  The \emph{SVD} of a matrix \eqn{\strong{A}} is defined as the
+  factorization:
+  \deqn{
+    \strong{A} = \strong{U}  \, \Sigma  \, \strong{V}^T
+  }
+  Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
+  \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
+  \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
+  
+  The inverse \eqn{\strong{A}^{-1}} of the matrix \eqn{\strong{A}} can be
+  calculated from the \emph{SVD} matrices as:
+  \deqn{
+    \strong{A}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+  }
+  
+  The \emph{regularized inverse} of the matrix \eqn{\strong{A}} is given by:
+  \deqn{
+    \strong{A}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+  }
+  Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
+  \emph{SVD} matrices with the rows and columns corresponding to zero
+  \emph{singular values} removed.
+  
+  The function \code{calc_inv()} applies regularization by discarding the
+  smallest singular values \eqn{\sigma_i} that are less than the threshold
+  level \code{eigen_thresh} times the sum of all the singular values:
+  \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
+  
+  It then discards additional singular values so that only the largest
+  \code{eigen_max} singular values remain.  
+  It calculates the shrinkage inverse from the \emph{SVD} matrices using
+  only the largest singular values up to \code{eigen_max}.  For example, if
+  \code{eigen_max = 3} then it only uses the \code{3} largest singular
+  values. This has the effect of dimension shrinkage.
+  
+  If the matrix \code{tseries} has a large number of small singular values,
+  then the number of remaining singular values may be less than
+  \code{eigen_max}.
 }
 \examples{
 \dontrun{
 # Calculate ETF returns
 re_turns <- na.omit(rutils::etf_env$re_turns)
-# Calculate regularized inverse using RcppArmadillo
-in_verse <- HighFreq::calc_inv(re_turns, eigen_max=3)
-# Calculate regularized inverse from SVD in R
-s_vd <- svd(re_turns)
+# Calculate covariance matrix
+cov_mat <- cov(re_turns)
+# Calculate shrinkage inverse using RcppArmadillo
+in_verse <- HighFreq::calc_inv(cov_mat, eigen_max=3)
+# Calculate shrinkage inverse from SVD in R
+s_vd <- svd(cov_mat)
 eigen_max <- 1:3
 inverse_r <-  s_vd$v[, eigen_max] \%*\% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 # Compare RcppArmadillo with R

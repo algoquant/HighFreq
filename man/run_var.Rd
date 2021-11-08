@@ -29,6 +29,10 @@ The function \code{run_var()} calculates the rolling variance of a
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
 
+  The above formula for \eqn{\sigma^2} slightly overestimates the variance
+  because it doesn't subtract the means before squaring the returns.  But
+  it's a very good approximation for daily returns.
+
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -39,9 +43,6 @@ The function \code{run_var()} calculates the rolling variance of a
   past values have a smaller weight, and the rolling variance values have a
   weaker dependence on past values.  This is equivalent to a short look-back
   interval.
-
-  The above formula slightly overestimates the variance because it doesn't
-  subtract the mean returns.
 
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.

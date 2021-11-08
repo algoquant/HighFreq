@@ -10,10 +10,11 @@ back_test(
   returns,
   startp,
   endp,
+  lambda,
   method = "rank_sharpe",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  con_fi = 0.1,
+  conf_lev = 0.1,
   alpha = 0,
   scale = TRUE,
   vol_target = 0.01,
@@ -32,27 +33,29 @@ returns data (the returns in excess of the risk-free rate).}
 
 \item{\code{endp}}{An \emph{integer vector} of end points.}
 
+\item{\code{lambda}}{A \emph{numeric} decay factor for averaging the
+portfolio weights.  (The default is \code{lambda = 0} - no averaging.)}
+
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
 
 \item{\code{bid_offer}}{A \emph{numeric} bid-offer spread (the default is
 \code{0})}
 
-\item{\code{method}}{A \emph{string} specifying the objective function for
-calculating the weights (see Details) (the default is \code{method =
-"rank_sharpe"})}
+\item{\code{method}}{A \emph{string} specifying the method for calculating
+the weights (see Details) (the default is \code{method = "rank_sharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
 \code{returns} matrix (the default is \code{0.001}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{returns}
+values used for calculating the shrinkage inverse of the \code{returns}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 the number of columns of \code{returns}).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -84,12 +87,23 @@ The function \code{back_test()} performs a backtest simulation of a
   \code{alpha}, \code{method}, and \code{scale} are also passed to the
   function \code{calc_weights()}.
   
-  The function \code{back_test()} multiplies the weights by the coefficient
-  \code{coeff} (with default equal to \code{1}), which allows reverting a
-  strategy if \code{co_eff = -1}.
+  It then recursively averages the current weights \eqn{w_i} with the
+  weights from the previous rebalancing period \eqn{w_{i-1}}, using the
+  decay factor \code{lambda = \eqn{\lambda}}:
+  \deqn{
+    w_i = (1-\lambda) w_i + \lambda w_{i-1}
+  }
+  The purpose of averaging the weights is to reduce their variance to
+  improve their out-of-sample performance.  It is equivalent to extending
+  the portfolio holding period beyond the rebalancing period.
   
   The function \code{back_test()} then multiplies the weights times the
   future portfolio returns, to calculate the out-of-sample strategy returns.
+  
+  The function \code{back_test()} multiplies the out-of-sample strategy
+  returns by the coefficient \code{coeff} (with default equal to \code{1}),
+  which allows simulating either a trending strategy (if \code{co_eff = 1}),
+  or a reverting strategy (if \code{co_eff = -1}).
   
   The function \code{back_test()} calculates the transaction costs by
   multiplying the bid-offer spread \code{bid_offer} times the absolute

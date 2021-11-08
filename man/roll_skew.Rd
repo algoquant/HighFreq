@@ -14,7 +14,7 @@ roll_skew(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  con_fi = 0.75
+  conf_lev = 0.75
 )
 }
 \arguments{
@@ -38,8 +38,8 @@ calculating the end points (the default is \code{stub = 0}).}
 \item{\code{method}}{A \emph{string} specifying the type of the skewness
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 }
 \value{
 A \emph{matrix} of skewness estimates with the same number of

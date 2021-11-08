@@ -7,11 +7,11 @@ of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
 calc_reg(
   response,
-  design,
+  predictor,
   method = "least_squares",
   eigen_thresh = 0.001,
   eigen_max = 0L,
-  con_fi = 0.1,
+  conf_lev = 0.1,
   alpha = 0
 )
 }
@@ -19,23 +19,23 @@ calc_reg(
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
-(predictor or explanatory data).}
+\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+data.}
 
 \item{\code{method}}{A \emph{string} specifying the type of the regression
 model the default is \code{method = "least_squares"} - see Details).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{design} matrix (the default is \code{0.001}).}
+\code{predictor} matrix (the default is \code{0.001}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{design}
+values used for calculating the shrinkage inverse of the \code{predictor}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-the number of columns of \code{design}).}
+the number of columns of \code{predictor}).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -54,14 +54,14 @@ The function \code{calc_reg()} performs multivariate regression using
   t-values, and the last residual z-score.
 
   The length of the return vector depends on the number of columns of
-  \code{design}.
+  \code{predictor}.
   The number of regression coefficients is equal to the number of columns of
-  \code{design} plus \code{1}.  The number of t-values is equal to the
+  \code{predictor} plus \code{1}.  The number of t-values is equal to the
   number of coefficients.  And there is only \code{1} z-score.
-  So if the number of columns of \code{design} is equal to \code{n}, then
+  So if the number of columns of \code{predictor} is equal to \code{n}, then
   the return vector will have \code{2n+3} elements.
 
-  For example, if the design matrix has \code{2} columns of data, then
+  For example, if the predictor matrix has \code{2} columns of data, then
   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
   regression coefficients (including the intercept coefficient), \code{3}
   corresponding t-values, and \code{1} z-score.
@@ -72,8 +72,8 @@ The function \code{calc_reg()} performs multivariate regression using
   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
   than \code{lm()}.
 
-  If \code{method = "regular"} then it performs regularized regression.  It
-  calculates the regularized inverse of the \code{design} matrix from its
+  If \code{method = "regular"} then it performs shrinkage regression.  It
+  calculates the shrinkage inverse of the \code{predictor} matrix from its
   singular value decomposition.  It applies dimension regularization by
   selecting only the largest singular values equal in number to
   \code{eigen_max}.
@@ -87,22 +87,22 @@ The function \code{calc_reg()} performs multivariate regression using
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and IEF returns
-de_sign <- re_turns[, -1]
+# Predictor matrix equals VTI and IEF returns
+predic_tor <- re_turns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(res_ponse ~ de_sign)
+reg_model <- lm(res_ponse ~ predic_tor)
 sum_mary <- summary(reg_model)
 co_eff <- sum_mary$coefficients
 # Perform multivariate regression using calc_reg()
-reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, design=de_sign))
+reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, predictor=predic_tor))
 # Compare the outputs of both functions
-all.equal(reg_arma[1:(2*(1+NCOL(de_sign)))], 
+all.equal(reg_arma[1:(2*(1+NCOL(predic_tor)))], 
   c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(response=res_ponse, design=de_sign),
-  Rcode=lm(res_ponse ~ de_sign),
+  Rcpp=HighFreq::calc_reg(response=res_ponse, predictor=predic_tor),
+  Rcode=lm(res_ponse ~ predic_tor),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

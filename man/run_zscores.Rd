@@ -5,20 +5,23 @@
 \title{Calculate the z-scores of rolling regressions of streaming \emph{time
 series} of returns.}
 \usage{
-run_zscores(response, design, lambda)
+run_zscores(response, predictor, lambda, demean = TRUE)
 }
 \arguments{
-\item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
-of response data.}
+\item{\code{response}}{A single-column \emph{time series} or a single-column
+\emph{matrix} of response data.}
 
-\item{\code{design}}{A \emph{time series} or a \emph{matrix} of design data
-(predictor or explanatory data).}
+\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+data.}
 
 \item{\code{lambda}}{A \emph{numeric} decay factor.}
+
+\item{\code{demean}}{A \emph{Boolean} specifying whether the weights should
+be scaled (the default is \code{demean = TRUE}).}
 }
 \value{
-A \emph{matrix} with the z-scores, betas, and variances of the
-  design data.
+A \emph{matrix} with the z-scores, betas, and the variances of the
+  predictor data.
 }
 \description{
 Calculate the z-scores of rolling regressions of streaming \emph{time
@@ -30,27 +33,41 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   recursively weighing the current estimates with past estimates, using the
   decay factor \eqn{\lambda}:
   \deqn{
+    \sigma^2_t = (1-\lambda) {r^p_t}^2 + \lambda \sigma^2_{t-1}
+  }
+  \deqn{
+    \sigma^{cov}_t = (1-\lambda) r^r_t r^p_t + \lambda \sigma^{cov}_{t-1}
+  }
+  \deqn{
     \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
   }
   \deqn{
-    \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^d_t) + \lambda \epsilon_{t-1}
+    \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^p_t) + \lambda \epsilon_{t-1}
   }
   Where \eqn{\sigma^{cov}_t} is the vector of covariances between the
-  response and design returns, at time \eqn{t};
-  \eqn{\sigma^2_t} is the vector of design variances,
-  and \eqn{r^r_t} and \eqn{r^d_t} are the streaming returns of the response
-  and design data.
+  response and predictor returns, at time \eqn{t};
+  \eqn{\sigma^2_t} is the vector of predictor variances,
+  and \eqn{r^r_t} and \eqn{r^p_t} are the streaming returns of the response
+  and predictor data.
+
+  The above formulas for \eqn{\sigma^2} and \eqn{\sigma^{cov}} are
+  approximate because they don't subtract the means before squaring the
+  returns.  But they're very good approximations for daily returns.
 
   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
-  dimensions as the input argument \code{design}.
+  dimensions as the input argument \code{predictor}.
 
-  The above formula is approximate because it doesn't subtract the mean
-  returns.
-
-  The \emph{z-score} \eqn{z_t} is equal to the residual \eqn{\epsilon_t} divided by
-  its volatility \eqn{\sigma^{\epsilon}_t}: 
+  If the argument \code{demean = TRUE} (the default) then the
+  \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
+  \eqn{\epsilon_t} minus their means \eqn{\mu_{\epsilon}}, divided by their
+  volatilities \eqn{\sigma^{\epsilon}}:
   \deqn{
-    z_t = \frac{\epsilon_t}{\sigma^{\epsilon}_t}
+    z_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+  }
+  If the argument \code{demean = FALSE} then the \emph{z-scores} are
+  only divided by their volatilities without subtracting their means:
+  \deqn{
+    z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
   }
 
   The value of the decay factor \eqn{\lambda} should be in the range between
@@ -60,20 +77,20 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   stronger dependence on past values.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the rolling \emph{z-score} values have
-  a weaker dependence on past values.  This is equivalent to a short
+  past values have a smaller weight, and the rolling \emph{z-score} values
+  have a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
 
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster.
+  weights, but it's faster to calculate.
 
   The function \code{run_zscores()} returns multiple columns of data. 
-  If the matrix \code{design} has \code{n} columns then \code{run_zscores()}
+  If the matrix \code{predictor} has \code{n} columns then \code{run_zscores()}
   returns a matrix with \code{2n+1} columns.  The first column contains the
   \emph{z-scores}, and the remaining columns contain the \emph{betas} and
-  the \emph{variances} of the design data.
+  the \emph{variances} of the predictor data.
 }
 \examples{
 \dontrun{
@@ -81,11 +98,11 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
 re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 res_ponse <- re_turns[, 1]
-# Design matrix equals VTI and IEF returns
-de_sign <- re_turns[, -1]
+# Predictor matrix equals VTI and IEF returns
+predic_tor <- re_turns[, -1]
 # Calculate the running z-scores
 lamb_da <- 0.9
-zscores <- HighFreq::run_zscores(response=res_ponse, design=de_sign, lambda=lamb_da)
+zscores <- HighFreq::run_zscores(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
 # Plot the running z-scores
 da_ta <- cbind(cumsum(res_ponse), zscores[, 1])
 colnames(da_ta) <- c("XLF", "zscores")

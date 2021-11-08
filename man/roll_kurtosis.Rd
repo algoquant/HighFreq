@@ -14,7 +14,7 @@ roll_kurtosis(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  con_fi = 0.75
+  conf_lev = 0.75
 )
 }
 \arguments{
@@ -38,8 +38,8 @@ calculating the end points (the default is \code{stub = 0}).}
 \item{\code{method}}{A \emph{string} specifying the type of the kurtosis
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 }
 \value{
 A \emph{matrix} of kurtosis estimates with the same number of
@@ -66,7 +66,7 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{design}
+  periods. It calculates the end points along the rows of \code{tseries}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
 

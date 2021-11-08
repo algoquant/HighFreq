@@ -32,6 +32,10 @@ The function \code{run_covar()} calculates the rolling covariance of
   Where \eqn{\sigma^{12}_t} is the covariance estimate at time \eqn{t}, and
   \eqn{r^1_t} and \eqn{r^2_t} are the streaming returns data.
 
+  The above formula slightly overestimates the covariance because it doesn't
+  subtract the mean values from the returns.  But it's a very good
+  approximations for daily returns.
+
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -42,9 +46,6 @@ The function \code{run_covar()} calculates the rolling covariance of
   past values have a smaller weight, and the rolling covariance values have
   a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
-
-  The above formula slightly overestimates the covariance because it doesn't
-  subtract the mean returns.
 
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.

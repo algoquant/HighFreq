@@ -14,7 +14,7 @@ roll_mean(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  con_fi = 0.75
+  conf_lev = 0.75
 )
 }
 \arguments{

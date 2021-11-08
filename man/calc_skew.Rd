@@ -5,7 +5,7 @@
 \title{Calculate the skewness of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_skew(tseries, method = "moment", con_fi = 0.75)
+calc_skew(tseries, method = "moment", conf_lev = 0.75)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
@@ -13,8 +13,8 @@ calc_skew(tseries, method = "moment", con_fi = 0.75)
 \item{\code{method}}{A \emph{string} specifying the type of the skewness
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantiles (the default is \code{con_fi = 0.75}).}
+\item{\code{conf_lev}}{The confidence level for calculating the
+quantiles (the default is \code{conf_lev = 0.75}).}
 }
 \value{
 A single-row matrix with the skewness of the columns of
@@ -70,13 +70,13 @@ summary(microbenchmark(
   Rcode=calc_skewr(re_turns),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile skewness
-HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)
+HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)
 # Calculate the quantile skewness in R
 calc_skewq <- function(x, a = 0.75) {
   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
 }  # end calc_skewq
-all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", con_fi=0.9)), 
+all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)), 
   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
