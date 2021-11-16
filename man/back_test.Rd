@@ -12,7 +12,7 @@ back_test(
   endp,
   lambda,
   method = "rank_sharpe",
-  eigen_thresh = 0.001,
+  eigen_thresh = 1e-05,
   eigen_max = 0L,
   conf_lev = 0.1,
   alpha = 0,
@@ -33,8 +33,8 @@ returns data (the returns in excess of the risk-free rate).}
 
 \item{\code{endp}}{An \emph{integer vector} of end points.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor for averaging the
-portfolio weights.  (The default is \code{lambda = 0} - no averaging.)}
+\item{\code{lambda}}{A \emph{numeric} decay factor to multiply the past
+portfolio weights.  (The default is \code{lambda = 0} - no memory.)}
 
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
@@ -47,7 +47,7 @@ the weights (see Details) (the default is \code{method = "rank_sharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{returns} matrix (the default is \code{0.001}).}
+\code{returns} matrix (the default is \code{1e-5}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
 values used for calculating the shrinkage inverse of the \code{returns}
@@ -64,7 +64,7 @@ quantiles (the default is \code{conf_lev = 0.75}).}
 be scaled (the default is \code{scale = TRUE}).}
 
 \item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
-weights (the default is \code{0.001})}
+weights (the default is \code{1e-5})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as
@@ -76,29 +76,31 @@ Simulate (backtest) a rolling portfolio optimization strategy, using
 }
 \details{
 The function \code{back_test()} performs a backtest simulation of a
-  rolling portfolio optimization strategy over a \emph{vector} of
-  \code{endp}.
+  rolling portfolio optimization strategy over a \emph{vector} of the end
+  points \code{endp}.
   
   It performs a loop over the end points \code{endp}, and subsets the
-  \emph{matrix} of excess returns \code{excess} along its rows, between the
-  corresponding end point and the start point. It passes the subset matrix
-  of excess returns into the function \code{calc_weights()}, which
-  calculates the optimal portfolio weights. The arguments \code{eigen_max},
-  \code{alpha}, \code{method}, and \code{scale} are also passed to the
-  function \code{calc_weights()}.
+  \emph{matrix} of the excess asset returns \code{excess} along its rows,
+  between the corresponding \emph{start point} and the \emph{end point}. It
+  passes the subset matrix of excess returns into the function
+  \code{calc_weights()}, which calculates the optimal portfolio weights at
+  each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
+  \code{method}, and \code{scale} are also passed to the function
+  \code{calc_weights()}.
   
-  It then recursively averages the current weights \eqn{w_i} with the
-  weights from the previous rebalancing period \eqn{w_{i-1}}, using the
-  decay factor \code{lambda = \eqn{\lambda}}:
+  It then recursively averages the weights \eqn{w_i} at the \emph{end point
+  = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
+  (i-1)}, using the decay factor \code{lambda = \eqn{\lambda}}:
   \deqn{
     w_i = (1-\lambda) w_i + \lambda w_{i-1}
   }
   The purpose of averaging the weights is to reduce their variance to
   improve their out-of-sample performance.  It is equivalent to extending
-  the portfolio holding period beyond the rebalancing period.
+  the portfolio holding period beyond the time interval between neighboring
+  \emph{end points}.
   
-  The function \code{back_test()} then multiplies the weights times the
-  future portfolio returns, to calculate the out-of-sample strategy returns.
+  The function \code{back_test()} then calculates the out-of-sample strategy
+  returns by multiplying the average weights times the future asset returns.
   
   The function \code{back_test()} multiplies the out-of-sample strategy
   returns by the coefficient \code{coeff} (with default equal to \code{1}),

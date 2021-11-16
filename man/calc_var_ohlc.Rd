@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var_ohlc}
 \alias{calc_var_ohlc}
-\title{Calculate the variance of \emph{OHLC} prices using different price range
-estimators.}
+\title{Calculate the variance of returns from \emph{OHLC} prices using different
+price range estimators.}
 \usage{
 calc_var_ohlc(
   ohlc,
@@ -44,8 +44,8 @@ A single \emph{numeric} value equal to the variance of the
   \emph{OHLC time series}.
 }
 \description{
-Calculate the variance of \emph{OHLC} prices using different price range
-estimators.
+Calculate the variance of returns from \emph{OHLC} prices using different
+price range estimators.
 }
 \details{
 The function \code{calc_var_ohlc()} calculates the variance from all the
@@ -53,8 +53,12 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   of \emph{OHLC} prices), using several different variance estimation
   methods.
 
-  The input \emph{OHLC time series} \code{ohlc} is assumed to be the log
-  prices.
+  The function \code{calc_var_ohlc()} does not calculate the logarithm of
+  the prices.
+  So if the argument \code{ohlc} contains dollar prices then
+  \code{calc_var_ohlc()} calculates the dollar variance.
+  If the argument \code{ohlc} contains the log prices then
+  \code{calc_var_ohlc()} calculates the percentage variance.
 
   The default \code{method} is \emph{"yang_zhang"}, which theoretically
   has the lowest standard error among unbiased estimators.

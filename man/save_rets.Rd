@@ -27,7 +27,7 @@ single symbol. Calculate returns and save them to a single
 \details{
 The function \code{save_rets} loads multiple days of \emph{TAQ}
   data, then scrubs, aggregates, and rbinds them into a \emph{OHLC} time
-  series.  It then calculates returns using function \code{run_returns()}, and
+  series.  It then calculates returns using function \code{ohlc_returns()}, and
   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
   to a file called \sQuote{\code{symbol.rets.RData}}.
   The \emph{TAQ} data files are assumed to be stored in separate directories

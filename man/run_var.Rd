@@ -2,45 +2,46 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var}
 \alias{run_var}
-\title{Calculate the rolling variance of streaming \emph{time series} of returns.}
+\title{Calculate the running variance of streaming \emph{time series} of returns.}
 \usage{
 run_var(tseries, lambda)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of returns.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor.}
+\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
+estimates.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the rolling variance of streaming \emph{time series} of returns.
+Calculate the running variance of streaming \emph{time series} of returns.
 }
 \details{
-The function \code{run_var()} calculates the rolling variance of a
-  streaming \emph{time series} of returns by recursively weighing the
-  squared present returns with past variance estimates, using the decay
-  factor \eqn{\lambda}:
+The function \code{run_var()} calculates the running variance of a
+  streaming \emph{time series} of returns, by recursively weighing the
+  squared returns \eqn{r^2_t} minus the squared means \eqn{\mu^2_t}, with
+  the past variance estimates \eqn{\sigma^2_{t-1}}, using the decay factor
+  \eqn{\lambda}:
   \deqn{
-    \sigma^2_t = (1-\lambda) r^2_t + \lambda \sigma^2_{t-1}
+    \mu_t = (1-\lambda) r_t + \lambda \mu_{t-1}
+  }
+  \deqn{
+    \sigma^2_t = (1-\lambda) (r^2_t - \mu^2_t) + \lambda \sigma^2_{t-1}
   }
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
 
-  The above formula for \eqn{\sigma^2} slightly overestimates the variance
-  because it doesn't subtract the means before squaring the returns.  But
-  it's a very good approximation for daily returns.
-
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the rolling variance values have a
+  values have a greater weight, and the running variance values have a
   stronger dependence on past values.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the rolling variance values have a
+  past values have a smaller weight, and the running variance values have a
   weaker dependence on past values.  This is equivalent to a short look-back
   interval.
 
@@ -60,10 +61,10 @@ The function \code{run_var()} calculates the rolling variance of a
 \dontrun{
 # Calculate historical returns
 re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
-# Calculate the rolling variance
+# Calculate the running variance
 lamb_da <- 0.9
 vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
-# Calculate rolling variance using R code
+# Calculate running variance using R code
 filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
   init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
   method="recursive")

@@ -187,7 +187,7 @@ remove_jumps <- function(oh_lc) {
 #'
 #' @return A single-column \emph{xts} time series of returns.
 #'
-#' @details The function \code{run_returns()} calculates the percentage returns
+#' @details The function \code{ohlc_returns()} calculates the percentage returns
 #'   for either \emph{TAQ} or \emph{OHLC} data, defined as the difference of log
 #'   prices.  Multi-period returns can be calculated by setting the \code{lag}
 #'   parameter to values greater than \code{1} (the default).
@@ -206,7 +206,7 @@ remove_jumps <- function(oh_lc) {
 #'   units of returns per second.  If the time index is in days, then the
 #'   returns are equal to the returns per day.
 #'
-#'   The function \code{run_returns()} identifies the \code{x_ts} time series as
+#'   The function \code{ohlc_returns()} identifies the \code{x_ts} time series as
 #'   \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
 #'   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
 #'   prices, but can also difference other prices depending on the value of
@@ -214,13 +214,13 @@ remove_jumps <- function(oh_lc) {
 #'
 #' @examples
 #' # Calculate secondly returns from TAQ data
-#' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY_TAQ)
+#' re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY_TAQ)
 #' # Calculate close to close returns
-#' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY)
+#' re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY)
 #' # Calculate open to open returns
-#' re_turns <- HighFreq::run_returns(x_ts=HighFreq::SPY, col_umn=1)
+#' re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY, col_umn=1)
 
-run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
+ohlc_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
   # Return NULL if no data
   if (is.null(x_ts))  return(NULL)
   # Calculate mid prices
@@ -235,7 +235,7 @@ run_returns <- function(x_ts, lagg=1, col_umn=4, scal_e=TRUE) {
   re_turns[1:lagg, ] <- 0
   # Colnames(re_turns) <- paste0(rutils::get_name(colnames(x_ts)[1]), ".returns")
   re_turns
-}  # end run_returns
+}  # end ohlc_returns
 
 
 
@@ -690,7 +690,7 @@ save_taq <- function(sym_bol,
 #'
 #' @details The function \code{save_rets} loads multiple days of \emph{TAQ}
 #'   data, then scrubs, aggregates, and rbinds them into a \emph{OHLC} time
-#'   series.  It then calculates returns using function \code{run_returns()}, and
+#'   series.  It then calculates returns using function \code{ohlc_returns()}, and
 #'   stores them in a variable named \sQuote{\code{symbol.rets}}, and saves them
 #'   to a file called \sQuote{\code{symbol.rets.RData}}.
 #'   The \emph{TAQ} data files are assumed to be stored in separate directories
@@ -734,7 +734,7 @@ save_rets <- function(sym_bol,
                       tzone=tzone)
 
 # Calculate returns
-  oh_lc <- lapply(oh_lc, run_returns)
+  oh_lc <- lapply(oh_lc, ohlc_returns)
 
 # Recursively "rbind" the list into a single xts
   oh_lc <- rutils::do_call_rbind(oh_lc)
@@ -767,7 +767,7 @@ save_rets <- function(sym_bol,
 #'
 #' @details The function \code{save_rets_ohlc()} loads \emph{OHLC} time series
 #'   data from a single file.  It then calculates returns using function
-#'   \code{run_returns()}, and stores them in a variable named
+#'   \code{ohlc_returns()}, and stores them in a variable named
 #'   \sQuote{\code{symbol.rets}}, and saves them to a file called
 #'   \sQuote{\code{symbol.rets.RData}}.
 #'
@@ -786,7 +786,7 @@ save_rets_ohlc <- function(sym_bol,
   sym_bol <- load(file_name)
 
 # Calculate returns
-  da_ta <- run_returns(get(sym_bol))
+  da_ta <- ohlc_returns(get(sym_bol))
 
 # Copy the xts data to a variable with the name 'sym_bol'
   sym_bol_rets <- paste(sym_bol, "rets", sep=".")
@@ -902,7 +902,7 @@ calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{oh_lc}.
 #'
-#' @details The function \code{run_variance()} calculates a time series of point
+#' @details The function \code{ohlc_variance()} calculates a time series of point
 #'   variance estimates of percentage returns, from \emph{OHLC} prices, without
 #'   averaging them over time. For example, the method \code{"close"} simply
 #'   calculates the squares of the differences of the log \emph{Close} prices.
@@ -947,7 +947,7 @@ calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
 #'   \emph{POSIXct} format, so that its internal value is equal to the number of
 #'   seconds that have elapsed since the \emph{epoch}.
 #'
-#'   The function \code{run_variance()} performs similar calculations to the
+#'   The function \code{ohlc_variance()} performs similar calculations to the
 #'   function \code{volatility()} from package
 #'   \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR}, but it
 #'   assumes zero drift, and doesn't calculate a running sum using
@@ -958,13 +958,13 @@ calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
 #' # Create minutely OHLC time series of random prices
 #' oh_lc <- HighFreq::random_ohlc()
 #' # Calculate variance estimates for oh_lc
-#' var_running <- HighFreq::run_variance(oh_lc)
+#' var_running <- HighFreq::ohlc_variance(oh_lc)
 #' # Calculate variance estimates for SPY
-#' var_running <- HighFreq::run_variance(HighFreq::SPY, method="yang_zhang")
+#' var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="yang_zhang")
 #' # Calculate SPY variance without overnight jumps
-#' var_running <- HighFreq::run_variance(HighFreq::SPY, method="rogers_satchell")
+#' var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="rogers_satchell")
 
-run_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
+ohlc_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
   vari_ance <- switch(method,
@@ -988,7 +988,7 @@ run_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
   vari_ance <- rutils::na_locf(vari_ance)
   # Colnames(vari_ance) <- paste0(sym_bol, ".Variance")
   vari_ance
-}  # end run_variance
+}  # end ohlc_variance
 
 
 
@@ -1005,7 +1005,7 @@ run_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
 #'
 #' @return A time series of point skew estimates.
 #'
-#' @details The function \code{run_skew()} calculates a time series of skew
+#' @details The function \code{ohlc_skew()} calculates a time series of skew
 #'   estimates from \emph{OHLC} prices, one for each row of \emph{OHLC} data.
 #'   The skew estimates are expressed in the time scale of the index of the
 #'   \emph{OHLC} time series.
@@ -1020,9 +1020,9 @@ run_variance <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
 #'
 #' @examples
 #' # Calculate time series of skew estimates for SPY
-#' sk_ew <- HighFreq::run_skew(HighFreq::SPY)
+#' sk_ew <- HighFreq::ohlc_skew(HighFreq::SPY)
 
-run_skew <- function(oh_lc, method="rogers_satchell") {
+ohlc_skew <- function(oh_lc, method="rogers_satchell") {
   sym_bol <- rutils::get_name(colnames(oh_lc)[1])
   # oh_lc <- log(oh_lc[, 1:4])
   sk_ew <- switch(method,
@@ -1047,7 +1047,7 @@ run_skew <- function(oh_lc, method="rogers_satchell") {
   sk_ew <- rutils::na_locf(sk_ew)
   # Colnames(sk_ew) <- paste0(sym_bol, ".Skew")
   sk_ew
-}  # end run_skew
+}  # end ohlc_skew
 
 
 
@@ -1065,7 +1065,7 @@ run_skew <- function(oh_lc, method="rogers_satchell") {
 #' @return An \emph{xts} time series with the same number of rows as the
 #'   argument \code{oh_lc}.
 #'
-#' @details The function \code{run_sharpe()} calculates Sharpe-like statistics
+#' @details The function \code{ohlc_sharpe()} calculates Sharpe-like statistics
 #'   for each row of a \emph{OHLC} time series.
 #'   The Sharpe-like statistic is defined as the ratio of the difference between
 #'   \emph{Close} minus \emph{Open} prices divided by the difference between
@@ -1078,9 +1078,9 @@ run_skew <- function(oh_lc, method="rogers_satchell") {
 #'
 #' @examples
 #' # Calculate time series of running Sharpe ratios for SPY
-#' sharpe_running <- run_sharpe(HighFreq::SPY)
+#' sharpe_running <- ohlc_sharpe(HighFreq::SPY)
 
-run_sharpe <- function(oh_lc, method="close") {
+ohlc_sharpe <- function(oh_lc, method="close") {
   sharpe_ratio <- switch(method,
                    "close"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])},
                    "method2"={(oh_lc[, 4]-oh_lc[, 1])/(oh_lc[, 2]-oh_lc[, 3])}
@@ -1088,7 +1088,7 @@ run_sharpe <- function(oh_lc, method="close") {
   sharpe_ratio <- ifelse(oh_lc[, 2]==oh_lc[, 3], 0, sharpe_ratio)
   # Colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(oh_lc)[1]), ".Sharpe")
   sharpe_ratio
-}  # end run_sharpe
+}  # end ohlc_sharpe
 
 
 
@@ -1128,11 +1128,11 @@ run_sharpe <- function(oh_lc, method="close") {
 #'
 #' @examples
 #' # Calculate weighted average variance for SPY (single number)
-#' vari_ance <- agg_stats_r(oh_lc=HighFreq::SPY, calc_bars="run_variance")
+#' vari_ance <- agg_stats_r(oh_lc=HighFreq::SPY, calc_bars="ohlc_variance")
 #' # Calculate time series of daily skew estimates for SPY
-#' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="run_skew")
+#' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
 
-agg_stats_r <- function(oh_lc, calc_bars="run_variance", weight_ed=TRUE, ...) {
+agg_stats_r <- function(oh_lc, calc_bars="ohlc_variance", weight_ed=TRUE, ...) {
   
 # Match "calc_bars" with moment function
   calc_bars <- match.fun(calc_bars)
@@ -1186,7 +1186,7 @@ agg_stats_r <- function(oh_lc, calc_bars="run_variance", weight_ed=TRUE, ...) {
 #' bg="white", lty=c(1, 1), lwd=c(2, 2),
 #' col=c("black", "red"), bty="n")
 #' # Calculate running returns
-#' returns_running <- run_returns(x_ts=HighFreq::SPY)
+#' returns_running <- ohlc_returns(x_ts=HighFreq::SPY)
 #' # Calculate the rolling volume-weighted average returns
 #' roll_vwap(oh_lc=HighFreq::SPY, close=returns_running, look_back=11)
 
@@ -1239,12 +1239,12 @@ roll_vwap <- function(oh_lc, close=oh_lc[, 4, drop=FALSE], look_back) {
 #' @examples
 #' # Calculate time series of rolling variance and skew estimates
 #' var_rolling <- roll_stats(oh_lc=HighFreq::SPY, look_back=21)
-#' skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="run_skew", look_back=21)
+#' skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
 #' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 #' skew_rolling[1, ] <- 0
 #' skew_rolling <- rutils::na_locf(skew_rolling)
 
-roll_stats <- function(oh_lc, calc_stats="run_variance", look_back=11, weight_ed=TRUE, ...) {
+roll_stats <- function(oh_lc, calc_stats="ohlc_variance", look_back=11, weight_ed=TRUE, ...) {
   
 # Match "calc_stats" with moment function
   calc_stats <- match.fun(calc_stats)
@@ -1382,7 +1382,7 @@ calc_var_ohlc_r <- function(oh_lc, method="yang_zhang", scal_e=TRUE) {
 #' sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
 
 roll_sharpe <- function(oh_lc, look_back=11) {
-  re_turns <- run_returns(oh_lc, lag=look_back, scal_e=FALSE)
+  re_turns <- ohlc_returns(oh_lc, lag=look_back, scal_e=FALSE)
   var_rolling <- sqrt(HighFreq::roll_var_ohlc(oh_lc, look_back=look_back, scal_e=FALSE))
   sharpe_rolling <- ifelse(var_rolling==0,
                            1.0,
@@ -1716,7 +1716,7 @@ roll_backtest <- function(x_ts,
 #'
 #' @examples
 #' # Calculate running variance of each minutely OHLC bar of data
-#' x_ts <- run_variance(HighFreq::SPY)
+#' x_ts <- ohlc_variance(HighFreq::SPY)
 #' # Remove overnight variance spikes at "09:31"
 #' in_dex <- format(index(x_ts), "%H:%M")
 #' x_ts <- x_ts[!in_dex=="09:31", ]

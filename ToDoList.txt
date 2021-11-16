@@ -80,6 +80,32 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Rename functions run_skew() to ohlc_skew(), run_returns() to ohlc_returns(), run_sharpe() to ohlc_sharpe() and run_variance() to ohlc_variance()
+
++ [x] Update the functions run_var() and run_covar() - subtract the means from returns
+
++ [x] Create function run_var_ohlc() to calculate the running OHLC variance using running formula - adapt from ohlc_variance()
+
++ [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
+
++ [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
+Rename run_var() to roll_var_garch() ?
+
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
+
++ [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
+Worker agg_ohlc()
+
++ [x] Create function run_reg() - adapt from run_zscores()
+
++ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
+Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
+Adapt from run_covar()
+
++ [ ] Deprecate run_zscores() ?
+
++ [ ] Create function run_sharpe()
+
 + [ ] Fix scaling in calc_weights() ?
 
 + [ ] Explain why roll_wsum() is slower than filter()
@@ -94,11 +120,6 @@ Therefore 1-second bar returns carry almost no information.
 
 + [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
 This avoids calling calc_var() in loop.
-
-+ [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
-
-+ [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
-Rename run_var() to roll_var_garch() ?
 
 + [ ] Create function sim_df() to simulate a Dickey-Fuller process
 
@@ -143,11 +164,6 @@ Calculate rolling variance efficiently (used by package fromo): https://www.john
 
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
-
-+ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
-
-+ [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
-Worker agg_ohlc()
 
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2()
 
@@ -555,9 +571,9 @@ It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 
 + [x] Rename argument t_series to se_ries
 
-+ [x] Create function roll_sum() for calculating a simple rolling sum over the columns of a matrix, without weighting or end points
-
 + [x] Rename roll_sum() to roll_wsum()
+
++ [x] Create function roll_sum() for calculating a simple rolling sum over the columns of a matrix, without weighting or end points
 
 + [x] Modify functions back_test() and calc_weights(): rename argument typ_e to model_type
 

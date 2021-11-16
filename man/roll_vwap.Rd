@@ -40,7 +40,7 @@ legend("top", legend=c("SPY prices", "VWAP prices"),
 bg="white", lty=c(1, 1), lwd=c(2, 2),
 col=c("black", "red"), bty="n")
 # Calculate running returns
-returns_running <- run_returns(x_ts=HighFreq::SPY)
+returns_running <- ohlc_returns(x_ts=HighFreq::SPY)
 # Calculate the rolling volume-weighted average returns
 roll_vwap(oh_lc=HighFreq::SPY, close=returns_running, look_back=11)
 }

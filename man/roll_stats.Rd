@@ -7,7 +7,7 @@ calculate a rolling mean over the statistics.}
 \usage{
 roll_stats(
   oh_lc,
-  calc_stats = "run_variance",
+  calc_stats = "ohlc_variance",
   look_back = 11,
   weight_ed = TRUE,
   ...
@@ -49,7 +49,7 @@ The function \code{roll_stats()} calculates a vector of statistics
 \examples{
 # Calculate time series of rolling variance and skew estimates
 var_rolling <- roll_stats(oh_lc=HighFreq::SPY, look_back=21)
-skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="run_skew", look_back=21)
+skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)

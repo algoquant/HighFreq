@@ -309,6 +309,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_var_ohlc
+arma::mat run_var_ohlc(const arma::mat& ohlc, double lambda);
+RcppExport SEXP _HighFreq_run_var_ohlc(SEXP ohlcSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type ohlc(ohlcSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_var_ohlc(ohlc, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_covar
 arma::mat run_covar(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_covar(SEXP tseriesSEXP, SEXP lambdaSEXP) {
@@ -318,6 +330,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(run_covar(tseries, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// run_reg
+arma::mat run_reg(const arma::mat& response, const arma::mat& predictor, double lambda, std::string method);
+RcppExport SEXP _HighFreq_run_reg(SEXP responseSEXP, SEXP predictorSEXP, SEXP lambdaSEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type predictor(predictorSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_reg(response, predictor, lambda, method));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -826,7 +852,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_run_max", (DL_FUNC) &_HighFreq_run_max, 2},
     {"_HighFreq_run_min", (DL_FUNC) &_HighFreq_run_min, 2},
     {"_HighFreq_run_var", (DL_FUNC) &_HighFreq_run_var, 2},
+    {"_HighFreq_run_var_ohlc", (DL_FUNC) &_HighFreq_run_var_ohlc, 2},
     {"_HighFreq_run_covar", (DL_FUNC) &_HighFreq_run_covar, 2},
+    {"_HighFreq_run_reg", (DL_FUNC) &_HighFreq_run_reg, 4},
     {"_HighFreq_run_zscores", (DL_FUNC) &_HighFreq_run_zscores, 4},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_var_vec", (DL_FUNC) &_HighFreq_calc_var_vec, 1},

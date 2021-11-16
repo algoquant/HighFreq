@@ -8,7 +8,7 @@ functions.}
 calc_weights(
   returns,
   method = "rank_sharpe",
-  eigen_thresh = 0.001,
+  eigen_thresh = 1e-05,
   eigen_max = 0L,
   conf_lev = 0.1,
   alpha = 0,
@@ -26,7 +26,7 @@ calculating the weights (see Details) (the default is \code{method =
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{returns} matrix (the default is \code{0.001}).}
+\code{returns} matrix (the default is \code{1e-5}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
 values used for calculating the shrinkage inverse of the \code{returns}

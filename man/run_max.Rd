@@ -9,7 +9,8 @@ run_max(tseries, lambda)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor.}
+\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
+estimates.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument

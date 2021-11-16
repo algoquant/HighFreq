@@ -5,7 +5,7 @@
 \title{Calculate the aggregation (weighted average) of a statistical estimator over
 a \emph{OHLC} time series using \code{R} code.}
 \usage{
-agg_stats_r(oh_lc, calc_bars = "run_variance", weight_ed = TRUE, ...)
+agg_stats_r(oh_lc, calc_bars = "ohlc_variance", weight_ed = TRUE, ...)
 }
 \arguments{
 \item{...}{additional parameters to the function \code{calc_bars}.}
@@ -44,7 +44,7 @@ The function \code{agg_stats_r()} calculates a single number
 }
 \examples{
 # Calculate weighted average variance for SPY (single number)
-vari_ance <- agg_stats_r(oh_lc=HighFreq::SPY, calc_bars="run_variance")
+vari_ance <- agg_stats_r(oh_lc=HighFreq::SPY, calc_bars="ohlc_variance")
 # Calculate time series of daily skew estimates for SPY
-skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="run_skew")
+skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
 }
