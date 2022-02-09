@@ -9,9 +9,9 @@ calc_var_ohlc_ag(
   ohlc,
   step = 1L,
   method = "yang_zhang",
-  lag_close = 0L,
+  close_lag = 0L,
   scale = TRUE,
-  in_dex = 0L
+  index = 0L
 )
 }
 \arguments{
@@ -32,16 +32,16 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \code{method = "yang_zhang"}.)}
 
-\item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
+\item{\code{close_lag}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{lag_close = 0}).}
+default is \code{close_lag = 0}).}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
 \code{scale = TRUE}).}
 
-\item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument (the default is \code{in_dex = 0}).}
+\item{\code{index}}{A \emph{vector} with the time index of the \emph{time
+series}.  This is an optional argument (the default is \code{index = 0}).}
 }
 \value{
 The variance of aggregated \emph{OHLC} prices.

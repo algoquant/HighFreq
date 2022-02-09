@@ -61,6 +61,11 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
   same dimensions as the input argument \code{predictor}.
 
+  The above recursive formula is convenient for processing live streaming
+  data because it doesn't require maintaining a buffer of past data.
+  The formula is equivalent to a convolution with exponentially decaying
+  weights, but it's faster to calculate.
+
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -71,11 +76,6 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   past values have a smaller weight, and the running \emph{z-score} values
   have a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
-
-  The above recursive formula is convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster to calculate.
 
   The \emph{residuals} may be scaled by their volatilities. The default is
   \code{method = "none"} - no scaling.

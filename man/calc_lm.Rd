@@ -17,7 +17,7 @@ data.}
 \value{
 A named list with three elements: a \emph{matrix} of coefficients
   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
-  (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+  (named \emph{"zscore"}), and a \emph{vector} with the R-squared and
   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
   coefficients named \emph{"coefficients"} contains the alpha and beta
   coefficients, and their \emph{t-values} and \emph{p-values}.

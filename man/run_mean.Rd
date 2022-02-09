@@ -2,48 +2,66 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_mean}
 \alias{run_mean}
-\title{Calculate the rolling mean of streaming \emph{time series} data.}
+\title{Calculate the running weighted means of streaming \emph{time series} data.}
 \usage{
-run_mean(tseries, lambda)
+run_mean(tseries, lambda, weights = 0L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
 estimates.}
+
+\item{\code{weights}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the rolling mean of streaming \emph{time series} data.
+Calculate the running weighted means of streaming \emph{time series} data.
 }
 \details{
-The function \code{run_mean()} calculates the rolling mean of streaming
-  \emph{time series} data by recursively weighing present and past values
-  using the decay factor \eqn{\lambda}:
+The function \code{run_mean()} calculates the running weighted means of
+  the streaming \emph{time series} data \eqn{p_t} by recursively weighing
+  present and past values using the decay factor \eqn{\lambda}:
   \deqn{
-    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+    \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
   }
-  Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-  streaming data.
+  \deqn{
+    \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
+  }
+  Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
+  weights, \eqn{\mu^w_t} are the running mean weights, and \eqn{\mu^p_t} are
+  the running mean products of the data and the weights. 
+  
+  The running mean weighted value \eqn{\mu_t} is equal to the ratio of the
+  data and weights products, divided by the mean weights:
+  \deqn{
+    \mu_t = \frac{\mu^p_t}{\mu^w_t}
+  }
 
-  The value of the decay factor \eqn{\lambda} should be in the range between
-  \code{0} and \code{1}.  
-  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the rolling mean values have a stronger
-  dependence on past values.  This is equivalent to a long look-back
-  interval.
-  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the rolling mean values have a
-  weaker dependence on past values.  This is equivalent to a short look-back
-  interval.
-
+  If the \code{weights} argument is omitted, then the function
+  \code{run_mean()} simply calculates the running means of \eqn{p_t}:
+  \deqn{
+    \mu_t = (1-\lambda) p_t + \lambda \mu^p_{t-1}
+  }
+  
   The above recursive formula is convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
+  
+  The value of the decay factor \eqn{\lambda} should be in the range between
+  \code{0} and \code{1}.  
+  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+  values have a greater weight, and the running mean values have a stronger
+  dependence on past values.  This is equivalent to a long look-back
+  interval.
+  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+  past values have a smaller weight, and the running mean values have a
+  weaker dependence on past values.  This is equivalent to a short look-back
+  interval.
 
   The function \code{run_mean()} performs the same calculation as the
   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
@@ -55,21 +73,34 @@ The function \code{run_mean()} calculates the rolling mean of streaming
 \examples{
 \dontrun{
 # Calculate historical prices
-price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-# Calculate the rolling means
-lamb_da <- 0.9
+oh_lc <- rutils::etf_env$VTI
+price_s <- quantmod::Cl(oh_lc)
+# Calculate the running means
+lamb_da <- 0.95
 means <- HighFreq::run_mean(price_s, lambda=lamb_da)
-# Calculate rolling means using R code
+# Calculate running means using R code
 filter_ed <- (1-lamb_da)*filter(price_s, 
   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
   method="recursive")
-all.equal(means, unclass(filter_ed), check.attributes=FALSE)
+all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
+
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+  
+# Create weights equal to the trading volumes
+weight_s <- quantmod::Vo(oh_lc)
+# Calculate the running weighted means
+meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
+# dygraph plot of running weighted means
+da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
+colnames(da_ta) <- c("means running", "means weighted")
+dygraphs::dygraph(da_ta, main="Running Means") \%>\%
+  dyOptions(colors=c("blue", "red"), strokeWidth=1) \%>\%
+  dyLegend(show="always", width=500)
 }
 
 }

@@ -783,22 +783,23 @@ roll_ohlc <- function(tseries, endp) {
 }
 
 #' Calculate the rolling sums over a single-column \emph{time series} or a
-#' \emph{column vector} using \emph{Rcpp}.
+#' single-column \emph{matrix} using \emph{Rcpp}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{column
-#'   vector} (a single-column matrix).
+#' @param \code{tseries} A single-column \emph{time series} or a single-column
+#'   \emph{matrix}.
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of elements of data used for calculating the sum.
 #'
-#' @return A \emph{column vector} of the same length as the argument
+#' @return A single-column \emph{matrix} of the same length as the argument
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{roll_vec()} calculates a \emph{column vector} of
-#'   rolling sums, over a \emph{column vector} of data, using fast \emph{Rcpp}
-#'   \code{C++} code.  The function \code{roll_vec()} is several times faster
-#'   than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#'   The function \code{roll_vec()} calculates a single-column \emph{matrix} of
+#'   rolling sums, over a single-column \emph{matrix} of data, using fast
+#'   \emph{Rcpp} \code{C++} code.  The function \code{roll_vec()} is several
+#'   times faster than \code{rutils::roll_sum()} which uses vectorized \code{R}
+#'   code.
 #'
 #' @examples
 #' \dontrun{
@@ -824,23 +825,24 @@ roll_vec <- function(tseries, look_back) {
 }
 
 #' Calculate the rolling weighted sums over a single-column \emph{time series}
-#' or a \emph{column vector} using \code{RcppArmadillo}.
+#' or a single-column \emph{matrix} using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{column
-#'   vector} (a single-column matrix).
+#' @param \code{tseries} A single-column \emph{time series} or a single-column
+#'   \emph{matrix}.
 #' 
-#' @param \code{weights} A \emph{column vector} of weights.
+#' @param \code{weights} A single-column \emph{matrix} of weights.
 #'
-#' @return A \emph{column vector} of the same length as the argument
+#' @return A single-column \emph{matrix} of the same length as the argument
 #'   \code{tseries}.
 #'
 #' @details
 #'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
-#'   \emph{column vector} over its past values (a convolution with the \emph{column vector}
-#'   of weights), using \code{RcppArmadillo}. It performs a similar calculation
-#'   as the standard \code{R} function \cr\code{stats::filter(x=series,
-#'   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
-#'   times faster, and it doesn't produce any \code{NA} values.
+#'   single-column \emph{matrix} over its past values (a convolution with the
+#'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
+#'   performs a similar calculation as the standard \code{R} function
+#'   \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+#'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+#'   \code{NA} values.
 #'   
 #' @examples
 #' \dontrun{
@@ -877,21 +879,21 @@ roll_vecw <- function(tseries, weights) {
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
-#' with a \emph{column vector} of weights.
+#' with a single-column \emph{matrix} of weights.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #' 
-#' @param \code{weights} A \emph{column vector} of weights.
+#' @param \code{weights} A single-column \emph{matrix} of weights.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input
 #'   argument \code{tseries}.
 #'
 #' @details
 #'   The function \code{roll_conv()} calculates the convolutions of the
-#'   \emph{matrix} columns with a \emph{column vector} of weights.  It performs
-#'   a loop over the \emph{matrix} rows and multiplies the past (higher) values
-#'   by the weights.  It calculates the rolling weighted sums of the past
-#'   values.
+#'   \emph{matrix} columns with a single-column \emph{matrix} of weights.  It
+#'   performs a loop over the \emph{matrix} rows and multiplies the past
+#'   (higher) values by the weights.  It calculates the rolling weighted sums
+#'   of the past values.
 #'   
 #'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 #'   \code{arma::conv2()}. It performs a similar calculation to the standard
@@ -1042,8 +1044,8 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
 #'   calculating the end points (the default is \code{stub = NULL}).
 #' 
-#' @param \code{weights} A \emph{column vector} of weights (the default is
-#'   \code{weights = NULL}).
+#' @param \code{weights} A single-column \emph{matrix} of weights (the default
+#'   is \code{weights = NULL}).
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
@@ -1146,41 +1148,59 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
     .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', tseries, endp, look_back, stub, weights)
 }
 
-#' Calculate the rolling mean of streaming \emph{time series} data.
+#' Calculate the running weighted means of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lambda} A \emph{numeric} decay factor to multiply past
 #'   estimates.
 #'   
+#' @param \code{weights} A single-column \emph{matrix} of weights.
+#'
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{run_mean()} calculates the rolling mean of streaming
-#'   \emph{time series} data by recursively weighing present and past values
-#'   using the decay factor \eqn{\lambda}:
+#'   The function \code{run_mean()} calculates the running weighted means of
+#'   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
+#'   present and past values using the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+#'     \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
 #'   }
-#'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-#'   streaming data.
+#'   \deqn{
+#'     \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
+#'   }
+#'   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
+#'   weights, \eqn{\mu^w_t} are the running mean weights, and \eqn{\mu^p_t} are
+#'   the running mean products of the data and the weights. 
+#'   
+#'   The running mean weighted value \eqn{\mu_t} is equal to the ratio of the
+#'   data and weights products, divided by the mean weights:
+#'   \deqn{
+#'     \mu_t = \frac{\mu^p_t}{\mu^w_t}
+#'   }
 #' 
-#'   The value of the decay factor \eqn{\lambda} should be in the range between
-#'   \code{0} and \code{1}.  
-#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-#'   values have a greater weight, and the rolling mean values have a stronger
-#'   dependence on past values.  This is equivalent to a long look-back
-#'   interval.
-#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-#'   past values have a smaller weight, and the rolling mean values have a
-#'   weaker dependence on past values.  This is equivalent to a short look-back
-#'   interval.
-#' 
+#'   If the \code{weights} argument is omitted, then the function
+#'   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
+#'   \deqn{
+#'     \mu_t = (1-\lambda) p_t + \lambda \mu^p_{t-1}
+#'   }
+#'   
 #'   The above recursive formula is convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster.
+#'   
+#'   The value of the decay factor \eqn{\lambda} should be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the running mean values have a stronger
+#'   dependence on past values.  This is equivalent to a long look-back
+#'   interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the running mean values have a
+#'   weaker dependence on past values.  This is equivalent to a short look-back
+#'   interval.
 #' 
 #'   The function \code{run_mean()} performs the same calculation as the
 #'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
@@ -1192,29 +1212,42 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' @examples
 #' \dontrun{
 #' # Calculate historical prices
-#' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-#' # Calculate the rolling means
-#' lamb_da <- 0.9
+#' oh_lc <- rutils::etf_env$VTI
+#' price_s <- quantmod::Cl(oh_lc)
+#' # Calculate the running means
+#' lamb_da <- 0.95
 #' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
-#' # Calculate rolling means using R code
+#' # Calculate running means using R code
 #' filter_ed <- (1-lamb_da)*filter(price_s, 
 #'   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
 #'   method="recursive")
-#' all.equal(means, unclass(filter_ed), check.attributes=FALSE)
+#' all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
+#' 
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
 #'   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#'   
+#' # Create weights equal to the trading volumes
+#' weight_s <- quantmod::Vo(oh_lc)
+#' # Calculate the running weighted means
+#' meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
+#' # dygraph plot of running weighted means
+#' da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
+#' colnames(da_ta) <- c("means running", "means weighted")
+#' dygraphs::dygraph(da_ta, main="Running Means") %>%
+#'   dyOptions(colors=c("blue", "red"), strokeWidth=1) %>%
+#'   dyLegend(show="always", width=500)
 #' }
 #' 
 #' @export
-run_mean <- function(tseries, lambda) {
-    .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda)
+run_mean <- function(tseries, lambda, weights = 0L) {
+    .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda, weights)
 }
 
-#' Calculate the rolling maximum of streaming \emph{time series} data.
+#' Calculate the running maximum of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1225,18 +1258,18 @@ run_mean <- function(tseries, lambda) {
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{run_max()} calculates the rolling maximum of streaming
+#'   The function \code{run_max()} calculates the running maximum of streaming
 #'   \emph{time series} data by recursively weighing present and past values
 #'   using the decay factor \eqn{\lambda}.
 #'
-#'   It first calculates the rolling mean of streaming data:
+#'   It first calculates the running mean of streaming data:
 #'   \deqn{
 #'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 #'   }
 #'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 #'   streaming data.
 #'
-#'   It then calculates the rolling maximums of streaming data, \eqn{p^{max}_t}:
+#'   It then calculates the running maximums of streaming data, \eqn{p^{max}_t}:
 #'   \deqn{
 #'     p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
 #'   }
@@ -1244,19 +1277,19 @@ run_mean <- function(tseries, lambda) {
 #'   The second term pulls the maximum value down to the mean value, allowing
 #'   it to gradually "forget" the maximum value from the more distant past.
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-#'   values have a greater weight, and the rolling maximum values have a stronger
+#'   values have a greater weight, and the running maximum values have a stronger
 #'   dependence on past values.  This is equivalent to a long look-back
 #'   interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-#'   past values have a smaller weight, and the rolling maximum values have a
+#'   past values have a smaller weight, and the running maximum values have a
 #'   weaker dependence on past values.  This is equivalent to a short look-back
 #'   interval.
-#' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_max()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1265,14 +1298,14 @@ run_mean <- function(tseries, lambda) {
 #' \dontrun{
 #' # Calculate historical prices
 #' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-#' # Calculate the rolling maximums
+#' # Calculate the running maximums
 #' lamb_da <- 0.9
 #' maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
-#' # Plot dygraph of VTI prices and rolling maximums
+#' # Plot dygraph of VTI prices and running maximums
 #' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
 #' colnames(da_ta) <- c("prices", "max")
 #' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Maximums") %>%
+#' dygraphs::dygraph(da_ta, main="VTI Prices and Running Maximums") %>%
 #'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
 #'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 #' }
@@ -1282,7 +1315,7 @@ run_max <- function(tseries, lambda) {
     .Call('_HighFreq_run_max', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
-#' Calculate the rolling minimum of streaming \emph{time series} data.
+#' Calculate the running minimum of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1293,18 +1326,18 @@ run_max <- function(tseries, lambda) {
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{run_min()} calculates the rolling minimum of streaming
+#'   The function \code{run_min()} calculates the running minimum of streaming
 #'   \emph{time series} data by recursively weighing present and past values
 #'   using the decay factor \eqn{\lambda}.
 #'
-#'   It first calculates the rolling mean of streaming data:
+#'   It first calculates the running mean of streaming data:
 #'   \deqn{
 #'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 #'   }
 #'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 #'   streaming data.
 #'
-#'   It then calculates the rolling minimums of streaming data, \eqn{p^{min}_t}:
+#'   It then calculates the running minimums of streaming data, \eqn{p^{min}_t}:
 #'   \deqn{
 #'     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
 #'   }
@@ -1312,19 +1345,19 @@ run_max <- function(tseries, lambda) {
 #'   The second term pulls the minimum value up to the mean value, allowing
 #'   it to gradually "forget" the minimum value from the more distant past.
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#' 
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-#'   values have a greater weight, and the rolling minimum values have a stronger
+#'   values have a greater weight, and the running minimum values have a stronger
 #'   dependence on past values.  This is equivalent to a long look-back
 #'   interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-#'   past values have a smaller weight, and the rolling minimum values have a
+#'   past values have a smaller weight, and the running minimum values have a
 #'   weaker dependence on past values.  This is equivalent to a short look-back
 #'   interval.
-#' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_min()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1333,14 +1366,14 @@ run_max <- function(tseries, lambda) {
 #' \dontrun{
 #' # Calculate historical prices
 #' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-#' # Calculate the rolling minimums
+#' # Calculate the running minimums
 #' lamb_da <- 0.9
 #' mins <- HighFreq::run_min(price_s, lambda=lamb_da)
-#' # Plot dygraph of VTI prices and rolling minimums
+#' # Plot dygraph of VTI prices and running minimums
 #' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
 #' colnames(da_ta) <- c("prices", "min")
 #' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Minimums") %>%
+#' dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") %>%
 #'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
 #'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 #' }
@@ -1375,6 +1408,11 @@ run_min <- function(tseries, lambda) {
 #'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 #'   \eqn{r_t} are the streaming returns data.
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -1385,11 +1423,6 @@ run_min <- function(tseries, lambda) {
 #'   past values have a smaller weight, and the running variance values have a
 #'   weaker dependence on past values.  This is equivalent to a short look-back
 #'   interval.
-#' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster.
 #' 
 #'   The function \code{run_var()} performs the same calculation as the
 #'   standard \code{R} function\cr\code{stats::filter(x=series,
@@ -1450,6 +1483,11 @@ run_var <- function(tseries, lambda) {
 #'   It recursively weighs the current variance estimate with the past
 #'   estimates \eqn{\sigma^2_{t-1}}, using the decay factor \eqn{\lambda}.
 #'
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#'   
 #'   The function \code{run_var_ohlc()} does not calculate the logarithm of
 #'   the prices.
 #'   So if the argument \code{ohlc} contains dollar prices then
@@ -1519,6 +1557,11 @@ run_var_ohlc <- function(ohlc, lambda) {
 #'   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
 #'   \eqn{\mu^1_t} and \eqn{\mu^2_t} are the means of the returns.
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster.
+#' 
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -1529,11 +1572,6 @@ run_var_ohlc <- function(ohlc, lambda) {
 #'   past values have a smaller weight, and the running covariance values have
 #'   a weaker dependence on past values.  This is equivalent to a short
 #'   look-back interval.
-#' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster.
 #' 
 #'   The function \code{run_covar()} returns three columns of data: the
 #'   covariance and the variances of the two columns of the argument
@@ -1611,6 +1649,11 @@ run_covar <- function(tseries, lambda) {
 #'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
 #'   same dimensions as the input argument \code{predictor}.
 #'
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster to calculate.
+#'
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -1622,11 +1665,6 @@ run_covar <- function(tseries, lambda) {
 #'   have a weaker dependence on past values.  This is equivalent to a short
 #'   look-back interval.
 #' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster to calculate.
-#'
 #'   The \emph{residuals} may be scaled by their volatilities. The default is
 #'   \code{method = "none"} - no scaling.
 #'   If the argument \code{method = "scale"} then the \emph{residuals}
@@ -1736,6 +1774,11 @@ run_reg <- function(response, predictor, lambda, method = "none") {
 #'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
 #'   }
 #' 
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
+#'   The formula is equivalent to a convolution with exponentially decaying
+#'   weights, but it's faster to calculate.
+#' 
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -1746,11 +1789,6 @@ run_reg <- function(response, predictor, lambda, method = "none") {
 #'   past values have a smaller weight, and the running \emph{z-score} values
 #'   have a weaker dependence on past values.  This is equivalent to a short
 #'   look-back interval.
-#' 
-#'   The above recursive formula is convenient for processing live streaming
-#'   data because it doesn't require maintaining a buffer of past data.
-#'   The formula is equivalent to a convolution with exponentially decaying
-#'   weights, but it's faster to calculate.
 #' 
 #'   The function \code{run_zscores()} returns multiple columns of data. 
 #'   If the matrix \code{predictor} has \code{n} columns then \code{run_zscores()}
@@ -2062,16 +2100,16 @@ calc_var_ag <- function(tseries, step = 1L) {
 #'    }
 #'    (The default is the \code{method = "yang_zhang"}.)
 #'    
-#' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+#' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
-#'   default is \code{lag_close = 0}).
+#'   default is \code{close_lag = 0}).
 #'   
 #' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
 #'   \code{scale = TRUE}).
 #'
-#' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+#' @param \code{index} A \emph{vector} with the time index of the \emph{time
+#'   series}.  This is an optional argument (the default is \code{index = 0}).
 #'   
 #' @return A single \emph{numeric} value equal to the variance of the
 #'   \emph{OHLC time series}.
@@ -2107,13 +2145,13 @@ calc_var_ag <- function(tseries, step = 1L) {
 #'   If the number of rows of \code{ohlc} is less than \code{3} then it
 #'   returns zero.
 #'   
-#'   The optional argument \code{in_dex} is the time index of the \emph{time
+#'   The optional argument \code{index} is the time index of the \emph{time
 #'   series} \code{ohlc}. If the time index is in seconds, then the
 #'   differences of the index are equal to the number of seconds in each time
 #'   period.  If the time index is in days, then the differences are equal to
 #'   the number of days in each time period.
 #'   
-#'   The optional argument \code{lag_close} are the lagged \emph{close} prices
+#'   The optional argument \code{close_lag} are the lagged \emph{close} prices
 #'   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
 #'   speeds up the calculation, so it's useful for rolling calculations.
 #'   
@@ -2129,18 +2167,18 @@ calc_var_ag <- function(tseries, step = 1L) {
 #' in_dex <- c(1, diff(xts::.index(oh_lc)))
 #' # Calculate the variance of SPY returns, with scaling of the returns
 #' HighFreq::calc_var_ohlc(oh_lc, 
-#'  method="yang_zhang", scale=TRUE, in_dex=in_dex)
+#'  method="yang_zhang", scale=TRUE, index=in_dex)
 #' # Calculate variance without accounting for overnight jumps
 #' HighFreq::calc_var_ohlc(oh_lc, 
-#'  method="rogers_satchell", scale=TRUE, in_dex=in_dex)
+#'  method="rogers_satchell", scale=TRUE, index=in_dex)
 #' # Calculate the variance without scaling the returns
 #' HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
 #' # Calculate the variance by passing in the lagged close prices
-#' lag_close <- HighFreq::lag_it(oh_lc[, 4])
+#' close_lag <- HighFreq::lag_it(oh_lc[, 4])
 #' all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-#'   HighFreq::calc_var_ohlc(oh_lc, lag_close=lag_close))
+#'   HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
 #' # Compare with HighFreq::calc_var_ohlc_r()
-#' all.equal(HighFreq::calc_var_ohlc(oh_lc, in_dex=in_dex), 
+#' all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
 #'   HighFreq::calc_var_ohlc_r(oh_lc))
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
@@ -2150,8 +2188,8 @@ calc_var_ag <- function(tseries, step = 1L) {
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = TRUE, in_dex = 0L) {
-    .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', ohlc, method, lag_close, scale, in_dex)
+calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
+    .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', ohlc, method, close_lag, scale, index)
 }
 
 #' Calculate the variance of aggregated \emph{OHLC} prices using different
@@ -2174,16 +2212,16 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = T
 #'    }
 #'    (The default is the \code{method = "yang_zhang"}.)
 #'    
-#' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+#' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
-#'   default is \code{lag_close = 0}).
+#'   default is \code{close_lag = 0}).
 #'   
 #' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
 #'   \code{scale = TRUE}).
 #'
-#' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+#' @param \code{index} A \emph{vector} with the time index of the \emph{time
+#'   series}.  This is an optional argument (the default is \code{index = 0}).
 #'   
 #' @return The variance of aggregated \emph{OHLC} prices.
 #'
@@ -2230,8 +2268,8 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", lag_close = 0L, scale = T
 #' }
 #' 
 #' @export
-calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", lag_close = 0L, scale = TRUE, in_dex = 0L) {
-    .Call('_HighFreq_calc_var_ohlc_ag', PACKAGE = 'HighFreq', ohlc, step, method, lag_close, scale, in_dex)
+calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
+    .Call('_HighFreq_calc_var_ohlc_ag', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
@@ -2484,16 +2522,16 @@ calc_hurst <- function(tseries, step = 1L) {
 #'    }
 #'    (The default is the \code{method = "yang_zhang"}.)
 #'    
-#' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+#' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
-#'   default is \code{lag_close = 0}).
+#'   default is \code{close_lag = 0}).
 #'   
 #' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
 #'   \code{scale = TRUE}).
 #'
-#' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+#' @param \code{index} A \emph{vector} with the time index of the \emph{time
+#'   series}.  This is an optional argument (the default is \code{index = 0}).
 #'   
 #' @return The Hurst exponent calculated from the variance ratio of aggregated
 #' \emph{OHLC} prices.
@@ -2530,8 +2568,8 @@ calc_hurst <- function(tseries, step = 1L) {
 #' }
 #' 
 #' @export
-calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", lag_close = 0L, scale = TRUE, in_dex = 0L) {
-    .Call('_HighFreq_calc_hurst_ohlc', PACKAGE = 'HighFreq', ohlc, step, method, lag_close, scale, in_dex)
+calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
+    .Call('_HighFreq_calc_hurst_ohlc', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 
 #' Perform multivariate linear regression using least squares and return a
@@ -2545,7 +2583,7 @@ calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", lag_close = 
 #' 
 #' @return A named list with three elements: a \emph{matrix} of coefficients
 #'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
-#'   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+#'   (named \emph{"zscore"}), and a \emph{vector} with the R-squared and
 #'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
 #'   coefficients named \emph{"coefficients"} contains the alpha and beta
 #'   coefficients, and their \emph{t-values} and \emph{p-values}.
@@ -2596,6 +2634,10 @@ calc_lm <- function(response, predictor) {
 #' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
+#' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+#'   term should be added to the predictor (the default is \code{intercept =
+#'   FALSE}).
+#'
 #' @param \code{method} A \emph{string} specifying the type of the regression
 #'   model the default is \code{method = "least_squares"} - see Details).
 #'   
@@ -2614,32 +2656,21 @@ calc_lm <- function(response, predictor) {
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
 #' 
-#' @return A vector with the regression coefficients, their t-values, and the
+#' @return A single-row matrix with
+#' A vector with the regression coefficients, their t-values, and the
 #'   last residual z-score.
 #'
 #' @details
 #'   The function \code{calc_reg()} performs multivariate regression using
 #'   different methods, and returns a vector of regression coefficients, their
 #'   t-values, and the last residual z-score.
-#' 
-#'   The length of the return vector depends on the number of columns of
-#'   \code{predictor}.
-#'   The number of regression coefficients is equal to the number of columns of
-#'   \code{predictor} plus \code{1}.  The number of t-values is equal to the
-#'   number of coefficients.  And there is only \code{1} z-score.
-#'   So if the number of columns of \code{predictor} is equal to \code{n}, then
-#'   the return vector will have \code{2n+3} elements.
-#' 
-#'   For example, if the predictor matrix has \code{2} columns of data, then
-#'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-#'   regression coefficients (including the intercept coefficient), \code{3}
-#'   corresponding t-values, and \code{1} z-score.
 #'
 #'   If \code{method = "least_squares"} (the default) then it performs the
 #'   standard least squares regression, the same as the function
-#'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
-#'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
-#'   than \code{lm()}.
+#'   \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
+#'   \emph{stats}.
+#'   But it uses \code{RcppArmadillo} \code{C++} code so it's several times
+#'   faster than \code{lm()}.
 #'
 #'   If \code{method = "regular"} then it performs shrinkage regression.  It
 #'   calculates the shrinkage inverse of the \code{predictor} matrix from its
@@ -2649,6 +2680,24 @@ calc_lm <- function(response, predictor) {
 #'   
 #'   If \code{method = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
+#' 
+#'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
+#'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+#'   
+#'   The length of the return vector depends on the number of columns of the
+#'   \code{predictor} matrix (including the intercept column, if it's added).
+#'   The length of the return vector is equal to the number of regression
+#'   coefficients, plus their t-values, plus the z-score.
+#'   The number of regression coefficients is equal to the number of columns of
+#'   the \code{predictor} matrix (including the intercept column, if it's
+#'   added).
+#'   The number of t-values is equal to the number of coefficients.
+#' 
+#'   For example, if the number of columns of the \code{predictor} matrix is
+#'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{calc_reg()}
+#'   returns a vector with \code{2n+3} elements: \code{n+1} regression
+#'   coefficients (including the intercept coefficient), \code{n+1}
+#'   corresponding t-values, and \code{1} z-score.
 #'
 #' @examples
 #' \dontrun{
@@ -2676,8 +2725,8 @@ calc_lm <- function(response, predictor) {
 #' }
 #' 
 #' @export
-calc_reg <- function(response, predictor, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, method, eigen_thresh, eigen_max, conf_lev, alpha)
+calc_reg <- function(response, predictor, intercept = FALSE, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, intercept, method, eigen_thresh, eigen_max, conf_lev, alpha)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -2779,22 +2828,24 @@ roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
-#' interval for a single-column \emph{time series} or a \emph{column vector}, using
-#' \code{RcppArmadillo}.
+#' interval for a single-column \emph{time series} or a single-column
+#' \emph{matrix}, using \code{RcppArmadillo}.
 #'
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{column vector}.
+#' @param \code{tseries} A single-column \emph{time series} or a single-column
+#'   \emph{matrix}.
 #' 
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of \emph{vector} elements used for calculating a single variance
 #'   estimate (the default is \code{look_back = 1}).
 #'
-#' @return A \emph{column vector} with the same number of elements as the input
-#'   argument \code{tseries}.
+#' @return A single-column \emph{matrix} with the same number of elements as
+#'   the input argument \code{tseries}.
 #'
 #' @details
 #'   The function \code{roll_var_vec()} calculates a \emph{vector} of variance
 #'   estimates over a rolling look-back interval for a single-column \emph{time
-#'   series} or a \emph{column vector}, using \code{RcppArmadillo} \code{C++} code.
+#'   series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
+#'   \code{C++} code.
 #'   
 #'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
@@ -2951,8 +3002,8 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'   by the time index, the number of seconds in each period?  (The default is
 #'   \code{scale = TRUE}.)
 #'   
-#' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-#'   series}.  This is an optional argument (the default is \code{in_dex=0}).
+#' @param \code{index} A \emph{vector} with the time index of the \emph{time
+#'   series}.  This is an optional argument (the default is \code{index=0}).
 #'
 #' @return A column \emph{vector} of variance estimates, with the number of
 #'   rows equal to the number of end points.
@@ -3009,7 +3060,7 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #'   time index is in days, then the variance is equal to the variance per day
 #'   squared.
 #'   
-#'   The optional argument \code{in_dex} is the time index of the \emph{time
+#'   The optional argument \code{index} is the time index of the \emph{time
 #'   series} \code{ohlc}. If the time index is in seconds, then the
 #'   differences of the index are equal to the number of seconds in each time
 #'   period.  If the time index is in days, then the differences are equal to
@@ -3029,7 +3080,7 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 #'                               step=1, look_back=21, 
 #'                               method="yang_zhang", 
-#'                               in_dex=in_dex, scale=TRUE)
+#'                               index=in_dex, scale=TRUE)
 #' # Daily OHLC prices
 #' oh_lc <- rutils::etf_env$VTI
 #' in_dex <- c(1, diff(xts::.index(oh_lc)))
@@ -3037,26 +3088,26 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 #'                               step=5, look_back=4, 
 #'                               method="yang_zhang", 
-#'                               in_dex=in_dex, scale=TRUE)
+#'                               index=in_dex, scale=TRUE)
 #' # Same calculation in R
 #' n_rows <- NROW(oh_lc)
-#' lag_close = HighFreq::lag_it(oh_lc[, 4])
+#' close_lag = HighFreq::lag_it(oh_lc[, 4])
 #' end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
 #' start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
 #' n_pts <- NROW(end_p)
 #' var_rollingr <- sapply(2:n_pts, function(it) {
 #'   ran_ge <- start_p[it]:end_p[it]
 #'   sub_ohlc = oh_lc[ran_ge, ]
-#'   sub_close = lag_close[ran_ge]
+#'   sub_close = close_lag[ran_ge]
 #'   sub_index = in_dex[ran_ge]
-#'   HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scale=TRUE, in_dex=sub_index)
+#'   HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 #' })  # end sapply
 #' var_rollingr <- c(0, var_rollingr)
 #' all.equal(drop(var_rolling), var_rollingr)
 #' }
 #' @export
-roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, in_dex = 0L) {
-    .Call('_HighFreq_roll_var_ohlc', PACKAGE = 'HighFreq', ohlc, startp, endp, step, look_back, stub, method, scale, in_dex)
+roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
+    .Call('_HighFreq_roll_var_ohlc', PACKAGE = 'HighFreq', ohlc, startp, endp, step, look_back, stub, method, scale, index)
 }
 
 #' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
@@ -3243,6 +3294,10 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #'   
+#' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+#'   term should be added to the predictor (the default is \code{intercept =
+#'   FALSE}).
+#'
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
@@ -3258,6 +3313,10 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' @param \code{stub} An \emph{integer} value equal to the first end point for
 #'   calculating the end points (the default is \code{stub = 0}).
 #' 
+#' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+#'   term should be added to the predictor (the default is \code{intercept =
+#'   FALSE}).
+#'
 #' @param \code{method} A \emph{string} specifying the type of the regression
 #'   model the default is \code{method = "least_squares"} - see Details).
 #'   
@@ -3276,7 +3335,10 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
 #' 
-#' @return A \emph{matrix} with the same number of rows as \code{predictor}, and a
+#' @return A \emph{matrix} with the regression coefficients, their t-values, and
+#' z-scores, and with the 
+#' same number of rows as \code{predictor}
+#' a
 #'   number of columns equal to \code{2n+3}, where \code{n} is the number of
 #'   columns of \code{predictor}.
 #'
@@ -3289,9 +3351,6 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   each end point it subsets the time series \code{predictor} over a look-back
 #'   interval equal to \code{look_back} number of end points.
 #'   
-#'   It passes the subset time series to the function \code{calc_reg()}, which
-#'   calculates the regression data.
-#'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{predictor}
@@ -3302,6 +3361,27 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   \code{75} day look-back, can be calculated using the parameters
 #'   \code{step = 25} and \code{look_back = 3}.
 #'
+#'   It passes the subset time series to the function \code{calc_reg()}, which
+#'   calculates the regression coefficients, their t-values, and the z-score.
+#'   
+#'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
+#'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+#'   
+#'   The number of columns of the return matrix depends on the number of
+#'   columns of the \code{predictor} matrix (including the intercept column, if
+#'   it's added).
+#'   The number of columns of the return matrix is equal to the number of
+#'   regression coefficients, plus their t-values, plus the z-score column.
+#'   The number of regression coefficients is equal to the number of columns of
+#'   the \code{predictor} matrix (including the intercept column, if it's
+#'   added).
+#'   The number of t-values is equal to the number of coefficients.
+#'   For example, if the number of columns of the \code{predictor} matrix is
+#'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{roll_reg()}
+#'   returns a matrix with \code{2n+3} columns: \code{n+1} regression
+#'   coefficients (including the intercept coefficient), \code{n+1}
+#'   corresponding t-values, and \code{1} z-score column.
+#' 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
@@ -3323,8 +3403,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' }
 #' 
 #' @export
-roll_reg <- function(response, predictor, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, conf_lev, alpha)
+roll_reg <- function(response, predictor, intercept = FALSE, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, conf_lev, alpha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a
@@ -3439,9 +3519,9 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #' z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
 #'   if (ro_w == 1) return(0)
 #'   start_point <- max(1, ro_w-look_back+1)
-#'   sub_response <- res_ponse[start_point:ro_w]
-#'   sub_predictor <- predic_tor[start_point:ro_w, ]
-#'   reg_model <- lm(sub_response ~ sub_predictor)
+#'   responsi <- res_ponse[start_point:ro_w]
+#'   predicti <- predic_tor[start_point:ro_w, ]
+#'   reg_model <- lm(responsi ~ predicti)
 #'   resid_uals <- reg_model$residuals
 #'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
 #' })  # end sapply

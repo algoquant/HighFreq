@@ -3,31 +3,32 @@
 \name{roll_vecw}
 \alias{roll_vecw}
 \title{Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{column vector} using \code{RcppArmadillo}.}
+or a single-column \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
 roll_vecw(tseries, weights)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{column
-vector} (a single-column matrix).}
+\item{\code{tseries}}{A single-column \emph{time series} or a single-column
+\emph{matrix}.}
 
-\item{\code{weights}}{A \emph{column vector} of weights.}
+\item{\code{weights}}{A single-column \emph{matrix} of weights.}
 }
 \value{
-A \emph{column vector} of the same length as the argument
+A single-column \emph{matrix} of the same length as the argument
   \code{tseries}.
 }
 \description{
 Calculate the rolling weighted sums over a single-column \emph{time series}
-or a \emph{column vector} using \code{RcppArmadillo}.
+or a single-column \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_vecw()} calculates the rolling weighted sums of a
-  \emph{column vector} over its past values (a convolution with the \emph{column vector}
-  of weights), using \code{RcppArmadillo}. It performs a similar calculation
-  as the standard \code{R} function \cr\code{stats::filter(x=series,
-  filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
-  times faster, and it doesn't produce any \code{NA} values.
+  single-column \emph{matrix} over its past values (a convolution with the
+  single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
+  performs a similar calculation as the standard \code{R} function
+  \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+  sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+  \code{NA} values.
 }
 \examples{
 \dontrun{

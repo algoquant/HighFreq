@@ -8,9 +8,9 @@ price range estimators.}
 calc_var_ohlc(
   ohlc,
   method = "yang_zhang",
-  lag_close = 0L,
+  close_lag = 0L,
   scale = TRUE,
-  in_dex = 0L
+  index = 0L
 )
 }
 \arguments{
@@ -28,16 +28,16 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \code{method = "yang_zhang"}.)}
 
-\item{\code{lag_close}}{A \emph{vector} with the lagged \emph{close} prices
+\item{\code{close_lag}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{lag_close = 0}).}
+default is \code{close_lag = 0}).}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
 \code{scale = TRUE}).}
 
-\item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument (the default is \code{in_dex = 0}).}
+\item{\code{index}}{A \emph{vector} with the time index of the \emph{time
+series}.  This is an optional argument (the default is \code{index = 0}).}
 }
 \value{
 A single \emph{numeric} value equal to the variance of the
@@ -78,13 +78,13 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   If the number of rows of \code{ohlc} is less than \code{3} then it
   returns zero.
   
-  The optional argument \code{in_dex} is the time index of the \emph{time
+  The optional argument \code{index} is the time index of the \emph{time
   series} \code{ohlc}. If the time index is in seconds, then the
   differences of the index are equal to the number of seconds in each time
   period.  If the time index is in days, then the differences are equal to
   the number of days in each time period.
   
-  The optional argument \code{lag_close} are the lagged \emph{close} prices
+  The optional argument \code{close_lag} are the lagged \emph{close} prices
   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
   speeds up the calculation, so it's useful for rolling calculations.
   
@@ -100,18 +100,18 @@ oh_lc <- log(HighFreq::SPY)
 in_dex <- c(1, diff(xts::.index(oh_lc)))
 # Calculate the variance of SPY returns, with scaling of the returns
 HighFreq::calc_var_ohlc(oh_lc, 
- method="yang_zhang", scale=TRUE, in_dex=in_dex)
+ method="yang_zhang", scale=TRUE, index=in_dex)
 # Calculate variance without accounting for overnight jumps
 HighFreq::calc_var_ohlc(oh_lc, 
- method="rogers_satchell", scale=TRUE, in_dex=in_dex)
+ method="rogers_satchell", scale=TRUE, index=in_dex)
 # Calculate the variance without scaling the returns
 HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
 # Calculate the variance by passing in the lagged close prices
-lag_close <- HighFreq::lag_it(oh_lc[, 4])
+close_lag <- HighFreq::lag_it(oh_lc[, 4])
 all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-  HighFreq::calc_var_ohlc(oh_lc, lag_close=lag_close))
+  HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
 # Compare with HighFreq::calc_var_ohlc_r()
-all.equal(HighFreq::calc_var_ohlc(oh_lc, in_dex=in_dex), 
+all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
   HighFreq::calc_var_ohlc_r(oh_lc))
 # Compare the speed of Rcpp with R code
 library(microbenchmark)

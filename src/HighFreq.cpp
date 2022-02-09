@@ -1166,22 +1166,23 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
 
 ////////////////////////////////////////////////////////////
 //' Calculate the rolling sums over a single-column \emph{time series} or a
-//' \emph{column vector} using \emph{Rcpp}.
+//' single-column \emph{matrix} using \emph{Rcpp}.
 //' 
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{column
-//'   vector} (a single-column matrix).
+//' @param \code{tseries} A single-column \emph{time series} or a single-column
+//'   \emph{matrix}.
 //' 
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   number of elements of data used for calculating the sum.
 //'
-//' @return A \emph{column vector} of the same length as the argument
+//' @return A single-column \emph{matrix} of the same length as the argument
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{roll_vec()} calculates a \emph{column vector} of
-//'   rolling sums, over a \emph{column vector} of data, using fast \emph{Rcpp}
-//'   \code{C++} code.  The function \code{roll_vec()} is several times faster
-//'   than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+//'   The function \code{roll_vec()} calculates a single-column \emph{matrix} of
+//'   rolling sums, over a single-column \emph{matrix} of data, using fast
+//'   \emph{Rcpp} \code{C++} code.  The function \code{roll_vec()} is several
+//'   times faster than \code{rutils::roll_sum()} which uses vectorized \code{R}
+//'   code.
 //'
 //' @examples
 //' \dontrun{
@@ -1228,23 +1229,24 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 
 ////////////////////////////////////////////////////////////
 //' Calculate the rolling weighted sums over a single-column \emph{time series}
-//' or a \emph{column vector} using \code{RcppArmadillo}.
+//' or a single-column \emph{matrix} using \code{RcppArmadillo}.
 //' 
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{column
-//'   vector} (a single-column matrix).
+//' @param \code{tseries} A single-column \emph{time series} or a single-column
+//'   \emph{matrix}.
 //' 
-//' @param \code{weights} A \emph{column vector} of weights.
+//' @param \code{weights} A single-column \emph{matrix} of weights.
 //'
-//' @return A \emph{column vector} of the same length as the argument
+//' @return A single-column \emph{matrix} of the same length as the argument
 //'   \code{tseries}.
 //'
 //' @details
 //'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
-//'   \emph{column vector} over its past values (a convolution with the \emph{column vector}
-//'   of weights), using \code{RcppArmadillo}. It performs a similar calculation
-//'   as the standard \code{R} function \cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="convolution", sides=1)}, but it's over \code{6}
-//'   times faster, and it doesn't produce any \code{NA} values.
+//'   single-column \emph{matrix} over its past values (a convolution with the
+//'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
+//'   performs a similar calculation as the standard \code{R} function
+//'   \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+//'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
+//'   \code{NA} values.
 //'   
 //' @examples
 //' \dontrun{
@@ -1302,21 +1304,21 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 
 ////////////////////////////////////////////////////////////
 //' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
-//' with a \emph{column vector} of weights.
+//' with a single-column \emph{matrix} of weights.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //' 
-//' @param \code{weights} A \emph{column vector} of weights.
+//' @param \code{weights} A single-column \emph{matrix} of weights.
 //'
 //' @return A \emph{matrix} with the same dimensions as the input
 //'   argument \code{tseries}.
 //'
 //' @details
 //'   The function \code{roll_conv()} calculates the convolutions of the
-//'   \emph{matrix} columns with a \emph{column vector} of weights.  It performs
-//'   a loop over the \emph{matrix} rows and multiplies the past (higher) values
-//'   by the weights.  It calculates the rolling weighted sums of the past
-//'   values.
+//'   \emph{matrix} columns with a single-column \emph{matrix} of weights.  It
+//'   performs a loop over the \emph{matrix} rows and multiplies the past
+//'   (higher) values by the weights.  It calculates the rolling weighted sums
+//'   of the past values.
 //'   
 //'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
@@ -1555,8 +1557,8 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = NULL}).
 //' 
-//' @param \code{weights} A \emph{column vector} of weights (the default is
-//'   \code{weights = NULL}).
+//' @param \code{weights} A single-column \emph{matrix} of weights (the default
+//'   is \code{weights = NULL}).
 //'
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
@@ -1725,44 +1727,60 @@ arma::mat roll_wsum(const arma::mat& tseries,
 ////////////////////////////////////////////////////////////
 
 
-
-
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling mean of streaming \emph{time series} data.
+//' Calculate the running weighted means of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
 //' @param \code{lambda} A \emph{numeric} decay factor to multiply past
 //'   estimates.
 //'   
+//' @param \code{weights} A single-column \emph{matrix} of weights.
+//'
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{run_mean()} calculates the rolling mean of streaming
-//'   \emph{time series} data by recursively weighing present and past values
-//'   using the decay factor \eqn{\lambda}:
+//'   The function \code{run_mean()} calculates the running weighted means of
+//'   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
+//'   present and past values using the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
+//'   }
+//'   \deqn{
+//'     \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
+//'   }
+//'   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
+//'   weights, \eqn{\mu^w_t} are the running mean weights, and \eqn{\mu^p_t} are
+//'   the running mean products of the data and the weights. 
+//'   
+//'   The running mean weighted value \eqn{\mu_t} is equal to the ratio of the
+//'   data and weights products, divided by the mean weights:
+//'   \deqn{
+//'     \mu_t = \frac{\mu^p_t}{\mu^w_t}
+//'   }
+//' 
+//'   If the \code{weights} argument is omitted, then the function
+//'   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
 //'   \deqn{
 //'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 //'   }
-//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-//'   streaming data.
-//' 
-//'   The value of the decay factor \eqn{\lambda} should be in the range between
-//'   \code{0} and \code{1}.  
-//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the rolling mean values have a stronger
-//'   dependence on past values.  This is equivalent to a long look-back
-//'   interval.
-//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the rolling mean values have a
-//'   weaker dependence on past values.  This is equivalent to a short look-back
-//'   interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
+//'   
+//'   The above recursive formulas are convenient for processing live streaming
 //'   data because it doesn't require maintaining a buffer of past data.
 //'   The formula is equivalent to a convolution with exponentially decaying
 //'   weights, but it's faster.
+//'   
+//'   The value of the decay factor \eqn{\lambda} should be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the running mean values have a stronger
+//'   dependence on past values.  This is equivalent to a long look-back
+//'   interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the running mean values have a
+//'   weaker dependence on past values.  This is equivalent to a short look-back
+//'   interval.
 //' 
 //'   The function \code{run_mean()} performs the same calculation as the
 //'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
@@ -1774,37 +1792,68 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate historical prices
-//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-//' # Calculate the rolling means
-//' lamb_da <- 0.9
+//' oh_lc <- rutils::etf_env$VTI
+//' price_s <- quantmod::Cl(oh_lc)
+//' # Calculate the running means
+//' lamb_da <- 0.95
 //' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
-//' # Calculate rolling means using R code
+//' # Calculate running means using R code
 //' filter_ed <- (1-lamb_da)*filter(price_s, 
 //'   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
 //'   method="recursive")
-//' all.equal(means, unclass(filter_ed), check.attributes=FALSE)
+//' all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
+//' 
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
 //'   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//'   
+//' # Create weights equal to the trading volumes
+//' weight_s <- quantmod::Vo(oh_lc)
+//' # Calculate the running weighted means
+//' meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
+//' # dygraph plot the running weighted means
+//' da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
+//' colnames(da_ta) <- c("means running", "means weighted")
+//' dygraphs::dygraph(da_ta, main="Running Means") %>%
+//'   dyOptions(colors=c("blue", "red"), strokeWidth=1) %>%
+//'   dyLegend(show="always", width=500)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_mean(const arma::mat& tseries, double lambda) {
+arma::mat run_mean(const arma::mat& tseries, 
+                   double lambda, 
+                   const arma::colvec& weights = 0) {
   
   arma::uword num_rows = tseries.n_rows;
+  arma::uword weights_rows = weights.n_elem;
   arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
-  // Perform loop over the rows
-  means.row(0) = tseries.row(0);
-  for (arma::uword it = 1; it < num_rows; it++) {
-    // Calculate the mean as the weighted sum
-    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
-  }  // end for
+  if (weights_rows == 1) {
+    means.row(0) = tseries.row(0);
+    // Calculate means without weights
+    for (arma::uword it = 1; it < num_rows; it++) {
+      // Calculate the means as the weighted sums
+      means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
+    }  // end for
+  } else if (weights_rows == num_rows) {
+    // Calculate means with weights
+    arma::mat meansw = arma::zeros<mat>(num_rows, 1);
+    means.row(0) = weights.row(0)*tseries.row(0);
+    meansw.row(0) = weights.row(0);
+    for (arma::uword it = 1; it < num_rows; it++) {
+      // Calculate the means as the weighted sums
+      meansw.row(it) = lambda1*weights.row(it) + lambda*meansw.row(it-1);
+      means.row(it) = lambda1*weights.row(it)*tseries.row(it) + lambda*means.row(it-1);
+      // Divide by the mean weight
+      means.row(it-1) = means.row(it-1)/meansw.row(it-1);
+    }  // end for
+    means.row(num_rows-1) = means.row(num_rows-1)/meansw.row(num_rows-1);
+  }  // end if
   
   return means;
   
@@ -1814,7 +1863,7 @@ arma::mat run_mean(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling maximum of streaming \emph{time series} data.
+//' Calculate the running maximum of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -1825,18 +1874,18 @@ arma::mat run_mean(const arma::mat& tseries, double lambda) {
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{run_max()} calculates the rolling maximum of streaming
+//'   The function \code{run_max()} calculates the running maximum of streaming
 //'   \emph{time series} data by recursively weighing present and past values
 //'   using the decay factor \eqn{\lambda}.
 //'
-//'   It first calculates the rolling mean of streaming data:
+//'   It first calculates the running mean of streaming data:
 //'   \deqn{
 //'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 //'   }
 //'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 //'   streaming data.
 //'
-//'   It then calculates the rolling maximums of streaming data, \eqn{p^{max}_t}:
+//'   It then calculates the running maximums of streaming data, \eqn{p^{max}_t}:
 //'   \deqn{
 //'     p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
 //'   }
@@ -1844,19 +1893,19 @@ arma::mat run_mean(const arma::mat& tseries, double lambda) {
 //'   The second term pulls the maximum value down to the mean value, allowing
 //'   it to gradually "forget" the maximum value from the more distant past.
 //' 
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the rolling maximum values have a stronger
+//'   values have a greater weight, and the running maximum values have a stronger
 //'   dependence on past values.  This is equivalent to a long look-back
 //'   interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the rolling maximum values have a
+//'   past values have a smaller weight, and the running maximum values have a
 //'   weaker dependence on past values.  This is equivalent to a short look-back
 //'   interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
 //' 
 //'   The function \code{run_max()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -1865,14 +1914,14 @@ arma::mat run_mean(const arma::mat& tseries, double lambda) {
 //' \dontrun{
 //' # Calculate historical prices
 //' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-//' # Calculate the rolling maximums
+//' # Calculate the running maximums
 //' lamb_da <- 0.9
 //' maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
-//' # Plot dygraph of VTI prices and rolling maximums
+//' # Plot dygraph of VTI prices and running maximums
 //' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
 //' colnames(da_ta) <- c("prices", "max")
 //' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Maximums") %>%
+//' dygraphs::dygraph(da_ta, main="VTI Prices and Running Maximums") %>%
 //'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
 //'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 //' }
@@ -1904,7 +1953,7 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the rolling minimum of streaming \emph{time series} data.
+//' Calculate the running minimum of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -1915,18 +1964,18 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{run_min()} calculates the rolling minimum of streaming
+//'   The function \code{run_min()} calculates the running minimum of streaming
 //'   \emph{time series} data by recursively weighing present and past values
 //'   using the decay factor \eqn{\lambda}.
 //'
-//'   It first calculates the rolling mean of streaming data:
+//'   It first calculates the running mean of streaming data:
 //'   \deqn{
 //'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 //'   }
 //'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
 //'   streaming data.
 //'
-//'   It then calculates the rolling minimums of streaming data, \eqn{p^{min}_t}:
+//'   It then calculates the running minimums of streaming data, \eqn{p^{min}_t}:
 //'   \deqn{
 //'     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
 //'   }
@@ -1934,19 +1983,19 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //'   The second term pulls the minimum value up to the mean value, allowing
 //'   it to gradually "forget" the minimum value from the more distant past.
 //' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the rolling minimum values have a stronger
+//'   values have a greater weight, and the running minimum values have a stronger
 //'   dependence on past values.  This is equivalent to a long look-back
 //'   interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the rolling minimum values have a
+//'   past values have a smaller weight, and the running minimum values have a
 //'   weaker dependence on past values.  This is equivalent to a short look-back
 //'   interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
 //' 
 //'   The function \code{run_min()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -1955,14 +2004,14 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' \dontrun{
 //' # Calculate historical prices
 //' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-//' # Calculate the rolling minimums
+//' # Calculate the running minimums
 //' lamb_da <- 0.9
 //' mins <- HighFreq::run_min(price_s, lambda=lamb_da)
-//' # Plot dygraph of VTI prices and rolling minimums
+//' # Plot dygraph of VTI prices and running minimums
 //' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
 //' colnames(da_ta) <- c("prices", "min")
 //' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Minimums") %>%
+//' dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") %>%
 //'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
 //'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 //' }
@@ -2019,6 +2068,11 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 //'   \eqn{r_t} are the streaming returns data.
 //' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -2029,11 +2083,6 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   past values have a smaller weight, and the running variance values have a
 //'   weaker dependence on past values.  This is equivalent to a short look-back
 //'   interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster.
 //' 
 //'   The function \code{run_var()} performs the same calculation as the
 //'   standard \code{R} function\cr\code{stats::filter(x=series,
@@ -2115,6 +2164,11 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //'   It recursively weighs the current variance estimate with the past
 //'   estimates \eqn{\sigma^2_{t-1}}, using the decay factor \eqn{\lambda}.
 //'
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//'   
 //'   The function \code{run_var_ohlc()} does not calculate the logarithm of
 //'   the prices.
 //'   So if the argument \code{ohlc} contains dollar prices then
@@ -2219,6 +2273,11 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //'   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
 //'   \eqn{\mu^1_t} and \eqn{\mu^2_t} are the means of the returns.
 //' 
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster.
+//' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -2229,11 +2288,6 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //'   past values have a smaller weight, and the running covariance values have
 //'   a weaker dependence on past values.  This is equivalent to a short
 //'   look-back interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster.
 //' 
 //'   The function \code{run_covar()} returns three columns of data: the
 //'   covariance and the variances of the two columns of the argument
@@ -2357,6 +2411,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
 //'   same dimensions as the input argument \code{predictor}.
 //'
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster to calculate.
+//'
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -2368,11 +2427,6 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   have a weaker dependence on past values.  This is equivalent to a short
 //'   look-back interval.
 //' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster to calculate.
-//'
 //'   The \emph{residuals} may be scaled by their volatilities. The default is
 //'   \code{method = "none"} - no scaling.
 //'   If the argument \code{method = "scale"} then the \emph{residuals}
@@ -2444,7 +2498,7 @@ arma::mat run_reg(const arma::mat& response,
     means_resp.row(it) = lambda1*response.row(it) + lambda*means_resp.row(it-1);
     means_pred.row(it) = lambda1*predictor.row(it) + lambda*means_pred.row(it-1);
     // cout << "Calculating vars: " << it << endl;
-    vars.row(it) = lambda1*(vars.row(it) - arma::square(means_pred.row(it))) + lambda*vars.row(it-1);
+    vars.row(it) = lambda1*arma::square(predictor.row(it)-means_pred.row(it)) + lambda*vars.row(it-1);
     // cout << "Calculating covars: " << it << endl;
     covars.row(it) = lambda1*((response.row(it)-means_resp.row(it))*(predictor.row(it)-means_pred.row(it))) + lambda*covars.row(it-1);
     // cout << "Calculating betas: " << it << endl;
@@ -2456,7 +2510,7 @@ arma::mat run_reg(const arma::mat& response,
     resids.row(it) = lambda1*(response.row(it) - arma::dot(betas.row(it), predictor.row(it))) + lambda*resids.row(it-1);
     // Calculate the mean and variance of the residuals.
     meanz.row(it) = lambda1*resids.row(it) + lambda*meanz.row(it-1);
-    varz.row(it) = lambda1*arma::square(resids.row(it) - resids.row(it-1)) + lambda*varz.row(it-1);
+    varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*varz.row(it-1);
   }  // end for
   
   if (method == "scale") {
@@ -2536,6 +2590,11 @@ arma::mat run_reg(const arma::mat& response,
 //'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
 //'   }
 //' 
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
+//'   The formula is equivalent to a convolution with exponentially decaying
+//'   weights, but it's faster to calculate.
+//' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -2546,11 +2605,6 @@ arma::mat run_reg(const arma::mat& response,
 //'   past values have a smaller weight, and the running \emph{z-score} values
 //'   have a weaker dependence on past values.  This is equivalent to a short
 //'   look-back interval.
-//' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster to calculate.
 //' 
 //'   The function \code{run_zscores()} returns multiple columns of data. 
 //'   If the matrix \code{predictor} has \code{n} columns then \code{run_zscores()}
@@ -3053,16 +3107,16 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 //'    }
 //'    (The default is the \code{method = "yang_zhang"}.)
 //'    
-//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
-//'   default is \code{lag_close = 0}).
+//'   default is \code{close_lag = 0}).
 //'   
 //' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
 //'   \code{scale = TRUE}).
 //'
-//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//' @param \code{index} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{index = 0}).
 //'   
 //' @return A single \emph{numeric} value equal to the variance of the
 //'   \emph{OHLC time series}.
@@ -3098,13 +3152,13 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 //'   If the number of rows of \code{ohlc} is less than \code{3} then it
 //'   returns zero.
 //'   
-//'   The optional argument \code{in_dex} is the time index of the \emph{time
+//'   The optional argument \code{index} is the time index of the \emph{time
 //'   series} \code{ohlc}. If the time index is in seconds, then the
 //'   differences of the index are equal to the number of seconds in each time
 //'   period.  If the time index is in days, then the differences are equal to
 //'   the number of days in each time period.
 //'   
-//'   The optional argument \code{lag_close} are the lagged \emph{close} prices
+//'   The optional argument \code{close_lag} are the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
 //'   speeds up the calculation, so it's useful for rolling calculations.
 //'   
@@ -3120,18 +3174,18 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 //' in_dex <- c(1, diff(xts::.index(oh_lc)))
 //' # Calculate the variance of SPY returns, with scaling of the returns
 //' HighFreq::calc_var_ohlc(oh_lc, 
-//'  method="yang_zhang", scale=TRUE, in_dex=in_dex)
+//'  method="yang_zhang", scale=TRUE, index=in_dex)
 //' # Calculate variance without accounting for overnight jumps
 //' HighFreq::calc_var_ohlc(oh_lc, 
-//'  method="rogers_satchell", scale=TRUE, in_dex=in_dex)
+//'  method="rogers_satchell", scale=TRUE, index=in_dex)
 //' # Calculate the variance without scaling the returns
 //' HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
 //' # Calculate the variance by passing in the lagged close prices
-//' lag_close <- HighFreq::lag_it(oh_lc[, 4])
+//' close_lag <- HighFreq::lag_it(oh_lc[, 4])
 //' all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-//'   HighFreq::calc_var_ohlc(oh_lc, lag_close=lag_close))
+//'   HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
 //' # Compare with HighFreq::calc_var_ohlc_r()
-//' all.equal(HighFreq::calc_var_ohlc(oh_lc, in_dex=in_dex), 
+//' all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
 //'   HighFreq::calc_var_ohlc_r(oh_lc))
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
@@ -3144,9 +3198,9 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 // [[Rcpp::export]]
 double calc_var_ohlc(const arma::mat& ohlc, 
                      std::string method = "yang_zhang", 
-                     arma::colvec lag_close = 0, 
+                     arma::colvec close_lag = 0, 
                      bool scale = true, 
-                     arma::colvec in_dex = 0) {
+                     arma::colvec index = 0) {
   
   arma::uword num_rows = ohlc.n_rows;
   double coeff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
@@ -3156,28 +3210,28 @@ double calc_var_ohlc(const arma::mat& ohlc,
     return 0;
   }  // end if
   
-  if (!scale || (in_dex.n_rows == 1)) {
-    in_dex = arma::ones(num_rows);
+  if (!scale || (index.n_rows == 1)) {
+    index = arma::ones(num_rows);
     // cout << "ohlc.n_rows = " << num_rows << endl;
-    // cout << "in_dex.n_rows = " << in_dex.n_rows << endl;
+    // cout << "index.n_rows = " << index.n_rows << endl;
   }  // end if
   
   // Calculate all the different intra-day and day-over-day returns 
   // (differences of OHLC prices)
   arma::colvec clo_se = ohlc.col(3);
   arma::colvec open_close(clo_se.n_rows);
-  if (lag_close.n_rows == 1) {
+  if (close_lag.n_rows == 1) {
     open_close = arma::join_cols(clo_se.subvec(0, 0), clo_se.subvec(0, clo_se.n_elem-2));
-    open_close = (ohlc.col(0) - open_close)/in_dex;
+    open_close = (ohlc.col(0) - open_close)/index;
   } else {
-    open_close = (ohlc.col(0) - lag_close)/in_dex;
+    open_close = (ohlc.col(0) - close_lag)/index;
   }  // end if
-  arma::colvec close_open = (clo_se - ohlc.col(0))/in_dex;
-  arma::colvec close_high = (clo_se - ohlc.col(1))/in_dex;
-  arma::colvec close_low = (clo_se - ohlc.col(2))/in_dex;
-  arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/in_dex;
-  arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/in_dex;
-  arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/in_dex;
+  arma::colvec close_open = (clo_se - ohlc.col(0))/index;
+  arma::colvec close_high = (clo_se - ohlc.col(1))/index;
+  arma::colvec close_low = (clo_se - ohlc.col(2))/index;
+  arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/index;
+  arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/index;
+  arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/index;
   
   if (method == "close") {
     // cout << "Calc method is Close" << endl;
@@ -3233,16 +3287,16 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //'    }
 //'    (The default is the \code{method = "yang_zhang"}.)
 //'    
-//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
-//'   default is \code{lag_close = 0}).
+//'   default is \code{close_lag = 0}).
 //'   
 //' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
 //'   \code{scale = TRUE}).
 //'
-//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//' @param \code{index} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{index = 0}).
 //'   
 //' @return The variance of aggregated \emph{OHLC} prices.
 //'
@@ -3293,13 +3347,13 @@ double calc_var_ohlc(const arma::mat& ohlc,
 double calc_var_ohlc_ag(const arma::mat& ohlc,
                         arma::uword step = 1, 
                         std::string method = "yang_zhang", 
-                        arma::colvec lag_close = 0, 
+                        arma::colvec close_lag = 0, 
                         bool scale = true, 
-                        arma::colvec in_dex = 0) {
+                        arma::colvec index = 0) {
   
   if (step == 1)
     // Calculate the variance without aggregations.
-    return calc_var_ohlc(ohlc, method, lag_close, scale, in_dex);
+    return calc_var_ohlc(ohlc, method, close_lag, scale, index);
   else {
     // Calculate the number of extra periods that don't fit over num_rows.
     arma::uword num_rows = ohlc.n_rows;
@@ -3315,7 +3369,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
       // end_p = end_p.elem(find(end_p < num_rows));
       // roll_ohlc
       aggs = roll_ohlc(ohlc, end_p);
-      var_s.row(stub) = calc_var_ohlc(aggs, method, lag_close, scale, in_dex);
+      var_s.row(stub) = calc_var_ohlc(aggs, method, close_lag, scale, index);
     }  // end for
     return arma::as_scalar(mean(var_s));
   }  // end if
@@ -3668,16 +3722,16 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //'    }
 //'    (The default is the \code{method = "yang_zhang"}.)
 //'    
-//' @param \code{lag_close} A \emph{vector} with the lagged \emph{close} prices
+//' @param \code{close_lag} A \emph{vector} with the lagged \emph{close} prices
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
-//'   default is \code{lag_close = 0}).
+//'   default is \code{close_lag = 0}).
 //'   
 //' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
 //'   \code{scale = TRUE}).
 //'
-//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument (the default is \code{in_dex = 0}).
+//' @param \code{index} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{index = 0}).
 //'   
 //' @return The Hurst exponent calculated from the variance ratio of aggregated
 //' \emph{OHLC} prices.
@@ -3718,12 +3772,12 @@ arma::mat calc_hurst(const arma::mat& tseries,
 double calc_hurst_ohlc(const arma::mat& ohlc,
                        arma::uword step = 1, 
                        std::string method = "yang_zhang", 
-                       arma::colvec lag_close = 0, 
+                       arma::colvec close_lag = 0, 
                        bool scale = true, 
-                       arma::colvec in_dex = 0) {
+                       arma::colvec index = 0) {
   
-  return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, lag_close, scale, in_dex)/
-                 calc_var_ohlc_ag(ohlc, 1, method, lag_close, scale, in_dex))/log(step);
+  return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, close_lag, scale, index)/
+                 calc_var_ohlc_ag(ohlc, 1, method, close_lag, scale, index))/log(step);
   
 }  // end calc_hurst_ohlc
 
@@ -3742,7 +3796,7 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' 
 //' @return A named list with three elements: a \emph{matrix} of coefficients
 //'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
-//'   (named \emph{"z_score"}), and a \emph{vector} with the R-squared and
+//'   (named \emph{"zscore"}), and a \emph{vector} with the R-squared and
 //'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
 //'   coefficients named \emph{"coefficients"} contains the alpha and beta
 //'   coefficients, and their \emph{t-values} and \emph{p-values}.
@@ -3783,20 +3837,20 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 // [[Rcpp::export]]
 Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   
-  // Add column for intercept to explanatory matrix
+  // Add column for intercept to predictor matrix
   arma::uword num_rows = predictor.n_rows;
-  arma::mat predictor_p = join_rows(ones(num_rows), predictor);
-  arma::uword num_cols = predictor_p.n_cols;
+  arma::mat predictori = join_rows(ones(num_rows), predictor);
+  arma::uword num_cols = predictori.n_cols;
   arma::uword deg_free = (num_rows - num_cols);
   
   // Calculate alpha and beta coefficients for the model response ~ predictor
-  arma::colvec coeff = arma::solve(predictor_p, response);
+  arma::colvec coeff = arma::solve(predictori, response);
   // Calculate residuals
-  arma::colvec resid_uals = response - predictor_p*coeff;
+  arma::colvec residuals = response - predictori*coeff;
   
   // Calculate TSS, RSS, and ESS
   double tot_sumsq = (num_rows-1)*arma::var(response);
-  double res_sumsq = arma::dot(resid_uals, resid_uals);
+  double res_sumsq = arma::dot(residuals, residuals);
   double exp_sumsq = tot_sumsq - res_sumsq;
   
   // Calculate R-squared and F-statistic
@@ -3809,16 +3863,16 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   stat_s.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
   
   // Calculate standard errors of beta coefficients
-  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictor_p)*predictor_p)));
+  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
   // Calculate t-values and p-values of beta coefficients
-  arma::colvec t_vals = coeff/std_err;
-  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(t_vals)), deg_free);
-  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), t_vals), p_vals));
+  arma::colvec tvals = coeff/std_err;
+  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(tvals)), deg_free);
+  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), tvals), p_vals));
   Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
   
   return Rcpp::List::create(Named("coefficients") = coeff_mat,
-                            // Named("residuals") = resid_uals,
-                            Named("z_score") = resid_uals(num_rows-1)/arma::stddev(resid_uals),
+                            // Named("residuals") = residuals,
+                            Named("zscore") = residuals(num_rows-1)/arma::stddev(residuals),
                             Named("stats") = stat_s);
   
 }  // end calc_lm
@@ -3835,6 +3889,10 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //' 
+//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+//'   term should be added to the predictor (the default is \code{intercept =
+//'   FALSE}).
+//'
 //' @param \code{method} A \emph{string} specifying the type of the regression
 //'   model the default is \code{method = "least_squares"} - see Details).
 //'   
@@ -3853,32 +3911,21 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @return A vector with the regression coefficients, their t-values, and the
+//' @return A single-row matrix with
+//' A vector with the regression coefficients, their t-values, and the
 //'   last residual z-score.
 //'
 //' @details
 //'   The function \code{calc_reg()} performs multivariate regression using
 //'   different methods, and returns a vector of regression coefficients, their
 //'   t-values, and the last residual z-score.
-//' 
-//'   The length of the return vector depends on the number of columns of
-//'   \code{predictor}.
-//'   The number of regression coefficients is equal to the number of columns of
-//'   \code{predictor} plus \code{1}.  The number of t-values is equal to the
-//'   number of coefficients.  And there is only \code{1} z-score.
-//'   So if the number of columns of \code{predictor} is equal to \code{n}, then
-//'   the return vector will have \code{2n+3} elements.
-//' 
-//'   For example, if the predictor matrix has \code{2} columns of data, then
-//'   \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-//'   regression coefficients (including the intercept coefficient), \code{3}
-//'   corresponding t-values, and \code{1} z-score.
 //'
 //'   If \code{method = "least_squares"} (the default) then it performs the
 //'   standard least squares regression, the same as the function
-//'   \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
-//'   It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
-//'   than \code{lm()}.
+//'   \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
+//'   \emph{stats}.
+//'   But it uses \code{RcppArmadillo} \code{C++} code so it's several times
+//'   faster than \code{lm()}.
 //'
 //'   If \code{method = "regular"} then it performs shrinkage regression.  It
 //'   calculates the shrinkage inverse of the \code{predictor} matrix from its
@@ -3888,6 +3935,24 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   
 //'   If \code{method = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
+//' 
+//'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
+//'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+//'   
+//'   The length of the return vector depends on the number of columns of the
+//'   \code{predictor} matrix (including the intercept column, if it's added).
+//'   The length of the return vector is equal to the number of regression
+//'   coefficients, plus their t-values, plus the z-score.
+//'   The number of regression coefficients is equal to the number of columns of
+//'   the \code{predictor} matrix (including the intercept column, if it's
+//'   added).
+//'   The number of t-values is equal to the number of coefficients.
+//' 
+//'   For example, if the number of columns of the \code{predictor} matrix is
+//'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{calc_reg()}
+//'   returns a vector with \code{2n+3} elements: \code{n+1} regression
+//'   coefficients (including the intercept coefficient), \code{n+1}
+//'   corresponding t-values, and \code{1} z-score.
 //'
 //' @examples
 //' \dontrun{
@@ -3916,32 +3981,37 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::colvec calc_reg(const arma::vec& response, 
-                      const arma::mat& predictor,
-                      std::string method = "least_squares",
-                      double eigen_thresh = 1e-5,
-                      arma::uword eigen_max = 0,
-                      double conf_lev = 0.1,
-                      double alpha = 0.0) {
+arma::mat calc_reg(const arma::mat& response, 
+                   const arma::mat& predictor,
+                   bool intercept = false,
+                   std::string method = "least_squares",
+                   double eigen_thresh = 1e-5,
+                   arma::uword eigen_max = 0,
+                   double conf_lev = 0.1,
+                   double alpha = 0.0) {
   
-  // Add column for intercept to explanatory matrix
+  // Add column for intercept to predictor matrix
   arma::uword num_rows = predictor.n_rows;
-  arma::mat predictor_p = join_rows(ones(num_rows), predictor);
-  arma::uword num_cols = predictor_p.n_cols;
+  arma::mat predictori = predictor;
+  if (intercept)
+    predictori = join_rows(ones(num_rows), predictor);
+
+  arma::uword num_cols = predictori.n_cols;
   arma::uword deg_free = (num_rows - num_cols);
-  arma::colvec coeff(num_cols, fill::zeros);
-  arma::colvec reg_data(2*num_cols+1, fill::zeros);
+  arma::vec coeff;
+  arma::vec tvals;
+  arma::mat reg_data = arma::zeros<mat>(2*num_cols+1, 1);
   
   // Switch for the different methods for weights
   switch(calc_method(method)) {
   case meth_od::least_squares: {
     // Calculate regression coefficients for the model response ~ predictor
-    coeff = arma::solve(predictor_p, response);
+    coeff = arma::solve(predictori, response);
     break;
   }  // end least_squares
   case meth_od::regular: {
     // Calculate shrinkage regression coefficients
-    coeff = calc_inv(predictor_p, eigen_thresh, eigen_max)*response;
+    coeff = calc_inv(predictori, eigen_thresh, eigen_max)*response;
     break;
   }  // end regular
   case meth_od::quantile: {
@@ -3955,27 +4025,27 @@ arma::colvec calc_reg(const arma::vec& response,
   }  // end switch
   
   // Calculate residuals
-  arma::colvec resid_uals = response - predictor_p*coeff;
+  arma::mat residuals = response - predictori*coeff;
   
   // Calculate TSS, RSS, and ESS
   // double tot_sumsq = (num_rows-1)*arma::var(response);
-  double res_sumsq = arma::dot(resid_uals, resid_uals);
+  double res_sumsq = arma::dot(residuals, residuals);
   // double exp_sumsq = tot_sumsq - res_sumsq;
   
-  // Calculate standard errors of beta coefficients
-  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictor_p)*predictor_p)));
-  // Calculate t-values and p-values of beta coefficients
-  arma::colvec t_vals = coeff/std_err;
+  // Calculate standard errors of the beta coefficients
+  arma::mat std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
+  // Calculate t-values of the beta coefficients
+  tvals = coeff/std_err;
   
   // Calculate z-score
-  double z_score = resid_uals(num_rows-1)/arma::stddev(resid_uals);
+  mat zscore = residuals(num_rows-1, 0)/arma::stddev(residuals);
   
   // Combine regression data
-  reg_data.subvec(0, num_cols-1) = coeff;
-  reg_data.subvec(num_cols, 2*num_cols-1) = t_vals;
-  reg_data(2*num_cols) = z_score;
+  reg_data.rows(0, num_cols-1) = coeff;
+  reg_data.rows(num_cols, 2*num_cols-1) = tvals;
+  reg_data.row(2*num_cols) = zscore;
   
-  return reg_data;
+  return reg_data.t();
   
 }  // end calc_reg
 
@@ -4136,22 +4206,24 @@ arma::mat roll_mean(const arma::mat& tseries,
 
 ////////////////////////////////////////////////////////////
 //' Calculate a \emph{vector} of variance estimates over a rolling look-back
-//' interval for a single-column \emph{time series} or a \emph{column vector}, using
-//' \code{RcppArmadillo}.
+//' interval for a single-column \emph{time series} or a single-column
+//' \emph{matrix}, using \code{RcppArmadillo}.
 //'
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{column vector}.
+//' @param \code{tseries} A single-column \emph{time series} or a single-column
+//'   \emph{matrix}.
 //' 
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   number of \emph{vector} elements used for calculating a single variance
 //'   estimate (the default is \code{look_back = 1}).
 //'
-//' @return A \emph{column vector} with the same number of elements as the input
-//'   argument \code{tseries}.
+//' @return A single-column \emph{matrix} with the same number of elements as
+//'   the input argument \code{tseries}.
 //'
 //' @details
 //'   The function \code{roll_var_vec()} calculates a \emph{vector} of variance
 //'   estimates over a rolling look-back interval for a single-column \emph{time
-//'   series} or a \emph{column vector}, using \code{RcppArmadillo} \code{C++} code.
+//'   series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
+//'   \code{C++} code.
 //'   
 //'   The function \code{roll_var_vec()} uses an expanding look-back interval in
 //'   the initial warmup period, to calculate the same number of elements as the
@@ -4377,8 +4449,8 @@ arma::mat roll_var(const arma::mat& tseries,
 //'   by the time index, the number of seconds in each period?  (The default is
 //'   \code{scale = TRUE}.)
 //'   
-//' @param \code{in_dex} A \emph{vector} with the time index of the \emph{time
-//'   series}.  This is an optional argument (the default is \code{in_dex=0}).
+//' @param \code{index} A \emph{vector} with the time index of the \emph{time
+//'   series}.  This is an optional argument (the default is \code{index=0}).
 //'
 //' @return A column \emph{vector} of variance estimates, with the number of
 //'   rows equal to the number of end points.
@@ -4435,7 +4507,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //'   time index is in days, then the variance is equal to the variance per day
 //'   squared.
 //'   
-//'   The optional argument \code{in_dex} is the time index of the \emph{time
+//'   The optional argument \code{index} is the time index of the \emph{time
 //'   series} \code{ohlc}. If the time index is in seconds, then the
 //'   differences of the index are equal to the number of seconds in each time
 //'   period.  If the time index is in days, then the differences are equal to
@@ -4455,7 +4527,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 //'                               step=1, look_back=21, 
 //'                               method="yang_zhang", 
-//'                               in_dex=in_dex, scale=TRUE)
+//'                               index=in_dex, scale=TRUE)
 //' # Daily OHLC prices
 //' oh_lc <- rutils::etf_env$VTI
 //' in_dex <- c(1, diff(xts::.index(oh_lc)))
@@ -4463,19 +4535,19 @@ arma::mat roll_var(const arma::mat& tseries,
 //' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
 //'                               step=5, look_back=4, 
 //'                               method="yang_zhang", 
-//'                               in_dex=in_dex, scale=TRUE)
+//'                               index=in_dex, scale=TRUE)
 //' # Same calculation in R
 //' n_rows <- NROW(oh_lc)
-//' lag_close = HighFreq::lag_it(oh_lc[, 4])
+//' close_lag = HighFreq::lag_it(oh_lc[, 4])
 //' end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
 //' start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
 //' n_pts <- NROW(end_p)
 //' var_rollingr <- sapply(2:n_pts, function(it) {
 //'   ran_ge <- start_p[it]:end_p[it]
 //'   sub_ohlc = oh_lc[ran_ge, ]
-//'   sub_close = lag_close[ran_ge]
+//'   sub_close = close_lag[ran_ge]
 //'   sub_index = in_dex[ran_ge]
-//'   HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scale=TRUE, in_dex=sub_index)
+//'   HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 //' })  # end sapply
 //' var_rollingr <- c(0, var_rollingr)
 //' all.equal(drop(var_rolling), var_rollingr)
@@ -4490,7 +4562,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
                         arma::uword stub = 0,
                         std::string method = "yang_zhang", 
                         bool scale = true, 
-                        arma::colvec in_dex = 0) {
+                        arma::colvec index = 0) {
   
   // Allocate end points
   arma::uword num_rows = ohlc.n_rows;
@@ -4520,11 +4592,11 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   
   // Extract OHLC close prices
   arma::colvec clo_se = ohlc.col(3);
-  arma::colvec lag_close = lag_it(clo_se);
+  arma::colvec close_lag = lag_it(clo_se, 1, false);
   
   // Set the time index to 1 if scale = FALSE
-  if (!scale || (in_dex.n_rows == 1)) {
-    in_dex = arma::ones(num_rows);
+  if (!scale || (index.n_rows == 1)) {
+    index = arma::ones(num_rows);
   }  // end if
   
   // Define data subsets over look-back intervals
@@ -4536,8 +4608,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     if (end_pts(ep) > start_pts(ep)) {
       sub_ohlc = ohlc.rows(start_pts(ep), end_pts(ep));
-      sub_close = lag_close.rows(start_pts(ep), end_pts(ep));
-      sub_index = in_dex.subvec(start_pts(ep), end_pts(ep));
+      sub_close = close_lag.rows(start_pts(ep), end_pts(ep));
+      sub_index = index.subvec(start_pts(ep), end_pts(ep));
       // Calculate variance
       variance.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
     }  // end if
@@ -4548,16 +4620,16 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   // Warmup period
   // for (arma::uword it = 1; it < look_back; it++) {
   //   arma::mat sub_ohlc = ohlc.rows(0, it);
-  //   arma::colvec sub_close = lag_close.rows(0, it);
-  //   arma::colvec sub_index = in_dex.subvec(0, it);
+  //   arma::colvec sub_close = close_lag.rows(0, it);
+  //   arma::colvec sub_index = index.subvec(0, it);
   //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
   // }  // end for
   
   // Remaining period
   // for (arma::uword it = look_back; it < num_rows; it++) {
   //   arma::mat sub_ohlc = ohlc.rows(it-look_back+1, it);
-  //   arma::colvec sub_close = lag_close.rows(it-look_back+1, it);
-  //   arma::colvec sub_index = in_dex.subvec(it-look_back+1, it);
+  //   arma::colvec sub_close = close_lag.rows(it-look_back+1, it);
+  //   arma::colvec sub_index = index.subvec(it-look_back+1, it);
   //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
   // }  // end for
   
@@ -4847,6 +4919,10 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //'   
+//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+//'   term should be added to the predictor (the default is \code{intercept =
+//'   FALSE}).
+//'
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
@@ -4862,6 +4938,10 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
+//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+//'   term should be added to the predictor (the default is \code{intercept =
+//'   FALSE}).
+//'
 //' @param \code{method} A \emph{string} specifying the type of the regression
 //'   model the default is \code{method = "least_squares"} - see Details).
 //'   
@@ -4880,7 +4960,10 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @return A \emph{matrix} with the same number of rows as \code{predictor}, and a
+//' @return A \emph{matrix} with the regression coefficients, their t-values, and
+//' z-scores, and with the 
+//' same number of rows as \code{predictor}
+//' a
 //'   number of columns equal to \code{2n+3}, where \code{n} is the number of
 //'   columns of \code{predictor}.
 //'
@@ -4893,9 +4976,6 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   each end point it subsets the time series \code{predictor} over a look-back
 //'   interval equal to \code{look_back} number of end points.
 //'   
-//'   It passes the subset time series to the function \code{calc_reg()}, which
-//'   calculates the regression data.
-//'   
 //'   If the arguments \code{endp} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{predictor}
@@ -4906,6 +4986,27 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   \code{75} day look-back, can be calculated using the parameters
 //'   \code{step = 25} and \code{look_back = 3}.
 //'
+//'   It passes the subset time series to the function \code{calc_reg()}, which
+//'   calculates the regression coefficients, their t-values, and the z-score.
+//'   
+//'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
+//'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+//'   
+//'   The number of columns of the return matrix depends on the number of
+//'   columns of the \code{predictor} matrix (including the intercept column, if
+//'   it's added).
+//'   The number of columns of the return matrix is equal to the number of
+//'   regression coefficients, plus their t-values, plus the z-score column.
+//'   The number of regression coefficients is equal to the number of columns of
+//'   the \code{predictor} matrix (including the intercept column, if it's
+//'   added).
+//'   The number of t-values is equal to the number of coefficients.
+//'   For example, if the number of columns of the \code{predictor} matrix is
+//'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{roll_reg()}
+//'   returns a matrix with \code{2n+3} columns: \code{n+1} regression
+//'   coefficients (including the intercept coefficient), \code{n+1}
+//'   corresponding t-values, and \code{1} z-score column.
+//' 
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
@@ -4928,8 +5029,9 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_reg(const arma::vec& response, 
+arma::mat roll_reg(const arma::mat& response, 
                    const arma::mat& predictor, 
+                   bool intercept = false,
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
                    arma::uword step = 1, 
@@ -4965,39 +5067,37 @@ arma::mat roll_reg(const arma::vec& response,
   
   
   // Allocate regression matrix
-  arma::vec sub_response;
-  arma::mat sub_predictor;
-  arma::colvec reg_data;
-  arma::uword num_cols = predictor.n_cols;
+  arma::mat responsi;
+  arma::mat predicti;
   arma::uword num_pts = end_pts.n_elem;
-  arma::mat reg_stats(num_pts, (2*(num_cols + 1) + 1), fill::zeros);
-  
-  
+  arma::uword num_cols = predictor.n_cols;
+  if (intercept) num_cols += 1;
+  arma::mat reg_stats(num_pts, (2*num_cols + 1), fill::zeros);
+
   // Perform loop over the end_pts
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate regression coefficients
     if (end_pts(ep) > start_pts(ep)) {
-      sub_response = response.subvec(start_pts(ep), end_pts(ep));
-      sub_predictor = predictor.rows(start_pts(ep), end_pts(ep));
-      reg_data = calc_reg(sub_response, sub_predictor, method, eigen_thresh, eigen_max, conf_lev, alpha);
-      reg_stats.row(ep) = conv_to<rowvec>::from(reg_data);
+      responsi = response.rows(start_pts(ep), end_pts(ep));
+      predicti = predictor.rows(start_pts(ep), end_pts(ep));
+      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, eigen_max, conf_lev, alpha);
     }  // end if
   }  // end for
   
   // Warmup period
   // reg_stats.rows(0, num_cols+1) = zeros(num_cols+2, (num_cols + 1));
   // for (arma::uword it = (num_cols+2); it < look_back; it++) {
-  //   sub_response = response.subvec(0, it);
-  //   sub_predictor = predictor.rows(0, it);
-  //   reg_data = calc_reg(sub_response, sub_predictor);
+  //   responsi = response.rows(0, it);
+  //   predicti = predictor.rows(0, it);
+  //   reg_data = calc_reg(responsi, predicti);
   //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
   // Remaining periods
   // for (arma::uword it = look_back; it < num_rows; it++) {
-  //   sub_response = response.subvec(it-look_back+1, it);
-  //   sub_predictor = predictor.rows(it-look_back+1, it);
-  //   reg_data = calc_reg(sub_response, sub_predictor, method, eigen_thresh, eigen_max, conf_lev, alpha);
+  //   responsi = response.rows(it-look_back+1, it);
+  //   predicti = predictor.rows(it-look_back+1, it);
+  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, eigen_max, conf_lev, alpha);
   //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -5146,9 +5246,9 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
 //'   if (ro_w == 1) return(0)
 //'   start_point <- max(1, ro_w-look_back+1)
-//'   sub_response <- res_ponse[start_point:ro_w]
-//'   sub_predictor <- predic_tor[start_point:ro_w, ]
-//'   reg_model <- lm(sub_response ~ sub_predictor)
+//'   responsi <- res_ponse[start_point:ro_w]
+//'   predicti <- predic_tor[start_point:ro_w, ]
+//'   reg_model <- lm(responsi ~ predicti)
 //'   resid_uals <- reg_model$residuals
 //'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
 //' })  # end sapply
@@ -5159,7 +5259,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_zscores(const arma::vec& response, 
+arma::vec roll_zscores(const arma::mat& response, 
                        const arma::mat& predictor, 
                        arma::uvec startp = 0, 
                        arma::uvec endp = 0, 
@@ -5190,37 +5290,37 @@ arma::vec roll_zscores(const arma::vec& response,
   }  // end if
   
   // Allocate regression matrix
-  arma::vec sub_response;
-  arma::mat sub_predictor;
+  arma::mat responsi;
+  arma::mat predicti;
   arma::uword num_pts = end_pts.n_elem;
-  arma::vec z_scores(num_pts, fill::zeros);
+  arma::vec zscores(num_pts, fill::zeros);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < num_pts; ep++) {
     // Calculate z-scores
     if (end_pts(ep) > start_pts(ep)) {
-      sub_response = response.subvec(start_pts(ep), end_pts(ep));
-      sub_predictor = predictor.rows(start_pts(ep), end_pts(ep));
-      z_scores(ep) = calc_lm(sub_response, sub_predictor)["z_score"];
+      responsi = response.rows(start_pts(ep), end_pts(ep));
+      predicti = predictor.rows(start_pts(ep), end_pts(ep));
+      zscores(ep) = calc_lm(responsi, predicti)["zscore"];
     }  // end if
   }  // end for
   
   // Old code below
   // Warmup period
   // for (arma::uword it = 1; it < look_back; it++) {
-  //   sub_response = response.subvec(0, it);
-  //   sub_predictor = predictor.rows(0, it);
-  //   z_scores(it) = calc_lm(sub_response, sub_predictor)["z_score"];
+  //   responsi = response.rows(0, it);
+  //   predicti = predictor.rows(0, it);
+  //   zscores(it) = calc_lm(responsi, predicti)["zscore"];
   // }  // end for
   
   // Remaining periods
   // for (arma::uword it = look_back; it < num_rows; it++) {
-  //   sub_response = response.subvec(it-look_back+1, it);
-  //   sub_predictor = predictor.rows(it-look_back+1, it);
-  //   z_scores(it) = calc_lm(sub_response, sub_predictor)["z_score"];
+  //   responsi = response.rows(it-look_back+1, it);
+  //   predicti = predictor.rows(it-look_back+1, it);
+  //   zscores(it) = calc_lm(responsi, predicti)["zscore"];
   // }  // end for
   
-  return z_scores;
+  return zscores;
   
 }  // end roll_zscores
 

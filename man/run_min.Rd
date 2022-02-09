@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_min}
 \alias{run_min}
-\title{Calculate the rolling minimum of streaming \emph{time series} data.}
+\title{Calculate the running minimum of streaming \emph{time series} data.}
 \usage{
 run_min(tseries, lambda)
 }
@@ -17,21 +17,21 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the rolling minimum of streaming \emph{time series} data.
+Calculate the running minimum of streaming \emph{time series} data.
 }
 \details{
-The function \code{run_min()} calculates the rolling minimum of streaming
+The function \code{run_min()} calculates the running minimum of streaming
   \emph{time series} data by recursively weighing present and past values
   using the decay factor \eqn{\lambda}.
 
-  It first calculates the rolling mean of streaming data:
+  It first calculates the running mean of streaming data:
   \deqn{
     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
   }
   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
   streaming data.
 
-  It then calculates the rolling minimums of streaming data, \eqn{p^{min}_t}:
+  It then calculates the running minimums of streaming data, \eqn{p^{min}_t}:
   \deqn{
     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
   }
@@ -39,19 +39,19 @@ The function \code{run_min()} calculates the rolling minimum of streaming
   The second term pulls the minimum value up to the mean value, allowing
   it to gradually "forget" the minimum value from the more distant past.
 
+  The above recursive formula is convenient for processing live streaming
+  data because it doesn't require maintaining a buffer of past data.
+
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the rolling minimum values have a stronger
+  values have a greater weight, and the running minimum values have a stronger
   dependence on past values.  This is equivalent to a long look-back
   interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the rolling minimum values have a
+  past values have a smaller weight, and the running minimum values have a
   weaker dependence on past values.  This is equivalent to a short look-back
   interval.
-
-  The above recursive formula is convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
 
   The function \code{run_min()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -60,14 +60,14 @@ The function \code{run_min()} calculates the rolling minimum of streaming
 \dontrun{
 # Calculate historical prices
 price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
-# Calculate the rolling minimums
+# Calculate the running minimums
 lamb_da <- 0.9
 mins <- HighFreq::run_min(price_s, lambda=lamb_da)
-# Plot dygraph of VTI prices and rolling minimums
+# Plot dygraph of VTI prices and running minimums
 da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
 colnames(da_ta) <- c("prices", "min")
 col_names <- colnames(da_ta)
-dygraphs::dygraph(da_ta, main="VTI Prices and Rolling Minimums") \%>\%
+dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") \%>\%
   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") \%>\%
   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
 }

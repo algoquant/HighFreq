@@ -36,6 +36,11 @@ The function \code{run_var_ohlc()} calculates a single-column
   It recursively weighs the current variance estimate with the past
   estimates \eqn{\sigma^2_{t-1}}, using the decay factor \eqn{\lambda}.
 
+  The above recursive formula is convenient for processing live streaming
+  data because it doesn't require maintaining a buffer of past data.
+  The formula is equivalent to a convolution with exponentially decaying
+  weights, but it's faster.
+  
   The function \code{run_var_ohlc()} does not calculate the logarithm of
   the prices.
   So if the argument \code{ohlc} contains dollar prices then

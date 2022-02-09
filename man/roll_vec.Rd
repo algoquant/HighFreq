@@ -3,30 +3,31 @@
 \name{roll_vec}
 \alias{roll_vec}
 \title{Calculate the rolling sums over a single-column \emph{time series} or a
-\emph{column vector} using \emph{Rcpp}.}
+single-column \emph{matrix} using \emph{Rcpp}.}
 \usage{
 roll_vec(tseries, look_back)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{column
-vector} (a single-column matrix).}
+\item{\code{tseries}}{A single-column \emph{time series} or a single-column
+\emph{matrix}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of elements of data used for calculating the sum.}
 }
 \value{
-A \emph{column vector} of the same length as the argument
+A single-column \emph{matrix} of the same length as the argument
   \code{tseries}.
 }
 \description{
 Calculate the rolling sums over a single-column \emph{time series} or a
-\emph{column vector} using \emph{Rcpp}.
+single-column \emph{matrix} using \emph{Rcpp}.
 }
 \details{
-The function \code{roll_vec()} calculates a \emph{column vector} of
-  rolling sums, over a \emph{column vector} of data, using fast \emph{Rcpp}
-  \code{C++} code.  The function \code{roll_vec()} is several times faster
-  than \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+The function \code{roll_vec()} calculates a single-column \emph{matrix} of
+  rolling sums, over a single-column \emph{matrix} of data, using fast
+  \emph{Rcpp} \code{C++} code.  The function \code{roll_vec()} is several
+  times faster than \code{rutils::roll_sum()} which uses vectorized \code{R}
+  code.
 }
 \examples{
 \dontrun{

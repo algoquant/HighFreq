@@ -80,6 +80,24 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Modify function run_mean() to calculate the running weighted mean if the weight vector is passed as an argument
+
++ [ ] Deprecate run_zscores() because run_reg() is the new version ?
+
++ [ ] Add t-values to run_reg()
+
++ [x] Fix run_reg() - keep old version as run_rego()
+Replace
+vars.row(it) = lambda1*(vars.row(it) - arma::square(means_pred.row(it))) + lambda*vars.row(it-1);
+With
+vars.row(it) = lambda1*arma::square(predictor.row(it)-means_pred.row(it)) + lambda*vars.row(it-1);
+Replace
+varz.row(it) = lambda1*arma::square(resids.row(it) - resids.row(it-1)) + lambda*varz.row(it-1);
+With
+varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*varz.row(it-1);
+
++ [x] In functions calc_reg() and roll_reg() make the intercept term optional
+
 + [x] Rename functions run_skew() to ohlc_skew(), run_returns() to ohlc_returns(), run_sharpe() to ohlc_sharpe() and run_variance() to ohlc_variance()
 
 + [x] Update the functions run_var() and run_covar() - subtract the means from returns
@@ -102,9 +120,9 @@ Worker agg_ohlc()
 Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
 Adapt from run_covar()
 
-+ [ ] Deprecate run_zscores() ?
-
 + [ ] Create function run_sharpe()
+
++ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] Fix scaling in calc_weights() ?
 
@@ -131,7 +149,7 @@ This avoids calling calc_var() in loop.
 
 + [ ] Create function fit_garch() to fit a GARCH process using a solver
 
-+ [ ] Rename calc_lm() to fit_lm(), and calc_reg() to fit_reg()
++ [ ] Rename calc_lm() to fit_lm(), and calc_reg() to fit_reg() ?
 
 + [ ] Create functions roll_max() and roll_min() using a look-back interval
 
@@ -155,7 +173,7 @@ https://en.cppreference.com/w/cpp/named_req/NullablePointer
 
 + [ ] In function calc_reg() add additional types of regressions: robust Theil-Sen regression, rank regression, quantile regression, PCA regression with shrinkage, etc.
 It should calculate Pearson, Spearman, and Kendall correlations.
-It should return a named vector of coefficients, tvals, and zscore.
+It should return a named vector of coefficients, tvals, and zscore - works only for Rcpp.
 
 + [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
@@ -165,7 +183,7 @@ Calculate rolling variance efficiently (used by package fromo): https://www.john
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
 
-+ [ ] Rewrite all weighted averages using convolution and function arma::conv2()
++ [ ] Rewrite all weighted averages using convolution and function arma::conv2() - it's actually quite slow
 
 + [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
@@ -294,8 +312,6 @@ Update the description documentation of roll_moment()
 Inoue Rolling Regressions Time Series Bias Variance Tradeoff.pdf
 Easley Volume Clock Trading Paradigm.pdf
 https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
-
-+ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory ?
 That may not always be correct, for example in the case of rolling calculations.

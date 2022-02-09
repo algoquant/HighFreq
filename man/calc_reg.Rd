@@ -8,6 +8,7 @@ of regression coefficients, their t-values, and the last residual z-score.}
 calc_reg(
   response,
   predictor,
+  intercept = FALSE,
   method = "least_squares",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
@@ -21,6 +22,10 @@ of response data.}
 
 \item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
+
+\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
+term should be added to the predictor (the default is \code{intercept =
+FALSE}).}
 
 \item{\code{method}}{A \emph{string} specifying the type of the regression
 model the default is \code{method = "least_squares"} - see Details).}
@@ -41,6 +46,7 @@ quantiles (the default is \code{conf_lev = 0.75}).}
 (the default is \code{0}).}
 }
 \value{
+A single-row matrix with
 A vector with the regression coefficients, their t-values, and the
   last residual z-score.
 }
@@ -53,24 +59,12 @@ The function \code{calc_reg()} performs multivariate regression using
   different methods, and returns a vector of regression coefficients, their
   t-values, and the last residual z-score.
 
-  The length of the return vector depends on the number of columns of
-  \code{predictor}.
-  The number of regression coefficients is equal to the number of columns of
-  \code{predictor} plus \code{1}.  The number of t-values is equal to the
-  number of coefficients.  And there is only \code{1} z-score.
-  So if the number of columns of \code{predictor} is equal to \code{n}, then
-  the return vector will have \code{2n+3} elements.
-
-  For example, if the predictor matrix has \code{2} columns of data, then
-  \code{calc_reg()} returns a vector with \code{7} elements: \code{3}
-  regression coefficients (including the intercept coefficient), \code{3}
-  corresponding t-values, and \code{1} z-score.
-
   If \code{method = "least_squares"} (the default) then it performs the
   standard least squares regression, the same as the function
-  \code{calc_reg()}, and the function \code{lm()} from package \emph{stats}.
-  It uses \code{RcppArmadillo} \code{C++} code so it's several times faster
-  than \code{lm()}.
+  \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
+  \emph{stats}.
+  But it uses \code{RcppArmadillo} \code{C++} code so it's several times
+  faster than \code{lm()}.
 
   If \code{method = "regular"} then it performs shrinkage regression.  It
   calculates the shrinkage inverse of the \code{predictor} matrix from its
@@ -80,6 +74,24 @@ The function \code{calc_reg()} performs multivariate regression using
   
   If \code{method = "quantile"} then it performs quantile regression (not
   implemented yet).
+
+  If \code{intercept = TRUE} then an extra intercept column (unit column) is
+  added to the predictor matrix (the default is \code{intercept = FALSE}).
+  
+  The length of the return vector depends on the number of columns of the
+  \code{predictor} matrix (including the intercept column, if it's added).
+  The length of the return vector is equal to the number of regression
+  coefficients, plus their t-values, plus the z-score.
+  The number of regression coefficients is equal to the number of columns of
+  the \code{predictor} matrix (including the intercept column, if it's
+  added).
+  The number of t-values is equal to the number of coefficients.
+
+  For example, if the number of columns of the \code{predictor} matrix is
+  equal to \code{n}, and if \code{intercept = TRUE}, then \code{calc_reg()}
+  returns a vector with \code{2n+3} elements: \code{n+1} regression
+  coefficients (including the intercept coefficient), \code{n+1}
+  corresponding t-values, and \code{1} z-score.
 }
 \examples{
 \dontrun{

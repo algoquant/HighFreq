@@ -20,8 +20,8 @@ is \code{look_back = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = NULL}).}
 
-\item{\code{weights}}{A \emph{column vector} of weights (the default is
-\code{weights = NULL}).}
+\item{\code{weights}}{A single-column \emph{matrix} of weights (the default
+is \code{weights = NULL}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument

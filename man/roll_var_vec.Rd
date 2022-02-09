@@ -3,31 +3,33 @@
 \name{roll_var_vec}
 \alias{roll_var_vec}
 \title{Calculate a \emph{vector} of variance estimates over a rolling look-back
-interval for a single-column \emph{time series} or a \emph{column vector}, using
-\code{RcppArmadillo}.}
+interval for a single-column \emph{time series} or a single-column
+\emph{matrix}, using \code{RcppArmadillo}.}
 \usage{
 roll_var_vec(tseries, look_back = 1L)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{column vector}.}
+\item{\code{tseries}}{A single-column \emph{time series} or a single-column
+\emph{matrix}.}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of \emph{vector} elements used for calculating a single variance
 estimate (the default is \code{look_back = 1}).}
 }
 \value{
-A \emph{column vector} with the same number of elements as the input
-  argument \code{tseries}.
+A single-column \emph{matrix} with the same number of elements as
+  the input argument \code{tseries}.
 }
 \description{
 Calculate a \emph{vector} of variance estimates over a rolling look-back
-interval for a single-column \emph{time series} or a \emph{column vector}, using
-\code{RcppArmadillo}.
+interval for a single-column \emph{time series} or a single-column
+\emph{matrix}, using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_var_vec()} calculates a \emph{vector} of variance
   estimates over a rolling look-back interval for a single-column \emph{time
-  series} or a \emph{column vector}, using \code{RcppArmadillo} \code{C++} code.
+  series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
+  \code{C++} code.
   
   The function \code{roll_var_vec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the

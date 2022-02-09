@@ -82,9 +82,9 @@ z_scores <- HighFreq::roll_zscores(response=res_ponse, predictor=predic_tor, loo
 z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
   if (ro_w == 1) return(0)
   start_point <- max(1, ro_w-look_back+1)
-  sub_response <- res_ponse[start_point:ro_w]
-  sub_predictor <- predic_tor[start_point:ro_w, ]
-  reg_model <- lm(sub_response ~ sub_predictor)
+  responsi <- res_ponse[start_point:ro_w]
+  predicti <- predic_tor[start_point:ro_w, ]
+  reg_model <- lm(responsi ~ predicti)
   resid_uals <- reg_model$residuals
   resid_uals[NROW(resid_uals)]/sd(resid_uals)
 })  # end sapply

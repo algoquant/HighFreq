@@ -8,6 +8,7 @@ z-scores, at the end points of the predictor matrix.}
 roll_reg(
   response,
   predictor,
+  intercept = FALSE,
   startp = 0L,
   endp = 0L,
   step = 1L,
@@ -42,6 +43,10 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
+\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
+term should be added to the predictor (the default is \code{intercept =
+FALSE}).}
+
 \item{\code{method}}{A \emph{string} specifying the type of the regression
 model the default is \code{method = "least_squares"} - see Details).}
 
@@ -61,7 +66,10 @@ quantiles (the default is \code{conf_lev = 0.75}).}
 (the default is \code{0}).}
 }
 \value{
-A \emph{matrix} with the same number of rows as \code{predictor}, and a
+A \emph{matrix} with the regression coefficients, their t-values, and
+z-scores, and with the 
+same number of rows as \code{predictor}
+a
   number of columns equal to \code{2n+3}, where \code{n} is the number of
   columns of \code{predictor}.
 }
@@ -78,9 +86,6 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   each end point it subsets the time series \code{predictor} over a look-back
   interval equal to \code{look_back} number of end points.
   
-  It passes the subset time series to the function \code{calc_reg()}, which
-  calculates the regression data.
-  
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{predictor}
@@ -90,6 +95,27 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   For example, the rolling regression at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
   \code{step = 25} and \code{look_back = 3}.
+
+  It passes the subset time series to the function \code{calc_reg()}, which
+  calculates the regression coefficients, their t-values, and the z-score.
+  
+  If \code{intercept = TRUE} then an extra intercept column (unit column) is
+  added to the predictor matrix (the default is \code{intercept = FALSE}).
+  
+  The number of columns of the return matrix depends on the number of
+  columns of the \code{predictor} matrix (including the intercept column, if
+  it's added).
+  The number of columns of the return matrix is equal to the number of
+  regression coefficients, plus their t-values, plus the z-score column.
+  The number of regression coefficients is equal to the number of columns of
+  the \code{predictor} matrix (including the intercept column, if it's
+  added).
+  The number of t-values is equal to the number of coefficients.
+  For example, if the number of columns of the \code{predictor} matrix is
+  equal to \code{n}, and if \code{intercept = TRUE}, then \code{roll_reg()}
+  returns a matrix with \code{2n+3} columns: \code{n+1} regression
+  coefficients (including the intercept coefficient), \code{n+1}
+  corresponding t-values, and \code{1} z-score column.
 }
 \examples{
 \dontrun{

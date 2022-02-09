@@ -15,7 +15,7 @@ roll_var_ohlc(
   stub = 0L,
   method = "yang_zhang",
   scale = TRUE,
-  in_dex = 0L
+  index = 0L
 )
 }
 \arguments{
@@ -52,8 +52,8 @@ estimator for calculating the variance.  The estimators include:
 by the time index, the number of seconds in each period?  (The default is
 \code{scale = TRUE}.)}
 
-\item{\code{in_dex}}{A \emph{vector} with the time index of the \emph{time
-series}.  This is an optional argument (the default is \code{in_dex=0}).}
+\item{\code{index}}{A \emph{vector} with the time index of the \emph{time
+series}.  This is an optional argument (the default is \code{index=0}).}
 }
 \value{
 A column \emph{vector} of variance estimates, with the number of
@@ -116,7 +116,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   time index is in days, then the variance is equal to the variance per day
   squared.
   
-  The optional argument \code{in_dex} is the time index of the \emph{time
+  The optional argument \code{index} is the time index of the \emph{time
   series} \code{ohlc}. If the time index is in seconds, then the
   differences of the index are equal to the number of seconds in each time
   period.  If the time index is in days, then the differences are equal to
@@ -136,7 +136,7 @@ in_dex <- c(1, diff(xts::.index(oh_lc)))
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
                               step=1, look_back=21, 
                               method="yang_zhang", 
-                              in_dex=in_dex, scale=TRUE)
+                              index=in_dex, scale=TRUE)
 # Daily OHLC prices
 oh_lc <- rutils::etf_env$VTI
 in_dex <- c(1, diff(xts::.index(oh_lc)))
@@ -144,19 +144,19 @@ in_dex <- c(1, diff(xts::.index(oh_lc)))
 var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
                               step=5, look_back=4, 
                               method="yang_zhang", 
-                              in_dex=in_dex, scale=TRUE)
+                              index=in_dex, scale=TRUE)
 # Same calculation in R
 n_rows <- NROW(oh_lc)
-lag_close = HighFreq::lag_it(oh_lc[, 4])
+close_lag = HighFreq::lag_it(oh_lc[, 4])
 end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
 start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
 n_pts <- NROW(end_p)
 var_rollingr <- sapply(2:n_pts, function(it) {
   ran_ge <- start_p[it]:end_p[it]
   sub_ohlc = oh_lc[ran_ge, ]
-  sub_close = lag_close[ran_ge]
+  sub_close = close_lag[ran_ge]
   sub_index = in_dex[ran_ge]
-  HighFreq::calc_var_ohlc(sub_ohlc, lag_close=sub_close, scale=TRUE, in_dex=sub_index)
+  HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 })  # end sapply
 var_rollingr <- c(0, var_rollingr)
 all.equal(drop(var_rolling), var_rollingr)
