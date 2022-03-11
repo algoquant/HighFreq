@@ -42,12 +42,12 @@ the \emph{open} value of the first row of \code{tseries}.
 \examples{
 \dontrun{
 # Define matrix of OHLC data
-oh_lc <- coredata(rutils::etf_env$VTI[, 1:5])
+ohlc <- coredata(rutils::etfenv$VTI[, 1:5])
 # Aggregate to single row matrix
-ohlc_agg <- HighFreq::agg_ohlc(oh_lc)
+ohlcagg <- HighFreq::agg_ohlc(ohlc)
 # Compare with calculation in R
-all.equal(drop(ohlc_agg),
-  c(oh_lc[1, 1], max(oh_lc[, 2]), min(oh_lc[, 3]), oh_lc[NROW(oh_lc), 4], sum(oh_lc[, 5])), 
+all.equal(drop(ohlcagg),
+  c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
   check.attributes=FALSE)
 }
 

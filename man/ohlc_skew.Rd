@@ -5,10 +5,10 @@
 \title{Calculate time series of point skew estimates from a \emph{OHLC} time series,
 assuming zero drift.}
 \usage{
-ohlc_skew(oh_lc, method = "rogers_satchell")
+ohlc_skew(ohlc, method = "rogers_satchell")
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{method}}{A \emph{character} string representing method for
 estimating skew.}
@@ -36,5 +36,5 @@ The function \code{ohlc_skew()} calculates a time series of skew
 }
 \examples{
 # Calculate time series of skew estimates for SPY
-sk_ew <- HighFreq::ohlc_skew(HighFreq::SPY)
+skew <- HighFreq::ohlc_skew(HighFreq::SPY)
 }

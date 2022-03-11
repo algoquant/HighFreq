@@ -83,13 +83,13 @@ The function \code{calc_var_ohlc_ag()} calculates the variance of
 \examples{
 \dontrun{
 # Calculate the log ohlc prices
-oh_lc <- log(rutils::etf_env$VTI)
+ohlc <- log(rutils::etfenv$VTI)
 # Calculate the daily variance of percentage returns
-calc_var_ohlc_ag(oh_lc, step=1)
+calc_var_ohlc_ag(ohlc, step=1)
 # Calculate the variance of returns aggregated over 21 days
-calc_var_ohlc_ag(oh_lc, step=21)
+calc_var_ohlc_ag(ohlc, step=21)
 # The variance over 21 days is approximately 21 times the daily variance
-21*calc_var_ohlc_ag(oh_lc, step=1)
+21*calc_var_ohlc_ag(ohlc, step=1)
 }
 
 }

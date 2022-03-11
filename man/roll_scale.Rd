@@ -46,10 +46,10 @@ The function \code{roll_scale()} performs a rolling scaling
 }
 \examples{
 \dontrun{
-mat_rix <- matrix(rnorm(20000), nc=2)
+matrixv <- matrix(rnorm(20000), nc=2)
 look_back <- 11
-rolled_scaled <- roll::roll_scale(data=mat_rix, width = look_back, min_obs=1)
-rolled_scaled2 <- roll_scale(matrix=mat_rix, look_back = look_back, use_median=FALSE)
+rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
+rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
 all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
 }
 

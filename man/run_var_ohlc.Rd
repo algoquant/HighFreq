@@ -55,24 +55,24 @@ The function \code{run_var_ohlc()} calculates a single-column
 \examples{
 \dontrun{
 # Extract the log OHLC prices of VTI
-oh_lc <- log(rutils::etf_env$VTI)
+ohlc <- log(rutils::etfenv$VTI)
 # Calculate the running variance
-var_running <- HighFreq::run_var_ohlc(oh_lc, lambda=0.8)
+var_running <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
 # Calculate the rolling variance
-var_rolling <- HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE)
-da_ta <- cbind(var_running, var_rolling)
-colnames(da_ta) <- c("running", "rolling")
-col_names <- colnames(da_ta)
-da_ta <- xts::xts(da_ta, index(oh_lc))
+var_rolling <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
+datav <- cbind(var_running, var_rolling)
+colnames(datav) <- c("running", "rolling")
+colnamev <- colnames(datav)
+datav <- xts::xts(datav, index(ohlc))
 # dygraph plot of VTI running versus rolling volatility
-dygraphs::dygraph(sqrt(da_ta[-(1:111), ]), main="Running and Rolling Volatility of VTI") \%>\%
+dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Running and Rolling Volatility of VTI") \%>\%
   dyOptions(colors=c("red", "blue"), strokeWidth=1) \%>\%
   dyLegend(show="always", width=500)
 # Compare the speed of running versus rolling volatility
 library(microbenchmark)
 summary(microbenchmark(
-  running=HighFreq::run_var_ohlc(oh_lc, lambda=0.8),
-  rolling=HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE),
+  running=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+  rolling=HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE),
   times=10))[, c(1, 4, 5)]
 }
 }

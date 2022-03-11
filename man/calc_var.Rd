@@ -66,27 +66,27 @@ The dispersion is a measure of the variability of the data.  Examples of
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 # Compare HighFreq::calc_var() with standard var()
-all.equal(drop(HighFreq::calc_var(re_turns)), 
-  apply(re_turns, 2, var), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(returns)), 
+  apply(returns, 2, var), check.attributes=FALSE)
 # Compare HighFreq::calc_var() with matrixStats
-all.equal(drop(HighFreq::calc_var(re_turns)), 
-  matrixStats::colVars(re_turns), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(returns)), 
+  matrixStats::colVars(returns), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(re_turns),
-  matrixStats=matrixStats::colVars(re_turns),
-  Rcode=apply(re_turns, 2, var),
+  Rcpp=HighFreq::calc_var(returns),
+  matrixStats=matrixStats::colVars(returns),
+  Rcode=apply(returns, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_var() with stats::mad()
-all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
-  sapply(re_turns, mad), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(returns, method="nonparametric")), 
+  sapply(returns, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
-  Rcode=sapply(re_turns, mad),
+  Rcpp=HighFreq::calc_var(returns, method="nonparametric"),
+  Rcode=sapply(returns, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

@@ -55,13 +55,13 @@ The function \code{calc_cvar()} calculates the Value at Risk (\emph{VaR})
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+returns <- na.omit(rutils::etf_env$returns[, c("VTI", "XLF")])
 # Calculate VaR
-all.equal(HighFreq::calc_cvar(re_turns), 
-  sapply(re_turns, quantile, probs=pnorm(-2)), check.attributes=FALSE)
+all.equal(HighFreq::calc_cvar(returns), 
+  sapply(returns, quantile, probs=pnorm(-2)), check.attributes=FALSE)
 # Calculate CVaR
-all.equal(HighFreq::calc_cvar(re_turns, method="cvar", con_fi=0.02), 
-  sapply(re_turns, function(x) mean(x[x < quantile(x, 0.02)])), 
+all.equal(HighFreq::calc_cvar(returns, method="cvar", con_fi=0.02), 
+  sapply(returns, function(x) mean(x[x < quantile(x, 0.02)])), 
   check.attributes=FALSE)
 }
 

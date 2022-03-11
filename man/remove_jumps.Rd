@@ -5,15 +5,15 @@
 \title{Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
 by adding adjustment terms to its prices.}
 \usage{
-remove_jumps(oh_lc)
+remove_jumps(ohlc)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 }
 \value{
 An \emph{OHLC} time series with the same dimensions and the same time
-  index as the input \code{oh_lc} time series.
+  index as the input \code{ohlc} time series.
 }
 \description{
 Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
@@ -33,11 +33,11 @@ The function \code{remove_jumps()} removes the overnight
   that are greater than 60 seconds. This assumes that intra-day periods
   between neighboring rows of data are 60 seconds or less.
 
-  The time index of the \code{oh_lc} time series is assumed to be in
+  The time index of the \code{ohlc} time series is assumed to be in
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 }
 \examples{
 # Remove overnight close-to-open price jumps from SPY data
-oh_lc <- remove_jumps(HighFreq::SPY)
+ohlc <- remove_jumps(HighFreq::SPY)
 }

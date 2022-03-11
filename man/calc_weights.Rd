@@ -95,24 +95,24 @@ The function \code{calc_weights()} calculates the optimal portfolio
 \examples{
 \dontrun{
 # Calculate covariance matrix of ETF returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
-ei_gen <- eigen(cov(re_turns))
+returns <- na.omit(rutils::etfenv$returns[, 1:16])
+eigend <- eigen(cov(returns))
 # Calculate shrinkage inverse of covariance matrix
 eigen_max <- 3
-eigen_vec <- ei_gen$vectors[, 1:eigen_max]
-eigen_val <- ei_gen$values[1:eigen_max]
-in_verse <- eigen_vec \%*\% (t(eigen_vec) / eigen_val)
+eigenvec <- eigend$vectors[, 1:eigen_max]
+eigenval <- eigend$values[1:eigen_max]
+in_verse <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 al_pha <- 0.5
-col_means <- colMeans(re_turns)
+col_means <- colMeans(returns)
 col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
 # Calculate weights using R
-weight_s <- in_verse \%*\% col_means
-n_col <- NCOL(re_turns)
-weights_r <- weights_r*sd(re_turns \%*\% rep(1/n_col, n_col))/sd(re_turns \%*\% weights_r)
+weights <- in_verse \%*\% col_means
+n_col <- NCOL(returns)
+weights_r <- weights_r*sd(returns \%*\% rep(1/n_col, n_col))/sd(returns \%*\% weights_r)
 # Calculate weights using RcppArmadillo
-weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
-all.equal(weight_s, weights_r)
+weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=al_pha))
+all.equal(weights, weights_r)
 }
 
 }

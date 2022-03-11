@@ -5,17 +5,17 @@
 \title{Calculate a time series of Sharpe ratios over a rolling look-back interval
 for an \emph{OHLC} time series.}
 \usage{
-roll_sharpe(oh_lc, look_back = 11)
+roll_sharpe(ohlc, look_back = 11)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{look_back}}{The size of the look-back interval, equal to the number of
 rows of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of
-  rows as the argument \code{oh_lc}.
+  rows as the argument \code{ohlc}.
 }
 \description{
 Calculate a time series of Sharpe ratios over a rolling look-back interval
@@ -28,5 +28,5 @@ The function \code{roll_sharpe()} calculates the rolling Sharpe
 }
 \examples{
 # Calculate rolling Sharpe ratio over SPY
-sharpe_rolling <- roll_sharpe(oh_lc=HighFreq::SPY, look_back=11)
+sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, look_back=11)
 }

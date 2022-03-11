@@ -32,18 +32,18 @@ The function \code{roll_vec()} calculates a single-column \emph{matrix} of
 \examples{
 \dontrun{
 # Define a single-column matrix of returns
-re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate rolling sums over 11-period look-back intervals
-sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
+sum_rolling <- HighFreq::roll_vec(returns, look_back=11)
 # Compare HighFreq::roll_vec() with rutils::roll_sum()
-all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
-         rutils::roll_sum(re_turns, look_back=11), 
+all.equal(HighFreq::roll_vec(returns, look_back=11), 
+         rutils::roll_sum(returns, look_back=11), 
          check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_vec(re_turns, look_back=11),
-  Rcode=rutils::roll_sum(re_turns, look_back=11),
+  Rcpp=HighFreq::roll_vec(returns, look_back=11),
+  Rcode=rutils::roll_sum(returns, look_back=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

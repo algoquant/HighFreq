@@ -77,9 +77,9 @@ ratios of the volatilities of aggregated \emph{OHLC} prices.
 \examples{
 \dontrun{
 # Calculate the log ohlc prices
-oh_lc <- log(rutils::etf_env$VTI)
+ohlc <- log(rutils::etfenv$VTI)
 # Calculate the Hurst exponent from 21 day aggregations
-calc_hurst_ohlc(oh_lc, step=21)
+calc_hurst_ohlc(ohlc, step=21)
 }
 
 }

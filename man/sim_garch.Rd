@@ -87,12 +87,12 @@ garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov
 plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 # Calculate historical VTI returns
-re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+returns <- na.omit(rutils::etfenv$returns$VTI)
 # Estimate the GARCH volatility of VTI returns
 garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
-  innov=re_turns, is_random=FALSE)
+  innov=returns, is_random=FALSE)
 # Plot dygraph of the estimated GARCH volatility
-dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(returns)), 
   main="Estimated GARCH Volatility of VTI")
 }
 

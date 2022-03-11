@@ -39,7 +39,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
   convolutions of the columns of \code{tseries} with the \emph{column
   vector} of weights using the \code{RcppArmadillo} function
   \code{arma::conv2()}.  It performs a similar calculation to the standard
-  \code{R} function \cr\code{stats::filter(x=re_turns, filter=weight_s,
+  \code{R} function \cr\code{stats::filter(x=returns, filter=weights,
   method="convolution", sides=1)}, but it can be many times faster, and it
   doesn't produce any leading \code{NA} values.
   
@@ -75,53 +75,53 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
 \dontrun{
 # First example
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
 # Calculate rolling sums and compare with rutils::roll_sum()
-c_sum <- HighFreq::roll_sum(re_turns, look_back)
-r_sum <- rutils::roll_sum(re_turns, look_back)
+c_sum <- HighFreq::roll_sum(returns, look_back)
+r_sum <- rutils::roll_sum(returns, look_back)
 all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 # Calculate rolling sums using R code
-r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+r_sum <- apply(zoo::coredata(returns), 2, cumsum)
 lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 r_sum <- (r_sum - lag_sum)
 all.equal(c_sum, r_sum, check.attributes=FALSE)
 
 # Calculate rolling sums at end points
 stu_b <- 21
-c_sum <- HighFreq::roll_wsum(re_turns, look_back, stub=stu_b)
-end_p <- (stu_b + look_back*(0:(NROW(re_turns) \%/\% look_back)))
-end_p <- end_p[end_p < NROW(re_turns)]
-r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
-r_sum <- r_sum[end_p+1, ]
+c_sum <- HighFreq::roll_wsum(returns, look_back, stub=stu_b)
+endp <- (stu_b + look_back*(0:(NROW(returns) \%/\% look_back)))
+endp <- endp[endp < NROW(returns)]
+r_sum <- apply(zoo::coredata(returns), 2, cumsum)
+r_sum <- r_sum[endp+1, ]
 lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
 r_sum <- (r_sum - lag_sum)
 all.equal(c_sum, r_sum, check.attributes=FALSE)
 
-# Calculate rolling sums at end points - pass in end_p
-c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p)
+# Calculate rolling sums at end points - pass in endp
+c_sum <- HighFreq::roll_wsum(returns, endp=endp)
 all.equal(c_sum, r_sum, check.attributes=FALSE)
 
 # Create exponentially decaying weights
-weight_s <- exp(-0.2*(1:11))
-weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+weights <- exp(-0.2*(1:11))
+weights <- matrix(weights/sum(weights), nc=1)
 # Calculate rolling weighted sum
-c_sum <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+c_sum <- HighFreq::roll_wsum(returns, weights=weights)
 # Calculate rolling weighted sum using filter()
-filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p, weights=weight_s)
-all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
+c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
+all.equal(c_sum, filter_ed[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
-weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+weights <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weight_ed <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+weight_ed <- HighFreq::roll_wsum(returns, weights=weights)
 # Compare with original
-all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 }
 
 }

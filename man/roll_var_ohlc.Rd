@@ -129,33 +129,33 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
 \examples{
 \dontrun{
 # Extract the log OHLC prices of SPY
-oh_lc <- log(HighFreq::SPY)
+ohlc <- log(HighFreq::SPY)
 # Extract the time index of SPY prices
-in_dex <- c(1, diff(xts::.index(oh_lc)))
+indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at minutely end points, with a 21 minute look-back
-var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
                               step=1, look_back=21, 
                               method="yang_zhang", 
-                              index=in_dex, scale=TRUE)
+                              index=indeks, scale=TRUE)
 # Daily OHLC prices
-oh_lc <- rutils::etf_env$VTI
-in_dex <- c(1, diff(xts::.index(oh_lc)))
+ohlc <- rutils::etfenv$VTI
+indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
-var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
                               step=5, look_back=4, 
                               method="yang_zhang", 
-                              index=in_dex, scale=TRUE)
+                              index=indeks, scale=TRUE)
 # Same calculation in R
-n_rows <- NROW(oh_lc)
-close_lag = HighFreq::lag_it(oh_lc[, 4])
-end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
-start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
-n_pts <- NROW(end_p)
+nrows <- NROW(ohlc)
+close_lag = HighFreq::lagit(ohlc[, 4])
+endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+startp <- drop(HighFreq::calc_startpoints(endp, 2))
+n_pts <- NROW(endp)
 var_rollingr <- sapply(2:n_pts, function(it) {
-  ran_ge <- start_p[it]:end_p[it]
-  sub_ohlc = oh_lc[ran_ge, ]
-  sub_close = close_lag[ran_ge]
-  sub_index = in_dex[ran_ge]
+  rangev <- startp[it]:endp[it]
+  sub_ohlc = ohlc[rangev, ]
+  sub_close = close_lag[rangev]
+  sub_index = indeks[rangev]
   HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 })  # end sapply
 var_rollingr <- c(0, var_rollingr)

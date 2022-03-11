@@ -6,9 +6,9 @@
 \emph{xts} format.}
 \usage{
 random_taq(
-  vol_at = 6.5e-05,
-  dri_ft = 0,
-  in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
+  volat = 6.5e-05,
+  drift = 0,
+  indeks = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
     as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
   bid_offer = 0.001,
   ...
@@ -18,17 +18,17 @@ random_taq(
 \item{bid_offer}{The bid-offer spread expressed as a fraction of the prices
 (default is 0.001=10bps).}
 
-\item{\code{vol_at}}{The volatility per period of the \code{in_dex} time index
+\item{\code{volat}}{The volatility per period of the \code{indeks} time index
 (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{\code{dri_ft}}{The drift per period of the \code{in_dex} time index (default
+\item{\code{drift}}{The drift per period of the \code{indeks} time index (default
 is 0.0).}
 
-\item{\code{in_dex}}{The time index for the \emph{TAQ} time series.}
+\item{\code{indeks}}{The time index for the \emph{TAQ} time series.}
 }
 \value{
 An \emph{xts} time series, with time index equal to the input
-  \code{in_dex} time index, and with four columns containing the bid, ask,
+  \code{indeks} time index, and with four columns containing the bid, ask,
   and trade prices, and the trade volume.
 }
 \description{
@@ -40,12 +40,12 @@ The function \code{random_taq()} calculates an \emph{xts} time
   series with four columns containing random prices following geometric
   Brownian motion: the bid, ask, and trade prices, combined with random trade
   volume data.
-  If \code{in_dex} isn't supplied as an argument, then by default it's
+  If \code{indeks} isn't supplied as an argument, then by default it's
   equal to the secondly index over the two previous calendar days.
 }
 \examples{
 # Create secondly TAQ time series of random prices
-ta_q <- HighFreq::random_taq()
+taq <- HighFreq::random_taq()
 # Create random TAQ time series from SPY index
-ta_q <- HighFreq::random_taq(in_dex=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
+taq <- HighFreq::random_taq(indeks=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
 }

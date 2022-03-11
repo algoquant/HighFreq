@@ -5,17 +5,17 @@
 \title{Calculate time series of point Sharpe-like statistics for each row of a
 \emph{OHLC} time series.}
 \usage{
-ohlc_sharpe(oh_lc, method = "close")
+ohlc_sharpe(ohlc, method = "close")
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{method}}{A \emph{character} string representing method for
 estimating the Sharpe-like exponent.}
 }
 \value{
 An \emph{xts} time series with the same number of rows as the
-  argument \code{oh_lc}.
+  argument \code{ohlc}.
 }
 \description{
 Calculate time series of point Sharpe-like statistics for each row of a

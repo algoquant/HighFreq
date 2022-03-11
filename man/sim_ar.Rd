@@ -32,7 +32,7 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
   The function \code{sim_ar()} simulates an \emph{autoregressive} process
   \eqn{AR(n)} of order \eqn{n}:
   \deqn{
-    r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+    r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
   }
   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -43,26 +43,26 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
   \code{coeff}.
 
   The function \code{sim_ar()} performs the same calculation as the standard
-  \code{R} function \cr\code{filter(x=innov, filter=co_eff,
+  \code{R} function \cr\code{filter(x=innov, filter=coeff,
   method="recursive")}, but it's several times faster.
 }
 \examples{
 \dontrun{
 # Define AR coefficients
-co_eff <- matrix(c(0.2, 0.2))
+coeff <- matrix(c(0.2, 0.2))
 # Calculate matrix of innovations
 in_nov <- matrix(rnorm(1e4, sd=0.01))
 # Calculate recursive filter using filter()
-filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
+filter_ed <- filter(in_nov, filter=coeff, method="recursive")
 # Calculate recursive filter using RcppArmadillo
-re_turns <- HighFreq::sim_ar(co_eff, in_nov)
+returns <- HighFreq::sim_ar(coeff, in_nov)
 # Compare the two methods
-all.equal(as.numeric(re_turns), as.numeric(filter_ed))
+all.equal(as.numeric(returns), as.numeric(filter_ed))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::sim_ar(co_eff, in_nov),
-  Rcode=filter(in_nov, filter=co_eff, method="recursive"),
+  Rcpp=HighFreq::sim_ar(coeff, in_nov),
+  Rcode=filter(in_nov, filter=coeff, method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

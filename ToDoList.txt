@@ -80,6 +80,13 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Simplify variable names by removing underscores: sym_bols -> symbolv, x_ts -> xtes
+Use last letter "d" for dates, "t" for times, "v" for variables, vectors and lists, "s" for series, etc.
+Run shell script:
+/Users/jerzy/Develop/lecture_slides/scripts/run.sh
+chmod +x run.sh
+./run.sh
+
 + [x] Modify function run_mean() to calculate the running weighted mean if the weight vector is passed as an argument
 
 + [ ] Deprecate run_zscores() because run_reg() is the new version ?

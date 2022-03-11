@@ -5,18 +5,18 @@
 \title{Calculate single period percentage returns from either \emph{TAQ} or
 \emph{OHLC} prices.}
 \usage{
-ohlc_returns(x_ts, lagg = 1, col_umn = 4, scal_e = TRUE)
+ohlc_returns(xtes, lagg = 1, colnum = 4, scalit = TRUE)
 }
 \arguments{
-\item{\code{x_ts}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
+\item{\code{xtes}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
 
 \item{\code{lagg}}{An integer equal to the number of time periods of lag. (default
 is 1)}
 
-\item{\code{col_umn}}{The column number to extract from the \emph{OHLC} data.
+\item{\code{colnum}}{The column number to extract from the \emph{OHLC} data.
 (default is \code{4}, or the \emph{Close} prices column)}
 
-\item{\code{scal_e}}{\emph{Boolean} argument: should the returns be divided by the
+\item{\code{scalit}}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
@@ -32,31 +32,31 @@ The function \code{ohlc_returns()} calculates the percentage returns
   prices.  Multi-period returns can be calculated by setting the \code{lag}
   parameter to values greater than \code{1} (the default).
 
-  If \code{scal_e} is \code{TRUE} (the default), then the returns are divided
+  If \code{scalit} is \code{TRUE} (the default), then the returns are divided
   by the differences of the time index (which scales the returns to units of
   returns per second.)
 
-  The time index of the \code{x_ts} time series is assumed to be in
+  The time index of the \code{xtes} time series is assumed to be in
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the returns are
-  expressed in the scale of the time index of the \code{x_ts} time series.
+  If \code{scalit} is \code{TRUE} (the default), then the returns are
+  expressed in the scale of the time index of the \code{xtes} time series.
   For example, if the time index is in seconds, then the returns are given in
   units of returns per second.  If the time index is in days, then the
   returns are equal to the returns per day.
 
-  The function \code{ohlc_returns()} identifies the \code{x_ts} time series as
+  The function \code{ohlc_returns()} identifies the \code{xtes} time series as
   \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
   prices, but can also difference other prices depending on the value of
-  \code{col_umn}.
+  \code{colnum}.
 }
 \examples{
 # Calculate secondly returns from TAQ data
-re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY_TAQ)
+returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY_TAQ)
 # Calculate close to close returns
-re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY)
+returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY)
 # Calculate open to open returns
-re_turns <- HighFreq::ohlc_returns(x_ts=HighFreq::SPY, col_umn=1)
+returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY, colnum=1)
 }

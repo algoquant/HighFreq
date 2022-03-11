@@ -6,7 +6,7 @@
 and save them to a single \sQuote{\code{*.RData}} file, without aggregation.}
 \usage{
 save_rets_ohlc(
-  sym_bol,
+  symbol,
   data_dir = "E:/output/data/",
   output_dir = "E:/output/data/"
 )

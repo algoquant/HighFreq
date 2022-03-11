@@ -44,10 +44,10 @@ The function \code{calc_hurst()} calculates the Hurst exponent from the
 \examples{
 \dontrun{
 # Calculate the log prices
-price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-price_s <- log(price_s)
+prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+prices <- log(prices)
 # Calculate the Hurst exponent from 21 day aggregations
-calc_hurst(price_s, step=21)
+calc_hurst(prices, step=21)
 }
 
 }

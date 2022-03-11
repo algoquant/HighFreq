@@ -6,7 +6,7 @@
 \emph{OHLC} format.}
 \usage{
 scrub_agg(
-  ta_q,
+  taq,
   look_back = 51,
   vol_mult = 2,
   period = "minutes",
@@ -40,11 +40,11 @@ series is rounded up to the next integer multiple of 'period'.
 }
 \examples{
 # Create random TAQ prices
-ta_q <- HighFreq::random_taq()
+taq <- HighFreq::random_taq()
 # Aggregate to ten minutes OHLC data
-oh_lc <- HighFreq::scrub_agg(ta_q, period="10 min")
-chart_Series(oh_lc, name="random prices")
+ohlc <- HighFreq::scrub_agg(taq, period="10 min")
+chart_Series(ohlc, name="random prices")
 # scrub and aggregate a single day of SPY TAQ data to OHLC
-oh_lc <- HighFreq::scrub_agg(ta_q=HighFreq::SPY_TAQ)
-chart_Series(oh_lc, name=sym_bol)
+ohlc <- HighFreq::scrub_agg(taq=HighFreq::SPY_TAQ)
+chart_Series(ohlc, name=symbol)
 }

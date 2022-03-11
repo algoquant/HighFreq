@@ -6,12 +6,12 @@
 end points along a time series of prices.}
 \usage{
 roll_backtest(
-  x_ts,
+  xtes,
   train_func,
   trade_func,
   look_back = look_forward,
   look_forward,
-  end_points = rutils::calc_endpoints(x_ts, look_forward),
+  endpoints = rutils::calc_endpoints(xtes, look_forward),
   ...
 )
 }
@@ -19,7 +19,7 @@ roll_backtest(
 \item{...}{additional parameters to the functions \code{train_func()} and
 \code{trade_func()}.}
 
-\item{\code{x_ts}}{A time series of prices, asset returns, trading volumes, and
+\item{\code{xtes}}{A time series of prices, asset returns, trading volumes, and
 other data, in \emph{xts} format.}
 
 \item{\code{train_func}}{The name of the function for training (calibrating) a
@@ -34,7 +34,7 @@ rows of data used for training the forecasting model.}
 \item{\code{look_forward}}{The size of the look-forward interval, equal to the number
 of rows of data used for trading the strategy.}
 
-\item{\code{end_points}}{A vector of end points along the rows of the \code{x_ts}
+\item{\code{endpoints}}{A vector of end points along the rows of the \code{xtes}
 time series, given as either integers or dates.}
 }
 \value{
@@ -49,7 +49,7 @@ end points along a time series of prices.
 The function \code{roll_backtest()} performs a rolling backtest 
   simulation of a trading strategy over a vector of end points. At each end 
   point, it trains (calibrates) a forecasting model using past data taken 
-  from the \code{x_ts} time series over the look-back interval, and applies
+  from the \code{xtes} time series over the look-back interval, and applies
   the forecasts to the \code{trade_func()} trading model, using out-of-sample
   future data from the look-forward interval.
   
@@ -60,28 +60,28 @@ The function \code{roll_backtest()} performs a rolling backtest
   elements, like the in-sample calibrated model statistics, etc.
 
   The function \code{roll_backtest()} returns a named list containing the
-  lists returned by function \code{trade_func()}.  The list names are equal
-  to the \emph{end_points} dates. 
-  The number of list elements is equal to the number of \emph{end_points}
+  listv returned by function \code{trade_func()}.  The list names are equal
+  to the \emph{endpoints} dates. 
+  The number of list elements is equal to the number of \emph{endpoints}
   minus two (because the first and last end points can't be included in the
   backtest).
 }
 \examples{
 \dontrun{
 # Combine two time series of prices
-price_s <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
+prices <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
 look_back <- 252
 look_forward <- 22
 # Define end points
-end_points <- rutils::calc_endpoints(price_s, look_forward)
+endpoints <- rutils::calc_endpoints(prices, look_forward)
 # Perform back-test
-back_test <- roll_backtest(end_points=end_points,
+back_test <- roll_backtest(endpoints=endpoints,
     look_forward=look_forward,
     look_back=look_back,
     train_func = train_model,
     trade_func = trade_model,
     model_params = model_params,
     trading_params = trading_params,
-    x_ts=price_s)
+    xtes=prices)
 }
 }

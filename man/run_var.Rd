@@ -52,7 +52,7 @@ The function \code{run_var()} calculates the running variance of a
 
   The function \code{run_var()} performs the same calculation as the
   standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weight_s, method="recursive")}, but it's several times faster.
+  filter=weights, method="recursive")}, but it's several times faster.
 
   The function \code{run_var()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -60,20 +60,20 @@ The function \code{run_var()} calculates the running variance of a
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the running variance
-lamb_da <- 0.9
-vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
+lambdav <- 0.9
+vars <- HighFreq::run_var(returns, lambda=lambdav)
 # Calculate running variance using R code
-filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
-  init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
+filter_ed <- (1-lambdav)*filter(returns^2, filter=lambdav, 
+  init=as.numeric(returns[1, 1])^2/(1-lambdav), 
   method="recursive")
 all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_var(re_turns, lambda=lamb_da),
-  Rcode=filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive"),
+  Rcpp=HighFreq::run_var(returns, lambda=lambdav),
+  Rcode=filter(returns^2, filter=lambdav, init=as.numeric(returns[1, 1])^2/(1-lambdav), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

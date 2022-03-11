@@ -48,44 +48,44 @@ The function \code{calc_mean()} calculates the mean (location) values of
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Calculate the column means in RcppArmadillo
-HighFreq::calc_mean(re_turns)
+HighFreq::calc_mean(returns)
 # Calculate the column means in R
-sapply(re_turns, mean)
+sapply(returns, mean)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(re_turns)), 
-  sapply(re_turns, mean), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(returns)), 
+  sapply(returns, mean), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(re_turns),
-  Rcode=sapply(re_turns, mean),
+  Rcpp=HighFreq::calc_mean(returns),
+  Rcode=sapply(returns, mean),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile mean (location)
-HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)
+HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
 # Calculate the quantile mean (location) in R
-colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
+colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)), 
-  colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
+all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+  colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9),
-  Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
+  Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+  Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the column medians in RcppArmadillo
-HighFreq::calc_mean(re_turns, method="nonparametric")
+HighFreq::calc_mean(returns, method="nonparametric")
 # Calculate the column medians in R
-sapply(re_turns, median)
+sapply(returns, median)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
-  sapply(re_turns, median), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(returns, method="nonparametric")), 
+  sapply(returns, median), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
-  Rcode=sapply(re_turns, median),
+  Rcpp=HighFreq::calc_mean(returns, method="nonparametric"),
+  Rcode=sapply(returns, median),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

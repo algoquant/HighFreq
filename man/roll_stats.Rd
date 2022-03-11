@@ -6,7 +6,7 @@
 calculate a rolling mean over the statistics.}
 \usage{
 roll_stats(
-  oh_lc,
+  ohlc,
   calc_stats = "ohlc_variance",
   look_back = 11,
   weight_ed = TRUE,
@@ -16,7 +16,7 @@ roll_stats(
 \arguments{
 \item{...}{additional parameters to the function \code{calc_stats}.}
 
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
 \item{\code{calc_stats}}{The name of the function for estimating statistics of a single
@@ -30,7 +30,7 @@ trade volume? (default \code{TRUE})}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of
-  rows as the argument \code{oh_lc}.
+  rows as the argument \code{ohlc}.
 }
 \description{
 Calculate a vector of statistics over an \emph{OHLC} time series, and
@@ -42,14 +42,14 @@ The function \code{roll_stats()} calculates a vector of statistics
   moments.  The statistics could also be any other aggregation of a single
   row of \emph{OHLC} data, for example the \emph{High} price minus the
   \emph{Low} price squared.  The length of the vector of statistics is equal
-  to the number of rows of the argument \code{oh_lc}. Then it calculates a
+  to the number of rows of the argument \code{ohlc}. Then it calculates a
   trade volume weighted rolling mean over the vector of statistics over and
   calculate statistics.
 }
 \examples{
 # Calculate time series of rolling variance and skew estimates
-var_rolling <- roll_stats(oh_lc=HighFreq::SPY, look_back=21)
-skew_rolling <- roll_stats(oh_lc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
+var_rolling <- roll_stats(ohlc=HighFreq::SPY, look_back=21)
+skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)

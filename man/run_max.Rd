@@ -39,7 +39,7 @@ The function \code{run_max()} calculates the running maximum of streaming
   The second term pulls the maximum value down to the mean value, allowing
   it to gradually "forget" the maximum value from the more distant past.
 
-  The above recursive formula is convenient for processing live streaming
+  The above recursive formulas are convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   
   The value of the decay factor \eqn{\lambda} should be in the range between
@@ -59,17 +59,17 @@ The function \code{run_max()} calculates the running maximum of streaming
 \examples{
 \dontrun{
 # Calculate historical prices
-price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the running maximums
-lamb_da <- 0.9
-maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
+lambdav <- 0.9
+maxs <- HighFreq::run_max(prices, lambda=lambdav)
 # Plot dygraph of VTI prices and running maximums
-da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
-colnames(da_ta) <- c("prices", "max")
-col_names <- colnames(da_ta)
-dygraphs::dygraph(da_ta, main="VTI Prices and Running Maximums") \%>\%
-  dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") \%>\%
-  dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+colnames(datav) <- c("prices", "max")
+colnamev <- colnames(datav)
+dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") \%>\%
+  dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
+  dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 }
 
 }

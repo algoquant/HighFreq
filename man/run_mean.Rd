@@ -44,10 +44,10 @@ The function \code{run_mean()} calculates the running weighted means of
   If the \code{weights} argument is omitted, then the function
   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
   \deqn{
-    \mu_t = (1-\lambda) p_t + \lambda \mu^p_{t-1}
+    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
   }
   
-  The above recursive formula is convenient for processing live streaming
+  The above recursive formulas are convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
@@ -64,7 +64,7 @@ The function \code{run_mean()} calculates the running weighted means of
   interval.
 
   The function \code{run_mean()} performs the same calculation as the
-  standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
+  standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdav,
   method="recursive")}, but it's several times faster.
 
   The function \code{run_mean()} returns a \emph{matrix} with the same
@@ -73,32 +73,32 @@ The function \code{run_mean()} calculates the running weighted means of
 \examples{
 \dontrun{
 # Calculate historical prices
-oh_lc <- rutils::etf_env$VTI
-price_s <- quantmod::Cl(oh_lc)
+ohlc <- rutils::etfenv$VTI
+prices <- quantmod::Cl(ohlc)
 # Calculate the running means
-lamb_da <- 0.95
-means <- HighFreq::run_mean(price_s, lambda=lamb_da)
+lambdav <- 0.95
+means <- HighFreq::run_mean(prices, lambda=lambdav)
 # Calculate running means using R code
-filter_ed <- (1-lamb_da)*filter(price_s, 
-  filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
+filter_ed <- (1-lambdav)*filter(prices, 
+  filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), 
   method="recursive")
 all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
 
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
-  Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
+  Rcpp=HighFreq::run_mean(prices, lambda=lambdav),
+  Rcode=filter(prices, filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Create weights equal to the trading volumes
-weight_s <- quantmod::Vo(oh_lc)
+weights <- quantmod::Vo(ohlc)
 # Calculate the running weighted means
-meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
-# dygraph plot of running weighted means
-da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
-colnames(da_ta) <- c("means running", "means weighted")
-dygraphs::dygraph(da_ta, main="Running Means") \%>\%
+meansw <- HighFreq::run_mean(prices, lambda=lambdav, weights=weights)
+# dygraph plot the running weighted means
+datav <- xts(cbind(means, meansw), zoo::index(ohlc))
+colnames(datav) <- c("means running", "means weighted")
+dygraphs::dygraph(datav, main="Running Means") \%>\%
   dyOptions(colors=c("blue", "red"), strokeWidth=1) \%>\%
   dyLegend(show="always", width=500)
 }

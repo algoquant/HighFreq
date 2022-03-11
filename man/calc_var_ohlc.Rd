@@ -95,29 +95,29 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
 \examples{
 \dontrun{
 # Extract the log OHLC prices of SPY
-oh_lc <- log(HighFreq::SPY)
+ohlc <- log(HighFreq::SPY)
 # Extract the time index of SPY prices
-in_dex <- c(1, diff(xts::.index(oh_lc)))
+indeks <- c(1, diff(xts::.index(ohlc)))
 # Calculate the variance of SPY returns, with scaling of the returns
-HighFreq::calc_var_ohlc(oh_lc, 
- method="yang_zhang", scale=TRUE, index=in_dex)
+HighFreq::calc_var_ohlc(ohlc, 
+ method="yang_zhang", scale=TRUE, index=indeks)
 # Calculate variance without accounting for overnight jumps
-HighFreq::calc_var_ohlc(oh_lc, 
- method="rogers_satchell", scale=TRUE, index=in_dex)
+HighFreq::calc_var_ohlc(ohlc, 
+ method="rogers_satchell", scale=TRUE, index=indeks)
 # Calculate the variance without scaling the returns
-HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
+HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
 # Calculate the variance by passing in the lagged close prices
-close_lag <- HighFreq::lag_it(oh_lc[, 4])
-all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-  HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
+close_lag <- HighFreq::lagit(ohlc[, 4])
+all.equal(HighFreq::calc_var_ohlc(ohlc), 
+  HighFreq::calc_var_ohlc(ohlc, close_lag=close_lag))
 # Compare with HighFreq::calc_var_ohlc_r()
-all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
-  HighFreq::calc_var_ohlc_r(oh_lc))
+all.equal(HighFreq::calc_var_ohlc(ohlc, index=indeks), 
+  HighFreq::calc_var_ohlc_r(ohlc))
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var_ohlc(oh_lc),
-  Rcode=HighFreq::calc_var_ohlc_r(oh_lc),
+  Rcpp=HighFreq::calc_var_ohlc(ohlc),
+  Rcode=HighFreq::calc_var_ohlc_r(ohlc),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

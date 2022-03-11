@@ -38,7 +38,7 @@ The function \code{sim_ou()} simulates the following
   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
   normal \emph{innovations}.
-  The recursion starts with the initial price: \eqn{p_1 = init\_price}.
+  The recursion starts with the initial price: \eqn{p1 = init\_price}.
 
   The function \code{sim_ou()} simulates the percentage returns as equal to
   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -61,8 +61,8 @@ sig_ma <- 0.01
 the_ta <- 0.01
 in_nov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 }
 
 }

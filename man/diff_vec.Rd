@@ -47,15 +47,15 @@ The function \code{diff_vec()} calculates the differences between the
 \examples{
 \dontrun{
 # Create a vector of random returns
-re_turns <- rnorm(1e6)
-# Compare diff_vec() with rutils::diff_it()
-all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE)),
-  rutils::diff_it(re_turns, lagg=3))
+returns <- rnorm(1e6)
+# Compare diff_vec() with rutils::diffit()
+all.equal(drop(HighFreq::diff_vec(returns, lagg=3, pad=TRUE)),
+  rutils::diffit(returns, lagg=3))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE),
-  Rcode=rutils::diff_it(re_turns, lagg=3),
+  Rcpp=HighFreq::diff_vec(returns, lagg=3, pad=TRUE),
+  Rcode=rutils::diffit(returns, lagg=3),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

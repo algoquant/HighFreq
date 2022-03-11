@@ -59,17 +59,17 @@ The function \code{run_min()} calculates the running minimum of streaming
 \examples{
 \dontrun{
 # Calculate historical prices
-price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the running minimums
-lamb_da <- 0.9
-mins <- HighFreq::run_min(price_s, lambda=lamb_da)
+lambdav <- 0.9
+mins <- HighFreq::run_min(prices, lambda=lambdav)
 # Plot dygraph of VTI prices and running minimums
-da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
-colnames(da_ta) <- c("prices", "min")
-col_names <- colnames(da_ta)
-dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") \%>\%
-  dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") \%>\%
-  dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
+colnames(datav) <- c("prices", "min")
+colnamev <- colnames(datav)
+dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") \%>\%
+  dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
+  dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 }
 
 }

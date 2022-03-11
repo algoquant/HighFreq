@@ -88,29 +88,29 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+returns <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling means at 25 day end points, with a 75 day look-back
-means <- HighFreq::roll_mean(re_turns, step=25, look_back=3)
+means <- HighFreq::roll_mean(returns, step=25, look_back=3)
 # Compare the mean estimates over 11-period look-back intervals
-all.equal(HighFreq::roll_mean(re_turns, look_back=11)[-(1:10), ], 
-  drop(RcppRoll::roll_mean(re_turns, n=11)), check.attributes=FALSE)
+all.equal(HighFreq::roll_mean(returns, look_back=11)[-(1:10), ], 
+  drop(RcppRoll::roll_mean(returns, n=11)), check.attributes=FALSE)
 # Define end points and start points
-end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling means using RcppArmadillo
-means <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p)
+means <- HighFreq::roll_mean(returns, startp=startp, endp=endp)
 # Calculate the rolling medians using RcppArmadillo
-medianscpp <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric")
+medianscpp <- HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric")
 # Calculate the rolling medians using R
-medians = sapply(1:NROW(end_p), function(i) {
-  median(re_turns[start_p[i]:end_p[i] + 1])
+medians = sapply(1:NROW(endp), function(i) {
+  median(returns[startp[i]:endp[i] + 1])
 })  # end sapply
 all.equal(medians, drop(medianscpp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric"),
-  Rcode=sapply(1:NROW(end_p), function(i) {median(re_turns[start_p[i]:end_p[i] + 1])}),
+  Rcpp=HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric"),
+  Rcode=sapply(1:NROW(endp), function(i) {median(returns[startp[i]:endp[i] + 1])}),
   times=10))[, c(1, 4, 5)]
 }
 }

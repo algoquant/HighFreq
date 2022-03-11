@@ -104,8 +104,8 @@ The function \code{back_test()} performs a backtest simulation of a
   
   The function \code{back_test()} multiplies the out-of-sample strategy
   returns by the coefficient \code{coeff} (with default equal to \code{1}),
-  which allows simulating either a trending strategy (if \code{co_eff = 1}),
-  or a reverting strategy (if \code{co_eff = -1}).
+  which allows simulating either a trending strategy (if \code{coeff = 1}),
+  or a reverting strategy (if \code{coeff = -1}).
   
   The function \code{back_test()} calculates the transaction costs by
   multiplying the bid-offer spread \code{bid_offer} times the absolute
@@ -120,29 +120,29 @@ The function \code{back_test()} performs a backtest simulation of a
 \examples{
 \dontrun{
 # Calculate the ETF daily excess returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
+returns <- na.omit(rutils::etfenv$returns[, 1:16])
 # risk_free is the daily risk-free rate
 risk_free <- 0.03/260
-ex_cess <- re_turns - risk_free
+ex_cess <- returns - risk_free
 # Define monthly end points without initial warmpup period
-end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
-end_p <- end_p[end_p > 0]
-len_gth <- NROW(end_p)
+endp <- rutils::calc_endpoints(returns, inter_val="months")
+endp <- endp[endp > 0]
+nrows <- NROW(endp)
 # Define 12-month look-back interval and start points over sliding window
 look_back <- 12
-start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
+startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 # Define shrinkage and regularization intensities
 al_pha <- 0.5
 eigen_max <- 3
 # Simulate a monthly rolling portfolio optimization strategy
-pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
-                            start_p-1, end_p-1, 
+pnls <- HighFreq::back_test(ex_cess, returns, 
+                            startp-1, endp-1, 
                             eigen_max = eigen_max, 
                             alpha = al_pha)
-pnl_s <- xts::xts(pnl_s, index(re_turns))
-colnames(pnl_s) <- "strat_rets"
+pnls <- xts::xts(pnls, index(returns))
+colnames(pnls) <- "strat_rets"
 # Plot dygraph of strategy
-dygraphs::dygraph(cumsum(pnl_s), 
+dygraphs::dygraph(cumsum(pnls), 
   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 }
 

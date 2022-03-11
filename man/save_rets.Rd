@@ -7,7 +7,7 @@ single symbol. Calculate returns and save them to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
 save_rets(
-  sym_bol,
+  symbol,
   data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/",
   look_back = 51,

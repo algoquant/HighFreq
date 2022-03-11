@@ -37,24 +37,24 @@ The function \code{calc_lm()} performs the same calculations as the
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-res_ponse <- re_turns[, 1]
+response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
-predic_tor <- re_turns[, -1]
+predictor <- returns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(res_ponse ~ predic_tor)
+reg_model <- lm(response ~ predictor)
 sum_mary <- summary(reg_model)
 # Perform multivariate regression using calc_lm()
-reg_arma <- HighFreq::calc_lm(response=res_ponse, predictor=predic_tor)
+reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
 # Compare the outputs of both functions
 all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
 all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
 all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_lm(response=res_ponse, predictor=predic_tor),
-  Rcode=lm(res_ponse ~ predic_tor),
+  Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
+  Rcode=lm(response ~ predictor),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

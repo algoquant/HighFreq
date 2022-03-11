@@ -40,14 +40,14 @@ The function \code{roll_ohlc()} performs a loop over the end points
 \examples{
 \dontrun{
 # Define matrix of OHLC data
-oh_lc <- rutils::etf_env$VTI[, 1:5]
+ohlc <- rutils::etfenv$VTI[, 1:5]
 # Define end points at 25 day intervals
-end_p <- HighFreq::calc_endpoints(NROW(oh_lc), step=25)
-# Aggregate over end_p:
-ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
+endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+# Aggregate over endp:
+ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
 # Compare with xts::to.period()
-ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p+1), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
-all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
+ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 }
 
 }

@@ -41,19 +41,19 @@ The function \code{calc_ranks()} calculates the ranks of the elements of a
 \examples{
 \dontrun{
 # Create a vector of random data
-da_ta <- round(runif(7), 2)
+datav <- round(runif(7), 2)
 # Calculate the ranks of the elements in two ways
-all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
 # Create a time series of random data
-da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 # Calculate the ranks of the elements in two ways
-all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
 # Compare the speed of RcppArmadillo with R code
-da_ta <- runif(7)
+datav <- runif(7)
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=calc_ranks(da_ta),
-  Rcode=rank(da_ta),
+  Rcpp=calc_ranks(datav),
+  Rcode=rank(datav),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

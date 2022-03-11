@@ -26,7 +26,7 @@ The function \code{roll_vecw()} calculates the rolling weighted sums of a
   single-column \emph{matrix} over its past values (a convolution with the
   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
   performs a similar calculation as the standard \code{R} function
-  \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+  \cr\code{stats::filter(x=series, filter=weights, method="convolution",
   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
   \code{NA} values.
 }
@@ -34,28 +34,28 @@ The function \code{roll_vecw()} calculates the rolling weighted sums of a
 \dontrun{
 # First example
 # Define a single-column matrix of returns
-re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Create simple weights
-weight_s <- matrix(c(1, rep(0, 10)))
+weights <- matrix(c(1, rep(0, 10)))
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 # Compare with original
-all.equal(zoo::coredata(re_turns), weight_ed, check.attributes=FALSE)
+all.equal(zoo::coredata(returns), weight_ed, check.attributes=FALSE)
 # Second example
 # Create exponentially decaying weights
-weight_s <- matrix(exp(-0.2*1:11))
-weight_s <- weight_s/sum(weight_s)
+weights <- matrix(exp(-0.2*1:11))
+weights <- weights/sum(weights)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 # Calculate rolling weighted sums using filter()
-filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+filter_ed <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
 # Compare both methods
 all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_vecw(tseries=re_turns, weights=weight_s),
-  Rcode=stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1),
+  Rcpp=HighFreq::roll_vecw(tseries=returns, weights=weights),
+  Rcode=stats::filter(x=returns, filter=weights, method="convolution", sides=1),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

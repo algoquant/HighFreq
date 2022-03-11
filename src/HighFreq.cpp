@@ -54,15 +54,15 @@ using namespace arma;
 //' @examples
 //' \dontrun{
 //' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' # Compare lag_vec() with rutils::lag_it()
-//' all.equal(drop(HighFreq::lag_vec(re_turns)), 
-//'   rutils::lag_it(re_turns))
+//' returns <- rnorm(1e6)
+//' # Compare lag_vec() with rutils::lagit()
+//' all.equal(drop(HighFreq::lag_vec(returns)), 
+//'   rutils::lagit(returns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::lag_vec(re_turns),
-//'   Rcode=rutils::lag_it(re_turns),
+//'   Rcpp=HighFreq::lag_vec(returns),
+//'   Rcode=rutils::lagit(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -72,27 +72,27 @@ arma::vec lag_vec(const arma::vec& tseries,
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
   
-  arma::uword num_rows = (tseries.n_elem-1);
+  arma::uword nrows = (tseries.n_elem-1);
   
   if (lagg > 0) {
     if (pad_zeros) {
       // Pad front with zeros
       return arma::join_cols(arma::zeros<vec>(lagg), 
-                             tseries.subvec(0, num_rows-lagg));
+                             tseries.subvec(0, nrows-lagg));
     } else {
       // Pad front with first element of tseries
       return arma::join_cols(arma::repelem(tseries.subvec(0, 0), lagg, 1), 
-                             tseries.subvec(0, num_rows-lagg));
+                             tseries.subvec(0, nrows-lagg));
     }  // end if
   } else {
     if (pad_zeros) {
       // Pad back with zeros
-      return arma::join_cols(tseries.subvec(-lagg, num_rows), 
+      return arma::join_cols(tseries.subvec(-lagg, nrows), 
                              arma::zeros<vec>(-lagg));
     } else {
       // Pad back with last element of tseries
-      return arma::join_cols(tseries.subvec(-lagg, num_rows), 
-                             arma::repelem(tseries.subvec(num_rows, num_rows), -lagg, 1));
+      return arma::join_cols(tseries.subvec(-lagg, nrows), 
+                             arma::repelem(tseries.subvec(nrows, nrows), -lagg, 1));
     }  // end if
   }  // end if
   
@@ -117,7 +117,7 @@ arma::vec lag_vec(const arma::vec& tseries,
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{lag_it()} applies a lag to the input \emph{matrix} by
+//'   The function \code{lagit()} applies a lag to the input \emph{matrix} by
 //'   shifting its rows by the number equal to the argument \code{lagg}. For
 //'   positive \code{lagg} values, the rows are shifted \emph{forward} (down),
 //'   and for negative \code{lagg} values they are shifted \emph{backward} (up).
@@ -138,47 +138,47 @@ arma::vec lag_vec(const arma::vec& tseries,
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random returns
-//' re_turns <- matrix(rnorm(5e6), nc=5)
-//' # Compare lag_it() with rutils::lag_it()
-//' all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
+//' returns <- matrix(rnorm(5e6), nc=5)
+//' # Compare lagit() with rutils::lagit()
+//' all.equal(HighFreq::lagit(returns), rutils::lagit(returns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::lag_it(re_turns),
-//'   Rcode=rutils::lag_it(re_turns),
+//'   Rcpp=HighFreq::lagit(returns),
+//'   Rcode=rutils::lagit(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat lag_it(const arma::mat& tseries, 
+arma::mat lagit(const arma::mat& tseries, 
                  arma::sword lagg = 1, 
                  bool pad_zeros = true) {
   
-  arma::uword num_rows = (tseries.n_rows-1);
-  arma::uword num_cols = tseries.n_cols;
+  arma::uword nrows = (tseries.n_rows-1);
+  arma::uword ncols = tseries.n_cols;
   
   if (lagg > 0) {
     // Positive lag
     if (pad_zeros) {
       // Pad front with zeros
-      return arma::join_cols(arma::zeros<mat>(lagg, num_cols), 
-                             tseries.rows(0, num_rows-lagg));
+      return arma::join_cols(arma::zeros<mat>(lagg, ncols), 
+                             tseries.rows(0, nrows-lagg));
     } else {
       // Pad front with first element of tseries
       return arma::join_cols(arma::repmat(tseries.rows(0, 0), lagg, 1), 
-                             tseries.rows(0, num_rows-lagg));
+                             tseries.rows(0, nrows-lagg));
     }  // end if
   } else {
     // Negative lag
     if (pad_zeros) {
       // Pad back with zeros
-      return arma::join_cols(tseries.rows(-lagg, num_rows), 
-                             arma::zeros<mat>(-lagg, num_cols));
+      return arma::join_cols(tseries.rows(-lagg, nrows), 
+                             arma::zeros<mat>(-lagg, ncols));
     } else {
       // Pad back with last element of tseries
-      return arma::join_cols(tseries.rows(-lagg, num_rows), 
-                             arma::repmat(tseries.rows(num_rows, num_rows), -lagg, 1));
+      return arma::join_cols(tseries.rows(-lagg, nrows), 
+                             arma::repmat(tseries.rows(nrows, nrows), -lagg, 1));
     }  // end if
   }  // end if
   
@@ -186,13 +186,13 @@ arma::mat lag_it(const arma::mat& tseries,
   // if (lagg > 0)
   //   // Positive lag
   //   return arma::join_cols(arma::repelem(tseries.row(0), lagg, 1), 
-  //                          tseries.rows(0, num_rows-lagg));
+  //                          tseries.rows(0, nrows-lagg));
   // else
   //   // Negative lag
-  //   return arma::join_cols(tseries.rows(-lagg, num_rows), 
-  //                          arma::repelem(tseries.row(num_rows), -lagg, 1));
+  //   return arma::join_cols(tseries.rows(-lagg, nrows), 
+  //                          arma::repelem(tseries.row(nrows), -lagg, 1));
   
-}  // end lag_it
+}  // end lagit
 
 
 
@@ -235,15 +235,15 @@ arma::mat lag_it(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' # Compare diff_vec() with rutils::diff_it()
-//' all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE)),
-//'   rutils::diff_it(re_turns, lagg=3))
+//' returns <- rnorm(1e6)
+//' # Compare diff_vec() with rutils::diffit()
+//' all.equal(drop(HighFreq::diff_vec(returns, lagg=3, pad=TRUE)),
+//'   rutils::diffit(returns, lagg=3))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE),
-//'   Rcode=rutils::diff_it(re_turns, lagg=3),
+//'   Rcpp=HighFreq::diff_vec(returns, lagg=3, pad=TRUE),
+//'   Rcode=rutils::diffit(returns, lagg=3),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -267,7 +267,7 @@ arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zero
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+//' Calculate the row differences of a \emph{time series} or a \emph{matrix}
 //' using \emph{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
@@ -285,7 +285,7 @@ arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zero
 //'   input \emph{matrix} \code{tseries}.
 //'
 //' @details
-//'   The function \code{diff_it()} calculates the differences between the rows
+//'   The function \code{diffit()} calculates the differences between the rows
 //'   of the input \emph{matrix} \code{tseries} and its lagged version.
 //'   
 //'   The argument \code{lagg} specifies the number of lags applied to the rows
@@ -307,63 +307,63 @@ arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zero
 //'   The padding operation can be time-consuming, because it requires the
 //'   copying of data.
 //'   
-//'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
+//'   The function \code{diffit()} is implemented in \code{RcppArmadillo}
 //'   \code{C++} code, which makes it much faster than \code{R} code.
 //'
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random data
-//' da_ta <- matrix(sample(15), nc=3)
+//' datav <- matrix(sample(15), nc=3)
 //' # Calculate differences with lagged rows
-//' HighFreq::diff_it(da_ta, lagg=2)
+//' HighFreq::diffit(datav, lagg=2)
 //' # Calculate differences with advanced rows
-//' HighFreq::diff_it(da_ta, lagg=-2)
-//' # Compare HighFreq::diff_it() with rutils::diff_it()
-//' all.equal(HighFreq::diff_it(da_ta, lagg=2), 
-//'   rutils::diff_it(da_ta, lagg=2), 
+//' HighFreq::diffit(datav, lagg=-2)
+//' # Compare HighFreq::diffit() with rutils::diffit()
+//' all.equal(HighFreq::diffit(datav, lagg=2), 
+//'   rutils::diffit(datav, lagg=2), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::diff_it(da_ta, lagg=2),
-//'   Rcode=rutils::diff_it(da_ta, lagg=2),
+//'   Rcpp=HighFreq::diffit(datav, lagg=2),
+//'   Rcode=rutils::diffit(datav, lagg=2),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat diff_it(const arma::mat& tseries, 
+arma::mat diffit(const arma::mat& tseries, 
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
   
-  arma::uword num_rows = (tseries.n_rows-1);
-  arma::uword num_cols = tseries.n_cols;
+  arma::uword nrows = (tseries.n_rows-1);
+  arma::uword ncols = tseries.n_cols;
   
   if (lagg > 0) {
     // Positive lag
     // Matrix difference without padding
-    arma::mat diff_mat = (tseries.rows(lagg, num_rows) - tseries.rows(0, num_rows - lagg));
+    arma::mat diffmat = (tseries.rows(lagg, nrows) - tseries.rows(0, nrows - lagg));
     if (pad_zeros) {
-      // Pad diff_mat with zeros at the front
-      return arma::join_cols(arma::zeros<mat>(lagg, num_cols), diff_mat);
+      // Pad diffmat with zeros at the front
+      return arma::join_cols(arma::zeros<mat>(lagg, ncols), diffmat);
     } else {
       // Don't pad the output
-      return diff_mat;
+      return diffmat;
     }  // end if pad_zeros
   } else {
     // Negative lag
     // Matrix difference without padding
-    arma::mat diff_mat = (tseries.rows(0, num_rows + lagg) - tseries.rows(-lagg, num_rows));
+    arma::mat diffmat = (tseries.rows(0, nrows + lagg) - tseries.rows(-lagg, nrows));
     if (pad_zeros) {
-      // Pad diff_mat with zeros at the back
-      return arma::join_cols(diff_mat, arma::zeros<mat>(-lagg, num_cols));
+      // Pad diffmat with zeros at the back
+      return arma::join_cols(diffmat, arma::zeros<mat>(-lagg, ncols));
     } else {
       // Don't pad the output
-      return diff_mat;
+      return diffmat;
     }  // end if pad_zeros
   }  // end if lagg
   
-}  // end diff_it
+}  // end diffit
 
 
 
@@ -513,17 +513,17 @@ arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, arma::uword 
 //'   
 //' @examples
 //' # Calculate end points
-//' end_p <- HighFreq::calc_endpoints(25, 5)
+//' endp <- HighFreq::calc_endpoints(25, 5)
 //' # Calculate start points corresponding to the end points
-//' start_p <- HighFreq::calc_startpoints(end_p, 2)
+//' startp <- HighFreq::calc_startpoints(endp, 2)
 //'
 //' @export
 // [[Rcpp::export]]
 arma::uvec calc_startpoints(arma::uvec endp, arma::uword look_back) {
   
-  arma::uword num_pts = endp.n_elem;
+  arma::uword numpts = endp.n_elem;
   arma::uvec startp = arma::join_cols(arma::zeros<uvec>(look_back), 
-                                      endp.subvec(0, num_pts - look_back - 1) + 1);
+                                      endp.subvec(0, numpts - look_back - 1) + 1);
   
   return startp;
   
@@ -576,31 +576,31 @@ arma::uvec calc_startpoints(arma::uvec endp, arma::uword look_back) {
 //' @examples
 //' \dontrun{
 //' # Multiply matrix columns using R
-//' mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-//' vec_tor <- round(runif(5e2), 2)
-//' prod_uct <- vec_tor*mat_rix
+//' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+//' vectorv <- round(runif(5e2), 2)
+//' prod_uct <- vectorv*matrixv
 //' # Multiply the matrix in place
-//' HighFreq::mult_vec_mat(vec_tor, mat_rix)
-//' all.equal(prod_uct, mat_rix)
+//' HighFreq::mult_vec_mat(vectorv, matrixv)
+//' all.equal(prod_uct, matrixv)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
-//'     Rcode=vec_tor*mat_rix,
+//'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv),
+//'     Rcode=vectorv*matrixv,
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' 
 //' # Multiply matrix rows using R
-//' mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-//' vec_tor <- round(runif(5e2), 2)
-//' prod_uct <- t(vec_tor*t(mat_rix))
+//' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+//' vectorv <- round(runif(5e2), 2)
+//' prod_uct <- t(vectorv*t(matrixv))
 //' # Multiply the matrix in place
-//' HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
-//' all.equal(prod_uct, mat_rix)
+//' HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE)
+//' all.equal(prod_uct, matrixv)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
-//'     Rcode=t(vec_tor*t(mat_rix)),
+//'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE),
+//'     Rcode=t(vectorv*t(matrixv)),
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -610,28 +610,28 @@ arma::uword mult_vec_mat(arma::vec& vector,
                          arma::mat& matrix,
                          bool by_col = true) {
   
-  arma::uword num_elem = vector.n_elem;
-  arma::uword num_rows = matrix.n_rows;
-  arma::uword num_cols = matrix.n_cols;
+  arma::uword numelem = vector.n_elem;
+  arma::uword nrows = matrix.n_rows;
+  arma::uword ncols = matrix.n_cols;
   
-  if ((num_cols == num_rows) && (num_elem == num_rows)) {
+  if ((ncols == nrows) && (numelem == nrows)) {
     if (by_col) {
       // Multiply each column of matrix by vector
       matrix.each_col() %= vector;
-      return num_rows;
+      return nrows;
     } else {
       // Multiply each row of matrix by vector
       matrix.each_row() %= conv_to<rowvec>::from(vector);
-      return num_cols;
+      return ncols;
     }
-  } else if (num_elem == num_rows) {
+  } else if (numelem == nrows) {
     // Multiply each column of matrix by vector
     matrix.each_col() %= vector;
-    return num_rows;
-  } else if (num_elem == num_cols) {
+    return nrows;
+  } else if (numelem == ncols) {
     // Multiply each row of matrix by vector
     matrix.each_row() %= conv_to<rowvec>::from(vector);
-    return num_cols;
+    return ncols;
   } else 
     stop("Error: Vector length is neither equal to the number of columns nor rows of the matrix!");
   // Return NA_INTEGER;
@@ -660,18 +660,18 @@ arma::uword mult_vec_mat(arma::vec& vector,
 //' @examples
 //' \dontrun{
 //' # Create matrix of random data
-//' da_ta <- matrix(rnorm(5e6), nc=5)
+//' datav <- matrix(rnorm(5e6), nc=5)
 //' # Calculate eigen decomposition
-//' ei_gen <- HighFreq::calc_eigen(scale(da_ta, scale=FALSE))
+//' eigend <- HighFreq::calc_eigen(scale(datav, scale=FALSE))
 //' # Calculate PCA
-//' pc_a <- prcomp(da_ta)
+//' pcad <- prcomp(datav)
 //' # Compare PCA with eigen decomposition
-//' all.equal(pc_a$sdev^2, drop(ei_gen$values))
-//' all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
+//' all.equal(pcad$sdev^2, drop(eigend$values))
+//' all.equal(abs(unname(pcad$rotation)), abs(eigend$vectors))
 //' # Compare the speed of Rcpp with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_eigen(da_ta),
-//'   Rcode=prcomp(da_ta),
+//'   Rcpp=HighFreq::calc_eigen(datav),
+//'   Rcode=prcomp(datav),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -679,15 +679,16 @@ arma::uword mult_vec_mat(arma::vec& vector,
 // [[Rcpp::export]]
 Rcpp::List calc_eigen(const arma::mat& tseries) {
   
-  arma::mat eigen_vec;
-  arma::vec eigen_val;
-  arma::eig_sym(eigen_val, eigen_vec, arma::cov(tseries));
+  arma::mat eigenvec;
+  arma::vec eigenval;
+  arma::eig_sym(eigenval, eigenvec, arma::cov(tseries));
   
   // Reverse the order of elements from largest eigenvalue to smallest, similar to R
-  return Rcpp::List::create(Named("values") = arma::flipud(eigen_val),
-                            Named("vectors") = arma::fliplr(eigen_vec));
+  return Rcpp::List::create(Named("values") = arma::flipud(eigenval),
+                            Named("vectors") = arma::fliplr(eigenvec));
   
 }  // end calc_eigen
+
 
 
 
@@ -757,13 +758,13 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //' @examples
 //' \dontrun{
 //' # Calculate ETF returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns)
+//' returns <- na.omit(rutils::etfenv$returns)
 //' # Calculate covariance matrix
-//' cov_mat <- cov(re_turns)
+//' covmat <- cov(returns)
 //' # Calculate shrinkage inverse using RcppArmadillo
-//' in_verse <- HighFreq::calc_inv(cov_mat, eigen_max=3)
+//' in_verse <- HighFreq::calc_inv(covmat, eigen_max=3)
 //' # Calculate shrinkage inverse from SVD in R
-//' s_vd <- svd(cov_mat)
+//' s_vd <- svd(covmat)
 //' eigen_max <- 1:3
 //' inverse_r <-  s_vd$v[, eigen_max] %*% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 //' # Compare RcppArmadillo with R
@@ -777,28 +778,28 @@ arma::mat calc_inv(const arma::mat& tseries,
                    arma::uword eigen_max = 0) {
   
   // Allocate SVD variables
-  arma::vec svd_val;  // Singular values
-  arma::mat svd_u, svd_v;  // Singular matrices
+  arma::vec svdval;  // Singular values
+  arma::mat svdu, svdv;  // Singular matrices
   // Calculate the SVD
-  arma::svd(svd_u, svd_val, svd_v, tseries);
+  arma::svd(svdu, svdval, svdv, tseries);
   // Calculate the number of non-small singular values
-  arma::uword svd_num = arma::sum(svd_val > eigen_thresh*arma::sum(svd_val));
+  arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
   
   if (eigen_max == 0) {
     // Set eigen_max
-    eigen_max = svd_num - 1;
+    eigen_max = svdnum - 1;
   } else {
     // Adjust eigen_max
-    eigen_max = min(eigen_max - 1, svd_num - 1);
+    eigen_max = min(eigen_max - 1, svdnum - 1);
   }  // end if
   
   // Remove all small singular values
-  svd_val = svd_val.subvec(0, eigen_max);
-  svd_u = svd_u.cols(0, eigen_max);
-  svd_v = svd_v.cols(0, eigen_max);
+  svdval = svdval.subvec(0, eigen_max);
+  svdu = svdu.cols(0, eigen_max);
+  svdv = svdv.cols(0, eigen_max);
   
   // Calculate the shrinkage inverse from the SVD decomposition
-  return svd_v*arma::diagmat(1/svd_val)*svd_u.t();
+  return svdv*arma::diagmat(1/svdval)*svdu.t();
   
 }  // end calc_inv
 
@@ -844,15 +845,15 @@ arma::mat calc_inv(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Create a matrix of random data
-//' re_turns <- matrix(rnorm(20000), nc=20)
-//' scale_d <- calc_scaled(tseries=re_turns, use_median=FALSE)
-//' scale_d2 <- scale(re_turns)
-//' all.equal(scale_d, scale_d2, check.attributes=FALSE)
+//' returns <- matrix(rnorm(20000), nc=20)
+//' scaled <- calc_scaled(tseries=returns, use_median=FALSE)
+//' scaled2 <- scale(returns)
+//' all.equal(scaled, scaled2, check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=calc_scaled(tseries=re_turns, use_median=FALSE),
-//'   Rcode=scale(re_turns),
+//'   Rcpp=calc_scaled(tseries=returns, use_median=FALSE),
+//'   Rcode=scale(returns),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -860,33 +861,33 @@ arma::mat calc_inv(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::uword num_cols = tseries.n_cols;
-  arma::mat scaled_mat(num_rows, num_cols, fill::zeros);
-  arma::vec scale_d(num_rows, fill::zeros);
-  double cen_ter;
+  arma::uword nrows = tseries.n_rows;
+  arma::uword ncols = tseries.n_cols;
+  arma::mat scaledmat(nrows, ncols, fill::zeros);
+  arma::vec scaled(nrows, fill::zeros);
+  double center;
   
   // Return zeros if not enough data
-  if (num_rows < 3) {
+  if (nrows < 3) {
     return tseries;
   }  // end if
   
   // Perform a loop over the columns
-  for (arma::uword it=0; it < num_cols; it++) {
+  for (arma::uword it=0; it < ncols; it++) {
     if (use_median) {
-      cen_ter = arma::median(tseries.col(it));
-      scale_d = (tseries.col(it) - cen_ter);
-      scale_d = scale_d/arma::median(arma::abs(scale_d));
-      scaled_mat.col(it) = scale_d;
+      center = arma::median(tseries.col(it));
+      scaled = (tseries.col(it) - center);
+      scaled = scaled/arma::median(arma::abs(scaled));
+      scaledmat.col(it) = scaled;
     } else {
-      cen_ter = arma::mean(tseries.col(it));
-      scale_d = (tseries.col(it) - cen_ter);
-      scale_d = scale_d/arma::stddev(scale_d);
-      scaled_mat.col(it) = scale_d;
+      center = arma::mean(tseries.col(it));
+      scaled = (tseries.col(it) - center);
+      scaled = scaled/arma::stddev(scaled);
+      scaledmat.col(it) = scaled;
     }  // end if
   }  // end for
   
-  return scaled_mat;
+  return scaledmat;
   
 }  // end calc_scaled
 
@@ -925,19 +926,19 @@ arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
 //' @examples
 //' \dontrun{
 //' # Create a vector of random data
-//' da_ta <- round(runif(7), 2)
+//' datav <- round(runif(7), 2)
 //' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+//' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
 //' # Create a time series of random data
-//' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+//' datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 //' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+//' all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
 //' # Compare the speed of RcppArmadillo with R code
-//' da_ta <- runif(7)
+//' datav <- runif(7)
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=calc_ranks(da_ta),
-//'   Rcode=rank(da_ta),
+//'   Rcpp=calc_ranks(datav),
+//'   Rcode=rank(datav),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -992,12 +993,12 @@ arma::uvec calc_ranks(const arma::vec& tseries) {
 //' @examples
 //' \dontrun{
 //' # Define matrix of OHLC data
-//' oh_lc <- coredata(rutils::etf_env$VTI[, 1:5])
+//' ohlc <- coredata(rutils::etfenv$VTI[, 1:5])
 //' # Aggregate to single row matrix
-//' ohlc_agg <- HighFreq::agg_ohlc(oh_lc)
+//' ohlcagg <- HighFreq::agg_ohlc(ohlc)
 //' # Compare with calculation in R
-//' all.equal(drop(ohlc_agg),
-//'   c(oh_lc[1, 1], max(oh_lc[, 2]), min(oh_lc[, 3]), oh_lc[NROW(oh_lc), 4], sum(oh_lc[, 5])), 
+//' all.equal(drop(ohlcagg),
+//'   c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
 //'   check.attributes=FALSE)
 //' }
 //' 
@@ -1005,24 +1006,24 @@ arma::uvec calc_ranks(const arma::vec& tseries) {
 // [[Rcpp::export]]
 arma::mat agg_ohlc(const arma::mat& tseries) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::uword num_cols = tseries.n_cols;
+  arma::uword nrows = tseries.n_rows;
+  arma::uword ncols = tseries.n_cols;
   
   // Number of output columns
-  arma::uword num_ohlc = num_cols;
-  if (num_cols < 4)
+  arma::uword numohlc = ncols;
+  if (ncols < 4)
     // Add volume column for non-OHLC data
-    num_ohlc = 4 + num_cols - 1;
+    numohlc = 4 + ncols - 1;
   // Allocate output matrix
-  arma::mat ohlc(1, num_ohlc);
+  arma::mat ohlc(1, numohlc);
   
-  if (num_cols < 4) {
+  if (ncols < 4) {
     // Aggregate time series into a single bar of OHLC data.
     ohlc(0, 0) = tseries(0, 0);
     ohlc(0, 1) = arma::max(tseries.col(0));
     ohlc(0, 2) = arma::min(tseries.col(0));
-    ohlc(0, 3) = tseries(num_rows-1, 0);
-    if (num_cols == 2) {
+    ohlc(0, 3) = tseries(nrows-1, 0);
+    if (ncols == 2) {
       // Aggregate volume data.
       ohlc(0, 4) = arma::sum(tseries.col(1));
     }  // end if
@@ -1031,8 +1032,8 @@ arma::mat agg_ohlc(const arma::mat& tseries) {
     ohlc(0, 0) = tseries(0, 0);
     ohlc(0, 1) = arma::max(tseries.col(1));
     ohlc(0, 2) = arma::min(tseries.col(2));
-    ohlc(0, 3) = tseries(num_rows-1, 3);
-    if (num_cols == 5) {
+    ohlc(0, 3) = tseries(nrows-1, 3);
+    if (ncols == 5) {
       // Aggregate volume data.
       ohlc(0, 4) = arma::sum(tseries.col(4));
     }  // end if
@@ -1130,34 +1131,34 @@ arma::uvec roll_count(const arma::uvec& tseries) {
 //' @examples
 //' \dontrun{
 //' # Define matrix of OHLC data
-//' oh_lc <- rutils::etf_env$VTI[, 1:5]
+//' ohlc <- rutils::etfenv$VTI[, 1:5]
 //' # Define end points at 25 day intervals
-//' end_p <- HighFreq::calc_endpoints(NROW(oh_lc), step=25)
-//' # Aggregate over end_p:
-//' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
+//' endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+//' # Aggregate over endp:
+//' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
 //' # Compare with xts::to.period()
-//' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p+1), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
-//' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
+//' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+//' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
   
-  // arma::uword num_rows = tseries.n_rows;
-  arma::uword num_cols = tseries.n_cols;
-  arma::uword num_pts = endp.size();
-  arma::mat ohlc_agg(num_pts-1, num_cols, fill::zeros);
+  // arma::uword nrows = tseries.n_rows;
+  arma::uword ncols = tseries.n_cols;
+  arma::uword numpts = endp.size();
+  arma::mat ohlcagg(numpts-1, ncols, fill::zeros);
   
   // Perform loop over the end points
-  for (arma::uword it = 1; it < num_pts; it++) {
+  for (arma::uword it = 1; it < numpts; it++) {
     // cout << "it: " << it << endl;
     // Aggregate the OHLC
-    ohlc_agg.row(it-1) = agg_ohlc(tseries.rows(endp(it-1)+1, endp(it)));
+    ohlcagg.row(it-1) = agg_ohlc(tseries.rows(endp(it-1)+1, endp(it)));
   }  // end for
   
   // Return the aggregations
-  return ohlc_agg;
+  return ohlcagg;
   
 }  // end roll_ohlc
 
@@ -1187,18 +1188,18 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
 //' @examples
 //' \dontrun{
 //' # Define a single-column matrix of returns
-//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+//' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate rolling sums over 11-period look-back intervals
-//' sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
+//' sum_rolling <- HighFreq::roll_vec(returns, look_back=11)
 //' # Compare HighFreq::roll_vec() with rutils::roll_sum()
-//' all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
-//'          rutils::roll_sum(re_turns, look_back=11), 
+//' all.equal(HighFreq::roll_vec(returns, look_back=11), 
+//'          rutils::roll_sum(returns, look_back=11), 
 //'          check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_vec(re_turns, look_back=11),
-//'   Rcode=rutils::roll_sum(re_turns, look_back=11),
+//'   Rcpp=HighFreq::roll_vec(returns, look_back=11),
+//'   Rcode=rutils::roll_sum(returns, look_back=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -1206,8 +1207,8 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
 // [[Rcpp::export]]
 arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::mat rolling_sum(num_rows, 1);
+  arma::uword nrows = tseries.n_rows;
+  arma::mat rolling_sum(nrows, 1);
   
   // Warmup period
   rolling_sum[0] = tseries[0];
@@ -1216,7 +1217,7 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
   }  // end for
   
   // Remaining period
-  for (arma::uword it = look_back; it < num_rows; it++) {
+  for (arma::uword it = look_back; it < nrows; it++) {
     rolling_sum[it] = rolling_sum[it-1] + tseries[it] - tseries[it-look_back];
   }  // end for
   
@@ -1244,7 +1245,7 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //'   single-column \emph{matrix} over its past values (a convolution with the
 //'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
 //'   performs a similar calculation as the standard \code{R} function
-//'   \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+//'   \cr\code{stats::filter(x=series, filter=weights, method="convolution",
 //'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
 //'   \code{NA} values.
 //'   
@@ -1252,28 +1253,28 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' \dontrun{
 //' # First example
 //' # Define a single-column matrix of returns
-//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+//' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Create simple weights
-//' weight_s <- matrix(c(1, rep(0, 10)))
+//' weights <- matrix(c(1, rep(0, 10)))
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+//' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 //' # Compare with original
-//' all.equal(zoo::coredata(re_turns), weight_ed, check.attributes=FALSE)
+//' all.equal(zoo::coredata(returns), weight_ed, check.attributes=FALSE)
 //' # Second example
 //' # Create exponentially decaying weights
-//' weight_s <- matrix(exp(-0.2*1:11))
-//' weight_s <- weight_s/sum(weight_s)
+//' weights <- matrix(exp(-0.2*1:11))
+//' weights <- weights/sum(weights)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+//' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_vecw(tseries=re_turns, weights=weight_s),
-//'   Rcode=stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1),
+//'   Rcpp=HighFreq::roll_vecw(tseries=returns, weights=weights),
+//'   Rcode=stats::filter(x=returns, filter=weights, method="convolution", sides=1),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -1281,18 +1282,18 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 // [[Rcpp::export]]
 arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
   
-  arma::uword num_rows = tseries.n_rows;
+  arma::uword nrows = tseries.n_rows;
   arma::uword look_back = weights.n_rows;
-  arma::mat rolling_sum(num_rows, 1);
-  arma::mat rev_weights = arma::reverse(weights);
-  // arma::mat rev_weights = weights;
+  arma::mat rolling_sum(nrows, 1);
+  arma::mat weightsr = arma::reverse(weights);
+  // arma::mat weightsr = weights;
   
   // Warmup period
   rolling_sum.rows(0, look_back-2) = tseries.rows(0, look_back-2);
   
   // Remaining periods
-  for (arma::uword it = look_back-1; it < num_rows; it++) {
-    rolling_sum(it) = arma::dot(rev_weights, tseries.rows(it-look_back+1, it));
+  for (arma::uword it = look_back-1; it < nrows; it++) {
+    rolling_sum(it) = arma::dot(weightsr, tseries.rows(it-look_back+1, it));
   }  // end for
   
   return rolling_sum;
@@ -1322,7 +1323,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //'   
 //'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
-//'   \code{R} function \cr\code{filter(x=tseries, filter=weight_s,
+//'   \code{R} function \cr\code{filter(x=tseries, filter=weights,
 //'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 //'   it doesn't produce any leading \code{NA} values.
 //'   
@@ -1330,21 +1331,21 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' \dontrun{
 //' # First example
 //' # Calculate a time series of returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 //' # Create simple weights equal to a 1 value plus zeros
-//' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+//' weights <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+//' weight_ed <- HighFreq::roll_conv(returns, weights)
 //' # Compare with original
-//' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 //' # Second example
 //' # Calculate exponentially decaying weights
-//' weight_s <- exp(-0.2*(1:11))
-//' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+//' weights <- exp(-0.2*(1:11))
+//' weights <- matrix(weights/sum(weights), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+//' weight_ed <- HighFreq::roll_conv(returns, weights)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 //' }
@@ -1354,7 +1355,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
   
   arma::uword look_back = weights.n_rows-2;
-  arma::uword num_rows = tseries.n_rows-1;
+  arma::uword nrows = tseries.n_rows-1;
   
   // Calculate the convolutions
   arma::mat convmat = arma::conv2(tseries, weights, "full");
@@ -1362,7 +1363,7 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
   // Copy the warmup period
   convmat.rows(0, look_back) = tseries.rows(0, look_back);
   
-  return convmat.rows(0, num_rows);
+  return convmat.rows(0, nrows);
   
 }  // end roll_conv
 
@@ -1397,15 +1398,15 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
 //' look_back <- 22
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' c_sum <- HighFreq::roll_sum(re_turns, look_back)
-//' r_sum <- rutils::roll_sum(re_turns, look_back)
+//' c_sum <- HighFreq::roll_sum(returns, look_back)
+//' r_sum <- rutils::roll_sum(returns, look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
-//' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+//' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
 //' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 //' r_sum <- (r_sum - lag_sum)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
@@ -1416,10 +1417,10 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
 arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
   
   // Calculate the cumulative sum
-  arma::mat cum_sum = arma::cumsum(tseries, 0);
+  arma::mat cumsumv = arma::cumsum(tseries, 0);
   
   // Return the differences of the cumulative sum
-  return diff_it(cum_sum, look_back, true);
+  return diffit(cumsumv, look_back, true);
   
 }  // end roll_sum
 
@@ -1461,16 +1462,16 @@ arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define end points at 25 day intervals
-//' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
+//' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
 //' # Define start points as 75 day lag of end points
-//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate rolling sums using Rcpp
-//' c_sum <- HighFreq::roll_sumep(re_turns, startp=start_p, endp=end_p)
+//' c_sum <- HighFreq::roll_sumep(returns, startp=startp, endp=endp)
 //' # Calculate rolling sums using R code
-//' r_sum <- sapply(1:NROW(end_p), function(ep) {
-//' colSums(re_turns[(start_p[ep]+1):(end_p[ep]+1), ])
+//' r_sum <- sapply(1:NROW(endp), function(ep) {
+//' colSums(returns[(startp[ep]+1):(endp[ep]+1), ])
 //'   })  # end sapply
 //' r_sum <- t(r_sum)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
@@ -1486,54 +1487,54 @@ arma::mat roll_sumep(const arma::mat& tseries,
                      arma::uword stub = 0) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
-    // Old code for start_pts
+    startpts = calc_startpoints(endpts, look_back);
+    // Old code for startpts
     // Start points equal to end points lagged by look_back - without adding +1
-    // arma::uword num_pts = end_pts.n_elem;
-    // arma::uvec start_pts = arma::join_cols(arma::zeros<uvec>(look_back), 
-    //                                        end_pts.subvec(0, num_pts - look_back - 1));
+    // arma::uword numpts = endpts.n_elem;
+    // arma::uvec startpts = arma::join_cols(arma::zeros<uvec>(look_back), 
+    //                                        endpts.subvec(0, numpts - look_back - 1));
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate sums matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat sums = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat sums = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate sums
-    if (end_pts(ep) > start_pts(ep)) {
-      sums.row(ep) = arma::sum(tseries.rows(start_pts(ep), end_pts(ep)));
+    if (endpts(ep) > startpts(ep)) {
+      sums.row(ep) = arma::sum(tseries.rows(startpts(ep), endpts(ep)));
     }  // end if
   }  // end for
   
   return sums;
   
-  // Old code using arma::cumsum() - sums exclude start_pts
+  // Old code using arma::cumsum() - sums exclude startpts
   // Calculate cumulative sums at end points.
-  // arma::mat cum_sum = arma::cumsum(tseries, 0);
-  // arma::mat cum_start = cum_sum.rows(start_pts);
-  // arma::mat cum_end = cum_sum.rows(end_pts);
+  // arma::mat cumsumv = arma::cumsum(tseries, 0);
+  // arma::mat cum_start = cumsumv.rows(startpts);
+  // arma::mat cum_end = cumsumv.rows(endpts);
   
   // Return the differences of the cumulative returns
-  // return diff_it(cum_sum, 1, true);
+  // return diffit(cumsumv, 1, true);
   // return (cum_end - cum_start);
   
 }  // end roll_sumep
@@ -1571,7 +1572,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   convolutions of the columns of \code{tseries} with the \emph{column
 //'   vector} of weights using the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}.  It performs a similar calculation to the standard
-//'   \code{R} function \cr\code{stats::filter(x=re_turns, filter=weight_s,
+//'   \code{R} function \cr\code{stats::filter(x=returns, filter=weights,
 //'   method="convolution", sides=1)}, but it can be many times faster, and it
 //'   doesn't produce any leading \code{NA} values.
 //'   
@@ -1607,53 +1608,53 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' \dontrun{
 //' # First example
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
 //' look_back <- 22
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' c_sum <- HighFreq::roll_sum(re_turns, look_back)
-//' r_sum <- rutils::roll_sum(re_turns, look_back)
+//' c_sum <- HighFreq::roll_sum(returns, look_back)
+//' r_sum <- rutils::roll_sum(returns, look_back)
 //' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
-//' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+//' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
 //' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 //' r_sum <- (r_sum - lag_sum)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
 //' 
 //' # Calculate rolling sums at end points
 //' stu_b <- 21
-//' c_sum <- HighFreq::roll_wsum(re_turns, look_back, stub=stu_b)
-//' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
-//' end_p <- end_p[end_p < NROW(re_turns)]
-//' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
-//' r_sum <- r_sum[end_p+1, ]
+//' c_sum <- HighFreq::roll_wsum(returns, look_back, stub=stu_b)
+//' endp <- (stu_b + look_back*(0:(NROW(returns) %/% look_back)))
+//' endp <- endp[endp < NROW(returns)]
+//' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
+//' r_sum <- r_sum[endp+1, ]
 //' lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
 //' r_sum <- (r_sum - lag_sum)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
 //' 
-//' # Calculate rolling sums at end points - pass in end_p
-//' c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p)
+//' # Calculate rolling sums at end points - pass in endp
+//' c_sum <- HighFreq::roll_wsum(returns, endp=endp)
 //' all.equal(c_sum, r_sum, check.attributes=FALSE)
 //' 
 //' # Create exponentially decaying weights
-//' weight_s <- exp(-0.2*(1:11))
-//' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+//' weights <- exp(-0.2*(1:11))
+//' weights <- matrix(weights/sum(weights), nc=1)
 //' # Calculate rolling weighted sum
-//' c_sum <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+//' c_sum <- HighFreq::roll_wsum(returns, weights=weights)
 //' # Calculate rolling weighted sum using filter()
-//' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+//' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 //' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
-//' c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p, weights=weight_s)
-//' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
+//' c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
+//' all.equal(c_sum, filter_ed[endp+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
-//' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+//' weights <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+//' weight_ed <- HighFreq::roll_wsum(returns, weights=weights)
 //' # Compare with original
-//' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -1664,8 +1665,8 @@ arma::mat roll_wsum(const arma::mat& tseries,
                     Rcpp::Nullable<int> stub = R_NilValue, 
                     Rcpp::Nullable<Rcpp::NumericVector> weights = R_NilValue) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::mat cum_sum;
+  arma::uword nrows = tseries.n_rows;
+  arma::mat cumsumv;
   
   // Calculate the rolling sums
   if (weights.isNotNull()) {
@@ -1673,49 +1674,49 @@ arma::mat roll_wsum(const arma::mat& tseries,
     arma::vec weights_vec = Rcpp::as<vec>(weights);
     arma::uword num_weights = weights_vec.n_elem;
     // Calculate the weighted averages as convolutions
-    cum_sum = arma::conv2(tseries, weights_vec, "full");
+    cumsumv = arma::conv2(tseries, weights_vec, "full");
     // Copy the warmup period
     // cout << "num_weights = " << num_weights << endl;
-    cum_sum.rows(0, num_weights-2) = tseries.rows(0, num_weights-2);
-    cum_sum = cum_sum.rows(0, num_rows-1);
-    // cout << "cum_sum.n_rows = " << cum_sum.n_rows << endl;
+    cumsumv.rows(0, num_weights-2) = tseries.rows(0, num_weights-2);
+    cumsumv = cumsumv.rows(0, nrows-1);
+    // cout << "cumsumv.n_rows = " << cumsumv.n_rows << endl;
   } else {
     // Calculate the cumulative sum
-    cum_sum = arma::cumsum(tseries, 0);
+    cumsumv = arma::cumsum(tseries, 0);
   }  // end if
   
   
   // Declare empty end points
-  arma::uvec end_pts;
+  arma::uvec endpts;
   // Update end points
   if (endp.isNotNull()) {
     // Copy endp
-    end_pts = Rcpp::as<uvec>(endp);
+    endpts = Rcpp::as<uvec>(endp);
   } else if (stub.isNotNull()) {
     // Calculate end points with stub
-    end_pts = arma::regspace<uvec>(Rcpp::as<uword>(stub), look_back, num_rows + look_back);
-    end_pts = end_pts.elem(find(end_pts < num_rows));
+    endpts = arma::regspace<uvec>(Rcpp::as<uword>(stub), look_back, nrows + look_back);
+    endpts = endpts.elem(find(endpts < nrows));
   }  // end if
   
   
   // Subset the rolling sums according the end points
-  if (end_pts.is_empty() && weights.isNotNull()) {
+  if (endpts.is_empty() && weights.isNotNull()) {
     // Do nothing
     // Return the weighted averages (convolutions) at each point
-    // return cum_sum;
-  } else if (end_pts.is_empty() && !weights.isNotNull()) {
+    // return cumsumv;
+  } else if (endpts.is_empty() && !weights.isNotNull()) {
     // Return unweighted rolling sums at each point
-    cum_sum = diff_it(cum_sum, look_back, true);
-  } else if (!end_pts.is_empty() && weights.isNotNull()) {
+    cumsumv = diffit(cumsumv, look_back, true);
+  } else if (!endpts.is_empty() && weights.isNotNull()) {
     // Return the weighted averages (convolutions) at end points
-    cum_sum = cum_sum.rows(end_pts);
-  } else if (!end_pts.is_empty() && !weights.isNotNull()) {
+    cumsumv = cumsumv.rows(endpts);
+  } else if (!endpts.is_empty() && !weights.isNotNull()) {
     // Return the unweighted rolling sums at end points
-    cum_sum = cum_sum.rows(end_pts);
-    cum_sum = diff_it(cum_sum, 1, true);
+    cumsumv = cumsumv.rows(endpts);
+    cumsumv = diffit(cumsumv, 1, true);
   }  // end if
   
-  return cum_sum;
+  return cumsumv;
   
 }  // end roll_wsum
 
@@ -1783,7 +1784,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   interval.
 //' 
 //'   The function \code{run_mean()} performs the same calculation as the
-//'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
+//'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdav,
 //'   method="recursive")}, but it's several times faster.
 //' 
 //'   The function \code{run_mean()} returns a \emph{matrix} with the same
@@ -1792,32 +1793,32 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate historical prices
-//' oh_lc <- rutils::etf_env$VTI
-//' price_s <- quantmod::Cl(oh_lc)
+//' ohlc <- rutils::etfenv$VTI
+//' prices <- quantmod::Cl(ohlc)
 //' # Calculate the running means
-//' lamb_da <- 0.95
-//' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
+//' lambdav <- 0.95
+//' means <- HighFreq::run_mean(prices, lambda=lambdav)
 //' # Calculate running means using R code
-//' filter_ed <- (1-lamb_da)*filter(price_s, 
-//'   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
+//' filter_ed <- (1-lambdav)*filter(prices, 
+//'   filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), 
 //'   method="recursive")
 //' all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
 //' 
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
-//'   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
+//'   Rcpp=HighFreq::run_mean(prices, lambda=lambdav),
+//'   Rcode=filter(prices, filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //'   
 //' # Create weights equal to the trading volumes
-//' weight_s <- quantmod::Vo(oh_lc)
+//' weights <- quantmod::Vo(ohlc)
 //' # Calculate the running weighted means
-//' meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
+//' meansw <- HighFreq::run_mean(prices, lambda=lambdav, weights=weights)
 //' # dygraph plot the running weighted means
-//' da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
-//' colnames(da_ta) <- c("means running", "means weighted")
-//' dygraphs::dygraph(da_ta, main="Running Means") %>%
+//' datav <- xts(cbind(means, meansw), zoo::index(ohlc))
+//' colnames(datav) <- c("means running", "means weighted")
+//' dygraphs::dygraph(datav, main="Running Means") %>%
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=1) %>%
 //'   dyLegend(show="always", width=500)
 //' }
@@ -1828,31 +1829,31 @@ arma::mat run_mean(const arma::mat& tseries,
                    double lambda, 
                    const arma::colvec& weights = 0) {
   
-  arma::uword num_rows = tseries.n_rows;
+  arma::uword nrows = tseries.n_rows;
   arma::uword weights_rows = weights.n_elem;
-  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   if (weights_rows == 1) {
     means.row(0) = tseries.row(0);
     // Calculate means without weights
-    for (arma::uword it = 1; it < num_rows; it++) {
+    for (arma::uword it = 1; it < nrows; it++) {
       // Calculate the means as the weighted sums
       means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     }  // end for
-  } else if (weights_rows == num_rows) {
+  } else if (weights_rows == nrows) {
     // Calculate means with weights
-    arma::mat meansw = arma::zeros<mat>(num_rows, 1);
+    arma::mat meansw = arma::zeros<mat>(nrows, 1);
     means.row(0) = weights.row(0)*tseries.row(0);
     meansw.row(0) = weights.row(0);
-    for (arma::uword it = 1; it < num_rows; it++) {
+    for (arma::uword it = 1; it < nrows; it++) {
       // Calculate the means as the weighted sums
       meansw.row(it) = lambda1*weights.row(it) + lambda*meansw.row(it-1);
       means.row(it) = lambda1*weights.row(it)*tseries.row(it) + lambda*means.row(it-1);
       // Divide by the mean weight
       means.row(it-1) = means.row(it-1)/meansw.row(it-1);
     }  // end for
-    means.row(num_rows-1) = means.row(num_rows-1)/meansw.row(num_rows-1);
+    means.row(nrows-1) = means.row(nrows-1)/meansw.row(nrows-1);
   }  // end if
   
   return means;
@@ -1913,32 +1914,32 @@ arma::mat run_mean(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate historical prices
-//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+//' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running maximums
-//' lamb_da <- 0.9
-//' maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
+//' lambdav <- 0.9
+//' maxs <- HighFreq::run_max(prices, lambda=lambdav)
 //' # Plot dygraph of VTI prices and running maximums
-//' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
-//' colnames(da_ta) <- c("prices", "max")
-//' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="VTI Prices and Running Maximums") %>%
-//'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
-//'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+//' colnames(datav) <- c("prices", "max")
+//' colnamev <- colnames(datav)
+//' dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") %>%
+//'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
+//'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat run_max(const arma::mat& tseries, double lambda) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::mat maxs = arma::zeros<mat>(num_rows, tseries.n_cols);
-  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::uword nrows = tseries.n_rows;
+  arma::mat maxs = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
   maxs.row(0) = tseries.row(0);
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the mean as a weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the max from a weighted sum
@@ -2003,32 +2004,32 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical prices
-//' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+//' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running minimums
-//' lamb_da <- 0.9
-//' mins <- HighFreq::run_min(price_s, lambda=lamb_da)
+//' lambdav <- 0.9
+//' mins <- HighFreq::run_min(prices, lambda=lambdav)
 //' # Plot dygraph of VTI prices and running minimums
-//' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
-//' colnames(da_ta) <- c("prices", "min")
-//' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") %>%
-//'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
-//'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
+//' colnames(datav) <- c("prices", "min")
+//' colnamev <- colnames(datav)
+//' dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") %>%
+//'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
+//'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat run_min(const arma::mat& tseries, double lambda) {
   
-  arma::uword num_rows = tseries.n_rows;
-  arma::mat mins = arma::zeros<mat>(num_rows, tseries.n_cols);
-  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::uword nrows = tseries.n_rows;
+  arma::mat mins = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
   mins.row(0) = tseries.row(0);
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the mean as a weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the min from a weighted sum
@@ -2086,7 +2087,7 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' 
 //'   The function \code{run_var()} performs the same calculation as the
 //'   standard \code{R} function\cr\code{stats::filter(x=series,
-//'   filter=weight_s, method="recursive")}, but it's several times faster.
+//'   filter=weights, method="recursive")}, but it's several times faster.
 //' 
 //'   The function \code{run_var()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -2094,20 +2095,20 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+//' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate the running variance
-//' lamb_da <- 0.9
-//' vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
+//' lambdav <- 0.9
+//' vars <- HighFreq::run_var(returns, lambda=lambdav)
 //' # Calculate running variance using R code
-//' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
-//'   init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
+//' filter_ed <- (1-lambdav)*filter(returns^2, filter=lambdav, 
+//'   init=as.numeric(returns[1, 1])^2/(1-lambdav), 
 //'   method="recursive")
 //' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_var(re_turns, lambda=lamb_da),
-//'   Rcode=filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive"),
+//'   Rcpp=HighFreq::run_var(returns, lambda=lambdav),
+//'   Rcode=filter(returns^2, filter=lambdav, init=as.numeric(returns[1, 1])^2/(1-lambdav), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2115,14 +2116,14 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 // [[Rcpp::export]]
 arma::mat run_var(const arma::mat& tseries, double lambda) {
   
-  arma::uword num_rows = tseries.n_rows;
+  arma::uword nrows = tseries.n_rows;
   arma::mat vars = arma::square(tseries);
-  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the mean as the weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the variance as the weighted sum of squared returns minus the squared means
@@ -2183,24 +2184,24 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' @examples
 //' \dontrun{
 //' # Extract the log OHLC prices of VTI
-//' oh_lc <- log(rutils::etf_env$VTI)
+//' ohlc <- log(rutils::etfenv$VTI)
 //' # Calculate the running variance
-//' var_running <- HighFreq::run_var_ohlc(oh_lc, lambda=0.8)
+//' var_running <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
 //' # Calculate the rolling variance
-//' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE)
-//' da_ta <- cbind(var_running, var_rolling)
-//' colnames(da_ta) <- c("running", "rolling")
-//' col_names <- colnames(da_ta)
-//' da_ta <- xts::xts(da_ta, index(oh_lc))
+//' var_rolling <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
+//' datav <- cbind(var_running, var_rolling)
+//' colnames(datav) <- c("running", "rolling")
+//' colnamev <- colnames(datav)
+//' datav <- xts::xts(datav, index(ohlc))
 //' # dygraph plot of VTI running versus rolling volatility
-//' dygraphs::dygraph(sqrt(da_ta[-(1:111), ]), main="Running and Rolling Volatility of VTI") %>%
+//' dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Running and Rolling Volatility of VTI") %>%
 //'   dyOptions(colors=c("red", "blue"), strokeWidth=1) %>%
 //'   dyLegend(show="always", width=500)
 //' # Compare the speed of running versus rolling volatility
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   running=HighFreq::run_var_ohlc(oh_lc, lambda=0.8),
-//'   rolling=HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE),
+//'   running=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+//'   rolling=HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE),
 //'   times=10))[, c(1, 4, 5)]
 //' }
 //' @export
@@ -2209,19 +2210,19 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
                        double lambda) {
   
   // Allocate variance matrix
-  arma::uword num_rows = ohlc.n_rows;
-  arma::mat vars = arma::zeros<mat>(num_rows, 1);
+  arma::uword nrows = ohlc.n_rows;
+  arma::mat vars = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   double coeff = 0.134;
 
   // Calculate all the different intra-day and day-over-day returns 
   // (differences of OHLC prices)
-  arma::mat clo_se = ohlc.col(3);
-  arma::mat open_close(clo_se.n_rows, 1);
-  open_close = (ohlc.col(0) - lag_it(clo_se, 1, false));
-  arma::mat close_open = (clo_se - ohlc.col(0));
-  arma::mat close_high = (clo_se - ohlc.col(1));
-  arma::mat close_low = (clo_se - ohlc.col(2));
+  arma::mat closep = ohlc.col(3);
+  arma::mat open_close(closep.n_rows, 1);
+  open_close = (ohlc.col(0) - lagit(closep, 1, false));
+  arma::mat close_open = (closep - ohlc.col(0));
+  arma::mat close_high = (closep - ohlc.col(1));
+  arma::mat close_low = (closep - ohlc.col(2));
   arma::mat high_low = (ohlc.col(1) - ohlc.col(2));
   arma::mat high_open = (ohlc.col(1) - ohlc.col(0));
   arma::mat low_open = (ohlc.col(2) - ohlc.col(0));
@@ -2229,7 +2230,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
   // Perform loop over the rows
   vars.row(0) = arma::square(open_close.row(0)) + coeff*arma::square(close_open.row(0)) +
     (coeff-1)*(close_high.row(0)*high_open.row(0) + close_low.row(0)*low_open.row(0));
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the variance as the weighted sum of squared returns minus the squared means
     vars.row(it) = lambda1*(arma::square(open_close.row(it)) + coeff*arma::square(close_open.row(it)) +
       (coeff-1)*(close_high.row(it)*high_open.row(it) + close_low.row(it)*low_open.row(it))) + lambda*vars.row(it-1);
@@ -2296,13 +2297,13 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
+//' returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' # Calculate the running covariance
-//' lamb_da <- 0.9
-//' covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
+//' lambdav <- 0.9
+//' covars <- HighFreq::run_covar(returns, lambda=lambdav)
 //' # Calculate running covariance using R code
-//' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], 
-//'   filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), 
+//' filter_ed <- (1-lambdav)*filter(returns[, 1]*returns[, 2], 
+//'   filter=lambdav, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambdav), 
 //'   method="recursive")
 //' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
 //' # Calculate the running correlation
@@ -2313,16 +2314,16 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 // [[Rcpp::export]]
 arma::mat run_covar(const arma::mat& tseries, double lambda) {
   
-  arma::uword num_rows = tseries.n_rows;
+  arma::uword nrows = tseries.n_rows;
   arma::mat vars = arma::square(tseries);
-  arma::mat covar = arma::zeros<mat>(num_rows, 1);
-  arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  arma::mat covar = arma::zeros<mat>(nrows, 1);
+  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
   covar(0) = tseries(0, 0)*tseries(0, 1);
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the mean as the weighted sum
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the covariance as the weighted sum of products of returns
@@ -2333,17 +2334,17 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   return arma::join_rows(covar, vars);
   
   // Old code version below - produces same output and it's slightly faster, but less elegant
-  // arma::uword num_rows = tseries.n_rows;
+  // arma::uword nrows = tseries.n_rows;
   // arma::mat var1 = arma::square(tseries.col(0));
   // arma::mat var2 = arma::square(tseries.col(1));
-  // arma::mat covar = arma::zeros<mat>(num_rows, 1);
-  // arma::mat means = arma::zeros<mat>(num_rows, tseries.n_cols);
+  // arma::mat covar = arma::zeros<mat>(nrows, 1);
+  // arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
   // double lambda1 = 1-lambda;
   // 
   // // Perform loop over the rows
   // means.row(0) = tseries.row(0);
   // covar(0) = tseries(0, 0)*tseries(0, 1);
-  // for (arma::uword it = 1; it < num_rows; it++) {
+  // for (arma::uword it = 1; it < nrows; it++) {
   //   // Calculate the mean as the weighted sum
   //   means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
   //   // Calculate the covariance as the weighted sum of products of returns
@@ -2451,23 +2452,23 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 //' # Response equals XLF returns
-//' res_ponse <- re_turns[, 1]
+//' response <- returns[, 1]
 //' # Predictor matrix equals VTI and IEF returns
-//' predic_tor <- re_turns[, -1]
+//' predictor <- returns[, -1]
 //' # Calculate the running regressions
-//' lamb_da <- 0.9
-//' regs <- HighFreq::run_reg(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
+//' lambdav <- 0.9
+//' regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambdav)
 //' # Plot the running alphas
-//' da_ta <- cbind(cumsum(res_ponse), regs[, 1])
-//' colnames(da_ta) <- c("XLF", "alphas")
-//' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="Alphas of XLF Versus VTI and IEF") %>%
-//'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
-//'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
-//'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
-//'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
+//' datav <- cbind(cumsum(response), regs[, 1])
+//' colnames(datav) <- c("XLF", "alphas")
+//' colnamev <- colnames(datav)
+//' dygraphs::dygraph(datav, main="Alphas of XLF Versus VTI and IEF") %>%
+//'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+//'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+//'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") %>%
+//'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
 //' }
 //' 
 //' @export
@@ -2477,23 +2478,23 @@ arma::mat run_reg(const arma::mat& response,
                   double lambda, 
                   std::string method = "none") {
   
-  arma::uword num_rows = predictor.n_rows;
-  arma::uword num_cols = predictor.n_cols;
-  arma::mat means_resp = arma::zeros<mat>(num_rows, 1);
-  arma::mat means_pred = arma::zeros<mat>(num_rows, num_cols);
+  arma::uword nrows = predictor.n_rows;
+  arma::uword ncols = predictor.n_cols;
+  arma::mat means_resp = arma::zeros<mat>(nrows, 1);
+  arma::mat means_pred = arma::zeros<mat>(nrows, ncols);
   arma::mat vars = arma::square(predictor);
-  arma::mat covars = arma::zeros<mat>(num_rows, num_cols);
-  arma::mat betas = arma::zeros<mat>(num_rows, num_cols);
-  arma::mat alphas = arma::zeros<mat>(num_rows, 1);
-  arma::mat resids = arma::zeros<mat>(num_rows, 1);
-  arma::mat varz = arma::ones<mat>(num_rows, 1);
-  arma::mat meanz = arma::zeros<mat>(num_rows, 1);
+  arma::mat covars = arma::zeros<mat>(nrows, ncols);
+  arma::mat betas = arma::zeros<mat>(nrows, ncols);
+  arma::mat alphas = arma::zeros<mat>(nrows, 1);
+  arma::mat resids = arma::zeros<mat>(nrows, 1);
+  arma::mat varz = arma::ones<mat>(nrows, 1);
+  arma::mat meanz = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means_resp.row(0) = response.row(0);
   means_pred.row(0) = predictor.row(0);
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the mean as the weighted sum
     means_resp.row(it) = lambda1*response.row(it) + lambda*means_resp.row(it-1);
     means_pred.row(it) = lambda1*predictor.row(it) + lambda*means_pred.row(it-1);
@@ -2615,23 +2616,23 @@ arma::mat run_reg(const arma::mat& response,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 //' # Response equals XLF returns
-//' res_ponse <- re_turns[, 1]
+//' response <- returns[, 1]
 //' # Predictor matrix equals VTI and IEF returns
-//' predic_tor <- re_turns[, -1]
+//' predictor <- returns[, -1]
 //' # Calculate the running z-scores
-//' lamb_da <- 0.9
-//' zscores <- HighFreq::run_zscores(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
+//' lambdav <- 0.9
+//' zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambdav)
 //' # Plot the running z-scores
-//' da_ta <- cbind(cumsum(res_ponse), zscores[, 1])
-//' colnames(da_ta) <- c("XLF", "zscores")
-//' col_names <- colnames(da_ta)
-//' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%
-//'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
-//'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
-//'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
-//'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
+//' datav <- cbind(cumsum(response), zscores[, 1])
+//' colnames(datav) <- c("XLF", "zscores")
+//' colnamev <- colnames(datav)
+//' dygraphs::dygraph(datav, main="Z-Scores of XLF Versus VTI and IEF") %>%
+//'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+//'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+//'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") %>%
+//'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
 //' }
 //' 
 //' @export
@@ -2641,14 +2642,14 @@ arma::mat run_zscores(const arma::mat& response,
                       double lambda, 
                       bool demean = true) {
   
-  arma::uword num_rows = predictor.n_rows;
-  arma::uword num_cols = predictor.n_cols;
+  arma::uword nrows = predictor.n_rows;
+  arma::uword ncols = predictor.n_cols;
   // arma::mat var1 = arma::square(tseries.col(0));
   arma::mat vars = arma::square(predictor);
-  arma::mat betas = arma::ones<mat>(num_rows, num_cols);
-  arma::mat zscores = arma::ones<mat>(num_rows, 1);
-  arma::mat varz = arma::ones<mat>(num_rows, 1);
-  arma::mat meanz = arma::zeros<mat>(num_rows, 1);
+  arma::mat betas = arma::ones<mat>(nrows, ncols);
+  arma::mat zscores = arma::ones<mat>(nrows, 1);
+  arma::mat varz = arma::ones<mat>(nrows, 1);
+  arma::mat meanz = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Multiply each column of predictor by the response.
@@ -2656,7 +2657,7 @@ arma::mat run_zscores(const arma::mat& response,
   covars.each_col() %= response;
   
   // Perform loop over the rows
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the z-score as the weighted sum of products of returns.
     // cout << "Calculating vars: " << it << endl;
     vars.row(it) = lambda1*vars.row(it) + lambda*vars.row(it-1);
@@ -2690,38 +2691,38 @@ arma::mat run_zscores(const arma::mat& response,
 // Define C++ enum type for the different methods for regularization,
 // calculating variance, skewness, kurtosis, covariance, regression, 
 // and matrix inverse.
-enum meth_od {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
+enum methodenum {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
               max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
 
 // Map string to C++ enum type for switch statement.
 // This is needed because Rcpp can't map C++ enum type to R variable SEXP.
-meth_od calc_method(std::string method) {
+methodenum calc_method(std::string method) {
   if (method == "moment" || method == "m") 
-    return meth_od::moment;
+    return methodenum::moment;
   else if (method == "least_squares" || method == "l")
-    return meth_od::least_squares;
+    return methodenum::least_squares;
   else if (method == "quantile" || method == "q")
-    return meth_od::quantile;
+    return methodenum::quantile;
   else if (method == "nonparametric" || method == "n")
-    return meth_od::nonparametric;
+    return methodenum::nonparametric;
   else if (method == "regular")
-    return meth_od::regular;
+    return methodenum::regular;
   else if (method == "rank_sharpe")
-    return meth_od::rank_sharpe;
+    return methodenum::rank_sharpe;
   else if (method == "max_sharpe")
-    return meth_od::max_sharpe;
+    return methodenum::max_sharpe;
   else if (method == "max_sharpe_median")
-    return meth_od::max_sharpe_median;
+    return methodenum::max_sharpe_median;
   else if (method == "min_var")
-    return meth_od::min_var;
+    return methodenum::min_var;
   else if (method == "min_varpca")
-    return meth_od::min_varpca;
+    return methodenum::min_varpca;
   else if (method == "rank")
-    return meth_od::rank;
+    return methodenum::rank;
   else if (method == "rankrob")
-    return meth_od::rankrob;
+    return methodenum::rankrob;
   else 
-    return meth_od::moment;
+    return methodenum::moment;
 }  // end calc_method
 
 
@@ -2766,44 +2767,44 @@ meth_od calc_method(std::string method) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 //' # Calculate the column means in RcppArmadillo
-//' HighFreq::calc_mean(re_turns)
+//' HighFreq::calc_mean(returns)
 //' # Calculate the column means in R
-//' sapply(re_turns, mean)
+//' sapply(returns, mean)
 //' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns)), 
-//'   sapply(re_turns, mean), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_mean(returns)), 
+//'   sapply(returns, mean), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns),
-//'   Rcode=sapply(re_turns, mean),
+//'   Rcpp=HighFreq::calc_mean(returns),
+//'   Rcode=sapply(returns, mean),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile mean (location)
-//' HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
 //' # Calculate the quantile mean (location) in R
-//' colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
+//' colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 //' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)), 
-//'   colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
+//' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+//'   colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9),
-//'   Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
+//'   Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+//'   Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the column medians in RcppArmadillo
-//' HighFreq::calc_mean(re_turns, method="nonparametric")
+//' HighFreq::calc_mean(returns, method="nonparametric")
 //' # Calculate the column medians in R
-//' sapply(re_turns, median)
+//' sapply(returns, median)
 //' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
-//'   sapply(re_turns, median), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_mean(returns, method="nonparametric")), 
+//'   sapply(returns, median), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
-//'   Rcode=sapply(re_turns, median),
+//'   Rcpp=HighFreq::calc_mean(returns, method="nonparametric"),
+//'   Rcode=sapply(returns, median),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2815,15 +2816,15 @@ arma::mat calc_mean(const arma::mat& tseries,
   
   // Switch for the different methods of location
   switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
+  case methodenum::moment: {  // moment
     return arma::mean(tseries);
   }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-conf_lev, conf_lev};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(0) + quantile_s.row(1));
+  case methodenum::quantile: {  // quantile
+    arma::vec levels = {1-conf_lev, conf_lev};
+    arma::mat quantiles = arma::quantile(tseries, levels);
+    return (quantiles.row(0) + quantiles.row(1));
   }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
+  case methodenum::nonparametric: {  // nonparametric
     return arma::median(tseries);
   }  // end nonparametric
   default : {
@@ -2838,7 +2839,7 @@ arma::mat calc_mean(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the variance of a a single-column \emph{time series} or a
+//' Calculate the variance of a single-column \emph{time series} or a
 //' \emph{vector} using \code{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
@@ -2846,32 +2847,32 @@ arma::mat calc_mean(const arma::mat& tseries,
 //' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 //'
 //' @details
-//'   The function \code{calc_var_vec()} calculates the variance of a
+//'   The function \code{calc_varvec()} calculates the variance of a
 //'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
 //'   significantly faster than the \code{R} function \code{var()}.
 //'
 //' @examples
 //' \dontrun{
 //' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
-//' # Compare calc_var_vec() with standard var()
-//' all.equal(HighFreq::calc_var_vec(re_turns), 
-//'   var(re_turns))
+//' returns <- rnorm(1e6)
+//' # Compare calc_varvec() with standard var()
+//' all.equal(HighFreq::calc_varvec(returns), 
+//'   var(returns))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var_vec(re_turns),
-//'   Rcode=var(re_turns),
+//'   Rcpp=HighFreq::calc_varvec(returns),
+//'   Rcode=var(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double calc_var_vec(const arma::vec& tseries) {
+double calc_varvec(const arma::vec& tseries) {
   
   return arma::var(tseries);
   
-}  // end calc_var_vec
+}  // end calc_varvec
 
 
 
@@ -2933,27 +2934,27 @@ double calc_var_vec(const arma::vec& tseries) {
 //' @examples
 //' \dontrun{
 //' # Calculate VTI and XLF returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 //' # Compare HighFreq::calc_var() with standard var()
-//' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   apply(re_turns, 2, var), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_var(returns)), 
+//'   apply(returns, 2, var), check.attributes=FALSE)
 //' # Compare HighFreq::calc_var() with matrixStats
-//' all.equal(drop(HighFreq::calc_var(re_turns)), 
-//'   matrixStats::colVars(re_turns), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_var(returns)), 
+//'   matrixStats::colVars(returns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with matrixStats and with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var(re_turns),
-//'   matrixStats=matrixStats::colVars(re_turns),
-//'   Rcode=apply(re_turns, 2, var),
+//'   Rcpp=HighFreq::calc_var(returns),
+//'   matrixStats=matrixStats::colVars(returns),
+//'   Rcode=apply(returns, 2, var),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Compare HighFreq::calc_var() with stats::mad()
-//' all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
-//'   sapply(re_turns, mad), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_var(returns, method="nonparametric")), 
+//'   sapply(returns, mad), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with stats::mad()
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
-//'   Rcode=sapply(re_turns, mad),
+//'   Rcpp=HighFreq::calc_var(returns, method="nonparametric"),
+//'   Rcode=sapply(returns, mad),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2970,20 +2971,20 @@ arma::mat calc_var(const arma::mat& tseries,
   
   // Switch for the different methods of dispersion
   switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
+  case methodenum::moment: {  // moment
     return arma::var(tseries);
   }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-conf_lev, conf_lev};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(1) - quantile_s.row(0));
+  case methodenum::quantile: {  // quantile
+    arma::vec levels = {1-conf_lev, conf_lev};
+    arma::mat quantiles = arma::quantile(tseries, levels);
+    return (quantiles.row(1) - quantiles.row(0));
   }  // end quantile
-  case meth_od::nonparametric: {  // MAD
-    double num_cols = tseries.n_cols;
+  case methodenum::nonparametric: {  // MAD
+    double ncols = tseries.n_cols;
     arma::mat medians = arma::median(tseries);
-    arma::mat mads(1, num_cols);
+    arma::mat mads(1, ncols);
     // Loop over columns of tseries
-    for (arma::uword it = 0; it < num_cols; it++) {
+    for (arma::uword it = 0; it < ncols; it++) {
       mads.col(it) = arma::median(arma::abs(tseries.col(it) - arma::as_scalar(medians.col(it))));
     }  // end for
     // tseries.each_row() -= arma::median(tseries, 0);
@@ -3044,16 +3045,16 @@ arma::mat calc_var(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate the log prices
-//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-//' price_s <- log(price_s)
+//' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+//' prices <- log(prices)
 //' # Calculate the daily variance of percentage returns
-//' calc_var_ag(price_s, step=1)
+//' calc_var_ag(prices, step=1)
 //' # Calculate the daily variance using R
-//' sapply(rutils::diff_it(price_s), var)
+//' sapply(rutils::diffit(prices), var)
 //' # Calculate the variance of returns aggregated over 21 days
-//' calc_var_ag(price_s, step=21)
+//' calc_var_ag(prices, step=21)
 //' # The variance over 21 days is approximately 21 times the daily variance
-//' 21*calc_var_ag(price_s, step=1)
+//' 21*calc_var_ag(prices, step=1)
 //' }
 //' 
 //' @export
@@ -3063,25 +3064,25 @@ arma::mat calc_var_ag(const arma::mat& tseries,
   
   if (step == 1)
     // Calculate the variance without aggregations.
-    return arma::var(diff_it(tseries, 1, false));
+    return arma::var(diffit(tseries, 1, false));
   else {
-    // Calculate the number of extra periods that don't fit over num_rows.
-    arma::uword num_rows = tseries.n_rows;
-    arma::uword remainder = num_rows % step;
+    // Calculate the number of extra periods that don't fit over nrows.
+    arma::uword nrows = tseries.n_rows;
+    arma::uword remainder = nrows % step;
     // Allocate aggregations, end points, and variance.
     arma::mat aggs;
-    arma::uvec end_p;
+    arma::uvec endp;
     // The number of rows is (remainder+1) so that it works for remainder=0
-    arma::mat var_s(remainder+1, tseries.n_cols);
+    arma::mat vars(remainder+1, tseries.n_cols);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub <= remainder; stub++) {
-      end_p = calc_endpoints(tseries.n_rows, step, stub);
-      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
-      // end_p = end_p.elem(find(end_p < num_rows));
-      aggs = tseries.rows(end_p);
-      var_s.row(stub) = arma::var(diff_it(aggs, 1, false));
+      endp = calc_endpoints(tseries.n_rows, step, stub);
+      // endp = arma::regspace<uvec>(stub, step, nrows + step);
+      // endp = endp.elem(find(endp < nrows));
+      aggs = tseries.rows(endp);
+      vars.row(stub) = arma::var(diffit(aggs, 1, false));
     }  // end for
-    return mean(var_s);
+    return mean(vars);
   }  // end if
   
 }  // end calc_var_ag
@@ -3169,29 +3170,29 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Extract the log OHLC prices of SPY
-//' oh_lc <- log(HighFreq::SPY)
+//' ohlc <- log(HighFreq::SPY)
 //' # Extract the time index of SPY prices
-//' in_dex <- c(1, diff(xts::.index(oh_lc)))
+//' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Calculate the variance of SPY returns, with scaling of the returns
-//' HighFreq::calc_var_ohlc(oh_lc, 
-//'  method="yang_zhang", scale=TRUE, index=in_dex)
+//' HighFreq::calc_var_ohlc(ohlc, 
+//'  method="yang_zhang", scale=TRUE, index=indeks)
 //' # Calculate variance without accounting for overnight jumps
-//' HighFreq::calc_var_ohlc(oh_lc, 
-//'  method="rogers_satchell", scale=TRUE, index=in_dex)
+//' HighFreq::calc_var_ohlc(ohlc, 
+//'  method="rogers_satchell", scale=TRUE, index=indeks)
 //' # Calculate the variance without scaling the returns
-//' HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
+//' HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
 //' # Calculate the variance by passing in the lagged close prices
-//' close_lag <- HighFreq::lag_it(oh_lc[, 4])
-//' all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-//'   HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
+//' close_lag <- HighFreq::lagit(ohlc[, 4])
+//' all.equal(HighFreq::calc_var_ohlc(ohlc), 
+//'   HighFreq::calc_var_ohlc(ohlc, close_lag=close_lag))
 //' # Compare with HighFreq::calc_var_ohlc_r()
-//' all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
-//'   HighFreq::calc_var_ohlc_r(oh_lc))
+//' all.equal(HighFreq::calc_var_ohlc(ohlc, index=indeks), 
+//'   HighFreq::calc_var_ohlc_r(ohlc))
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_var_ohlc(oh_lc),
-//'   Rcode=HighFreq::calc_var_ohlc_r(oh_lc),
+//'   Rcpp=HighFreq::calc_var_ohlc(ohlc),
+//'   Rcode=HighFreq::calc_var_ohlc_r(ohlc),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
@@ -3202,58 +3203,58 @@ double calc_var_ohlc(const arma::mat& ohlc,
                      bool scale = true, 
                      arma::colvec index = 0) {
   
-  arma::uword num_rows = ohlc.n_rows;
-  double coeff = 0.34/(1.34 + (num_rows+1)/(num_rows-1));
+  arma::uword nrows = ohlc.n_rows;
+  double coeff = 0.34/(1.34 + (nrows+1)/(nrows-1));
   
-  if (num_rows < 3) {
+  if (nrows < 3) {
     // Return zero if not enough data
     return 0;
   }  // end if
   
   if (!scale || (index.n_rows == 1)) {
-    index = arma::ones(num_rows);
-    // cout << "ohlc.n_rows = " << num_rows << endl;
+    index = arma::ones(nrows);
+    // cout << "ohlc.n_rows = " << nrows << endl;
     // cout << "index.n_rows = " << index.n_rows << endl;
   }  // end if
   
   // Calculate all the different intra-day and day-over-day returns 
   // (differences of OHLC prices)
-  arma::colvec clo_se = ohlc.col(3);
-  arma::colvec open_close(clo_se.n_rows);
+  arma::colvec closep = ohlc.col(3);
+  arma::colvec open_close(closep.n_rows);
   if (close_lag.n_rows == 1) {
-    open_close = arma::join_cols(clo_se.subvec(0, 0), clo_se.subvec(0, clo_se.n_elem-2));
+    open_close = arma::join_cols(closep.subvec(0, 0), closep.subvec(0, closep.n_elem-2));
     open_close = (ohlc.col(0) - open_close)/index;
   } else {
     open_close = (ohlc.col(0) - close_lag)/index;
   }  // end if
-  arma::colvec close_open = (clo_se - ohlc.col(0))/index;
-  arma::colvec close_high = (clo_se - ohlc.col(1))/index;
-  arma::colvec close_low = (clo_se - ohlc.col(2))/index;
+  arma::colvec close_open = (closep - ohlc.col(0))/index;
+  arma::colvec close_high = (closep - ohlc.col(1))/index;
+  arma::colvec close_low = (closep - ohlc.col(2))/index;
   arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/index;
   arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/index;
   arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/index;
   
   if (method == "close") {
     // cout << "Calc method is Close" << endl;
-    return arma::var(arma::diff(clo_se));
+    return arma::var(arma::diff(closep));
   } else if (method == "rogers_satchell") {
     // cout << "Calc method is Rogers-Satchell" << endl;
     return -(arma::dot(close_high, high_open) +
-             arma::dot(close_low, low_open))/num_rows;
+             arma::dot(close_low, low_open))/nrows;
   } else if (method == "garman_klass") {
     // cout << "Calc method is Garman-Klass" << endl;
     return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows;
+            (2*log(2)-1)*arma::dot(close_open, close_open))/nrows;
   } else if (method == "garman_klass_yz") {
     // cout << "Calc method is Garman-Klass-YZ" << endl;
     return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/num_rows + 
+            (2*log(2)-1)*arma::dot(close_open, close_open))/nrows + 
             arma::var(open_close);
   } else if (method == "yang_zhang") {
     // cout << "Calc method is Yang-Zhang" << endl;
     return arma::var(open_close) + coeff*arma::var(close_open) +
       (coeff-1)*(arma::dot(close_high, high_open) + 
-      arma::dot(close_low, low_open))/num_rows;
+      arma::dot(close_low, low_open))/nrows;
   } else {
     cout << "Wrong calc method!" << endl;
     return 1;
@@ -3333,13 +3334,13 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Calculate the log ohlc prices
-//' oh_lc <- log(rutils::etf_env$VTI)
+//' ohlc <- log(rutils::etfenv$VTI)
 //' # Calculate the daily variance of percentage returns
-//' calc_var_ohlc_ag(oh_lc, step=1)
+//' calc_var_ohlc_ag(ohlc, step=1)
 //' # Calculate the variance of returns aggregated over 21 days
-//' calc_var_ohlc_ag(oh_lc, step=21)
+//' calc_var_ohlc_ag(ohlc, step=21)
 //' # The variance over 21 days is approximately 21 times the daily variance
-//' 21*calc_var_ohlc_ag(oh_lc, step=1)
+//' 21*calc_var_ohlc_ag(ohlc, step=1)
 //' }
 //' 
 //' @export
@@ -3355,23 +3356,23 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     // Calculate the variance without aggregations.
     return calc_var_ohlc(ohlc, method, close_lag, scale, index);
   else {
-    // Calculate the number of extra periods that don't fit over num_rows.
-    arma::uword num_rows = ohlc.n_rows;
-    arma::uword remainder = num_rows % step;
+    // Calculate the number of extra periods that don't fit over nrows.
+    arma::uword nrows = ohlc.n_rows;
+    arma::uword remainder = nrows % step;
     // Allocate aggregations, end points, and variance.
     arma::mat aggs;
-    arma::uvec end_p;
-    arma::mat var_s(remainder, 1);
+    arma::uvec endp;
+    arma::mat vars(remainder, 1);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < remainder; stub++) {
-      end_p = calc_endpoints(num_rows, step, stub);
-      // end_p = arma::regspace<uvec>(stub, step, num_rows + step);
-      // end_p = end_p.elem(find(end_p < num_rows));
+      endp = calc_endpoints(nrows, step, stub);
+      // endp = arma::regspace<uvec>(stub, step, nrows + step);
+      // endp = endp.elem(find(endp < nrows));
       // roll_ohlc
-      aggs = roll_ohlc(ohlc, end_p);
-      var_s.row(stub) = calc_var_ohlc(aggs, method, close_lag, scale, index);
+      aggs = roll_ohlc(ohlc, endp);
+      vars.row(stub) = calc_var_ohlc(aggs, method, close_lag, scale, index);
     }  // end for
-    return arma::as_scalar(mean(var_s));
+    return arma::as_scalar(mean(vars));
   }  // end if
   
 }  // end calc_var_ohlc_ag
@@ -3423,46 +3424,46 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Define a single-column time series of returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the moment skewness
-//' HighFreq::calc_skew(re_turns)
+//' HighFreq::calc_skew(returns)
 //' # Calculate the moment skewness in R
 //' calc_skewr <- function(x) {
 //'   x <- (x-mean(x))
 //'   sum(x^3)/var(x)^1.5/NROW(x)
 //' }  # end calc_skewr
-//' all.equal(HighFreq::calc_skew(re_turns), 
-//'   calc_skewr(re_turns), check.attributes=FALSE)
+//' all.equal(HighFreq::calc_skew(returns), 
+//'   calc_skewr(returns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns),
-//'   Rcode=calc_skewr(re_turns),
+//'   Rcpp=HighFreq::calc_skew(returns),
+//'   Rcode=calc_skewr(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile skewness
-//' HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)
 //' # Calculate the quantile skewness in R
 //' calc_skewq <- function(x, a = 0.75) {
-//'   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
-//'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+//'   	quantiles <- quantile(x, c(1-a, 0.5, a), type=5)
+//'   	(quantiles[3] + quantiles[1] - 2*quantiles[2])/(quantiles[3] - quantiles[1])
 //' }  # end calc_skewq
-//' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)), 
-//'   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)), 
+//'   calc_skewq(returns, a=0.9), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, method="quantile"),
-//'   Rcode=calc_skewq(re_turns),
+//'   Rcpp=HighFreq::calc_skew(returns, method="quantile"),
+//'   Rcode=calc_skewq(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the nonparametric skewness
-//' HighFreq::calc_skew(re_turns, method="nonparametric")
+//' HighFreq::calc_skew(returns, method="nonparametric")
 //' # Compare HighFreq::calc_skew() with R nonparametric skewness
-//' all.equal(drop(HighFreq::calc_skew(re_turns, method="nonparametric")), 
-//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//' all.equal(drop(HighFreq::calc_skew(returns, method="nonparametric")), 
+//'   (mean(returns)-median(returns))/sd(returns), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_skew(re_turns, method="nonparametric"),
-//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   Rcpp=HighFreq::calc_skew(returns, method="nonparametric"),
+//'   Rcode=(mean(returns)-median(returns))/sd(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -3479,26 +3480,26 @@ arma::mat calc_skew(const arma::mat& tseries,
   
   // Switch for the different methods of skew
   switch(calc_method(method)) {
-  case meth_od::moment: {  // moment
-    double num_rows = tseries.n_rows;
-    double num_cols = tseries.n_cols;
+  case methodenum::moment: {  // moment
+    double nrows = tseries.n_rows;
+    double ncols = tseries.n_cols;
     arma::mat means = arma::mean(tseries);
-    arma::mat var_s = arma::var(tseries);
-    arma::mat skewness(1, num_cols);
+    arma::mat vars = arma::var(tseries);
+    arma::mat skewness(1, ncols);
     // De-mean the columns of tseries
     // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 3))/arma::pow(var_s, 1.5)/num_rows;
-    for (arma::uword it = 0; it < num_cols; it++) {
-      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(var_s.col(it), 1.5)/num_rows;
+    // return arma::sum(arma::pow(tseries, 3))/arma::pow(vars, 1.5)/nrows;
+    for (arma::uword it = 0; it < ncols; it++) {
+      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(vars.col(it), 1.5)/nrows;
     }  // end for
     return skewness;
   }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-conf_lev, 0.5, conf_lev};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(2) + quantile_s.row(0) - 2*quantile_s.row(1))/(quantile_s.row(2) - quantile_s.row(0));
+  case methodenum::quantile: {  // quantile
+    arma::vec levels = {1-conf_lev, 0.5, conf_lev};
+    arma::mat quantiles = arma::quantile(tseries, levels);
+    return (quantiles.row(2) + quantiles.row(0) - 2*quantiles.row(1))/(quantiles.row(2) - quantiles.row(0));
   }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
+  case methodenum::nonparametric: {  // nonparametric
     return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
   }  // end nonparametric
   default : {
@@ -3557,46 +3558,46 @@ arma::mat calc_skew(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Define a single-column time series of returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the moment kurtosis
-//' HighFreq::calc_kurtosis(re_turns)
+//' HighFreq::calc_kurtosis(returns)
 //' # Calculate the moment kurtosis in R
 //' calc_kurtr <- function(x) {
 //'   x <- (x-mean(x))
 //'   sum(x^4)/var(x)^2/NROW(x)
 //' }  # end calc_kurtr
-//' all.equal(HighFreq::calc_kurtosis(re_turns), 
-//'   calc_kurtr(re_turns), check.attributes=FALSE)
+//' all.equal(HighFreq::calc_kurtosis(returns), 
+//'   calc_kurtr(returns), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns),
-//'   Rcode=calc_kurtr(re_turns),
+//'   Rcpp=HighFreq::calc_kurtosis(returns),
+//'   Rcode=calc_kurtr(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile kurtosis
-//' HighFreq::calc_kurtosis(re_turns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)
 //' # Calculate the quantile kurtosis in R
 //' calc_kurtq <- function(x, a=0.9) {
-//'   	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
-//'   	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
+//'   	quantiles <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
+//'   	(quantiles[4] - quantiles[1])/(quantiles[3] - quantiles[2])
 //' }  # end calc_kurtq
-//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", conf_lev=0.9)), 
-//'   calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
+//' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)), 
+//'   calc_kurtq(returns, a=0.9), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="quantile"),
-//'   Rcode=calc_kurtq(re_turns),
+//'   Rcpp=HighFreq::calc_kurtosis(returns, method="quantile"),
+//'   Rcode=calc_kurtq(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the nonparametric kurtosis
-//' HighFreq::calc_kurtosis(re_turns, method="nonparametric")
+//' HighFreq::calc_kurtosis(returns, method="nonparametric")
 //' # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
-//' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="nonparametric")), 
-//'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+//' all.equal(drop(HighFreq::calc_kurtosis(returns, method="nonparametric")), 
+//'   (mean(returns)-median(returns))/sd(returns), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="nonparametric"),
-//'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+//'   Rcpp=HighFreq::calc_kurtosis(returns, method="nonparametric"),
+//'   Rcode=(mean(returns)-median(returns))/sd(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -3613,27 +3614,27 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
   
   // Switch for the different methods of kurtosis
   switch(calc_method(method)) {
-  case meth_od::moment: {  // Fourth moment
-    double num_rows = tseries.n_rows;
-    double num_cols = tseries.n_cols;
+  case methodenum::moment: {  // Fourth moment
+    double nrows = tseries.n_rows;
+    double ncols = tseries.n_cols;
     arma::mat means = arma::mean(tseries);
-    arma::mat var_s = arma::var(tseries);
-    arma::mat kurtosis(1, num_cols);
+    arma::mat vars = arma::var(tseries);
+    arma::mat kurtosis(1, ncols);
     // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
     // Loop over columns of tseries
-    for (arma::uword it = 0; it < num_cols; it++) {
-      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(var_s.col(it), 2)/num_rows;
+    for (arma::uword it = 0; it < ncols; it++) {
+      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(vars.col(it), 2)/nrows;
     }  // end for
     // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 4))/arma::pow(var_s, 2)/num_rows;
+    // return arma::sum(arma::pow(tseries, 4))/arma::pow(vars, 2)/nrows;
     return kurtosis;
   }  // end moment
-  case meth_od::quantile: {  // quantile
-    arma::vec level_s = {1-conf_lev, 0.25, 0.75, conf_lev};
-    arma::mat quantile_s = arma::quantile(tseries, level_s);
-    return (quantile_s.row(3) - quantile_s.row(0))/(quantile_s.row(2) - quantile_s.row(1));
+  case methodenum::quantile: {  // quantile
+    arma::vec levels = {1-conf_lev, 0.25, 0.75, conf_lev};
+    arma::mat quantiles = arma::quantile(tseries, levels);
+    return (quantiles.row(3) - quantiles.row(0))/(quantiles.row(2) - quantiles.row(1));
   }  // end quantile
-  case meth_od::nonparametric: {  // nonparametric
+  case methodenum::nonparametric: {  // nonparametric
     return (arma::mean(tseries) - arma::median(tseries))/arma::stddev(tseries);
   }  // end nonparametric
   default : {
@@ -3683,10 +3684,10 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate the log prices
-//' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-//' price_s <- log(price_s)
+//' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+//' prices <- log(prices)
 //' # Calculate the Hurst exponent from 21 day aggregations
-//' calc_hurst(price_s, step=21)
+//' calc_hurst(prices, step=21)
 //' }
 //' 
 //' @export
@@ -3762,9 +3763,9 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate the log ohlc prices
-//' oh_lc <- log(rutils::etf_env$VTI)
+//' ohlc <- log(rutils::etfenv$VTI)
 //' # Calculate the Hurst exponent from 21 day aggregations
-//' calc_hurst_ohlc(oh_lc, step=21)
+//' calc_hurst_ohlc(ohlc, step=21)
 //' }
 //' 
 //' @export
@@ -3812,24 +3813,24 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 //' # Response equals XLF returns
-//' res_ponse <- re_turns[, 1]
+//' response <- returns[, 1]
 //' # Predictor matrix equals VTI and IEF returns
-//' predic_tor <- re_turns[, -1]
+//' predictor <- returns[, -1]
 //' # Perform multivariate regression using lm()
-//' reg_model <- lm(res_ponse ~ predic_tor)
+//' reg_model <- lm(response ~ predictor)
 //' sum_mary <- summary(reg_model)
 //' # Perform multivariate regression using calc_lm()
-//' reg_arma <- HighFreq::calc_lm(response=res_ponse, predictor=predic_tor)
+//' reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
 //' # Compare the outputs of both functions
 //' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
 //' all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
 //' all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_lm(response=res_ponse, predictor=predic_tor),
-//'   Rcode=lm(res_ponse ~ predic_tor),
+//'   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
+//'   Rcode=lm(response ~ predictor),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -3838,10 +3839,10 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   
   // Add column for intercept to predictor matrix
-  arma::uword num_rows = predictor.n_rows;
-  arma::mat predictori = join_rows(ones(num_rows), predictor);
-  arma::uword num_cols = predictori.n_cols;
-  arma::uword deg_free = (num_rows - num_cols);
+  arma::uword nrows = predictor.n_rows;
+  arma::mat predictori = join_rows(ones(nrows), predictor);
+  arma::uword ncols = predictori.n_cols;
+  arma::uword deg_free = (nrows - ncols);
   
   // Calculate alpha and beta coefficients for the model response ~ predictor
   arma::colvec coeff = arma::solve(predictori, response);
@@ -3849,31 +3850,31 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   arma::colvec residuals = response - predictori*coeff;
   
   // Calculate TSS, RSS, and ESS
-  double tot_sumsq = (num_rows-1)*arma::var(response);
+  double tot_sumsq = (nrows-1)*arma::var(response);
   double res_sumsq = arma::dot(residuals, residuals);
   double exp_sumsq = tot_sumsq - res_sumsq;
   
   // Calculate R-squared and F-statistic
-  double r_squared = exp_sumsq/tot_sumsq;
-  double f_stat = (exp_sumsq*deg_free)/(res_sumsq*(num_cols-1));
-  // arma::rowvec stat_s=join_horiz(r_squared, f_stat);
-  Rcpp::NumericVector stat_s(2);
-  stat_s(0) = r_squared;
-  stat_s(1) = f_stat;
-  stat_s.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
+  double rsquared = exp_sumsq/tot_sumsq;
+  double fstat = (exp_sumsq*deg_free)/(res_sumsq*(ncols-1));
+  // arma::rowvec stats=join_horiz(rsquared, fstat);
+  Rcpp::NumericVector stats(2);
+  stats(0) = rsquared;
+  stats(1) = fstat;
+  stats.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
   
   // Calculate standard errors of beta coefficients
-  arma::colvec std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
+  arma::colvec stderr = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
   // Calculate t-values and p-values of beta coefficients
-  arma::colvec tvals = coeff/std_err;
-  arma::colvec p_vals = 2*Rcpp::pt(-abs(wrap(tvals)), deg_free);
-  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, std_err), tvals), p_vals));
-  Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "std_err", "tvals", "pvals");
+  arma::colvec tvals = coeff/stderr;
+  arma::colvec pvals = 2*Rcpp::pt(-abs(wrap(tvals)), deg_free);
+  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderr), tvals), pvals));
+  Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
   
   return Rcpp::List::create(Named("coefficients") = coeff_mat,
                             // Named("residuals") = residuals,
-                            Named("zscore") = residuals(num_rows-1)/arma::stddev(residuals),
-                            Named("stats") = stat_s);
+                            Named("zscore") = residuals(nrows-1)/arma::stddev(residuals),
+                            Named("stats") = stats);
   
 }  // end calc_lm
 
@@ -3957,25 +3958,25 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 //' # Response equals XLF returns
-//' res_ponse <- re_turns[, 1]
+//' response <- returns[, 1]
 //' # Predictor matrix equals VTI and IEF returns
-//' predic_tor <- re_turns[, -1]
+//' predictor <- returns[, -1]
 //' # Perform multivariate regression using lm()
-//' reg_model <- lm(res_ponse ~ predic_tor)
+//' reg_model <- lm(response ~ predictor)
 //' sum_mary <- summary(reg_model)
-//' co_eff <- sum_mary$coefficients
+//' coeff <- sum_mary$coefficients
 //' # Perform multivariate regression using calc_reg()
-//' reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, predictor=predic_tor))
+//' reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
 //' # Compare the outputs of both functions
-//' all.equal(reg_arma[1:(2*(1+NCOL(predic_tor)))], 
-//'   c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
+//' all.equal(reg_arma[1:(2*(1+NCOL(predictor)))], 
+//'   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_reg(response=res_ponse, predictor=predic_tor),
-//'   Rcode=lm(res_ponse ~ predic_tor),
+//'   Rcpp=HighFreq::calc_reg(response=response, predictor=predictor),
+//'   Rcode=lm(response ~ predictor),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -3991,30 +3992,30 @@ arma::mat calc_reg(const arma::mat& response,
                    double alpha = 0.0) {
   
   // Add column for intercept to predictor matrix
-  arma::uword num_rows = predictor.n_rows;
+  arma::uword nrows = predictor.n_rows;
   arma::mat predictori = predictor;
   if (intercept)
-    predictori = join_rows(ones(num_rows), predictor);
+    predictori = join_rows(ones(nrows), predictor);
 
-  arma::uword num_cols = predictori.n_cols;
-  arma::uword deg_free = (num_rows - num_cols);
+  arma::uword ncols = predictori.n_cols;
+  arma::uword deg_free = (nrows - ncols);
   arma::vec coeff;
   arma::vec tvals;
-  arma::mat reg_data = arma::zeros<mat>(2*num_cols+1, 1);
+  arma::mat reg_data = arma::zeros<mat>(2*ncols+1, 1);
   
   // Switch for the different methods for weights
   switch(calc_method(method)) {
-  case meth_od::least_squares: {
+  case methodenum::least_squares: {
     // Calculate regression coefficients for the model response ~ predictor
     coeff = arma::solve(predictori, response);
     break;
   }  // end least_squares
-  case meth_od::regular: {
+  case methodenum::regular: {
     // Calculate shrinkage regression coefficients
     coeff = calc_inv(predictori, eigen_thresh, eigen_max)*response;
     break;
   }  // end regular
-  case meth_od::quantile: {
+  case methodenum::quantile: {
     // Not implemented yet
     break;
   }  // end quantile
@@ -4028,22 +4029,22 @@ arma::mat calc_reg(const arma::mat& response,
   arma::mat residuals = response - predictori*coeff;
   
   // Calculate TSS, RSS, and ESS
-  // double tot_sumsq = (num_rows-1)*arma::var(response);
+  // double tot_sumsq = (nrows-1)*arma::var(response);
   double res_sumsq = arma::dot(residuals, residuals);
   // double exp_sumsq = tot_sumsq - res_sumsq;
   
   // Calculate standard errors of the beta coefficients
-  arma::mat std_err = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
+  arma::mat stderr = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
   // Calculate t-values of the beta coefficients
-  tvals = coeff/std_err;
+  tvals = coeff/stderr;
   
   // Calculate z-score
-  mat zscore = residuals(num_rows-1, 0)/arma::stddev(residuals);
+  mat zscore = residuals(nrows-1, 0)/arma::stddev(residuals);
   
   // Combine regression data
-  reg_data.rows(0, num_cols-1) = coeff;
-  reg_data.rows(num_cols, 2*num_cols-1) = tvals;
-  reg_data.row(2*num_cols) = zscore;
+  reg_data.rows(0, ncols-1) = coeff;
+  reg_data.rows(ncols, 2*ncols-1) = tvals;
+  reg_data.row(2*ncols) = zscore;
   
   return reg_data.t();
   
@@ -4126,29 +4127,29 @@ arma::mat calc_reg(const arma::mat& response,
 //' @examples
 //' \dontrun{
 //' # Define time series of returns using package rutils
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling means at 25 day end points, with a 75 day look-back
-//' means <- HighFreq::roll_mean(re_turns, step=25, look_back=3)
+//' means <- HighFreq::roll_mean(returns, step=25, look_back=3)
 //' # Compare the mean estimates over 11-period look-back intervals
-//' all.equal(HighFreq::roll_mean(re_turns, look_back=11)[-(1:10), ], 
-//'   drop(RcppRoll::roll_mean(re_turns, n=11)), check.attributes=FALSE)
+//' all.equal(HighFreq::roll_mean(returns, look_back=11)[-(1:10), ], 
+//'   drop(RcppRoll::roll_mean(returns, n=11)), check.attributes=FALSE)
 //' # Define end points and start points
-//' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling means using RcppArmadillo
-//' means <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p)
+//' means <- HighFreq::roll_mean(returns, startp=startp, endp=endp)
 //' # Calculate the rolling medians using RcppArmadillo
-//' medianscpp <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric")
+//' medianscpp <- HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric")
 //' # Calculate the rolling medians using R
-//' medians = sapply(1:NROW(end_p), function(i) {
-//'   median(re_turns[start_p[i]:end_p[i] + 1])
+//' medians = sapply(1:NROW(endp), function(i) {
+//'   median(returns[startp[i]:endp[i] + 1])
 //' })  # end sapply
 //' all.equal(medians, drop(medianscpp))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric"),
-//'   Rcode=sapply(1:NROW(end_p), function(i) {median(re_turns[start_p[i]:end_p[i] + 1])}),
+//'   Rcpp=HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric"),
+//'   Rcode=sapply(1:NROW(endp), function(i) {median(returns[startp[i]:endp[i] + 1])}),
 //'   times=10))[, c(1, 4, 5)]
 //' }
 //' @export
@@ -4163,37 +4164,37 @@ arma::mat roll_mean(const arma::mat& tseries,
                     double conf_lev = 0.75) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   
   // Allocate mean matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat means = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat means = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate means
-    if (end_pts(ep) > start_pts(ep)) {
-      means.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+    if (endpts(ep) > startpts(ep)) {
+      means.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
     }  // end if
   }  // end for
   
@@ -4220,16 +4221,16 @@ arma::mat roll_mean(const arma::mat& tseries,
 //'   the input argument \code{tseries}.
 //'
 //' @details
-//'   The function \code{roll_var_vec()} calculates a \emph{vector} of variance
+//'   The function \code{roll_varvec()} calculates a \emph{vector} of variance
 //'   estimates over a rolling look-back interval for a single-column \emph{time
 //'   series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
 //'   \code{C++} code.
 //'   
-//'   The function \code{roll_var_vec()} uses an expanding look-back interval in
+//'   The function \code{roll_varvec()} uses an expanding look-back interval in
 //'   the initial warmup period, to calculate the same number of elements as the
 //'   input argument \code{tseries}.
 //'
-//'   The function \code{roll_var_vec()} performs the same calculation as the
+//'   The function \code{roll_varvec()} performs the same calculation as the
 //'   function \code{roll_var()} from package
 //'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
 //'   but it's several times faster because it uses \code{RcppArmadillo}
@@ -4238,37 +4239,37 @@ arma::mat roll_mean(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Create a vector of random returns
-//' re_turns <- rnorm(1e6)
+//' returns <- rnorm(1e6)
 //' # Compare the variance estimates over 11-period look-back intervals
-//' all.equal(drop(HighFreq::roll_var_vec(re_turns, look_back=11))[-(1:10)], 
-//'   RcppRoll::roll_var(re_turns, n=11))
+//' all.equal(drop(HighFreq::roll_varvec(returns, look_back=11))[-(1:10)], 
+//'   RcppRoll::roll_var(returns, n=11))
 //' # Compare the speed of RcppArmadillo with RcppRoll
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_var_vec(re_turns, look_back=11),
-//'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
+//'   Rcpp=HighFreq::roll_varvec(returns, look_back=11),
+//'   RcppRoll=RcppRoll::roll_var(returns, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_var_vec(const arma::vec& tseries, arma::uword look_back = 1) {
+arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
   
   arma::uword length = tseries.n_elem;
-  arma::vec var_vec = arma::zeros<vec>(length);
+  arma::vec varvec = arma::zeros<vec>(length);
   
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
-    var_vec(it) = arma::var(tseries.subvec(0, it));
+    varvec(it) = arma::var(tseries.subvec(0, it));
   }  // end for
   
   // Remaining period
   for (arma::uword it = look_back; it < length; it++) {
-    var_vec(it) = arma::var(tseries.subvec(it-look_back+1, it));
+    varvec(it) = arma::var(tseries.subvec(it-look_back+1, it));
   }  // end for
   
-  return var_vec;
+  return varvec;
   
-}  // end roll_var_vec
+}  // end roll_varvec
 
 
 
@@ -4340,22 +4341,22 @@ arma::vec roll_var_vec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' @examples
 //' \dontrun{
 //' # Define time series of returns using package rutils
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' vari_ance <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+//' variance <- HighFreq::roll_var(returns, step=25, look_back=3)
 //' # Compare the variance estimates over 11-period look-back intervals
-//' all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
-//'   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
+//' all.equal(HighFreq::roll_var(returns, look_back=11)[-(1:10), ], 
+//'   drop(RcppRoll::roll_var(returns, n=11)), check.attributes=FALSE)
 //' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
-//'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
+//'   Rcpp=HighFreq::roll_var(returns, look_back=11),
+//'   RcppRoll=RcppRoll::roll_var(returns, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
 //' summary(microbenchmark(
-//'     Rcpp=HighFreq::roll_var(re_turns, look_back=11, method="quantile"),
-//'     TTR=TTR::runMAD(re_turns, n = 11),
+//'     Rcpp=HighFreq::roll_var(returns, look_back=11, method="quantile"),
+//'     TTR=TTR::runMAD(returns, n = 11),
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
@@ -4370,37 +4371,37 @@ arma::mat roll_var(const arma::mat& tseries,
                    double conf_lev = 0.75) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   
   // Allocate variance matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat variance = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat variance = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate variance
-    if (end_pts(ep) > start_pts(ep)) {
-      variance.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+    if (endpts(ep) > startpts(ep)) {
+      variance.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
     }  // end if
   }  // end for
   
@@ -4520,33 +4521,33 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Extract the log OHLC prices of SPY
-//' oh_lc <- log(HighFreq::SPY)
+//' ohlc <- log(HighFreq::SPY)
 //' # Extract the time index of SPY prices
-//' in_dex <- c(1, diff(xts::.index(oh_lc)))
+//' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Rolling variance at minutely end points, with a 21 minute look-back
-//' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+//' var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
 //'                               step=1, look_back=21, 
 //'                               method="yang_zhang", 
-//'                               index=in_dex, scale=TRUE)
+//'                               index=indeks, scale=TRUE)
 //' # Daily OHLC prices
-//' oh_lc <- rutils::etf_env$VTI
-//' in_dex <- c(1, diff(xts::.index(oh_lc)))
+//' ohlc <- rutils::etfenv$VTI
+//' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
-//' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+//' var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
 //'                               step=5, look_back=4, 
 //'                               method="yang_zhang", 
-//'                               index=in_dex, scale=TRUE)
+//'                               index=indeks, scale=TRUE)
 //' # Same calculation in R
-//' n_rows <- NROW(oh_lc)
-//' close_lag = HighFreq::lag_it(oh_lc[, 4])
-//' end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
-//' start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
-//' n_pts <- NROW(end_p)
+//' nrows <- NROW(ohlc)
+//' close_lag = HighFreq::lagit(ohlc[, 4])
+//' endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+//' startp <- drop(HighFreq::calc_startpoints(endp, 2))
+//' n_pts <- NROW(endp)
 //' var_rollingr <- sapply(2:n_pts, function(it) {
-//'   ran_ge <- start_p[it]:end_p[it]
-//'   sub_ohlc = oh_lc[ran_ge, ]
-//'   sub_close = close_lag[ran_ge]
-//'   sub_index = in_dex[ran_ge]
+//'   rangev <- startp[it]:endp[it]
+//'   sub_ohlc = ohlc[rangev, ]
+//'   sub_close = close_lag[rangev]
+//'   sub_index = indeks[rangev]
 //'   HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 //' })  # end sapply
 //' var_rollingr <- c(0, var_rollingr)
@@ -4565,38 +4566,38 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
                         arma::colvec index = 0) {
   
   // Allocate end points
-  arma::uword num_rows = ohlc.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = ohlc.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate variance matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::vec variance = arma::zeros<vec>(num_pts);
+  arma::uword numpts = endpts.n_elem;
+  arma::vec variance = arma::zeros<vec>(numpts);
   
   // Extract OHLC close prices
-  arma::colvec clo_se = ohlc.col(3);
-  arma::colvec close_lag = lag_it(clo_se, 1, false);
+  arma::colvec closep = ohlc.col(3);
+  arma::colvec close_lag = lagit(closep, 1, false);
   
   // Set the time index to 1 if scale = FALSE
   if (!scale || (index.n_rows == 1)) {
-    index = arma::ones(num_rows);
+    index = arma::ones(nrows);
   }  // end if
   
   // Define data subsets over look-back intervals
@@ -4605,11 +4606,11 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   arma::colvec sub_index;
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
-    if (end_pts(ep) > start_pts(ep)) {
-      sub_ohlc = ohlc.rows(start_pts(ep), end_pts(ep));
-      sub_close = close_lag.rows(start_pts(ep), end_pts(ep));
-      sub_index = index.subvec(start_pts(ep), end_pts(ep));
+  for (arma::uword ep = 0; ep < numpts; ep++) {
+    if (endpts(ep) > startpts(ep)) {
+      sub_ohlc = ohlc.rows(startpts(ep), endpts(ep));
+      sub_close = close_lag.rows(startpts(ep), endpts(ep));
+      sub_index = index.subvec(startpts(ep), endpts(ep));
       // Calculate variance
       variance.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
     }  // end if
@@ -4626,7 +4627,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   // }  // end for
   
   // Remaining period
-  // for (arma::uword it = look_back; it < num_rows; it++) {
+  // for (arma::uword it = look_back; it < nrows; it++) {
   //   arma::mat sub_ohlc = ohlc.rows(it-look_back+1, it);
   //   arma::colvec sub_close = close_lag.rows(it-look_back+1, it);
   //   arma::colvec sub_index = index.subvec(it-look_back+1, it);
@@ -4703,24 +4704,24 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' @examples
 //' \dontrun{
 //' # Define time series of returns using package rutils
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
-//' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
-//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-//' skew_ness <- HighFreq::roll_skew(re_turns, step=25, look_back=3)
+//' skew_ness <- HighFreq::roll_skew(returns, step=25, look_back=3)
 //' # Calculate the rolling skewness using R code
-//' skew_r <- sapply(1:NROW(end_p), function(it) {
-//'   HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+//' skew_r <- sapply(1:NROW(endp), function(it) {
+//'   HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 //' })  # end sapply
 //' # Compare the skewness estimates
 //' all.equal(drop(skew_ness), skew_r, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_skew(re_turns, step=25, look_back=3),
-//'   Rcode=sapply(1:NROW(end_p), function(it) {
-//'     HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+//'   Rcpp=HighFreq::roll_skew(returns, step=25, look_back=3),
+//'   Rcode=sapply(1:NROW(endp), function(it) {
+//'     HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -4736,36 +4737,36 @@ arma::mat roll_skew(const arma::mat& tseries,
                     double conf_lev = 0.75) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate skewness matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat skew_ness = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat skew_ness = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate skewness
-    if (end_pts(ep) > start_pts(ep)) {
-      skew_ness.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+    if (endpts(ep) > startpts(ep)) {
+      skew_ness.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
     }  // end if
   }  // end for
   
@@ -4837,24 +4838,24 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Define time series of returns using package rutils
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
-//' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
-//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-//' kurto_sis <- HighFreq::roll_kurtosis(re_turns, step=25, look_back=3)
+//' kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 //' # Calculate the rolling kurtosis using R code
-//' kurt_r <- sapply(1:NROW(end_p), function(it) {
-//'   HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+//' kurt_r <- sapply(1:NROW(endp), function(it) {
+//'   HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 //' })  # end sapply
 //' # Compare the kurtosis estimates
 //' all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_kurtosis(re_turns, step=25, look_back=3),
-//'   Rcode=sapply(1:NROW(end_p), function(it) {
-//'     HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+//'   Rcpp=HighFreq::roll_kurtosis(returns, step=25, look_back=3),
+//'   Rcode=sapply(1:NROW(endp), function(it) {
+//'     HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -4870,36 +4871,36 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
                         double conf_lev = 0.75) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate kurtosis matrix
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat kurto_sis = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat kurto_sis = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate kurtosis
-    if (end_pts(ep) > start_pts(ep)) {
-      kurto_sis.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+    if (endpts(ep) > startpts(ep)) {
+      kurto_sis.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
     }  // end if
   }  // end for
   
@@ -5010,18 +5011,18 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 //' # Define monthly end points and start points
-//' end_p <- xts::endpoints(re_turns, on="months")[-1]
+//' endp <- xts::endpoints(returns, on="months")[-1]
 //' look_back <- 12
-//' start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+//' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 //' # Calculate rolling betas using RcppArmadillo
-//' reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], predictor=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
+//' reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
 //' beta_s <- reg_stats[, 2]
 //' # Calculate rolling betas in R
-//' betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
-//'   da_ta <- re_turns[start_p[ep]:end_p[ep], ]
-//'   drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
+//' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+//'   datav <- returns[startp[ep]:endp[ep], ]
+//'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 //' })  # end sapply
 //' # Compare the outputs of both functions
 //' all.equal(beta_s, betas_r, check.attributes=FALSE)
@@ -5044,49 +5045,49 @@ arma::mat roll_reg(const arma::mat& response,
                    double alpha = 0.0) {
   
   // Allocate end points
-  arma::uword num_rows = predictor.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = predictor.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   
   // Allocate regression matrix
   arma::mat responsi;
   arma::mat predicti;
-  arma::uword num_pts = end_pts.n_elem;
-  arma::uword num_cols = predictor.n_cols;
-  if (intercept) num_cols += 1;
-  arma::mat reg_stats(num_pts, (2*num_cols + 1), fill::zeros);
+  arma::uword numpts = endpts.n_elem;
+  arma::uword ncols = predictor.n_cols;
+  if (intercept) ncols += 1;
+  arma::mat reg_stats(numpts, (2*ncols + 1), fill::zeros);
 
-  // Perform loop over the end_pts
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  // Perform loop over the endpts
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate regression coefficients
-    if (end_pts(ep) > start_pts(ep)) {
-      responsi = response.rows(start_pts(ep), end_pts(ep));
-      predicti = predictor.rows(start_pts(ep), end_pts(ep));
+    if (endpts(ep) > startpts(ep)) {
+      responsi = response.rows(startpts(ep), endpts(ep));
+      predicti = predictor.rows(startpts(ep), endpts(ep));
       reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, eigen_max, conf_lev, alpha);
     }  // end if
   }  // end for
   
   // Warmup period
-  // reg_stats.rows(0, num_cols+1) = zeros(num_cols+2, (num_cols + 1));
-  // for (arma::uword it = (num_cols+2); it < look_back; it++) {
+  // reg_stats.rows(0, ncols+1) = zeros(ncols+2, (ncols + 1));
+  // for (arma::uword it = (ncols+2); it < look_back; it++) {
   //   responsi = response.rows(0, it);
   //   predicti = predictor.rows(0, it);
   //   reg_data = calc_reg(responsi, predicti);
@@ -5094,7 +5095,7 @@ arma::mat roll_reg(const arma::mat& response,
   // }  // end for
   
   // Remaining periods
-  // for (arma::uword it = look_back; it < num_rows; it++) {
+  // for (arma::uword it = look_back; it < nrows; it++) {
   //   responsi = response.rows(it-look_back+1, it);
   //   predicti = predictor.rows(it-look_back+1, it);
   //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, eigen_max, conf_lev, alpha);
@@ -5144,10 +5145,10 @@ arma::mat roll_reg(const arma::mat& response,
 //'   
 //' @examples
 //' \dontrun{
-//' mat_rix <- matrix(rnorm(20000), nc=2)
+//' matrixv <- matrix(rnorm(20000), nc=2)
 //' look_back <- 11
-//' rolled_scaled <- roll::roll_scale(data=mat_rix, width = look_back, min_obs=1)
-//' rolled_scaled2 <- roll_scale(matrix=mat_rix, look_back = look_back, use_median=FALSE)
+//' rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
+//' rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
 //' all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
 //' }
 //' 
@@ -5157,26 +5158,26 @@ arma::mat roll_scale(const arma::mat& matrix,
                      arma::uword look_back,
                      bool use_median=false) {
   
-  arma::uword num_rows = matrix.n_rows;
-  arma::mat scaled_mat(num_rows, matrix.n_cols);
+  arma::uword nrows = matrix.n_rows;
+  arma::mat scaledmat(nrows, matrix.n_cols);
   arma::mat sub_mat;
   
   // Warmup period
-  scaled_mat.row(0) = matrix.row(0);
+  scaledmat.row(0) = matrix.row(0);
   for (arma::uword it = 1; it < look_back; it++) {
     sub_mat = matrix.rows(0, it);
     sub_mat = calc_scaled(sub_mat, use_median);
-    scaled_mat.row(it) = sub_mat.row(sub_mat.n_rows-1);
+    scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < num_rows; it++) {
+  for (arma::uword it = look_back; it < nrows; it++) {
     sub_mat = matrix.rows(it-look_back+1, it);
     sub_mat = calc_scaled(sub_mat, use_median);
-    scaled_mat.row(it) = sub_mat.row(sub_mat.n_rows-1);
+    scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
-  return scaled_mat;
+  return scaledmat;
 }  // end roll_scale
 
 
@@ -5234,23 +5235,23 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+//' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 //' # Response equals XLF returns
-//' res_ponse <- re_turns[, 1]
+//' response <- returns[, 1]
 //' # Predictor matrix equals VTI and IEF returns
-//' predic_tor <- re_turns[, -1]
+//' predictor <- returns[, -1]
 //' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 //' look_back <- 11
-//' z_scores <- HighFreq::roll_zscores(response=res_ponse, predictor=predic_tor, look_back)
+//' z_scores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
 //' # Calculate z-scores in R from rolling multivariate regression using lm()
-//' z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
+//' z_scoresr <- sapply(1:NROW(predictor), function(ro_w) {
 //'   if (ro_w == 1) return(0)
-//'   start_point <- max(1, ro_w-look_back+1)
-//'   responsi <- res_ponse[start_point:ro_w]
-//'   predicti <- predic_tor[start_point:ro_w, ]
+//'   startpoint <- max(1, ro_w-look_back+1)
+//'   responsi <- response[startpoint:ro_w]
+//'   predicti <- predictor[startpoint:ro_w, ]
 //'   reg_model <- lm(responsi ~ predicti)
-//'   resid_uals <- reg_model$residuals
-//'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
+//'   residuals <- reg_model$residuals
+//'   residuals[NROW(residuals)]/sd(residuals)
 //' })  # end sapply
 //' # Compare the outputs of both functions
 //' all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
@@ -5268,39 +5269,39 @@ arma::vec roll_zscores(const arma::mat& response,
                        arma::uword stub = 0) {
   
   // Allocate end points
-  arma::uword num_rows = predictor.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = predictor.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate regression matrix
   arma::mat responsi;
   arma::mat predicti;
-  arma::uword num_pts = end_pts.n_elem;
-  arma::vec zscores(num_pts, fill::zeros);
+  arma::uword numpts = endpts.n_elem;
+  arma::vec zscores(numpts, fill::zeros);
   
   // Perform loop over the end points
-  for (arma::uword ep = 0; ep < num_pts; ep++) {
+  for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate z-scores
-    if (end_pts(ep) > start_pts(ep)) {
-      responsi = response.rows(start_pts(ep), end_pts(ep));
-      predicti = predictor.rows(start_pts(ep), end_pts(ep));
+    if (endpts(ep) > startpts(ep)) {
+      responsi = response.rows(startpts(ep), endpts(ep));
+      predicti = predictor.rows(startpts(ep), endpts(ep));
       zscores(ep) = calc_lm(responsi, predicti)["zscore"];
     }  // end if
   }  // end for
@@ -5314,7 +5315,7 @@ arma::vec roll_zscores(const arma::mat& response,
   // }  // end for
   
   // Remaining periods
-  // for (arma::uword it = look_back; it < num_rows; it++) {
+  // for (arma::uword it = look_back; it < nrows; it++) {
   //   responsi = response.rows(it-look_back+1, it);
   //   predicti = predictor.rows(it-look_back+1, it);
   //   zscores(it) = calc_lm(responsi, predicti)["zscore"];
@@ -5393,30 +5394,30 @@ arma::vec roll_zscores(const arma::mat& response,
 //' @examples
 //' \dontrun{
 //' # Define time series of returns using package rutils
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", step=25, look_back=3)
+//' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", step=25, look_back=3)
 //' # Calculate the rolling variance using roll_var()
-//' var_roll <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+//' var_roll <- HighFreq::roll_var(returns, step=25, look_back=3)
 //' # Compare the two methods
 //' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 //' # Define end points and start points
-//' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-//' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+//' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling variance using RcppArmadillo
-//' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p)
+//' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp)
 //' # Calculate the rolling variance using R code
-//' var_roll <- sapply(1:NROW(end_p), function(it) {
-//'   var(re_turns[start_p[it]:end_p[it]+1, ])
+//' var_roll <- sapply(1:NROW(endp), function(it) {
+//'   var(returns[startp[it]:endp[it]+1, ])
 //' })  # end sapply
 //' # Compare the two methods
 //' all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p),
-//'   Rcode=sapply(1:NROW(end_p), function(it) {
-//'     var(re_turns[start_p[it]:end_p[it]+1, ])
+//'   Rcpp=HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp),
+//'   Rcode=sapply(1:NROW(endp), function(it) {
+//'     var(returns[startp[it]:endp[it]+1, ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -5433,62 +5434,62 @@ arma::mat roll_fun(const arma::mat& tseries,
                    double conf_lev = 0.75) {
   
   // Allocate end points
-  arma::uword num_rows = tseries.n_rows;
-  arma::uvec end_pts;
-  arma::uvec start_pts;
+  arma::uword nrows = tseries.n_rows;
+  arma::uvec endpts;
+  arma::uvec startpts;
   
   // Calculate end points if missing
   if (sum(endp) == 0) {
-    end_pts = calc_endpoints(num_rows, step, stub);
+    endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    end_pts = endp;
+    endpts = endp;
   }  // end if
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
-    start_pts = calc_startpoints(end_pts, look_back);
+    startpts = calc_startpoints(endpts, look_back);
   } else {
     // Copy start points
-    start_pts = startp;
+    startpts = startp;
   }  // end if
   
   // Allocate matrix of statistics
-  arma::uword num_pts = end_pts.n_elem;
-  arma::mat stats = arma::zeros<mat>(num_pts, tseries.n_cols);
+  arma::uword numpts = endpts.n_elem;
+  arma::mat stats = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   if (fun == "calc_mean") {
     // Calculate the dispersion (variance)
-    for (arma::uword ep = 0; ep < num_pts; ep++) {
+    for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
-      if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_mean(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+      if (endpts(ep) > startpts(ep)) {
+        stats.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
       }  // end if
     }  // end for
   } else if (fun == "calc_var") {
     // Calculate the dispersion (variance)
-    for (arma::uword ep = 0; ep < num_pts; ep++) {
+    for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
-      if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_var(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+      if (endpts(ep) > startpts(ep)) {
+        stats.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
       }  // end if
     }  // end for
   } else if (fun == "calc_skew") {
     // Perform loop over the end points
-    for (arma::uword ep = 0; ep < num_pts; ep++) {
+    for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
-      if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_skew(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+      if (endpts(ep) > startpts(ep)) {
+        stats.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
       }  // end if
     }  // end for
   } else if (fun == "calc_kurtosis") {
     // Perform loop over the end points
-    for (arma::uword ep = 0; ep < num_pts; ep++) {
+    for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
-      if (end_pts(ep) > start_pts(ep)) {
-        stats.row(ep) = calc_kurtosis(tseries.rows(start_pts(ep), end_pts(ep)), method, conf_lev);
+      if (endpts(ep) > startpts(ep)) {
+        stats.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
       }  // end if
     }  // end for
   } else {
@@ -5587,12 +5588,12 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 //' # Calculate historical VTI returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Estimate the GARCH volatility of VTI returns
 //' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
-//'   innov=re_turns, is_random=FALSE)
+//'   innov=returns, is_random=FALSE)
 //' # Plot dygraph of the estimated GARCH volatility
-//' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+//' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(returns)), 
 //'   main="Estimated GARCH Volatility of VTI")
 //' }
 //' 
@@ -5604,16 +5605,16 @@ arma::mat sim_garch(double omega,
                     arma::mat& innov,
                     bool is_random = true) {
   
-  arma::uword num_rows = innov.n_rows;
+  arma::uword nrows = innov.n_rows;
   
   if (is_random) {
     // The innovations are random numbers
-    arma::mat variance(num_rows, 1);
+    arma::mat variance(nrows, 1);
     variance[0] = omega/(1-alpha-beta);
-    arma::mat returns(num_rows, 1);
+    arma::mat returns(nrows, 1);
     returns[0] = std::sqrt(variance[0])*innov[0];
     
-    for (arma::uword it = 1; it < num_rows; it++) {
+    for (arma::uword it = 1; it < nrows; it++) {
       returns[it] = std::sqrt(variance[it-1])*innov[it];
       variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
     }  // end for
@@ -5622,7 +5623,7 @@ arma::mat sim_garch(double omega,
     // The innovations are historical returns
     arma::mat variance = arma::square(innov);
     variance[0] = omega/(1-alpha-beta);
-    for (arma::uword it = 1; it < num_rows; it++) {
+    for (arma::uword it = 1; it < nrows; it++) {
       variance[it] = omega + alpha*variance[it] + beta*variance[it-1];
     }  // end for
     return join_rows(innov, variance);
@@ -5662,7 +5663,7 @@ arma::mat sim_garch(double omega,
 //'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 //'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
 //'   normal \emph{innovations}.
-//'   The recursion starts with the initial price: \eqn{p_1 = init\_price}.
+//'   The recursion starts with the initial price: \eqn{p1 = init\_price}.
 //'
 //'   The function \code{sim_ou()} simulates the percentage returns as equal to
 //'   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -5685,8 +5686,8 @@ arma::mat sim_garch(double omega,
 //' the_ta <- 0.01
 //' in_nov <- matrix(rnorm(1e3))
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-//' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+//' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+//' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 //' }
 //' 
 //' @export
@@ -5697,12 +5698,12 @@ arma::mat sim_ou(double init_price,
                  double theta, 
                  arma::mat& innov) {
   
-  arma::uword num_rows = innov.n_rows;
-  arma::mat prices = arma::zeros<mat>(num_rows, 1);
-  arma::mat returns = arma::zeros<mat>(num_rows, 1);
+  arma::uword nrows = innov.n_rows;
+  arma::mat prices = arma::zeros<mat>(nrows, 1);
+  arma::mat returns = arma::zeros<mat>(nrows, 1);
   
   prices.row(0) = init_price;
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     returns.row(it) = theta*(eq_price - prices.row(it-1)) + volat*innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
@@ -5755,8 +5756,8 @@ arma::mat sim_ou(double init_price,
 //' the_ta <- 0.01
 //' in_nov <- matrix(rnorm(1e3))
 //' # Simulate Schwartz process using Rcpp
-//' re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-//' plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
+//' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+//' plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 //' }
 //' 
 //' @export
@@ -5766,12 +5767,12 @@ arma::mat sim_schwartz(double eq_price,
                        double theta, 
                        arma::mat& innov) {
   
-  arma::uword num_rows = innov.n_rows;
-  arma::mat prices = arma::zeros<mat>(num_rows, 1);
-  arma::mat returns = arma::zeros<mat>(num_rows, 1);
+  arma::uword nrows = innov.n_rows;
+  arma::mat prices = arma::zeros<mat>(nrows, 1);
+  arma::mat returns = arma::zeros<mat>(nrows, 1);
   
   prices.row(0) = exp(volat*innov.row(0));
-  for (arma::uword it = 1; it < num_rows; it++) {
+  for (arma::uword it = 1; it < nrows; it++) {
     returns.row(it) = theta*(eq_price - prices.row(it-1)) + volat*innov.row(it);
     prices.row(it) = prices.row(it-1) * exp(returns.row(it));
   }  // end for
@@ -5804,7 +5805,7 @@ arma::mat sim_schwartz(double eq_price,
 //'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
 //'   \eqn{AR(n)} of order \eqn{n}:
 //'   \deqn{
-//'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+//'     r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 //'   }
 //'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 //'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -5815,26 +5816,26 @@ arma::mat sim_schwartz(double eq_price,
 //'   \code{coeff}.
 //'
 //'   The function \code{sim_ar()} performs the same calculation as the standard
-//'   \code{R} function \cr\code{filter(x=innov, filter=co_eff,
+//'   \code{R} function \cr\code{filter(x=innov, filter=coeff,
 //'   method="recursive")}, but it's several times faster.
 //'   
 //' @examples
 //' \dontrun{
 //' # Define AR coefficients
-//' co_eff <- matrix(c(0.2, 0.2))
+//' coeff <- matrix(c(0.2, 0.2))
 //' # Calculate matrix of innovations
 //' in_nov <- matrix(rnorm(1e4, sd=0.01))
 //' # Calculate recursive filter using filter()
-//' filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
+//' filter_ed <- filter(in_nov, filter=coeff, method="recursive")
 //' # Calculate recursive filter using RcppArmadillo
-//' re_turns <- HighFreq::sim_ar(co_eff, in_nov)
+//' returns <- HighFreq::sim_ar(coeff, in_nov)
 //' # Compare the two methods
-//' all.equal(as.numeric(re_turns), as.numeric(filter_ed))
+//' all.equal(as.numeric(returns), as.numeric(filter_ed))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::sim_ar(co_eff, in_nov),
-//'   Rcode=filter(in_nov, filter=co_eff, method="recursive"),
+//'   Rcpp=HighFreq::sim_ar(coeff, in_nov),
+//'   Rcode=filter(in_nov, filter=coeff, method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -5842,21 +5843,21 @@ arma::mat sim_schwartz(double eq_price,
 // [[Rcpp::export]]
 arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
   
-  arma::uword num_rows = innov.n_rows;
+  arma::uword nrows = innov.n_rows;
   arma::uword look_back = coeff.n_rows;
-  arma::mat rev_coeff = arma::reverse(coeff);
-  arma::mat returns = arma::zeros<mat>(num_rows, 1);
+  arma::mat coeffr = arma::reverse(coeff);
+  arma::mat returns = arma::zeros<mat>(nrows, 1);
 
   // Warmup period
   returns.row(0) = innov.row(0);
-  returns.row(1) = innov.row(1) + rev_coeff.row(look_back-1) * returns.row(0);
+  returns.row(1) = innov.row(1) + coeffr.row(look_back-1) * returns.row(0);
   for (arma::uword it=2; it < look_back-1; it++) {
-    returns.row(it) = innov.row(it) + arma::dot(rev_coeff.rows(look_back-it, look_back-1), returns.rows(0, it-1));
+    returns.row(it) = innov.row(it) + arma::dot(coeffr.rows(look_back-it, look_back-1), returns.rows(0, it-1));
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < num_rows; it++) {
-    returns.row(it) = innov.row(it) + arma::dot(rev_coeff, returns.rows(it-look_back, it-1));
+  for (arma::uword it = look_back; it < nrows; it++) {
+    returns.row(it) = innov.row(it) + arma::dot(coeffr, returns.rows(it-look_back, it-1));
   }  // end for
   
   return returns;
@@ -5887,7 +5888,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 //'   process:
 //'   \deqn{
-//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
 //'   }
 //'   \deqn{
 //'     p_i = p_{i-1} + r_i
@@ -5897,7 +5898,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //'   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
 //'   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
 //'   normal \emph{innovations}.
-//'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+//'   The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
 //'
 //'   The \emph{Dickey-Fuller} process is a combination of an
 //'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -5918,12 +5919,12 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //' sig_ma <- 0.01
 //' the_ta <- 0.01
 //' # Define AR coefficients
-//' co_eff <- matrix(c(0.2, 0.2))
+//' coeff <- matrix(c(0.2, 0.2))
 //' # Calculate matrix of standard normal innovations
 //' in_nov <- matrix(rnorm(1e3))
 //' # Simulate Dickey-Fuller process using Rcpp
-//' re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, co_eff, innov=in_nov)
-//' plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
+//' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, coeff, innov=in_nov)
+//' plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
 //' }
 //' 
 //' @export
@@ -5934,24 +5935,24 @@ arma::mat sim_df(double eq_price,
                  arma::mat& coeff, 
                  arma::mat& innov) {
   
-  arma::uword num_rows = innov.n_rows;
+  arma::uword nrows = innov.n_rows;
   arma::uword look_back = coeff.n_rows;
-  arma::mat rev_coeff = arma::reverse(coeff);
-  arma::mat prices = arma::zeros<mat>(num_rows, 1);
-  arma::mat returns = arma::zeros<mat>(num_rows, 1);
+  arma::mat coeffr = arma::reverse(coeff);
+  arma::mat prices = arma::zeros<mat>(nrows, 1);
+  arma::mat returns = arma::zeros<mat>(nrows, 1);
 
   // Warmup period
   returns.row(0) = volat*innov.row(0);
-  returns.row(1) = volat*innov.row(1) + rev_coeff.row(look_back-1) * returns.row(0);
+  returns.row(1) = volat*innov.row(1) + coeffr.row(look_back-1) * returns.row(0);
   prices.row(0) = volat*innov.row(0);
   for (arma::uword it=2; it < look_back-1; it++) {
-    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(rev_coeff.rows(look_back-it, look_back-1), returns.rows(0, it-1));
+    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr.rows(look_back-it, look_back-1), returns.rows(0, it-1));
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < num_rows; it++) {
-    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(rev_coeff, returns.rows(it-look_back, it-1));
+  for (arma::uword it = look_back; it < nrows; it++) {
+    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-look_back, it-1));
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
@@ -6010,9 +6011,9 @@ arma::mat sim_df(double eq_price,
 //' be_ta <- 0.2
 //' om_ega <- 1e-4*(1-al_pha-be_ta)
 //' # Calculate historical VTI returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+//' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-//' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=re_turns)
+//' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=returns)
 //' }
 //' 
 //' @export
@@ -6030,7 +6031,7 @@ double lik_garch(double omega,
   // Apply floor to variance
   variance.transform([&minval](double x) {return max(x, minval);});
   // Lag the variance
-  variance = lag_it(variance, 1, false);
+  variance = lagit(variance, 1, false);
   // Calculate the log-likelihood
   double likelihood = -conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
   
@@ -6122,24 +6123,24 @@ double lik_garch(double omega,
 //' @examples
 //' \dontrun{
 //' # Calculate covariance matrix of ETF returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
-//' ei_gen <- eigen(cov(re_turns))
+//' returns <- na.omit(rutils::etfenv$returns[, 1:16])
+//' eigend <- eigen(cov(returns))
 //' # Calculate shrinkage inverse of covariance matrix
 //' eigen_max <- 3
-//' eigen_vec <- ei_gen$vectors[, 1:eigen_max]
-//' eigen_val <- ei_gen$values[1:eigen_max]
-//' in_verse <- eigen_vec %*% (t(eigen_vec) / eigen_val)
+//' eigenvec <- eigend$vectors[, 1:eigen_max]
+//' eigenval <- eigend$values[1:eigen_max]
+//' in_verse <- eigenvec %*% (t(eigenvec) / eigenval)
 //' # Define shrinkage intensity and apply shrinkage to the mean returns
 //' al_pha <- 0.5
-//' col_means <- colMeans(re_turns)
+//' col_means <- colMeans(returns)
 //' col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
 //' # Calculate weights using R
-//' weight_s <- in_verse %*% col_means
-//' n_col <- NCOL(re_turns)
-//' weights_r <- weights_r*sd(re_turns %*% rep(1/n_col, n_col))/sd(re_turns %*% weights_r)
+//' weights <- in_verse %*% col_means
+//' n_col <- NCOL(returns)
+//' weights_r <- weights_r*sd(returns %*% rep(1/n_col, n_col))/sd(returns %*% weights_r)
 //' # Calculate weights using RcppArmadillo
-//' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
-//' all.equal(weight_s, weights_r)
+//' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=al_pha))
+//' all.equal(weights, weights_r)
 //' }
 //' 
 //' @export
@@ -6158,93 +6159,93 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
   
   // Switch for the different methods for weights
   switch(calc_method(method)) {
-  case meth_od::rank_sharpe: {
+  case methodenum::rank_sharpe: {
     // Mean returns by columns
-    arma::vec mean_cols = arma::trans(arma::mean(returns, 0));
+    arma::vec meancols = arma::trans(arma::mean(returns, 0));
     // Standard deviation by columns
     arma::vec sd_cols = arma::trans(arma::stddev(returns, 0));
     sd_cols.replace(0, 1);
-    mean_cols = mean_cols/sd_cols;
+    meancols = meancols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(meancols)));
     weights = (weights - arma::mean(weights));
     break;
   }  // end rank_sharpe
-  case meth_od::max_sharpe: {
+  case methodenum::max_sharpe: {
     // Mean returns by columns
-    arma::vec mean_cols = arma::trans(arma::mean(returns, 0));
-    // Shrink mean_cols to the mean of returns
-    mean_cols = ((1-alpha)*mean_cols + alpha*arma::mean(mean_cols));
+    arma::vec meancols = arma::trans(arma::mean(returns, 0));
+    // Shrink meancols to the mean of returns
+    meancols = ((1-alpha)*meancols + alpha*arma::mean(meancols));
     // Apply shrinkage inverse
     // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
-    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
-    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*mean_cols;
+    // weights = calc_inv(cov(returns), eigen_max)*meancols;
+    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*meancols;
     break;
   }  // end max_sharpe
-  case meth_od::max_sharpe_median: {
+  case methodenum::max_sharpe_median: {
     // Mean returns by columns
-    arma::vec mean_cols = arma::trans(arma::median(returns, 0));
-    // Shrink mean_cols to the mean of returns
-    mean_cols = ((1-alpha)*mean_cols + alpha*arma::median(mean_cols));
+    arma::vec meancols = arma::trans(arma::median(returns, 0));
+    // Shrink meancols to the mean of returns
+    meancols = ((1-alpha)*meancols + alpha*arma::median(meancols));
     // Apply shrinkage inverse
     // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
-    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*mean_cols;
+    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*meancols;
     break;
   }  // end max_sharpe_median
-  case meth_od::min_var: {
+  case methodenum::min_var: {
     // Apply shrinkage inverse to unit vector
     weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*arma::ones(returns.n_cols);
     break;
   }  // end min_var
-  case meth_od::min_varpca: {
+  case methodenum::min_varpca: {
     // Calculate highest order principal component
-    arma::vec eigen_val;
-    arma::mat eigen_vec;
-    arma::eig_sym(eigen_val, eigen_vec, arma::cov(returns));
-    weights = eigen_vec.col(0);
+    arma::vec eigenval;
+    arma::mat eigenvec;
+    arma::eig_sym(eigenval, eigenvec, arma::cov(returns));
+    weights = eigenvec.col(0);
     break;
   }  // end min_varpca
-  case meth_od::rank: {
+  case methodenum::rank: {
     // Mean returns by columns
-    arma::vec mean_cols = arma::trans(arma::mean(returns, 0));
+    arma::vec meancols = arma::trans(arma::mean(returns, 0));
     // Standard deviation by columns
     arma::vec sd_cols = arma::trans(arma::stddev(returns, 0));
     sd_cols.replace(0, 1);
-    mean_cols = mean_cols/sd_cols;
+    meancols = meancols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(meancols)));
     weights = (weights - arma::mean(weights));
     break;
   }  // end rank
-  case meth_od::rankrob: {
+  case methodenum::rankrob: {
     // Median returns by columns
-    arma::vec mean_cols = arma::trans(arma::median(returns, 0));
-    // mean_cols = ((1-alpha)*mean_cols + alpha*arma::mean(mean_cols));
+    arma::vec meancols = arma::trans(arma::median(returns, 0));
+    // meancols = ((1-alpha)*meancols + alpha*arma::mean(meancols));
     // Standard deviation by columns
     arma::vec sd_cols = arma::trans(arma::stddev(returns, 0));
     sd_cols.replace(0, 1);
-    mean_cols = mean_cols/sd_cols;
+    meancols = meancols/sd_cols;
     // Apply shrinkage inverse
     // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
-    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
-    // weights = calc_inv(cov(returns), eigen_max)*mean_cols;
+    // weights = calc_inv(cov(returns), eigen_max)*meancols;
+    // weights = calc_inv(cov(returns), eigen_max)*meancols;
     // // Standard deviation by columns
-    // arma::vec sd_cols = mean_cols;
+    // arma::vec sd_cols = meancols;
     // for (arma::uword it=0; it < returns.n_cols; it++) {
     //   sd_cols(it) = arma::median(arma::abs((returns.col(it) - sd_cols)));
     // }  // end for
     // sd_cols.replace(0, 1);
-    // mean_cols = mean_cols/sd_cols;
+    // meancols = meancols/sd_cols;
     // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(mean_cols)));
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(meancols)));
     // level;
     weights = (weights - arma::mean(weights));
     break;
   }  // end rankrob
-  case meth_od::quantile: {
+  case methodenum::quantile: {
     // Sum of quantiles for columns
-    arma::vec level_s = {conf_lev, 1-conf_lev};
-    weights = conv_to<vec>::from(arma::sum(arma::quantile(returns, level_s, 0), 0));
+    arma::vec levels = {conf_lev, 1-conf_lev};
+    weights = conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
     // Weights equal to ranks
     weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(weights)));
     weights = (weights - arma::mean(weights));
@@ -6260,7 +6261,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     // return weights/std::sqrt(sum(square(weights)));
     // return weights/sum(weights);
     // Returns of equally weighted portfolio
-    // arma::vec mean_rows = arma::mean(returns, 1);
+    // arma::vec meanrows = arma::mean(returns, 1);
     // Returns of weighted portfolio
     // arma::vec returns_portf = returns*weights;
     // Scale weights to equally weighted portfolio and return them
@@ -6355,8 +6356,8 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   
 //'   The function \code{back_test()} multiplies the out-of-sample strategy
 //'   returns by the coefficient \code{coeff} (with default equal to \code{1}),
-//'   which allows simulating either a trending strategy (if \code{co_eff = 1}),
-//'   or a reverting strategy (if \code{co_eff = -1}).
+//'   which allows simulating either a trending strategy (if \code{coeff = 1}),
+//'   or a reverting strategy (if \code{coeff = -1}).
 //'   
 //'   The function \code{back_test()} calculates the transaction costs by
 //'   multiplying the bid-offer spread \code{bid_offer} times the absolute
@@ -6371,29 +6372,29 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //' @examples
 //' \dontrun{
 //' # Calculate the ETF daily excess returns
-//' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
+//' returns <- na.omit(rutils::etfenv$returns[, 1:16])
 //' # risk_free is the daily risk-free rate
 //' risk_free <- 0.03/260
-//' ex_cess <- re_turns - risk_free
+//' ex_cess <- returns - risk_free
 //' # Define monthly end points without initial warmpup period
-//' end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
-//' end_p <- end_p[end_p > 0]
-//' len_gth <- NROW(end_p)
+//' endp <- rutils::calc_endpoints(returns, inter_val="months")
+//' endp <- endp[endp > 0]
+//' nrows <- NROW(endp)
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
-//' start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
+//' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 //' # Define shrinkage and regularization intensities
 //' al_pha <- 0.5
 //' eigen_max <- 3
 //' # Simulate a monthly rolling portfolio optimization strategy
-//' pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
-//'                             start_p-1, end_p-1, 
+//' pnls <- HighFreq::back_test(ex_cess, returns, 
+//'                             startp-1, endp-1, 
 //'                             eigen_max = eigen_max, 
 //'                             alpha = al_pha)
-//' pnl_s <- xts::xts(pnl_s, index(re_turns))
-//' colnames(pnl_s) <- "strat_rets"
+//' pnls <- xts::xts(pnls, index(returns))
+//' colnames(pnls) <- "strat_rets"
 //' # Plot dygraph of strategy
-//' dygraphs::dygraph(cumsum(pnl_s), 
+//' dygraphs::dygraph(cumsum(pnls), 
 //'   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 //' }
 //' 
@@ -6418,7 +6419,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   arma::uword num_weights = returns.n_cols;
   arma::vec weights(num_weights, fill::zeros);
   arma::vec weights_past = ones(num_weights)/sqrt(num_weights);
-  arma::mat pnl_s = zeros(returns.n_rows, 1);
+  arma::mat pnls = zeros(returns.n_rows, 1);
 
   // Perform loop over the end points
   for (arma::uword it = 1; it < endp.size(); it++) {
@@ -6428,15 +6429,15 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
     // Calculate the weights as the weighted sum with past weights
     weights = lambda1*weights + lambda*weights_past;
     // Calculate out-of-sample returns
-    pnl_s.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weights;
+    pnls.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weights;
     // Add transaction costs
-    pnl_s.row(endp(it-1)+1) -= bid_offer*sum(abs(weights - weights_past))/2;
+    pnls.row(endp(it-1)+1) -= bid_offer*sum(abs(weights - weights_past))/2;
     // Copy the weights
     weights_past = weights;
   }  // end for
   
-  // Return the strategy pnl_s
-  return pnl_s;
+  // Return the strategy pnls
+  return pnls;
   
 }  // end back_test
 

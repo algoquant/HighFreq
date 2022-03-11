@@ -6,33 +6,33 @@
 \emph{xts} format.}
 \usage{
 random_ohlc(
-  oh_lc = NULL,
-  re_duce = TRUE,
-  vol_at = 6.5e-05,
-  dri_ft = 0,
-  in_dex = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
+  ohlc = NULL,
+  reducit = TRUE,
+  volat = 6.5e-05,
+  drift = 0,
+  indeks = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
     as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
   ...
 )
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format (default is \emph{NULL}).}
 
-\item{\code{vol_at}}{The volatility per period of the \code{in_dex} time index
+\item{\code{volat}}{The volatility per period of the \code{indeks} time index
 (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{\code{dri_ft}}{The drift per period of the \code{in_dex} time index (default
+\item{\code{drift}}{The drift per period of the \code{indeks} time index (default
 is 0.0).}
 
-\item{\code{in_dex}}{The time index for the \emph{OHLC} time series.}
+\item{\code{indeks}}{The time index for the \emph{OHLC} time series.}
 
-\item{\code{re_duce}}{\emph{Boolean} argument: should \code{oh_lc} time series be
+\item{\code{reducit}}{\emph{Boolean} argument: should \code{ohlc} time series be
 transformed to reduced form? (default is \code{TRUE})}
 }
 \value{
 An \emph{xts} time series with the same dimensions and the same time
-  index as the input \code{oh_lc} time series.
+  index as the input \code{ohlc} time series.
 }
 \description{
 Calculate a random \emph{OHLC} time series either by simulating random prices
@@ -40,15 +40,15 @@ following geometric Brownian motion, or by randomly sampling from an input
 time series.
 }
 \details{
-If the input \code{oh_lc} time series is \emph{NULL} (the default),
+If the input \code{ohlc} time series is \emph{NULL} (the default),
   then the function \code{random_ohlc()} simulates a minutely \emph{OHLC}
   time series of random prices following geometric Brownian motion, over the
   two previous calendar days.
 
-  If the input \code{oh_lc} time series is not \emph{NULL}, then the rows of
-  \code{oh_lc} are randomly sampled, to produce a random time series.
+  If the input \code{ohlc} time series is not \emph{NULL}, then the rows of
+  \code{ohlc} are randomly sampled, to produce a random time series.
 
-  If \code{re_duce} is \code{TRUE} (the default), then the \code{oh_lc} time
+  If \code{reducit} is \code{TRUE} (the default), then the \code{ohlc} time
   series is first transformed to reduced form, then randomly sampled, and
   finally converted to standard form.
 
@@ -59,7 +59,7 @@ If the input \code{oh_lc} time series is \emph{NULL} (the default),
 }
 \examples{
 # Create minutely synthetic OHLC time series of random prices
-oh_lc <- HighFreq::random_ohlc()
+ohlc <- HighFreq::random_ohlc()
 # Create random time series from SPY by randomly sampling it
-oh_lc <- HighFreq::random_ohlc(oh_lc=HighFreq::SPY["2012-02-13/2012-02-15"])
+ohlc <- HighFreq::random_ohlc(ohlc=HighFreq::SPY["2012-02-13/2012-02-15"])
 }

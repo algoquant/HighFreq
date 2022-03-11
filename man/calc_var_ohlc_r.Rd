@@ -5,10 +5,10 @@
 \title{Calculate the variance of an \emph{OHLC} time series, using different range
 estimators for variance.}
 \usage{
-calc_var_ohlc_r(oh_lc, method = "yang_zhang", scal_e = TRUE)
+calc_var_ohlc_r(ohlc, method = "yang_zhang", scalit = TRUE)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{method}}{A \emph{character} string representing the method for
 estimating variance.  The methods include:
@@ -21,7 +21,7 @@ estimating variance.  The methods include:
  }
  (default is \code{"yang_zhang"})}
 
-\item{\code{scal_e}}{\emph{Boolean} argument: should the returns be divided by the
+\item{\code{scalit}}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
@@ -44,7 +44,7 @@ The function \code{calc_var_ohlc_r()} calculates the variance
   methods \code{"garman_klass"} and \code{"rogers_satchell"} do not account
   for close-to-open price jumps.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the returns are divided
+  If \code{scalit} is \code{TRUE} (the default), then the returns are divided
   by the differences of the time index (which scales the variance to the
   units of variance per second squared.) This is useful when calculating the
   variance from minutely bar data, because dividing returns by the number of
@@ -59,5 +59,5 @@ HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="yang_zhang")
 # Calculate variance without accounting for overnight jumps
 HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="rogers_satchell")
 # Calculate the variance without scaling the returns
-HighFreq::calc_var_ohlc_r(HighFreq::SPY, scal_e=FALSE)
+HighFreq::calc_var_ohlc_r(HighFreq::SPY, scalit=FALSE)
 }

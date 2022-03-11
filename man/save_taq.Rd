@@ -6,7 +6,7 @@
 it to multiple \sQuote{\code{*.RData}} files.}
 \usage{
 save_taq(
-  sym_bol,
+  symbol,
   data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/",
   look_back = 51,

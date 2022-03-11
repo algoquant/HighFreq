@@ -61,7 +61,7 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
   same dimensions as the input argument \code{predictor}.
 
-  The above recursive formula is convenient for processing live streaming
+  The above recursive formulas are convenient for processing live streaming
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster to calculate.
@@ -101,23 +101,23 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-res_ponse <- re_turns[, 1]
+response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
-predic_tor <- re_turns[, -1]
+predictor <- returns[, -1]
 # Calculate the running regressions
-lamb_da <- 0.9
-regs <- HighFreq::run_reg(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
+lambdav <- 0.9
+regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambdav)
 # Plot the running alphas
-da_ta <- cbind(cumsum(res_ponse), regs[, 1])
-colnames(da_ta) <- c("XLF", "alphas")
-col_names <- colnames(da_ta)
-dygraphs::dygraph(da_ta, main="Alphas of XLF Versus VTI and IEF") \%>\%
-  dyAxis("y", label=col_names[1], independentTicks=TRUE) \%>\%
-  dyAxis("y2", label=col_names[2], independentTicks=TRUE) \%>\%
-  dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") \%>\%
-  dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
+datav <- cbind(cumsum(response), regs[, 1])
+colnames(datav) <- c("XLF", "alphas")
+colnamev <- colnames(datav)
+dygraphs::dygraph(datav, main="Alphas of XLF Versus VTI and IEF") \%>\%
+  dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%
+  dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
+  dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") \%>\%
+  dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
 }
 
 }

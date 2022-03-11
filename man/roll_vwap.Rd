@@ -5,10 +5,10 @@
 \title{Calculate the volume-weighted average price of an \emph{OHLC} time series
 over a rolling look-back interval.}
 \usage{
-roll_vwap(oh_lc, close = oh_lc[, 4, drop = FALSE], look_back)
+roll_vwap(ohlc, close = ohlc[, 4, drop = FALSE], look_back)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{close}}{A time series of close prices.}
 
@@ -17,7 +17,7 @@ rows of data used for calculating the average price.}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of
-  rows as the argument \code{oh_lc}.
+  rows as the argument \code{ohlc}.
 }
 \description{
 Performs the same operation as function \code{VWAP()} from package
@@ -33,14 +33,14 @@ The function \code{roll_vwap()} calculates the volume-weighted
 }
 \examples{
 # Calculate and plot rolling volume-weighted average closing prices (VWAP)
-prices_rolling <- roll_vwap(oh_lc=HighFreq::SPY["2013-11"], look_back=11)
+prices_rolling <- roll_vwap(ohlc=HighFreq::SPY["2013-11"], look_back=11)
 chart_Series(HighFreq::SPY["2013-11-12"], name="SPY prices")
 add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
 legend("top", legend=c("SPY prices", "VWAP prices"),
 bg="white", lty=c(1, 1), lwd=c(2, 2),
 col=c("black", "red"), bty="n")
 # Calculate running returns
-returns_running <- ohlc_returns(x_ts=HighFreq::SPY)
+returns_running <- ohlc_returns(xtes=HighFreq::SPY)
 # Calculate the rolling volume-weighted average returns
-roll_vwap(oh_lc=HighFreq::SPY, close=returns_running, look_back=11)
+roll_vwap(ohlc=HighFreq::SPY, close=returns_running, look_back=11)
 }

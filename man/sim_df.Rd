@@ -30,7 +30,7 @@ Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
   process:
   \deqn{
-    r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+    r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
   }
   \deqn{
     p_i = p_{i-1} + r_i
@@ -40,7 +40,7 @@ The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
   normal \emph{innovations}.
-  The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+  The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
 
   The \emph{Dickey-Fuller} process is a combination of an
   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -61,12 +61,12 @@ eq_price <- 1.0
 sig_ma <- 0.01
 the_ta <- 0.01
 # Define AR coefficients
-co_eff <- matrix(c(0.2, 0.2))
+coeff <- matrix(c(0.2, 0.2))
 # Calculate matrix of standard normal innovations
 in_nov <- matrix(rnorm(1e3))
 # Simulate Dickey-Fuller process using Rcpp
-re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, co_eff, innov=in_nov)
-plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
+returns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, coeff, innov=in_nov)
+plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
 }
 
 }

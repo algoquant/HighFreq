@@ -54,31 +54,31 @@ The function \code{mult_vec_mat()} multiplies the columns or rows of a
 \examples{
 \dontrun{
 # Multiply matrix columns using R
-mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-vec_tor <- round(runif(5e2), 2)
-prod_uct <- vec_tor*mat_rix
+matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+vectorv <- round(runif(5e2), 2)
+prod_uct <- vectorv*matrixv
 # Multiply the matrix in place
-HighFreq::mult_vec_mat(vec_tor, mat_rix)
-all.equal(prod_uct, mat_rix)
+HighFreq::mult_vec_mat(vectorv, matrixv)
+all.equal(prod_uct, matrixv)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
-    Rcode=vec_tor*mat_rix,
+    Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv),
+    Rcode=vectorv*matrixv,
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 
 # Multiply matrix rows using R
-mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-vec_tor <- round(runif(5e2), 2)
-prod_uct <- t(vec_tor*t(mat_rix))
+matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+vectorv <- round(runif(5e2), 2)
+prod_uct <- t(vectorv*t(matrixv))
 # Multiply the matrix in place
-HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
-all.equal(prod_uct, mat_rix)
+HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE)
+all.equal(prod_uct, matrixv)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-    Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
-    Rcode=t(vec_tor*t(mat_rix)),
+    Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE),
+    Rcode=t(vectorv*t(matrixv)),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

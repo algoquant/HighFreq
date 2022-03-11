@@ -120,18 +120,18 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Define monthly end points and start points
-end_p <- xts::endpoints(re_turns, on="months")[-1]
+endp <- xts::endpoints(returns, on="months")[-1]
 look_back <- 12
-start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], predictor=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
+reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
 beta_s <- reg_stats[, 2]
 # Calculate rolling betas in R
-betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
-  da_ta <- re_turns[start_p[ep]:end_p[ep], ]
-  drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
+betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+  datav <- returns[startp[ep]:endp[ep], ]
+  drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 })  # end sapply
 # Compare the outputs of both functions
 all.equal(beta_s, betas_r, check.attributes=FALSE)

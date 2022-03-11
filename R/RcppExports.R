@@ -39,15 +39,15 @@
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
-#' # Compare lag_vec() with rutils::lag_it()
-#' all.equal(drop(HighFreq::lag_vec(re_turns)), 
-#'   rutils::lag_it(re_turns))
+#' returns <- rnorm(1e6)
+#' # Compare lag_vec() with rutils::lagit()
+#' all.equal(drop(HighFreq::lag_vec(returns)), 
+#'   rutils::lagit(returns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::lag_vec(re_turns),
-#'   Rcode=rutils::lag_it(re_turns),
+#'   Rcpp=HighFreq::lag_vec(returns),
+#'   Rcode=rutils::lagit(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -71,7 +71,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{lag_it()} applies a lag to the input \emph{matrix} by
+#'   The function \code{lagit()} applies a lag to the input \emph{matrix} by
 #'   shifting its rows by the number equal to the argument \code{lagg}. For
 #'   positive \code{lagg} values, the rows are shifted \emph{forward} (down),
 #'   and for negative \code{lagg} values they are shifted \emph{backward} (up).
@@ -92,20 +92,20 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random returns
-#' re_turns <- matrix(rnorm(5e6), nc=5)
-#' # Compare lag_it() with rutils::lag_it()
-#' all.equal(HighFreq::lag_it(re_turns), rutils::lag_it(re_turns))
+#' returns <- matrix(rnorm(5e6), nc=5)
+#' # Compare lagit() with rutils::lagit()
+#' all.equal(HighFreq::lagit(returns), rutils::lagit(returns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::lag_it(re_turns),
-#'   Rcode=rutils::lag_it(re_turns),
+#'   Rcpp=HighFreq::lagit(returns),
+#'   Rcode=rutils::lagit(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-lag_it <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_lag_it', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_lagit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
@@ -145,15 +145,15 @@ lag_it <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
-#' # Compare diff_vec() with rutils::diff_it()
-#' all.equal(drop(HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE)),
-#'   rutils::diff_it(re_turns, lagg=3))
+#' returns <- rnorm(1e6)
+#' # Compare diff_vec() with rutils::diffit()
+#' all.equal(drop(HighFreq::diff_vec(returns, lagg=3, pad=TRUE)),
+#'   rutils::diffit(returns, lagg=3))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::diff_vec(re_turns, lagg=3, pad=TRUE),
-#'   Rcode=rutils::diff_it(re_turns, lagg=3),
+#'   Rcpp=HighFreq::diff_vec(returns, lagg=3, pad=TRUE),
+#'   Rcode=rutils::diffit(returns, lagg=3),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -162,7 +162,7 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
     .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
-#' Calculate the row differences of a a \emph{time series} or a \emph{matrix}
+#' Calculate the row differences of a \emph{time series} or a \emph{matrix}
 #' using \emph{RcppArmadillo}.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
@@ -180,7 +180,7 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   input \emph{matrix} \code{tseries}.
 #'
 #' @details
-#'   The function \code{diff_it()} calculates the differences between the rows
+#'   The function \code{diffit()} calculates the differences between the rows
 #'   of the input \emph{matrix} \code{tseries} and its lagged version.
 #'   
 #'   The argument \code{lagg} specifies the number of lags applied to the rows
@@ -202,32 +202,32 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   The padding operation can be time-consuming, because it requires the
 #'   copying of data.
 #'   
-#'   The function \code{diff_it()} is implemented in \code{RcppArmadillo}
+#'   The function \code{diffit()} is implemented in \code{RcppArmadillo}
 #'   \code{C++} code, which makes it much faster than \code{R} code.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random data
-#' da_ta <- matrix(sample(15), nc=3)
+#' datav <- matrix(sample(15), nc=3)
 #' # Calculate differences with lagged rows
-#' HighFreq::diff_it(da_ta, lagg=2)
+#' HighFreq::diffit(datav, lagg=2)
 #' # Calculate differences with advanced rows
-#' HighFreq::diff_it(da_ta, lagg=-2)
-#' # Compare HighFreq::diff_it() with rutils::diff_it()
-#' all.equal(HighFreq::diff_it(da_ta, lagg=2), 
-#'   rutils::diff_it(da_ta, lagg=2), 
+#' HighFreq::diffit(datav, lagg=-2)
+#' # Compare HighFreq::diffit() with rutils::diffit()
+#' all.equal(HighFreq::diffit(datav, lagg=2), 
+#'   rutils::diffit(datav, lagg=2), 
 #'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::diff_it(da_ta, lagg=2),
-#'   Rcode=rutils::diff_it(da_ta, lagg=2),
+#'   Rcpp=HighFreq::diffit(datav, lagg=2),
+#'   Rcode=rutils::diffit(datav, lagg=2),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-diff_it <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_diff_it', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
+    .Call('_HighFreq_diffit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Calculate a vector of end points that divides a vector into equal intervals.
@@ -342,9 +342,9 @@ calc_endpoints <- function(length, step = 1L, stub = 0L) {
 #'   
 #' @examples
 #' # Calculate end points
-#' end_p <- HighFreq::calc_endpoints(25, 5)
+#' endp <- HighFreq::calc_endpoints(25, 5)
 #' # Calculate start points corresponding to the end points
-#' start_p <- HighFreq::calc_startpoints(end_p, 2)
+#' startp <- HighFreq::calc_startpoints(endp, 2)
 #'
 #' @export
 calc_startpoints <- function(endp, look_back) {
@@ -395,31 +395,31 @@ calc_startpoints <- function(endp, look_back) {
 #' @examples
 #' \dontrun{
 #' # Multiply matrix columns using R
-#' mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-#' vec_tor <- round(runif(5e2), 2)
-#' prod_uct <- vec_tor*mat_rix
+#' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+#' vectorv <- round(runif(5e2), 2)
+#' prod_uct <- vectorv*matrixv
 #' # Multiply the matrix in place
-#' HighFreq::mult_vec_mat(vec_tor, mat_rix)
-#' all.equal(prod_uct, mat_rix)
+#' HighFreq::mult_vec_mat(vectorv, matrixv)
+#' all.equal(prod_uct, matrixv)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix),
-#'     Rcode=vec_tor*mat_rix,
+#'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv),
+#'     Rcode=vectorv*matrixv,
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' 
 #' # Multiply matrix rows using R
-#' mat_rix <- matrix(round(runif(25e4), 2), nc=5e2)
-#' vec_tor <- round(runif(5e2), 2)
-#' prod_uct <- t(vec_tor*t(mat_rix))
+#' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+#' vectorv <- round(runif(5e2), 2)
+#' prod_uct <- t(vectorv*t(matrixv))
 #' # Multiply the matrix in place
-#' HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE)
-#' all.equal(prod_uct, mat_rix)
+#' HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE)
+#' all.equal(prod_uct, matrixv)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'     Rcpp=HighFreq::mult_vec_mat(vec_tor, mat_rix, by_col=FALSE),
-#'     Rcode=t(vec_tor*t(mat_rix)),
+#'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE),
+#'     Rcode=t(vectorv*t(matrixv)),
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -446,18 +446,18 @@ mult_vec_mat <- function(vector, matrix, by_col = TRUE) {
 #' @examples
 #' \dontrun{
 #' # Create matrix of random data
-#' da_ta <- matrix(rnorm(5e6), nc=5)
+#' datav <- matrix(rnorm(5e6), nc=5)
 #' # Calculate eigen decomposition
-#' ei_gen <- HighFreq::calc_eigen(scale(da_ta, scale=FALSE))
+#' eigend <- HighFreq::calc_eigen(scale(datav, scale=FALSE))
 #' # Calculate PCA
-#' pc_a <- prcomp(da_ta)
+#' pcad <- prcomp(datav)
 #' # Compare PCA with eigen decomposition
-#' all.equal(pc_a$sdev^2, drop(ei_gen$values))
-#' all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
+#' all.equal(pcad$sdev^2, drop(eigend$values))
+#' all.equal(abs(unname(pcad$rotation)), abs(eigend$vectors))
 #' # Compare the speed of Rcpp with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_eigen(da_ta),
-#'   Rcode=prcomp(da_ta),
+#'   Rcpp=HighFreq::calc_eigen(datav),
+#'   Rcode=prcomp(datav),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -531,13 +531,13 @@ calc_eigen <- function(tseries) {
 #' @examples
 #' \dontrun{
 #' # Calculate ETF returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns)
+#' returns <- na.omit(rutils::etfenv$returns)
 #' # Calculate covariance matrix
-#' cov_mat <- cov(re_turns)
+#' covmat <- cov(returns)
 #' # Calculate shrinkage inverse using RcppArmadillo
-#' in_verse <- HighFreq::calc_inv(cov_mat, eigen_max=3)
+#' in_verse <- HighFreq::calc_inv(covmat, eigen_max=3)
 #' # Calculate shrinkage inverse from SVD in R
-#' s_vd <- svd(cov_mat)
+#' s_vd <- svd(covmat)
 #' eigen_max <- 1:3
 #' inverse_r <-  s_vd$v[, eigen_max] %*% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 #' # Compare RcppArmadillo with R
@@ -588,15 +588,15 @@ calc_inv <- function(tseries, eigen_thresh = 0.01, eigen_max = 0L) {
 #' @examples
 #' \dontrun{
 #' # Create a matrix of random data
-#' re_turns <- matrix(rnorm(20000), nc=20)
-#' scale_d <- calc_scaled(tseries=re_turns, use_median=FALSE)
-#' scale_d2 <- scale(re_turns)
-#' all.equal(scale_d, scale_d2, check.attributes=FALSE)
+#' returns <- matrix(rnorm(20000), nc=20)
+#' scaled <- calc_scaled(tseries=returns, use_median=FALSE)
+#' scaled2 <- scale(returns)
+#' all.equal(scaled, scaled2, check.attributes=FALSE)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=calc_scaled(tseries=re_turns, use_median=FALSE),
-#'   Rcode=scale(re_turns),
+#'   Rcpp=calc_scaled(tseries=returns, use_median=FALSE),
+#'   Rcode=scale(returns),
 #'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -636,19 +636,19 @@ calc_scaled <- function(tseries, use_median = FALSE) {
 #' @examples
 #' \dontrun{
 #' # Create a vector of random data
-#' da_ta <- round(runif(7), 2)
+#' datav <- round(runif(7), 2)
 #' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(da_ta), drop(HighFreq::calc_ranks(da_ta)))
+#' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
 #' # Create a time series of random data
-#' da_ta <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
+#' datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
 #' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(coredata(da_ta)), drop(HighFreq::calc_ranks(da_ta)))
+#' all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
 #' # Compare the speed of RcppArmadillo with R code
-#' da_ta <- runif(7)
+#' datav <- runif(7)
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=calc_ranks(da_ta),
-#'   Rcode=rank(da_ta),
+#'   Rcpp=calc_ranks(datav),
+#'   Rcode=rank(datav),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -691,12 +691,12 @@ calc_ranks <- function(tseries) {
 #' @examples
 #' \dontrun{
 #' # Define matrix of OHLC data
-#' oh_lc <- coredata(rutils::etf_env$VTI[, 1:5])
+#' ohlc <- coredata(rutils::etfenv$VTI[, 1:5])
 #' # Aggregate to single row matrix
-#' ohlc_agg <- HighFreq::agg_ohlc(oh_lc)
+#' ohlcagg <- HighFreq::agg_ohlc(ohlc)
 #' # Compare with calculation in R
-#' all.equal(drop(ohlc_agg),
-#'   c(oh_lc[1, 1], max(oh_lc[, 2]), min(oh_lc[, 3]), oh_lc[NROW(oh_lc), 4], sum(oh_lc[, 5])), 
+#' all.equal(drop(ohlcagg),
+#'   c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
 #'   check.attributes=FALSE)
 #' }
 #' 
@@ -767,14 +767,14 @@ roll_count <- function(tseries) {
 #' @examples
 #' \dontrun{
 #' # Define matrix of OHLC data
-#' oh_lc <- rutils::etf_env$VTI[, 1:5]
+#' ohlc <- rutils::etfenv$VTI[, 1:5]
 #' # Define end points at 25 day intervals
-#' end_p <- HighFreq::calc_endpoints(NROW(oh_lc), step=25)
-#' # Aggregate over end_p:
-#' ohlc_agg <- HighFreq::roll_ohlc(tseries=oh_lc, endp=end_p)
+#' endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+#' # Aggregate over endp:
+#' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
 #' # Compare with xts::to.period()
-#' ohlc_agg_xts <- .Call("toPeriod", oh_lc, as.integer(end_p+1), TRUE, NCOL(oh_lc), FALSE, FALSE, colnames(oh_lc), PACKAGE="xts")
-#' all.equal(ohlc_agg, coredata(ohlc_agg_xts), check.attributes=FALSE)
+#' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+#' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 #' }
 #' 
 #' @export
@@ -804,18 +804,18 @@ roll_ohlc <- function(tseries, endp) {
 #' @examples
 #' \dontrun{
 #' # Define a single-column matrix of returns
-#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+#' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate rolling sums over 11-period look-back intervals
-#' sum_rolling <- HighFreq::roll_vec(re_turns, look_back=11)
+#' sum_rolling <- HighFreq::roll_vec(returns, look_back=11)
 #' # Compare HighFreq::roll_vec() with rutils::roll_sum()
-#' all.equal(HighFreq::roll_vec(re_turns, look_back=11), 
-#'          rutils::roll_sum(re_turns, look_back=11), 
+#' all.equal(HighFreq::roll_vec(returns, look_back=11), 
+#'          rutils::roll_sum(returns, look_back=11), 
 #'          check.attributes=FALSE)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_vec(re_turns, look_back=11),
-#'   Rcode=rutils::roll_sum(re_turns, look_back=11),
+#'   Rcpp=HighFreq::roll_vec(returns, look_back=11),
+#'   Rcode=rutils::roll_sum(returns, look_back=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -840,7 +840,7 @@ roll_vec <- function(tseries, look_back) {
 #'   single-column \emph{matrix} over its past values (a convolution with the
 #'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
 #'   performs a similar calculation as the standard \code{R} function
-#'   \cr\code{stats::filter(x=series, filter=weight_s, method="convolution",
+#'   \cr\code{stats::filter(x=series, filter=weights, method="convolution",
 #'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
 #'   \code{NA} values.
 #'   
@@ -848,28 +848,28 @@ roll_vec <- function(tseries, look_back) {
 #' \dontrun{
 #' # First example
 #' # Define a single-column matrix of returns
-#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+#' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Create simple weights
-#' weight_s <- matrix(c(1, rep(0, 10)))
+#' weights <- matrix(c(1, rep(0, 10)))
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+#' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 #' # Compare with original
-#' all.equal(zoo::coredata(re_turns), weight_ed, check.attributes=FALSE)
+#' all.equal(zoo::coredata(returns), weight_ed, check.attributes=FALSE)
 #' # Second example
 #' # Create exponentially decaying weights
-#' weight_s <- matrix(exp(-0.2*1:11))
-#' weight_s <- weight_s/sum(weight_s)
+#' weights <- matrix(exp(-0.2*1:11))
+#' weights <- weights/sum(weights)
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_vecw(tseries=re_turns, weights=weight_s)
+#' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 #' # Calculate rolling weighted sums using filter()
-#' filter_ed <- stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_vecw(tseries=re_turns, weights=weight_s),
-#'   Rcode=stats::filter(x=re_turns, filter=weight_s, method="convolution", sides=1),
+#'   Rcpp=HighFreq::roll_vecw(tseries=returns, weights=weights),
+#'   Rcode=stats::filter(x=returns, filter=weights, method="convolution", sides=1),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -897,7 +897,7 @@ roll_vecw <- function(tseries, weights) {
 #'   
 #'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 #'   \code{arma::conv2()}. It performs a similar calculation to the standard
-#'   \code{R} function \cr\code{filter(x=tseries, filter=weight_s,
+#'   \code{R} function \cr\code{filter(x=tseries, filter=weights,
 #'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 #'   it doesn't produce any leading \code{NA} values.
 #'   
@@ -905,21 +905,21 @@ roll_vecw <- function(tseries, weights) {
 #' \dontrun{
 #' # First example
 #' # Calculate a time series of returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 #' # Create simple weights equal to a 1 value plus zeros
-#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+#' weights <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+#' weight_ed <- HighFreq::roll_conv(returns, weights)
 #' # Compare with original
-#' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+#' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 #' # Second example
 #' # Calculate exponentially decaying weights
-#' weight_s <- exp(-0.2*(1:11))
-#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+#' weights <- exp(-0.2*(1:11))
+#' weights <- matrix(weights/sum(weights), nc=1)
 #' # Calculate rolling weighted sums
-#' weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+#' weight_ed <- HighFreq::roll_conv(returns, weights)
 #' # Calculate rolling weighted sums using filter()
-#' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 #' }
@@ -956,15 +956,15 @@ roll_conv <- function(tseries, weights) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define parameters
 #' look_back <- 22
 #' # Calculate rolling sums and compare with rutils::roll_sum()
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back)
-#' r_sum <- rutils::roll_sum(re_turns, look_back)
+#' c_sum <- HighFreq::roll_sum(returns, look_back)
+#' r_sum <- rutils::roll_sum(returns, look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 #' # Calculate rolling sums using R code
-#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+#' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
 #' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 #' r_sum <- (r_sum - lag_sum)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
@@ -1009,16 +1009,16 @@ roll_sum <- function(tseries, look_back = 1L) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define end points at 25 day intervals
-#' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
+#' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
 #' # Define start points as 75 day lag of end points
-#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate rolling sums using Rcpp
-#' c_sum <- HighFreq::roll_sumep(re_turns, startp=start_p, endp=end_p)
+#' c_sum <- HighFreq::roll_sumep(returns, startp=startp, endp=endp)
 #' # Calculate rolling sums using R code
-#' r_sum <- sapply(1:NROW(end_p), function(ep) {
-#' colSums(re_turns[(start_p[ep]+1):(end_p[ep]+1), ])
+#' r_sum <- sapply(1:NROW(endp), function(ep) {
+#' colSums(returns[(startp[ep]+1):(endp[ep]+1), ])
 #'   })  # end sapply
 #' r_sum <- t(r_sum)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
@@ -1058,7 +1058,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   convolutions of the columns of \code{tseries} with the \emph{column
 #'   vector} of weights using the \code{RcppArmadillo} function
 #'   \code{arma::conv2()}.  It performs a similar calculation to the standard
-#'   \code{R} function \cr\code{stats::filter(x=re_turns, filter=weight_s,
+#'   \code{R} function \cr\code{stats::filter(x=returns, filter=weights,
 #'   method="convolution", sides=1)}, but it can be many times faster, and it
 #'   doesn't produce any leading \code{NA} values.
 #'   
@@ -1094,53 +1094,53 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' \dontrun{
 #' # First example
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define parameters
 #' look_back <- 22
 #' # Calculate rolling sums and compare with rutils::roll_sum()
-#' c_sum <- HighFreq::roll_sum(re_turns, look_back)
-#' r_sum <- rutils::roll_sum(re_turns, look_back)
+#' c_sum <- HighFreq::roll_sum(returns, look_back)
+#' r_sum <- rutils::roll_sum(returns, look_back)
 #' all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
 #' # Calculate rolling sums using R code
-#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
+#' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
 #' lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
 #' r_sum <- (r_sum - lag_sum)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
 #' # Calculate rolling sums at end points
 #' stu_b <- 21
-#' c_sum <- HighFreq::roll_wsum(re_turns, look_back, stub=stu_b)
-#' end_p <- (stu_b + look_back*(0:(NROW(re_turns) %/% look_back)))
-#' end_p <- end_p[end_p < NROW(re_turns)]
-#' r_sum <- apply(zoo::coredata(re_turns), 2, cumsum)
-#' r_sum <- r_sum[end_p+1, ]
+#' c_sum <- HighFreq::roll_wsum(returns, look_back, stub=stu_b)
+#' endp <- (stu_b + look_back*(0:(NROW(returns) %/% look_back)))
+#' endp <- endp[endp < NROW(returns)]
+#' r_sum <- apply(zoo::coredata(returns), 2, cumsum)
+#' r_sum <- r_sum[endp+1, ]
 #' lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
 #' r_sum <- (r_sum - lag_sum)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
-#' # Calculate rolling sums at end points - pass in end_p
-#' c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p)
+#' # Calculate rolling sums at end points - pass in endp
+#' c_sum <- HighFreq::roll_wsum(returns, endp=endp)
 #' all.equal(c_sum, r_sum, check.attributes=FALSE)
 #' 
 #' # Create exponentially decaying weights
-#' weight_s <- exp(-0.2*(1:11))
-#' weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+#' weights <- exp(-0.2*(1:11))
+#' weights <- matrix(weights/sum(weights), nc=1)
 #' # Calculate rolling weighted sum
-#' c_sum <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+#' c_sum <- HighFreq::roll_wsum(returns, weights=weights)
 #' # Calculate rolling weighted sum using filter()
-#' filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+#' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 #' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
 #' 
 #' # Calculate rolling weighted sums at end points
-#' c_sum <- HighFreq::roll_wsum(re_turns, endp=end_p, weights=weight_s)
-#' all.equal(c_sum, filter_ed[end_p+1, ], check.attributes=FALSE)
+#' c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
+#' all.equal(c_sum, filter_ed[endp+1, ], check.attributes=FALSE)
 #' 
 #' # Create simple weights equal to a 1 value plus zeros
-#' weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+#' weights <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sum
-#' weight_ed <- HighFreq::roll_wsum(re_turns, weights=weight_s)
+#' weight_ed <- HighFreq::roll_wsum(returns, weights=weights)
 #' # Compare with original
-#' all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+#' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 #' }
 #' 
 #' @export
@@ -1183,10 +1183,10 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   If the \code{weights} argument is omitted, then the function
 #'   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
 #'   \deqn{
-#'     \mu_t = (1-\lambda) p_t + \lambda \mu^p_{t-1}
+#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
 #'   }
 #'   
-#'   The above recursive formula is convenient for processing live streaming
+#'   The above recursive formulas are convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster.
@@ -1203,7 +1203,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   interval.
 #' 
 #'   The function \code{run_mean()} performs the same calculation as the
-#'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lamb_da,
+#'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdav,
 #'   method="recursive")}, but it's several times faster.
 #' 
 #'   The function \code{run_mean()} returns a \emph{matrix} with the same
@@ -1212,32 +1212,32 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' @examples
 #' \dontrun{
 #' # Calculate historical prices
-#' oh_lc <- rutils::etf_env$VTI
-#' price_s <- quantmod::Cl(oh_lc)
+#' ohlc <- rutils::etfenv$VTI
+#' prices <- quantmod::Cl(ohlc)
 #' # Calculate the running means
-#' lamb_da <- 0.95
-#' means <- HighFreq::run_mean(price_s, lambda=lamb_da)
+#' lambdav <- 0.95
+#' means <- HighFreq::run_mean(prices, lambda=lambdav)
 #' # Calculate running means using R code
-#' filter_ed <- (1-lamb_da)*filter(price_s, 
-#'   filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), 
+#' filter_ed <- (1-lambdav)*filter(prices, 
+#'   filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), 
 #'   method="recursive")
 #' all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
 #' 
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_mean(price_s, lambda=lamb_da),
-#'   Rcode=filter(price_s, filter=lamb_da, init=as.numeric(price_s[1, 1])/(1-lamb_da), method="recursive"),
+#'   Rcpp=HighFreq::run_mean(prices, lambda=lambdav),
+#'   Rcode=filter(prices, filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #'   
 #' # Create weights equal to the trading volumes
-#' weight_s <- quantmod::Vo(oh_lc)
+#' weights <- quantmod::Vo(ohlc)
 #' # Calculate the running weighted means
-#' meansw <- HighFreq::run_mean(price_s, lambda=lamb_da, weights=weight_s)
-#' # dygraph plot of running weighted means
-#' da_ta <- xts(cbind(means, meansw), zoo::index(oh_lc))
-#' colnames(da_ta) <- c("means running", "means weighted")
-#' dygraphs::dygraph(da_ta, main="Running Means") %>%
+#' meansw <- HighFreq::run_mean(prices, lambda=lambdav, weights=weights)
+#' # dygraph plot the running weighted means
+#' datav <- xts(cbind(means, meansw), zoo::index(ohlc))
+#' colnames(datav) <- c("means running", "means weighted")
+#' dygraphs::dygraph(datav, main="Running Means") %>%
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=1) %>%
 #'   dyLegend(show="always", width=500)
 #' }
@@ -1277,7 +1277,7 @@ run_mean <- function(tseries, lambda, weights = 0L) {
 #'   The second term pulls the maximum value down to the mean value, allowing
 #'   it to gradually "forget" the maximum value from the more distant past.
 #' 
-#'   The above recursive formula is convenient for processing live streaming
+#'   The above recursive formulas are convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
@@ -1297,17 +1297,17 @@ run_mean <- function(tseries, lambda, weights = 0L) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical prices
-#' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+#' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the running maximums
-#' lamb_da <- 0.9
-#' maxs <- HighFreq::run_max(price_s, lambda=lamb_da)
+#' lambdav <- 0.9
+#' maxs <- HighFreq::run_max(prices, lambda=lambdav)
 #' # Plot dygraph of VTI prices and running maximums
-#' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), maxs)
-#' colnames(da_ta) <- c("prices", "max")
-#' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="VTI Prices and Running Maximums") %>%
-#'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+#' colnames(datav) <- c("prices", "max")
+#' colnamev <- colnames(datav)
+#' dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") %>%
+#'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
+#'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 #' }
 #' 
 #' @export
@@ -1365,17 +1365,17 @@ run_max <- function(tseries, lambda) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical prices
-#' price_s <- zoo::coredata(quantmod::Cl(rutils::etf_env$VTI))
+#' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the running minimums
-#' lamb_da <- 0.9
-#' mins <- HighFreq::run_min(price_s, lambda=lamb_da)
+#' lambdav <- 0.9
+#' mins <- HighFreq::run_min(prices, lambda=lambdav)
 #' # Plot dygraph of VTI prices and running minimums
-#' da_ta <- cbind(quantmod::Cl(rutils::etf_env$VTI), mins)
-#' colnames(da_ta) <- c("prices", "min")
-#' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="VTI Prices and Running Minimums") %>%
-#'   dySeries(name=col_names[1], label=col_names[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=col_names[2], label=col_names[2], strokeWidth=2, col="red")
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
+#' colnames(datav) <- c("prices", "min")
+#' colnamev <- colnames(datav)
+#' dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") %>%
+#'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
+#'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 #' }
 #' 
 #' @export
@@ -1426,7 +1426,7 @@ run_min <- function(tseries, lambda) {
 #' 
 #'   The function \code{run_var()} performs the same calculation as the
 #'   standard \code{R} function\cr\code{stats::filter(x=series,
-#'   filter=weight_s, method="recursive")}, but it's several times faster.
+#'   filter=weights, method="recursive")}, but it's several times faster.
 #' 
 #'   The function \code{run_var()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1434,20 +1434,20 @@ run_min <- function(tseries, lambda) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns$VTI))
+#' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate the running variance
-#' lamb_da <- 0.9
-#' vars <- HighFreq::run_var(re_turns, lambda=lamb_da)
+#' lambdav <- 0.9
+#' vars <- HighFreq::run_var(returns, lambda=lambdav)
 #' # Calculate running variance using R code
-#' filter_ed <- (1-lamb_da)*filter(re_turns^2, filter=lamb_da, 
-#'   init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), 
+#' filter_ed <- (1-lambdav)*filter(returns^2, filter=lambdav, 
+#'   init=as.numeric(returns[1, 1])^2/(1-lambdav), 
 #'   method="recursive")
 #' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_var(re_turns, lambda=lamb_da),
-#'   Rcode=filter(re_turns^2, filter=lamb_da, init=as.numeric(re_turns[1, 1])^2/(1-lamb_da), method="recursive"),
+#'   Rcpp=HighFreq::run_var(returns, lambda=lambdav),
+#'   Rcode=filter(returns^2, filter=lambdav, init=as.numeric(returns[1, 1])^2/(1-lambdav), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -1502,24 +1502,24 @@ run_var <- function(tseries, lambda) {
 #' @examples
 #' \dontrun{
 #' # Extract the log OHLC prices of VTI
-#' oh_lc <- log(rutils::etf_env$VTI)
+#' ohlc <- log(rutils::etfenv$VTI)
 #' # Calculate the running variance
-#' var_running <- HighFreq::run_var_ohlc(oh_lc, lambda=0.8)
+#' var_running <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
 #' # Calculate the rolling variance
-#' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE)
-#' da_ta <- cbind(var_running, var_rolling)
-#' colnames(da_ta) <- c("running", "rolling")
-#' col_names <- colnames(da_ta)
-#' da_ta <- xts::xts(da_ta, index(oh_lc))
+#' var_rolling <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
+#' datav <- cbind(var_running, var_rolling)
+#' colnames(datav) <- c("running", "rolling")
+#' colnamev <- colnames(datav)
+#' datav <- xts::xts(datav, index(ohlc))
 #' # dygraph plot of VTI running versus rolling volatility
-#' dygraphs::dygraph(sqrt(da_ta[-(1:111), ]), main="Running and Rolling Volatility of VTI") %>%
+#' dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Running and Rolling Volatility of VTI") %>%
 #'   dyOptions(colors=c("red", "blue"), strokeWidth=1) %>%
 #'   dyLegend(show="always", width=500)
 #' # Compare the speed of running versus rolling volatility
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   running=HighFreq::run_var_ohlc(oh_lc, lambda=0.8),
-#'   rolling=HighFreq::roll_var_ohlc(oh_lc, look_back=5, method="yang_zhang", scale=FALSE),
+#'   running=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+#'   rolling=HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE),
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
@@ -1580,13 +1580,13 @@ run_var_ohlc <- function(ohlc, lambda) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- zoo::coredata(na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")]))
+#' returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 #' # Calculate the running covariance
-#' lamb_da <- 0.9
-#' covars <- HighFreq::run_covar(re_turns, lambda=lamb_da)
+#' lambdav <- 0.9
+#' covars <- HighFreq::run_covar(returns, lambda=lambdav)
 #' # Calculate running covariance using R code
-#' filter_ed <- (1-lamb_da)*filter(re_turns[, 1]*re_turns[, 2], 
-#'   filter=lamb_da, init=as.numeric(re_turns[1, 1]*re_turns[1, 2])/(1-lamb_da), 
+#' filter_ed <- (1-lambdav)*filter(returns[, 1]*returns[, 2], 
+#'   filter=lambdav, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambdav), 
 #'   method="recursive")
 #' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
 #' # Calculate the running correlation
@@ -1649,7 +1649,7 @@ run_covar <- function(tseries, lambda) {
 #'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
 #'   same dimensions as the input argument \code{predictor}.
 #'
-#'   The above recursive formula is convenient for processing live streaming
+#'   The above recursive formulas are convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster to calculate.
@@ -1689,23 +1689,23 @@ run_covar <- function(tseries, lambda) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 #' # Response equals XLF returns
-#' res_ponse <- re_turns[, 1]
+#' response <- returns[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predic_tor <- re_turns[, -1]
+#' predictor <- returns[, -1]
 #' # Calculate the running regressions
-#' lamb_da <- 0.9
-#' regs <- HighFreq::run_reg(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
+#' lambdav <- 0.9
+#' regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambdav)
 #' # Plot the running alphas
-#' da_ta <- cbind(cumsum(res_ponse), regs[, 1])
-#' colnames(da_ta) <- c("XLF", "alphas")
-#' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="Alphas of XLF Versus VTI and IEF") %>%
-#'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
-#'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
-#'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
-#'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
+#' datav <- cbind(cumsum(response), regs[, 1])
+#' colnames(datav) <- c("XLF", "alphas")
+#' colnamev <- colnames(datav)
+#' dygraphs::dygraph(datav, main="Alphas of XLF Versus VTI and IEF") %>%
+#'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+#'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+#'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") %>%
+#'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
 #' }
 #' 
 #' @export
@@ -1774,7 +1774,7 @@ run_reg <- function(response, predictor, lambda, method = "none") {
 #'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
 #'   }
 #' 
-#'   The above recursive formula is convenient for processing live streaming
+#'   The above recursive formulas are convenient for processing live streaming
 #'   data because it doesn't require maintaining a buffer of past data.
 #'   The formula is equivalent to a convolution with exponentially decaying
 #'   weights, but it's faster to calculate.
@@ -1799,23 +1799,23 @@ run_reg <- function(response, predictor, lambda, method = "none") {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 #' # Response equals XLF returns
-#' res_ponse <- re_turns[, 1]
+#' response <- returns[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predic_tor <- re_turns[, -1]
+#' predictor <- returns[, -1]
 #' # Calculate the running z-scores
-#' lamb_da <- 0.9
-#' zscores <- HighFreq::run_zscores(response=res_ponse, predictor=predic_tor, lambda=lamb_da)
+#' lambdav <- 0.9
+#' zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambdav)
 #' # Plot the running z-scores
-#' da_ta <- cbind(cumsum(res_ponse), zscores[, 1])
-#' colnames(da_ta) <- c("XLF", "zscores")
-#' col_names <- colnames(da_ta)
-#' dygraphs::dygraph(da_ta, main="Z-Scores of XLF Versus VTI and IEF") %>%
-#'   dyAxis("y", label=col_names[1], independentTicks=TRUE) %>%
-#'   dyAxis("y2", label=col_names[2], independentTicks=TRUE) %>%
-#'   dySeries(name=col_names[1], axis="y", label=col_names[1], strokeWidth=1, col="blue") %>%
-#'   dySeries(name=col_names[2], axis="y2", label=col_names[2], strokeWidth=1, col="red")
+#' datav <- cbind(cumsum(response), zscores[, 1])
+#' colnames(datav) <- c("XLF", "zscores")
+#' colnamev <- colnames(datav)
+#' dygraphs::dygraph(datav, main="Z-Scores of XLF Versus VTI and IEF") %>%
+#'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+#'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+#'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") %>%
+#'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
 #' }
 #' 
 #' @export
@@ -1861,44 +1861,44 @@ run_zscores <- function(response, predictor, lambda, demean = TRUE) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 #' # Calculate the column means in RcppArmadillo
-#' HighFreq::calc_mean(re_turns)
+#' HighFreq::calc_mean(returns)
 #' # Calculate the column means in R
-#' sapply(re_turns, mean)
+#' sapply(returns, mean)
 #' # Compare the values
-#' all.equal(drop(HighFreq::calc_mean(re_turns)), 
-#'   sapply(re_turns, mean), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_mean(returns)), 
+#'   sapply(returns, mean), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_mean(re_turns),
-#'   Rcode=sapply(re_turns, mean),
+#'   Rcpp=HighFreq::calc_mean(returns),
+#'   Rcode=sapply(returns, mean),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile mean (location)
-#' HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
 #' # Calculate the quantile mean (location) in R
-#' colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5))
+#' colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 #' # Compare the values
-#' all.equal(drop(HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9)), 
-#'   colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)), 
+#' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+#'   colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
 #'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_mean(re_turns, method="quantile", conf_lev=0.9),
-#'   Rcode=colSums(sapply(re_turns, quantile, c(0.9, 0.1), type=5)),
+#'   Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+#'   Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the column medians in RcppArmadillo
-#' HighFreq::calc_mean(re_turns, method="nonparametric")
+#' HighFreq::calc_mean(returns, method="nonparametric")
 #' # Calculate the column medians in R
-#' sapply(re_turns, median)
+#' sapply(returns, median)
 #' # Compare the values
-#' all.equal(drop(HighFreq::calc_mean(re_turns, method="nonparametric")), 
-#'   sapply(re_turns, median), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_mean(returns, method="nonparametric")), 
+#'   sapply(returns, median), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_mean(re_turns, method="nonparametric"),
-#'   Rcode=sapply(re_turns, median),
+#'   Rcpp=HighFreq::calc_mean(returns, method="nonparametric"),
+#'   Rcode=sapply(returns, median),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -1907,7 +1907,7 @@ calc_mean <- function(tseries, method = "moment", conf_lev = 0.75) {
     .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, conf_lev)
 }
 
-#' Calculate the variance of a a single-column \emph{time series} or a
+#' Calculate the variance of a single-column \emph{time series} or a
 #' \emph{vector} using \code{RcppArmadillo}.
 #' 
 #' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
@@ -1915,28 +1915,28 @@ calc_mean <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 #'
 #' @details
-#'   The function \code{calc_var_vec()} calculates the variance of a
+#'   The function \code{calc_varvec()} calculates the variance of a
 #'   \emph{vector} using \code{RcppArmadillo} \code{C++} code, so it's
 #'   significantly faster than the \code{R} function \code{var()}.
 #'
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
-#' # Compare calc_var_vec() with standard var()
-#' all.equal(HighFreq::calc_var_vec(re_turns), 
-#'   var(re_turns))
+#' returns <- rnorm(1e6)
+#' # Compare calc_varvec() with standard var()
+#' all.equal(HighFreq::calc_varvec(returns), 
+#'   var(returns))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_var_vec(re_turns),
-#'   Rcode=var(re_turns),
+#'   Rcpp=HighFreq::calc_varvec(returns),
+#'   Rcode=var(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_var_vec <- function(tseries) {
-    .Call('_HighFreq_calc_var_vec', PACKAGE = 'HighFreq', tseries)
+calc_varvec <- function(tseries) {
+    .Call('_HighFreq_calc_varvec', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the dispersion (variance) of the columns of a \emph{time series}
@@ -1995,27 +1995,27 @@ calc_var_vec <- function(tseries) {
 #' @examples
 #' \dontrun{
 #' # Calculate VTI and XLF returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("VTI", "XLF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 #' # Compare HighFreq::calc_var() with standard var()
-#' all.equal(drop(HighFreq::calc_var(re_turns)), 
-#'   apply(re_turns, 2, var), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_var(returns)), 
+#'   apply(returns, 2, var), check.attributes=FALSE)
 #' # Compare HighFreq::calc_var() with matrixStats
-#' all.equal(drop(HighFreq::calc_var(re_turns)), 
-#'   matrixStats::colVars(re_turns), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_var(returns)), 
+#'   matrixStats::colVars(returns), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with matrixStats and with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_var(re_turns),
-#'   matrixStats=matrixStats::colVars(re_turns),
-#'   Rcode=apply(re_turns, 2, var),
+#'   Rcpp=HighFreq::calc_var(returns),
+#'   matrixStats=matrixStats::colVars(returns),
+#'   Rcode=apply(returns, 2, var),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Compare HighFreq::calc_var() with stats::mad()
-#' all.equal(drop(HighFreq::calc_var(re_turns, method="nonparametric")), 
-#'   sapply(re_turns, mad), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_var(returns, method="nonparametric")), 
+#'   sapply(returns, mad), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with stats::mad()
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_var(re_turns, method="nonparametric"),
-#'   Rcode=sapply(re_turns, mad),
+#'   Rcpp=HighFreq::calc_var(returns, method="nonparametric"),
+#'   Rcode=sapply(returns, mad),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2066,16 +2066,16 @@ calc_var <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' @examples
 #' \dontrun{
 #' # Calculate the log prices
-#' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-#' price_s <- log(price_s)
+#' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+#' prices <- log(prices)
 #' # Calculate the daily variance of percentage returns
-#' calc_var_ag(price_s, step=1)
+#' calc_var_ag(prices, step=1)
 #' # Calculate the daily variance using R
-#' sapply(rutils::diff_it(price_s), var)
+#' sapply(rutils::diffit(prices), var)
 #' # Calculate the variance of returns aggregated over 21 days
-#' calc_var_ag(price_s, step=21)
+#' calc_var_ag(prices, step=21)
 #' # The variance over 21 days is approximately 21 times the daily variance
-#' 21*calc_var_ag(price_s, step=1)
+#' 21*calc_var_ag(prices, step=1)
 #' }
 #' 
 #' @export
@@ -2162,29 +2162,29 @@ calc_var_ag <- function(tseries, step = 1L) {
 #' @examples
 #' \dontrun{
 #' # Extract the log OHLC prices of SPY
-#' oh_lc <- log(HighFreq::SPY)
+#' ohlc <- log(HighFreq::SPY)
 #' # Extract the time index of SPY prices
-#' in_dex <- c(1, diff(xts::.index(oh_lc)))
+#' indeks <- c(1, diff(xts::.index(ohlc)))
 #' # Calculate the variance of SPY returns, with scaling of the returns
-#' HighFreq::calc_var_ohlc(oh_lc, 
-#'  method="yang_zhang", scale=TRUE, index=in_dex)
+#' HighFreq::calc_var_ohlc(ohlc, 
+#'  method="yang_zhang", scale=TRUE, index=indeks)
 #' # Calculate variance without accounting for overnight jumps
-#' HighFreq::calc_var_ohlc(oh_lc, 
-#'  method="rogers_satchell", scale=TRUE, index=in_dex)
+#' HighFreq::calc_var_ohlc(ohlc, 
+#'  method="rogers_satchell", scale=TRUE, index=indeks)
 #' # Calculate the variance without scaling the returns
-#' HighFreq::calc_var_ohlc(oh_lc, scale=FALSE)
+#' HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
 #' # Calculate the variance by passing in the lagged close prices
-#' close_lag <- HighFreq::lag_it(oh_lc[, 4])
-#' all.equal(HighFreq::calc_var_ohlc(oh_lc), 
-#'   HighFreq::calc_var_ohlc(oh_lc, close_lag=close_lag))
+#' close_lag <- HighFreq::lagit(ohlc[, 4])
+#' all.equal(HighFreq::calc_var_ohlc(ohlc), 
+#'   HighFreq::calc_var_ohlc(ohlc, close_lag=close_lag))
 #' # Compare with HighFreq::calc_var_ohlc_r()
-#' all.equal(HighFreq::calc_var_ohlc(oh_lc, index=in_dex), 
-#'   HighFreq::calc_var_ohlc_r(oh_lc))
+#' all.equal(HighFreq::calc_var_ohlc(ohlc, index=indeks), 
+#'   HighFreq::calc_var_ohlc_r(ohlc))
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_var_ohlc(oh_lc),
-#'   Rcode=HighFreq::calc_var_ohlc_r(oh_lc),
+#'   Rcpp=HighFreq::calc_var_ohlc(ohlc),
+#'   Rcode=HighFreq::calc_var_ohlc_r(ohlc),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
@@ -2258,13 +2258,13 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = T
 #' @examples
 #' \dontrun{
 #' # Calculate the log ohlc prices
-#' oh_lc <- log(rutils::etf_env$VTI)
+#' ohlc <- log(rutils::etfenv$VTI)
 #' # Calculate the daily variance of percentage returns
-#' calc_var_ohlc_ag(oh_lc, step=1)
+#' calc_var_ohlc_ag(ohlc, step=1)
 #' # Calculate the variance of returns aggregated over 21 days
-#' calc_var_ohlc_ag(oh_lc, step=21)
+#' calc_var_ohlc_ag(ohlc, step=21)
 #' # The variance over 21 days is approximately 21 times the daily variance
-#' 21*calc_var_ohlc_ag(oh_lc, step=1)
+#' 21*calc_var_ohlc_ag(ohlc, step=1)
 #' }
 #' 
 #' @export
@@ -2315,46 +2315,46 @@ calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag =
 #' @examples
 #' \dontrun{
 #' # Define a single-column time series of returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the moment skewness
-#' HighFreq::calc_skew(re_turns)
+#' HighFreq::calc_skew(returns)
 #' # Calculate the moment skewness in R
 #' calc_skewr <- function(x) {
 #'   x <- (x-mean(x))
 #'   sum(x^3)/var(x)^1.5/NROW(x)
 #' }  # end calc_skewr
-#' all.equal(HighFreq::calc_skew(re_turns), 
-#'   calc_skewr(re_turns), check.attributes=FALSE)
+#' all.equal(HighFreq::calc_skew(returns), 
+#'   calc_skewr(returns), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_skew(re_turns),
-#'   Rcode=calc_skewr(re_turns),
+#'   Rcpp=HighFreq::calc_skew(returns),
+#'   Rcode=calc_skewr(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile skewness
-#' HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)
 #' # Calculate the quantile skewness in R
 #' calc_skewq <- function(x, a = 0.75) {
-#'   	quantile_s <- quantile(x, c(1-a, 0.5, a), type=5)
-#'   	(quantile_s[3] + quantile_s[1] - 2*quantile_s[2])/(quantile_s[3] - quantile_s[1])
+#'   	quantiles <- quantile(x, c(1-a, 0.5, a), type=5)
+#'   	(quantiles[3] + quantiles[1] - 2*quantiles[2])/(quantiles[3] - quantiles[1])
 #' }  # end calc_skewq
-#' all.equal(drop(HighFreq::calc_skew(re_turns, method="quantile", conf_lev=0.9)), 
-#'   calc_skewq(re_turns, a=0.9), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)), 
+#'   calc_skewq(returns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_skew(re_turns, method="quantile"),
-#'   Rcode=calc_skewq(re_turns),
+#'   Rcpp=HighFreq::calc_skew(returns, method="quantile"),
+#'   Rcode=calc_skewq(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the nonparametric skewness
-#' HighFreq::calc_skew(re_turns, method="nonparametric")
+#' HighFreq::calc_skew(returns, method="nonparametric")
 #' # Compare HighFreq::calc_skew() with R nonparametric skewness
-#' all.equal(drop(HighFreq::calc_skew(re_turns, method="nonparametric")), 
-#'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+#' all.equal(drop(HighFreq::calc_skew(returns, method="nonparametric")), 
+#'   (mean(returns)-median(returns))/sd(returns), 
 #'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_skew(re_turns, method="nonparametric"),
-#'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+#'   Rcpp=HighFreq::calc_skew(returns, method="nonparametric"),
+#'   Rcode=(mean(returns)-median(returns))/sd(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2408,46 +2408,46 @@ calc_skew <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' @examples
 #' \dontrun{
 #' # Define a single-column time series of returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the moment kurtosis
-#' HighFreq::calc_kurtosis(re_turns)
+#' HighFreq::calc_kurtosis(returns)
 #' # Calculate the moment kurtosis in R
 #' calc_kurtr <- function(x) {
 #'   x <- (x-mean(x))
 #'   sum(x^4)/var(x)^2/NROW(x)
 #' }  # end calc_kurtr
-#' all.equal(HighFreq::calc_kurtosis(re_turns), 
-#'   calc_kurtr(re_turns), check.attributes=FALSE)
+#' all.equal(HighFreq::calc_kurtosis(returns), 
+#'   calc_kurtr(returns), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_kurtosis(re_turns),
-#'   Rcode=calc_kurtr(re_turns),
+#'   Rcpp=HighFreq::calc_kurtosis(returns),
+#'   Rcode=calc_kurtr(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile kurtosis
-#' HighFreq::calc_kurtosis(re_turns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)
 #' # Calculate the quantile kurtosis in R
 #' calc_kurtq <- function(x, a=0.9) {
-#'   	quantile_s <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
-#'   	(quantile_s[4] - quantile_s[1])/(quantile_s[3] - quantile_s[2])
+#'   	quantiles <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
+#'   	(quantiles[4] - quantiles[1])/(quantiles[3] - quantiles[2])
 #' }  # end calc_kurtq
-#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="quantile", conf_lev=0.9)), 
-#'   calc_kurtq(re_turns, a=0.9), check.attributes=FALSE)
+#' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)), 
+#'   calc_kurtq(returns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="quantile"),
-#'   Rcode=calc_kurtq(re_turns),
+#'   Rcpp=HighFreq::calc_kurtosis(returns, method="quantile"),
+#'   Rcode=calc_kurtq(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the nonparametric kurtosis
-#' HighFreq::calc_kurtosis(re_turns, method="nonparametric")
+#' HighFreq::calc_kurtosis(returns, method="nonparametric")
 #' # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
-#' all.equal(drop(HighFreq::calc_kurtosis(re_turns, method="nonparametric")), 
-#'   (mean(re_turns)-median(re_turns))/sd(re_turns), 
+#' all.equal(drop(HighFreq::calc_kurtosis(returns, method="nonparametric")), 
+#'   (mean(returns)-median(returns))/sd(returns), 
 #'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_kurtosis(re_turns, method="nonparametric"),
-#'   Rcode=(mean(re_turns)-median(re_turns))/sd(re_turns),
+#'   Rcpp=HighFreq::calc_kurtosis(returns, method="nonparametric"),
+#'   Rcode=(mean(returns)-median(returns))/sd(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2491,10 +2491,10 @@ calc_kurtosis <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' @examples
 #' \dontrun{
 #' # Calculate the log prices
-#' price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-#' price_s <- log(price_s)
+#' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+#' prices <- log(prices)
 #' # Calculate the Hurst exponent from 21 day aggregations
-#' calc_hurst(price_s, step=21)
+#' calc_hurst(prices, step=21)
 #' }
 #' 
 #' @export
@@ -2562,9 +2562,9 @@ calc_hurst <- function(tseries, step = 1L) {
 #' @examples
 #' \dontrun{
 #' # Calculate the log ohlc prices
-#' oh_lc <- log(rutils::etf_env$VTI)
+#' ohlc <- log(rutils::etfenv$VTI)
 #' # Calculate the Hurst exponent from 21 day aggregations
-#' calc_hurst_ohlc(oh_lc, step=21)
+#' calc_hurst_ohlc(ohlc, step=21)
 #' }
 #' 
 #' @export
@@ -2599,24 +2599,24 @@ calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", close_lag = 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 #' # Response equals XLF returns
-#' res_ponse <- re_turns[, 1]
+#' response <- returns[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predic_tor <- re_turns[, -1]
+#' predictor <- returns[, -1]
 #' # Perform multivariate regression using lm()
-#' reg_model <- lm(res_ponse ~ predic_tor)
+#' reg_model <- lm(response ~ predictor)
 #' sum_mary <- summary(reg_model)
 #' # Perform multivariate regression using calc_lm()
-#' reg_arma <- HighFreq::calc_lm(response=res_ponse, predictor=predic_tor)
+#' reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
 #' # Compare the outputs of both functions
 #' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
 #' all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
 #' all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_lm(response=res_ponse, predictor=predic_tor),
-#'   Rcode=lm(res_ponse ~ predic_tor),
+#'   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
+#'   Rcode=lm(response ~ predictor),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2702,25 +2702,25 @@ calc_lm <- function(response, predictor) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 #' # Response equals XLF returns
-#' res_ponse <- re_turns[, 1]
+#' response <- returns[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predic_tor <- re_turns[, -1]
+#' predictor <- returns[, -1]
 #' # Perform multivariate regression using lm()
-#' reg_model <- lm(res_ponse ~ predic_tor)
+#' reg_model <- lm(response ~ predictor)
 #' sum_mary <- summary(reg_model)
-#' co_eff <- sum_mary$coefficients
+#' coeff <- sum_mary$coefficients
 #' # Perform multivariate regression using calc_reg()
-#' reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, predictor=predic_tor))
+#' reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
 #' # Compare the outputs of both functions
-#' all.equal(reg_arma[1:(2*(1+NCOL(predic_tor)))], 
-#'   c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
+#' all.equal(reg_arma[1:(2*(1+NCOL(predictor)))], 
+#'   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_reg(response=res_ponse, predictor=predic_tor),
-#'   Rcode=lm(res_ponse ~ predic_tor),
+#'   Rcpp=HighFreq::calc_reg(response=response, predictor=predictor),
+#'   Rcode=lm(response ~ predictor),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2797,29 +2797,29 @@ calc_reg <- function(response, predictor, intercept = FALSE, method = "least_squ
 #' @examples
 #' \dontrun{
 #' # Define time series of returns using package rutils
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the rolling means at 25 day end points, with a 75 day look-back
-#' means <- HighFreq::roll_mean(re_turns, step=25, look_back=3)
+#' means <- HighFreq::roll_mean(returns, step=25, look_back=3)
 #' # Compare the mean estimates over 11-period look-back intervals
-#' all.equal(HighFreq::roll_mean(re_turns, look_back=11)[-(1:10), ], 
-#'   drop(RcppRoll::roll_mean(re_turns, n=11)), check.attributes=FALSE)
+#' all.equal(HighFreq::roll_mean(returns, look_back=11)[-(1:10), ], 
+#'   drop(RcppRoll::roll_mean(returns, n=11)), check.attributes=FALSE)
 #' # Define end points and start points
-#' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling means using RcppArmadillo
-#' means <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p)
+#' means <- HighFreq::roll_mean(returns, startp=startp, endp=endp)
 #' # Calculate the rolling medians using RcppArmadillo
-#' medianscpp <- HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric")
+#' medianscpp <- HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric")
 #' # Calculate the rolling medians using R
-#' medians = sapply(1:NROW(end_p), function(i) {
-#'   median(re_turns[start_p[i]:end_p[i] + 1])
+#' medians = sapply(1:NROW(endp), function(i) {
+#'   median(returns[startp[i]:endp[i] + 1])
 #' })  # end sapply
 #' all.equal(medians, drop(medianscpp))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_mean(re_turns, startp=start_p, endp=end_p, method="nonparametric"),
-#'   Rcode=sapply(1:NROW(end_p), function(i) {median(re_turns[start_p[i]:end_p[i] + 1])}),
+#'   Rcpp=HighFreq::roll_mean(returns, startp=startp, endp=endp, method="nonparametric"),
+#'   Rcode=sapply(1:NROW(endp), function(i) {median(returns[startp[i]:endp[i] + 1])}),
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
@@ -2842,16 +2842,16 @@ roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   the input argument \code{tseries}.
 #'
 #' @details
-#'   The function \code{roll_var_vec()} calculates a \emph{vector} of variance
+#'   The function \code{roll_varvec()} calculates a \emph{vector} of variance
 #'   estimates over a rolling look-back interval for a single-column \emph{time
 #'   series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
 #'   \code{C++} code.
 #'   
-#'   The function \code{roll_var_vec()} uses an expanding look-back interval in
+#'   The function \code{roll_varvec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
 #'   input argument \code{tseries}.
 #'
-#'   The function \code{roll_var_vec()} performs the same calculation as the
+#'   The function \code{roll_varvec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
 #'   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
 #'   but it's several times faster because it uses \code{RcppArmadillo}
@@ -2860,20 +2860,20 @@ roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' @examples
 #' \dontrun{
 #' # Create a vector of random returns
-#' re_turns <- rnorm(1e6)
+#' returns <- rnorm(1e6)
 #' # Compare the variance estimates over 11-period look-back intervals
-#' all.equal(drop(HighFreq::roll_var_vec(re_turns, look_back=11))[-(1:10)], 
-#'   RcppRoll::roll_var(re_turns, n=11))
+#' all.equal(drop(HighFreq::roll_varvec(returns, look_back=11))[-(1:10)], 
+#'   RcppRoll::roll_var(returns, n=11))
 #' # Compare the speed of RcppArmadillo with RcppRoll
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_var_vec(re_turns, look_back=11),
-#'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
+#'   Rcpp=HighFreq::roll_varvec(returns, look_back=11),
+#'   RcppRoll=RcppRoll::roll_var(returns, n=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var_vec <- function(tseries, look_back = 1L) {
-    .Call('_HighFreq_roll_var_vec', PACKAGE = 'HighFreq', tseries, look_back)
+roll_varvec <- function(tseries, look_back = 1L) {
+    .Call('_HighFreq_roll_varvec', PACKAGE = 'HighFreq', tseries, look_back)
 }
 
 #' Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
@@ -2942,22 +2942,22 @@ roll_var_vec <- function(tseries, look_back = 1L) {
 #' @examples
 #' \dontrun{
 #' # Define time series of returns using package rutils
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-#' vari_ance <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+#' variance <- HighFreq::roll_var(returns, step=25, look_back=3)
 #' # Compare the variance estimates over 11-period look-back intervals
-#' all.equal(HighFreq::roll_var(re_turns, look_back=11)[-(1:10), ], 
-#'   drop(RcppRoll::roll_var(re_turns, n=11)), check.attributes=FALSE)
+#' all.equal(HighFreq::roll_var(returns, look_back=11)[-(1:10), ], 
+#'   drop(RcppRoll::roll_var(returns, n=11)), check.attributes=FALSE)
 #' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_var(re_turns, look_back=11),
-#'   RcppRoll=RcppRoll::roll_var(re_turns, n=11),
+#'   Rcpp=HighFreq::roll_var(returns, look_back=11),
+#'   RcppRoll=RcppRoll::roll_var(returns, n=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
 #' summary(microbenchmark(
-#'     Rcpp=HighFreq::roll_var(re_turns, look_back=11, method="quantile"),
-#'     TTR=TTR::runMAD(re_turns, n = 11),
+#'     Rcpp=HighFreq::roll_var(returns, look_back=11, method="quantile"),
+#'     TTR=TTR::runMAD(returns, n = 11),
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
@@ -3073,33 +3073,33 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #' @examples
 #' \dontrun{
 #' # Extract the log OHLC prices of SPY
-#' oh_lc <- log(HighFreq::SPY)
+#' ohlc <- log(HighFreq::SPY)
 #' # Extract the time index of SPY prices
-#' in_dex <- c(1, diff(xts::.index(oh_lc)))
+#' indeks <- c(1, diff(xts::.index(ohlc)))
 #' # Rolling variance at minutely end points, with a 21 minute look-back
-#' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+#' var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
 #'                               step=1, look_back=21, 
 #'                               method="yang_zhang", 
-#'                               index=in_dex, scale=TRUE)
+#'                               index=indeks, scale=TRUE)
 #' # Daily OHLC prices
-#' oh_lc <- rutils::etf_env$VTI
-#' in_dex <- c(1, diff(xts::.index(oh_lc)))
+#' ohlc <- rutils::etfenv$VTI
+#' indeks <- c(1, diff(xts::.index(ohlc)))
 #' # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
-#' var_rolling <- HighFreq::roll_var_ohlc(oh_lc, 
+#' var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
 #'                               step=5, look_back=4, 
 #'                               method="yang_zhang", 
-#'                               index=in_dex, scale=TRUE)
+#'                               index=indeks, scale=TRUE)
 #' # Same calculation in R
-#' n_rows <- NROW(oh_lc)
-#' close_lag = HighFreq::lag_it(oh_lc[, 4])
-#' end_p <- drop(HighFreq::calc_endpoints(n_rows, 3)) + 1
-#' start_p <- drop(HighFreq::calc_startpoints(end_p, 2))
-#' n_pts <- NROW(end_p)
+#' nrows <- NROW(ohlc)
+#' close_lag = HighFreq::lagit(ohlc[, 4])
+#' endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+#' startp <- drop(HighFreq::calc_startpoints(endp, 2))
+#' n_pts <- NROW(endp)
 #' var_rollingr <- sapply(2:n_pts, function(it) {
-#'   ran_ge <- start_p[it]:end_p[it]
-#'   sub_ohlc = oh_lc[ran_ge, ]
-#'   sub_close = close_lag[ran_ge]
-#'   sub_index = in_dex[ran_ge]
+#'   rangev <- startp[it]:endp[it]
+#'   sub_ohlc = ohlc[rangev, ]
+#'   sub_close = close_lag[rangev]
+#'   sub_index = indeks[rangev]
 #'   HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
 #' })  # end sapply
 #' var_rollingr <- c(0, var_rollingr)
@@ -3172,24 +3172,24 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' @examples
 #' \dontrun{
 #' # Define time series of returns using package rutils
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Define end points and start points
-#' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
-#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-#' skew_ness <- HighFreq::roll_skew(re_turns, step=25, look_back=3)
+#' skew_ness <- HighFreq::roll_skew(returns, step=25, look_back=3)
 #' # Calculate the rolling skewness using R code
-#' skew_r <- sapply(1:NROW(end_p), function(it) {
-#'   HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+#' skew_r <- sapply(1:NROW(endp), function(it) {
+#'   HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 #' })  # end sapply
 #' # Compare the skewness estimates
 #' all.equal(drop(skew_ness), skew_r, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_skew(re_turns, step=25, look_back=3),
-#'   Rcode=sapply(1:NROW(end_p), function(it) {
-#'     HighFreq::calc_skew(re_turns[start_p[it]:end_p[it], ])
+#'   Rcpp=HighFreq::roll_skew(returns, step=25, look_back=3),
+#'   Rcode=sapply(1:NROW(endp), function(it) {
+#'     HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -3259,24 +3259,24 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' @examples
 #' \dontrun{
 #' # Define time series of returns using package rutils
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Define end points and start points
-#' end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
-#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-#' kurto_sis <- HighFreq::roll_kurtosis(re_turns, step=25, look_back=3)
+#' kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 #' # Calculate the rolling kurtosis using R code
-#' kurt_r <- sapply(1:NROW(end_p), function(it) {
-#'   HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+#' kurt_r <- sapply(1:NROW(endp), function(it) {
+#'   HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 #' })  # end sapply
 #' # Compare the kurtosis estimates
 #' all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_kurtosis(re_turns, step=25, look_back=3),
-#'   Rcode=sapply(1:NROW(end_p), function(it) {
-#'     HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+#'   Rcpp=HighFreq::roll_kurtosis(returns, step=25, look_back=3),
+#'   Rcode=sapply(1:NROW(endp), function(it) {
+#'     HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -3385,18 +3385,18 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLP", "VTI")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 #' # Define monthly end points and start points
-#' end_p <- xts::endpoints(re_turns, on="months")[-1]
+#' endp <- xts::endpoints(returns, on="months")[-1]
 #' look_back <- 12
-#' start_p <- c(rep(1, look_back), end_p[1:(NROW(end_p)-look_back)])
+#' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 #' # Calculate rolling betas using RcppArmadillo
-#' reg_stats <- HighFreq::roll_reg(response=re_turns[, 1], predictor=re_turns[, 2], endp=(end_p-1), startp=(start_p-1))
+#' reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
 #' beta_s <- reg_stats[, 2]
 #' # Calculate rolling betas in R
-#' betas_r <- sapply(1:NROW(end_p), FUN=function(ep) {
-#'   da_ta <- re_turns[start_p[ep]:end_p[ep], ]
-#'   drop(cov(da_ta[, 1], da_ta[, 2])/var(da_ta[, 2]))
+#' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+#'   datav <- returns[startp[ep]:endp[ep], ]
+#'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
 #' all.equal(beta_s, betas_r, check.attributes=FALSE)
@@ -3443,10 +3443,10 @@ roll_reg <- function(response, predictor, intercept = FALSE, startp = 0L, endp =
 #'   
 #' @examples
 #' \dontrun{
-#' mat_rix <- matrix(rnorm(20000), nc=2)
+#' matrixv <- matrix(rnorm(20000), nc=2)
 #' look_back <- 11
-#' rolled_scaled <- roll::roll_scale(data=mat_rix, width = look_back, min_obs=1)
-#' rolled_scaled2 <- roll_scale(matrix=mat_rix, look_back = look_back, use_median=FALSE)
+#' rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
+#' rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
 #' all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
 #' }
 #' 
@@ -3507,23 +3507,23 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 #' # Response equals XLF returns
-#' res_ponse <- re_turns[, 1]
+#' response <- returns[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predic_tor <- re_turns[, -1]
+#' predictor <- returns[, -1]
 #' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 #' look_back <- 11
-#' z_scores <- HighFreq::roll_zscores(response=res_ponse, predictor=predic_tor, look_back)
+#' z_scores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
 #' # Calculate z-scores in R from rolling multivariate regression using lm()
-#' z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
+#' z_scoresr <- sapply(1:NROW(predictor), function(ro_w) {
 #'   if (ro_w == 1) return(0)
-#'   start_point <- max(1, ro_w-look_back+1)
-#'   responsi <- res_ponse[start_point:ro_w]
-#'   predicti <- predic_tor[start_point:ro_w, ]
+#'   startpoint <- max(1, ro_w-look_back+1)
+#'   responsi <- response[startpoint:ro_w]
+#'   predicti <- predictor[startpoint:ro_w, ]
 #'   reg_model <- lm(responsi ~ predicti)
-#'   resid_uals <- reg_model$residuals
-#'   resid_uals[NROW(resid_uals)]/sd(resid_uals)
+#'   residuals <- reg_model$residuals
+#'   residuals[NROW(residuals)]/sd(residuals)
 #' })  # end sapply
 #' # Compare the outputs of both functions
 #' all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
@@ -3600,30 +3600,30 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #' @examples
 #' \dontrun{
 #' # Define time series of returns using package rutils
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-#' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", step=25, look_back=3)
+#' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", step=25, look_back=3)
 #' # Calculate the rolling variance using roll_var()
-#' var_roll <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+#' var_roll <- HighFreq::roll_var(returns, step=25, look_back=3)
 #' # Compare the two methods
 #' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 #' # Define end points and start points
-#' end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-#' start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+#' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling variance using RcppArmadillo
-#' var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p)
+#' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp)
 #' # Calculate the rolling variance using R code
-#' var_roll <- sapply(1:NROW(end_p), function(it) {
-#'   var(re_turns[start_p[it]:end_p[it]+1, ])
+#' var_roll <- sapply(1:NROW(endp), function(it) {
+#'   var(returns[startp[it]:endp[it]+1, ])
 #' })  # end sapply
 #' # Compare the two methods
 #' all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p),
-#'   Rcode=sapply(1:NROW(end_p), function(it) {
-#'     var(re_turns[start_p[it]:end_p[it]+1, ])
+#'   Rcpp=HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp),
+#'   Rcode=sapply(1:NROW(endp), function(it) {
+#'     var(returns[startp[it]:endp[it]+1, ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
@@ -3709,12 +3709,12 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 #' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 #' # Calculate historical VTI returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Estimate the GARCH volatility of VTI returns
 #' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
-#'   innov=re_turns, is_random=FALSE)
+#'   innov=returns, is_random=FALSE)
 #' # Plot dygraph of the estimated GARCH volatility
-#' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(re_turns)), 
+#' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(returns)), 
 #'   main="Estimated GARCH Volatility of VTI")
 #' }
 #' 
@@ -3752,7 +3752,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 #'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
 #'   normal \emph{innovations}.
-#'   The recursion starts with the initial price: \eqn{p_1 = init\_price}.
+#'   The recursion starts with the initial price: \eqn{p1 = init\_price}.
 #'
 #'   The function \code{sim_ou()} simulates the percentage returns as equal to
 #'   the difference between the equilibrium price \eqn{\mu} minus the latest
@@ -3775,8 +3775,8 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' the_ta <- 0.01
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' price_s <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-#' plot(price_s, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+#' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+#' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -3825,8 +3825,8 @@ sim_ou <- function(init_price, eq_price, volat, theta, innov) {
 #' the_ta <- 0.01
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Schwartz process using Rcpp
-#' re_turns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
-#' plot(exp(cumsum(re_turns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
+#' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+#' plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -3855,7 +3855,7 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
 #'   \eqn{AR(n)} of order \eqn{n}:
 #'   \deqn{
-#'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+#'     r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 #'   }
 #'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 #'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -3866,26 +3866,26 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'   \code{coeff}.
 #'
 #'   The function \code{sim_ar()} performs the same calculation as the standard
-#'   \code{R} function \cr\code{filter(x=innov, filter=co_eff,
+#'   \code{R} function \cr\code{filter(x=innov, filter=coeff,
 #'   method="recursive")}, but it's several times faster.
 #'   
 #' @examples
 #' \dontrun{
 #' # Define AR coefficients
-#' co_eff <- matrix(c(0.2, 0.2))
+#' coeff <- matrix(c(0.2, 0.2))
 #' # Calculate matrix of innovations
 #' in_nov <- matrix(rnorm(1e4, sd=0.01))
 #' # Calculate recursive filter using filter()
-#' filter_ed <- filter(in_nov, filter=co_eff, method="recursive")
+#' filter_ed <- filter(in_nov, filter=coeff, method="recursive")
 #' # Calculate recursive filter using RcppArmadillo
-#' re_turns <- HighFreq::sim_ar(co_eff, in_nov)
+#' returns <- HighFreq::sim_ar(coeff, in_nov)
 #' # Compare the two methods
-#' all.equal(as.numeric(re_turns), as.numeric(filter_ed))
+#' all.equal(as.numeric(returns), as.numeric(filter_ed))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::sim_ar(co_eff, in_nov),
-#'   Rcode=filter(in_nov, filter=co_eff, method="recursive"),
+#'   Rcpp=HighFreq::sim_ar(coeff, in_nov),
+#'   Rcode=filter(in_nov, filter=coeff, method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -3915,7 +3915,7 @@ sim_ar <- function(coeff, innov) {
 #'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 #'   process:
 #'   \deqn{
-#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
 #'   }
 #'   \deqn{
 #'     p_i = p_{i-1} + r_i
@@ -3925,7 +3925,7 @@ sim_ar <- function(coeff, innov) {
 #'   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
 #'   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
 #'   normal \emph{innovations}.
-#'   The recursion starts with: \eqn{p_1 = r_1 = \sigma \, \xi_1}.
+#'   The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
 #'
 #'   The \emph{Dickey-Fuller} process is a combination of an
 #'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -3946,12 +3946,12 @@ sim_ar <- function(coeff, innov) {
 #' sig_ma <- 0.01
 #' the_ta <- 0.01
 #' # Define AR coefficients
-#' co_eff <- matrix(c(0.2, 0.2))
+#' coeff <- matrix(c(0.2, 0.2))
 #' # Calculate matrix of standard normal innovations
 #' in_nov <- matrix(rnorm(1e3))
 #' # Simulate Dickey-Fuller process using Rcpp
-#' re_turns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, co_eff, innov=in_nov)
-#' plot(cumsum(re_turns), t="l", main="Simulated Dickey-Fuller Prices")
+#' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, coeff, innov=in_nov)
+#' plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
 #' }
 #' 
 #' @export
@@ -4007,9 +4007,9 @@ sim_df <- function(eq_price, volat, theta, coeff, innov) {
 #' be_ta <- 0.2
 #' om_ega <- 1e-4*(1-al_pha-be_ta)
 #' # Calculate historical VTI returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+#' returns <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-#' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=re_turns)
+#' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=returns)
 #' }
 #' 
 #' @export
@@ -4093,24 +4093,24 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' @examples
 #' \dontrun{
 #' # Calculate covariance matrix of ETF returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
-#' ei_gen <- eigen(cov(re_turns))
+#' returns <- na.omit(rutils::etfenv$returns[, 1:16])
+#' eigend <- eigen(cov(returns))
 #' # Calculate shrinkage inverse of covariance matrix
 #' eigen_max <- 3
-#' eigen_vec <- ei_gen$vectors[, 1:eigen_max]
-#' eigen_val <- ei_gen$values[1:eigen_max]
-#' in_verse <- eigen_vec %*% (t(eigen_vec) / eigen_val)
+#' eigenvec <- eigend$vectors[, 1:eigen_max]
+#' eigenval <- eigend$values[1:eigen_max]
+#' in_verse <- eigenvec %*% (t(eigenvec) / eigenval)
 #' # Define shrinkage intensity and apply shrinkage to the mean returns
 #' al_pha <- 0.5
-#' col_means <- colMeans(re_turns)
+#' col_means <- colMeans(returns)
 #' col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
 #' # Calculate weights using R
-#' weight_s <- in_verse %*% col_means
-#' n_col <- NCOL(re_turns)
-#' weights_r <- weights_r*sd(re_turns %*% rep(1/n_col, n_col))/sd(re_turns %*% weights_r)
+#' weights <- in_verse %*% col_means
+#' n_col <- NCOL(returns)
+#' weights_r <- weights_r*sd(returns %*% rep(1/n_col, n_col))/sd(returns %*% weights_r)
 #' # Calculate weights using RcppArmadillo
-#' weight_s <- drop(HighFreq::calc_weights(re_turns, eigen_max, alpha=al_pha))
-#' all.equal(weight_s, weights_r)
+#' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=al_pha))
+#' all.equal(weights, weights_r)
 #' }
 #' 
 #' @export
@@ -4197,8 +4197,8 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 1e-5, e
 #'   
 #'   The function \code{back_test()} multiplies the out-of-sample strategy
 #'   returns by the coefficient \code{coeff} (with default equal to \code{1}),
-#'   which allows simulating either a trending strategy (if \code{co_eff = 1}),
-#'   or a reverting strategy (if \code{co_eff = -1}).
+#'   which allows simulating either a trending strategy (if \code{coeff = 1}),
+#'   or a reverting strategy (if \code{coeff = -1}).
 #'   
 #'   The function \code{back_test()} calculates the transaction costs by
 #'   multiplying the bid-offer spread \code{bid_offer} times the absolute
@@ -4213,29 +4213,29 @@ calc_weights <- function(returns, method = "rank_sharpe", eigen_thresh = 1e-5, e
 #' @examples
 #' \dontrun{
 #' # Calculate the ETF daily excess returns
-#' re_turns <- na.omit(rutils::etf_env$re_turns[, 1:16])
+#' returns <- na.omit(rutils::etfenv$returns[, 1:16])
 #' # risk_free is the daily risk-free rate
 #' risk_free <- 0.03/260
-#' ex_cess <- re_turns - risk_free
+#' ex_cess <- returns - risk_free
 #' # Define monthly end points without initial warmpup period
-#' end_p <- rutils::calc_endpoints(re_turns, inter_val="months")
-#' end_p <- end_p[end_p > 0]
-#' len_gth <- NROW(end_p)
+#' endp <- rutils::calc_endpoints(returns, inter_val="months")
+#' endp <- endp[endp > 0]
+#' nrows <- NROW(endp)
 #' # Define 12-month look-back interval and start points over sliding window
 #' look_back <- 12
-#' start_p <- c(rep_len(1, look_back-1), end_p[1:(len_gth-look_back+1)])
+#' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 #' # Define shrinkage and regularization intensities
 #' al_pha <- 0.5
 #' eigen_max <- 3
 #' # Simulate a monthly rolling portfolio optimization strategy
-#' pnl_s <- HighFreq::back_test(ex_cess, re_turns, 
-#'                             start_p-1, end_p-1, 
+#' pnls <- HighFreq::back_test(ex_cess, returns, 
+#'                             startp-1, endp-1, 
 #'                             eigen_max = eigen_max, 
 #'                             alpha = al_pha)
-#' pnl_s <- xts::xts(pnl_s, index(re_turns))
-#' colnames(pnl_s) <- "strat_rets"
+#' pnls <- xts::xts(pnls, index(returns))
+#' colnames(pnls) <- "strat_rets"
 #' # Plot dygraph of strategy
-#' dygraphs::dygraph(cumsum(pnl_s), 
+#' dygraphs::dygraph(cumsum(pnls), 
 #'   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
 #' }
 #' 

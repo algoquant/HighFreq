@@ -70,23 +70,23 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-res_ponse <- re_turns[, 1]
+response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
-predic_tor <- re_turns[, -1]
+predictor <- returns[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-z_scores <- HighFreq::roll_zscores(response=res_ponse, predictor=predic_tor, look_back)
+z_scores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
-z_scoresr <- sapply(1:NROW(predic_tor), function(ro_w) {
+z_scoresr <- sapply(1:NROW(predictor), function(ro_w) {
   if (ro_w == 1) return(0)
-  start_point <- max(1, ro_w-look_back+1)
-  responsi <- res_ponse[start_point:ro_w]
-  predicti <- predic_tor[start_point:ro_w, ]
+  startpoint <- max(1, ro_w-look_back+1)
+  responsi <- response[startpoint:ro_w]
+  predicti <- predictor[startpoint:ro_w, ]
   reg_model <- lm(responsi ~ predicti)
-  resid_uals <- reg_model$residuals
-  resid_uals[NROW(resid_uals)]/sd(resid_uals)
+  residuals <- reg_model$residuals
+  residuals[NROW(residuals)]/sd(residuals)
 })  # end sapply
 # Compare the outputs of both functions
 all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 

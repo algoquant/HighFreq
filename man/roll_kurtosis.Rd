@@ -81,24 +81,24 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+returns <- na.omit(rutils::etfenv$returns$VTI)
 # Define end points and start points
-end_p <- 1 + HighFreq::calc_endpoints(NROW(re_turns), step=25)
-start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
+startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-kurto_sis <- HighFreq::roll_kurtosis(re_turns, step=25, look_back=3)
+kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 # Calculate the rolling kurtosis using R code
-kurt_r <- sapply(1:NROW(end_p), function(it) {
-  HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+kurt_r <- sapply(1:NROW(endp), function(it) {
+  HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 })  # end sapply
 # Compare the kurtosis estimates
 all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_kurtosis(re_turns, step=25, look_back=3),
-  Rcode=sapply(1:NROW(end_p), function(it) {
-    HighFreq::calc_kurtosis(re_turns[start_p[it]:end_p[it], ])
+  Rcpp=HighFreq::roll_kurtosis(returns, step=25, look_back=3),
+  Rcode=sapply(1:NROW(endp), function(it) {
+    HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

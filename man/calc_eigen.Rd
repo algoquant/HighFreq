@@ -28,18 +28,18 @@ The function \code{calc_eigen()} first calculates the covariance
 \examples{
 \dontrun{
 # Create matrix of random data
-da_ta <- matrix(rnorm(5e6), nc=5)
+datav <- matrix(rnorm(5e6), nc=5)
 # Calculate eigen decomposition
-ei_gen <- HighFreq::calc_eigen(scale(da_ta, scale=FALSE))
+eigend <- HighFreq::calc_eigen(scale(datav, scale=FALSE))
 # Calculate PCA
-pc_a <- prcomp(da_ta)
+pcad <- prcomp(datav)
 # Compare PCA with eigen decomposition
-all.equal(pc_a$sdev^2, drop(ei_gen$values))
-all.equal(abs(unname(pc_a$rotation)), abs(ei_gen$vectors))
+all.equal(pcad$sdev^2, drop(eigend$values))
+all.equal(abs(unname(pcad$rotation)), abs(eigend$vectors))
 # Compare the speed of Rcpp with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_eigen(da_ta),
-  Rcode=prcomp(da_ta),
+  Rcpp=HighFreq::calc_eigen(datav),
+  Rcode=prcomp(datav),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

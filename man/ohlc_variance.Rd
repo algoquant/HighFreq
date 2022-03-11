@@ -5,10 +5,10 @@
 \title{Calculate a time series of point estimates of variance for an \emph{OHLC}
 time series, using different range estimators for variance.}
 \usage{
-ohlc_variance(oh_lc, method = "yang_zhang", scal_e = TRUE)
+ohlc_variance(ohlc, method = "yang_zhang", scalit = TRUE)
 }
 \arguments{
-\item{\code{oh_lc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
 \item{\code{method}}{A \emph{character} string representing the method for
 estimating variance.  The methods include:
@@ -21,12 +21,12 @@ estimating variance.  The methods include:
  }
  (default is \code{"yang_zhang"})}
 
-\item{\code{scal_e}}{\emph{Boolean} argument: should the returns be divided by the
+\item{\code{scalit}}{\emph{Boolean} argument: should the returns be divided by the
 number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of
-  rows as the argument \code{oh_lc}.
+  rows as the argument \code{ohlc}.
 }
 \description{
 Calculates the point variance estimates from individual rows of \emph{OHLC}
@@ -62,20 +62,20 @@ The function \code{ohlc_variance()} calculates a time series of point
   The point variance estimates can also be considered to be technical
   indicators, and can be used as inputs into trading models.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the variance is divided
+  If \code{scalit} is \code{TRUE} (the default), then the variance is divided
   by the squared differences of the time index (which scales the variance to
   units of variance per second squared.) This is useful for example, when
   calculating intra-day variance from minutely bar data, because dividing
   returns by the number of seconds decreases the effect of overnight price
   jumps.
 
-  If \code{scal_e} is \code{TRUE} (the default), then the variance is
+  If \code{scalit} is \code{TRUE} (the default), then the variance is
   expressed in the scale of the time index of the \emph{OHLC} time series.
   For example, if the time index is in seconds, then the variance is given in
   units of variance per second squared.  If the time index is in days, then
   the variance is equal to the variance per day squared.
 
-  The time index of the \code{oh_lc} time series is assumed to be in
+  The time index of the \code{ohlc} time series is assumed to be in
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 
@@ -88,9 +88,9 @@ The function \code{ohlc_variance()} calculates a time series of point
 }
 \examples{
 # Create minutely OHLC time series of random prices
-oh_lc <- HighFreq::random_ohlc()
-# Calculate variance estimates for oh_lc
-var_running <- HighFreq::ohlc_variance(oh_lc)
+ohlc <- HighFreq::random_ohlc()
+# Calculate variance estimates for ohlc
+var_running <- HighFreq::ohlc_variance(ohlc)
 # Calculate variance estimates for SPY
 var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="yang_zhang")
 # Calculate SPY variance without overnight jumps

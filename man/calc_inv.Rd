@@ -75,13 +75,13 @@ The function \code{calc_inv()} calculates the shrinkage inverse of the
 \examples{
 \dontrun{
 # Calculate ETF returns
-re_turns <- na.omit(rutils::etf_env$re_turns)
+returns <- na.omit(rutils::etfenv$returns)
 # Calculate covariance matrix
-cov_mat <- cov(re_turns)
+covmat <- cov(returns)
 # Calculate shrinkage inverse using RcppArmadillo
-in_verse <- HighFreq::calc_inv(cov_mat, eigen_max=3)
+in_verse <- HighFreq::calc_inv(covmat, eigen_max=3)
 # Calculate shrinkage inverse from SVD in R
-s_vd <- svd(cov_mat)
+s_vd <- svd(covmat)
 eigen_max <- 1:3
 inverse_r <-  s_vd$v[, eigen_max] \%*\% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
 # Compare RcppArmadillo with R

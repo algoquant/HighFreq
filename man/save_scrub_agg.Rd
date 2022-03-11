@@ -7,7 +7,7 @@ single symbol, and save the \emph{OHLC} time series to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
 save_scrub_agg(
-  sym_bol,
+  symbol,
   data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/",
   look_back = 51,
@@ -17,7 +17,7 @@ save_scrub_agg(
 )
 }
 \arguments{
-\item{\code{sym_bol}}{A \emph{character} string representing symbol or ticker.}
+\item{\code{symbol}}{A \emph{character} string representing symbol or ticker.}
 
 \item{\code{data_dir}}{A \emph{character} string representing directory containing
 input \sQuote{\code{*.RData}} files.}
@@ -52,8 +52,8 @@ The function \code{save_scrub_agg()} loads multiple days of
 # set data directories
 data_dir <- "C:/Develop/data/hfreq/src/"
 output_dir <- "C:/Develop/data/hfreq/scrub/"
-sym_bol <- "SPY"
+symbol <- "SPY"
 # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
-save_scrub_agg(sym_bol=sym_bol, data_dir=data_dir, output_dir=output_dir, period="15 min")
+save_scrub_agg(symbol=symbol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 }
 }

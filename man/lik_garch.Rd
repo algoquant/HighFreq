@@ -58,9 +58,9 @@ al_pha <- 0.79
 be_ta <- 0.2
 om_ega <- 1e-4*(1-al_pha-be_ta)
 # Calculate historical VTI returns
-re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+returns <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=re_turns)
+HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=returns)
 }
 
 }

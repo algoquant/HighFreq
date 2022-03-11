@@ -96,25 +96,25 @@ The function \code{calc_reg()} performs multivariate regression using
 \examples{
 \dontrun{
 # Calculate historical returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("XLF", "VTI", "IEF")])
+returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-res_ponse <- re_turns[, 1]
+response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
-predic_tor <- re_turns[, -1]
+predictor <- returns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(res_ponse ~ predic_tor)
+reg_model <- lm(response ~ predictor)
 sum_mary <- summary(reg_model)
-co_eff <- sum_mary$coefficients
+coeff <- sum_mary$coefficients
 # Perform multivariate regression using calc_reg()
-reg_arma <- drop(HighFreq::calc_reg(response=res_ponse, predictor=predic_tor))
+reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
 # Compare the outputs of both functions
-all.equal(reg_arma[1:(2*(1+NCOL(predic_tor)))], 
-  c(co_eff[, "Estimate"], co_eff[, "t value"]), check.attributes=FALSE)
+all.equal(reg_arma[1:(2*(1+NCOL(predictor)))], 
+  c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(response=res_ponse, predictor=predic_tor),
-  Rcode=lm(res_ponse ~ predic_tor),
+  Rcpp=HighFreq::calc_reg(response=response, predictor=predictor),
+  Rcode=lm(response ~ predictor),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

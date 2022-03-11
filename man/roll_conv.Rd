@@ -29,7 +29,7 @@ The function \code{roll_conv()} calculates the convolutions of the
   
   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
-  \code{R} function \cr\code{filter(x=tseries, filter=weight_s,
+  \code{R} function \cr\code{filter(x=tseries, filter=weights,
   method="convolution", sides=1)}, but it's over \code{6} times faster, and
   it doesn't produce any leading \code{NA} values.
 }
@@ -37,21 +37,21 @@ The function \code{roll_conv()} calculates the convolutions of the
 \dontrun{
 # First example
 # Calculate a time series of returns
-re_turns <- na.omit(rutils::etf_env$re_turns[, c("IEF", "VTI")])
+returns <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 # Create simple weights equal to a 1 value plus zeros
-weight_s <- matrix(c(1, rep(0, 10)), nc=1)
+weights <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+weight_ed <- HighFreq::roll_conv(returns, weights)
 # Compare with original
-all.equal(coredata(re_turns), weight_ed, check.attributes=FALSE)
+all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
 # Second example
 # Calculate exponentially decaying weights
-weight_s <- exp(-0.2*(1:11))
-weight_s <- matrix(weight_s/sum(weight_s), nc=1)
+weights <- exp(-0.2*(1:11))
+weights <- matrix(weights/sum(weights), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv(re_turns, weight_s)
+weight_ed <- HighFreq::roll_conv(returns, weights)
 # Calculate rolling weighted sums using filter()
-filter_ed <- filter(x=re_turns, filter=weight_s, method="convolution", sides=1)
+filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
 # Compare both methods
 all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
 }

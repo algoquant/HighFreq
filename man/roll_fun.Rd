@@ -86,30 +86,30 @@ The function \code{roll_fun()} calculates a \emph{matrix} of estimator
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-re_turns <- na.omit(rutils::etf_env$re_turns$VTI)
+returns <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", step=25, look_back=3)
+var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", step=25, look_back=3)
 # Calculate the rolling variance using roll_var()
-var_roll <- HighFreq::roll_var(re_turns, step=25, look_back=3)
+var_roll <- HighFreq::roll_var(returns, step=25, look_back=3)
 # Compare the two methods
 all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 # Define end points and start points
-end_p <- HighFreq::calc_endpoints(NROW(re_turns), step=25)
-start_p <- HighFreq::calc_startpoints(end_p, look_back=3)
+endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
+startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling variance using RcppArmadillo
-var_rollfun <- HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p)
+var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp)
 # Calculate the rolling variance using R code
-var_roll <- sapply(1:NROW(end_p), function(it) {
-  var(re_turns[start_p[it]:end_p[it]+1, ])
+var_roll <- sapply(1:NROW(endp), function(it) {
+  var(returns[startp[it]:endp[it]+1, ])
 })  # end sapply
 # Compare the two methods
 all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_fun(re_turns, fun="calc_var", startp=start_p, endp=end_p),
-  Rcode=sapply(1:NROW(end_p), function(it) {
-    var(re_turns[start_p[it]:end_p[it]+1, ])
+  Rcpp=HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp),
+  Rcode=sapply(1:NROW(endp), function(it) {
+    var(returns[startp[it]:endp[it]+1, ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

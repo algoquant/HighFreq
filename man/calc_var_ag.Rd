@@ -51,16 +51,16 @@ The function \code{calc_var_ag()} calculates the variance of returns
 \examples{
 \dontrun{
 # Calculate the log prices
-price_s <- na.omit(rutils::etf_env$price_s[, c("XLP", "VTI")])
-price_s <- log(price_s)
+prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+prices <- log(prices)
 # Calculate the daily variance of percentage returns
-calc_var_ag(price_s, step=1)
+calc_var_ag(prices, step=1)
 # Calculate the daily variance using R
-sapply(rutils::diff_it(price_s), var)
+sapply(rutils::diffit(prices), var)
 # Calculate the variance of returns aggregated over 21 days
-calc_var_ag(price_s, step=21)
+calc_var_ag(prices, step=21)
 # The variance over 21 days is approximately 21 times the daily variance
-21*calc_var_ag(price_s, step=1)
+21*calc_var_ag(prices, step=1)
 }
 
 }
