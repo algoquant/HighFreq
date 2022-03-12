@@ -762,13 +762,13 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //' # Calculate covariance matrix
 //' covmat <- cov(returns)
 //' # Calculate shrinkage inverse using RcppArmadillo
-//' in_verse <- HighFreq::calc_inv(covmat, eigen_max=3)
+//' inverse <- HighFreq::calc_inv(covmat, eigen_max=3)
 //' # Calculate shrinkage inverse from SVD in R
-//' s_vd <- svd(covmat)
+//' svdec <- svd(covmat)
 //' eigen_max <- 1:3
-//' inverse_r <-  s_vd$v[, eigen_max] %*% (t(s_vd$u[, eigen_max]) / s_vd$d[eigen_max])
+//' inverser <-  svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 //' # Compare RcppArmadillo with R
-//' all.equal(in_verse, inverse_r)
+//' all.equal(inverse, inverser)
 //' }
 //' 
 //' @export
@@ -1257,19 +1257,19 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' # Create simple weights
 //' weights <- matrix(c(1, rep(0, 10)))
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
+//' weighted <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 //' # Compare with original
-//' all.equal(zoo::coredata(returns), weight_ed, check.attributes=FALSE)
+//' all.equal(zoo::coredata(returns), weighted, check.attributes=FALSE)
 //' # Second example
 //' # Create exponentially decaying weights
 //' weights <- matrix(exp(-0.2*1:11))
 //' weights <- weights/sum(weights)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
+//' weighted <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
+//' filtered <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
 //' # Compare both methods
-//' all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
+//' all.equal(filtered[-(1:11)], weighted[-(1:11)], check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -1335,19 +1335,19 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' # Create simple weights equal to a 1 value plus zeros
 //' weights <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(returns, weights)
+//' weighted <- HighFreq::roll_conv(returns, weights)
 //' # Compare with original
-//' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(returns), weighted, check.attributes=FALSE)
 //' # Second example
 //' # Calculate exponentially decaying weights
 //' weights <- exp(-0.2*(1:11))
 //' weights <- matrix(weights/sum(weights), nc=1)
 //' # Calculate rolling weighted sums
-//' weight_ed <- HighFreq::roll_conv(returns, weights)
+//' weighted <- HighFreq::roll_conv(returns, weights)
 //' # Calculate rolling weighted sums using filter()
-//' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
+//' filtered <- filter(x=returns, filter=weights, method="convolution", sides=1)
 //' # Compare both methods
-//' all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+//' all.equal(filtered[-(1:11), ], weighted[-(1:11), ], check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -1642,19 +1642,19 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Calculate rolling weighted sum
 //' c_sum <- HighFreq::roll_wsum(returns, weights=weights)
 //' # Calculate rolling weighted sum using filter()
-//' filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
-//' all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
+//' filtered <- filter(x=returns, filter=weights, method="convolution", sides=1)
+//' all.equal(c_sum[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
 //' c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
-//' all.equal(c_sum, filter_ed[endp+1, ], check.attributes=FALSE)
+//' all.equal(c_sum, filtered[endp+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
 //' weights <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sum
-//' weight_ed <- HighFreq::roll_wsum(returns, weights=weights)
+//' weighted <- HighFreq::roll_wsum(returns, weights=weights)
 //' # Compare with original
-//' all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
+//' all.equal(coredata(returns), weighted, check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -1672,12 +1672,12 @@ arma::mat roll_wsum(const arma::mat& tseries,
   if (weights.isNotNull()) {
     // Coerce weights from Rcpp to Armadillo vector
     arma::vec weights_vec = Rcpp::as<vec>(weights);
-    arma::uword num_weights = weights_vec.n_elem;
+    arma::uword nweights = weights_vec.n_elem;
     // Calculate the weighted averages as convolutions
     cumsumv = arma::conv2(tseries, weights_vec, "full");
     // Copy the warmup period
-    // cout << "num_weights = " << num_weights << endl;
-    cumsumv.rows(0, num_weights-2) = tseries.rows(0, num_weights-2);
+    // cout << "nweights = " << nweights << endl;
+    cumsumv.rows(0, nweights-2) = tseries.rows(0, nweights-2);
     cumsumv = cumsumv.rows(0, nrows-1);
     // cout << "cumsumv.n_rows = " << cumsumv.n_rows << endl;
   } else {
@@ -1784,7 +1784,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   interval.
 //' 
 //'   The function \code{run_mean()} performs the same calculation as the
-//'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdav,
+//'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambda,
 //'   method="recursive")}, but it's several times faster.
 //' 
 //'   The function \code{run_mean()} returns a \emph{matrix} with the same
@@ -1796,27 +1796,27 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' ohlc <- rutils::etfenv$VTI
 //' prices <- quantmod::Cl(ohlc)
 //' # Calculate the running means
-//' lambdav <- 0.95
-//' means <- HighFreq::run_mean(prices, lambda=lambdav)
+//' lambda <- 0.95
+//' means <- HighFreq::run_mean(prices, lambda=lambda)
 //' # Calculate running means using R code
-//' filter_ed <- (1-lambdav)*filter(prices, 
-//'   filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), 
+//' filtered <- (1-lambda)*filter(prices, 
+//'   filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
 //'   method="recursive")
-//' all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
+//' all.equal(drop(means), unclass(filtered), check.attributes=FALSE)
 //' 
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_mean(prices, lambda=lambdav),
-//'   Rcode=filter(prices, filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), method="recursive"),
+//'   Rcpp=HighFreq::run_mean(prices, lambda=lambda),
+//'   Rcode=filter(prices, filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //'   
 //' # Create weights equal to the trading volumes
 //' weights <- quantmod::Vo(ohlc)
 //' # Calculate the running weighted means
-//' meansw <- HighFreq::run_mean(prices, lambda=lambdav, weights=weights)
+//' meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
 //' # dygraph plot the running weighted means
-//' datav <- xts(cbind(means, meansw), zoo::index(ohlc))
+//' datav <- xts(cbind(means, meanw), zoo::index(ohlc))
 //' colnames(datav) <- c("means running", "means weighted")
 //' dygraphs::dygraph(datav, main="Running Means") %>%
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=1) %>%
@@ -1843,17 +1843,17 @@ arma::mat run_mean(const arma::mat& tseries,
     }  // end for
   } else if (weights_rows == nrows) {
     // Calculate means with weights
-    arma::mat meansw = arma::zeros<mat>(nrows, 1);
+    arma::mat meanw = arma::zeros<mat>(nrows, 1);
     means.row(0) = weights.row(0)*tseries.row(0);
-    meansw.row(0) = weights.row(0);
+    meanw.row(0) = weights.row(0);
     for (arma::uword it = 1; it < nrows; it++) {
       // Calculate the means as the weighted sums
-      meansw.row(it) = lambda1*weights.row(it) + lambda*meansw.row(it-1);
+      meanw.row(it) = lambda1*weights.row(it) + lambda*meanw.row(it-1);
       means.row(it) = lambda1*weights.row(it)*tseries.row(it) + lambda*means.row(it-1);
       // Divide by the mean weight
-      means.row(it-1) = means.row(it-1)/meansw.row(it-1);
+      means.row(it-1) = means.row(it-1)/meanw.row(it-1);
     }  // end for
-    means.row(nrows-1) = means.row(nrows-1)/meansw.row(nrows-1);
+    means.row(nrows-1) = means.row(nrows-1)/meanw.row(nrows-1);
   }  // end if
   
   return means;
@@ -1916,8 +1916,8 @@ arma::mat run_mean(const arma::mat& tseries,
 //' # Calculate historical prices
 //' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running maximums
-//' lambdav <- 0.9
-//' maxs <- HighFreq::run_max(prices, lambda=lambdav)
+//' lambda <- 0.9
+//' maxs <- HighFreq::run_max(prices, lambda=lambda)
 //' # Plot dygraph of VTI prices and running maximums
 //' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
 //' colnames(datav) <- c("prices", "max")
@@ -2006,8 +2006,8 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' # Calculate historical prices
 //' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running minimums
-//' lambdav <- 0.9
-//' mins <- HighFreq::run_min(prices, lambda=lambdav)
+//' lambda <- 0.9
+//' mins <- HighFreq::run_min(prices, lambda=lambda)
 //' # Plot dygraph of VTI prices and running minimums
 //' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
 //' colnames(datav) <- c("prices", "min")
@@ -2097,18 +2097,18 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' # Calculate historical returns
 //' returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate the running variance
-//' lambdav <- 0.9
-//' vars <- HighFreq::run_var(returns, lambda=lambdav)
+//' lambda <- 0.9
+//' vars <- HighFreq::run_var(returns, lambda=lambda)
 //' # Calculate running variance using R code
-//' filter_ed <- (1-lambdav)*filter(returns^2, filter=lambdav, 
-//'   init=as.numeric(returns[1, 1])^2/(1-lambdav), 
+//' filtered <- (1-lambda)*filter(returns^2, filter=lambda, 
+//'   init=as.numeric(returns[1, 1])^2/(1-lambda), 
 //'   method="recursive")
-//' all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
+//' all.equal(vars, unclass(filtered), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_var(returns, lambda=lambdav),
-//'   Rcode=filter(returns^2, filter=lambdav, init=as.numeric(returns[1, 1])^2/(1-lambdav), method="recursive"),
+//'   Rcpp=HighFreq::run_var(returns, lambda=lambda),
+//'   Rcode=filter(returns^2, filter=lambda, init=as.numeric(returns[1, 1])^2/(1-lambda), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2299,13 +2299,13 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //' # Calculate historical returns
 //' returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' # Calculate the running covariance
-//' lambdav <- 0.9
-//' covars <- HighFreq::run_covar(returns, lambda=lambdav)
+//' lambda <- 0.9
+//' covars <- HighFreq::run_covar(returns, lambda=lambda)
 //' # Calculate running covariance using R code
-//' filter_ed <- (1-lambdav)*filter(returns[, 1]*returns[, 2], 
-//'   filter=lambdav, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambdav), 
+//' filtered <- (1-lambda)*filter(returns[, 1]*returns[, 2], 
+//'   filter=lambda, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambda), 
 //'   method="recursive")
-//' all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
+//' all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
 //' # Calculate the running correlation
 //' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 //' }
@@ -2458,8 +2458,8 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' # Predictor matrix equals VTI and IEF returns
 //' predictor <- returns[, -1]
 //' # Calculate the running regressions
-//' lambdav <- 0.9
-//' regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambdav)
+//' lambda <- 0.9
+//' regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
 //' # Plot the running alphas
 //' datav <- cbind(cumsum(response), regs[, 1])
 //' colnames(datav) <- c("XLF", "alphas")
@@ -2622,8 +2622,8 @@ arma::mat run_reg(const arma::mat& response,
 //' # Predictor matrix equals VTI and IEF returns
 //' predictor <- returns[, -1]
 //' # Calculate the running z-scores
-//' lambdav <- 0.9
-//' zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambdav)
+//' lambda <- 0.9
+//' zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambda)
 //' # Plot the running z-scores
 //' datav <- cbind(cumsum(response), zscores[, 1])
 //' colnames(datav) <- c("XLF", "zscores")
@@ -2691,7 +2691,7 @@ arma::mat run_zscores(const arma::mat& response,
 // Define C++ enum type for the different methods for regularization,
 // calculating variance, skewness, kurtosis, covariance, regression, 
 // and matrix inverse.
-enum methodenum {moment, least_squares, quantile, nonparametric, regular, rank_sharpe, 
+enum methodenum {moment, least_squares, quantile, nonparametric, regular, ranksharpe, 
               max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
 
 // Map string to C++ enum type for switch statement.
@@ -2707,8 +2707,8 @@ methodenum calc_method(std::string method) {
     return methodenum::nonparametric;
   else if (method == "regular")
     return methodenum::regular;
-  else if (method == "rank_sharpe")
-    return methodenum::rank_sharpe;
+  else if (method == "ranksharpe")
+    return methodenum::ranksharpe;
   else if (method == "max_sharpe")
     return methodenum::max_sharpe;
   else if (method == "max_sharpe_median")
@@ -3868,10 +3868,10 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   // Calculate t-values and p-values of beta coefficients
   arma::colvec tvals = coeff/stderr;
   arma::colvec pvals = 2*Rcpp::pt(-abs(wrap(tvals)), deg_free);
-  Rcpp::NumericMatrix coeff_mat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderr), tvals), pvals));
-  Rcpp::colnames(coeff_mat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
+  Rcpp::NumericMatrix coeffmat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderr), tvals), pvals));
+  Rcpp::colnames(coeffmat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
   
-  return Rcpp::List::create(Named("coefficients") = coeff_mat,
+  return Rcpp::List::create(Named("coefficients") = coeffmat,
                             // Named("residuals") = residuals,
                             Named("zscore") = residuals(nrows-1)/arma::stddev(residuals),
                             Named("stats") = stats);
@@ -5018,14 +5018,14 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 //' # Calculate rolling betas using RcppArmadillo
 //' reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
-//' beta_s <- reg_stats[, 2]
+//' betas <- reg_stats[, 2]
 //' # Calculate rolling betas in R
 //' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
 //'   datav <- returns[startp[ep]:endp[ep], ]
 //'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 //' })  # end sapply
 //' # Compare the outputs of both functions
-//' all.equal(beta_s, betas_r, check.attributes=FALSE)
+//' all.equal(betas, betas_r, check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -5577,20 +5577,20 @@ arma::mat roll_fun(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Define the GARCH model parameters
-//' al_pha <- 0.79
-//' be_ta <- 0.2
-//' om_ega <- 1e-4*(1-al_pha-be_ta)
+//' alpha <- 0.79
+//' betav <- 0.2
+//' om_ega <- 1e-4*(1-alpha-betav)
 //' # Calculate matrix of standard normal innovations
-//' in_nov <- matrix(rnorm(1e3))
+//' innov <- matrix(rnorm(1e3))
 //' # Simulate the GARCH process using Rcpp
-//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov=in_nov)
+//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, innov=innov)
 //' # Plot the GARCH rolling volatility and cumulative returns
 //' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 //' # Calculate historical VTI returns
 //' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Estimate the GARCH volatility of VTI returns
-//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
+//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, 
 //'   innov=returns, is_random=FALSE)
 //' # Plot dygraph of the estimated GARCH volatility
 //' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(returns)), 
@@ -5682,11 +5682,11 @@ arma::mat sim_garch(double omega,
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
 //' eq_price <- 1.0
-//' sig_ma <- 0.01
-//' the_ta <- 0.01
-//' in_nov <- matrix(rnorm(1e3))
+//' sigmav <- 0.01
+//' thetav <- 0.01
+//' innov <- matrix(rnorm(1e3))
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+//' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 //' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 //' }
 //' 
@@ -5752,11 +5752,11 @@ arma::mat sim_ou(double init_price,
 //' \dontrun{
 //' # Define the Schwartz model parameters
 //' eq_price <- 2.0
-//' sig_ma <- 0.01
-//' the_ta <- 0.01
-//' in_nov <- matrix(rnorm(1e3))
+//' sigmav <- 0.01
+//' thetav <- 0.01
+//' innov <- matrix(rnorm(1e3))
 //' # Simulate Schwartz process using Rcpp
-//' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+//' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 //' plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 //' }
 //' 
@@ -5824,18 +5824,18 @@ arma::mat sim_schwartz(double eq_price,
 //' # Define AR coefficients
 //' coeff <- matrix(c(0.2, 0.2))
 //' # Calculate matrix of innovations
-//' in_nov <- matrix(rnorm(1e4, sd=0.01))
+//' innov <- matrix(rnorm(1e4, sd=0.01))
 //' # Calculate recursive filter using filter()
-//' filter_ed <- filter(in_nov, filter=coeff, method="recursive")
+//' filtered <- filter(innov, filter=coeff, method="recursive")
 //' # Calculate recursive filter using RcppArmadillo
-//' returns <- HighFreq::sim_ar(coeff, in_nov)
+//' returns <- HighFreq::sim_ar(coeff, innov)
 //' # Compare the two methods
-//' all.equal(as.numeric(returns), as.numeric(filter_ed))
+//' all.equal(as.numeric(returns), as.numeric(filtered))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::sim_ar(coeff, in_nov),
-//'   Rcode=filter(in_nov, filter=coeff, method="recursive"),
+//'   Rcpp=HighFreq::sim_ar(coeff, innov),
+//'   Rcode=filter(innov, filter=coeff, method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -5916,14 +5916,14 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
 //' eq_price <- 1.0
-//' sig_ma <- 0.01
-//' the_ta <- 0.01
+//' sigmav <- 0.01
+//' thetav <- 0.01
 //' # Define AR coefficients
 //' coeff <- matrix(c(0.2, 0.2))
 //' # Calculate matrix of standard normal innovations
-//' in_nov <- matrix(rnorm(1e3))
+//' innov <- matrix(rnorm(1e3))
 //' # Simulate Dickey-Fuller process using Rcpp
-//' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, coeff, innov=in_nov)
+//' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sigmav, theta=thetav, coeff, innov=innov)
 //' plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
 //' }
 //' 
@@ -6007,13 +6007,13 @@ arma::mat sim_df(double eq_price,
 //' @examples
 //' \dontrun{
 //' # Define the GARCH model parameters
-//' al_pha <- 0.79
-//' be_ta <- 0.2
-//' om_ega <- 1e-4*(1-al_pha-be_ta)
+//' alpha <- 0.79
+//' betav <- 0.2
+//' om_ega <- 1e-4*(1-alpha-betav)
 //' # Calculate historical VTI returns
 //' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-//' HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=returns)
+//' HighFreq::lik_garch(omega=om_ega, alpha=alpha,  beta=betav, returns=returns)
 //' }
 //' 
 //' @export
@@ -6055,7 +6055,7 @@ double lik_garch(double omega,
 //'   
 //' @param \code{method} A \emph{string} specifying the method for
 //'   calculating the weights (see Details) (the default is \code{method =
-//'   "rank_sharpe"})
+//'   "ranksharpe"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 //'   small singular values in order to regularize the inverse of the
@@ -6086,7 +6086,7 @@ double lik_garch(double omega,
 //'   weights for different types of methods, using \code{RcppArmadillo}
 //'   \code{C++} code.
 //' 
-//'   If \code{method = "rank_sharpe"} (the default) then it calculates the
+//'   If \code{method = "ranksharpe"} (the default) then it calculates the
 //'   weights as the ranks (order index) of the trailing Sharpe ratios of the
 //'   asset \code{returns}.
 //'
@@ -6129,24 +6129,24 @@ double lik_garch(double omega,
 //' eigen_max <- 3
 //' eigenvec <- eigend$vectors[, 1:eigen_max]
 //' eigenval <- eigend$values[1:eigen_max]
-//' in_verse <- eigenvec %*% (t(eigenvec) / eigenval)
+//' inverse <- eigenvec %*% (t(eigenvec) / eigenval)
 //' # Define shrinkage intensity and apply shrinkage to the mean returns
-//' al_pha <- 0.5
-//' col_means <- colMeans(returns)
-//' col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
+//' alpha <- 0.5
+//' colmeans <- colMeans(returns)
+//' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 //' # Calculate weights using R
-//' weights <- in_verse %*% col_means
+//' weights <- inverse %*% colmeans
 //' n_col <- NCOL(returns)
-//' weights_r <- weights_r*sd(returns %*% rep(1/n_col, n_col))/sd(returns %*% weights_r)
+//' weightsr <- weightsr*sd(returns %*% rep(1/n_col, n_col))/sd(returns %*% weightsr)
 //' # Calculate weights using RcppArmadillo
-//' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=al_pha))
-//' all.equal(weights, weights_r)
+//' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
+//' all.equal(weights, weightsr)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
-                       std::string method = "rank_sharpe",
+                       std::string method = "ranksharpe",
                        double eigen_thresh = 1e-5,
                        arma::uword eigen_max = 0,
                        double conf_lev = 0.1,
@@ -6159,7 +6159,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
   
   // Switch for the different methods for weights
   switch(calc_method(method)) {
-  case methodenum::rank_sharpe: {
+  case methodenum::ranksharpe: {
     // Mean returns by columns
     arma::vec meancols = arma::trans(arma::mean(returns, 0));
     // Standard deviation by columns
@@ -6170,14 +6170,14 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(meancols)));
     weights = (weights - arma::mean(weights));
     break;
-  }  // end rank_sharpe
+  }  // end ranksharpe
   case methodenum::max_sharpe: {
     // Mean returns by columns
     arma::vec meancols = arma::trans(arma::mean(returns, 0));
     // Shrink meancols to the mean of returns
     meancols = ((1-alpha)*meancols + alpha*arma::mean(meancols));
     // Apply shrinkage inverse
-    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    // arma::mat inverse = calc_inv(cov(returns), eigen_max);
     // weights = calc_inv(cov(returns), eigen_max)*meancols;
     weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*meancols;
     break;
@@ -6188,7 +6188,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     // Shrink meancols to the mean of returns
     meancols = ((1-alpha)*meancols + alpha*arma::median(meancols));
     // Apply shrinkage inverse
-    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    // arma::mat inverse = calc_inv(cov(returns), eigen_max);
     weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*meancols;
     break;
   }  // end max_sharpe_median
@@ -6226,7 +6226,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
     sd_cols.replace(0, 1);
     meancols = meancols/sd_cols;
     // Apply shrinkage inverse
-    // arma::mat in_verse = calc_inv(cov(returns), eigen_max);
+    // arma::mat inverse = calc_inv(cov(returns), eigen_max);
     // weights = calc_inv(cov(returns), eigen_max)*meancols;
     // weights = calc_inv(cov(returns), eigen_max)*meancols;
     // // Standard deviation by columns
@@ -6300,7 +6300,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   \code{0})
 //'
 //' @param \code{method} A \emph{string} specifying the method for calculating
-//'   the weights (see Details) (the default is \code{method = "rank_sharpe"})
+//'   the weights (see Details) (the default is \code{method = "ranksharpe"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 //'   small singular values in order to regularize the inverse of the
@@ -6373,24 +6373,24 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //' \dontrun{
 //' # Calculate the ETF daily excess returns
 //' returns <- na.omit(rutils::etfenv$returns[, 1:16])
-//' # risk_free is the daily risk-free rate
-//' risk_free <- 0.03/260
-//' ex_cess <- returns - risk_free
+//' # riskf is the daily risk-free rate
+//' riskf <- 0.03/260
+//' excess <- returns - riskf
 //' # Define monthly end points without initial warmpup period
-//' endp <- rutils::calc_endpoints(returns, inter_val="months")
+//' endp <- rutils::calc_endpoints(returns, interval="months")
 //' endp <- endp[endp > 0]
 //' nrows <- NROW(endp)
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
 //' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 //' # Define shrinkage and regularization intensities
-//' al_pha <- 0.5
+//' alpha <- 0.5
 //' eigen_max <- 3
 //' # Simulate a monthly rolling portfolio optimization strategy
-//' pnls <- HighFreq::back_test(ex_cess, returns, 
+//' pnls <- HighFreq::back_test(excess, returns, 
 //'                             startp-1, endp-1, 
 //'                             eigen_max = eigen_max, 
-//'                             alpha = al_pha)
+//'                             alpha = alpha)
 //' pnls <- xts::xts(pnls, index(returns))
 //' colnames(pnls) <- "strat_rets"
 //' # Plot dygraph of strategy
@@ -6405,7 +6405,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
                     arma::uvec startp, // Start points
                     arma::uvec endp, // End points
                     double lambda, // Decay factor for averaging the portfolio weights
-                    std::string method = "rank_sharpe",  // The method for calculating the weights
+                    std::string method = "ranksharpe",  // The method for calculating the weights
                     double eigen_thresh = 1e-5,
                     arma::uword eigen_max = 0,
                     double conf_lev = 0.1,
@@ -6416,9 +6416,9 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
                     double bid_offer = 0.0) {
   
   double lambda1 = 1-lambda;
-  arma::uword num_weights = returns.n_cols;
-  arma::vec weights(num_weights, fill::zeros);
-  arma::vec weights_past = ones(num_weights)/sqrt(num_weights);
+  arma::uword nweights = returns.n_cols;
+  arma::vec weights(nweights, fill::zeros);
+  arma::vec weights_past = ones(nweights)/sqrt(nweights);
   arma::mat pnls = zeros(returns.n_rows, 1);
 
   // Perform loop over the end points

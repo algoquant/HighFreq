@@ -62,18 +62,18 @@ The function \code{run_var()} calculates the running variance of a
 # Calculate historical returns
 returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the running variance
-lambdav <- 0.9
-vars <- HighFreq::run_var(returns, lambda=lambdav)
+lambda <- 0.9
+vars <- HighFreq::run_var(returns, lambda=lambda)
 # Calculate running variance using R code
-filter_ed <- (1-lambdav)*filter(returns^2, filter=lambdav, 
-  init=as.numeric(returns[1, 1])^2/(1-lambdav), 
+filtered <- (1-lambda)*filter(returns^2, filter=lambda, 
+  init=as.numeric(returns[1, 1])^2/(1-lambda), 
   method="recursive")
-all.equal(vars, unclass(filter_ed), check.attributes=FALSE)
+all.equal(vars, unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_var(returns, lambda=lambdav),
-  Rcode=filter(returns^2, filter=lambdav, init=as.numeric(returns[1, 1])^2/(1-lambdav), method="recursive"),
+  Rcpp=HighFreq::run_var(returns, lambda=lambda),
+  Rcode=filter(returns^2, filter=lambda, init=as.numeric(returns[1, 1])^2/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

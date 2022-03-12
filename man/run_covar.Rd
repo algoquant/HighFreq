@@ -65,13 +65,13 @@ The function \code{run_covar()} calculates the running covariance of two
 # Calculate historical returns
 returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the running covariance
-lambdav <- 0.9
-covars <- HighFreq::run_covar(returns, lambda=lambdav)
+lambda <- 0.9
+covars <- HighFreq::run_covar(returns, lambda=lambda)
 # Calculate running covariance using R code
-filter_ed <- (1-lambdav)*filter(returns[, 1]*returns[, 2], 
-  filter=lambdav, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambdav), 
+filtered <- (1-lambda)*filter(returns[, 1]*returns[, 2], 
+  filter=lambda, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambda), 
   method="recursive")
-all.equal(covars[, 1], unclass(filter_ed), check.attributes=FALSE)
+all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
 # Calculate the running correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 }

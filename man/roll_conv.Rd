@@ -41,19 +41,19 @@ returns <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 # Create simple weights equal to a 1 value plus zeros
 weights <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv(returns, weights)
+weighted <- HighFreq::roll_conv(returns, weights)
 # Compare with original
-all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
+all.equal(coredata(returns), weighted, check.attributes=FALSE)
 # Second example
 # Calculate exponentially decaying weights
 weights <- exp(-0.2*(1:11))
 weights <- matrix(weights/sum(weights), nc=1)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_conv(returns, weights)
+weighted <- HighFreq::roll_conv(returns, weights)
 # Calculate rolling weighted sums using filter()
-filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
+filtered <- filter(x=returns, filter=weights, method="convolution", sides=1)
 # Compare both methods
-all.equal(filter_ed[-(1:11), ], weight_ed[-(1:11), ], check.attributes=FALSE)
+all.equal(filtered[-(1:11), ], weighted[-(1:11), ], check.attributes=FALSE)
 }
 
 }

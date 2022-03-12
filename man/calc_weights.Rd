@@ -7,7 +7,7 @@ functions.}
 \usage{
 calc_weights(
   returns,
-  method = "rank_sharpe",
+  method = "ranksharpe",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
   conf_lev = 0.1,
@@ -22,7 +22,7 @@ data (the returns in excess of the risk-free rate).}
 
 \item{\code{method}}{A \emph{string} specifying the method for
 calculating the weights (see Details) (the default is \code{method =
-"rank_sharpe"})}
+"ranksharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
@@ -58,7 +58,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   weights for different types of methods, using \code{RcppArmadillo}
   \code{C++} code.
 
-  If \code{method = "rank_sharpe"} (the default) then it calculates the
+  If \code{method = "ranksharpe"} (the default) then it calculates the
   weights as the ranks (order index) of the trailing Sharpe ratios of the
   asset \code{returns}.
 
@@ -101,18 +101,18 @@ eigend <- eigen(cov(returns))
 eigen_max <- 3
 eigenvec <- eigend$vectors[, 1:eigen_max]
 eigenval <- eigend$values[1:eigen_max]
-in_verse <- eigenvec \%*\% (t(eigenvec) / eigenval)
+inverse <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
-al_pha <- 0.5
-col_means <- colMeans(returns)
-col_means <- ((1-al_pha)*col_means + al_pha*mean(col_means))
+alpha <- 0.5
+colmeans <- colMeans(returns)
+colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
-weights <- in_verse \%*\% col_means
+weights <- inverse \%*\% colmeans
 n_col <- NCOL(returns)
-weights_r <- weights_r*sd(returns \%*\% rep(1/n_col, n_col))/sd(returns \%*\% weights_r)
+weightsr <- weightsr*sd(returns \%*\% rep(1/n_col, n_col))/sd(returns \%*\% weightsr)
 # Calculate weights using RcppArmadillo
-weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=al_pha))
-all.equal(weights, weights_r)
+weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
+all.equal(weights, weightsr)
 }
 
 }

@@ -61,8 +61,8 @@ The function \code{run_max()} calculates the running maximum of streaming
 # Calculate historical prices
 prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the running maximums
-lambdav <- 0.9
-maxs <- HighFreq::run_max(prices, lambda=lambdav)
+lambda <- 0.9
+maxs <- HighFreq::run_max(prices, lambda=lambda)
 # Plot dygraph of VTI prices and running maximums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
 colnames(datav) <- c("prices", "max")

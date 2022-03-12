@@ -6,7 +6,7 @@
 (\emph{CVaR}) of an \emph{xts} \emph{time series} of returns, using \code{R}
 code.}
 \usage{
-calc_cvar(tseries, method = "var", con_fi = pnorm(-2))
+calc_cvar(tseries, method = "var", confi = pnorm(-2))
 }
 \arguments{
 \item{\code{tseries}}{An \emph{xts} \emph{time series} of returns with
@@ -15,8 +15,8 @@ multiple columns.}
 \item{\code{method}}{A \emph{string} specifying the type of risk measure
 (the default is \code{method = "var"} - see Details).}
 
-\item{\code{con_fi}}{The confidence level for calculating the
-quantile (the default is \code{con_fi = pnorm(-2) = 0.02275}).}
+\item{\code{confi}}{The confidence level for calculating the
+quantile (the default is \code{confi = pnorm(-2) = 0.02275}).}
 }
 \value{
 A vector with the risk measures of the columns of the input
@@ -55,12 +55,12 @@ The function \code{calc_cvar()} calculates the Value at Risk (\emph{VaR})
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-returns <- na.omit(rutils::etf_env$returns[, c("VTI", "XLF")])
+returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 # Calculate VaR
 all.equal(HighFreq::calc_cvar(returns), 
   sapply(returns, quantile, probs=pnorm(-2)), check.attributes=FALSE)
 # Calculate CVaR
-all.equal(HighFreq::calc_cvar(returns, method="cvar", con_fi=0.02), 
+all.equal(HighFreq::calc_cvar(returns, method="cvar", confi=0.02), 
   sapply(returns, function(x) mean(x[x < quantile(x, 0.02)])), 
   check.attributes=FALSE)
 }

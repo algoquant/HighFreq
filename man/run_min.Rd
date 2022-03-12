@@ -61,8 +61,8 @@ The function \code{run_min()} calculates the running minimum of streaming
 # Calculate historical prices
 prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the running minimums
-lambdav <- 0.9
-mins <- HighFreq::run_min(prices, lambda=lambdav)
+lambda <- 0.9
+mins <- HighFreq::run_min(prices, lambda=lambda)
 # Plot dygraph of VTI prices and running minimums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
 colnames(datav) <- c("prices", "min")

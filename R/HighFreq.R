@@ -286,18 +286,18 @@ ohlc_returns <- function(xtes, lagg=1, colnum=4, scalit=TRUE) {
 
 which_extreme <- function(xtes, look_back=51, vol_mult=2) {
 # Calculate volatility as rolling quantile
-  quan_tile <- caTools::runquantile(x=abs(as.numeric(xtes)), k=look_back,
+  quantilev <- caTools::runquantile(x=abs(as.numeric(xtes)), k=look_back,
                         probs=0.9, endrule="constant", align="center")
-#  quan_tile <- xts(quan_tile, order.by=index(xtes))
-#  colnames(quan_tile) <- "volat"
+#  quantilev <- xts(quantilev, order.by=index(xtes))
+#  colnames(quantilev) <- "volat"
 # Carry forward non-zero volatility values
-  quan_tile[quan_tile==0] <- NA
-  quan_tile[1] <- 1
-  quan_tile <- rutils::na_locf(quan_tile)
-#  quan_tile <- rutils::na_locf(quan_tile, fromLast=TRUE)
+  quantilev[quantilev==0] <- NA
+  quantilev[1] <- 1
+  quantilev <- rutils::na_locf(quantilev)
+#  quantilev <- rutils::na_locf(quantilev, fromLast=TRUE)
 
 # extreme value if xtes greater than scaled volatility
-  ex_treme <- (abs(xtes) > 2*vol_mult*quan_tile)
+  ex_treme <- (abs(xtes) > 2*vol_mult*quantilev)
   ex_treme[1] <- FALSE
 #  colnames(ex_treme) <- "suspect"
 
@@ -362,25 +362,25 @@ which_jumps <- function(xtes, look_back=51, vol_mult=2) {
 #  colnames(rets_advanced) <- "rets_advanced"
 
 # Calculate volatility as the rolling quantile of returns
-  quan_tile <- caTools::runquantile(x=abs(returns), k=look_back,
+  quantilev <- caTools::runquantile(x=abs(returns), k=look_back,
                         probs=0.9, endrule="constant", align="center")
-#  quan_tile <- xts(quan_tile, order.by=index(returns))
-#  colnames(quan_tile) <- "volat"
-# Carry forward non-zero quan_tile values
-  quan_tile[quan_tile==0] <- NA
-  quan_tile[1] <- 1
-  quan_tile <- rutils::na_locf(quan_tile)
-#  quan_tile <- rutils::na_locf(quan_tile, fromLast=TRUE)
+#  quantilev <- xts(quantilev, order.by=index(returns))
+#  colnames(quantilev) <- "volat"
+# Carry forward non-zero quantilev values
+  quantilev[quantilev==0] <- NA
+  quantilev[1] <- 1
+  quantilev <- rutils::na_locf(quantilev)
+#  quantilev <- rutils::na_locf(quantilev, fromLast=TRUE)
 
-# value is suspect if abs returns greater than quan_tile,
-# and if abs sum of returns less than quan_tile
-  sus_pect <- ((abs(returns) > vol_mult*quan_tile) &
-      (abs(rets_advanced) > vol_mult*quan_tile) &
-      (abs(returns+rets_advanced) < 2*vol_mult*quan_tile))
+# value is suspect if abs returns greater than quantilev,
+# and if abs sum of returns less than quantilev
+  sus_pect <- ((abs(returns) > vol_mult*quantilev) &
+      (abs(rets_advanced) > vol_mult*quantilev) &
+      (abs(returns+rets_advanced) < 2*vol_mult*quantilev))
   sus_pect[1] <- FALSE
 #  colnames(sus_pect) <- "suspect"
 # Cat("Parsing", deparse(substitute(taq)), "\n")
-# Cat("Parsing", strsplit(deparse(substitute(taq)), split="[.]")[[1]][4], "on date:", format(to_day), "\tfound", sum(sus_pect), "suspect prices\n")
+# Cat("Parsing", strsplit(deparse(substitute(taq)), split="[.]")[[1]][4], "on date:", format(todayd), "\tfound", sum(sus_pect), "suspect prices\n")
   cat("date:", format(as.Date(index(first(xtes)))), "\tfound", sum(sus_pect), "jump prices\n")
   sus_pect
 }  # end which_jumps
@@ -420,7 +420,7 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
   taq <- taq["T09:30:00/T16:00:00", ]
 # Return NULL if no data
   if (NROW(taq)==0)  return(NULL)
-#  to_day <- as.Date(index(first(taq)))
+#  todayd <- as.Date(index(first(taq)))
 
 # Remove duplicate time stamps using duplicated()
   taq <- taq[!duplicated(index(taq)), ]
@@ -492,7 +492,7 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
   taq <- taq["T09:30:00/T16:00:00", ]
 # Return NULL if no data
   if (NROW(taq)==0)  return(NULL)
-#  to_day <- as.Date(index(first(taq)))
+#  todayd <- as.Date(index(first(taq)))
 
 # Remove duplicate time stamps using duplicated()
   taq <- taq[!duplicated(index(taq)), ]
@@ -813,8 +813,8 @@ save_rets_ohlc <- function(symbol,
 #' @param \code{method} A \emph{string} specifying the type of risk measure
 #'   (the default is \code{method = "var"} - see Details).
 #'    
-#' @param \code{con_fi} The confidence level for calculating the
-#'   quantile (the default is \code{con_fi = pnorm(-2) = 0.02275}).
+#' @param \code{confi} The confidence level for calculating the
+#'   quantile (the default is \code{confi = pnorm(-2) = 0.02275}).
 #'
 #' @return A vector with the risk measures of the columns of the input
 #'   \emph{time series} \code{tseries}.
@@ -848,24 +848,24 @@ save_rets_ohlc <- function(symbol,
 #' @examples
 #' \dontrun{
 #' # Calculate VTI and XLF returns
-#' returns <- na.omit(rutils::etf_env$returns[, c("VTI", "XLF")])
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 #' # Calculate VaR
 #' all.equal(HighFreq::calc_cvar(returns), 
 #'   sapply(returns, quantile, probs=pnorm(-2)), check.attributes=FALSE)
 #' # Calculate CVaR
-#' all.equal(HighFreq::calc_cvar(returns, method="cvar", con_fi=0.02), 
+#' all.equal(HighFreq::calc_cvar(returns, method="cvar", confi=0.02), 
 #'   sapply(returns, function(x) mean(x[x < quantile(x, 0.02)])), 
 #'   check.attributes=FALSE)
 #' }
 #' 
 #' @export
-calc_cvar <- function(tseries, method = "var", con_fi = pnorm(-2)) {
+calc_cvar <- function(tseries, method = "var", confi = pnorm(-2)) {
 
   # Switch for the different risk methods
   risk <- switch(method,
-                 "var"={sapply(tseries, quantile, probs=con_fi)},
+                 "var"={sapply(tseries, quantile, probs=confi)},
                  # Calculate CVaR as expected loss
-                 "cvar"={sapply(tseries, function(x) mean(x[x < quantile(x, con_fi)]))}
+                 "cvar"={sapply(tseries, function(x) mean(x[x < quantile(x, confi)]))}
   )  # end switch
   
   risk
@@ -1104,7 +1104,7 @@ ohlc_sharpe <- function(ohlc, method="close") {
 #' @param \code{calc_bars} A \emph{character} string representing a function
 #'   for calculating statistics for individual \emph{OHLC} bars.
 #'
-#' @param \code{weight_ed} \emph{Boolean} argument: should estimate be weighted
+#' @param \code{weighted} \emph{Boolean} argument: should estimate be weighted
 #'   by the trading volume? (default is \code{TRUE})
 #'
 #' @param ... additional parameters to the function \code{calc_bars}.
@@ -1132,14 +1132,14 @@ ohlc_sharpe <- function(ohlc, method="close") {
 #' # Calculate time series of daily skew estimates for SPY
 #' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
 
-agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weight_ed=TRUE, ...) {
+agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
   
 # Match "calc_bars" with moment function
   calc_bars <- match.fun(calc_bars)
   agg_regations <- calc_bars(ohlc, ...)
   
 # Weight the estimates by volume
-  if (weight_ed) {
+  if (weighted) {
     agg_regations <- ohlc[, 5]*agg_regations
     agg_regations <- sum(agg_regations)/sum(ohlc[, 5])
   } else
@@ -1219,7 +1219,7 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #' @param \code{look_back} The size of the look-back interval, equal to the number of
 #'   rows of data used for calculating the rolling mean.
 #'   
-#' @param \code{weight_ed} \emph{Boolean} argument: should statistic be weighted by
+#' @param \code{weighted} \emph{Boolean} argument: should statistic be weighted by
 #'   trade volume? (default \code{TRUE})
 #'   
 #' @param ... additional parameters to the function \code{calc_stats}.
@@ -1244,14 +1244,14 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #' skew_rolling[1, ] <- 0
 #' skew_rolling <- rutils::na_locf(skew_rolling)
 
-roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weight_ed=TRUE, ...) {
+roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=TRUE, ...) {
   
 # Match "calc_stats" with moment function
   calc_stats <- match.fun(calc_stats)
   agg_regations <- calc_stats(ohlc, ...)
   
 # Weight by volume
-  if (weight_ed) {
+  if (weighted) {
     agg_regations <- ohlc[, 5]*agg_regations
     volume_rolling <- rutils::roll_sum(ohlc[, 5], look_back=look_back)
     agg_regations <- rutils::roll_sum(agg_regations, look_back=look_back)/volume_rolling
@@ -1524,7 +1524,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' @examples
 #' # extract a single day of SPY data
 #' ohlc <- HighFreq::SPY["2012-02-13"]
-#' inter_val <- 11  # number of data points between end points
+#' interval <- 11  # number of data points between end points
 #' look_back <- 4  # number of end points in look-back interval
 #' # Calculate the rolling sums of ohlc columns over a rolling look-back interval
 #' agg_regations <- roll_apply(ohlc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
@@ -1532,7 +1532,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' agg_function <- function(ohlc)  c(max(ohlc[, 2]), min(ohlc[, 3]))
 #' agg_regations <- roll_apply(ohlc, agg_fun=agg_function, look_back=look_back)
 #' # Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
-#' endpoints <- rutils::endpoints(ohlc, inter_val=inter_val)
+#' endpoints <- rutils::endpoints(ohlc, interval=interval)
 #' # Calculate the sums of ohlc columns over endpoints using non-overlapping intervals
 #' agg_regations <- roll_apply(ohlc, agg_fun=sum, endpoints=endpoints, by_columns=TRUE)
 #' # Apply a vector-valued aggregation function over the endpoints of ohlc
@@ -1632,7 +1632,7 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
 #' @examples
 #' \dontrun{
 #' # Combine two time series of prices
-#' prices <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
+#' prices <- cbind(rutils::etfenv$XLU, rutils::etfenv$XLP)
 #' look_back <- 252
 #' look_forward <- 22
 #' # Define end points

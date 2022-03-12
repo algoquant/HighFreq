@@ -5,7 +5,7 @@
 \title{Calculate the aggregation (weighted average) of a statistical estimator over
 a \emph{OHLC} time series using \code{R} code.}
 \usage{
-agg_stats_r(ohlc, calc_bars = "ohlc_variance", weight_ed = TRUE, ...)
+agg_stats_r(ohlc, calc_bars = "ohlc_variance", weighted = TRUE, ...)
 }
 \arguments{
 \item{...}{additional parameters to the function \code{calc_bars}.}
@@ -16,7 +16,7 @@ in \emph{xts} format.}
 \item{\code{calc_bars}}{A \emph{character} string representing a function
 for calculating statistics for individual \emph{OHLC} bars.}
 
-\item{\code{weight_ed}}{\emph{Boolean} argument: should estimate be weighted
+\item{\code{weighted}}{\emph{Boolean} argument: should estimate be weighted
 by the trading volume? (default is \code{TRUE})}
 }
 \value{

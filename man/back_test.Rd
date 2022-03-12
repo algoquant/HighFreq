@@ -11,7 +11,7 @@ back_test(
   startp,
   endp,
   lambda,
-  method = "rank_sharpe",
+  method = "ranksharpe",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
   conf_lev = 0.1,
@@ -43,7 +43,7 @@ default is \code{1})}
 \code{0})}
 
 \item{\code{method}}{A \emph{string} specifying the method for calculating
-the weights (see Details) (the default is \code{method = "rank_sharpe"})}
+the weights (see Details) (the default is \code{method = "ranksharpe"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
@@ -121,24 +121,24 @@ The function \code{back_test()} performs a backtest simulation of a
 \dontrun{
 # Calculate the ETF daily excess returns
 returns <- na.omit(rutils::etfenv$returns[, 1:16])
-# risk_free is the daily risk-free rate
-risk_free <- 0.03/260
-ex_cess <- returns - risk_free
+# riskf is the daily risk-free rate
+riskf <- 0.03/260
+excess <- returns - riskf
 # Define monthly end points without initial warmpup period
-endp <- rutils::calc_endpoints(returns, inter_val="months")
+endp <- rutils::calc_endpoints(returns, interval="months")
 endp <- endp[endp > 0]
 nrows <- NROW(endp)
 # Define 12-month look-back interval and start points over sliding window
 look_back <- 12
 startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 # Define shrinkage and regularization intensities
-al_pha <- 0.5
+alpha <- 0.5
 eigen_max <- 3
 # Simulate a monthly rolling portfolio optimization strategy
-pnls <- HighFreq::back_test(ex_cess, returns, 
+pnls <- HighFreq::back_test(excess, returns, 
                             startp-1, endp-1, 
                             eigen_max = eigen_max, 
-                            alpha = al_pha)
+                            alpha = alpha)
 pnls <- xts::xts(pnls, index(returns))
 colnames(pnls) <- "strat_rets"
 # Plot dygraph of strategy

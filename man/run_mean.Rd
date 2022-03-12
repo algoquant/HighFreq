@@ -64,7 +64,7 @@ The function \code{run_mean()} calculates the running weighted means of
   interval.
 
   The function \code{run_mean()} performs the same calculation as the
-  standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdav,
+  standard \code{R} function\cr\code{stats::filter(x=series, filter=lambda,
   method="recursive")}, but it's several times faster.
 
   The function \code{run_mean()} returns a \emph{matrix} with the same
@@ -76,27 +76,27 @@ The function \code{run_mean()} calculates the running weighted means of
 ohlc <- rutils::etfenv$VTI
 prices <- quantmod::Cl(ohlc)
 # Calculate the running means
-lambdav <- 0.95
-means <- HighFreq::run_mean(prices, lambda=lambdav)
+lambda <- 0.95
+means <- HighFreq::run_mean(prices, lambda=lambda)
 # Calculate running means using R code
-filter_ed <- (1-lambdav)*filter(prices, 
-  filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), 
+filtered <- (1-lambda)*filter(prices, 
+  filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
   method="recursive")
-all.equal(drop(means), unclass(filter_ed), check.attributes=FALSE)
+all.equal(drop(means), unclass(filtered), check.attributes=FALSE)
 
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(prices, lambda=lambdav),
-  Rcode=filter(prices, filter=lambdav, init=as.numeric(prices[1, 1])/(1-lambdav), method="recursive"),
+  Rcpp=HighFreq::run_mean(prices, lambda=lambda),
+  Rcode=filter(prices, filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Create weights equal to the trading volumes
 weights <- quantmod::Vo(ohlc)
 # Calculate the running weighted means
-meansw <- HighFreq::run_mean(prices, lambda=lambdav, weights=weights)
+meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
 # dygraph plot the running weighted means
-datav <- xts(cbind(means, meansw), zoo::index(ohlc))
+datav <- xts(cbind(means, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means running", "means weighted")
 dygraphs::dygraph(datav, main="Running Means") \%>\%
   dyOptions(colors=c("blue", "red"), strokeWidth=1) \%>\%

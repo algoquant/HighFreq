@@ -107,8 +107,8 @@ response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
 # Calculate the running regressions
-lambdav <- 0.9
-regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambdav)
+lambda <- 0.9
+regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
 # Plot the running alphas
 datav <- cbind(cumsum(response), regs[, 1])
 colnames(datav) <- c("XLF", "alphas")

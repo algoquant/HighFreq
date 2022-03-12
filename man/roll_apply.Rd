@@ -94,7 +94,7 @@ The function \code{roll_apply()} applies an aggregation function
 \examples{
 # extract a single day of SPY data
 ohlc <- HighFreq::SPY["2012-02-13"]
-inter_val <- 11  # number of data points between end points
+interval <- 11  # number of data points between end points
 look_back <- 4  # number of end points in look-back interval
 # Calculate the rolling sums of ohlc columns over a rolling look-back interval
 agg_regations <- roll_apply(ohlc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
@@ -102,7 +102,7 @@ agg_regations <- roll_apply(ohlc, agg_fun=sum, look_back=look_back, by_columns=T
 agg_function <- function(ohlc)  c(max(ohlc[, 2]), min(ohlc[, 3]))
 agg_regations <- roll_apply(ohlc, agg_fun=agg_function, look_back=look_back)
 # Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
-endpoints <- rutils::endpoints(ohlc, inter_val=inter_val)
+endpoints <- rutils::endpoints(ohlc, interval=interval)
 # Calculate the sums of ohlc columns over endpoints using non-overlapping intervals
 agg_regations <- roll_apply(ohlc, agg_fun=sum, endpoints=endpoints, by_columns=TRUE)
 # Apply a vector-valued aggregation function over the endpoints of ohlc

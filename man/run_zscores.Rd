@@ -102,8 +102,8 @@ response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
 # Calculate the running z-scores
-lambdav <- 0.9
-zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambdav)
+lambda <- 0.9
+zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambda)
 # Plot the running z-scores
 datav <- cbind(cumsum(response), zscores[, 1])
 colnames(datav) <- c("XLF", "zscores")

@@ -38,19 +38,19 @@ returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Create simple weights
 weights <- matrix(c(1, rep(0, 10)))
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
+weighted <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 # Compare with original
-all.equal(zoo::coredata(returns), weight_ed, check.attributes=FALSE)
+all.equal(zoo::coredata(returns), weighted, check.attributes=FALSE)
 # Second example
 # Create exponentially decaying weights
 weights <- matrix(exp(-0.2*1:11))
 weights <- weights/sum(weights)
 # Calculate rolling weighted sums
-weight_ed <- HighFreq::roll_vecw(tseries=returns, weights=weights)
+weighted <- HighFreq::roll_vecw(tseries=returns, weights=weights)
 # Calculate rolling weighted sums using filter()
-filter_ed <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
+filtered <- stats::filter(x=returns, filter=weights, method="convolution", sides=1)
 # Compare both methods
-all.equal(filter_ed[-(1:11)], weight_ed[-(1:11)], check.attributes=FALSE)
+all.equal(filtered[-(1:11)], weighted[-(1:11)], check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(

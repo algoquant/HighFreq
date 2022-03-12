@@ -57,11 +57,11 @@ The function \code{sim_ou()} simulates the following
 \dontrun{
 # Define the Ornstein-Uhlenbeck model parameters
 eq_price <- 1.0
-sig_ma <- 0.01
-the_ta <- 0.01
-in_nov <- matrix(rnorm(1e3))
+sigmav <- 0.01
+thetav <- 0.01
+innov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 }
 

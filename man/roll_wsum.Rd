@@ -109,19 +109,19 @@ weights <- matrix(weights/sum(weights), nc=1)
 # Calculate rolling weighted sum
 c_sum <- HighFreq::roll_wsum(returns, weights=weights)
 # Calculate rolling weighted sum using filter()
-filter_ed <- filter(x=returns, filter=weights, method="convolution", sides=1)
-all.equal(c_sum[-(1:11), ], filter_ed[-(1:11), ], check.attributes=FALSE)
+filtered <- filter(x=returns, filter=weights, method="convolution", sides=1)
+all.equal(c_sum[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
 c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
-all.equal(c_sum, filter_ed[endp+1, ], check.attributes=FALSE)
+all.equal(c_sum, filtered[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weights <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weight_ed <- HighFreq::roll_wsum(returns, weights=weights)
+weighted <- HighFreq::roll_wsum(returns, weights=weights)
 # Compare with original
-all.equal(coredata(returns), weight_ed, check.attributes=FALSE)
+all.equal(coredata(returns), weighted, check.attributes=FALSE)
 }
 
 }

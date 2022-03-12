@@ -69,7 +69,7 @@ The function \code{roll_backtest()} performs a rolling backtest
 \examples{
 \dontrun{
 # Combine two time series of prices
-prices <- cbind(rutils::etf_env$XLU, rutils::etf_env$XLP)
+prices <- cbind(rutils::etfenv$XLU, rutils::etfenv$XLP)
 look_back <- 252
 look_forward <- 22
 # Define end points

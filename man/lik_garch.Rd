@@ -54,13 +54,13 @@ The function \code{lik_garch()} calculates the log-likelihood of a time
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-al_pha <- 0.79
-be_ta <- 0.2
-om_ega <- 1e-4*(1-al_pha-be_ta)
+alpha <- 0.79
+betav <- 0.2
+om_ega <- 1e-4*(1-alpha-betav)
 # Calculate historical VTI returns
 returns <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-HighFreq::lik_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, returns=returns)
+HighFreq::lik_garch(omega=om_ega, alpha=alpha,  beta=betav, returns=returns)
 }
 
 }

@@ -127,14 +127,14 @@ look_back <- 12
 startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 # Calculate rolling betas using RcppArmadillo
 reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
-beta_s <- reg_stats[, 2]
+betas <- reg_stats[, 2]
 # Calculate rolling betas in R
 betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
   datav <- returns[startp[ep]:endp[ep], ]
   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 })  # end sapply
 # Compare the outputs of both functions
-all.equal(beta_s, betas_r, check.attributes=FALSE)
+all.equal(betas, betas_r, check.attributes=FALSE)
 }
 
 }

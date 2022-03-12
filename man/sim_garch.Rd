@@ -76,20 +76,20 @@ The function \code{sim_garch()} simulates or estimates the rolling variance
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-al_pha <- 0.79
-be_ta <- 0.2
-om_ega <- 1e-4*(1-al_pha-be_ta)
+alpha <- 0.79
+betav <- 0.2
+om_ega <- 1e-4*(1-alpha-betav)
 # Calculate matrix of standard normal innovations
-in_nov <- matrix(rnorm(1e3))
+innov <- matrix(rnorm(1e3))
 # Simulate the GARCH process using Rcpp
-garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, innov=in_nov)
+garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, innov=innov)
 # Plot the GARCH rolling volatility and cumulative returns
 plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 # Calculate historical VTI returns
 returns <- na.omit(rutils::etfenv$returns$VTI)
 # Estimate the GARCH volatility of VTI returns
-garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=al_pha,  beta=be_ta, 
+garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, 
   innov=returns, is_random=FALSE)
 # Plot dygraph of the estimated GARCH volatility
 dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(returns)), 

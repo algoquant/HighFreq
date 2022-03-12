@@ -9,7 +9,7 @@ roll_stats(
   ohlc,
   calc_stats = "ohlc_variance",
   look_back = 11,
-  weight_ed = TRUE,
+  weighted = TRUE,
   ...
 )
 }
@@ -25,7 +25,7 @@ row of \emph{OHLC} data, such as volatility, skew, and higher moments.}
 \item{\code{look_back}}{The size of the look-back interval, equal to the number of
 rows of data used for calculating the rolling mean.}
 
-\item{\code{weight_ed}}{\emph{Boolean} argument: should statistic be weighted by
+\item{\code{weighted}}{\emph{Boolean} argument: should statistic be weighted by
 trade volume? (default \code{TRUE})}
 }
 \value{

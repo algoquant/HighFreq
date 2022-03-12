@@ -46,11 +46,11 @@ The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
 \dontrun{
 # Define the Schwartz model parameters
 eq_price <- 2.0
-sig_ma <- 0.01
-the_ta <- 0.01
-in_nov <- matrix(rnorm(1e3))
+sigmav <- 0.01
+thetav <- 0.01
+innov <- matrix(rnorm(1e3))
 # Simulate Schwartz process using Rcpp
-returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sig_ma, theta=the_ta, innov=in_nov)
+returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 

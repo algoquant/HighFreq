@@ -51,18 +51,18 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
 # Define AR coefficients
 coeff <- matrix(c(0.2, 0.2))
 # Calculate matrix of innovations
-in_nov <- matrix(rnorm(1e4, sd=0.01))
+innov <- matrix(rnorm(1e4, sd=0.01))
 # Calculate recursive filter using filter()
-filter_ed <- filter(in_nov, filter=coeff, method="recursive")
+filtered <- filter(innov, filter=coeff, method="recursive")
 # Calculate recursive filter using RcppArmadillo
-returns <- HighFreq::sim_ar(coeff, in_nov)
+returns <- HighFreq::sim_ar(coeff, innov)
 # Compare the two methods
-all.equal(as.numeric(returns), as.numeric(filter_ed))
+all.equal(as.numeric(returns), as.numeric(filtered))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::sim_ar(coeff, in_nov),
-  Rcode=filter(in_nov, filter=coeff, method="recursive"),
+  Rcpp=HighFreq::sim_ar(coeff, innov),
+  Rcode=filter(innov, filter=coeff, method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

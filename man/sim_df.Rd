@@ -58,14 +58,14 @@ The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 \dontrun{
 # Define the Ornstein-Uhlenbeck model parameters
 eq_price <- 1.0
-sig_ma <- 0.01
-the_ta <- 0.01
+sigmav <- 0.01
+thetav <- 0.01
 # Define AR coefficients
 coeff <- matrix(c(0.2, 0.2))
 # Calculate matrix of standard normal innovations
-in_nov <- matrix(rnorm(1e3))
+innov <- matrix(rnorm(1e3))
 # Simulate Dickey-Fuller process using Rcpp
-returns <- HighFreq::sim_df(eq_price=eq_price, volat=sig_ma, theta=the_ta, coeff, innov=in_nov)
+returns <- HighFreq::sim_df(eq_price=eq_price, volat=sigmav, theta=thetav, coeff, innov=innov)
 plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
 }
 
