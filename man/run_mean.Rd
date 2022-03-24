@@ -74,10 +74,10 @@ The function \code{run_mean()} calculates the running weighted means of
 \dontrun{
 # Calculate historical prices
 ohlc <- rutils::etfenv$VTI
-prices <- quantmod::Cl(ohlc)
+closep <- quantmod::Cl(ohlc)
 # Calculate the running means
 lambda <- 0.95
-means <- HighFreq::run_mean(prices, lambda=lambda)
+means <- HighFreq::run_mean(closep, lambda=lambda)
 # Calculate running means using R code
 filtered <- (1-lambda)*filter(prices, 
   filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
@@ -95,7 +95,7 @@ summary(microbenchmark(
 weights <- quantmod::Vo(ohlc)
 # Calculate the running weighted means
 meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
-# dygraph plot the running weighted means
+# Plot dygraph of the running weighted means
 datav <- xts(cbind(means, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means running", "means weighted")
 dygraphs::dygraph(datav, main="Running Means") \%>\%

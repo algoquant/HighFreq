@@ -539,9 +539,9 @@ calc_eigen <- function(tseries) {
 #' # Calculate shrinkage inverse from SVD in R
 #' svdec <- svd(covmat)
 #' eigen_max <- 1:3
-#' inverse_r <-  svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+#' inverser <-  svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 #' # Compare RcppArmadillo with R
-#' all.equal(inverse, inverse_r)
+#' all.equal(inverse, inverser)
 #' }
 #' 
 #' @export
@@ -1213,10 +1213,10 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' \dontrun{
 #' # Calculate historical prices
 #' ohlc <- rutils::etfenv$VTI
-#' prices <- quantmod::Cl(ohlc)
+#' closep <- quantmod::Cl(ohlc)
 #' # Calculate the running means
 #' lambda <- 0.95
-#' means <- HighFreq::run_mean(prices, lambda=lambda)
+#' means <- HighFreq::run_mean(closep, lambda=lambda)
 #' # Calculate running means using R code
 #' filtered <- (1-lambda)*filter(prices, 
 #'   filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
@@ -1234,7 +1234,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' weights <- quantmod::Vo(ohlc)
 #' # Calculate the running weighted means
 #' meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
-#' # dygraph plot the running weighted means
+#' # Plot dygraph of the running weighted means
 #' datav <- xts(cbind(means, meanw), zoo::index(ohlc))
 #' colnames(datav) <- c("means running", "means weighted")
 #' dygraphs::dygraph(datav, main="Running Means") %>%
@@ -3688,8 +3688,8 @@ roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1
 #'   Where \eqn{\sigma^2_i} is the rolling variance.
 #'   
 #'   The above should be viewed as a formula for \emph{estimating} the rolling
-#'   rolling variance from the historical returns, rather than simulating them.
-#'   It represents exponential smoothing of the squared returns with a decay
+#'   variance from the historical returns, rather than simulating them. It
+#'   represents exponential smoothing of the squared returns with a decay
 #'   factor equal to \eqn{\beta}.
 #'
 #'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
@@ -3725,8 +3725,6 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 #' 
-#' @param \code{volat} The volatility of returns.
-#' 
 #' @param \code{init_price} The initial price. 
 #' 
 #' @param \code{eq_price} The equilibrium price. 
@@ -3743,7 +3741,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #'   The function \code{sim_ou()} simulates the following
 #'   \emph{Ornstein-Uhlenbeck} process:
 #'   \deqn{
-#'     r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \sigma \, \xi_i
+#'     r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \xi_i
 #'   }
 #'   \deqn{
 #'     p_i = p_{i-1} + r_i
@@ -3751,42 +3749,42 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
 #'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 #'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
-#'   normal \emph{innovations}.
-#'   The recursion starts with the initial price: \eqn{p1 = init\_price}.
+#'   \emph{innovations}.
+#'   The recursion starts with: \eqn{r_1 = \xi_1} and \eqn{p_1 = init\_price}.
 #'
 #'   The function \code{sim_ou()} simulates the percentage returns as equal to
 #'   the difference between the equilibrium price \eqn{\mu} minus the latest
 #'   price \eqn{p_{i-1}}, times the mean reversion parameter \eqn{\theta}, plus
-#'   a random innovation proportional to the volatility \eqn{\sigma}. The log
-#'   prices are calculated as the sum of returns (not compounded), so they can
-#'   become negative.
+#'   a random normal innovation. The log prices are calculated as the sum of
+#'   returns (not compounded), so they can become negative.
 #'
 #'   The function \code{sim_ou()} simulates the \emph{Ornstein-Uhlenbeck}
 #'   process using fast \emph{Rcpp} \code{C++} code.
 #'
 #'   The function \code{sim_ou()} returns a single-column \emph{matrix}
-#'   representing the \emph{time series} of simulated returns.
+#'   representing the \emph{time series} of simulated prices.
 #'
 #' @examples
 #' \dontrun{
 #' # Define the Ornstein-Uhlenbeck model parameters
+#' init_price <- 0.0
 #' eq_price <- 1.0
 #' sigmav <- 0.01
 #' thetav <- 0.01
 #' innov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
+#' prices <- HighFreq::sim_ou(init_price=init_price, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 #' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
-sim_ou <- function(init_price, eq_price, volat, theta, innov) {
-    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', init_price, eq_price, volat, theta, innov)
+sim_ou <- function(init_price, eq_price, theta, innov) {
+    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
 }
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 #' 
-#' @param \code{volat} The volatility of returns.
+#' @param \code{init_price} The initial price. 
 #' 
 #' @param \code{eq_price} The equilibrium price. 
 #' 
@@ -3795,7 +3793,7 @@ sim_ou <- function(init_price, eq_price, volat, theta, innov) {
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A single-column \emph{matrix} of simulated returns, with the same
+#' @return A single-column \emph{matrix} of simulated prices, with the same
 #'   number of rows as the argument \code{innov}.
 #'
 #' @details
@@ -3811,27 +3809,26 @@ sim_ou <- function(init_price, eq_price, volat, theta, innov) {
 #'   The function \code{sim_schwartz()} simulates the percentage returns as
 #'   equal to the difference between the equilibrium price \eqn{\mu} minus the
 #'   latest price \eqn{p_{i-1}}, times the mean reversion parameter
-#'   \eqn{\theta}, plus a random innovation proportional to the volatility
-#'   \eqn{\sigma}.
+#'   \eqn{\theta}, plus a random normal innovation.
 #'
 #'   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
-#'   representing the \emph{time series} of simulated returns.
+#'   representing the \emph{time series} of simulated prices.
 #'
 #' @examples
 #' \dontrun{
 #' # Define the Schwartz model parameters
+#' init_price <- 1.0
 #' eq_price <- 2.0
-#' sigmav <- 0.01
 #' thetav <- 0.01
-#' innov <- matrix(rnorm(1e3))
+#' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Schwartz process using Rcpp
-#' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
-#' plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
+#' prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+#' plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
 #' @export
-sim_schwartz <- function(eq_price, volat, theta, innov) {
-    .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', eq_price, volat, theta, innov)
+sim_schwartz <- function(init_price, eq_price, theta, innov) {
+    .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
 }
 
 #' Simulate \emph{autoregressive} returns by recursively filtering a
@@ -3855,7 +3852,7 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
 #'   \eqn{AR(n)} of order \eqn{n}:
 #'   \deqn{
-#'     r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+#'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 #'   }
 #'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 #'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -3872,7 +3869,7 @@ sim_schwartz <- function(eq_price, volat, theta, innov) {
 #' @examples
 #' \dontrun{
 #' # Define AR coefficients
-#' coeff <- matrix(c(0.2, 0.2))
+#' coeff <- matrix(c(0.1, 0.3, 0.5))
 #' # Calculate matrix of innovations
 #' innov <- matrix(rnorm(1e4, sd=0.01))
 #' # Calculate recursive filter using filter()
@@ -3896,7 +3893,7 @@ sim_ar <- function(coeff, innov) {
 
 #' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 #' 
-#' @param \code{volat} The volatility of returns.
+#' @param \code{init_price} The initial price. 
 #' 
 #' @param \code{eq_price} The equilibrium price. 
 #' 
@@ -3908,24 +3905,23 @@ sim_ar <- function(coeff, innov) {
 #' @param \code{innov} A single-column \emph{matrix} of innovations (random
 #'   numbers).
 #' 
-#' @return A single-column \emph{matrix} of simulated returns, with the same
+#' @return A single-column \emph{matrix} of simulated prices, with the same
 #'   number of rows as the argument \code{innov}.
 #'
 #' @details
 #'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 #'   process:
 #'   \deqn{
-#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+#'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \xi_i
 #'   }
 #'   \deqn{
 #'     p_i = p_{i-1} + r_i
 #'   }
 #'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
-#'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
-#'   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
-#'   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
-#'   normal \emph{innovations}.
-#'   The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
+#'   \eqn{\theta} and \eqn{\mu} are the \emph{Ornstein-Uhlenbeck} parameters,
+#'   \eqn{\varphi_i} are the \emph{autoregressive} coefficients, and
+#'   \eqn{\xi_i} are the normal \emph{innovations}.
+#'   The recursion starts with: \eqn{r_1 = \xi_1} and \eqn{p_1 = init\_price}.
 #'
 #'   The \emph{Dickey-Fuller} process is a combination of an
 #'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -3937,26 +3933,26 @@ sim_ar <- function(coeff, innov) {
 #'   process using fast \emph{Rcpp} \code{C++} code.
 #'
 #'   The function \code{sim_df()} returns a single-column \emph{matrix}
-#'   representing the \emph{time series} of returns.
+#'   representing the \emph{time series} of prices.
 #'
 #' @examples
 #' \dontrun{
 #' # Define the Ornstein-Uhlenbeck model parameters
-#' eq_price <- 1.0
-#' sigmav <- 0.01
+#' init_price <- 1.0
+#' eq_price <- 2.0
 #' thetav <- 0.01
 #' # Define AR coefficients
-#' coeff <- matrix(c(0.2, 0.2))
+#' coeff <- matrix(c(0.1, 0.3, 0.5))
 #' # Calculate matrix of standard normal innovations
-#' innov <- matrix(rnorm(1e3))
+#' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Dickey-Fuller process using Rcpp
-#' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sigmav, theta=thetav, coeff, innov=innov)
-#' plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
+#' prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+#' plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 #' }
 #' 
 #' @export
-sim_df <- function(eq_price, volat, theta, coeff, innov) {
-    .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', eq_price, volat, theta, coeff, innov)
+sim_df <- function(init_price, eq_price, theta, coeff, innov) {
+    .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', init_price, eq_price, theta, coeff, innov)
 }
 
 #' Calculate the log-likelihood of a time series of returns assuming a

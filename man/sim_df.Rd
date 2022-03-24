@@ -4,10 +4,10 @@
 \alias{sim_df}
 \title{Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.}
 \usage{
-sim_df(eq_price, volat, theta, coeff, innov)
+sim_df(init_price, eq_price, theta, coeff, innov)
 }
 \arguments{
-\item{\code{volat}}{The volatility of returns.}
+\item{\code{init_price}}{The initial price.}
 
 \item{\code{eq_price}}{The equilibrium price.}
 
@@ -20,7 +20,7 @@ coefficients.}
 numbers).}
 }
 \value{
-A single-column \emph{matrix} of simulated returns, with the same
+A single-column \emph{matrix} of simulated prices, with the same
   number of rows as the argument \code{innov}.
 }
 \description{
@@ -30,17 +30,16 @@ Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
   process:
   \deqn{
-    r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+    r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \xi_i
   }
   \deqn{
     p_i = p_{i-1} + r_i
   }
   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
-  \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
-  \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
-  \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
-  normal \emph{innovations}.
-  The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
+  \eqn{\theta} and \eqn{\mu} are the \emph{Ornstein-Uhlenbeck} parameters,
+  \eqn{\varphi_i} are the \emph{autoregressive} coefficients, and
+  \eqn{\xi_i} are the normal \emph{innovations}.
+  The recursion starts with: \eqn{r_1 = \xi_1} and \eqn{p_1 = init\_price}.
 
   The \emph{Dickey-Fuller} process is a combination of an
   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -52,21 +51,21 @@ The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
   process using fast \emph{Rcpp} \code{C++} code.
 
   The function \code{sim_df()} returns a single-column \emph{matrix}
-  representing the \emph{time series} of returns.
+  representing the \emph{time series} of prices.
 }
 \examples{
 \dontrun{
 # Define the Ornstein-Uhlenbeck model parameters
-eq_price <- 1.0
-sigmav <- 0.01
+init_price <- 1.0
+eq_price <- 2.0
 thetav <- 0.01
 # Define AR coefficients
-coeff <- matrix(c(0.2, 0.2))
+coeff <- matrix(c(0.1, 0.3, 0.5))
 # Calculate matrix of standard normal innovations
-innov <- matrix(rnorm(1e3))
+innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Dickey-Fuller process using Rcpp
-returns <- HighFreq::sim_df(eq_price=eq_price, volat=sigmav, theta=thetav, coeff, innov=innov)
-plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
+prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 }
 
 }

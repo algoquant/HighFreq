@@ -83,9 +83,9 @@ inverse <- HighFreq::calc_inv(covmat, eigen_max=3)
 # Calculate shrinkage inverse from SVD in R
 svdec <- svd(covmat)
 eigen_max <- 1:3
-inverse_r <-  svdec$v[, eigen_max] \%*\% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+inverser <-  svdec$v[, eigen_max] \%*\% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 # Compare RcppArmadillo with R
-all.equal(inverse, inverse_r)
+all.equal(inverse, inverser)
 }
 
 }

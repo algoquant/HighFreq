@@ -4,10 +4,10 @@
 \alias{sim_schwartz}
 \title{Simulate a \emph{Schwartz} process using \emph{Rcpp}.}
 \usage{
-sim_schwartz(eq_price, volat, theta, innov)
+sim_schwartz(init_price, eq_price, theta, innov)
 }
 \arguments{
-\item{\code{volat}}{The volatility of returns.}
+\item{\code{init_price}}{The initial price.}
 
 \item{\code{eq_price}}{The equilibrium price.}
 
@@ -17,7 +17,7 @@ sim_schwartz(eq_price, volat, theta, innov)
 numbers).}
 }
 \value{
-A single-column \emph{matrix} of simulated returns, with the same
+A single-column \emph{matrix} of simulated prices, with the same
   number of rows as the argument \code{innov}.
 }
 \description{
@@ -36,22 +36,21 @@ The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
   The function \code{sim_schwartz()} simulates the percentage returns as
   equal to the difference between the equilibrium price \eqn{\mu} minus the
   latest price \eqn{p_{i-1}}, times the mean reversion parameter
-  \eqn{\theta}, plus a random innovation proportional to the volatility
-  \eqn{\sigma}.
+  \eqn{\theta}, plus a random normal innovation.
 
   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
-  representing the \emph{time series} of simulated returns.
+  representing the \emph{time series} of simulated prices.
 }
 \examples{
 \dontrun{
 # Define the Schwartz model parameters
+init_price <- 1.0
 eq_price <- 2.0
-sigmav <- 0.01
 thetav <- 0.01
-innov <- matrix(rnorm(1e3))
+innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Schwartz process using Rcpp
-returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
-plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
+prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 
 }

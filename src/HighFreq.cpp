@@ -1794,10 +1794,10 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' \dontrun{
 //' # Calculate historical prices
 //' ohlc <- rutils::etfenv$VTI
-//' prices <- quantmod::Cl(ohlc)
+//' closep <- quantmod::Cl(ohlc)
 //' # Calculate the running means
 //' lambda <- 0.95
-//' means <- HighFreq::run_mean(prices, lambda=lambda)
+//' means <- HighFreq::run_mean(closep, lambda=lambda)
 //' # Calculate running means using R code
 //' filtered <- (1-lambda)*filter(prices, 
 //'   filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
@@ -1815,7 +1815,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' weights <- quantmod::Vo(ohlc)
 //' # Calculate the running weighted means
 //' meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
-//' # dygraph plot the running weighted means
+//' # Plot dygraph of the running weighted means
 //' datav <- xts(cbind(means, meanw), zoo::index(ohlc))
 //' colnames(datav) <- c("means running", "means weighted")
 //' dygraphs::dygraph(datav, main="Running Means") %>%
@@ -5567,8 +5567,8 @@ arma::mat roll_fun(const arma::mat& tseries,
 //'   Where \eqn{\sigma^2_i} is the rolling variance.
 //'   
 //'   The above should be viewed as a formula for \emph{estimating} the rolling
-//'   rolling variance from the historical returns, rather than simulating them.
-//'   It represents exponential smoothing of the squared returns with a decay
+//'   variance from the historical returns, rather than simulating them. It
+//'   represents exponential smoothing of the squared returns with a decay
 //'   factor equal to \eqn{\beta}.
 //'
 //'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
@@ -5636,8 +5636,6 @@ arma::mat sim_garch(double omega,
 ////////////////////////////////////////////////////////////
 //' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 //' 
-//' @param \code{volat} The volatility of returns.
-//' 
 //' @param \code{init_price} The initial price. 
 //' 
 //' @param \code{eq_price} The equilibrium price. 
@@ -5654,7 +5652,7 @@ arma::mat sim_garch(double omega,
 //'   The function \code{sim_ou()} simulates the following
 //'   \emph{Ornstein-Uhlenbeck} process:
 //'   \deqn{
-//'     r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \sigma \, \xi_i
+//'     r_i = p_i - p_{i-1} = \theta \, (\mu - p_{i-1}) + \xi_i
 //'   }
 //'   \deqn{
 //'     p_i = p_{i-1} + r_i
@@ -5662,31 +5660,31 @@ arma::mat sim_garch(double omega,
 //'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
 //'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
 //'   \emph{Ornstein-Uhlenbeck} parameters, and \eqn{\xi_i} are the standard
-//'   normal \emph{innovations}.
-//'   The recursion starts with the initial price: \eqn{p1 = init\_price}.
+//'   \emph{innovations}.
+//'   The recursion starts with: \eqn{r_1 = \xi_1} and \eqn{p_1 = init\_price}.
 //'
 //'   The function \code{sim_ou()} simulates the percentage returns as equal to
 //'   the difference between the equilibrium price \eqn{\mu} minus the latest
 //'   price \eqn{p_{i-1}}, times the mean reversion parameter \eqn{\theta}, plus
-//'   a random innovation proportional to the volatility \eqn{\sigma}. The log
-//'   prices are calculated as the sum of returns (not compounded), so they can
-//'   become negative.
+//'   a random normal innovation. The log prices are calculated as the sum of
+//'   returns (not compounded), so they can become negative.
 //'
 //'   The function \code{sim_ou()} simulates the \emph{Ornstein-Uhlenbeck}
 //'   process using fast \emph{Rcpp} \code{C++} code.
 //'
 //'   The function \code{sim_ou()} returns a single-column \emph{matrix}
-//'   representing the \emph{time series} of simulated returns.
+//'   representing the \emph{time series} of simulated prices.
 //'
 //' @examples
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
+//' init_price <- 0.0
 //' eq_price <- 1.0
 //' sigmav <- 0.01
 //' thetav <- 0.01
 //' innov <- matrix(rnorm(1e3))
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' prices <- HighFreq::sim_ou(init_price=0, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
+//' prices <- HighFreq::sim_ou(init_price=init_price, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
 //' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 //' }
 //' 
@@ -5694,7 +5692,6 @@ arma::mat sim_garch(double omega,
 // [[Rcpp::export]]
 arma::mat sim_ou(double init_price, 
                  double eq_price,
-                 double volat, 
                  double theta, 
                  arma::mat& innov) {
   
@@ -5702,9 +5699,10 @@ arma::mat sim_ou(double init_price,
   arma::mat prices = arma::zeros<mat>(nrows, 1);
   arma::mat returns = arma::zeros<mat>(nrows, 1);
   
+  returns.row(0) = innov.row(0);
   prices.row(0) = init_price;
   for (arma::uword it = 1; it < nrows; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + volat*innov.row(it);
+    returns.row(it) = theta*(eq_price - prices.row(it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
@@ -5717,7 +5715,7 @@ arma::mat sim_ou(double init_price,
 ////////////////////////////////////////////////////////////
 //' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 //' 
-//' @param \code{volat} The volatility of returns.
+//' @param \code{init_price} The initial price. 
 //' 
 //' @param \code{eq_price} The equilibrium price. 
 //' 
@@ -5726,7 +5724,7 @@ arma::mat sim_ou(double init_price,
 //' @param \code{innov} A single-column \emph{matrix} of innovations (random
 //'   numbers).
 //' 
-//' @return A single-column \emph{matrix} of simulated returns, with the same
+//' @return A single-column \emph{matrix} of simulated prices, with the same
 //'   number of rows as the argument \code{innov}.
 //'
 //' @details
@@ -5742,28 +5740,27 @@ arma::mat sim_ou(double init_price,
 //'   The function \code{sim_schwartz()} simulates the percentage returns as
 //'   equal to the difference between the equilibrium price \eqn{\mu} minus the
 //'   latest price \eqn{p_{i-1}}, times the mean reversion parameter
-//'   \eqn{\theta}, plus a random innovation proportional to the volatility
-//'   \eqn{\sigma}.
+//'   \eqn{\theta}, plus a random normal innovation.
 //'
 //'   The function \code{sim_schwartz()} returns a single-column \emph{matrix}
-//'   representing the \emph{time series} of simulated returns.
+//'   representing the \emph{time series} of simulated prices.
 //'
 //' @examples
 //' \dontrun{
 //' # Define the Schwartz model parameters
+//' init_price <- 1.0
 //' eq_price <- 2.0
-//' sigmav <- 0.01
 //' thetav <- 0.01
-//' innov <- matrix(rnorm(1e3))
+//' innov <- matrix(rnorm(1e3, sd=0.01))
 //' # Simulate Schwartz process using Rcpp
-//' returns <- HighFreq::sim_schwartz(eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
-//' plot(exp(cumsum(returns)), t="l", main="Simulated Schwartz Prices", ylab="prices")
+//' prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+//' plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_schwartz(double eq_price, 
-                       double volat, 
+arma::mat sim_schwartz(double init_price, 
+                       double eq_price, 
                        double theta, 
                        arma::mat& innov) {
   
@@ -5771,13 +5768,14 @@ arma::mat sim_schwartz(double eq_price,
   arma::mat prices = arma::zeros<mat>(nrows, 1);
   arma::mat returns = arma::zeros<mat>(nrows, 1);
   
-  prices.row(0) = exp(volat*innov.row(0));
+  returns.row(0) = innov.row(0);
+  prices.row(0) = init_price;
   for (arma::uword it = 1; it < nrows; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + volat*innov.row(it);
+    returns.row(it) = theta*(eq_price - prices.row(it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) * exp(returns.row(it));
   }  // end for
   
-  return returns;
+  return prices;
   
 }  // end sim_schwartz
 
@@ -5805,7 +5803,7 @@ arma::mat sim_schwartz(double eq_price,
 //'   The function \code{sim_ar()} simulates an \emph{autoregressive} process
 //'   \eqn{AR(n)} of order \eqn{n}:
 //'   \deqn{
-//'     r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+//'     r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
 //'   }
 //'   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
 //'   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -5822,7 +5820,7 @@ arma::mat sim_schwartz(double eq_price,
 //' @examples
 //' \dontrun{
 //' # Define AR coefficients
-//' coeff <- matrix(c(0.2, 0.2))
+//' coeff <- matrix(c(0.1, 0.3, 0.5))
 //' # Calculate matrix of innovations
 //' innov <- matrix(rnorm(1e4, sd=0.01))
 //' # Calculate recursive filter using filter()
@@ -5844,20 +5842,20 @@ arma::mat sim_schwartz(double eq_price,
 arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
   
   arma::uword nrows = innov.n_rows;
-  arma::uword look_back = coeff.n_rows;
+  arma::uword ncoeff = coeff.n_rows;
   arma::mat coeffr = arma::reverse(coeff);
   arma::mat returns = arma::zeros<mat>(nrows, 1);
 
   // Warmup period
   returns.row(0) = innov.row(0);
-  returns.row(1) = innov.row(1) + coeffr.row(look_back-1) * returns.row(0);
-  for (arma::uword it=2; it < look_back-1; it++) {
-    returns.row(it) = innov.row(it) + arma::dot(coeffr.rows(look_back-it, look_back-1), returns.rows(0, it-1));
+  returns.row(1) = innov.row(1) + coeffr.row(ncoeff-1) * returns.row(0);
+  for (arma::uword it = 2; it < ncoeff; it++) {
+    returns.row(it) = innov.row(it) + arma::dot(coeffr.rows(ncoeff-it, ncoeff-1), returns.rows(0, it-1));
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < nrows; it++) {
-    returns.row(it) = innov.row(it) + arma::dot(coeffr, returns.rows(it-look_back, it-1));
+  for (arma::uword it = ncoeff; it < nrows; it++) {
+    returns.row(it) = innov.row(it) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1));
   }  // end for
   
   return returns;
@@ -5869,7 +5867,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 ////////////////////////////////////////////////////////////
 //' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 //' 
-//' @param \code{volat} The volatility of returns.
+//' @param \code{init_price} The initial price. 
 //' 
 //' @param \code{eq_price} The equilibrium price. 
 //' 
@@ -5881,24 +5879,23 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //' @param \code{innov} A single-column \emph{matrix} of innovations (random
 //'   numbers).
 //' 
-//' @return A single-column \emph{matrix} of simulated returns, with the same
+//' @return A single-column \emph{matrix} of simulated prices, with the same
 //'   number of rows as the argument \code{innov}.
 //'
 //' @details
 //'   The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 //'   process:
 //'   \deqn{
-//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \sigma \, \xi_i
+//'     r_i = \theta \, (\mu - p_{i-1}) + \varphi_1 r_{i-1} + \ldots + \varphi_n r_{i-n} + \xi_i
 //'   }
 //'   \deqn{
 //'     p_i = p_{i-1} + r_i
 //'   }
 //'   Where \eqn{r_i} and \eqn{p_i} are the simulated returns and prices,
-//'   \eqn{\theta}, \eqn{\mu}, and \eqn{\sigma} are the
-//'   \emph{Ornstein-Uhlenbeck} parameters, \eqn{\varphi_i} are the
-//'   \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
-//'   normal \emph{innovations}.
-//'   The recursion starts with: \eqn{p1 = r1 = \sigma \, \xi1}.
+//'   \eqn{\theta} and \eqn{\mu} are the \emph{Ornstein-Uhlenbeck} parameters,
+//'   \eqn{\varphi_i} are the \emph{autoregressive} coefficients, and
+//'   \eqn{\xi_i} are the normal \emph{innovations}.
+//'   The recursion starts with: \eqn{r_1 = \xi_1} and \eqn{p_1 = init\_price}.
 //'
 //'   The \emph{Dickey-Fuller} process is a combination of an
 //'   \emph{Ornstein-Uhlenbeck} process and an \emph{autoregressive} process.
@@ -5910,53 +5907,54 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //'   process using fast \emph{Rcpp} \code{C++} code.
 //'
 //'   The function \code{sim_df()} returns a single-column \emph{matrix}
-//'   representing the \emph{time series} of returns.
+//'   representing the \emph{time series} of prices.
 //'
 //' @examples
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
-//' eq_price <- 1.0
-//' sigmav <- 0.01
+//' init_price <- 1.0
+//' eq_price <- 2.0
 //' thetav <- 0.01
 //' # Define AR coefficients
-//' coeff <- matrix(c(0.2, 0.2))
+//' coeff <- matrix(c(0.1, 0.3, 0.5))
 //' # Calculate matrix of standard normal innovations
-//' innov <- matrix(rnorm(1e3))
+//' innov <- matrix(rnorm(1e3, sd=0.01))
 //' # Simulate Dickey-Fuller process using Rcpp
-//' returns <- HighFreq::sim_df(eq_price=eq_price, volat=sigmav, theta=thetav, coeff, innov=innov)
-//' plot(cumsum(returns), t="l", main="Simulated Dickey-Fuller Prices")
+//' prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+//' plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_df(double eq_price, 
-                 double volat, 
+arma::mat sim_df(double init_price, 
+                 double eq_price, 
                  double theta, 
                  arma::mat& coeff, 
                  arma::mat& innov) {
   
   arma::uword nrows = innov.n_rows;
-  arma::uword look_back = coeff.n_rows;
+  arma::uword ncoeff = coeff.n_rows;
   arma::mat coeffr = arma::reverse(coeff);
   arma::mat prices = arma::zeros<mat>(nrows, 1);
   arma::mat returns = arma::zeros<mat>(nrows, 1);
 
   // Warmup period
-  returns.row(0) = volat*innov.row(0);
-  returns.row(1) = volat*innov.row(1) + coeffr.row(look_back-1) * returns.row(0);
-  prices.row(0) = volat*innov.row(0);
-  for (arma::uword it=2; it < look_back-1; it++) {
-    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr.rows(look_back-it, look_back-1), returns.rows(0, it-1));
+  returns.row(0) = innov.row(0);
+  prices.row(0) = init_price;
+  returns.row(1) = theta*(eq_price - prices.row(0)) + coeffr.row(ncoeff-1) * returns.row(0) + innov.row(1);
+  prices.row(1) = prices.row(0) + returns.row(1);
+  for (arma::uword it = 2; it < ncoeff; it++) {
+    returns.row(it) = theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr.rows(ncoeff-it, ncoeff-1), returns.rows(0, it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
   // Remaining periods
-  for (arma::uword it = look_back; it < nrows; it++) {
-    returns.row(it) = volat*innov.row(it) + theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-look_back, it-1));
+  for (arma::uword it = ncoeff; it < nrows; it++) {
+    returns.row(it) = theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
-  return returns;
+  return prices;
   
 }  // end sim_df
 

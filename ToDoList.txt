@@ -21,8 +21,8 @@ export(new_func)
 
 ## Steps to fix the NAMESPACE file after adding a new function - sometimes produces a bad NAMESPACE file
 1. In RStudio from Build menu run Document - usually produces a bad NAMESPACE file
-2. Edit the NAMESPACE file again and remove all lines that don't contain export()
-3. Move to top of NAMESPACE file the lines:
+2. Edit the NAMESPACE file again and remove all lines that don't contain export() - no longer necessary
+3. Add at the top of NAMESPACE file the lines:
 useDynLib(HighFreq)
 importFrom(Rcpp, evalCpp)
 
@@ -146,7 +146,11 @@ Adapt from run_covar()
 + [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
 This avoids calling calc_var() in loop.
 
-+ [ ] Create function sim_df() to simulate a Dickey-Fuller process
++ [x] Remove volat argument in functions sim_ou(), sim_schwartz(), and sim_df() 
+
++ [x] In functions sim_df() and sim_schwartz() add argument init_price
+
++ [x] Create function sim_df() to simulate a Dickey-Fuller process
 
 + [ ] Create function fit_ar() to fit an AR process using matrix algebra
 
@@ -791,7 +795,7 @@ Run random data through model to test if there is data snooping.
 + [x] Modify functions run_variance() and run_skew() to scale their outputs by the time differences, similar to run_returns()  
 
 + [x] Create a function called sim_arima() in RcppArmadillo which replicates the function stats::filter() with method="recursive"
-Adapt code from C:/Develop/R/lecture_slides/scripts/sim_arima.cpp
+Adapt code from /Users/jerzy/Develop/lecture_slides/scripts/sim_arima.cpp
 
 + [x] Add sim_* functions using RcppArmadillo: sim_arima(), sim_garch()
 

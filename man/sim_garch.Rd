@@ -66,8 +66,8 @@ The function \code{sim_garch()} simulates or estimates the rolling variance
   Where \eqn{\sigma^2_i} is the rolling variance.
   
   The above should be viewed as a formula for \emph{estimating} the rolling
-  rolling variance from the historical returns, rather than simulating them.
-  It represents exponential smoothing of the squared returns with a decay
+  variance from the historical returns, rather than simulating them. It
+  represents exponential smoothing of the squared returns with a decay
   factor equal to \eqn{\beta}.
 
   The function \code{sim_garch()} simulates the \emph{GARCH} process using

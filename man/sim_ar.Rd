@@ -32,7 +32,7 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
   The function \code{sim_ar()} simulates an \emph{autoregressive} process
   \eqn{AR(n)} of order \eqn{n}:
   \deqn{
-    r_i = \varphi1 r_{i-1} + \varphi2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
+    r_i = \varphi_1 r_{i-1} + \varphi_2 r_{i-2} + \ldots + \varphi_n r_{i-n} + \xi_i
   }
   Where \eqn{r_i} is the simulated output time series, \eqn{\varphi_i} are
   the \emph{autoregressive} coefficients, and \eqn{\xi_i} are the standard
@@ -49,7 +49,7 @@ The function \code{sim_ar()} recursively filters the \emph{matrix} of
 \examples{
 \dontrun{
 # Define AR coefficients
-coeff <- matrix(c(0.2, 0.2))
+coeff <- matrix(c(0.1, 0.3, 0.5))
 # Calculate matrix of innovations
 innov <- matrix(rnorm(1e4, sd=0.01))
 # Calculate recursive filter using filter()
