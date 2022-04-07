@@ -34,10 +34,10 @@ The function \code{run_var()} calculates the running variance of a
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
 
-  The above recursive formula is convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster.
+  The above recursive formulas are convenient for processing live streaming
+  data because they don't require maintaining a buffer of past data.
+  The formulas are equivalent to a convolution with exponentially decaying
+  weights, but they're faster to calculate.
 
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  

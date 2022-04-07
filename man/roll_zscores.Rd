@@ -77,19 +77,19 @@ response <- returns[, 1]
 predictor <- returns[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-z_scores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
+zscores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
-z_scoresr <- sapply(1:NROW(predictor), function(ro_w) {
+zscoresr <- sapply(1:NROW(predictor), function(ro_w) {
   if (ro_w == 1) return(0)
   startpoint <- max(1, ro_w-look_back+1)
   responsi <- response[startpoint:ro_w]
   predicti <- predictor[startpoint:ro_w, ]
-  reg_model <- lm(responsi ~ predicti)
-  residuals <- reg_model$residuals
+  lmod <- lm(responsi ~ predicti)
+  residuals <- lmod$residuals
   residuals[NROW(residuals)]/sd(residuals)
 })  # end sapply
 # Compare the outputs of both functions
-all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
+all.equal(zscores[-(1:look_back)], zscoresr[-(1:look_back)], 
   check.attributes=FALSE)
 }
 

@@ -48,9 +48,9 @@ The function \code{run_mean()} calculates the running weighted means of
   }
   
   The above recursive formulas are convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster.
+  data because they don't require maintaining a buffer of past data.
+  The formulas are equivalent to a convolution with exponentially decaying
+  weights, but they're faster to calculate.
   
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  

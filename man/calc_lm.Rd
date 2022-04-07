@@ -43,14 +43,14 @@ response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(response ~ predictor)
-sum_mary <- summary(reg_model)
+lmod <- lm(response ~ predictor)
+lmodsum <- summary(lmod)
 # Perform multivariate regression using calc_lm()
 reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
 # Compare the outputs of both functions
-all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
-all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
-all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
+all.equal(reg_arma$coefficients[, "coeff"], unname(coef(lmod)))
+all.equal(unname(reg_arma$coefficients), unname(lmodsum$coefficients))
+all.equal(unname(reg_arma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),

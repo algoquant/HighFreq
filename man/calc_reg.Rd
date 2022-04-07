@@ -8,7 +8,7 @@ of regression coefficients, their t-values, and the last residual z-score.}
 calc_reg(
   response,
   predictor,
-  intercept = FALSE,
+  intercept = TRUE,
   method = "least_squares",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
@@ -25,7 +25,7 @@ data.}
 
 \item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
 term should be added to the predictor (the default is \code{intercept =
-FALSE}).}
+TRUE}).}
 
 \item{\code{method}}{A \emph{string} specifying the type of the regression
 model the default is \code{method = "least_squares"} - see Details).}
@@ -88,10 +88,15 @@ The function \code{calc_reg()} performs multivariate regression using
   The number of t-values is equal to the number of coefficients.
 
   For example, if the number of columns of the \code{predictor} matrix is
-  equal to \code{n}, and if \code{intercept = TRUE}, then \code{calc_reg()}
-  returns a vector with \code{2n+3} elements: \code{n+1} regression
-  coefficients (including the intercept coefficient), \code{n+1}
-  corresponding t-values, and \code{1} z-score.
+  equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+  \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
+  regression coefficients (including the intercept coefficient), \code{n+1}
+  corresponding t-values, and \code{1} z-score value.
+
+  If \code{intercept = FALSE}, then \code{calc_reg()} returns a vector with
+  \code{2n+1} elements: \code{n} regression coefficients (without the
+  intercept coefficient), \code{n} corresponding t-values, and \code{1}
+  z-score value.
 }
 \examples{
 \dontrun{
@@ -102,9 +107,9 @@ response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
 # Perform multivariate regression using lm()
-reg_model <- lm(response ~ predictor)
-sum_mary <- summary(reg_model)
-coeff <- sum_mary$coefficients
+lmod <- lm(response ~ predictor)
+lmodsum <- summary(lmod)
+coeff <- lmodsum$coefficients
 # Perform multivariate regression using calc_reg()
 reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
 # Compare the outputs of both functions

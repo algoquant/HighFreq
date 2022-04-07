@@ -59,26 +59,26 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   and predictor data.
 
   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
-  same dimensions as the input argument \code{predictor}.
+  same number of rows as the input argument \code{predictor}.
 
   The above recursive formulas are convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster to calculate.
+  data because they don't require maintaining a buffer of past data.
+  The formulas are equivalent to a convolution with exponentially decaying
+  weights, but they're faster to calculate.
 
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the running \emph{z-score} values have a
-  stronger dependence on past values.  This is equivalent to a long
-  look-back interval.
+  values have a greater weight, so the running values have a greater
+  dependence on past values.  This is equivalent to a long look-back
+  interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the running \emph{z-score} values
-  have a weaker dependence on past values.  This is equivalent to a short
-  look-back interval.
+  past values have a smaller weight, so the running values have a weaker
+  dependence on past values.  This is equivalent to a short look-back
+  interval.
 
-  The \emph{residuals} may be scaled by their volatilities. The default is
-  \code{method = "none"} - no scaling.
+  The \emph{residuals} may be scaled by their volatilities to obtain the
+  \emph{z-scores}. The default is \code{method = "none"} - no scaling.
   If the argument \code{method = "scale"} then the \emph{residuals}
   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma^{\epsilon}}
   without subtracting their means:
@@ -91,11 +91,12 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   \deqn{
     \epsilon_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
   }
+  Which are equal to the \emph{z-scores}.
 
   The function \code{run_reg()} returns multiple columns of data. If the
   matrix \code{predictor} has \code{n} columns then \code{run_reg()} returns
   a matrix with \code{n+2} columns.  The first column contains the
-  \emph{residuals}, the second the \emph{alphas}, and the last columns
+  \emph{residuals}, the second the \emph{alphas}, and the remaining columns
   contain the \emph{betas}.
 }
 \examples{
@@ -109,11 +110,11 @@ predictor <- returns[, -1]
 # Calculate the running regressions
 lambda <- 0.9
 regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
-# Plot the running alphas
+# Plot the running residuals
 datav <- cbind(cumsum(response), regs[, 1])
-colnames(datav) <- c("XLF", "alphas")
+colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)
-dygraphs::dygraph(datav, main="Alphas of XLF Versus VTI and IEF") \%>\%
+dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") \%>\%
   dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%
   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") \%>\%

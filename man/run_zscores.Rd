@@ -55,8 +55,8 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   approximate because they don't subtract the means before squaring the
   returns.  But they're very good approximations for daily returns.
 
-  The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
-  dimensions as the input argument \code{predictor}.
+  The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
+  same number of rows as the input argument \code{predictor}.
 
   If the argument \code{demean = TRUE} (the default) then the
   \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
@@ -72,9 +72,9 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   }
 
   The above recursive formulas are convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster to calculate.
+  data because they don't require maintaining a buffer of past data.
+  The formulas are equivalent to a convolution with exponentially decaying
+  weights, but they're faster to calculate.
 
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.

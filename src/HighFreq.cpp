@@ -766,7 +766,7 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //' # Calculate shrinkage inverse from SVD in R
 //' svdec <- svd(covmat)
 //' eigen_max <- 1:3
-//' inverser <-  svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+//' inverser <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 //' # Compare RcppArmadillo with R
 //' all.equal(inverse, inverser)
 //' }
@@ -1768,9 +1768,9 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   }
 //'   
 //'   The above recursive formulas are convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster.
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're faster to calculate.
 //'   
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
@@ -1895,7 +1895,7 @@ arma::mat run_mean(const arma::mat& tseries,
 //'   it to gradually "forget" the maximum value from the more distant past.
 //' 
 //'   The above recursive formulas are convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
+//'   data because they don't require maintaining a buffer of past data.
 //'   
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
@@ -1984,8 +1984,8 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //'   The second term pulls the minimum value up to the mean value, allowing
 //'   it to gradually "forget" the minimum value from the more distant past.
 //' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because they don't require maintaining a buffer of past data.
 //' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
@@ -2069,10 +2069,10 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 //'   \eqn{r_t} are the streaming returns data.
 //' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster.
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're faster to calculate.
 //' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
@@ -2274,10 +2274,10 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //'   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
 //'   \eqn{\mu^1_t} and \eqn{\mu^2_t} are the means of the returns.
 //' 
-//'   The above recursive formula is convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster.
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're faster to calculate.
 //' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
@@ -2410,26 +2410,26 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   and predictor data.
 //' 
 //'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
-//'   same dimensions as the input argument \code{predictor}.
+//'   same number of rows as the input argument \code{predictor}.
 //'
 //'   The above recursive formulas are convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster to calculate.
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're faster to calculate.
 //'
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the running \emph{z-score} values have a
-//'   stronger dependence on past values.  This is equivalent to a long
-//'   look-back interval.
+//'   values have a greater weight, so the running values have a greater
+//'   dependence on past values.  This is equivalent to a long look-back
+//'   interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the running \emph{z-score} values
-//'   have a weaker dependence on past values.  This is equivalent to a short
-//'   look-back interval.
+//'   past values have a smaller weight, so the running values have a weaker
+//'   dependence on past values.  This is equivalent to a short look-back
+//'   interval.
 //' 
-//'   The \emph{residuals} may be scaled by their volatilities. The default is
-//'   \code{method = "none"} - no scaling.
+//'   The \emph{residuals} may be scaled by their volatilities to obtain the
+//'   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
 //'   If the argument \code{method = "scale"} then the \emph{residuals}
 //'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma^{\epsilon}}
 //'   without subtracting their means:
@@ -2442,11 +2442,12 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   \deqn{
 //'     \epsilon_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
 //'   }
+//'   Which are equal to the \emph{z-scores}.
 //' 
 //'   The function \code{run_reg()} returns multiple columns of data. If the
 //'   matrix \code{predictor} has \code{n} columns then \code{run_reg()} returns
 //'   a matrix with \code{n+2} columns.  The first column contains the
-//'   \emph{residuals}, the second the \emph{alphas}, and the last columns
+//'   \emph{residuals}, the second the \emph{alphas}, and the remaining columns
 //'   contain the \emph{betas}.
 //' 
 //' @examples
@@ -2460,11 +2461,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' # Calculate the running regressions
 //' lambda <- 0.9
 //' regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
-//' # Plot the running alphas
+//' # Plot the running residuals
 //' datav <- cbind(cumsum(response), regs[, 1])
-//' colnames(datav) <- c("XLF", "alphas")
+//' colnames(datav) <- c("XLF", "residuals")
 //' colnamev <- colnames(datav)
-//' dygraphs::dygraph(datav, main="Alphas of XLF Versus VTI and IEF") %>%
+//' dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") %>%
 //'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 //'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
 //'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") %>%
@@ -2575,8 +2576,8 @@ arma::mat run_reg(const arma::mat& response,
 //'   approximate because they don't subtract the means before squaring the
 //'   returns.  But they're very good approximations for daily returns.
 //' 
-//'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\beta} have the same
-//'   dimensions as the input argument \code{predictor}.
+//'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
+//'   same number of rows as the input argument \code{predictor}.
 //'
 //'   If the argument \code{demean = TRUE} (the default) then the
 //'   \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
@@ -2592,9 +2593,9 @@ arma::mat run_reg(const arma::mat& response,
 //'   }
 //' 
 //'   The above recursive formulas are convenient for processing live streaming
-//'   data because it doesn't require maintaining a buffer of past data.
-//'   The formula is equivalent to a convolution with exponentially decaying
-//'   weights, but it's faster to calculate.
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're faster to calculate.
 //' 
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.
@@ -3819,14 +3820,14 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' # Predictor matrix equals VTI and IEF returns
 //' predictor <- returns[, -1]
 //' # Perform multivariate regression using lm()
-//' reg_model <- lm(response ~ predictor)
-//' sum_mary <- summary(reg_model)
+//' lmod <- lm(response ~ predictor)
+//' lmodsum <- summary(lmod)
 //' # Perform multivariate regression using calc_lm()
 //' reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
 //' # Compare the outputs of both functions
-//' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(reg_model)))
-//' all.equal(unname(reg_arma$coefficients), unname(sum_mary$coefficients))
-//' all.equal(unname(reg_arma$stats), c(sum_mary$r.squared, unname(sum_mary$fstatistic[1])))
+//' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(lmod)))
+//' all.equal(unname(reg_arma$coefficients), unname(lmodsum$coefficients))
+//' all.equal(unname(reg_arma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
@@ -3864,17 +3865,17 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   stats.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
   
   // Calculate standard errors of beta coefficients
-  arma::colvec stderr = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
+  arma::colvec stderrv = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
   // Calculate t-values and p-values of beta coefficients
-  arma::colvec tvals = coeff/stderr;
-  arma::colvec pvals = 2*Rcpp::pt(-abs(wrap(tvals)), deg_free);
-  Rcpp::NumericMatrix coeffmat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderr), tvals), pvals));
+  arma::colvec tvals = coeff/stderrv;
+  arma::colvec pvals = 2*Rcpp::pt(-Rcpp::abs(Rcpp::wrap(tvals)), deg_free);
+  Rcpp::NumericMatrix coeffmat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderrv), tvals), pvals));
   Rcpp::colnames(coeffmat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
   
-  return Rcpp::List::create(Named("coefficients") = coeffmat,
+  return Rcpp::List::create(Rcpp::Named("coefficients") = coeffmat,
                             // Named("residuals") = residuals,
-                            Named("zscore") = residuals(nrows-1)/arma::stddev(residuals),
-                            Named("stats") = stats);
+                            Rcpp::Named("zscore") = residuals(nrows-1)/arma::stddev(residuals),
+                            Rcpp::Named("stats") = stats);
   
 }  // end calc_lm
 
@@ -3892,7 +3893,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' 
 //' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
 //'   term should be added to the predictor (the default is \code{intercept =
-//'   FALSE}).
+//'   TRUE}).
 //'
 //' @param \code{method} A \emph{string} specifying the type of the regression
 //'   model the default is \code{method = "least_squares"} - see Details).
@@ -3950,11 +3951,16 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   The number of t-values is equal to the number of coefficients.
 //' 
 //'   For example, if the number of columns of the \code{predictor} matrix is
-//'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{calc_reg()}
-//'   returns a vector with \code{2n+3} elements: \code{n+1} regression
-//'   coefficients (including the intercept coefficient), \code{n+1}
-//'   corresponding t-values, and \code{1} z-score.
+//'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+//'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
+//'   regression coefficients (including the intercept coefficient), \code{n+1}
+//'   corresponding t-values, and \code{1} z-score value.
 //'
+//'   If \code{intercept = FALSE}, then \code{calc_reg()} returns a vector with
+//'   \code{2n+1} elements: \code{n} regression coefficients (without the
+//'   intercept coefficient), \code{n} corresponding t-values, and \code{1}
+//'   z-score value.
+//'   
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
@@ -3964,9 +3970,9 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' # Predictor matrix equals VTI and IEF returns
 //' predictor <- returns[, -1]
 //' # Perform multivariate regression using lm()
-//' reg_model <- lm(response ~ predictor)
-//' sum_mary <- summary(reg_model)
-//' coeff <- sum_mary$coefficients
+//' lmod <- lm(response ~ predictor)
+//' lmodsum <- summary(lmod)
+//' coeff <- lmodsum$coefficients
 //' # Perform multivariate regression using calc_reg()
 //' reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
 //' # Compare the outputs of both functions
@@ -3984,7 +3990,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 // [[Rcpp::export]]
 arma::mat calc_reg(const arma::mat& response, 
                    const arma::mat& predictor,
-                   bool intercept = false,
+                   bool intercept = true,
                    std::string method = "least_squares",
                    double eigen_thresh = 1e-5,
                    arma::uword eigen_max = 0,
@@ -4034,9 +4040,9 @@ arma::mat calc_reg(const arma::mat& response,
   // double exp_sumsq = tot_sumsq - res_sumsq;
   
   // Calculate standard errors of the beta coefficients
-  arma::mat stderr = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
+  arma::mat stderrv = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predictori)*predictori)));
   // Calculate t-values of the beta coefficients
-  tvals = coeff/stderr;
+  tvals = coeff/stderrv;
   
   // Calculate z-score
   mat zscore = residuals(nrows-1, 0)/arma::stddev(residuals);
@@ -4941,7 +4947,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' 
 //' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
 //'   term should be added to the predictor (the default is \code{intercept =
-//'   FALSE}).
+//'   TRUE}).
 //'
 //' @param \code{method} A \emph{string} specifying the type of the regression
 //'   model the default is \code{method = "least_squares"} - see Details).
@@ -4961,10 +4967,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @return A \emph{matrix} with the regression coefficients, their t-values, and
-//' z-scores, and with the 
-//' same number of rows as \code{predictor}
-//' a
+//' @return A \emph{matrix} with the regression coefficients, their t-values,
+//'   and z-scores, and with the same number of rows as \code{predictor} a
 //'   number of columns equal to \code{2n+3}, where \code{n} is the number of
 //'   columns of \code{predictor}.
 //'
@@ -4990,8 +4994,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   It passes the subset time series to the function \code{calc_reg()}, which
 //'   calculates the regression coefficients, their t-values, and the z-score.
 //'   
-//'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
-//'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+//'   If \code{intercept = TRUE} (the default) then an extra intercept column
+//'   (unit column) is added to the predictor matrix.
 //'   
 //'   The number of columns of the return matrix depends on the number of
 //'   columns of the \code{predictor} matrix (including the intercept column, if
@@ -5003,9 +5007,9 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   added).
 //'   The number of t-values is equal to the number of coefficients.
 //'   For example, if the number of columns of the \code{predictor} matrix is
-//'   equal to \code{n}, and if \code{intercept = TRUE}, then \code{roll_reg()}
-//'   returns a matrix with \code{2n+3} columns: \code{n+1} regression
-//'   coefficients (including the intercept coefficient), \code{n+1}
+//'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+//'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
+//'   regression coefficients (including the intercept coefficient), \code{n+1}
 //'   corresponding t-values, and \code{1} z-score column.
 //' 
 //' @examples
@@ -5032,7 +5036,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat roll_reg(const arma::mat& response, 
                    const arma::mat& predictor, 
-                   bool intercept = false,
+                   bool intercept = true,
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
                    arma::uword step = 1, 
@@ -5242,19 +5246,19 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' predictor <- returns[, -1]
 //' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 //' look_back <- 11
-//' z_scores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
+//' zscores <- HighFreq::roll_zscores(response=response, predictor=predictor, look_back)
 //' # Calculate z-scores in R from rolling multivariate regression using lm()
-//' z_scoresr <- sapply(1:NROW(predictor), function(ro_w) {
+//' zscoresr <- sapply(1:NROW(predictor), function(ro_w) {
 //'   if (ro_w == 1) return(0)
 //'   startpoint <- max(1, ro_w-look_back+1)
 //'   responsi <- response[startpoint:ro_w]
 //'   predicti <- predictor[startpoint:ro_w, ]
-//'   reg_model <- lm(responsi ~ predicti)
-//'   residuals <- reg_model$residuals
+//'   lmod <- lm(responsi ~ predicti)
+//'   residuals <- lmod$residuals
 //'   residuals[NROW(residuals)]/sd(residuals)
 //' })  # end sapply
 //' # Compare the outputs of both functions
-//' all.equal(z_scores[-(1:look_back)], z_scoresr[-(1:look_back)], 
+//' all.equal(zscores[-(1:look_back)], zscoresr[-(1:look_back)], 
 //'   check.attributes=FALSE)
 //' }
 //' 

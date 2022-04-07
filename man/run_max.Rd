@@ -40,7 +40,7 @@ The function \code{run_max()} calculates the running maximum of streaming
   it to gradually "forget" the maximum value from the more distant past.
 
   The above recursive formulas are convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
+  data because they don't require maintaining a buffer of past data.
   
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  

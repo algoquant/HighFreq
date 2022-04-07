@@ -39,8 +39,8 @@ The function \code{run_min()} calculates the running minimum of streaming
   The second term pulls the minimum value up to the mean value, allowing
   it to gradually "forget" the minimum value from the more distant past.
 
-  The above recursive formula is convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
+  The above recursive formulas are convenient for processing live streaming
+  data because they don't require maintaining a buffer of past data.
 
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  

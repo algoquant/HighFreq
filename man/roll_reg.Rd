@@ -8,7 +8,7 @@ z-scores, at the end points of the predictor matrix.}
 roll_reg(
   response,
   predictor,
-  intercept = FALSE,
+  intercept = TRUE,
   startp = 0L,
   endp = 0L,
   step = 1L,
@@ -45,7 +45,7 @@ calculating the end points (the default is \code{stub = 0}).}
 
 \item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
 term should be added to the predictor (the default is \code{intercept =
-FALSE}).}
+TRUE}).}
 
 \item{\code{method}}{A \emph{string} specifying the type of the regression
 model the default is \code{method = "least_squares"} - see Details).}
@@ -66,10 +66,8 @@ quantiles (the default is \code{conf_lev = 0.75}).}
 (the default is \code{0}).}
 }
 \value{
-A \emph{matrix} with the regression coefficients, their t-values, and
-z-scores, and with the 
-same number of rows as \code{predictor}
-a
+A \emph{matrix} with the regression coefficients, their t-values,
+  and z-scores, and with the same number of rows as \code{predictor} a
   number of columns equal to \code{2n+3}, where \code{n} is the number of
   columns of \code{predictor}.
 }
@@ -99,8 +97,8 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   It passes the subset time series to the function \code{calc_reg()}, which
   calculates the regression coefficients, their t-values, and the z-score.
   
-  If \code{intercept = TRUE} then an extra intercept column (unit column) is
-  added to the predictor matrix (the default is \code{intercept = FALSE}).
+  If \code{intercept = TRUE} (the default) then an extra intercept column
+  (unit column) is added to the predictor matrix.
   
   The number of columns of the return matrix depends on the number of
   columns of the \code{predictor} matrix (including the intercept column, if
@@ -112,9 +110,9 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   added).
   The number of t-values is equal to the number of coefficients.
   For example, if the number of columns of the \code{predictor} matrix is
-  equal to \code{n}, and if \code{intercept = TRUE}, then \code{roll_reg()}
-  returns a matrix with \code{2n+3} columns: \code{n+1} regression
-  coefficients (including the intercept coefficient), \code{n+1}
+  equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+  \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
+  regression coefficients (including the intercept coefficient), \code{n+1}
   corresponding t-values, and \code{1} z-score column.
 }
 \examples{

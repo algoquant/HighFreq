@@ -40,10 +40,10 @@ The function \code{run_covar()} calculates the running covariance of two
   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
   \eqn{\mu^1_t} and \eqn{\mu^2_t} are the means of the returns.
 
-  The above recursive formula is convenient for processing live streaming
-  data because it doesn't require maintaining a buffer of past data.
-  The formula is equivalent to a convolution with exponentially decaying
-  weights, but it's faster.
+  The above recursive formulas are convenient for processing live streaming
+  data because they don't require maintaining a buffer of past data.
+  The formulas are equivalent to a convolution with exponentially decaying
+  weights, but they're faster to calculate.
 
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  

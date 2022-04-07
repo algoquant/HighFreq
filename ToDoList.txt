@@ -80,36 +80,35 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [x] Simplify variable names by removing underscores: sym_bols -> symbolv, x_ts -> xtes
-Use last letter "d" for dates, "t" for times, "v" for variables, vectors and lists, "s" for series, etc.
-Run shell script:
-/Users/jerzy/Develop/lecture_slides/scripts/run.sh
-chmod +x run.sh
-./run.sh
++ [ ] Fix functions calc_lm() and calc_reg()
+Rename stderr to stderrv.  Add Rcpp:: clauses.
 
-+ [x] Modify function run_mean() to calculate the running weighted mean if the weight vector is passed as an argument
++ [ ] In function roll_sum() set diffit(cumsumv, look_back, false)
 
-+ [ ] Deprecate run_zscores() because run_reg() is the new version ?
++ [ ] Create a function that multiplies the columns of an xts or matrix by a vector of weights, without adding the columns as in (prices %*% weights)
+Equivalent to this in R:
+prices <- lapply(1:NCOL(prices), function (i) weights[i]*prices[, i])
+prices <- rutils::do_call(cbind, prices)
+
++ [ ] In functions calc_reg() and roll_reg() add an argument called "method" for scaling the residuals
+
++ [ ] Compare the outputs of functions run_reg() versus roll_reg()
+Find the lambda parameter which produces similar values for a given look_back parameter.
+
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
+
++ [ ] Deprecate run_zscores() because run_reg() is the new version
 
 + [ ] Add t-values to run_reg()
 
-+ [x] Fix run_reg() - keep old version as run_rego()
-Replace
-vars.row(it) = lambda1*(vars.row(it) - arma::square(means_pred.row(it))) + lambda*vars.row(it-1);
-With
-vars.row(it) = lambda1*arma::square(predictor.row(it)-means_pred.row(it)) + lambda*vars.row(it-1);
-Replace
-varz.row(it) = lambda1*arma::square(resids.row(it) - resids.row(it-1)) + lambda*varz.row(it-1);
-With
-varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*varz.row(it-1);
-
-+ [x] In functions calc_reg() and roll_reg() make the intercept term optional
-
-+ [x] Rename functions run_skew() to ohlc_skew(), run_returns() to ohlc_returns(), run_sharpe() to ohlc_sharpe() and run_variance() to ohlc_variance()
-
-+ [x] Update the functions run_var() and run_covar() - subtract the means from returns
-
-+ [x] Create function run_var_ohlc() to calculate the running OHLC variance using running formula - adapt from ohlc_variance()
++ [ ] Create function tdistr() for non-standard Student’s t-distribution
+tdistr <- function(x, dfree, loc=0, scalev=1) {
+  dt((x-loc)/scalev, df=dfree)/scalev
+}  # end tdistr
+tdistr <- function(x, dfree, loc=0, scalev=1) {
+  gamma((dfree+1)/2)/(sqrt(pi*dfree)*gamma(dfree/2)*scalev)*
+    (1+((x-loc)/scalev)^2/dfree)^(-(dfree+1)/2)
+}  # end tdistr
 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
@@ -120,8 +119,6 @@ Rename run_var() to roll_var_garch() ?
 
 + [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
 Worker agg_ohlc()
-
-+ [x] Create function run_reg() - adapt from run_zscores()
 
 + [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
 Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
@@ -145,12 +142,6 @@ Adapt from run_covar()
 
 + [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
 This avoids calling calc_var() in loop.
-
-+ [x] Remove volat argument in functions sim_ou(), sim_schwartz(), and sim_df() 
-
-+ [x] In functions sim_df() and sim_schwartz() add argument init_price
-
-+ [x] Create function sim_df() to simulate a Dickey-Fuller process
 
 + [ ] Create function fit_ar() to fit an AR process using matrix algebra
 
@@ -483,6 +474,43 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] In functions calc_reg() and roll_reg() change the default to intercept=TRUE
+
++ [x] Simplify variable names by removing underscores: sym_bols -> symbolv, x_ts -> xtes
+Use last letter "d" for dates, "t" for times, "v" for variables, vectors and lists, "s" for series, etc.
+Run shell script:
+/Users/jerzy/Develop/lecture_slides/scripts/run.sh
+chmod +x run.sh
+./run.sh
+
++ [x] Modify function run_mean() to calculate the running weighted mean if the weight vector is passed as an argument
+
++ [x] Fix run_reg() - keep old version as run_rego()
+Replace
+vars.row(it) = lambda1*(vars.row(it) - arma::square(means_pred.row(it))) + lambda*vars.row(it-1);
+With
+vars.row(it) = lambda1*arma::square(predictor.row(it)-means_pred.row(it)) + lambda*vars.row(it-1);
+Replace
+varz.row(it) = lambda1*arma::square(resids.row(it) - resids.row(it-1)) + lambda*varz.row(it-1);
+With
+varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*varz.row(it-1);
+
++ [x] In functions calc_reg() and roll_reg() make the intercept term optional
+
++ [x] Rename functions run_skew() to ohlc_skew(), run_returns() to ohlc_returns(), run_sharpe() to ohlc_sharpe() and run_variance() to ohlc_variance()
+
++ [x] Update the functions run_var() and run_covar() - subtract the means from returns
+
++ [x] Create function run_var_ohlc() to calculate the running OHLC variance using running formula - adapt from ohlc_variance()
+
++ [x] Create function run_reg() - adapt from run_zscores()
+
++ [x] Remove volat argument in functions sim_ou(), sim_schwartz(), and sim_df() 
+
++ [x] In functions sim_df() and sim_schwartz() add argument init_price
+
++ [x] Create function sim_df() to simulate a Dickey-Fuller process
 
 + [x] Fix the regularization in calc_inv(): Check for zeros in the singular values svd_val to remove the zero singular values
 Use the tolerance argument eigen_thresh.  If svd_val is less than eigen_thresh then remove it by adjusting eigen_max.
