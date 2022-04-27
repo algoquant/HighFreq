@@ -23,8 +23,8 @@ back_test(
 )
 }
 \arguments{
-\item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
-data (the returns in excess of the risk-free rate).}
+\item{\code{returns}}{A \emph{time series} or a \emph{matrix} of asset
+returns data.}
 
 \item{\code{excess}}{A \emph{time series} or a \emph{matrix} of excess
 returns data (the returns in excess of the risk-free rate).}

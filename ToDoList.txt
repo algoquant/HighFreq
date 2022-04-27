@@ -80,18 +80,6 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Fix functions calc_lm() and calc_reg()
-Rename stderr to stderrv.  Add Rcpp:: clauses.
-
-+ [ ] In function roll_sum() set diffit(cumsumv, look_back, false)
-
-+ [ ] Create a function that multiplies the columns of an xts or matrix by a vector of weights, without adding the columns as in (prices %*% weights)
-Equivalent to this in R:
-prices <- lapply(1:NCOL(prices), function (i) weights[i]*prices[, i])
-prices <- rutils::do_call(cbind, prices)
-
-+ [ ] In functions calc_reg() and roll_reg() add an argument called "method" for scaling the residuals
-
 + [ ] Compare the outputs of functions run_reg() versus roll_reg()
 Find the lambda parameter which produces similar values for a given look_back parameter.
 
@@ -101,14 +89,18 @@ Find the lambda parameter which produces similar values for a given look_back pa
 
 + [ ] Add t-values to run_reg()
 
-+ [ ] Create function tdistr() for non-standard Student’s t-distribution
-tdistr <- function(x, dfree, loc=0, scalev=1) {
-  dt((x-loc)/scalev, df=dfree)/scalev
-}  # end tdistr
-tdistr <- function(x, dfree, loc=0, scalev=1) {
-  gamma((dfree+1)/2)/(sqrt(pi*dfree)*gamma(dfree/2)*scalev)*
-    (1+((x-loc)/scalev)^2/dfree)^(-(dfree+1)/2)
-}  # end tdistr
++ [ ] Rename the variable weights to weightv ?
+
++ [ ] Fix function mult_mat_ref() - it doesn't do anything - it doesn't multiply the matrix
+Is it a problem only on the Mac because of incompatible compiler?
+
++ [ ] Create a function that de-means the columns of a matrix
+Performs these operations:
+predictor <- apply(predictor, 2, function(x) (x-mean(x)))
+Or
+predictor <- t(t(predictor) - colMeans(predictor))
+
++ [ ] In functions calc_reg() and roll_reg() add an argument called "method" for scaling the residuals
 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
@@ -474,6 +466,19 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Fix functions calc_lm() and calc_reg()
+Rename stderr to stderrv.  Add prefix Rcpp:: to function calls.
+
++ [x] Rename mult_vec_mat() to mult_mat()
+When dimensions are wrong, don't produce error, just return the original matrix.
+Change by_col to byrow.
+
++ [x] Create a function that multiplies the columns of an xts or matrix by a vector of weights, without adding together the columns as in (prices %*% weights)
+This is done by mult_mat().
+Equivalent to this in R:
+prices <- lapply(1:NCOL(prices), function(i) weights[i]*prices[, i])
+prices <- rutils::do_call(cbind, prices)
 
 + [x] In functions calc_reg() and roll_reg() change the default to intercept=TRUE
 

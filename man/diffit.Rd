@@ -15,7 +15,7 @@ periods) to lag when calculating the differences (the default is
 \code{lagg = 1}).}
 
 \item{\code{pad_zeros}}{\emph{Boolean} argument: Should the output
-\emph{matrix} be padded (extended) with zeros, in order to return a
+\emph{matrix} be padded (extended) with zero values, in order to return a
 \emph{matrix} with the same number of rows as the input? (the default is
 \code{pad_zeros = TRUE})}
 }
@@ -44,11 +44,12 @@ The function \code{diffit()} calculates the differences between the rows
   default is \code{lagg = 1}.
 
   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
-  should be padded (extended) with the rows of the initial (warmup) period
-  at the front, in order to return a \emph{matrix} with the same number of
-  rows as the input \code{tseries}.  The default is \code{pad_zeros = TRUE}.
-  The padding operation can be time-consuming, because it requires the
-  copying of data.
+  should be padded (extended) with zero values in order to return a
+  \emph{matrix} with the same number of rows as the input \code{tseries}.
+  The default is \code{pad_zeros = TRUE}. If \code{pad_zeros = FALSE} then
+  the return \emph{matrix} has a smaller number of rows than the input
+  \code{tseries}. The padding operation can be time-consuming, because it
+  requires the copying of data.
   
   The function \code{diffit()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it much faster than \code{R} code.

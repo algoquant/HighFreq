@@ -79,13 +79,13 @@ returns <- na.omit(rutils::etfenv$returns)
 # Calculate covariance matrix
 covmat <- cov(returns)
 # Calculate shrinkage inverse using RcppArmadillo
-inverse <- HighFreq::calc_inv(covmat, eigen_max=3)
+invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
 # Calculate shrinkage inverse from SVD in R
 svdec <- svd(covmat)
 eigen_max <- 1:3
-inverser <-  svdec$v[, eigen_max] \%*\% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+invsvd <- svdec$v[, eigen_max] \%*\% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 # Compare RcppArmadillo with R
-all.equal(inverse, inverser)
+all.equal(invmat, invsvd)
 }
 
 }

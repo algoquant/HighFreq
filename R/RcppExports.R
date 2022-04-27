@@ -172,7 +172,7 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   \code{lagg = 1}).
 #'   
 #' @param \code{pad_zeros} \emph{Boolean} argument: Should the output
-#'   \emph{matrix} be padded (extended) with zeros, in order to return a
+#'   \emph{matrix} be padded (extended) with zero values, in order to return a
 #'   \emph{matrix} with the same number of rows as the input? (the default is
 #'   \code{pad_zeros = TRUE})
 #'
@@ -196,11 +196,12 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   default is \code{lagg = 1}.
 #' 
 #'   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
-#'   should be padded (extended) with the rows of the initial (warmup) period
-#'   at the front, in order to return a \emph{matrix} with the same number of
-#'   rows as the input \code{tseries}.  The default is \code{pad_zeros = TRUE}.
-#'   The padding operation can be time-consuming, because it requires the
-#'   copying of data.
+#'   should be padded (extended) with zero values in order to return a
+#'   \emph{matrix} with the same number of rows as the input \code{tseries}.
+#'   The default is \code{pad_zeros = TRUE}. If \code{pad_zeros = FALSE} then
+#'   the return \emph{matrix} has a smaller number of rows than the input
+#'   \code{tseries}. The padding operation can be time-consuming, because it
+#'   requires the copying of data.
 #'   
 #'   The function \code{diffit()} is implemented in \code{RcppArmadillo}
 #'   \code{C++} code, which makes it much faster than \code{R} code.
@@ -351,81 +352,160 @@ calc_startpoints <- function(endp, look_back) {
     .Call('_HighFreq_calc_startpoints', PACKAGE = 'HighFreq', endp, look_back)
 }
 
-#' Multiply in place (without copying) the columns or rows of a \emph{matrix}
-#' times a \emph{vector}, element-wise.
+#' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
+#' element-wise.
 #' 
-#' @param \code{vector} A \emph{vector}.
+#' @param \code{vector} A \emph{numeric} \emph{vector}.
 #' 
-#' @param \code{matrix} A \emph{matrix}.
+#' @param \code{matrix} A \emph{numeric} \emph{matrix}.
 #' 
-#' @param \code{by_col} A \emph{Boolean} argument: if \code{TRUE} then multiply
-#'   the columns, otherwise multiply the rows (the default is
-#'   \code{by_col = TRUE}.)
+#' @param \code{byrow} A \emph{Boolean} argument: if \code{TRUE} then multiply
+#'   the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
+#'   (the default is \code{byrow = TRUE}.)
 #' 
-#' @return A single \emph{integer} value, equal to either the number of
-#'   \emph{matrix} columns or the number of rows.
+#' @return A \emph{matrix} equal to the product of the arguments \code{matrix}
+#'   times \code{vector}, with the same dimensions as the argument
+#'   \code{matrix}.
 #' 
 #' @details
-#'   The function \code{mult_vec_mat()} multiplies the columns or rows of a
+#'   The function \code{mult_mat()} multiplies the rows or columns of a
 #'   \emph{matrix} times a \emph{vector}, element-wise.
 #'
-#'   If the number of \emph{vector} elements is equal to the number of matrix
-#'   columns, then it multiplies the columns by the \emph{vector}, and returns
-#'   the number of columns. If the number of \emph{vector} elements is equal to
-#'   the number of rows, then it multiplies the rows, and returns the number of
-#'   rows.
+#'   If \code{byrow = TRUE} (the default), then function \code{mult_mat()}
+#'   multiplies the rows of the argument \code{matrix} times the argument
+#'   \code{vector}.
+#'   Otherwise it multiplies the columns of \code{matrix}.
+#' 
+#'   In \code{R}, \emph{matrix} multiplication is performed by columns.
+#'   Performing multiplication by rows is often required, for example when
+#'   multiplying stock returns by portfolio weights.
+#'   But performing multiplication by rows requires explicit loops in \code{R},
+#'   or it requires \emph{matrix} transpose.  And both are slow.
 #'
-#'   If the \emph{matrix} is square and if \code{by_col} is \code{TRUE} then it
-#'   multiplies the columns, otherwise it multiplies the rows.
-#'   
-#'   It accepts \emph{pointers} to the \emph{matrix} and \emph{vector}, and
-#'   replaces the old \emph{matrix} values with the new values.
-#'   It performs the calculation in place, without copying the \emph{matrix} in
-#'   memory (which greatly increases the computation speed).
-#'   It performs an implicit loop over the \emph{matrix} rows and columns using
-#'   the \emph{Armadillo} operators \code{each_row()} and \code{each_col()},
-#'   instead of performing explicit \code{for()} loops (both methods are
-#'   equally fast).
-#'
-#'   The function \code{mult_vec_mat()} uses \code{RcppArmadillo} \code{C++}
+#'   The function \code{mult_mat()} uses \code{RcppArmadillo} \code{C++}
 #'   code, so when multiplying large \emph{matrix} columns it's several times
 #'   faster than vectorized \code{R} code, and it's even much faster compared
 #'   to \code{R} when multiplying the \emph{matrix} rows.
+#' 
+#'   The function \code{mult_mat()} performs loops over the \emph{matrix} rows
+#'   and columns using the \emph{Armadillo} operators \code{each_row()} and
+#'   \code{each_col()}, instead of performing explicit \code{for()} loops (both
+#'   methods are equally fast).
 #'   
 #' @examples
 #' \dontrun{
-#' # Multiply matrix columns using R
+#' # Create vector and matrix data
 #' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
 #' vectorv <- round(runif(5e2), 2)
-#' prod_uct <- vectorv*matrixv
-#' # Multiply the matrix in place
-#' HighFreq::mult_vec_mat(vectorv, matrixv)
-#' all.equal(prod_uct, matrixv)
-#' # Compare the speed of Rcpp with R code
-#' library(microbenchmark)
-#' summary(microbenchmark(
-#'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv),
-#'     Rcode=vectorv*matrixv,
-#'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' 
-#' # Multiply matrix rows using R
-#' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
-#' vectorv <- round(runif(5e2), 2)
-#' prod_uct <- t(vectorv*t(matrixv))
-#' # Multiply the matrix in place
-#' HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE)
-#' all.equal(prod_uct, matrixv)
+#' # Multiply the matrix rows using R
+#' matrixr <- t(vectorv*t(matrixv))
+#' # Multiply the matrix rows using C++
+#' matrixp <- HighFreq::mult_mat(vectorv, matrixv, byrow=TRUE)
+#' all.equal(matrixr, matrixp)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'     Rcpp=HighFreq::mult_vec_mat(vectorv, matrixv, by_col=FALSE),
+#'     Rcpp=HighFreq::mult_mat(vectorv, matrixv, byrow=TRUE),
 #'     Rcode=t(vectorv*t(matrixv)),
+#'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#'     
+#' # Multiply the matrix columns using R
+#' matrixr <- vectorv*matrixv
+#' # Multiply the matrix columns using C++
+#' matrixp <- HighFreq::mult_mat(vectorv, matrixv, byrow=FALSE)
+#' all.equal(matrixr, matrixp)
+#' # Compare the speed of Rcpp with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'     Rcpp=HighFreq::mult_mat(vectorv, matrixv, byrow=FALSE),
+#'     Rcode=vectorv*matrixv,
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-mult_vec_mat <- function(vector, matrix, by_col = TRUE) {
-    .Call('_HighFreq_mult_vec_mat', PACKAGE = 'HighFreq', vector, matrix, by_col)
+mult_mat <- function(vector, matrix, byrow = TRUE) {
+    .Call('_HighFreq_mult_mat', PACKAGE = 'HighFreq', vector, matrix, byrow)
+}
+
+#' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
+#' element-wise and in place (without copying).
+#' 
+#' @param \code{vector} A \emph{numeric} \emph{vector}.
+#' 
+#' @param \code{matrix} A \emph{numeric} \emph{matrix}.
+#' 
+#' @param \code{byrow} A \emph{Boolean} argument: if \code{TRUE} then multiply
+#'   the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
+#'   (the default is \code{byrow = TRUE}.)
+#' 
+#' @return Void (no return value).
+#' 
+#' @details
+#'   The function \code{mult_mat_ref()} multiplies the rows or columns of a
+#'   \emph{matrix} times a \emph{vector}, element-wise and in place (without
+#'   copying).
+#'
+#'   It accepts a \emph{pointer} to the argument \code{matrix}, and replaces
+#'   the old \code{matrix} values with the new values. It performs the
+#'   calculation in place, without copying the \emph{matrix} in memory, which
+#'   can significantly increase the computation speed for large matrices.
+#'
+#'   If \code{byrow = TRUE} (the default), then function \code{mult_mat_ref()}
+#'   multiplies the rows of the argument \code{matrix} times the argument
+#'   \code{vector}.
+#'   Otherwise it multiplies the columns of \code{matrix}.
+#' 
+#'   In \code{R}, \emph{matrix} multiplication is performed by columns.
+#'   Performing multiplication by rows is often required, for example when
+#'   multiplying stock returns by portfolio weights.
+#'   But performing multiplication by rows requires explicit loops in \code{R},
+#'   or it requires \emph{matrix} transpose.  And both are slow.
+#'
+#'   The function \code{mult_mat_ref()} uses \code{RcppArmadillo} \code{C++}
+#'   code, so when multiplying large \emph{matrix} columns it's several times
+#'   faster than vectorized \code{R} code, and it's even much faster compared
+#'   to \code{R} when multiplying the \emph{matrix} rows.
+#' 
+#'   The function \code{mult_mat_ref()} performs loops over the \emph{matrix} rows
+#'   and columns using the \emph{Armadillo} operators \code{each_row()} and
+#'   \code{each_col()}, instead of performing explicit \code{for()} loops (both
+#'   methods are equally fast).
+#'   
+#' @examples
+#' \dontrun{
+#' # Create vector and matrix data
+#' matrixv <- matrix(round(runif(25e4), 2), nc=5e2)
+#' vectorv <- round(runif(5e2), 2)
+#' 
+#' # Multiply the matrix rows using R
+#' matrixr <- t(vectorv*t(matrixv))
+#' # Multiply the matrix rows using C++
+#' HighFreq::mult_mat_ref(vectorv, matrixv, byrow=TRUE)
+#' all.equal(matrixr, matrixv)
+#' # Compare the speed of Rcpp with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'     Rcpp=HighFreq::mult_mat_ref(vectorv, matrixv, byrow=TRUE),
+#'     Rcode=t(vectorv*t(matrixv)),
+#'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#'     
+#' # Multiply the matrix columns using R
+#' matrixr <- vectorv*matrixv
+#' # Multiply the matrix columns using C++
+#' HighFreq::mult_mat_ref(vectorv, matrixv, byrow=FALSE)
+#' all.equal(matrixr, matrixv)
+#' # Compare the speed of Rcpp with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'     Rcpp=HighFreq::mult_mat_ref(vectorv, matrixv, byrow=FALSE),
+#'     Rcode=vectorv*matrixv,
+#'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+mult_mat_ref <- function(vector, matrix, byrow = TRUE) {
+    invisible(.Call('_HighFreq_mult_mat_ref', PACKAGE = 'HighFreq', vector, matrix, byrow))
 }
 
 #' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
@@ -535,13 +615,13 @@ calc_eigen <- function(tseries) {
 #' # Calculate covariance matrix
 #' covmat <- cov(returns)
 #' # Calculate shrinkage inverse using RcppArmadillo
-#' inverse <- HighFreq::calc_inv(covmat, eigen_max=3)
+#' invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
 #' # Calculate shrinkage inverse from SVD in R
 #' svdec <- svd(covmat)
 #' eigen_max <- 1:3
-#' inverser <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+#' invsvd <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
 #' # Compare RcppArmadillo with R
-#' all.equal(inverse, inverser)
+#' all.equal(invmat, invsvd)
 #' }
 #' 
 #' @export
@@ -4099,15 +4179,15 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' eigen_max <- 3
 #' eigenvec <- eigend$vectors[, 1:eigen_max]
 #' eigenval <- eigend$values[1:eigen_max]
-#' inverse <- eigenvec %*% (t(eigenvec) / eigenval)
+#' invmat <- eigenvec %*% (t(eigenvec) / eigenval)
 #' # Define shrinkage intensity and apply shrinkage to the mean returns
 #' alpha <- 0.5
 #' colmeans <- colMeans(returns)
 #' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 #' # Calculate weights using R
-#' weights <- inverse %*% colmeans
-#' n_col <- NCOL(returns)
-#' weightsr <- weightsr*sd(returns %*% rep(1/n_col, n_col))/sd(returns %*% weightsr)
+#' weights <- invmat %*% colmeans
+#' ncols <- NCOL(returns)
+#' weightsr <- weightsr*sd(returns %*% rep(1/ncols, ncols))/sd(returns %*% weightsr)
 #' # Calculate weights using RcppArmadillo
 #' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
 #' all.equal(weights, weightsr)
@@ -4121,8 +4201,8 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
 #' \code{RcppArmadillo}.
 #' 
-#' @param \code{returns} A \emph{time series} or a \emph{matrix} of returns
-#'   data (the returns in excess of the risk-free rate).
+#' @param \code{returns} A \emph{time series} or a \emph{matrix} of asset
+#'   returns data.
 #'   
 #' @param \code{excess} A \emph{time series} or a \emph{matrix} of excess
 #'   returns data (the returns in excess of the risk-free rate).

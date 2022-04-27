@@ -101,15 +101,15 @@ eigend <- eigen(cov(returns))
 eigen_max <- 3
 eigenvec <- eigend$vectors[, 1:eigen_max]
 eigenval <- eigend$values[1:eigen_max]
-inverse <- eigenvec \%*\% (t(eigenvec) / eigenval)
+invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 alpha <- 0.5
 colmeans <- colMeans(returns)
 colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
-weights <- inverse \%*\% colmeans
-n_col <- NCOL(returns)
-weightsr <- weightsr*sd(returns \%*\% rep(1/n_col, n_col))/sd(returns \%*\% weightsr)
+weights <- invmat \%*\% colmeans
+ncols <- NCOL(returns)
+weightsr <- weightsr*sd(returns \%*\% rep(1/ncols, ncols))/sd(returns \%*\% weightsr)
 # Calculate weights using RcppArmadillo
 weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
 all.equal(weights, weightsr)

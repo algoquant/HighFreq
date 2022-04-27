@@ -88,17 +88,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// mult_vec_mat
-arma::uword mult_vec_mat(arma::vec& vector, arma::mat& matrix, bool by_col);
-RcppExport SEXP _HighFreq_mult_vec_mat(SEXP vectorSEXP, SEXP matrixSEXP, SEXP by_colSEXP) {
+// mult_mat
+arma::mat mult_mat(arma::vec vector, arma::mat matrix, bool byrow);
+RcppExport SEXP _HighFreq_mult_mat(SEXP vectorSEXP, SEXP matrixSEXP, SEXP byrowSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type vector(vectorSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type matrix(matrixSEXP);
-    Rcpp::traits::input_parameter< bool >::type by_col(by_colSEXP);
-    rcpp_result_gen = Rcpp::wrap(mult_vec_mat(vector, matrix, by_col));
+    Rcpp::traits::input_parameter< arma::vec >::type vector(vectorSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type matrix(matrixSEXP);
+    Rcpp::traits::input_parameter< bool >::type byrow(byrowSEXP);
+    rcpp_result_gen = Rcpp::wrap(mult_mat(vector, matrix, byrow));
     return rcpp_result_gen;
+END_RCPP
+}
+// mult_mat_ref
+void mult_mat_ref(arma::vec vector, arma::mat matrix, bool byrow);
+RcppExport SEXP _HighFreq_mult_mat_ref(SEXP vectorSEXP, SEXP matrixSEXP, SEXP byrowSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type vector(vectorSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type matrix(matrixSEXP);
+    Rcpp::traits::input_parameter< bool >::type byrow(byrowSEXP);
+    mult_mat_ref(vector, matrix, byrow);
+    return R_NilValue;
 END_RCPP
 }
 // calc_eigen
@@ -836,7 +848,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_diffit", (DL_FUNC) &_HighFreq_diffit, 3},
     {"_HighFreq_calc_endpoints", (DL_FUNC) &_HighFreq_calc_endpoints, 3},
     {"_HighFreq_calc_startpoints", (DL_FUNC) &_HighFreq_calc_startpoints, 2},
-    {"_HighFreq_mult_vec_mat", (DL_FUNC) &_HighFreq_mult_vec_mat, 3},
+    {"_HighFreq_mult_mat", (DL_FUNC) &_HighFreq_mult_mat, 3},
+    {"_HighFreq_mult_mat_ref", (DL_FUNC) &_HighFreq_mult_mat_ref, 3},
     {"_HighFreq_calc_eigen", (DL_FUNC) &_HighFreq_calc_eigen, 1},
     {"_HighFreq_calc_inv", (DL_FUNC) &_HighFreq_calc_inv, 3},
     {"_HighFreq_calc_scaled", (DL_FUNC) &_HighFreq_calc_scaled, 2},
