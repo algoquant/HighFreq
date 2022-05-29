@@ -24,10 +24,28 @@ Calculate the running weighted means of streaming \emph{time series} data.
 \details{
 The function \code{run_mean()} calculates the running weighted means of
   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
-  present and past values using the decay factor \eqn{\lambda}:
+  present and past values using the decay factor \eqn{\lambda}.
+  If the \code{weights} argument is omitted, then the function
+  \code{run_mean()} simply calculates the exponentially weighted moving
+  average value of the streaming \emph{time series} data \eqn{p_t}:
+  \deqn{
+    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1} = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+  }
+  
+  Some applications require applying additional weight factors, like for
+  example the volume-weighted average price indicator.  The streaming prices
+  are multiplied by the streaming trading volumes.
+  
+  If the \code{weights} argument is included, then the function
+  \code{run_mean()} calculates the running weighted means in two steps.
+  
+  First it calculates the running mean weights \eqn{\mu^w_t}:
   \deqn{
     \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
   }
+  
+  Second it calculates the the running mean products \eqn{\mu^p_t} of the
+  weights \eqn{w_t} and the data \eqn{p_t}:
   \deqn{
     \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
   }
@@ -41,12 +59,6 @@ The function \code{run_mean()} calculates the running weighted means of
     \mu_t = \frac{\mu^p_t}{\mu^w_t}
   }
 
-  If the \code{weights} argument is omitted, then the function
-  \code{run_mean()} simply calculates the running means of \eqn{p_t}:
-  \deqn{
-    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
-  }
-  
   The above recursive formulas are convenient for processing live streaming
   data because they don't require maintaining a buffer of past data.
   The formulas are equivalent to a convolution with exponentially decaying

@@ -5,7 +5,7 @@
 \title{Calculate the mean (location) of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_mean(tseries, method = "moment", conf_lev = 0.75)
+calc_mean(tseries, method = "moment", confl = 0.75)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
@@ -13,8 +13,8 @@ calc_mean(tseries, method = "moment", conf_lev = 0.75)
 \item{\code{method}}{A \emph{string} specifying the type of the mean
 (location) model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the mean (location) of the columns of
@@ -63,16 +63,16 @@ summary(microbenchmark(
   Rcode=sapply(returns, mean),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile mean (location)
-HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
+HighFreq::calc_mean(returns, method="quantile", confl=0.9)
 # Calculate the quantile mean (location) in R
 colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+all.equal(drop(HighFreq::calc_mean(returns, method="quantile", confl=0.9)), 
   colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+  Rcpp=HighFreq::calc_mean(returns, method="quantile", confl=0.9),
   Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the column medians in RcppArmadillo

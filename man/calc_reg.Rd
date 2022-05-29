@@ -12,7 +12,7 @@ calc_reg(
   method = "least_squares",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
-  conf_lev = 0.1,
+  confl = 0.1,
   alpha = 0
 )
 }
@@ -35,12 +35,12 @@ small singular values in order to regularize the inverse of the
 \code{predictor} matrix (the default is \code{1e-5}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the shrinkage inverse of the \code{predictor}
+values used for calculating the regularized inverse of the \code{predictor}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 the number of columns of \code{predictor}).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
@@ -67,10 +67,9 @@ The function \code{calc_reg()} performs multivariate regression using
   faster than \code{lm()}.
 
   If \code{method = "regular"} then it performs shrinkage regression.  It
-  calculates the shrinkage inverse of the \code{predictor} matrix from its
-  singular value decomposition.  It applies dimension regularization by
-  selecting only the largest singular values equal in number to
-  \code{eigen_max}.
+  calculates the regularized inverse of the \code{predictor} matrix from its
+  singular value decomposition.  It performs regularization by selecting
+  only the largest singular values equal in number to \code{eigen_max}.
   
   If \code{method = "quantile"} then it performs quantile regression (not
   implemented yet).

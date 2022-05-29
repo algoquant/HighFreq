@@ -5,7 +5,7 @@
 \title{Calculate the dispersion (variance) of the columns of a \emph{time series}
 or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(tseries, method = "moment", conf_lev = 0.75)
+calc_var(tseries, method = "moment", confl = 0.75)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
@@ -13,8 +13,8 @@ calc_var(tseries, method = "moment", conf_lev = 0.75)
 \item{\code{method}}{A \emph{string} specifying the type of the dispersion
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix
@@ -25,19 +25,18 @@ Calculate the dispersion (variance) of the columns of a \emph{time series}
 or a \emph{matrix} using \code{RcppArmadillo}.
 }
 \details{
-The dispersion is a measure of the variability of the data.  Examples of
-  dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
-
-  The function \code{calc_var()} calculates the dispersion of the
+The function \code{calc_var()} calculates the dispersion of the
   columns of a \emph{time series} or a \emph{matrix} of data using
   \code{RcppArmadillo} \code{C++} code.
   
+  The dispersion is a measure of the variability of the data.  Examples of
+  dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
+
   If \code{method = "moment"} (the default) then \code{calc_var()}
   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
   (the variance).
-
-  If \code{method = "moment"} then \code{calc_var()} performs the same
-  calculation as the function \code{colVars()} from package
+  Then \code{calc_var()} performs the same calculation as the function
+  \code{colVars()} from package
   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 

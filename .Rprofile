@@ -6,5 +6,9 @@
 # set.seed(1234)
 # .First <- function() cat("n   Welcome to R!nn")
 # .Last <- function()  cat("n   Goodbye!nn")
+
 library(HighFreq)
 options(rgl.useNULL=TRUE)
+
+# Suppress spurious timezone warning message: "timezone of object is different than current timezone"
+options(xts_check_TZ=FALSE)

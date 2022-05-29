@@ -10,13 +10,15 @@ back_test(
   returns,
   startp,
   endp,
-  lambda,
-  method = "ranksharpe",
+  lambda = 0,
+  method = "sharpem",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
-  conf_lev = 0.1,
+  confl = 0.1,
   alpha = 0,
-  scale = TRUE,
+  rankw = FALSE,
+  centerw = FALSE,
+  scalew = "voltarget",
   vol_target = 0.01,
   coeff = 1,
   bid_offer = 0
@@ -43,25 +45,31 @@ default is \code{1})}
 \code{0})}
 
 \item{\code{method}}{A \emph{string} specifying the method for calculating
-the weights (see Details) (the default is \code{method = "ranksharpe"})}
+the weights (see Details) (the default is \code{method = "sharpem"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{returns} matrix (the default is \code{1e-5}).}
+\code{covariance matrix} (the default is \code{1e-5}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the shrinkage inverse of the \code{returns}
+values used for calculating the regularized inverse of the \code{returns}
 matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 the number of columns of \code{returns}).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 
 \item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
 (the default is \code{0}).}
 
-\item{\code{scale}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scale = TRUE}).}
+\item{\code{rankw}}{A \emph{Boolean} specifying whether the weights should
+be ranked (the default is \code{rankw = FALSE}).}
+
+\item{\code{centerw}}{A \emph{Boolean} specifying whether the weights should
+be centered (the default is \code{centerw = FALSE}).}
+
+\item{\code{scalew}}{A \emph{string} specifying the method for scaling
+the weights (the default is \code{scalew = "voltarget"}).}
 
 \item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
 weights (the default is \code{1e-5})}
@@ -85,8 +93,8 @@ The function \code{back_test()} performs a backtest simulation of a
   passes the subset matrix of excess returns into the function
   \code{calc_weights()}, which calculates the optimal portfolio weights at
   each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
-  \code{method}, and \code{scale} are also passed to the function
-  \code{calc_weights()}.
+  \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
+  also passed to the function \code{calc_weights()}.
   
   It then recursively averages the weights \eqn{w_i} at the \emph{end point
   = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
@@ -94,7 +102,7 @@ The function \code{back_test()} performs a backtest simulation of a
   \deqn{
     w_i = (1-\lambda) w_i + \lambda w_{i-1}
   }
-  The purpose of averaging the weights is to reduce their variance to
+  The purpose of averaging the weights is to reduce their variance, to
   improve their out-of-sample performance.  It is equivalent to extending
   the portfolio holding period beyond the time interval between neighboring
   \emph{end points}.
@@ -131,7 +139,7 @@ nrows <- NROW(endp)
 # Define 12-month look-back interval and start points over sliding window
 look_back <- 12
 startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
-# Define shrinkage and regularization intensities
+# Define return shrinkage and regularization intensities
 alpha <- 0.5
 eigen_max <- 3
 # Simulate a monthly rolling portfolio optimization strategy

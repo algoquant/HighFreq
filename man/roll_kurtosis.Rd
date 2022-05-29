@@ -14,7 +14,7 @@ roll_kurtosis(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  conf_lev = 0.75
+  confl = 0.75
 )
 }
 \arguments{
@@ -38,8 +38,8 @@ calculating the end points (the default is \code{stub = 0}).}
 \item{\code{method}}{A \emph{string} specifying the type of the kurtosis
 model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A \emph{matrix} of kurtosis estimates with the same number of
@@ -86,13 +86,13 @@ returns <- na.omit(rutils::etfenv$returns$VTI)
 endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
 startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
+kurtosisv <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 # Calculate the rolling kurtosis using R code
 kurt_r <- sapply(1:NROW(endp), function(it) {
   HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 })  # end sapply
 # Compare the kurtosis estimates
-all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
+all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

@@ -6,10 +6,10 @@
 points of an \emph{OHLC} time series, using \code{R} code.}
 \usage{
 roll_apply(
-  xtes,
+  xtsv,
   agg_fun,
   look_back = 2,
-  endpoints = seq_along(xtes),
+  endpoints = seq_along(xtsv),
   by_columns = FALSE,
   out_xts = TRUE,
   ...
@@ -18,7 +18,7 @@ roll_apply(
 \arguments{
 \item{...}{additional parameters to the function \code{agg_fun}.}
 
-\item{\code{xtes}}{An \emph{OHLC} time series of prices and trading volumes, in
+\item{\code{xtsv}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 
 \item{\code{agg_fun}}{The name of the aggregation function to be applied over a

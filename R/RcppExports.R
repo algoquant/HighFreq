@@ -508,7 +508,7 @@ mult_mat_ref <- function(vector, matrix, byrow = TRUE) {
     invisible(.Call('_HighFreq_mult_mat_ref', PACKAGE = 'HighFreq', vector, matrix, byrow))
 }
 
-#' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+#' Calculate the eigen decomposition of the \emph{covariance matrix} of returns
 #' data using \code{RcppArmadillo}.
 #' 
 #' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns
@@ -519,9 +519,9 @@ mult_mat_ref <- function(vector, matrix, byrow = TRUE) {
 #'   "vectors").
 #'
 #' @details
-#'   The function \code{calc_eigen()} first calculates the covariance
-#'   \emph{matrix} of \code{tseries}, and then calculates the eigen
-#'   decomposition of the covariance \emph{matrix}.
+#'   The function \code{calc_eigen()} first calculates the \emph{covariance
+#'   matrix} of \code{tseries}, and then calculates the eigen
+#'   decomposition of the \emph{covariance matrix}.
 #'
 #' @examples
 #' \dontrun{
@@ -546,7 +546,7 @@ calc_eigen <- function(tseries) {
     .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', tseries)
 }
 
-#' Calculate the shrinkage inverse of a \emph{matrix} of data using Singular
+#' Calculate the regularized inverse of a \emph{matrix} of data using Singular
 #' Value Decomposition (\emph{SVD}).
 #' 
 #' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
@@ -556,50 +556,51 @@ calc_eigen <- function(tseries) {
 #'   matrix \code{tseries} (the default is \code{0.01}).
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-#'   values used for calculating the shrinkage inverse of the matrix
+#'   values used for calculating the regularized inverse of the matrix
 #'   \code{tseries} (the default is \code{eigen_max = 0} - equivalent to
 #'   \code{eigen_max} equal to the number of columns of \code{tseries}).
 #'
-#' @return A \emph{matrix} equal to the shrinkage inverse of the matrix
+#' @return A \emph{matrix} equal to the regularized inverse of the matrix
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{calc_inv()} calculates the shrinkage inverse of the
+#'   The function \code{calc_inv()} calculates the regularized inverse of the
 #'   matrix \code{tseries} using Singular Value Decomposition (\emph{SVD}).
 #'   
 #'   The function \code{calc_inv()} first performs Singular Value Decomposition
 #'   (\emph{SVD}) of the matrix \code{tseries}.  
-#'   The \emph{SVD} of a matrix \eqn{\strong{A}} is defined as the
+#'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
 #'   factorization:
 #'   \deqn{
-#'     \strong{A} = \strong{U}  \, \Sigma  \, \strong{V}^T
+#'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
 #'   }
 #'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
 #'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
 #'   \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
 #'   
-#'   The inverse \eqn{\strong{A}^{-1}} of the matrix \eqn{\strong{A}} can be
+#'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
 #'   calculated from the \emph{SVD} matrices as:
 #'   \deqn{
-#'     \strong{A}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+#'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
 #'   }
 #'   
-#'   The \emph{regularized inverse} of the matrix \eqn{\strong{A}} is given by:
+#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is given
+#'   by:
 #'   \deqn{
-#'     \strong{A}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+#'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
 #'   }
 #'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
 #'   \emph{SVD} matrices with the rows and columns corresponding to zero
 #'   \emph{singular values} removed.
 #'   
-#'   The function \code{calc_inv()} applies regularization by discarding the
+#'   The function \code{calc_inv()} performs regularization by discarding the
 #'   smallest singular values \eqn{\sigma_i} that are less than the threshold
 #'   level \code{eigen_thresh} times the sum of all the singular values:
 #'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
 #'   
 #'   It then discards additional singular values so that only the largest
 #'   \code{eigen_max} singular values remain.  
-#'   It calculates the shrinkage inverse from the \emph{SVD} matrices using
+#'   It calculates the regularized inverse from the \emph{SVD} matrices using
 #'   only the largest singular values up to \code{eigen_max}.  For example, if
 #'   \code{eigen_max = 3} then it only uses the \code{3} largest singular
 #'   values. This has the effect of dimension shrinkage.
@@ -614,9 +615,9 @@ calc_eigen <- function(tseries) {
 #' returns <- na.omit(rutils::etfenv$returns)
 #' # Calculate covariance matrix
 #' covmat <- cov(returns)
-#' # Calculate shrinkage inverse using RcppArmadillo
+#' # Calculate regularized inverse using RcppArmadillo
 #' invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
-#' # Calculate shrinkage inverse from SVD in R
+#' # Calculate regularized inverse from SVD in R
 #' svdec <- svd(covmat)
 #' eigen_max <- 1:3
 #' invsvd <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
@@ -1243,10 +1244,28 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' @details
 #'   The function \code{run_mean()} calculates the running weighted means of
 #'   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
-#'   present and past values using the decay factor \eqn{\lambda}:
+#'   present and past values using the decay factor \eqn{\lambda}.
+#'   If the \code{weights} argument is omitted, then the function
+#'   \code{run_mean()} simply calculates the exponentially weighted moving
+#'   average value of the streaming \emph{time series} data \eqn{p_t}:
+#'   \deqn{
+#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1} = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+#'   }
+#'   
+#'   Some applications require applying additional weight factors, like for
+#'   example the volume-weighted average price indicator.  The streaming prices
+#'   are multiplied by the streaming trading volumes.
+#'   
+#'   If the \code{weights} argument is included, then the function
+#'   \code{run_mean()} calculates the running weighted means in two steps.
+#'   
+#'   First it calculates the running mean weights \eqn{\mu^w_t}:
 #'   \deqn{
 #'     \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
 #'   }
+#'   
+#'   Second it calculates the the running mean products \eqn{\mu^p_t} of the
+#'   weights \eqn{w_t} and the data \eqn{p_t}:
 #'   \deqn{
 #'     \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
 #'   }
@@ -1260,12 +1279,6 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'     \mu_t = \frac{\mu^p_t}{\mu^w_t}
 #'   }
 #' 
-#'   If the \code{weights} argument is omitted, then the function
-#'   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
-#'   \deqn{
-#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
-#'   }
-#'   
 #'   The above recursive formulas are convenient for processing live streaming
 #'   data because they don't require maintaining a buffer of past data.
 #'   The formulas are equivalent to a convolution with exponentially decaying
@@ -1912,8 +1925,8 @@ run_zscores <- function(response, predictor, lambda, demean = TRUE) {
 #' @param \code{method} A \emph{string} specifying the type of the mean
 #'   (location) model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the mean (location) of the columns of
 #'   \code{tseries}.
@@ -1957,16 +1970,16 @@ run_zscores <- function(response, predictor, lambda, demean = TRUE) {
 #'   Rcode=sapply(returns, mean),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile mean (location)
-#' HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_mean(returns, method="quantile", confl=0.9)
 #' # Calculate the quantile mean (location) in R
 #' colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 #' # Compare the values
-#' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+#' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", confl=0.9)), 
 #'   colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
 #'   check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+#'   Rcpp=HighFreq::calc_mean(returns, method="quantile", confl=0.9),
 #'   Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the column medians in RcppArmadillo
@@ -1984,8 +1997,8 @@ run_zscores <- function(response, predictor, lambda, demean = TRUE) {
 #' }
 #' 
 #' @export
-calc_mean <- function(tseries, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, conf_lev)
+calc_mean <- function(tseries, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the variance of a single-column \emph{time series} or a
@@ -2028,26 +2041,25 @@ calc_varvec <- function(tseries) {
 #' @param \code{method} A \emph{string} specifying the type of the dispersion
 #'   model (the default is \code{method = "moment"} - see Details).
 #'    
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A row vector equal to the dispersion of the columns of the matrix
 #'   \code{tseries}.
 #'
 #' @details
-#'   The dispersion is a measure of the variability of the data.  Examples of
-#'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
-#'
 #'   The function \code{calc_var()} calculates the dispersion of the
 #'   columns of a \emph{time series} or a \emph{matrix} of data using
 #'   \code{RcppArmadillo} \code{C++} code.
 #'   
+#'   The dispersion is a measure of the variability of the data.  Examples of
+#'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
+#'
 #'   If \code{method = "moment"} (the default) then \code{calc_var()}
 #'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
 #'   (the variance).
-#'
-#'   If \code{method = "moment"} then \code{calc_var()} performs the same
-#'   calculation as the function \code{colVars()} from package
+#'   Then \code{calc_var()} performs the same calculation as the function
+#'   \code{colVars()} from package
 #'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
 #'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 #'
@@ -2101,8 +2113,86 @@ calc_varvec <- function(tseries) {
 #' }
 #' 
 #' @export
-calc_var <- function(tseries, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, conf_lev)
+calc_var <- function(tseries, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, confl)
+}
+
+#' Calculate the covariance matrix of the columns of a \emph{time series}
+#' using \code{RcppArmadillo}.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#'   
+#' @param \code{method} A \emph{string} specifying the type of the covariance
+#'   model (the default is \code{method = "moment"} - see Details).
+#'    
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
+#'
+#' @return A square matrix with the covariance coefficients of the columns of
+#'   the \emph{time series} \code{tseries}.
+#'
+#' @details
+#'   The function \code{calc_covar()} calculates the covariance matrix of the
+#'   columns of a \emph{time series} or a \emph{matrix} of data using
+#'   \code{RcppArmadillo} \code{C++} code.
+#'   The covariance is a measure of the codependency of the data.
+#'
+#'   If \code{method = "moment"} (the default) then \code{calc_covar()}
+#'   calculates the covariance as the second co-moment:
+#'   \deqn{
+#'     \sigma_{xy} = \frac{1}{n-1} \sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})
+#'   }
+#'   Then \code{calc_covar()} performs the same calculation as the \code{R}
+#'   function \code{stats::cov()}.
+#'
+#'   If \code{method = "quantile"} then it calculates the covariance as the
+#'   difference between the quantiles as follows:
+#'   \deqn{
+#'     \mu = q_{\alpha} - q_{1-\alpha}
+#'   }
+#'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+#'   
+#'   If \code{method = "nonparametric"} then it calculates the covariance as the
+#'   Median Absolute Deviation (\emph{MAD}):
+#'   \deqn{
+#'     MAD = median(abs(x - median(x)))
+#'   }
+#'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+#'   comparable to the standard deviation.
+#'
+#'   If \code{method = "nonparametric"} then \code{calc_covar()} performs the
+#'   same calculation as the function \code{stats::mad()}, but it's much faster
+#'   because it uses \code{RcppArmadillo} \code{C++} code.
+#'
+#'   If the number of rows of \code{tseries} is less than \code{3} then it
+#'   returns zeros.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate VTI and XLF returns
+#' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
+#' # Compare HighFreq::calc_covar() with standard var()
+#' all.equal(drop(HighFreq::calc_covar(returns)), 
+#'   cov(returns), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with matrixStats and with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_covar(returns),
+#'   Rcode=cov(returns),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' # Compare HighFreq::calc_covar() with stats::mad()
+#' all.equal(drop(HighFreq::calc_covar(returns, method="nonparametric")), 
+#'   sapply(returns, mad), check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with stats::mad()
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_covar(returns, method="nonparametric"),
+#'   Rcode=sapply(returns, mad),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_covar <- function(tseries, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_calc_covar', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the variance of returns aggregated over end points. 
@@ -2361,8 +2451,8 @@ calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag =
 #' @param \code{method} A \emph{string} specifying the type of the skewness
 #'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the skewness of the columns of
 #'   \code{tseries}.
@@ -2413,13 +2503,13 @@ calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag =
 #'   Rcode=calc_skewr(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile skewness
-#' HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_skew(returns, method="quantile", confl=0.9)
 #' # Calculate the quantile skewness in R
 #' calc_skewq <- function(x, a = 0.75) {
 #'   	quantiles <- quantile(x, c(1-a, 0.5, a), type=5)
 #'   	(quantiles[3] + quantiles[1] - 2*quantiles[2])/(quantiles[3] - quantiles[1])
 #' }  # end calc_skewq
-#' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)), 
+#' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", confl=0.9)), 
 #'   calc_skewq(returns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
@@ -2440,8 +2530,8 @@ calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag =
 #' }
 #' 
 #' @export
-calc_skew <- function(tseries, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, conf_lev)
+calc_skew <- function(tseries, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -2452,8 +2542,8 @@ calc_skew <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' @param \code{method} A \emph{string} specifying the type of the kurtosis
 #'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the kurtosis of the columns of
 #'   \code{tseries}.
@@ -2506,13 +2596,13 @@ calc_skew <- function(tseries, method = "moment", conf_lev = 0.75) {
 #'   Rcode=calc_kurtr(returns),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' # Calculate the quantile kurtosis
-#' HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)
+#' HighFreq::calc_kurtosis(returns, method="quantile", confl=0.9)
 #' # Calculate the quantile kurtosis in R
 #' calc_kurtq <- function(x, a=0.9) {
 #'   	quantiles <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
 #'   	(quantiles[4] - quantiles[1])/(quantiles[3] - quantiles[2])
 #' }  # end calc_kurtq
-#' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)), 
+#' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", confl=0.9)), 
 #'   calc_kurtq(returns, a=0.9), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
@@ -2533,8 +2623,8 @@ calc_skew <- function(tseries, method = "moment", conf_lev = 0.75) {
 #' }
 #' 
 #' @export
-calc_kurtosis <- function(tseries, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, conf_lev)
+calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
@@ -2727,12 +2817,12 @@ calc_lm <- function(response, predictor) {
 #'   \code{predictor} matrix (the default is \code{1e-5}).
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-#'   values used for calculating the shrinkage inverse of the \code{predictor}
+#'   values used for calculating the regularized inverse of the \code{predictor}
 #'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 #'   the number of columns of \code{predictor}).
 #'   
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -2754,10 +2844,9 @@ calc_lm <- function(response, predictor) {
 #'   faster than \code{lm()}.
 #'
 #'   If \code{method = "regular"} then it performs shrinkage regression.  It
-#'   calculates the shrinkage inverse of the \code{predictor} matrix from its
-#'   singular value decomposition.  It applies dimension regularization by
-#'   selecting only the largest singular values equal in number to
-#'   \code{eigen_max}.
+#'   calculates the regularized inverse of the \code{predictor} matrix from its
+#'   singular value decomposition.  It performs regularization by selecting
+#'   only the largest singular values equal in number to \code{eigen_max}.
 #'   
 #'   If \code{method = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
@@ -2811,8 +2900,8 @@ calc_lm <- function(response, predictor) {
 #' }
 #' 
 #' @export
-calc_reg <- function(response, predictor, intercept = TRUE, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, intercept, method, eigen_thresh, eigen_max, conf_lev, alpha)
+calc_reg <- function(response, predictor, intercept = TRUE, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, intercept, method, eigen_thresh, eigen_max, confl, alpha)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -2909,8 +2998,8 @@ calc_reg <- function(response, predictor, intercept = TRUE, method = "least_squa
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
-roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_roll_mean', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, conf_lev)
+roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_roll_mean', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3047,8 +3136,8 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, conf_lev)
+roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3220,8 +3309,8 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' @param \code{method} A \emph{string} specifying the type of the skewness
 #'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A \emph{matrix} of skewness estimates with the same number of
 #'   columns as the input time series \code{tseries}, and the number of rows
@@ -3263,13 +3352,13 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
 #' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-#' skew_ness <- HighFreq::roll_skew(returns, step=25, look_back=3)
+#' skewv <- HighFreq::roll_skew(returns, step=25, look_back=3)
 #' # Calculate the rolling skewness using R code
-#' skew_r <- sapply(1:NROW(endp), function(it) {
+#' skewr <- sapply(1:NROW(endp), function(it) {
 #'   HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 #' })  # end sapply
 #' # Compare the skewness estimates
-#' all.equal(drop(skew_ness), skew_r, check.attributes=FALSE)
+#' all.equal(drop(skewv), skewr, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -3280,8 +3369,8 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, conf_lev)
+roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
@@ -3308,8 +3397,8 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' @param \code{method} A \emph{string} specifying the type of the kurtosis
 #'   model (the default is \code{method = "moment"} - see Details).
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A \emph{matrix} of kurtosis estimates with the same number of
 #'   columns as the input time series \code{tseries}, and the number of rows
@@ -3350,13 +3439,13 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
 #' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 #' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-#' kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
+#' kurtosisv <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 #' # Calculate the rolling kurtosis using R code
 #' kurt_r <- sapply(1:NROW(endp), function(it) {
 #'   HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 #' })  # end sapply
 #' # Compare the kurtosis estimates
-#' all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
+#' all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -3367,8 +3456,8 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, conf_lev)
+roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -3411,12 +3500,12 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   \code{predictor} matrix (the default is \code{1e-5}).
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-#'   values used for calculating the shrinkage inverse of the \code{predictor}
+#'   values used for calculating the regularized inverse of the \code{predictor}
 #'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 #'   the number of columns of \code{predictor}).
 #'   
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
@@ -3487,8 +3576,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' }
 #' 
 #' @export
-roll_reg <- function(response, predictor, intercept = TRUE, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, conf_lev, alpha)
+roll_reg <- function(response, predictor, intercept = TRUE, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, confl, alpha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a
@@ -3646,8 +3735,8 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #' @param \code{method} A \emph{string} specifying the type of the model for the
 #'   estimator (the default is \code{method = "moment"}.)
 #'
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
 #'   series \code{tseries}, and the number of rows equal to the number of end
@@ -3712,8 +3801,8 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", conf_lev = 0.75) {
-    .Call('_HighFreq_roll_fun', PACKAGE = 'HighFreq', tseries, fun, startp, endp, step, look_back, stub, method, conf_lev)
+roll_fun <- function(tseries, fun = "calc_var", startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call('_HighFreq_roll_fun', PACKAGE = 'HighFreq', tseries, fun, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
@@ -4097,33 +4186,40 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
     .Call('_HighFreq_lik_garch', PACKAGE = 'HighFreq', omega, alpha, beta, returns, minval)
 }
 
-#' Calculate the optimal portfolio weights for different types of objective
-#' functions.
+#' Calculate the optimal portfolio weights using a variety of different
+#' objective functions.
 #' 
 #' @param \code{returns} A \emph{time series} or a \emph{matrix} of returns
 #'   data (the returns in excess of the risk-free rate).
 #'   
 #' @param \code{method} A \emph{string} specifying the method for
 #'   calculating the weights (see Details) (the default is \code{method =
-#'   "ranksharpe"})
+#'   "sharpem"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 #'   small singular values in order to regularize the inverse of the
-#'   \code{returns} matrix (the default is \code{1e-5}).
+#'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-#'   values used for calculating the shrinkage inverse of the \code{returns}
-#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-#'   the number of columns of \code{returns}).
+#'   values used for calculating the regularized inverse of the
+#'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
+#'   equivalent to \code{eigen_max} equal to the number of columns of
+#'   \code{returns}).
 #'   
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
-#' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-#'   (the default is \code{0}).
+#' @param \code{alpha} The shrinkage intensity of \code{returns}.
+#'   (values between \code{0} and \code{1} - the default is \code{0}).
 #' 
-#' @param \code{scale} A \emph{Boolean} specifying whether the weights should
-#'   be scaled (the default is \code{scale = TRUE}).
+#' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
+#'   be ranked (the default is \code{rankw = FALSE}).
+#'
+#' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
+#'   be centered (the default is \code{centerw = FALSE}).
+#'
+#' @param \code{scalew} A \emph{string} specifying the method for scaling
+#'   the weights (the default is \code{scalew = "voltarget"}).
 #'
 #' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
 #'   weights (the default is \code{0.001})
@@ -4133,49 +4229,93 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'
 #' @details
 #'   The function \code{calc_weights()} calculates the optimal portfolio
-#'   weights for different types of methods, using \code{RcppArmadillo}
-#'   \code{C++} code.
+#'   weights using a variety of different objective functions.
 #' 
-#'   If \code{method = "ranksharpe"} (the default) then it calculates the
-#'   weights as the ranks (order index) of the trailing Sharpe ratios of the
-#'   asset \code{returns}.
-#'
-#'   If \code{method = "rank"} then it calculates the weights as the ranks
-#'   (order index) of the last row of the \code{returns}.
-#'
-#'   If \code{method = "max_sharpe"} then \code{calc_weights()} calculates
-#'   the weights of the maximum Sharpe portfolio, by multiplying the inverse of
-#'   the covariance \emph{matrix} times the mean column returns.
-#'
-#'   If \code{method = "min_var"} then it calculates the weights of the
-#'   minimum variance portfolio under linear constraints.
-#'
-#'   If \code{method = "min_varpca"} then it calculates the weights of the
-#'   minimum variance portfolio under quadratic constraints (which is the
+#'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
+#'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
+#'   regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
+#'   times the mean column returns \eqn{\mu}:
+#'   \deqn{
+#'     \strong{w} = \strong{C}^{-1} \mu
+#'   }
+#'   
+#'   If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
+#'   medians instead of the means.
+#'   
+#'   If \code{method = "minvarlin"} then it calculates the weights of the
+#'   minimum variance portfolio under linear constraint, by multiplying the
+#'   regularized inverse of the \emph{covariance matrix} times the unit vector:
+#'   \deqn{
+#'     \strong{w} = \strong{C}^{-1} \strong{1}
+#'   }
+#'   
+#'   If \code{method = "minvarquad"} then it calculates the weights of the
+#'   minimum variance portfolio under quadratic constraint (which is the
 #'   highest order principal component).
 #'
-#'   If \code{scale = TRUE} (the default) then the weights are scaled so that
-#'   the resulting portfolio has a volatility equal to \code{vol_target}.
+#'   If \code{method = "sharpem"} then it calculates the momentum weights equal
+#'   to the Sharpe ratios (the \code{returns} divided by their standard
+#'   deviations):
+#'   \deqn{
+#'     \strong{w} = \frac{\mu}{\sigma}
+#'   }
 #'
-#'   \code{calc_weights()} calculates the shrinkage inverse of the covariance
-#'   \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
-#'   dimension regularization by selecting only the largest eigenvalues equal
-#'   in number to \code{eigen_max}. 
+#'   If \code{method = "kellym"} then it calculates the momentum weights equal
+#'   to the Kelly ratios (the \code{returns} divided by their variance):
+#'   \deqn{
+#'     \strong{w} = \frac{\mu}{\sigma^2}
+#'   }
+#'
+#'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
+#'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
+#'   It performs regularization by selecting only the largest eigenvalues equal
+#'   in number to \code{eigen_max}.
 #'   
 #'   In addition, \code{calc_weights()} applies shrinkage to the columns of
-#'   \code{returns}, by shrinking their means to their common mean value. The
-#'   shrinkage intensity \code{alpha} determines the amount of shrinkage that
-#'   is applied, with \code{alpha = 0} representing no shrinkage (with the
-#'   column means of \code{returns} unchanged), and \code{alpha = 1}
-#'   representing complete shrinkage (with the column means of \code{returns}
-#'   all equal to the single mean of all the columns).
+#'   \code{returns}, by shrinking their means to their common mean value:
+#'   \deqn{
+#'     r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+#'   }
+#'   Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
+#'   mean of all the columns.
+#'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
+#'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
+#'   column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+#'   complete shrinkage (with the column means all equal to the single mean of
+#'   all the columns: \eqn{r_i = \bar{r}}).
+#'
+#'   After the weights are calculated, they are scaled, depending on several
+#'   arguments.
+#'
+#'   If \code{rankw = TRUE} then the weights are converted into their ranks.
+#'   The default is \code{rankw = FALSE}.
+#'
+#'   If \code{centerw = TRUE} then the weights are centered so that their sum
+#'   is equal to \code{0}.  The default is \code{centerw = FALSE}.
+#'
+#'   If \code{scalew = "voltarget"} (the default) then the weights are
+#'   scaled (multiplied by a factor) so that the weighted portfolio has an
+#'   in-sample volatility equal to \code{vol_target}.
+#'   
+#'   If \code{scalew = "voleqw"} then the weights are scaled so that the
+#'   weighted portfolio has the same volatility as the equal weight portfolio.
+#'   
+#'   If \code{scalew = "sumone"} then the weights are scaled so that their
+#'   sum is equal to \code{1}.
+#'   If \code{scalew = "sumsq"} then the weights are scaled so that their
+#'   sum of squares is equal to \code{1}.
+#'   If \code{scalew = "none"} then the weights are not scaled.
 #' 
+#'   The function \code{calc_weights()} is written in \code{RcppArmadillo}
+#'   \code{C++} code.
+#'   
 #' @examples
 #' \dontrun{
-#' # Calculate covariance matrix of ETF returns
+#' # Calculate covariance matrix and eigen decomposition of ETF returns
 #' returns <- na.omit(rutils::etfenv$returns[, 1:16])
+#' ncols <- NCOL(returns)
 #' eigend <- eigen(cov(returns))
-#' # Calculate shrinkage inverse of covariance matrix
+#' # Calculate regularized inverse of covariance matrix
 #' eigen_max <- 3
 #' eigenvec <- eigend$vectors[, 1:eigen_max]
 #' eigenval <- eigend$values[1:eigen_max]
@@ -4185,17 +4325,18 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' colmeans <- colMeans(returns)
 #' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 #' # Calculate weights using R
-#' weights <- invmat %*% colmeans
-#' ncols <- NCOL(returns)
-#' weightsr <- weightsr*sd(returns %*% rep(1/ncols, ncols))/sd(returns %*% weightsr)
+#' weightsr <- drop(invmat %*% colmeans)
+#' weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
+#' weightsr <- 0.01*weightsr/sd(returns %*% weightsr)
+#' weightsr <- weightsr/sqrt(sum(weightsr^2))
 #' # Calculate weights using RcppArmadillo
-#' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
-#' all.equal(weights, weightsr)
+#' weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+#' all.equal(weightcpp, weightsr)
 #' }
 #' 
 #' @export
-calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, eigen_max, conf_lev, alpha, scale, vol_target)
+calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -4221,25 +4362,31 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #'   \code{0})
 #'
 #' @param \code{method} A \emph{string} specifying the method for calculating
-#'   the weights (see Details) (the default is \code{method = "ranksharpe"})
+#'   the weights (see Details) (the default is \code{method = "sharpem"})
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 #'   small singular values in order to regularize the inverse of the
-#'   \code{returns} matrix (the default is \code{1e-5}).
+#'   \code{covariance matrix} (the default is \code{1e-5}).
 #'   
 #' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-#'   values used for calculating the shrinkage inverse of the \code{returns}
+#'   values used for calculating the regularized inverse of the \code{returns}
 #'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 #'   the number of columns of \code{returns}).
 #'   
-#' @param \code{conf_lev} The confidence level for calculating the
-#'   quantiles (the default is \code{conf_lev = 0.75}).
+#' @param \code{confl} The confidence level for calculating the
+#'   quantiles of returns (the default is \code{confl = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 #'   (the default is \code{0}).
 #' 
-#' @param \code{scale} A \emph{Boolean} specifying whether the weights should
-#'   be scaled (the default is \code{scale = TRUE}).
+#' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
+#'   be ranked (the default is \code{rankw = FALSE}).
+#'
+#' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
+#'   be centered (the default is \code{centerw = FALSE}).
+#'
+#' @param \code{scalew} A \emph{string} specifying the method for scaling
+#'   the weights (the default is \code{scalew = "voltarget"}).
 #'
 #' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
 #'   weights (the default is \code{1e-5})
@@ -4258,8 +4405,8 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #'   passes the subset matrix of excess returns into the function
 #'   \code{calc_weights()}, which calculates the optimal portfolio weights at
 #'   each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
-#'   \code{method}, and \code{scale} are also passed to the function
-#'   \code{calc_weights()}.
+#'   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
+#'   also passed to the function \code{calc_weights()}.
 #'   
 #'   It then recursively averages the weights \eqn{w_i} at the \emph{end point
 #'   = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
@@ -4267,7 +4414,7 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #'   \deqn{
 #'     w_i = (1-\lambda) w_i + \lambda w_{i-1}
 #'   }
-#'   The purpose of averaging the weights is to reduce their variance to
+#'   The purpose of averaging the weights is to reduce their variance, to
 #'   improve their out-of-sample performance.  It is equivalent to extending
 #'   the portfolio holding period beyond the time interval between neighboring
 #'   \emph{end points}.
@@ -4304,7 +4451,7 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #' # Define 12-month look-back interval and start points over sliding window
 #' look_back <- 12
 #' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
-#' # Define shrinkage and regularization intensities
+#' # Define return shrinkage and regularization intensities
 #' alpha <- 0.5
 #' eigen_max <- 3
 #' # Simulate a monthly rolling portfolio optimization strategy
@@ -4320,7 +4467,7 @@ calc_weights <- function(returns, method = "ranksharpe", eigen_thresh = 1e-5, ei
 #' }
 #' 
 #' @export
-back_test <- function(excess, returns, startp, endp, lambda, method = "ranksharpe", eigen_thresh = 1e-5, eigen_max = 0L, conf_lev = 0.1, alpha = 0.0, scale = TRUE, vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, lambda, method, eigen_thresh, eigen_max, conf_lev, alpha, scale, vol_target, coeff, bid_offer)
+back_test <- function(excess, returns, startp, endp, lambda = 0.0, method = "sharpem", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, lambda, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target, coeff, bid_offer)
 }
 

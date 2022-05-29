@@ -6,10 +6,10 @@
 single-column \emph{xts} time series or vector, over a rolling look-back
 interval.}
 \usage{
-which_extreme(xtes, look_back = 51, vol_mult = 2)
+which_extreme(xtsv, look_back = 51, vol_mult = 2)
 }
 \arguments{
-\item{\code{xtes}}{A single-column \emph{xts} time series, or a \emph{numeric} or
+\item{\code{xtsv}}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
 \item{\code{look_back}}{The number of data points in rolling look-back interval for 

@@ -15,7 +15,7 @@ roll_fun(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  conf_lev = 0.75
+  confl = 0.75
 )
 }
 \arguments{
@@ -42,8 +42,8 @@ calculating the end points (the default is \code{stub = 0}).}
 \item{\code{method}}{A \emph{string} specifying the type of the model for the
 estimator (the default is \code{method = "moment"}.)}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time

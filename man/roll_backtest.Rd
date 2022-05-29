@@ -6,12 +6,12 @@
 end points along a time series of prices.}
 \usage{
 roll_backtest(
-  xtes,
+  xtsv,
   train_func,
   trade_func,
   look_back = look_forward,
   look_forward,
-  endpoints = rutils::calc_endpoints(xtes, look_forward),
+  endpoints = rutils::calc_endpoints(xtsv, look_forward),
   ...
 )
 }
@@ -19,7 +19,7 @@ roll_backtest(
 \item{...}{additional parameters to the functions \code{train_func()} and
 \code{trade_func()}.}
 
-\item{\code{xtes}}{A time series of prices, asset returns, trading volumes, and
+\item{\code{xtsv}}{A time series of prices, asset returns, trading volumes, and
 other data, in \emph{xts} format.}
 
 \item{\code{train_func}}{The name of the function for training (calibrating) a
@@ -34,7 +34,7 @@ rows of data used for training the forecasting model.}
 \item{\code{look_forward}}{The size of the look-forward interval, equal to the number
 of rows of data used for trading the strategy.}
 
-\item{\code{endpoints}}{A vector of end points along the rows of the \code{xtes}
+\item{\code{endpoints}}{A vector of end points along the rows of the \code{xtsv}
 time series, given as either integers or dates.}
 }
 \value{
@@ -49,7 +49,7 @@ end points along a time series of prices.
 The function \code{roll_backtest()} performs a rolling backtest 
   simulation of a trading strategy over a vector of end points. At each end 
   point, it trains (calibrates) a forecasting model using past data taken 
-  from the \code{xtes} time series over the look-back interval, and applies
+  from the \code{xtsv} time series over the look-back interval, and applies
   the forecasts to the \code{trade_func()} trading model, using out-of-sample
   future data from the look-forward interval.
   
@@ -82,6 +82,6 @@ back_test <- roll_backtest(endpoints=endpoints,
     trade_func = trade_model,
     model_params = model_params,
     trading_params = trading_params,
-    xtes=prices)
+    xtsv=prices)
 }
 }

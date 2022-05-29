@@ -735,7 +735,7 @@ void mult_mat_ref(arma::vec vector,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+//' Calculate the eigen decomposition of the \emph{covariance matrix} of returns
 //' data using \code{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of returns
@@ -746,9 +746,9 @@ void mult_mat_ref(arma::vec vector,
 //'   "vectors").
 //'
 //' @details
-//'   The function \code{calc_eigen()} first calculates the covariance
-//'   \emph{matrix} of \code{tseries}, and then calculates the eigen
-//'   decomposition of the covariance \emph{matrix}.
+//'   The function \code{calc_eigen()} first calculates the \emph{covariance
+//'   matrix} of \code{tseries}, and then calculates the eigen
+//'   decomposition of the \emph{covariance matrix}.
 //'
 //' @examples
 //' \dontrun{
@@ -786,7 +786,7 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the shrinkage inverse of a \emph{matrix} of data using Singular
+//' Calculate the regularized inverse of a \emph{matrix} of data using Singular
 //' Value Decomposition (\emph{SVD}).
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
@@ -796,50 +796,51 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //'   matrix \code{tseries} (the default is \code{0.01}).
 //'   
 //' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the shrinkage inverse of the matrix
+//'   values used for calculating the regularized inverse of the matrix
 //'   \code{tseries} (the default is \code{eigen_max = 0} - equivalent to
 //'   \code{eigen_max} equal to the number of columns of \code{tseries}).
 //'
-//' @return A \emph{matrix} equal to the shrinkage inverse of the matrix
+//' @return A \emph{matrix} equal to the regularized inverse of the matrix
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{calc_inv()} calculates the shrinkage inverse of the
+//'   The function \code{calc_inv()} calculates the regularized inverse of the
 //'   matrix \code{tseries} using Singular Value Decomposition (\emph{SVD}).
 //'   
 //'   The function \code{calc_inv()} first performs Singular Value Decomposition
 //'   (\emph{SVD}) of the matrix \code{tseries}.  
-//'   The \emph{SVD} of a matrix \eqn{\strong{A}} is defined as the
+//'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
 //'   factorization:
 //'   \deqn{
-//'     \strong{A} = \strong{U}  \, \Sigma  \, \strong{V}^T
+//'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
 //'   }
 //'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
 //'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
 //'   \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
 //'   
-//'   The inverse \eqn{\strong{A}^{-1}} of the matrix \eqn{\strong{A}} can be
+//'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
 //'   calculated from the \emph{SVD} matrices as:
 //'   \deqn{
-//'     \strong{A}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+//'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
 //'   }
 //'   
-//'   The \emph{regularized inverse} of the matrix \eqn{\strong{A}} is given by:
+//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is given
+//'   by:
 //'   \deqn{
-//'     \strong{A}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+//'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
 //'   }
 //'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
 //'   \emph{SVD} matrices with the rows and columns corresponding to zero
 //'   \emph{singular values} removed.
 //'   
-//'   The function \code{calc_inv()} applies regularization by discarding the
+//'   The function \code{calc_inv()} performs regularization by discarding the
 //'   smallest singular values \eqn{\sigma_i} that are less than the threshold
 //'   level \code{eigen_thresh} times the sum of all the singular values:
 //'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
 //'   
 //'   It then discards additional singular values so that only the largest
 //'   \code{eigen_max} singular values remain.  
-//'   It calculates the shrinkage inverse from the \emph{SVD} matrices using
+//'   It calculates the regularized inverse from the \emph{SVD} matrices using
 //'   only the largest singular values up to \code{eigen_max}.  For example, if
 //'   \code{eigen_max = 3} then it only uses the \code{3} largest singular
 //'   values. This has the effect of dimension shrinkage.
@@ -854,9 +855,9 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //' returns <- na.omit(rutils::etfenv$returns)
 //' # Calculate covariance matrix
 //' covmat <- cov(returns)
-//' # Calculate shrinkage inverse using RcppArmadillo
+//' # Calculate regularized inverse using RcppArmadillo
 //' invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
-//' # Calculate shrinkage inverse from SVD in R
+//' # Calculate regularized inverse from SVD in R
 //' svdec <- svd(covmat)
 //' eigen_max <- 1:3
 //' invsvd <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
@@ -883,7 +884,7 @@ arma::mat calc_inv(const arma::mat& tseries,
     eigen_max = svdnum - 1;
   } else {
     // Adjust eigen_max
-    eigen_max = min(eigen_max - 1, svdnum - 1);
+    eigen_max = std::min(eigen_max - 1, svdnum - 1);
   }  // end if
   
   // Remove all small singular values
@@ -891,7 +892,7 @@ arma::mat calc_inv(const arma::mat& tseries,
   svdu = svdu.cols(0, eigen_max);
   svdv = svdv.cols(0, eigen_max);
   
-  // Calculate the shrinkage inverse from the SVD decomposition
+  // Calculate the regularized inverse from the SVD decomposition
   return svdv*arma::diagmat(1/svdval)*svdu.t();
   
 }  // end calc_inv
@@ -1837,10 +1838,28 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' @details
 //'   The function \code{run_mean()} calculates the running weighted means of
 //'   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
-//'   present and past values using the decay factor \eqn{\lambda}:
+//'   present and past values using the decay factor \eqn{\lambda}.
+//'   If the \code{weights} argument is omitted, then the function
+//'   \code{run_mean()} simply calculates the exponentially weighted moving
+//'   average value of the streaming \emph{time series} data \eqn{p_t}:
+//'   \deqn{
+//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1} = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+//'   }
+//'   
+//'   Some applications require applying additional weight factors, like for
+//'   example the volume-weighted average price indicator.  The streaming prices
+//'   are multiplied by the streaming trading volumes.
+//'   
+//'   If the \code{weights} argument is included, then the function
+//'   \code{run_mean()} calculates the running weighted means in two steps.
+//'   
+//'   First it calculates the running mean weights \eqn{\mu^w_t}:
 //'   \deqn{
 //'     \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
 //'   }
+//'   
+//'   Second it calculates the the running mean products \eqn{\mu^p_t} of the
+//'   weights \eqn{w_t} and the data \eqn{p_t}:
 //'   \deqn{
 //'     \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
 //'   }
@@ -1854,12 +1873,6 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'     \mu_t = \frac{\mu^p_t}{\mu^w_t}
 //'   }
 //' 
-//'   If the \code{weights} argument is omitted, then the function
-//'   \code{run_mean()} simply calculates the running means of \eqn{p_t}:
-//'   \deqn{
-//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
-//'   }
-//'   
 //'   The above recursive formulas are convenient for processing live streaming
 //'   data because they don't require maintaining a buffer of past data.
 //'   The formulas are equivalent to a convolution with exponentially decaying
@@ -1931,7 +1944,7 @@ arma::mat run_mean(const arma::mat& tseries,
     means.row(0) = tseries.row(0);
     // Calculate means without weights
     for (arma::uword it = 1; it < nrows; it++) {
-      // Calculate the means as the weighted sums
+      // Calculate the means using the decay factor
       means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     }  // end for
   } else if (weights_rows == nrows) {
@@ -1940,7 +1953,7 @@ arma::mat run_mean(const arma::mat& tseries,
     means.row(0) = weights.row(0)*tseries.row(0);
     meanw.row(0) = weights.row(0);
     for (arma::uword it = 1; it < nrows; it++) {
-      // Calculate the means as the weighted sums
+      // Calculate the means using the decay factor
       meanw.row(it) = lambda1*weights.row(it) + lambda*meanw.row(it-1);
       means.row(it) = lambda1*weights.row(it)*tseries.row(it) + lambda*means.row(it-1);
       // Divide by the mean weight
@@ -2033,9 +2046,9 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
   means.row(0) = tseries.row(0);
   maxs.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the mean as a weighted sum
+    // Calculate the means using the decay factor
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
-    // Calculate the max from a weighted sum
+    // Calculate the max using the decay factor
     maxs.row(it) = arma::max(tseries.row(it), maxs.row(it-1) + lambda1*(means.row(it-1) - maxs.row(it-1)));
   }  // end for
   
@@ -2123,9 +2136,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
   means.row(0) = tseries.row(0);
   mins.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the mean as a weighted sum
+    // Calculate the means using the decay factor
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
-    // Calculate the min from a weighted sum
+    // Calculate the min using the decay factor
     mins.row(it) = arma::min(tseries.row(it), mins.row(it-1) + lambda1*(means.row(it-1) - mins.row(it-1)));
   }  // end for
   
@@ -2217,7 +2230,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the mean as the weighted sum
+    // Calculate the means using the decay factor
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the variance as the weighted sum of squared returns minus the squared means
     vars.row(it) = lambda1*(vars.row(it) - arma::square(means.row(it))) + lambda*vars.row(it-1);
@@ -2417,7 +2430,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   means.row(0) = tseries.row(0);
   covar(0) = tseries(0, 0)*tseries(0, 1);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the mean as the weighted sum
+    // Calculate the means using the decay factor
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the covariance as the weighted sum of products of returns
     vars.row(it) = lambda1*(vars.row(it) - arma::square(means.row(it))) + lambda*vars.row(it-1);
@@ -2591,7 +2604,7 @@ arma::mat run_reg(const arma::mat& response,
   respmeans.row(0) = response.row(0);
   predmeans.row(0) = predictor.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the mean as the weighted sum
+    // Calculate the means using the decay factor
     respmeans.row(it) = lambda1*response.row(it) + lambda*respmeans.row(it-1);
     predmeans.row(it) = lambda1*predictor.row(it) + lambda*predmeans.row(it-1);
     // cout << "Calculating vars: " << it << endl;
@@ -2784,11 +2797,12 @@ arma::mat run_zscores(const arma::mat& response,
 
 
 ////////////////////////////////////////////////////////////
-// Define C++ enum type for the different methods for regularization,
-// calculating variance, skewness, kurtosis, covariance, regression, 
+// Define C++ enum type for different methods of regularization,
+// methodsfor calculating variance, skewness, kurtosis, covariance, regression, 
 // and matrix inverse.
-enum methodenum {moment, least_squares, quantile, nonparametric, regular, ranksharpe, 
-              max_sharpe, max_sharpe_median, min_var, min_varpca, rank, rankrob};
+enum methodenum {moment, least_squares, quantile, nonparametric, regular, sharpem, 
+              maxsharpe, maxsharpemed, minvarlin, minvarquad, kellym, robustm, 
+              sumsq, sumone, voltarget, voleqw};
 
 // Map string to C++ enum type for switch statement.
 // This is needed because Rcpp can't map C++ enum type to R variable SEXP.
@@ -2803,20 +2817,24 @@ methodenum calc_method(std::string method) {
     return methodenum::nonparametric;
   else if (method == "regular")
     return methodenum::regular;
-  else if (method == "ranksharpe")
-    return methodenum::ranksharpe;
-  else if (method == "max_sharpe")
-    return methodenum::max_sharpe;
-  else if (method == "max_sharpe_median")
-    return methodenum::max_sharpe_median;
-  else if (method == "min_var")
-    return methodenum::min_var;
-  else if (method == "min_varpca")
-    return methodenum::min_varpca;
-  else if (method == "rank")
-    return methodenum::rank;
-  else if (method == "rankrob")
-    return methodenum::rankrob;
+  else if (method == "sharpem")
+    return methodenum::sharpem;
+  else if (method == "maxsharpe")
+    return methodenum::maxsharpe;
+  else if (method == "maxsharpemed")
+    return methodenum::maxsharpemed;
+  else if (method == "minvarlin")
+    return methodenum::minvarlin;
+  else if (method == "minvarquad")
+    return methodenum::minvarquad;
+  else if (method == "kellym")
+    return methodenum::kellym;
+  else if (method == "robustm")
+    return methodenum::robustm;
+  else if (method == "sumsq")
+    return methodenum::sumsq;
+  else if (method == "voltarget")
+    return methodenum::voltarget;
   else 
     return methodenum::moment;
 }  // end calc_method
@@ -2833,8 +2851,8 @@ methodenum calc_method(std::string method) {
 //' @param \code{method} A \emph{string} specifying the type of the mean
 //'   (location) model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the mean (location) of the columns of
 //'   \code{tseries}.
@@ -2878,16 +2896,16 @@ methodenum calc_method(std::string method) {
 //'   Rcode=sapply(returns, mean),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile mean (location)
-//' HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_mean(returns, method="quantile", confl=0.9)
 //' # Calculate the quantile mean (location) in R
 //' colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
 //' # Compare the values
-//' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9)), 
+//' all.equal(drop(HighFreq::calc_mean(returns, method="quantile", confl=0.9)), 
 //'   colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
 //'   check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_mean(returns, method="quantile", conf_lev=0.9),
+//'   Rcpp=HighFreq::calc_mean(returns, method="quantile", confl=0.9),
 //'   Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the column medians in RcppArmadillo
@@ -2908,15 +2926,15 @@ methodenum calc_method(std::string method) {
 // [[Rcpp::export]]
 arma::mat calc_mean(const arma::mat& tseries,
                     std::string method = "moment", 
-                    double conf_lev = 0.75) {
+                    double confl = 0.75) {
   
-  // Switch for the different methods of location
+  // Apply different calculation methods for location
   switch(calc_method(method)) {
   case methodenum::moment: {  // moment
     return arma::mean(tseries);
   }  // end moment
   case methodenum::quantile: {  // quantile
-    arma::vec levels = {1-conf_lev, conf_lev};
+    arma::vec levels = {1-confl, confl};
     arma::mat quantiles = arma::quantile(tseries, levels);
     return (quantiles.row(0) + quantiles.row(1));
   }  // end quantile
@@ -2982,26 +3000,25 @@ double calc_varvec(const arma::vec& tseries) {
 //' @param \code{method} A \emph{string} specifying the type of the dispersion
 //'   model (the default is \code{method = "moment"} - see Details).
 //'    
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A row vector equal to the dispersion of the columns of the matrix
 //'   \code{tseries}.
 //'
 //' @details
-//'   The dispersion is a measure of the variability of the data.  Examples of
-//'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
-//'
 //'   The function \code{calc_var()} calculates the dispersion of the
 //'   columns of a \emph{time series} or a \emph{matrix} of data using
 //'   \code{RcppArmadillo} \code{C++} code.
 //'   
+//'   The dispersion is a measure of the variability of the data.  Examples of
+//'   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
+//'
 //'   If \code{method = "moment"} (the default) then \code{calc_var()}
 //'   calculates the dispersion as the second moment of the data \eqn{\sigma^2}
 //'   (the variance).
-//'
-//'   If \code{method = "moment"} then \code{calc_var()} performs the same
-//'   calculation as the function \code{colVars()} from package
+//'   Then \code{calc_var()} performs the same calculation as the function
+//'   \code{colVars()} from package
 //'   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
 //'   but it's much faster because it uses \code{RcppArmadillo} \code{C++} code.
 //'
@@ -3058,25 +3075,25 @@ double calc_varvec(const arma::vec& tseries) {
 // [[Rcpp::export]]
 arma::mat calc_var(const arma::mat& tseries,
                    std::string method = "moment", 
-                   double conf_lev = 0.75) {
+                   double confl = 0.75) {
   
+  double ncols = tseries.n_cols;
   // Return zeros if not enough data
   if (tseries.n_rows < 3) {
-    return arma::zeros<rowvec>(tseries.n_cols);
+    return arma::zeros<rowvec>(ncols);
   }  // end if
   
-  // Switch for the different methods of dispersion
+  // Apply different calculation methods for dispersion
   switch(calc_method(method)) {
   case methodenum::moment: {  // moment
     return arma::var(tseries);
   }  // end moment
   case methodenum::quantile: {  // quantile
-    arma::vec levels = {1-conf_lev, conf_lev};
+    arma::vec levels = {1-confl, confl};
     arma::mat quantiles = arma::quantile(tseries, levels);
     return (quantiles.row(1) - quantiles.row(0));
   }  // end quantile
   case methodenum::nonparametric: {  // MAD
-    double ncols = tseries.n_cols;
     arma::mat medians = arma::median(tseries);
     arma::mat mads(1, ncols);
     // Loop over columns of tseries
@@ -3089,11 +3106,129 @@ arma::mat calc_var(const arma::mat& tseries,
   }  // end nonparametric
   default : {
     cout << "Warning: Invalid method parameter" << endl;
-    return arma::zeros<rowvec>(tseries.n_cols);
+    return arma::zeros<rowvec>(ncols);
   }  // end default
   }  // end switch
   
 }  // end calc_var
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the covariance matrix of the columns of a \emph{time series}
+//' using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+//'   
+//' @param \code{method} A \emph{string} specifying the type of the covariance
+//'   model (the default is \code{method = "moment"} - see Details).
+//'    
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
+//'
+//' @return A square matrix with the covariance coefficients of the columns of
+//'   the \emph{time series} \code{tseries}.
+//'
+//' @details
+//'   The function \code{calc_covar()} calculates the covariance matrix of the
+//'   columns of a \emph{time series} or a \emph{matrix} of data using
+//'   \code{RcppArmadillo} \code{C++} code.
+//'   The covariance is a measure of the codependency of the data.
+//'
+//'   If \code{method = "moment"} (the default) then \code{calc_covar()}
+//'   calculates the covariance as the second co-moment:
+//'   \deqn{
+//'     \sigma_{xy} = \frac{1}{n-1} \sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})
+//'   }
+//'   Then \code{calc_covar()} performs the same calculation as the \code{R}
+//'   function \code{stats::cov()}.
+//'
+//'   If \code{method = "quantile"} then it calculates the covariance as the
+//'   difference between the quantiles as follows:
+//'   \deqn{
+//'     \mu = q_{\alpha} - q_{1-\alpha}
+//'   }
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   
+//'   If \code{method = "nonparametric"} then it calculates the covariance as the
+//'   Median Absolute Deviation (\emph{MAD}):
+//'   \deqn{
+//'     MAD = median(abs(x - median(x)))
+//'   }
+//'   It also multiplies the \emph{MAD} by a factor of \code{1.4826}, to make it
+//'   comparable to the standard deviation.
+//'
+//'   If \code{method = "nonparametric"} then \code{calc_covar()} performs the
+//'   same calculation as the function \code{stats::mad()}, but it's much faster
+//'   because it uses \code{RcppArmadillo} \code{C++} code.
+//'
+//'   If the number of rows of \code{tseries} is less than \code{3} then it
+//'   returns zeros.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate VTI and XLF returns
+//' returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
+//' # Compare HighFreq::calc_covar() with standard var()
+//' all.equal(drop(HighFreq::calc_covar(returns)), 
+//'   cov(returns), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with matrixStats and with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_covar(returns),
+//'   Rcode=cov(returns),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' # Compare HighFreq::calc_covar() with stats::mad()
+//' all.equal(drop(HighFreq::calc_covar(returns, method="nonparametric")), 
+//'   sapply(returns, mad), check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with stats::mad()
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_covar(returns, method="nonparametric"),
+//'   Rcode=sapply(returns, mad),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_covar(const arma::mat& tseries,
+                     std::string method = "moment", 
+                     double confl = 0.75) {
+  
+  double ncols = tseries.n_cols;
+  // Return zeros if not enough data
+  // if (tseries.n_rows < 3) {
+  //   return arma::zeros<rowvec>(ncols);
+  // }  // end if
+  
+  // Apply different calculation methods for covariance
+  switch(calc_method(method)) {
+  case methodenum::moment: {  // moment
+    return arma::cov(tseries);
+  }  // end moment
+  case methodenum::quantile: {  // quantile
+    arma::vec levels = {1-confl, confl};
+    arma::mat quantiles = arma::quantile(tseries, levels);
+    return (quantiles.row(1) - quantiles.row(0));
+  }  // end quantile
+  case methodenum::nonparametric: {  // MAD
+    arma::mat medians = arma::median(tseries);
+    arma::mat mads(1, ncols);
+    // Loop over columns of tseries
+    for (arma::uword it = 0; it < ncols; it++) {
+      mads.col(it) = arma::median(arma::abs(tseries.col(it) - arma::as_scalar(medians.col(it))));
+    }  // end for
+    // tseries.each_row() -= arma::median(tseries, 0);
+    // return 1.4826*arma::median(arma::abs(tseries), 0);
+    return 1.4826*mads;
+  }  // end nonparametric
+  default : {
+    cout << "Warning: Invalid method parameter" << endl;
+    return arma::zeros<rowvec>(ncols);
+  }  // end default
+  }  // end switch
+  
+}  // end calc_covar
 
 
 
@@ -3296,7 +3431,7 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 double calc_var_ohlc(const arma::mat& ohlc, 
                      std::string method = "yang_zhang", 
                      arma::colvec close_lag = 0, 
-                     bool scale = true, 
+                     bool scale = true, // Divide the returns by time index
                      arma::colvec index = 0) {
   
   arma::uword nrows = ohlc.n_rows;
@@ -3445,7 +3580,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
                         arma::uword step = 1, 
                         std::string method = "yang_zhang", 
                         arma::colvec close_lag = 0, 
-                        bool scale = true, 
+                        bool scale = true, // Divide the returns by time index
                         arma::colvec index = 0) {
   
   if (step == 1)
@@ -3485,8 +3620,8 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //' @param \code{method} A \emph{string} specifying the type of the skewness
 //'   model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the skewness of the columns of
 //'   \code{tseries}.
@@ -3537,13 +3672,13 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'   Rcode=calc_skewr(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile skewness
-//' HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_skew(returns, method="quantile", confl=0.9)
 //' # Calculate the quantile skewness in R
 //' calc_skewq <- function(x, a = 0.75) {
 //'   	quantiles <- quantile(x, c(1-a, 0.5, a), type=5)
 //'   	(quantiles[3] + quantiles[1] - 2*quantiles[2])/(quantiles[3] - quantiles[1])
 //' }  # end calc_skewq
-//' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", conf_lev=0.9)), 
+//' all.equal(drop(HighFreq::calc_skew(returns, method="quantile", confl=0.9)), 
 //'   calc_skewq(returns, a=0.9), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
@@ -3567,14 +3702,14 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 // [[Rcpp::export]]
 arma::mat calc_skew(const arma::mat& tseries,
                     std::string method = "moment", 
-                    double conf_lev = 0.75) {
+                    double confl = 0.75) {
   
   // Return zeros if not enough data
   if (tseries.n_rows < 3) {
     return arma::zeros<rowvec>(tseries.n_cols);
   }  // end if
   
-  // Switch for the different methods of skew
+  // Apply different calculation methods for skew
   switch(calc_method(method)) {
   case methodenum::moment: {  // moment
     double nrows = tseries.n_rows;
@@ -3591,7 +3726,7 @@ arma::mat calc_skew(const arma::mat& tseries,
     return skewness;
   }  // end moment
   case methodenum::quantile: {  // quantile
-    arma::vec levels = {1-conf_lev, 0.5, conf_lev};
+    arma::vec levels = {1-confl, 0.5, confl};
     arma::mat quantiles = arma::quantile(tseries, levels);
     return (quantiles.row(2) + quantiles.row(0) - 2*quantiles.row(1))/(quantiles.row(2) - quantiles.row(0));
   }  // end quantile
@@ -3617,8 +3752,8 @@ arma::mat calc_skew(const arma::mat& tseries,
 //' @param \code{method} A \emph{string} specifying the type of the kurtosis
 //'   model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the kurtosis of the columns of
 //'   \code{tseries}.
@@ -3671,13 +3806,13 @@ arma::mat calc_skew(const arma::mat& tseries,
 //'   Rcode=calc_kurtr(returns),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Calculate the quantile kurtosis
-//' HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)
+//' HighFreq::calc_kurtosis(returns, method="quantile", confl=0.9)
 //' # Calculate the quantile kurtosis in R
 //' calc_kurtq <- function(x, a=0.9) {
 //'   	quantiles <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
 //'   	(quantiles[4] - quantiles[1])/(quantiles[3] - quantiles[2])
 //' }  # end calc_kurtq
-//' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", conf_lev=0.9)), 
+//' all.equal(drop(HighFreq::calc_kurtosis(returns, method="quantile", confl=0.9)), 
 //'   calc_kurtq(returns, a=0.9), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
@@ -3701,14 +3836,14 @@ arma::mat calc_skew(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat calc_kurtosis(const arma::mat& tseries,
                         std::string method = "moment", 
-                        double conf_lev = 0.75) {
+                        double confl = 0.75) {
   
   // Return zeros if not enough data
   if (tseries.n_rows < 3) {
     return arma::zeros<rowvec>(tseries.n_cols);
   }  // end if
   
-  // Switch for the different methods of kurtosis
+  // Apply different calculation methods for kurtosis
   switch(calc_method(method)) {
   case methodenum::moment: {  // Fourth moment
     double nrows = tseries.n_rows;
@@ -3726,7 +3861,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
     return kurtosis;
   }  // end moment
   case methodenum::quantile: {  // quantile
-    arma::vec levels = {1-conf_lev, 0.25, 0.75, conf_lev};
+    arma::vec levels = {1-confl, 0.25, 0.75, confl};
     arma::mat quantiles = arma::quantile(tseries, levels);
     return (quantiles.row(3) - quantiles.row(0))/(quantiles.row(2) - quantiles.row(1));
   }  // end quantile
@@ -3870,7 +4005,7 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
                        arma::uword step = 1, 
                        std::string method = "yang_zhang", 
                        arma::colvec close_lag = 0, 
-                       bool scale = true, 
+                       bool scale = true, // Divide the returns by time index
                        arma::colvec index = 0) {
   
   return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, close_lag, scale, index)/
@@ -3998,12 +4133,12 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   \code{predictor} matrix (the default is \code{1e-5}).
 //'   
 //' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the shrinkage inverse of the \code{predictor}
+//'   values used for calculating the regularized inverse of the \code{predictor}
 //'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 //'   the number of columns of \code{predictor}).
 //'   
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
@@ -4025,10 +4160,9 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   faster than \code{lm()}.
 //'
 //'   If \code{method = "regular"} then it performs shrinkage regression.  It
-//'   calculates the shrinkage inverse of the \code{predictor} matrix from its
-//'   singular value decomposition.  It applies dimension regularization by
-//'   selecting only the largest singular values equal in number to
-//'   \code{eigen_max}.
+//'   calculates the regularized inverse of the \code{predictor} matrix from its
+//'   singular value decomposition.  It performs regularization by selecting
+//'   only the largest singular values equal in number to \code{eigen_max}.
 //'   
 //'   If \code{method = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
@@ -4087,9 +4221,9 @@ arma::mat calc_reg(const arma::mat& response,
                    const arma::mat& predictor,
                    bool intercept = true,
                    std::string method = "least_squares",
-                   double eigen_thresh = 1e-5,
-                   arma::uword eigen_max = 0,
-                   double conf_lev = 0.1,
+                   double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                   arma::uword eigen_max = 0, // Regularization intensity
+                   double confl = 0.1, // Confidence level for calculating the quantiles of returns
                    double alpha = 0.0) {
   
   // Add column for intercept to predictor matrix
@@ -4104,7 +4238,7 @@ arma::mat calc_reg(const arma::mat& response,
   arma::vec tvals;
   arma::mat reg_data = arma::zeros<mat>(2*ncols+1, 1);
   
-  // Switch for the different methods for weights
+  // Apply different calculation methods for weights
   switch(calc_method(method)) {
   case methodenum::least_squares: {
     // Calculate regression coefficients for the model response ~ predictor
@@ -4262,7 +4396,7 @@ arma::mat roll_mean(const arma::mat& tseries,
                     arma::uword look_back = 1, 
                     arma::uword stub = 0,
                     std::string method = "moment", 
-                    double conf_lev = 0.75) {
+                    double confl = 0.75) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
@@ -4295,7 +4429,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate means
     if (endpts(ep) > startpts(ep)) {
-      means.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+      means.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, confl);
     }  // end if
   }  // end for
   
@@ -4469,7 +4603,7 @@ arma::mat roll_var(const arma::mat& tseries,
                    arma::uword look_back = 1, 
                    arma::uword stub = 0,
                    std::string method = "moment", 
-                   double conf_lev = 0.75) {
+                   double confl = 0.75) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
@@ -4502,7 +4636,7 @@ arma::mat roll_var(const arma::mat& tseries,
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate variance
     if (endpts(ep) > startpts(ep)) {
-      variance.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+      variance.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, confl);
     }  // end if
   }  // end for
   
@@ -4663,7 +4797,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
                         arma::uword look_back = 1, 
                         arma::uword stub = 0,
                         std::string method = "yang_zhang", 
-                        bool scale = true, 
+                        bool scale = true, // Divide the returns by time index
                         arma::colvec index = 0) {
   
   // Allocate end points
@@ -4767,8 +4901,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' @param \code{method} A \emph{string} specifying the type of the skewness
 //'   model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} of skewness estimates with the same number of
 //'   columns as the input time series \code{tseries}, and the number of rows
@@ -4810,13 +4944,13 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
 //' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-//' skew_ness <- HighFreq::roll_skew(returns, step=25, look_back=3)
+//' skewv <- HighFreq::roll_skew(returns, step=25, look_back=3)
 //' # Calculate the rolling skewness using R code
-//' skew_r <- sapply(1:NROW(endp), function(it) {
+//' skewr <- sapply(1:NROW(endp), function(it) {
 //'   HighFreq::calc_skew(returns[startp[it]:endp[it], ])
 //' })  # end sapply
 //' # Compare the skewness estimates
-//' all.equal(drop(skew_ness), skew_r, check.attributes=FALSE)
+//' all.equal(drop(skewv), skewr, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -4835,7 +4969,7 @@ arma::mat roll_skew(const arma::mat& tseries,
                     arma::uword look_back = 1, 
                     arma::uword stub = 0,
                     std::string method = "moment", 
-                    double conf_lev = 0.75) {
+                    double confl = 0.75) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
@@ -4861,17 +4995,17 @@ arma::mat roll_skew(const arma::mat& tseries,
   
   // Allocate skewness matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat skew_ness = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat skewv = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate skewness
     if (endpts(ep) > startpts(ep)) {
-      skew_ness.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+      skewv.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, confl);
     }  // end if
   }  // end for
   
-  return skew_ness;
+  return skewv;
   
 }  // end roll_skew
 
@@ -4902,8 +5036,8 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' @param \code{method} A \emph{string} specifying the type of the kurtosis
 //'   model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} of kurtosis estimates with the same number of
 //'   columns as the input time series \code{tseries}, and the number of rows
@@ -4944,13 +5078,13 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' endp <- 1 + HighFreq::calc_endpoints(NROW(returns), step=25)
 //' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-//' kurto_sis <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
+//' kurtosisv <- HighFreq::roll_kurtosis(returns, step=25, look_back=3)
 //' # Calculate the rolling kurtosis using R code
 //' kurt_r <- sapply(1:NROW(endp), function(it) {
 //'   HighFreq::calc_kurtosis(returns[startp[it]:endp[it], ])
 //' })  # end sapply
 //' # Compare the kurtosis estimates
-//' all.equal(drop(kurto_sis), kurt_r, check.attributes=FALSE)
+//' all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -4969,7 +5103,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
                         arma::uword look_back = 1, 
                         arma::uword stub = 0,
                         std::string method = "moment", 
-                        double conf_lev = 0.75) {
+                        double confl = 0.75) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
@@ -4995,17 +5129,17 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   
   // Allocate kurtosis matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat kurto_sis = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat kurtosisv = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate kurtosis
     if (endpts(ep) > startpts(ep)) {
-      kurto_sis.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+      kurtosisv.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, confl);
     }  // end if
   }  // end for
   
-  return kurto_sis;
+  return kurtosisv;
   
 }  // end roll_kurtosis
 
@@ -5052,12 +5186,12 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   \code{predictor} matrix (the default is \code{1e-5}).
 //'   
 //' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the shrinkage inverse of the \code{predictor}
+//'   values used for calculating the regularized inverse of the \code{predictor}
 //'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 //'   the number of columns of \code{predictor}).
 //'   
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
@@ -5138,9 +5272,9 @@ arma::mat roll_reg(const arma::mat& response,
                    arma::uword look_back = 1, 
                    arma::uword stub = 0,
                    std::string method = "least_squares",
-                   double eigen_thresh = 1e-5,
-                   arma::uword eigen_max = 0,
-                   double conf_lev = 0.1,
+                   double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                   arma::uword eigen_max = 0, // Regularization intensity
+                   double confl = 0.1, // Confidence level for calculating the quantiles of returns
                    double alpha = 0.0) {
   
   // Allocate end points
@@ -5180,7 +5314,7 @@ arma::mat roll_reg(const arma::mat& response,
     if (endpts(ep) > startpts(ep)) {
       responsi = response.rows(startpts(ep), endpts(ep));
       predicti = predictor.rows(startpts(ep), endpts(ep));
-      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, eigen_max, conf_lev, alpha);
+      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, eigen_max, confl, alpha);
     }  // end if
   }  // end for
   
@@ -5197,7 +5331,7 @@ arma::mat roll_reg(const arma::mat& response,
   // for (arma::uword it = look_back; it < nrows; it++) {
   //   responsi = response.rows(it-look_back+1, it);
   //   predicti = predictor.rows(it-look_back+1, it);
-  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, eigen_max, conf_lev, alpha);
+  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, eigen_max, confl, alpha);
   //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -5455,8 +5589,8 @@ arma::vec roll_zscores(const arma::mat& response,
 //' @param \code{method} A \emph{string} specifying the type of the model for the
 //'   estimator (the default is \code{method = "moment"}.)
 //'
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} with the same number of columns as the input time
 //'   series \code{tseries}, and the number of rows equal to the number of end
@@ -5530,7 +5664,7 @@ arma::mat roll_fun(const arma::mat& tseries,
                    arma::uword look_back = 1, 
                    arma::uword stub = 0,
                    std::string method = "moment", 
-                   double conf_lev = 0.75) {
+                   double confl = 0.75) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
@@ -5564,7 +5698,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
       if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+        stats.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, confl);
       }  // end if
     }  // end for
   } else if (fun == "calc_var") {
@@ -5572,7 +5706,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
       if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+        stats.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, confl);
       }  // end if
     }  // end for
   } else if (fun == "calc_skew") {
@@ -5580,7 +5714,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
       if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+        stats.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, confl);
       }  // end if
     }  // end for
   } else if (fun == "calc_kurtosis") {
@@ -5588,7 +5722,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     for (arma::uword ep = 0; ep < numpts; ep++) {
       // Calculate kurtosis
       if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, conf_lev);
+        stats.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, confl);
       }  // end if
     }  // end for
   } else {
@@ -6144,33 +6278,40 @@ double lik_garch(double omega,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the optimal portfolio weights for different types of objective
-//' functions.
+//' Calculate the optimal portfolio weights using a variety of different
+//' objective functions.
 //' 
 //' @param \code{returns} A \emph{time series} or a \emph{matrix} of returns
 //'   data (the returns in excess of the risk-free rate).
 //'   
 //' @param \code{method} A \emph{string} specifying the method for
 //'   calculating the weights (see Details) (the default is \code{method =
-//'   "ranksharpe"})
+//'   "sharpem"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 //'   small singular values in order to regularize the inverse of the
-//'   \code{returns} matrix (the default is \code{1e-5}).
+//'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 //'   
 //' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the shrinkage inverse of the \code{returns}
-//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-//'   the number of columns of \code{returns}).
+//'   values used for calculating the regularized inverse of the
+//'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
+//'   equivalent to \code{eigen_max} equal to the number of columns of
+//'   \code{returns}).
 //'   
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
-//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-//'   (the default is \code{0}).
+//' @param \code{alpha} The shrinkage intensity of \code{returns}.
+//'   (values between \code{0} and \code{1} - the default is \code{0}).
 //' 
-//' @param \code{scale} A \emph{Boolean} specifying whether the weights should
-//'   be scaled (the default is \code{scale = TRUE}).
+//' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
+//'   be ranked (the default is \code{rankw = FALSE}).
+//'
+//' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
+//'   be centered (the default is \code{centerw = FALSE}).
+//'
+//' @param \code{scalew} A \emph{string} specifying the method for scaling
+//'   the weights (the default is \code{scalew = "voltarget"}).
 //'
 //' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
 //'   weights (the default is \code{0.001})
@@ -6180,49 +6321,93 @@ double lik_garch(double omega,
 //'
 //' @details
 //'   The function \code{calc_weights()} calculates the optimal portfolio
-//'   weights for different types of methods, using \code{RcppArmadillo}
-//'   \code{C++} code.
+//'   weights using a variety of different objective functions.
 //' 
-//'   If \code{method = "ranksharpe"} (the default) then it calculates the
-//'   weights as the ranks (order index) of the trailing Sharpe ratios of the
-//'   asset \code{returns}.
-//'
-//'   If \code{method = "rank"} then it calculates the weights as the ranks
-//'   (order index) of the last row of the \code{returns}.
-//'
-//'   If \code{method = "max_sharpe"} then \code{calc_weights()} calculates
-//'   the weights of the maximum Sharpe portfolio, by multiplying the inverse of
-//'   the covariance \emph{matrix} times the mean column returns.
-//'
-//'   If \code{method = "min_var"} then it calculates the weights of the
-//'   minimum variance portfolio under linear constraints.
-//'
-//'   If \code{method = "min_varpca"} then it calculates the weights of the
-//'   minimum variance portfolio under quadratic constraints (which is the
+//'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
+//'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
+//'   regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
+//'   times the mean column returns \eqn{\mu}:
+//'   \deqn{
+//'     \strong{w} = \strong{C}^{-1} \mu
+//'   }
+//'   
+//'   If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
+//'   medians instead of the means.
+//'   
+//'   If \code{method = "minvarlin"} then it calculates the weights of the
+//'   minimum variance portfolio under linear constraint, by multiplying the
+//'   regularized inverse of the \emph{covariance matrix} times the unit vector:
+//'   \deqn{
+//'     \strong{w} = \strong{C}^{-1} \strong{1}
+//'   }
+//'   
+//'   If \code{method = "minvarquad"} then it calculates the weights of the
+//'   minimum variance portfolio under quadratic constraint (which is the
 //'   highest order principal component).
 //'
-//'   If \code{scale = TRUE} (the default) then the weights are scaled so that
-//'   the resulting portfolio has a volatility equal to \code{vol_target}.
+//'   If \code{method = "sharpem"} then it calculates the momentum weights equal
+//'   to the Sharpe ratios (the \code{returns} divided by their standard
+//'   deviations):
+//'   \deqn{
+//'     \strong{w} = \frac{\mu}{\sigma}
+//'   }
 //'
-//'   \code{calc_weights()} calculates the shrinkage inverse of the covariance
-//'   \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
-//'   dimension regularization by selecting only the largest eigenvalues equal
-//'   in number to \code{eigen_max}. 
+//'   If \code{method = "kellym"} then it calculates the momentum weights equal
+//'   to the Kelly ratios (the \code{returns} divided by their variance):
+//'   \deqn{
+//'     \strong{w} = \frac{\mu}{\sigma^2}
+//'   }
+//'
+//'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
+//'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
+//'   It performs regularization by selecting only the largest eigenvalues equal
+//'   in number to \code{eigen_max}.
 //'   
 //'   In addition, \code{calc_weights()} applies shrinkage to the columns of
-//'   \code{returns}, by shrinking their means to their common mean value. The
-//'   shrinkage intensity \code{alpha} determines the amount of shrinkage that
-//'   is applied, with \code{alpha = 0} representing no shrinkage (with the
-//'   column means of \code{returns} unchanged), and \code{alpha = 1}
-//'   representing complete shrinkage (with the column means of \code{returns}
-//'   all equal to the single mean of all the columns).
+//'   \code{returns}, by shrinking their means to their common mean value:
+//'   \deqn{
+//'     r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+//'   }
+//'   Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
+//'   mean of all the columns.
+//'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
+//'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
+//'   column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+//'   complete shrinkage (with the column means all equal to the single mean of
+//'   all the columns: \eqn{r_i = \bar{r}}).
+//'
+//'   After the weights are calculated, they are scaled, depending on several
+//'   arguments.
+//'
+//'   If \code{rankw = TRUE} then the weights are converted into their ranks.
+//'   The default is \code{rankw = FALSE}.
+//'
+//'   If \code{centerw = TRUE} then the weights are centered so that their sum
+//'   is equal to \code{0}.  The default is \code{centerw = FALSE}.
+//'
+//'   If \code{scalew = "voltarget"} (the default) then the weights are
+//'   scaled (multiplied by a factor) so that the weighted portfolio has an
+//'   in-sample volatility equal to \code{vol_target}.
+//'   
+//'   If \code{scalew = "voleqw"} then the weights are scaled so that the
+//'   weighted portfolio has the same volatility as the equal weight portfolio.
+//'   
+//'   If \code{scalew = "sumone"} then the weights are scaled so that their
+//'   sum is equal to \code{1}.
+//'   If \code{scalew = "sumsq"} then the weights are scaled so that their
+//'   sum of squares is equal to \code{1}.
+//'   If \code{scalew = "none"} then the weights are not scaled.
 //' 
+//'   The function \code{calc_weights()} is written in \code{RcppArmadillo}
+//'   \code{C++} code.
+//'   
 //' @examples
 //' \dontrun{
-//' # Calculate covariance matrix of ETF returns
+//' # Calculate covariance matrix and eigen decomposition of ETF returns
 //' returns <- na.omit(rutils::etfenv$returns[, 1:16])
+//' ncols <- NCOL(returns)
 //' eigend <- eigen(cov(returns))
-//' # Calculate shrinkage inverse of covariance matrix
+//' # Calculate regularized inverse of covariance matrix
 //' eigen_max <- 3
 //' eigenvec <- eigend$vectors[, 1:eigen_max]
 //' eigenval <- eigend$values[1:eigen_max]
@@ -6232,140 +6417,154 @@ double lik_garch(double omega,
 //' colmeans <- colMeans(returns)
 //' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 //' # Calculate weights using R
-//' weights <- invmat %*% colmeans
-//' ncols <- NCOL(returns)
-//' weightsr <- weightsr*sd(returns %*% rep(1/ncols, ncols))/sd(returns %*% weightsr)
+//' weightsr <- drop(invmat %*% colmeans)
+//' # Apply weights scaling
+//' weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
+//' weightsr <- 0.01*weightsr/sd(returns %*% weightsr)
+//' weightsr <- weightsr/sqrt(sum(weightsr^2))
 //' # Calculate weights using RcppArmadillo
-//' weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
-//' all.equal(weights, weightsr)
+//' weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+//' all.equal(weightcpp, weightsr)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
-                       std::string method = "ranksharpe",
-                       double eigen_thresh = 1e-5,
-                       arma::uword eigen_max = 0,
-                       double conf_lev = 0.1,
-                       double alpha = 0.0,
-                       bool scale = true,
-                       double vol_target = 0.01) {
-  // Initialize
-  arma::vec weights(returns.n_cols, fill::zeros);
-  if (eigen_max == 0)  eigen_max = returns.n_cols;
+arma::vec calc_weights(const arma::mat& returns, // Asset returns
+                       std::string method = "maxsharpe", // Method for calculating the weights
+                       double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                       arma::uword eigen_max = 0, // Regularization intensity
+                       double confl = 0.1, // Confidence level for calculating the quantiles of returns
+                       double alpha = 0.0, // Return shrinkage intensity
+                       bool rankw = false, // Rank the weights
+                       bool centerw = false, // Center the weights
+                       std::string scalew = "voltarget", // Method for scaling the weights
+                       double vol_target = 0.01) { // Target volatility for scaling the weights
   
-  // Switch for the different methods for weights
+  // Initialize
+  arma::uword ncols = returns.n_cols;
+  arma::vec weights(ncols, fill::zeros);
+  // No regularization so set eigen_max to ncols
+  if (eigen_max == 0)  eigen_max = ncols;
+  // Calculate the covariance matrix
+  arma::mat covmat = calc_covar(returns);
+  
+  // Apply different calculation methods for weights
   switch(calc_method(method)) {
-  case methodenum::ranksharpe: {
-    // Mean returns by columns
-    arma::vec colmeans = arma::trans(arma::mean(returns, 0));
-    // Standard deviation by columns
-    arma::vec colsd = arma::trans(arma::stddev(returns, 0));
-    colsd.replace(0, 1);
-    colmeans = colmeans/colsd;
-    // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(colmeans)));
-    weights = (weights - arma::mean(weights));
-    break;
-  }  // end ranksharpe
-  case methodenum::max_sharpe: {
-    // Mean returns by columns
+  case methodenum::maxsharpe: {
+    // Mean returns of columns
     arma::vec colmeans = arma::trans(arma::mean(returns, 0));
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
-    // Apply shrinkage inverse
-    // arma::mat invmat = calc_inv(cov(returns), eigen_max);
-    // weights = calc_inv(cov(returns), eigen_max)*colmeans;
-    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*colmeans;
+    // Calculate weights using regularized inverse
+    weights = calc_inv(covmat, eigen_thresh, eigen_max)*colmeans;
     break;
-  }  // end max_sharpe
-  case methodenum::max_sharpe_median: {
-    // Mean returns by columns
+  }  // end maxsharpe
+  case methodenum::maxsharpemed: {
+    // Median returns of columns
     arma::vec colmeans = arma::trans(arma::median(returns, 0));
-    // Shrink colmeans to the mean of returns
+    // Shrink colmeans to the median of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
-    // Apply shrinkage inverse
-    // arma::mat invmat = calc_inv(cov(returns), eigen_max);
-    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*colmeans;
+    // Calculate weights using regularized inverse
+    weights = calc_inv(covmat, eigen_thresh, eigen_max)*colmeans;
     break;
-  }  // end max_sharpe_median
-  case methodenum::min_var: {
-    // Apply shrinkage inverse to unit vector
-    weights = calc_inv(cov(returns), eigen_thresh, eigen_max)*arma::ones(returns.n_cols);
+  }  // end maxsharpemed
+  case methodenum::minvarlin: {
+    // Minimum variance weights under linear constraint
+    // Multiply regularized inverse times unit vector
+    weights = calc_inv(covmat, eigen_thresh, eigen_max)*arma::ones(ncols);
     break;
-  }  // end min_var
-  case methodenum::min_varpca: {
+  }  // end minvarlin
+  case methodenum::minvarquad: {
+    // Minimum variance weights under quadratic constraint
     // Calculate highest order principal component
     arma::vec eigenval;
     arma::mat eigenvec;
-    arma::eig_sym(eigenval, eigenvec, arma::cov(returns));
-    weights = eigenvec.col(0);
+    arma::eig_sym(eigenval, eigenvec, covmat);
+    weights = eigenvec.col(ncols-1);
     break;
-  }  // end min_varpca
-  case methodenum::rank: {
-    // Mean returns by columns
+  }  // end minvarquad
+  case methodenum::sharpem: {
+    // Momentum weights equal to Sharpe ratios
+    // Mean returns of columns
     arma::vec colmeans = arma::trans(arma::mean(returns, 0));
-    // Standard deviation by columns
-    arma::vec colsd = arma::trans(arma::stddev(returns, 0));
+    // Standard deviation of columns
+    arma::vec colsd = arma::sqrt(covmat.diag());
     colsd.replace(0, 1);
-    colmeans = colmeans/colsd;
-    // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(colmeans)));
-    weights = (weights - arma::mean(weights));
+    // Momentum weights equal to Sharpe ratios
+    weights = colmeans/colsd;
     break;
-  }  // end rank
-  case methodenum::rankrob: {
-    // Median returns by columns
+  }  // end sharpem
+  case methodenum::kellym: {
+    // Momentum weights equal to Kelly ratios
+    // Mean returns of columns
+    arma::vec colmeans = arma::trans(arma::mean(returns, 0));
+    // Variance of columns
+    arma::vec colvar = covmat.diag();
+    colvar.replace(0, 1);
+    // Momentum weights equal to Kelly ratios
+    weights = colmeans/colvar;
+    break;
+  }  // end kellym
+  case methodenum::robustm: {
+    // Momentum weights equal to robust Sharpe ratios
+    // Median returns of columns
     arma::vec colmeans = arma::trans(arma::median(returns, 0));
-    // colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
-    // Standard deviation by columns
-    arma::vec colsd = arma::trans(arma::stddev(returns, 0));
+    // Standard deviation of columns
+    arma::vec colsd = arma::sqrt(covmat.diag());
     colsd.replace(0, 1);
+    // Momentum weights equal to robust Sharpe ratios
     colmeans = colmeans/colsd;
-    // Apply shrinkage inverse
-    // arma::mat invmat = calc_inv(cov(returns), eigen_max);
-    // weights = calc_inv(cov(returns), eigen_max)*colmeans;
-    // weights = calc_inv(cov(returns), eigen_max)*colmeans;
-    // // Standard deviation by columns
-    // arma::vec colsd = colmeans;
-    // for (arma::uword it=0; it < returns.n_cols; it++) {
-    //   colsd(it) = arma::median(arma::abs((returns.col(it) - colsd)));
-    // }  // end for
-    // colsd.replace(0, 1);
-    // colmeans = colmeans/colsd;
-    // Weights equal to ranks of Sharpe
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(colmeans)));
-    // level;
-    weights = (weights - arma::mean(weights));
     break;
-  }  // end rankrob
+  }  // end robustm
   case methodenum::quantile: {
-    // Sum of quantiles for columns
-    arma::vec levels = {conf_lev, 1-conf_lev};
+    // Momentum weights equal to sum of quantiles for columns
+    arma::vec levels = {confl, 1-confl};
     weights = conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
-    // Weights equal to ranks
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(weights)));
-    weights = (weights - arma::mean(weights));
     break;
   }  // end quantile
   default : {
     cout << "Warning: Invalid method parameter: " << method << endl;
-    return arma::ones(returns.n_cols);
+    return arma::ones(ncols);
   }  // end default
   }  // end switch
   
-  if (scale == TRUE) {
-    // return weights/std::sqrt(sum(square(weights)));
-    // return weights/sum(weights);
-    // Returns of equally weighted portfolio
-    // arma::vec rowmeans = arma::mean(returns, 1);
-    // Returns of weighted portfolio
-    // arma::vec returns_portf = returns*weights;
-    // Scale weights to equally weighted portfolio and return them
-    // return weights*arma::stddev(arma::mean(returns, 1))/arma::stddev(returns*weights);
-    // Scale weights so the resulting portfolio has a volatility equal to vol_target
-    return weights*vol_target/arma::stddev(returns*weights);
+  if (rankw == TRUE) {
+    // Convert the weights to their ranks
+    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(weights)));
   }  // end if
+  
+  if (centerw == TRUE) {
+    // Center the weights so their sum is equal to zero
+    weights = (weights - arma::mean(weights));
+  }  // end if
+  
+  // Apply different scaling methods for weights
+  switch(calc_method(scalew)) {
+  case methodenum::voltarget: {
+    // Scale the weights so the portfolio has the volatility equal to vol_target
+    weights = weights*vol_target/arma::stddev(returns*weights);
+    break;
+  }  // end voltarget
+  case methodenum::voleqw: {
+    // Scale the weights to the volatility of the equal weight portfolio
+    weights = weights*arma::stddev(arma::mean(returns, 1))/arma::stddev(returns*weights);
+    break;
+  }  // end voleqw
+  case methodenum::sumone: {
+    // Scale the weights so their sum of squares is equal to one
+    weights = weights/arma::sum(weights*arma::ones(ncols));
+    break;
+  }  // end sumone
+  case methodenum::sumsq: {
+    // Scale the weights so their sum of squares is equal to one
+    weights = weights/std::sqrt(arma::sum(square(weights)));
+    break;
+  }  // end sumsq
+  default : {
+    // No scaling
+    break;
+  }  // end default
+  }  // end switch
   
   return weights;
   
@@ -6397,25 +6596,31 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   \code{0})
 //'
 //' @param \code{method} A \emph{string} specifying the method for calculating
-//'   the weights (see Details) (the default is \code{method = "ranksharpe"})
+//'   the weights (see Details) (the default is \code{method = "sharpem"})
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
 //'   small singular values in order to regularize the inverse of the
-//'   \code{returns} matrix (the default is \code{1e-5}).
+//'   \code{covariance matrix} (the default is \code{1e-5}).
 //'   
 //' @param \code{eigen_max} An \emph{integer} equal to the number of singular
-//'   values used for calculating the shrinkage inverse of the \code{returns}
+//'   values used for calculating the regularized inverse of the \code{returns}
 //'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
 //'   the number of columns of \code{returns}).
 //'   
-//' @param \code{conf_lev} The confidence level for calculating the
-//'   quantiles (the default is \code{conf_lev = 0.75}).
+//' @param \code{confl} The confidence level for calculating the
+//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
 //'   (the default is \code{0}).
 //' 
-//' @param \code{scale} A \emph{Boolean} specifying whether the weights should
-//'   be scaled (the default is \code{scale = TRUE}).
+//' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
+//'   be ranked (the default is \code{rankw = FALSE}).
+//'
+//' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
+//'   be centered (the default is \code{centerw = FALSE}).
+//'
+//' @param \code{scalew} A \emph{string} specifying the method for scaling
+//'   the weights (the default is \code{scalew = "voltarget"}).
 //'
 //' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
 //'   weights (the default is \code{1e-5})
@@ -6434,8 +6639,8 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   passes the subset matrix of excess returns into the function
 //'   \code{calc_weights()}, which calculates the optimal portfolio weights at
 //'   each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
-//'   \code{method}, and \code{scale} are also passed to the function
-//'   \code{calc_weights()}.
+//'   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
+//'   also passed to the function \code{calc_weights()}.
 //'   
 //'   It then recursively averages the weights \eqn{w_i} at the \emph{end point
 //'   = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
@@ -6443,7 +6648,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //'   \deqn{
 //'     w_i = (1-\lambda) w_i + \lambda w_{i-1}
 //'   }
-//'   The purpose of averaging the weights is to reduce their variance to
+//'   The purpose of averaging the weights is to reduce their variance, to
 //'   improve their out-of-sample performance.  It is equivalent to extending
 //'   the portfolio holding period beyond the time interval between neighboring
 //'   \emph{end points}.
@@ -6480,7 +6685,7 @@ arma::vec calc_weights(const arma::mat& returns, // Portfolio returns
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
 //' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
-//' # Define shrinkage and regularization intensities
+//' # Define return shrinkage and regularization intensities
 //' alpha <- 0.5
 //' eigen_max <- 3
 //' # Simulate a monthly rolling portfolio optimization strategy
@@ -6501,15 +6706,17 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
                     const arma::mat& returns, // Asset returns
                     arma::uvec startp, // Start points
                     arma::uvec endp, // End points
-                    double lambda, // Decay factor for averaging the portfolio weights
-                    std::string method = "ranksharpe",  // The method for calculating the weights
-                    double eigen_thresh = 1e-5,
-                    arma::uword eigen_max = 0,
-                    double conf_lev = 0.1,
-                    double alpha = 0.0,
-                    bool scale = true,
-                    double vol_target = 0.01,
-                    double coeff = 1.0,
+                    double lambda = 0.0, // Decay factor for averaging the portfolio weights
+                    std::string method = "sharpem", // Method for calculating the weights
+                    double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                    arma::uword eigen_max = 0, // Regularization intensity
+                    double confl = 0.1, // Confidence level for calculating the quantiles of returns
+                    double alpha = 0.0, // Return shrinkage intensity
+                    bool rankw = false, // Rank the weights
+                    bool centerw = false, // Center the weights
+                    std::string scalew = "voltarget", // Method for scaling the weights
+                    double vol_target = 0.01, // Target volatility for scaling the weights
+                    double coeff = 1.0, // Multiplier strategy returns
                     double bid_offer = 0.0) {
   
   double lambda1 = 1-lambda;
@@ -6522,7 +6729,8 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   for (arma::uword it = 1; it < endp.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate portfolio weights
-    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, eigen_max, conf_lev, alpha, scale, vol_target);
+    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, eigen_max, 
+                                 confl, alpha, rankw, centerw, scalew, vol_target);
     // Calculate the weights as the weighted sum with past weights
     weights = lambda1*weights + lambda*weights_past;
     // Calculate out-of-sample returns

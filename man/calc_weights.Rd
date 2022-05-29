@@ -2,17 +2,19 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_weights}
 \alias{calc_weights}
-\title{Calculate the optimal portfolio weights for different types of objective
-functions.}
+\title{Calculate the optimal portfolio weights using a variety of different
+objective functions.}
 \usage{
 calc_weights(
   returns,
-  method = "ranksharpe",
+  method = "maxsharpe",
   eigen_thresh = 1e-05,
   eigen_max = 0L,
-  conf_lev = 0.1,
+  confl = 0.1,
   alpha = 0,
-  scale = TRUE,
+  rankw = FALSE,
+  centerw = FALSE,
+  scalew = "voltarget",
   vol_target = 0.01
 )
 }
@@ -22,25 +24,32 @@ data (the returns in excess of the risk-free rate).}
 
 \item{\code{method}}{A \emph{string} specifying the method for
 calculating the weights (see Details) (the default is \code{method =
-"ranksharpe"})}
+"sharpem"})}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-\code{returns} matrix (the default is \code{1e-5}).}
+\code{covariance matrix} of \code{returns} (the default is \code{1e-5}).}
 
 \item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
-values used for calculating the shrinkage inverse of the \code{returns}
-matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
-the number of columns of \code{returns}).}
+values used for calculating the regularized inverse of the
+\code{covariance matrix} of \code{returns} (the default is \code{0} -
+equivalent to \code{eigen_max} equal to the number of columns of
+\code{returns}).}
 
-\item{\code{conf_lev}}{The confidence level for calculating the
-quantiles (the default is \code{conf_lev = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the
+quantiles of returns (the default is \code{confl = 0.75}).}
 
-\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
-(the default is \code{0}).}
+\item{\code{alpha}}{The shrinkage intensity of \code{returns}.
+(values between \code{0} and \code{1} - the default is \code{0}).}
 
-\item{\code{scale}}{A \emph{Boolean} specifying whether the weights should
-be scaled (the default is \code{scale = TRUE}).}
+\item{\code{rankw}}{A \emph{Boolean} specifying whether the weights should
+be ranked (the default is \code{rankw = FALSE}).}
+
+\item{\code{centerw}}{A \emph{Boolean} specifying whether the weights should
+be centered (the default is \code{centerw = FALSE}).}
+
+\item{\code{scalew}}{A \emph{string} specifying the method for scaling
+the weights (the default is \code{scalew = "voltarget"}).}
 
 \item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
 weights (the default is \code{0.001})}
@@ -50,54 +59,98 @@ A column \emph{vector} of the same length as the number of columns
   of \code{returns}.
 }
 \description{
-Calculate the optimal portfolio weights for different types of objective
-functions.
+Calculate the optimal portfolio weights using a variety of different
+objective functions.
 }
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
-  weights for different types of methods, using \code{RcppArmadillo}
-  \code{C++} code.
+  weights using a variety of different objective functions.
 
-  If \code{method = "ranksharpe"} (the default) then it calculates the
-  weights as the ranks (order index) of the trailing Sharpe ratios of the
-  asset \code{returns}.
-
-  If \code{method = "rank"} then it calculates the weights as the ranks
-  (order index) of the last row of the \code{returns}.
-
-  If \code{method = "max_sharpe"} then \code{calc_weights()} calculates
-  the weights of the maximum Sharpe portfolio, by multiplying the inverse of
-  the covariance \emph{matrix} times the mean column returns.
-
-  If \code{method = "min_var"} then it calculates the weights of the
-  minimum variance portfolio under linear constraints.
-
-  If \code{method = "min_varpca"} then it calculates the weights of the
-  minimum variance portfolio under quadratic constraints (which is the
+  If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
+  calculates the weights of the maximum Sharpe portfolio, by multiplying the
+  regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
+  times the mean column returns \eqn{\mu}:
+  \deqn{
+    \strong{w} = \strong{C}^{-1} \mu
+  }
+  
+  If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
+  medians instead of the means.
+  
+  If \code{method = "minvarlin"} then it calculates the weights of the
+  minimum variance portfolio under linear constraint, by multiplying the
+  regularized inverse of the \emph{covariance matrix} times the unit vector:
+  \deqn{
+    \strong{w} = \strong{C}^{-1} \strong{1}
+  }
+  
+  If \code{method = "minvarquad"} then it calculates the weights of the
+  minimum variance portfolio under quadratic constraint (which is the
   highest order principal component).
 
-  If \code{scale = TRUE} (the default) then the weights are scaled so that
-  the resulting portfolio has a volatility equal to \code{vol_target}.
+  If \code{method = "sharpem"} then it calculates the momentum weights equal
+  to the Sharpe ratios (the \code{returns} divided by their standard
+  deviations):
+  \deqn{
+    \strong{w} = \frac{\mu}{\sigma}
+  }
 
-  \code{calc_weights()} calculates the shrinkage inverse of the covariance
-  \emph{matrix} of \code{returns} from its eigen decomposition.  It applies
-  dimension regularization by selecting only the largest eigenvalues equal
-  in number to \code{eigen_max}. 
+  If \code{method = "kellym"} then it calculates the momentum weights equal
+  to the Kelly ratios (the \code{returns} divided by their variance):
+  \deqn{
+    \strong{w} = \frac{\mu}{\sigma^2}
+  }
+
+  \code{calc_weights()} calls the function \code{calc_inv()} to calculate
+  the regularized inverse of the \emph{covariance matrix} of \code{returns}.
+  It performs regularization by selecting only the largest eigenvalues equal
+  in number to \code{eigen_max}.
   
   In addition, \code{calc_weights()} applies shrinkage to the columns of
-  \code{returns}, by shrinking their means to their common mean value. The
-  shrinkage intensity \code{alpha} determines the amount of shrinkage that
-  is applied, with \code{alpha = 0} representing no shrinkage (with the
-  column means of \code{returns} unchanged), and \code{alpha = 1}
-  representing complete shrinkage (with the column means of \code{returns}
-  all equal to the single mean of all the columns).
+  \code{returns}, by shrinking their means to their common mean value:
+  \deqn{
+    r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+  }
+  Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
+  mean of all the columns.
+  The shrinkage intensity \code{alpha} determines the amount of shrinkage
+  that is applied, with \code{alpha = 0} representing no shrinkage (with the
+  column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+  complete shrinkage (with the column means all equal to the single mean of
+  all the columns: \eqn{r_i = \bar{r}}).
+
+  After the weights are calculated, they are scaled, depending on several
+  arguments.
+
+  If \code{rankw = TRUE} then the weights are converted into their ranks.
+  The default is \code{rankw = FALSE}.
+
+  If \code{centerw = TRUE} then the weights are centered so that their sum
+  is equal to \code{0}.  The default is \code{centerw = FALSE}.
+
+  If \code{scalew = "voltarget"} (the default) then the weights are
+  scaled (multiplied by a factor) so that the weighted portfolio has an
+  in-sample volatility equal to \code{vol_target}.
+  
+  If \code{scalew = "voleqw"} then the weights are scaled so that the
+  weighted portfolio has the same volatility as the equal weight portfolio.
+  
+  If \code{scalew = "sumone"} then the weights are scaled so that their
+  sum is equal to \code{1}.
+  If \code{scalew = "sumsq"} then the weights are scaled so that their
+  sum of squares is equal to \code{1}.
+  If \code{scalew = "none"} then the weights are not scaled.
+
+  The function \code{calc_weights()} is written in \code{RcppArmadillo}
+  \code{C++} code.
 }
 \examples{
 \dontrun{
-# Calculate covariance matrix of ETF returns
+# Calculate covariance matrix and eigen decomposition of ETF returns
 returns <- na.omit(rutils::etfenv$returns[, 1:16])
+ncols <- NCOL(returns)
 eigend <- eigen(cov(returns))
-# Calculate shrinkage inverse of covariance matrix
+# Calculate regularized inverse of covariance matrix
 eigen_max <- 3
 eigenvec <- eigend$vectors[, 1:eigen_max]
 eigenval <- eigend$values[1:eigen_max]
@@ -107,12 +160,13 @@ alpha <- 0.5
 colmeans <- colMeans(returns)
 colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
-weights <- invmat \%*\% colmeans
-ncols <- NCOL(returns)
-weightsr <- weightsr*sd(returns \%*\% rep(1/ncols, ncols))/sd(returns \%*\% weightsr)
+weightsr <- drop(invmat \%*\% colmeans)
+weightsr <- weightsr*sd(rowMeans(returns))/sd(returns \%*\% weightsr)
+weightsr <- 0.01*weightsr/sd(returns \%*\% weightsr)
+weightsr <- weightsr/sqrt(sum(weightsr^2))
 # Calculate weights using RcppArmadillo
-weights <- drop(HighFreq::calc_weights(returns, eigen_max, alpha=alpha))
-all.equal(weights, weightsr)
+weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+all.equal(weightcpp, weightsr)
 }
 
 }

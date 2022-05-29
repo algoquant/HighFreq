@@ -106,11 +106,11 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
   if (is.null(ohlc)) {
     nrows <- NROW(indeks)
     # Create xts of random prices following geometric Brownian motion
-    xtes <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)), order.by=indeks)
+    xtsv <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)), order.by=indeks)
     # Add trade volume column
-    xtes <- merge(xtes, volume=sample(x=10*(2:18), size=nrows, replace=TRUE))
+    xtsv <- merge(xtsv, volume=sample(x=10*(2:18), size=nrows, replace=TRUE))
     # Aggregate to minutes OHLC data
-    to.period(x=xtes, period="minutes")
+    to.period(x=xtsv, period="minutes")
   } else {
     ohlc <- log(ohlc)  # transform to normal
     if (reducit)  # Calculate reduced form of ohlc
@@ -177,7 +177,7 @@ remove_jumps <- function(ohlc) {
 #' \emph{OHLC} prices.
 #'
 #' @export
-#' @param \code{xtes} An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
+#' @param \code{xtsv} An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
 #' @param \code{lagg} An integer equal to the number of time periods of lag. (default
 #'   is 1)
 #' @param \code{colnum} The column number to extract from the \emph{OHLC} data.
@@ -196,17 +196,17 @@ remove_jumps <- function(ohlc) {
 #'   by the differences of the time index (which scales the returns to units of
 #'   returns per second.)
 #'
-#'   The time index of the \code{xtes} time series is assumed to be in
+#'   The time index of the \code{xtsv} time series is assumed to be in
 #'   \emph{POSIXct} format, so that its internal value is equal to the number of
 #'   seconds that have elapsed since the \emph{epoch}.
 #'
 #'   If \code{scalit} is \code{TRUE} (the default), then the returns are
-#'   expressed in the scale of the time index of the \code{xtes} time series.
+#'   expressed in the scale of the time index of the \code{xtsv} time series.
 #'   For example, if the time index is in seconds, then the returns are given in
 #'   units of returns per second.  If the time index is in days, then the
 #'   returns are equal to the returns per day.
 #'
-#'   The function \code{ohlc_returns()} identifies the \code{xtes} time series as
+#'   The function \code{ohlc_returns()} identifies the \code{xtsv} time series as
 #'   \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
 #'   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
 #'   prices, but can also difference other prices depending on the value of
@@ -214,26 +214,26 @@ remove_jumps <- function(ohlc) {
 #'
 #' @examples
 #' # Calculate secondly returns from TAQ data
-#' returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY_TAQ)
+#' returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY_TAQ)
 #' # Calculate close to close returns
-#' returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY)
+#' returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY)
 #' # Calculate open to open returns
-#' returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY, colnum=1)
+#' returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY, colnum=1)
 
-ohlc_returns <- function(xtes, lagg=1, colnum=4, scalit=TRUE) {
+ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
   # Return NULL if no data
-  if (is.null(xtes))  return(NULL)
+  if (is.null(xtsv))  return(NULL)
   # Calculate mid prices
-  if (NCOL(xtes)==6)  # TAQ data has 6 columns
-    returns <- 0.5 * (xtes[, "Bid.Price"] + xtes[, "Ask.Price"])
+  if (NCOL(xtsv)==6)  # TAQ data has 6 columns
+    returns <- 0.5 * (xtsv[, "Bid.Price"] + xtsv[, "Ask.Price"])
   else
-    returns <- xtes[, colnum]  # OHLC data
+    returns <- xtsv[, colnum]  # OHLC data
   # Calculate returns
   returns <- rutils::diffit(log(returns), lagg=lagg)
   if (scalit)
     returns <- returns / c(rep(1, lagg), diff(xts::.index(returns), lagg=lagg))
   returns[1:lagg, ] <- 0
-  # Colnames(returns) <- paste0(rutils::get_name(colnames(xtes)[1]), ".returns")
+  # Colnames(returns) <- paste0(rutils::get_name(colnames(xtsv)[1]), ".returns")
   returns
 }  # end ohlc_returns
 
@@ -246,7 +246,7 @@ ohlc_returns <- function(xtes, lagg=1, colnum=4, scalit=TRUE) {
 #' interval.
 #'
 #' @export
-#' @param \code{xtes} A single-column \emph{xts} time series, or a \emph{numeric} or
+#' @param \code{xtsv} A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
 #' @param \code{look_back} The number of data points in rolling look-back interval for 
 #'   estimating rolling quantile.
@@ -284,11 +284,11 @@ ohlc_returns <- function(xtes, lagg=1, colnum=4, scalit=TRUE) {
 #' # Remove suspect values
 #' taq <- taq[!sus_pect]
 
-which_extreme <- function(xtes, look_back=51, vol_mult=2) {
+which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
 # Calculate volatility as rolling quantile
-  quantilev <- caTools::runquantile(x=abs(as.numeric(xtes)), k=look_back,
+  quantilev <- caTools::runquantile(x=abs(as.numeric(xtsv)), k=look_back,
                         probs=0.9, endrule="constant", align="center")
-#  quantilev <- xts(quantilev, order.by=index(xtes))
+#  quantilev <- xts(quantilev, order.by=index(xtsv))
 #  colnames(quantilev) <- "volat"
 # Carry forward non-zero volatility values
   quantilev[quantilev==0] <- NA
@@ -296,12 +296,12 @@ which_extreme <- function(xtes, look_back=51, vol_mult=2) {
   quantilev <- rutils::na_locf(quantilev)
 #  quantilev <- rutils::na_locf(quantilev, fromLast=TRUE)
 
-# extreme value if xtes greater than scaled volatility
-  ex_treme <- (abs(xtes) > 2*vol_mult*quantilev)
+# extreme value if xtsv greater than scaled volatility
+  ex_treme <- (abs(xtsv) > 2*vol_mult*quantilev)
   ex_treme[1] <- FALSE
 #  colnames(ex_treme) <- "suspect"
 
-  cat("date:", format(as.Date(index(first(xtes)))), "\tfound", sum(ex_treme), "extreme values\n")
+  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(ex_treme), "extreme values\n")
   ex_treme
 }  # end which_extreme
 
@@ -352,9 +352,9 @@ which_extreme <- function(xtes, look_back=51, vol_mult=2) {
 #' taq[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 #' taq <- xts:::na.locf.xts(taq)
 
-which_jumps <- function(xtes, look_back=51, vol_mult=2) {
+which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 # Calculate simple returns
-  returns <- rutils::diffit(as.numeric(xtes))
+  returns <- rutils::diffit(as.numeric(xtsv))
 #  returns[1] <- 0
 #  colnames(returns) <- "diffs"
   rets_advanced <- rutils::lagit(returns, -1)
@@ -381,7 +381,7 @@ which_jumps <- function(xtes, look_back=51, vol_mult=2) {
 #  colnames(sus_pect) <- "suspect"
 # Cat("Parsing", deparse(substitute(taq)), "\n")
 # Cat("Parsing", strsplit(deparse(substitute(taq)), split="[.]")[[1]][4], "on date:", format(todayd), "\tfound", sum(sus_pect), "suspect prices\n")
-  cat("date:", format(as.Date(index(first(xtes)))), "\tfound", sum(sus_pect), "jump prices\n")
+  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(sus_pect), "jump prices\n")
   sus_pect
 }  # end which_jumps
 
@@ -1186,13 +1186,13 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' bg="white", lty=c(1, 1), lwd=c(2, 2),
 #' col=c("black", "red"), bty="n")
 #' # Calculate running returns
-#' returns_running <- ohlc_returns(xtes=HighFreq::SPY)
+#' returns_running <- ohlc_returns(xtsv=HighFreq::SPY)
 #' # Calculate the rolling volume-weighted average returns
 #' roll_vwap(ohlc=HighFreq::SPY, close=returns_running, look_back=11)
 
 roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
-  roll_vwap <- rutils::roll_sum(xtes=close*ohlc[, 5, drop=FALSE], look_back=look_back)
-  volume_rolling <- rutils::roll_sum(xtes=ohlc[, 5, drop=FALSE], look_back=look_back)
+  roll_vwap <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], look_back=look_back)
+  volume_rolling <- rutils::roll_sum(xtsv=ohlc[, 5, drop=FALSE], look_back=look_back)
   # roll_vwap <- HighFreq::roll_sum(tseries=close*ohlc[, 5, drop=FALSE], look_back=look_back)
   # volume_rolling <- HighFreq::roll_sum(tseries=ohlc[, 5, drop=FALSE], look_back=look_back)
   roll_vwap <- ifelse(volume_rolling > 0, roll_vwap/volume_rolling, 0)
@@ -1452,7 +1452,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' points of an \emph{OHLC} time series, using \code{R} code.
 #'
 #' @export
-#' @param \code{xtes} An \emph{OHLC} time series of prices and trading volumes, in
+#' @param \code{xtsv} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
 #'   
 #' @param \code{agg_fun} The name of the aggregation function to be applied over a
@@ -1540,7 +1540,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' agg_regations <- roll_apply(ohlc, agg_fun=agg_function,
 #'                             look_back=5, endpoints=endpoints)
 
-roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes), 
+roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv), 
                        by_columns=FALSE, out_xts=TRUE, ...) {
   # Match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
@@ -1555,13 +1555,13 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
   # Perform aggregations over length of endpoints
   if (by_columns) {
     # Perform individual aggregations by columns
-    agg_regations <- lapply(xtes, function(colnum)
+    agg_regations <- lapply(xtsv, function(colnum)
       lapply(look_backs, function(look_back)
-        agg_fun(xtes[look_back], ...)
+        agg_fun(xtsv[look_back], ...)
       ))  # end lapply
   } else {  # not by_columns
     agg_regations <- lapply(look_backs, function(look_back)
-      agg_fun(xtes[look_back], ...)
+      agg_fun(xtsv[look_back], ...)
     )  # end lapply
   }  # end if
   
@@ -1571,7 +1571,7 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
       agg_regations <- t(agg_regations)
     agg_regations <- t(agg_regations)
     # Coerce agg_regations into xts series
-    xts(agg_regations, order.by=index(xtes[endpoints]))
+    xts(agg_regations, order.by=index(xtsv[endpoints]))
   } else
     agg_regations
   
@@ -1585,7 +1585,7 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
 #' end points along a time series of prices.
 #'
 #' @export
-#' @param \code{xtes} A time series of prices, asset returns, trading volumes, and
+#' @param \code{xtsv} A time series of prices, asset returns, trading volumes, and
 #'   other data, in \emph{xts} format.
 #'   
 #' @param \code{train_func} The name of the function for training (calibrating) a
@@ -1600,7 +1600,7 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
 #' @param \code{look_forward} The size of the look-forward interval, equal to the number
 #'   of rows of data used for trading the strategy.
 #'   
-#' @param \code{endpoints} A vector of end points along the rows of the \code{xtes}
+#' @param \code{endpoints} A vector of end points along the rows of the \code{xtsv}
 #'   time series, given as either integers or dates.
 #'   
 #' @param ... additional parameters to the functions \code{train_func()} and
@@ -1612,7 +1612,7 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
 #' @details The function \code{roll_backtest()} performs a rolling backtest 
 #'   simulation of a trading strategy over a vector of end points. At each end 
 #'   point, it trains (calibrates) a forecasting model using past data taken 
-#'   from the \code{xtes} time series over the look-back interval, and applies
+#'   from the \code{xtsv} time series over the look-back interval, and applies
 #'   the forecasts to the \code{trade_func()} trading model, using out-of-sample
 #'   future data from the look-forward interval.
 #'   
@@ -1645,14 +1645,14 @@ roll_apply <- function(xtes, agg_fun, look_back=2, endpoints=seq_along(xtes),
 #'     trade_func = trade_model,
 #'     model_params = model_params,
 #'     trading_params = trading_params,
-#'     xtes=prices)
+#'     xtsv=prices)
 #' }
 
-roll_backtest <- function(xtes,
+roll_backtest <- function(xtsv,
                           train_func, trade_func,
                           look_back=look_forward,
                           look_forward,
-                          endpoints=rutils::calc_endpoints(xtes, look_forward),
+                          endpoints=rutils::calc_endpoints(xtsv, look_forward),
                           ...) {
   # Match train and trade function names to functions
   train_func <- match.fun(train_func)
@@ -1661,9 +1661,9 @@ roll_backtest <- function(xtes,
   # Convert endpoints dates to integer
   if (inherits(endpoints, c("Date", "POSIXt"))) {
     endds <- endpoints
-    endpoints <- match(endpoints, index(xtes))
+    endpoints <- match(endpoints, index(xtsv))
   } else {
-    endds <- index(xtes[endpoints])
+    endds <- index(xtsv[endpoints])
   }  # end if
 
   # Define integer back_points and fwd_points from integer endpoints
@@ -1671,14 +1671,14 @@ roll_backtest <- function(xtes,
   back_points[back_points < 1] <- 1
   
   fwd_points <- endpoints + look_forward
-  fwd_points[fwd_points > NROW(xtes)] <- NROW(xtes)
+  fwd_points[fwd_points > NROW(xtsv)] <- NROW(xtsv)
 
   # Perform backtest over length of endpoints
   backtest_range <- 2:(NROW(endpoints)-1)
   back_test <- lapply(backtest_range, function(indeks) {
     trained_model <- 
-      train_func(xtes[back_points[indeks]:endpoints[indeks]], ...)
-    trade_func(xtes[(endpoints[indeks]+1):fwd_points[indeks]],
+      train_func(xtsv[back_points[indeks]:endpoints[indeks]], ...)
+    trade_func(xtsv[(endpoints[indeks]+1):fwd_points[indeks]],
                trained_model, ...)
   })  # end lapply
 
@@ -1689,7 +1689,7 @@ roll_backtest <- function(xtes,
   #   back_test <- t(back_test)
   # back_test <- t(back_test)
   # Coerce back_test into xts series
-  # xts(back_test, order.by=index(xtes[endpoints[backtest_range]]))
+  # xts(back_test, order.by=index(xtsv[endpoints[backtest_range]]))
 }  # end roll_backtest
 
 
@@ -1699,10 +1699,10 @@ roll_backtest <- function(xtes,
 #' Perform seasonality aggregations over a single-column \emph{xts} time series.
 #'
 #' @export
-#' @param \code{xtes} A single-column \emph{xts} time series.
+#' @param \code{xtsv} A single-column \emph{xts} time series.
 #' 
 #' @param \code{indeks} A vector of \emph{character} strings representing points in
-#'   time, of the same length as the argument \code{xtes}.
+#'   time, of the same length as the argument \code{xtsv}.
 #'
 #' @return An \emph{xts} time series with mean aggregations over the seasonality
 #'   interval.
@@ -1712,28 +1712,28 @@ roll_backtest <- function(xtes,
 #'   \code{indeks}. An example of a daily seasonality aggregation is the average
 #'   price of a stock between 9:30AM and 10:00AM every day, over many days. The
 #'   argument \code{indeks} is passed into function \code{tapply()}, and must be
-#'   the same length as the argument \code{xtes}.
+#'   the same length as the argument \code{xtsv}.
 #'
 #' @examples
 #' # Calculate running variance of each minutely OHLC bar of data
-#' xtes <- ohlc_variance(HighFreq::SPY)
+#' xtsv <- ohlc_variance(HighFreq::SPY)
 #' # Remove overnight variance spikes at "09:31"
-#' indeks <- format(index(xtes), "%H:%M")
-#' xtes <- xtes[!indeks=="09:31", ]
+#' indeks <- format(index(xtsv), "%H:%M")
+#' xtsv <- xtsv[!indeks=="09:31", ]
 #' # Calculate daily seasonality of variance
-#' var_seasonal <- season_ality(xtes=xtes)
+#' var_seasonal <- season_ality(xtsv=xtsv)
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
 
-season_ality <- function(xtes, indeks=format(zoo::index(xtes), "%H:%M")) {
+season_ality <- function(xtsv, indeks=format(zoo::index(xtsv), "%H:%M")) {
 # Aggregate the mean
-  agg_regation <- tapply(X=xtes, INDEX=indeks, FUN=mean)
+  agg_regation <- tapply(X=xtsv, INDEX=indeks, FUN=mean)
 # Coerce from array to named vector
   agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
 # Coerce to xts
   agg_regation <- xts(x=agg_regation,
       order.by=as.POSIXct(paste(Sys.Date(), names(agg_regation))))
-  colnames(agg_regation) <- colnames(xtes)
+  colnames(agg_regation) <- colnames(xtsv)
   agg_regation
 }  # end season_ality
 

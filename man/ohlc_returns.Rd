@@ -5,10 +5,10 @@
 \title{Calculate single period percentage returns from either \emph{TAQ} or
 \emph{OHLC} prices.}
 \usage{
-ohlc_returns(xtes, lagg = 1, colnum = 4, scalit = TRUE)
+ohlc_returns(xtsv, lagg = 1, colnum = 4, scalit = TRUE)
 }
 \arguments{
-\item{\code{xtes}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
+\item{\code{xtsv}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
 
 \item{\code{lagg}}{An integer equal to the number of time periods of lag. (default
 is 1)}
@@ -36,17 +36,17 @@ The function \code{ohlc_returns()} calculates the percentage returns
   by the differences of the time index (which scales the returns to units of
   returns per second.)
 
-  The time index of the \code{xtes} time series is assumed to be in
+  The time index of the \code{xtsv} time series is assumed to be in
   \emph{POSIXct} format, so that its internal value is equal to the number of
   seconds that have elapsed since the \emph{epoch}.
 
   If \code{scalit} is \code{TRUE} (the default), then the returns are
-  expressed in the scale of the time index of the \code{xtes} time series.
+  expressed in the scale of the time index of the \code{xtsv} time series.
   For example, if the time index is in seconds, then the returns are given in
   units of returns per second.  If the time index is in days, then the
   returns are equal to the returns per day.
 
-  The function \code{ohlc_returns()} identifies the \code{xtes} time series as
+  The function \code{ohlc_returns()} identifies the \code{xtsv} time series as
   \emph{TAQ} data when it has six columns, otherwise assumes it's \emph{OHLC}
   data. By default, for \emph{OHLC} data, it differences the \emph{Close}
   prices, but can also difference other prices depending on the value of
@@ -54,9 +54,9 @@ The function \code{ohlc_returns()} calculates the percentage returns
 }
 \examples{
 # Calculate secondly returns from TAQ data
-returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY_TAQ)
+returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY_TAQ)
 # Calculate close to close returns
-returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY)
+returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY)
 # Calculate open to open returns
-returns <- HighFreq::ohlc_returns(xtes=HighFreq::SPY, colnum=1)
+returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY, colnum=1)
 }

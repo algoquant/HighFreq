@@ -80,6 +80,43 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
+
++ [ ] Add argument control to function back_test() and pass it to calc_weights(), instead of passing many arguments - similar to RiskPortfolios by Ardia
+
++ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
+Adapt function calc_var()
+Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
+Several possible methods are: 
+The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
+cov = (var(r1+r2) - var(r1-r2))/4
+Gerber covariance estimator.
+Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
+Hodges-Lehmann estimator: 
+
++ [ ] In function calc_weights() don't calculate the mean of returns and the covariance of returns, but instead pass them in as arguments?
+But then weight scaling has to be performed outside calc_weights().
+
++ [ ] In function back_test() calculate the mean of returns using function calc_mean() and the covariance of returns using function calc_covar()?
+Add weight scaling instead of in calc_weights()?
+
++ [ ] In function calc_weights() fix scaling method voleqw - the below code should produce TRUE
+weightsr <- drop(invmat %*% colmeans)
+weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
+weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="voleqw"))
+all.equal(weightcpp, weightsr)
+
++ [ ] In function calc_mean() add shrinkage of returns?
+
++ [ ] Create the function run_covmat() - for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar()
+
++ [ ] Add Portfolio Optimization using the Gerber Statistic
+http://nextlevelanalytics.github.io/2016/05/26/Gerber/
+Gerber Statistic Portfolio Optimization.pdf
+
++ [ ] Introduce shrinkage of returns to the PCAs - is it equivalent to eigen shrinkage? No
+
++ [ ] In function back_test(), scale the weights to match the volatility of the equally weighted portfolio?
+
 + [ ] Compare the outputs of functions run_reg() versus roll_reg()
 Find the lambda parameter which produces similar values for a given look_back parameter.
 
@@ -88,8 +125,6 @@ Find the lambda parameter which produces similar values for a given look_back pa
 + [ ] Deprecate run_zscores() because run_reg() is the new version
 
 + [ ] Add t-values to run_reg()
-
-+ [ ] Rename the variable weights to weightv ?
 
 + [ ] Fix function mult_mat_ref() - it doesn't do anything - it doesn't multiply the matrix
 Is it a problem only on the Mac because of incompatible compiler?
@@ -186,14 +221,6 @@ Does it actually calculate by reference?
 
 + [ ] Combine functions sim_ou() and sim_schwartz() into a single function?
 
-+ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
-Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
-Several possible methods are: 
-The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
-cov = (VAR(r1+r2) - VAR(r1-r2))/4
-Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
-Hodges-Lehmann estimator: 
-
 + [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
 calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
 One robust method should be the Wilcoxon W statistic.
@@ -238,6 +265,10 @@ https://stackoverflow.com/questions/65739109/r-r6-inheritance-with-roxygen2-clas
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
 
++ [ ] Adapt function pointers using stl
+test_rcpp_stl_functor.cpp
+test_stl_functor.cpp
+
 + [ ] Create a function called get_fun() for dispatching functions in C++: it should accept a string with a function name and return a pointer to the function with that name
 
 + [ ] Create function roll_fun() that accepts a function pointer argument and rolls it over end points
@@ -268,12 +299,15 @@ https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and
 https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
 https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
 
++ [ ] It's not possible to create an Rcpp function with dots because the .Call() interface doesn't support them
+https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
+The only workaround is passing a list of parameters and unpacking them.
+
 + [ ] Pass parameters to function back_test() using parameter pack and dots or va_list argument to C++ functions
 https://stackoverflow.com/questions/3530771/passing-variable-arguments-to-another-function-that-accepts-a-variable-argument
 https://stackoverflow.com/questions/20901811/function-with-three-dots-argument
 https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
 https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
-https://stackoverflow.com/questions/24590946/passing-many-argumentes-by-ellipsis-in-rcpp
 https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
 https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
 https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
@@ -306,6 +340,11 @@ Update the description documentation of roll_moment()
 Inoue Rolling Regressions Time Series Bias Variance Tradeoff.pdf
 Easley Volume Clock Trading Paradigm.pdf
 https://quantivity.wordpress.com/2012/10/23/volume-clock-gaps-and-goog/
+
++ [ ] Run Rcpp11 code
+install.packages("Rcpp11")
+devtools::install_github("Rcpp11/attributes")
+attributes::sourceCpp(file="/Users/jerzy/Develop/Rcpp/test_dots_copy.cpp")
 
 + [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory ?
 That may not always be correct, for example in the case of rolling calculations.
@@ -466,6 +505,17 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] In function calc_weights() introduce independent ranking, centering and scaling of weights: rankw, centerw, rankcenterw, scalew, centerscalew
+Modify the argument scale from type Boolean to type methodenum.
+Rename the argument scale to scalew.
+Rename methods rank_sharpe/sharpem, rankrob/robustm, min_var/minvarlin, min_varpca/minvarquad, max_sharpe/maxsharpe, max_sharpe_median/maxsharpemed
+
++ [x] In function calc_weights() modify the method rank because it's identical to ranksharpe
+Rename methodenum::rank to methodenum::kellym.
+Calculate the momentum weights equal to the Kelly ratios: the returns divided by their variance.
+
++ [x] Update the documentation for calc_weights() and calc_inv()
 
 + [x] Fix functions calc_lm() and calc_reg()
 Rename stderr to stderrv.  Add prefix Rcpp:: to function calls.
@@ -996,12 +1046,12 @@ created function save_rets_OHLC()
 
 ### Tasks deprecated
 
++ [ ] Rename the variable weights to weightv ?
+
 + [ ] Remove unnecessary pointer "&" and "const" attributes from input arguments - No!
 Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.
 
 + [ ] In function roll_wsum() add argument start_p - it's not needed because the length of weights determines the start points
-
-+ [ ] Rename the function roll_zscores() to roll_reg()
 
 + [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 

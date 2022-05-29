@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_eigen}
 \alias{calc_eigen}
-\title{Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+\title{Calculate the eigen decomposition of the \emph{covariance matrix} of returns
 data using \code{RcppArmadillo}.}
 \usage{
 calc_eigen(tseries)
@@ -17,13 +17,13 @@ A list with two elements: a \emph{vector} of eigenvalues
   "vectors").
 }
 \description{
-Calculate the eigen decomposition of the covariance \emph{matrix} of returns
+Calculate the eigen decomposition of the \emph{covariance matrix} of returns
 data using \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_eigen()} first calculates the covariance
-  \emph{matrix} of \code{tseries}, and then calculates the eigen
-  decomposition of the covariance \emph{matrix}.
+The function \code{calc_eigen()} first calculates the \emph{covariance
+  matrix} of \code{tseries}, and then calculates the eigen
+  decomposition of the \emph{covariance matrix}.
 }
 \examples{
 \dontrun{

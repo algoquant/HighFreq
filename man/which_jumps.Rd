@@ -5,7 +5,7 @@
 \title{Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
 a single-column \emph{xts} time series or vector, over a rolling interval.}
 \usage{
-which_jumps(xtes, look_back = 51, vol_mult = 2)
+which_jumps(xtsv, look_back = 51, vol_mult = 2)
 }
 \value{
 A \emph{Boolean} vector with the same number of rows as the input

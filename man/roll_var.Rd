@@ -14,7 +14,7 @@ roll_var(
   look_back = 1L,
   stub = 0L,
   method = "moment",
-  conf_lev = 0.75
+  confl = 0.75
 )
 }
 \arguments{
