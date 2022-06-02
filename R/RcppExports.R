@@ -555,10 +555,10 @@ calc_eigen <- function(tseries) {
 #'   small singular values in order to regularize the inverse of the
 #'   matrix \code{tseries} (the default is \code{0.01}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#' @param \code{dimax} An \emph{integer} equal to the number of singular
 #'   values used for calculating the regularized inverse of the matrix
-#'   \code{tseries} (the default is \code{eigen_max = 0} - equivalent to
-#'   \code{eigen_max} equal to the number of columns of \code{tseries}).
+#'   \code{tseries} (the default is \code{dimax = 0} - equivalent to
+#'   \code{dimax} equal to the number of columns of \code{tseries}).
 #'
 #' @return A \emph{matrix} equal to the regularized inverse of the matrix
 #'   \code{tseries}.
@@ -599,15 +599,15 @@ calc_eigen <- function(tseries) {
 #'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
 #'   
 #'   It then discards additional singular values so that only the largest
-#'   \code{eigen_max} singular values remain.  
+#'   \code{dimax} singular values remain.  
 #'   It calculates the regularized inverse from the \emph{SVD} matrices using
-#'   only the largest singular values up to \code{eigen_max}.  For example, if
-#'   \code{eigen_max = 3} then it only uses the \code{3} largest singular
+#'   only the largest singular values up to \code{dimax}.  For example, if
+#'   \code{dimax = 3} then it only uses the \code{3} largest singular
 #'   values. This has the effect of dimension shrinkage.
 #'   
 #'   If the matrix \code{tseries} has a large number of small singular values,
 #'   then the number of remaining singular values may be less than
-#'   \code{eigen_max}.
+#'   \code{dimax}.
 #'   
 #' @examples
 #' \dontrun{
@@ -616,18 +616,18 @@ calc_eigen <- function(tseries) {
 #' # Calculate covariance matrix
 #' covmat <- cov(returns)
 #' # Calculate regularized inverse using RcppArmadillo
-#' invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
+#' invmat <- HighFreq::calc_inv(covmat, dimax=3)
 #' # Calculate regularized inverse from SVD in R
 #' svdec <- svd(covmat)
-#' eigen_max <- 1:3
-#' invsvd <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+#' dimax <- 1:3
+#' invsvd <- svdec$v[, dimax] %*% (t(svdec$u[, dimax]) / svdec$d[dimax])
 #' # Compare RcppArmadillo with R
 #' all.equal(invmat, invsvd)
 #' }
 #' 
 #' @export
-calc_inv <- function(tseries, eigen_thresh = 0.01, eigen_max = 0L) {
-    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', tseries, eigen_thresh, eigen_max)
+calc_inv <- function(tseries, eigen_thresh = 0.01, dimax = 0L) {
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', tseries, eigen_thresh, dimax)
 }
 
 #' Scale (standardize) the columns of a \emph{matrix} of data using
@@ -2816,9 +2816,9 @@ calc_lm <- function(response, predictor) {
 #'   small singular values in order to regularize the inverse of the
 #'   \code{predictor} matrix (the default is \code{1e-5}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#' @param \code{dimax} An \emph{integer} equal to the number of singular
 #'   values used for calculating the regularized inverse of the \code{predictor}
-#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 #'   the number of columns of \code{predictor}).
 #'   
 #' @param \code{confl} The confidence level for calculating the
@@ -2846,7 +2846,7 @@ calc_lm <- function(response, predictor) {
 #'   If \code{method = "regular"} then it performs shrinkage regression.  It
 #'   calculates the regularized inverse of the \code{predictor} matrix from its
 #'   singular value decomposition.  It performs regularization by selecting
-#'   only the largest singular values equal in number to \code{eigen_max}.
+#'   only the largest singular values equal in number to \code{dimax}.
 #'   
 #'   If \code{method = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
@@ -2900,8 +2900,8 @@ calc_lm <- function(response, predictor) {
 #' }
 #' 
 #' @export
-calc_reg <- function(response, predictor, intercept = TRUE, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, intercept, method, eigen_thresh, eigen_max, confl, alpha)
+calc_reg <- function(response, predictor, intercept = TRUE, method = "least_squares", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, intercept, method, eigen_thresh, dimax, confl, alpha)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -3499,9 +3499,9 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   small singular values in order to regularize the inverse of the
 #'   \code{predictor} matrix (the default is \code{1e-5}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#' @param \code{dimax} An \emph{integer} equal to the number of singular
 #'   values used for calculating the regularized inverse of the \code{predictor}
-#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 #'   the number of columns of \code{predictor}).
 #'   
 #' @param \code{confl} The confidence level for calculating the
@@ -3576,8 +3576,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' }
 #' 
 #' @export
-roll_reg <- function(response, predictor, intercept = TRUE, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, confl, alpha)
+roll_reg <- function(response, predictor, intercept = TRUE, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "least_squares", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0) {
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, dimax, confl, alpha)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a
@@ -4200,10 +4200,10 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   small singular values in order to regularize the inverse of the
 #'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#' @param \code{dimax} An \emph{integer} equal to the number of singular
 #'   values used for calculating the regularized inverse of the
 #'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
-#'   equivalent to \code{eigen_max} equal to the number of columns of
+#'   equivalent to \code{dimax} equal to the number of columns of
 #'   \code{returns}).
 #'   
 #' @param \code{confl} The confidence level for calculating the
@@ -4269,7 +4269,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
 #'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
 #'   It performs regularization by selecting only the largest eigenvalues equal
-#'   in number to \code{eigen_max}.
+#'   in number to \code{dimax}.
 #'   
 #'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 #'   \code{returns}, by shrinking their means to their common mean value:
@@ -4316,9 +4316,9 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' ncols <- NCOL(returns)
 #' eigend <- eigen(cov(returns))
 #' # Calculate regularized inverse of covariance matrix
-#' eigen_max <- 3
-#' eigenvec <- eigend$vectors[, 1:eigen_max]
-#' eigenval <- eigend$values[1:eigen_max]
+#' dimax <- 3
+#' eigenvec <- eigend$vectors[, 1:dimax]
+#' eigenval <- eigend$values[1:dimax]
 #' invmat <- eigenvec %*% (t(eigenvec) / eigenval)
 #' # Define shrinkage intensity and apply shrinkage to the mean returns
 #' alpha <- 0.5
@@ -4326,17 +4326,18 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 #' # Calculate weights using R
 #' weightsr <- drop(invmat %*% colmeans)
+#' # Apply weights scaling
 #' weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
 #' weightsr <- 0.01*weightsr/sd(returns %*% weightsr)
 #' weightsr <- weightsr/sqrt(sum(weightsr^2))
 #' # Calculate weights using RcppArmadillo
-#' weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+#' weightcpp <- drop(HighFreq::calc_weights(returns, dimax=dimax, alpha=alpha, scalew="sumsq"))
 #' all.equal(weightcpp, weightsr)
 #' }
 #' 
 #' @export
-calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target)
+calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01) {
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -4368,9 +4369,9 @@ calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eig
 #'   small singular values in order to regularize the inverse of the
 #'   \code{covariance matrix} (the default is \code{1e-5}).
 #'   
-#' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+#' @param \code{dimax} An \emph{integer} equal to the number of singular
 #'   values used for calculating the regularized inverse of the \code{returns}
-#'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+#'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 #'   the number of columns of \code{returns}).
 #'   
 #' @param \code{confl} The confidence level for calculating the
@@ -4404,7 +4405,7 @@ calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eig
 #'   between the corresponding \emph{start point} and the \emph{end point}. It
 #'   passes the subset matrix of excess returns into the function
 #'   \code{calc_weights()}, which calculates the optimal portfolio weights at
-#'   each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
+#'   each \emph{end point}. The arguments \code{dimax}, \code{alpha},
 #'   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
 #'   also passed to the function \code{calc_weights()}.
 #'   
@@ -4453,11 +4454,11 @@ calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eig
 #' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 #' # Define return shrinkage and regularization intensities
 #' alpha <- 0.5
-#' eigen_max <- 3
+#' dimax <- 3
 #' # Simulate a monthly rolling portfolio optimization strategy
 #' pnls <- HighFreq::back_test(excess, returns, 
 #'                             startp-1, endp-1, 
-#'                             eigen_max = eigen_max, 
+#'                             dimax = dimax, 
 #'                             alpha = alpha)
 #' pnls <- xts::xts(pnls, index(returns))
 #' colnames(pnls) <- "strat_rets"
@@ -4467,7 +4468,7 @@ calc_weights <- function(returns, method = "maxsharpe", eigen_thresh = 1e-5, eig
 #' }
 #' 
 #' @export
-back_test <- function(excess, returns, startp, endp, lambda = 0.0, method = "sharpem", eigen_thresh = 1e-5, eigen_max = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, lambda, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target, coeff, bid_offer)
+back_test <- function(excess, returns, startp, endp, lambda = 0.0, method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.01, coeff = 1.0, bid_offer = 0.0) {
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, startp, endp, lambda, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target, coeff, bid_offer)
 }
 

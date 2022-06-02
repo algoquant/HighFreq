@@ -125,15 +125,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_inv
-arma::mat calc_inv(const arma::mat& tseries, double eigen_thresh, arma::uword eigen_max);
-RcppExport SEXP _HighFreq_calc_inv(SEXP tseriesSEXP, SEXP eigen_threshSEXP, SEXP eigen_maxSEXP) {
+arma::mat calc_inv(const arma::mat& tseries, double eigen_thresh, arma::uword dimax);
+RcppExport SEXP _HighFreq_calc_inv(SEXP tseriesSEXP, SEXP eigen_threshSEXP, SEXP dimaxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type eigen_thresh(eigen_threshSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type eigen_max(eigen_maxSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_inv(tseries, eigen_thresh, eigen_max));
+    Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_inv(tseries, eigen_thresh, dimax));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -534,8 +534,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_reg
-arma::mat calc_reg(const arma::mat& response, const arma::mat& predictor, bool intercept, std::string method, double eigen_thresh, arma::uword eigen_max, double confl, double alpha);
-RcppExport SEXP _HighFreq_calc_reg(SEXP responseSEXP, SEXP predictorSEXP, SEXP interceptSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP eigen_maxSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
+arma::mat calc_reg(const arma::mat& response, const arma::mat& predictor, bool intercept, std::string method, double eigen_thresh, arma::uword dimax, double confl, double alpha);
+RcppExport SEXP _HighFreq_calc_reg(SEXP responseSEXP, SEXP predictorSEXP, SEXP interceptSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -544,10 +544,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< double >::type eigen_thresh(eigen_threshSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type eigen_max(eigen_maxSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_reg(response, predictor, intercept, method, eigen_thresh, eigen_max, confl, alpha));
+    rcpp_result_gen = Rcpp::wrap(calc_reg(response, predictor, intercept, method, eigen_thresh, dimax, confl, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -655,8 +655,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_reg
-arma::mat roll_reg(const arma::mat& response, const arma::mat& predictor, bool intercept, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub, std::string method, double eigen_thresh, arma::uword eigen_max, double confl, double alpha);
-RcppExport SEXP _HighFreq_roll_reg(SEXP responseSEXP, SEXP predictorSEXP, SEXP interceptSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP eigen_maxSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
+arma::mat roll_reg(const arma::mat& response, const arma::mat& predictor, bool intercept, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub, std::string method, double eigen_thresh, arma::uword dimax, double confl, double alpha);
+RcppExport SEXP _HighFreq_roll_reg(SEXP responseSEXP, SEXP predictorSEXP, SEXP interceptSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -670,10 +670,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< double >::type eigen_thresh(eigen_threshSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type eigen_max(eigen_maxSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_reg(response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, eigen_max, confl, alpha));
+    rcpp_result_gen = Rcpp::wrap(roll_reg(response, predictor, intercept, startp, endp, step, look_back, stub, method, eigen_thresh, dimax, confl, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -812,28 +812,28 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_weights
-arma::vec calc_weights(const arma::mat& returns, std::string method, double eigen_thresh, arma::uword eigen_max, double confl, double alpha, bool rankw, bool centerw, std::string scalew, double vol_target);
-RcppExport SEXP _HighFreq_calc_weights(SEXP returnsSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP eigen_maxSEXP, SEXP conflSEXP, SEXP alphaSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP vol_targetSEXP) {
+arma::vec calc_weights(const arma::mat& returns, std::string method, double eigen_thresh, arma::uword dimax, double confl, double alpha, bool rankw, bool centerw, std::string scalew, double vol_target);
+RcppExport SEXP _HighFreq_calc_weights(SEXP returnsSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphaSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP vol_targetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type returns(returnsSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< double >::type eigen_thresh(eigen_threshSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type eigen_max(eigen_maxSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< bool >::type rankw(rankwSEXP);
     Rcpp::traits::input_parameter< bool >::type centerw(centerwSEXP);
     Rcpp::traits::input_parameter< std::string >::type scalew(scalewSEXP);
     Rcpp::traits::input_parameter< double >::type vol_target(vol_targetSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_weights(returns, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target));
+    rcpp_result_gen = Rcpp::wrap(calc_weights(returns, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target));
     return rcpp_result_gen;
 END_RCPP
 }
 // back_test
-arma::mat back_test(const arma::mat& excess, const arma::mat& returns, arma::uvec startp, arma::uvec endp, double lambda, std::string method, double eigen_thresh, arma::uword eigen_max, double confl, double alpha, bool rankw, bool centerw, std::string scalew, double vol_target, double coeff, double bid_offer);
-RcppExport SEXP _HighFreq_back_test(SEXP excessSEXP, SEXP returnsSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP lambdaSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP eigen_maxSEXP, SEXP conflSEXP, SEXP alphaSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP vol_targetSEXP, SEXP coeffSEXP, SEXP bid_offerSEXP) {
+arma::mat back_test(const arma::mat& excess, const arma::mat& returns, arma::uvec startp, arma::uvec endp, double lambda, std::string method, double eigen_thresh, arma::uword dimax, double confl, double alpha, bool rankw, bool centerw, std::string scalew, double vol_target, double coeff, double bid_offer);
+RcppExport SEXP _HighFreq_back_test(SEXP excessSEXP, SEXP returnsSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP lambdaSEXP, SEXP methodSEXP, SEXP eigen_threshSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphaSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP vol_targetSEXP, SEXP coeffSEXP, SEXP bid_offerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -844,7 +844,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< double >::type eigen_thresh(eigen_threshSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type eigen_max(eigen_maxSEXP);
+    Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
     Rcpp::traits::input_parameter< bool >::type rankw(rankwSEXP);
@@ -853,7 +853,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type vol_target(vol_targetSEXP);
     Rcpp::traits::input_parameter< double >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< double >::type bid_offer(bid_offerSEXP);
-    rcpp_result_gen = Rcpp::wrap(back_test(excess, returns, startp, endp, lambda, method, eigen_thresh, eigen_max, confl, alpha, rankw, centerw, scalew, vol_target, coeff, bid_offer));
+    rcpp_result_gen = Rcpp::wrap(back_test(excess, returns, startp, endp, lambda, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target, coeff, bid_offer));
     return rcpp_result_gen;
 END_RCPP
 }

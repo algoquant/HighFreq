@@ -795,10 +795,10 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //'   small singular values in order to regularize the inverse of the
 //'   matrix \code{tseries} (the default is \code{0.01}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
 //'   values used for calculating the regularized inverse of the matrix
-//'   \code{tseries} (the default is \code{eigen_max = 0} - equivalent to
-//'   \code{eigen_max} equal to the number of columns of \code{tseries}).
+//'   \code{tseries} (the default is \code{dimax = 0} - equivalent to
+//'   \code{dimax} equal to the number of columns of \code{tseries}).
 //'
 //' @return A \emph{matrix} equal to the regularized inverse of the matrix
 //'   \code{tseries}.
@@ -839,15 +839,15 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
 //'   
 //'   It then discards additional singular values so that only the largest
-//'   \code{eigen_max} singular values remain.  
+//'   \code{dimax} singular values remain.  
 //'   It calculates the regularized inverse from the \emph{SVD} matrices using
-//'   only the largest singular values up to \code{eigen_max}.  For example, if
-//'   \code{eigen_max = 3} then it only uses the \code{3} largest singular
-//'   values. This has the effect of dimension shrinkage.
+//'   only the largest singular values up to \code{dimax}.  For example, if
+//'   \code{dimax = 3} then it only uses the \code{3} largest singular
+//'   values. This has the effect of dimension reduction.
 //'   
 //'   If the matrix \code{tseries} has a large number of small singular values,
 //'   then the number of remaining singular values may be less than
-//'   \code{eigen_max}.
+//'   \code{dimax}.
 //'   
 //' @examples
 //' \dontrun{
@@ -856,11 +856,11 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 //' # Calculate covariance matrix
 //' covmat <- cov(returns)
 //' # Calculate regularized inverse using RcppArmadillo
-//' invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
+//' invmat <- HighFreq::calc_inv(covmat, dimax=3)
 //' # Calculate regularized inverse from SVD in R
 //' svdec <- svd(covmat)
-//' eigen_max <- 1:3
-//' invsvd <- svdec$v[, eigen_max] %*% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+//' dimax <- 1:3
+//' invsvd <- svdec$v[, dimax] %*% (t(svdec$u[, dimax]) / svdec$d[dimax])
 //' # Compare RcppArmadillo with R
 //' all.equal(invmat, invsvd)
 //' }
@@ -869,7 +869,7 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
 // [[Rcpp::export]]
 arma::mat calc_inv(const arma::mat& tseries,
                    double eigen_thresh = 0.01, 
-                   arma::uword eigen_max = 0) {
+                   arma::uword dimax = 0) {
   
   // Allocate SVD variables
   arma::vec svdval;  // Singular values
@@ -879,18 +879,18 @@ arma::mat calc_inv(const arma::mat& tseries,
   // Calculate the number of non-small singular values
   arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
   
-  if (eigen_max == 0) {
-    // Set eigen_max
-    eigen_max = svdnum - 1;
+  if (dimax == 0) {
+    // Set dimax
+    dimax = svdnum - 1;
   } else {
-    // Adjust eigen_max
-    eigen_max = std::min(eigen_max - 1, svdnum - 1);
+    // Adjust dimax
+    dimax = std::min(dimax - 1, svdnum - 1);
   }  // end if
   
   // Remove all small singular values
-  svdval = svdval.subvec(0, eigen_max);
-  svdu = svdu.cols(0, eigen_max);
-  svdv = svdv.cols(0, eigen_max);
+  svdval = svdval.subvec(0, dimax);
+  svdu = svdu.cols(0, dimax);
+  svdv = svdv.cols(0, dimax);
   
   // Calculate the regularized inverse from the SVD decomposition
   return svdv*arma::diagmat(1/svdval)*svdu.t();
@@ -4132,9 +4132,9 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   small singular values in order to regularize the inverse of the
 //'   \code{predictor} matrix (the default is \code{1e-5}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
 //'   values used for calculating the regularized inverse of the \code{predictor}
-//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 //'   the number of columns of \code{predictor}).
 //'   
 //' @param \code{confl} The confidence level for calculating the
@@ -4162,7 +4162,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   If \code{method = "regular"} then it performs shrinkage regression.  It
 //'   calculates the regularized inverse of the \code{predictor} matrix from its
 //'   singular value decomposition.  It performs regularization by selecting
-//'   only the largest singular values equal in number to \code{eigen_max}.
+//'   only the largest singular values equal in number to \code{dimax}.
 //'   
 //'   If \code{method = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
@@ -4222,7 +4222,7 @@ arma::mat calc_reg(const arma::mat& response,
                    bool intercept = true,
                    std::string method = "least_squares",
                    double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                   arma::uword eigen_max = 0, // Regularization intensity
+                   arma::uword dimax = 0, // Regularization intensity
                    double confl = 0.1, // Confidence level for calculating the quantiles of returns
                    double alpha = 0.0) {
   
@@ -4247,7 +4247,7 @@ arma::mat calc_reg(const arma::mat& response,
   }  // end least_squares
   case methodenum::regular: {
     // Calculate shrinkage regression coefficients
-    coeff = calc_inv(predictori, eigen_thresh, eigen_max)*response;
+    coeff = calc_inv(predictori, eigen_thresh, dimax)*response;
     break;
   }  // end regular
   case methodenum::quantile: {
@@ -5185,9 +5185,9 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   small singular values in order to regularize the inverse of the
 //'   \code{predictor} matrix (the default is \code{1e-5}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
 //'   values used for calculating the regularized inverse of the \code{predictor}
-//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 //'   the number of columns of \code{predictor}).
 //'   
 //' @param \code{confl} The confidence level for calculating the
@@ -5273,7 +5273,7 @@ arma::mat roll_reg(const arma::mat& response,
                    arma::uword stub = 0,
                    std::string method = "least_squares",
                    double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                   arma::uword eigen_max = 0, // Regularization intensity
+                   arma::uword dimax = 0, // Regularization intensity
                    double confl = 0.1, // Confidence level for calculating the quantiles of returns
                    double alpha = 0.0) {
   
@@ -5314,7 +5314,7 @@ arma::mat roll_reg(const arma::mat& response,
     if (endpts(ep) > startpts(ep)) {
       responsi = response.rows(startpts(ep), endpts(ep));
       predicti = predictor.rows(startpts(ep), endpts(ep));
-      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, eigen_max, confl, alpha);
+      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, dimax, confl, alpha);
     }  // end if
   }  // end for
   
@@ -5331,7 +5331,7 @@ arma::mat roll_reg(const arma::mat& response,
   // for (arma::uword it = look_back; it < nrows; it++) {
   //   responsi = response.rows(it-look_back+1, it);
   //   predicti = predictor.rows(it-look_back+1, it);
-  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, eigen_max, confl, alpha);
+  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, dimax, confl, alpha);
   //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -6292,10 +6292,10 @@ double lik_garch(double omega,
 //'   small singular values in order to regularize the inverse of the
 //'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
 //'   values used for calculating the regularized inverse of the
 //'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
-//'   equivalent to \code{eigen_max} equal to the number of columns of
+//'   equivalent to \code{dimax} equal to the number of columns of
 //'   \code{returns}).
 //'   
 //' @param \code{confl} The confidence level for calculating the
@@ -6361,7 +6361,7 @@ double lik_garch(double omega,
 //'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
 //'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
 //'   It performs regularization by selecting only the largest eigenvalues equal
-//'   in number to \code{eigen_max}.
+//'   in number to \code{dimax}.
 //'   
 //'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 //'   \code{returns}, by shrinking their means to their common mean value:
@@ -6408,9 +6408,9 @@ double lik_garch(double omega,
 //' ncols <- NCOL(returns)
 //' eigend <- eigen(cov(returns))
 //' # Calculate regularized inverse of covariance matrix
-//' eigen_max <- 3
-//' eigenvec <- eigend$vectors[, 1:eigen_max]
-//' eigenval <- eigend$values[1:eigen_max]
+//' dimax <- 3
+//' eigenvec <- eigend$vectors[, 1:dimax]
+//' eigenval <- eigend$values[1:dimax]
 //' invmat <- eigenvec %*% (t(eigenvec) / eigenval)
 //' # Define shrinkage intensity and apply shrinkage to the mean returns
 //' alpha <- 0.5
@@ -6423,7 +6423,7 @@ double lik_garch(double omega,
 //' weightsr <- 0.01*weightsr/sd(returns %*% weightsr)
 //' weightsr <- weightsr/sqrt(sum(weightsr^2))
 //' # Calculate weights using RcppArmadillo
-//' weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+//' weightcpp <- drop(HighFreq::calc_weights(returns, dimax=dimax, alpha=alpha, scalew="sumsq"))
 //' all.equal(weightcpp, weightsr)
 //' }
 //' 
@@ -6432,7 +6432,7 @@ double lik_garch(double omega,
 arma::vec calc_weights(const arma::mat& returns, // Asset returns
                        std::string method = "maxsharpe", // Method for calculating the weights
                        double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                       arma::uword eigen_max = 0, // Regularization intensity
+                       arma::uword dimax = 0, // Regularization intensity
                        double confl = 0.1, // Confidence level for calculating the quantiles of returns
                        double alpha = 0.0, // Return shrinkage intensity
                        bool rankw = false, // Rank the weights
@@ -6443,8 +6443,8 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   // Initialize
   arma::uword ncols = returns.n_cols;
   arma::vec weights(ncols, fill::zeros);
-  // No regularization so set eigen_max to ncols
-  if (eigen_max == 0)  eigen_max = ncols;
+  // No regularization so set dimax to ncols
+  if (dimax == 0)  dimax = ncols;
   // Calculate the covariance matrix
   arma::mat covmat = calc_covar(returns);
   
@@ -6456,7 +6456,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
     // Calculate weights using regularized inverse
-    weights = calc_inv(covmat, eigen_thresh, eigen_max)*colmeans;
+    weights = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
     break;
   }  // end maxsharpe
   case methodenum::maxsharpemed: {
@@ -6465,13 +6465,13 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the median of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
     // Calculate weights using regularized inverse
-    weights = calc_inv(covmat, eigen_thresh, eigen_max)*colmeans;
+    weights = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
     break;
   }  // end maxsharpemed
   case methodenum::minvarlin: {
     // Minimum variance weights under linear constraint
     // Multiply regularized inverse times unit vector
-    weights = calc_inv(covmat, eigen_thresh, eigen_max)*arma::ones(ncols);
+    weights = calc_inv(covmat, eigen_thresh, dimax)*arma::ones(ncols);
     break;
   }  // end minvarlin
   case methodenum::minvarquad: {
@@ -6602,9 +6602,9 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   small singular values in order to regularize the inverse of the
 //'   \code{covariance matrix} (the default is \code{1e-5}).
 //'   
-//' @param \code{eigen_max} An \emph{integer} equal to the number of singular
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
 //'   values used for calculating the regularized inverse of the \code{returns}
-//'   matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 //'   the number of columns of \code{returns}).
 //'   
 //' @param \code{confl} The confidence level for calculating the
@@ -6638,7 +6638,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   between the corresponding \emph{start point} and the \emph{end point}. It
 //'   passes the subset matrix of excess returns into the function
 //'   \code{calc_weights()}, which calculates the optimal portfolio weights at
-//'   each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
+//'   each \emph{end point}. The arguments \code{dimax}, \code{alpha},
 //'   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
 //'   also passed to the function \code{calc_weights()}.
 //'   
@@ -6687,11 +6687,11 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 //' # Define return shrinkage and regularization intensities
 //' alpha <- 0.5
-//' eigen_max <- 3
+//' dimax <- 3
 //' # Simulate a monthly rolling portfolio optimization strategy
 //' pnls <- HighFreq::back_test(excess, returns, 
 //'                             startp-1, endp-1, 
-//'                             eigen_max = eigen_max, 
+//'                             dimax = dimax, 
 //'                             alpha = alpha)
 //' pnls <- xts::xts(pnls, index(returns))
 //' colnames(pnls) <- "strat_rets"
@@ -6709,7 +6709,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
                     double lambda = 0.0, // Decay factor for averaging the portfolio weights
                     std::string method = "sharpem", // Method for calculating the weights
                     double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                    arma::uword eigen_max = 0, // Regularization intensity
+                    arma::uword dimax = 0, // Regularization intensity
                     double confl = 0.1, // Confidence level for calculating the quantiles of returns
                     double alpha = 0.0, // Return shrinkage intensity
                     bool rankw = false, // Rank the weights
@@ -6729,7 +6729,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   for (arma::uword it = 1; it < endp.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate portfolio weights
-    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, eigen_max, 
+    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, dimax, 
                                  confl, alpha, rankw, centerw, scalew, vol_target);
     // Calculate the weights as the weighted sum with past weights
     weights = lambda1*weights + lambda*weights_past;

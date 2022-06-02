@@ -80,6 +80,13 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Rename eigen_max to dimax
+
++ [x] Rename "eigen shrinkage" to "dimension reduction"
+
++ [ ] Switch terms around in running formulas:
+μt = (1 − λ)pt + λμt−1
+μt = λμt−1 + (1 − λ)pt
 
 + [ ] Add argument control to function back_test() and pass it to calc_weights(), instead of passing many arguments - similar to RiskPortfolios by Ardia
 
