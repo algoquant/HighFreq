@@ -41,4 +41,5 @@ The function \code{save_rets} loads multiple days of \emph{TAQ}
 \dontrun{
 save_rets("SPY")
 }
+
 }

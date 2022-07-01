@@ -2,58 +2,62 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_ranks}
 \alias{calc_ranks}
-\title{Calculate the ranks of the elements of a single-column \emph{time series} or
-a \emph{vector} using \code{RcppArmadillo}.}
+\title{Calculate the ranks of the elements of a single-column \emph{time series},
+\emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.}
 \usage{
 calc_ranks(tseries)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a \emph{vector}.}
+\item{\code{tseries}}{A single-column \emph{time series}, \emph{matrix}, or
+a \emph{vector}.}
 }
 \value{
 An \emph{integer vector} with the ranks of the elements of the
   \code{tseries}.
 }
 \description{
-Calculate the ranks of the elements of a single-column \emph{time series} or
-a \emph{vector} using \code{RcppArmadillo}.
+Calculate the ranks of the elements of a single-column \emph{time series},
+\emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_ranks()} calculates the ranks of the elements of a
-  single-column \emph{time series} or a \emph{vector}. It uses the
-  \code{RcppArmadillo} function \code{arma::sort_index()}. The function
-  \code{arma::sort_index()} calculates the permutation index to sort a given
-  vector into ascending order.
+  single-column \emph{time series}, \emph{matrix}, or a \emph{vector}. 
   
+  The permutation index is an integer vector which sorts a given vector into
+  ascending order. 
+  The permutation index of the permutation index is the \emph{reverse}
+  permutation index, because it sorts the vector from ascending order back
+  into its original unsorted order.
+  The ranks of the elements are equal to the \emph{reverse} permutation
+  index. The function \code{calc_ranks()} calculates the \emph{reverse}
+  permutation index.
+  
+  The ranks produced by \code{calc_ranks()} start at zero, following the 
+  \code{C++} convention.
+  
+  The \code{RcppArmadillo} function \code{arma::sort_index()} calculates the
+  permutation index which sorts a given vector into an ascending order.
   Applying the function \code{arma::sort_index()} twice:
   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
   permutation index to sort the vector from ascending order back into its
   original unsorted order.
-  The permutation index produced by:
-  \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
-  permutation index produced by: \code{arma::sort_index()}.
   
-  The ranks of the elements are equal to the \emph{reverse} permutation
-  index.
-  The function \code{calc_ranks()} calculates the \emph{reverse} permutation
-  index.
+  The function \code{calc_ranks()} calls the \code{RcppArmadillo} function
+  \code{arma::sort_index()} twice to calculate the \emph{reverse}
+  permutation index, to sort the vector from ascending order back into its
+  original unsorted order.
 }
 \examples{
 \dontrun{
-# Create a vector of random data
-datav <- round(runif(7), 2)
-# Calculate the ranks of the elements in two ways
-all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
-# Create a time series of random data
-datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
-# Calculate the ranks of the elements in two ways
-all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
-# Compare the speed of RcppArmadillo with R code
-datav <- runif(7)
+# Create a vector of data
+datav <- rnorm(1e3)
+# Calculate the ranks of the elements using R code and RcppArmadillo
+all.equal(rank(datav), drop(HighFreq::calc_ranks(datav))+1)
+# Compare the speed of R code with RcppArmadillo
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=calc_ranks(datav),
   Rcode=rank(datav),
+  Rcpp=calc_ranks(datav),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

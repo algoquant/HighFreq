@@ -4,17 +4,17 @@
 \alias{calc_hurst}
 \title{Calculate the Hurst exponent from the volatility ratio of aggregated returns.}
 \usage{
-calc_hurst(tseries, step = 1L)
+calc_hurst(tseries, step)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of prices.}
 
-\item{\code{step}}{The number of periods in each interval between
+\item{\code{step}}{The number of time periods in each interval between
 neighboring end points.}
 }
 \value{
-The Hurst exponent calculated from the variance of aggregated
-  returns.
+The Hurst exponent calculated from the volatility ratio of
+  aggregated returns.
 }
 \description{
 Calculate the Hurst exponent from the volatility ratio of aggregated returns.
@@ -23,9 +23,11 @@ Calculate the Hurst exponent from the volatility ratio of aggregated returns.
 The function \code{calc_hurst()} calculates the Hurst exponent from the
   ratios of the volatilities of aggregated returns.
 
-  The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-  length of the aggregation interval \eqn{\Delta t} raised to the power of
-  the \emph{Hurst exponent} \eqn{H}:
+  The aggregated volatility \eqn{\sigma_t} increases with the length of the
+  aggregation interval \eqn{\Delta t}.
+  The aggregated volatility increases as the length of the aggregation
+  interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+  \eqn{H}:
     \deqn{
       \sigma_t = \sigma {\Delta t}^H
     }
@@ -39,7 +41,7 @@ The function \code{calc_hurst()} calculates the Hurst exponent from the
     }
 
   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-  to calculate the aggregated volatility \eqn{\sigma_t}.
+  to calculate the aggregated variance \eqn{\sigma^2_t}.
 }
 \examples{
 \dontrun{

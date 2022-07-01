@@ -9,7 +9,7 @@ calc_weights(
   returns,
   method = "maxsharpe",
   eigen_thresh = 1e-05,
-  eigen_max = 0L,
+  dimax = 0L,
   confl = 0.1,
   alpha = 0,
   rankw = FALSE,
@@ -30,10 +30,10 @@ calculating the weights (see Details) (the default is \code{method =
 small singular values in order to regularize the inverse of the
 \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+\item{\code{dimax}}{An \emph{integer} equal to the number of singular
 values used for calculating the regularized inverse of the
 \code{covariance matrix} of \code{returns} (the default is \code{0} -
-equivalent to \code{eigen_max} equal to the number of columns of
+equivalent to \code{dimax} equal to the number of columns of
 \code{returns}).}
 
 \item{\code{confl}}{The confidence level for calculating the
@@ -104,7 +104,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
   It performs regularization by selecting only the largest eigenvalues equal
-  in number to \code{eigen_max}.
+  in number to \code{dimax}.
   
   In addition, \code{calc_weights()} applies shrinkage to the columns of
   \code{returns}, by shrinking their means to their common mean value:
@@ -151,9 +151,9 @@ returns <- na.omit(rutils::etfenv$returns[, 1:16])
 ncols <- NCOL(returns)
 eigend <- eigen(cov(returns))
 # Calculate regularized inverse of covariance matrix
-eigen_max <- 3
-eigenvec <- eigend$vectors[, 1:eigen_max]
-eigenval <- eigend$values[1:eigen_max]
+dimax <- 3
+eigenvec <- eigend$vectors[, 1:dimax]
+eigenval <- eigend$values[1:dimax]
 invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 alpha <- 0.5
@@ -161,11 +161,12 @@ colmeans <- colMeans(returns)
 colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
 weightsr <- drop(invmat \%*\% colmeans)
+# Apply weights scaling
 weightsr <- weightsr*sd(rowMeans(returns))/sd(returns \%*\% weightsr)
 weightsr <- 0.01*weightsr/sd(returns \%*\% weightsr)
 weightsr <- weightsr/sqrt(sum(weightsr^2))
 # Calculate weights using RcppArmadillo
-weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="sumsq"))
+weightcpp <- drop(HighFreq::calc_weights(returns, dimax=dimax, alpha=alpha, scalew="sumsq"))
 all.equal(weightcpp, weightsr)
 }
 

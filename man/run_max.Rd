@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_max}
 \alias{run_max}
-\title{Calculate the running maximum of streaming \emph{time series} data.}
+\title{Calculate the running maximum values of streaming \emph{time series} data.}
 \usage{
 run_max(tseries, lambda)
 }
@@ -17,41 +17,41 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the running maximum of streaming \emph{time series} data.
+Calculate the running maximum values of streaming \emph{time series} data.
 }
 \details{
 The function \code{run_max()} calculates the running maximum of streaming
   \emph{time series} data by recursively weighing present and past values
   using the decay factor \eqn{\lambda}.
 
-  It first calculates the running mean of streaming data:
+  It calculates the running maximum values \eqn{p^{max}_t} of the streaming
+  data \eqn{p_t} as follows:
   \deqn{
-    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+    p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
   }
-  Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-  streaming data.
-
-  It then calculates the running maximums of streaming data, \eqn{p^{max}_t}:
-  \deqn{
-    p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
-  }
-
-  The second term pulls the maximum value down to the mean value, allowing
-  it to gradually "forget" the maximum value from the more distant past.
-
-  The above recursive formulas are convenient for processing live streaming
-  data because they don't require maintaining a buffer of past data.
+  The first term in the sum is the maximum value multiplied by the decay
+  factor \eqn{\lambda}, so that the past maximum value is gradually
+  "forgotten". The second term pulls the maximum value to the current value
+  \eqn{p_t}.
   
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
-  If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the running maximum values have a stronger
-  dependence on past values.  This is equivalent to a long look-back
-  interval.
-  If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the running maximum values have a
-  weaker dependence on past values.  This is equivalent to a short look-back
-  interval.
+  If \eqn{\lambda} is close to \code{1} then the past maximum values persist
+  for longer.  This is equivalent to a long look-back interval.
+  If \eqn{\lambda} is much less than \code{1} then the past maximum values
+  decay quickly, and the running maximum depends on the more recent
+  streaming values.  This is equivalent to a short look-back interval.
+
+  The above formula can also be expressed as:
+  \deqn{
+    p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1-\lambda) p_t
+  }
+  The first term is the maximum value multiplied by the decay factor
+  \eqn{\lambda}, so that the past maximum value is gradually "forgotten".
+  The second term pulls the maximum value to the current value \eqn{p_t}.
+  
+  The above recursive formula is convenient for processing live streaming
+  data because it doesn't require maintaining a buffer of past data.
 
   The function \code{run_max()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -62,9 +62,9 @@ The function \code{run_max()} calculates the running maximum of streaming
 prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the running maximums
 lambda <- 0.9
-maxs <- HighFreq::run_max(prices, lambda=lambda)
+maxv <- HighFreq::run_max(prices, lambda=lambda)
 # Plot dygraph of VTI prices and running maximums
-datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
 colnames(datav) <- c("prices", "max")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") \%>\%

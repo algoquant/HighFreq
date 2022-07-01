@@ -22,14 +22,14 @@ Calculate the running variance of streaming \emph{time series} of returns.
 \details{
 The function \code{run_var()} calculates the running variance of a
   streaming \emph{time series} of returns, by recursively weighing the
-  squared returns \eqn{r^2_t} minus the squared means \eqn{\mu^2_t}, with
-  the past variance estimates \eqn{\sigma^2_{t-1}}, using the decay factor
-  \eqn{\lambda}:
+  squared differences of the returns minus the running means \eqn{(r_t -
+  \mu_t)^2}, with the past variance estimates \eqn{\sigma^2_{t-1}}, using
+  the decay factor \eqn{\lambda}:
   \deqn{
     \mu_t = (1-\lambda) r_t + \lambda \mu_{t-1}
   }
   \deqn{
-    \sigma^2_t = (1-\lambda) (r^2_t - \mu^2_t) + \lambda \sigma^2_{t-1}
+    \sigma^2_t = (1-\lambda) (r_t - \mu_t)^2 + \lambda \sigma^2_{t-1}
   }
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
@@ -64,16 +64,18 @@ returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the running variance
 lambda <- 0.9
 vars <- HighFreq::run_var(returns, lambda=lambda)
+# Calculate centered returns
+retc <- (returns - HighFreq::run_mean(returns, lambda=lambda))
 # Calculate running variance using R code
-filtered <- (1-lambda)*filter(returns^2, filter=lambda, 
-  init=as.numeric(returns[1, 1])^2/(1-lambda), 
+filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+  init=as.numeric(retc[1, 1])^2/(1-lambda), 
   method="recursive")
 all.equal(vars, unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::run_var(returns, lambda=lambda),
-  Rcode=filter(returns^2, filter=lambda, init=as.numeric(returns[1, 1])^2/(1-lambda), method="recursive"),
+  Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

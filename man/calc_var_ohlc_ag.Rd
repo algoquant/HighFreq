@@ -7,7 +7,7 @@ price range estimators.}
 \usage{
 calc_var_ohlc_ag(
   ohlc,
-  step = 1L,
+  step,
   method = "yang_zhang",
   close_lag = 0L,
   scale = TRUE,
@@ -18,7 +18,7 @@ calc_var_ohlc_ag(
 \item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 prices.}
 
-\item{\code{step}}{The number of periods in each interval between
+\item{\code{step}}{The number of time periods in each interval between
 neighboring end points.}
 
 \item{\code{method}}{A \emph{character} string representing the price range
@@ -52,33 +52,30 @@ price range estimators.
 }
 \details{
 The function \code{calc_var_ohlc_ag()} calculates the variance of
-  \emph{OHLC} prices aggregated over end points.
+  \emph{OHLC} prices aggregated over the end points.
 
   It first calculates the end points spaced apart by the number of periods
   equal to the argument \code{step}.  Then it aggregates the \emph{OHLC}
   prices to the end points. Finally it calculates the variance of the
   aggregated \emph{OHLC} prices.
 
-  If there are extra periods that don't fit over the length of \code{ohlc},
-  then \code{calc_var_ohlc_ag()} loops over all possible stub intervals,
-  it calculates all the corresponding variance values, and it averages
-  them.
+  The choice of the first end point is arbitrary, so \code{calc_var_ohlc_ag()}
+  calculates the different end points for all the possible starting points.
+  It then calculates the variance values for all the different end points
+  and averages them.
 
-  For example, if the number of rows of \code{ohlc} is equal to \code{20},
-  and \code{step=3} then \code{6} end points fit over the length of
-  \code{ohlc}, and there are \code{2} extra periods that must fit into
-  stubs, either at the beginning or at the end (or both).
-
-  The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-  length of the aggregation interval \eqn{\Delta t} raised to the power of
-  the \emph{Hurst exponent} \eqn{H}:
+  The aggregated volatility \eqn{\sigma_t} increases with the length of the
+  aggregation interval \eqn{\Delta t}.
+  The aggregated volatility increases as the length of the aggregation
+  interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+  \eqn{H}:
     \deqn{
       \sigma_t = \sigma {\Delta t}^H
     }
   Where \eqn{\sigma} is the daily return volatility.
 
-  The function \code{calc_var_ohlc_ag()} can therefore be used to calculate the
-  \emph{Hurst exponent} from the volatility ratio.
+  The function \code{calc_var_ohlc_ag()} can therefore be used to calculate
+  the \emph{Hurst exponent} from the variance ratio.
 }
 \examples{
 \dontrun{

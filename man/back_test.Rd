@@ -13,7 +13,7 @@ back_test(
   lambda = 0,
   method = "sharpem",
   eigen_thresh = 1e-05,
-  eigen_max = 0L,
+  dimax = 0L,
   confl = 0.1,
   alpha = 0,
   rankw = FALSE,
@@ -51,9 +51,9 @@ the weights (see Details) (the default is \code{method = "sharpem"})}
 small singular values in order to regularize the inverse of the
 \code{covariance matrix} (the default is \code{1e-5}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+\item{\code{dimax}}{An \emph{integer} equal to the number of singular
 values used for calculating the regularized inverse of the \code{returns}
-matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 the number of columns of \code{returns}).}
 
 \item{\code{confl}}{The confidence level for calculating the
@@ -92,7 +92,7 @@ The function \code{back_test()} performs a backtest simulation of a
   between the corresponding \emph{start point} and the \emph{end point}. It
   passes the subset matrix of excess returns into the function
   \code{calc_weights()}, which calculates the optimal portfolio weights at
-  each \emph{end point}. The arguments \code{eigen_max}, \code{alpha},
+  each \emph{end point}. The arguments \code{dimax}, \code{alpha},
   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
   also passed to the function \code{calc_weights()}.
   
@@ -141,11 +141,11 @@ look_back <- 12
 startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 # Define return shrinkage and regularization intensities
 alpha <- 0.5
-eigen_max <- 3
+dimax <- 3
 # Simulate a monthly rolling portfolio optimization strategy
 pnls <- HighFreq::back_test(excess, returns, 
                             startp-1, endp-1, 
-                            eigen_max = eigen_max, 
+                            dimax = dimax, 
                             alpha = alpha)
 pnls <- xts::xts(pnls, index(returns))
 colnames(pnls) <- "strat_rets"

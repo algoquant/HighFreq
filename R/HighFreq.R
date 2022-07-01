@@ -5,7 +5,6 @@
 #' Calculate a \emph{TAQ} time series of random prices following geometric
 #' Brownian motion, combined with random trading volumes.
 #'
-#' @export
 #' @param \code{volat} The volatility per period of the \code{indeks} time index
 #'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
 #' @param \code{drift} The drift per period of the \code{indeks} time index (default
@@ -30,6 +29,8 @@
 #' taq <- HighFreq::random_taq()
 #' # Create random TAQ time series from SPY index
 #' taq <- HighFreq::random_taq(indeks=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
+#'
+#' @export
 
 random_taq <- function(volat=6.5e-5, drift=0.0,
   indeks=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
@@ -63,7 +64,6 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
 #' following geometric Brownian motion, or by randomly sampling from an input
 #' time series.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format (default is \emph{NULL}).
 #' @param \code{volat} The volatility per period of the \code{indeks} time index
@@ -99,6 +99,8 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
 #' ohlc <- HighFreq::random_ohlc()
 #' # Create random time series from SPY by randomly sampling it
 #' ohlc <- HighFreq::random_ohlc(ohlc=HighFreq::SPY["2012-02-13/2012-02-15"])
+#'
+#' @export
 
 random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
     indeks=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
@@ -129,7 +131,6 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
 #' Remove overnight close-to-open price jumps from an \emph{OHLC} time series,
 #' by adding adjustment terms to its prices.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
 #'
@@ -156,6 +157,8 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
 #' @examples
 #' # Remove overnight close-to-open price jumps from SPY data
 #' ohlc <- remove_jumps(HighFreq::SPY)
+#'
+#' @export
 
 remove_jumps <- function(ohlc) {
   # find time index of the periods greater than 60 seconds
@@ -176,7 +179,6 @@ remove_jumps <- function(ohlc) {
 #' Calculate single period percentage returns from either \emph{TAQ} or
 #' \emph{OHLC} prices.
 #'
-#' @export
 #' @param \code{xtsv} An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
 #' @param \code{lagg} An integer equal to the number of time periods of lag. (default
 #'   is 1)
@@ -219,6 +221,8 @@ remove_jumps <- function(ohlc) {
 #' returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY)
 #' # Calculate open to open returns
 #' returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY, colnum=1)
+#' 
+#' @export
 
 ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
   # Return NULL if no data
@@ -245,7 +249,6 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' single-column \emph{xts} time series or vector, over a rolling look-back
 #' interval.
 #'
-#' @export
 #' @param \code{xtsv} A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
 #' @param \code{look_back} The number of data points in rolling look-back interval for 
@@ -283,6 +286,8 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
 #' # Remove suspect values
 #' taq <- taq[!sus_pect]
+#' 
+#' @export
 
 which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
 # Calculate volatility as rolling quantile
@@ -312,7 +317,6 @@ which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
 #' Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
 #' a single-column \emph{xts} time series or vector, over a rolling interval.
 #'
-#' @export
 #' @inheritParams which_extreme
 #'
 #' @return A \emph{Boolean} vector with the same number of rows as the input
@@ -351,6 +355,8 @@ which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
 #' # Replace whole rows containing suspect price jumps with NA, and perform locf()
 #' taq[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 #' taq <- xts:::na.locf.xts(taq)
+#' 
+#' @export
 
 which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 # Calculate simple returns
@@ -392,7 +398,6 @@ which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 #' Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 #' aggregation.
 #'
-#' @export
 #' @inheritParams which_extreme
 #' 
 #' @param \code{taq} \emph{TAQ} A time series in \emph{xts} format.
@@ -412,6 +417,8 @@ which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 #' taq <- HighFreq::random_taq()
 #' taq <- HighFreq::scrub_taq(taq=taq)
 #' taq <- HighFreq::scrub_taq(taq=taq, look_back=11, vol_mult=1)
+#' 
+#' @export
 
 scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 # Convert timezone of index to New_York
@@ -454,7 +461,6 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 #' Scrub a single day of \emph{TAQ} data, aggregate it, and convert to
 #' \emph{OHLC} format.
 #'
-#' @export
 #' @inheritParams scrub_taq
 #' @param \code{period} The aggregation period.
 #'
@@ -483,6 +489,8 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 #' # scrub and aggregate a single day of SPY TAQ data to OHLC
 #' ohlc <- HighFreq::scrub_agg(taq=HighFreq::SPY_TAQ)
 #' chart_Series(ohlc, name=symbol)
+#' 
+#' @export
 
 scrub_agg <- function(taq, look_back=51, vol_mult=2,
                       period="minutes", tzone="America/New_York") {
@@ -543,7 +551,6 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 #' single symbol, and save the \emph{OHLC} time series to a single
 #' \sQuote{\code{*.RData}} file.
 #'
-#' @export
 #' @param \code{symbol} A \emph{character} string representing symbol or ticker.
 #' @param \code{data_dir} A \emph{character} string representing directory containing
 #'   input \sQuote{\code{*.RData}} files.
@@ -574,6 +581,8 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 #' # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
 #' save_scrub_agg(symbol=symbol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 #' }
+#' 
+#' @export
 
 save_scrub_agg <- function(symbol,
                       data_dir="E:/mktdata/sec/",
@@ -621,7 +630,6 @@ datav <- lapply(file_names, function(file_name) {
 #' Load and scrub multiple days of \emph{TAQ} data for a single symbol, and save
 #' it to multiple \sQuote{\code{*.RData}} files.
 #'
-#' @export
 #' @inheritParams save_scrub_agg
 #'
 #' @return a \emph{TAQ} time series in \emph{xts} format.
@@ -641,6 +649,8 @@ datav <- lapply(file_names, function(file_name) {
 #' \dontrun{
 #' save_taq("SPY")
 #' }
+#' 
+#' @export
 
 save_taq <- function(symbol,
                       data_dir="E:/mktdata/sec/",
@@ -683,7 +693,6 @@ save_taq <- function(symbol,
 #' single symbol. Calculate returns and save them to a single
 #' \sQuote{\code{*.RData}} file.
 #'
-#' @export
 #' @inheritParams save_scrub_agg
 #'
 #' @return A time series of returns and volume in \emph{xts} format.
@@ -704,6 +713,8 @@ save_taq <- function(symbol,
 #' \dontrun{
 #' save_rets("SPY")
 #' }
+#' 
+#' @export
 
 save_rets <- function(symbol,
                       data_dir="E:/mktdata/sec/",
@@ -760,7 +771,6 @@ save_rets <- function(symbol,
 #' Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 #' and save them to a single \sQuote{\code{*.RData}} file, without aggregation.
 #'
-#' @export
 #' @inheritParams save_scrub_agg
 #'
 #' @return A time series of returns and volume in \emph{xts} format.
@@ -775,6 +785,8 @@ save_rets <- function(symbol,
 #' \dontrun{
 #' save_rets_ohlc("SPY")
 #' }
+#' 
+#' @export
 
 save_rets_ohlc <- function(symbol,
                       data_dir="E:/output/data/",
@@ -859,6 +871,7 @@ save_rets_ohlc <- function(symbol,
 #' }
 #' 
 #' @export
+
 calc_cvar <- function(tseries, method = "var", confi = pnorm(-2)) {
 
   # Switch for the different risk methods
@@ -883,7 +896,6 @@ calc_cvar <- function(tseries, method = "var", confi = pnorm(-2)) {
 #' prices (rows of data), using the squared differences of \emph{OHLC} prices at
 #' each point in time, without averaging them over time.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{method} A \emph{character} string representing the method for
@@ -963,6 +975,8 @@ calc_cvar <- function(tseries, method = "var", confi = pnorm(-2)) {
 #' var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="yang_zhang")
 #' # Calculate SPY variance without overnight jumps
 #' var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="rogers_satchell")
+#' 
+#' @export
 
 ohlc_variance <- function(ohlc, method="yang_zhang", scalit=TRUE) {
   symbol <- rutils::get_name(colnames(ohlc)[1])
@@ -997,7 +1011,6 @@ ohlc_variance <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #' Calculate time series of point skew estimates from a \emph{OHLC} time series,
 #' assuming zero drift.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{method} A \emph{character} string representing method for
@@ -1021,6 +1034,8 @@ ohlc_variance <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #' @examples
 #' # Calculate time series of skew estimates for SPY
 #' skew <- HighFreq::ohlc_skew(HighFreq::SPY)
+#' 
+#' @export
 
 ohlc_skew <- function(ohlc, method="rogers_satchell") {
   symbol <- rutils::get_name(colnames(ohlc)[1])
@@ -1056,7 +1071,6 @@ ohlc_skew <- function(ohlc, method="rogers_satchell") {
 #' Calculate time series of point Sharpe-like statistics for each row of a
 #' \emph{OHLC} time series.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{method} A \emph{character} string representing method for
@@ -1079,6 +1093,8 @@ ohlc_skew <- function(ohlc, method="rogers_satchell") {
 #' @examples
 #' # Calculate time series of running Sharpe ratios for SPY
 #' sharpe_running <- ohlc_sharpe(HighFreq::SPY)
+#' 
+#' @export
 
 ohlc_sharpe <- function(ohlc, method="close") {
   sharpe_ratio <- switch(method,
@@ -1097,7 +1113,6 @@ ohlc_sharpe <- function(ohlc, method="close") {
 #' Calculate the aggregation (weighted average) of a statistical estimator over
 #' a \emph{OHLC} time series using \code{R} code.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes,
 #'   in \emph{xts} format.
 #'
@@ -1131,6 +1146,8 @@ ohlc_sharpe <- function(ohlc, method="close") {
 #' variance <- agg_stats_r(ohlc=HighFreq::SPY, calc_bars="ohlc_variance")
 #' # Calculate time series of daily skew estimates for SPY
 #' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
+#' 
+#' @export
 
 agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
   
@@ -1160,7 +1177,6 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' \href{https://cran.r-project.org/web/packages/TTR/index.html}{TTR},
 #' but using vectorized functions, so it's a little faster.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{close} A time series of close prices.
@@ -1189,6 +1205,8 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' returns_running <- ohlc_returns(xtsv=HighFreq::SPY)
 #' # Calculate the rolling volume-weighted average returns
 #' roll_vwap(ohlc=HighFreq::SPY, close=returns_running, look_back=11)
+#' 
+#' @export
 
 roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
   roll_vwap <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], look_back=look_back)
@@ -1209,7 +1227,6 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #' Calculate a vector of statistics over an \emph{OHLC} time series, and
 #' calculate a rolling mean over the statistics.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
 #'   
@@ -1243,6 +1260,8 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 #' skew_rolling[1, ] <- 0
 #' skew_rolling <- rutils::na_locf(skew_rolling)
+#' 
+#' @export
 
 roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=TRUE, ...) {
   
@@ -1271,7 +1290,6 @@ roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=
 #' Calculate the variance of an \emph{OHLC} time series, using different range
 #' estimators for variance.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{method} A \emph{character} string representing the method for
@@ -1318,6 +1336,8 @@ roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=
 #' HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="rogers_satchell")
 #' # Calculate the variance without scaling the returns
 #' HighFreq::calc_var_ohlc_r(HighFreq::SPY, scalit=FALSE)
+#' 
+#' @export
 
 calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
   
@@ -1364,7 +1384,6 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #' Calculate a time series of Sharpe ratios over a rolling look-back interval
 #' for an \emph{OHLC} time series.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{look_back} The size of the look-back interval, equal to the number of
@@ -1380,6 +1399,8 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #' @examples
 #' # Calculate rolling Sharpe ratio over SPY
 #' sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, look_back=11)
+#' 
+#' @export
 
 roll_sharpe <- function(ohlc, look_back=11) {
   returns <- ohlc_returns(ohlc, lag=look_back, scalit=FALSE)
@@ -1398,7 +1419,6 @@ roll_sharpe <- function(ohlc, look_back=11) {
 #' Calculate a time series of \emph{Hurst} exponents over a rolling look-back
 #' interval.
 #'
-#' @export
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
 #' @param \code{look_back} The size of the look-back interval, equal to the number of 
@@ -1432,6 +1452,8 @@ roll_sharpe <- function(ohlc, look_back=11) {
 #' # Calculate rolling Hurst for SPY in March 2009
 #' hurst_rolling <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], look_back=11)
 #' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
+#' 
+#' @export
 
 roll_hurst <- function(ohlc, look_back=11) {
   rangev <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=ohlc[, 2], n=look_back) +
@@ -1451,7 +1473,6 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' Apply an aggregation function over a rolling look-back interval and the end
 #' points of an \emph{OHLC} time series, using \code{R} code.
 #'
-#' @export
 #' @param \code{xtsv} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format.
 #'   
@@ -1539,6 +1560,8 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' # using overlapping intervals
 #' agg_regations <- roll_apply(ohlc, agg_fun=agg_function,
 #'                             look_back=5, endpoints=endpoints)
+#'                             
+#' @export
 
 roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv), 
                        by_columns=FALSE, out_xts=TRUE, ...) {
@@ -1584,7 +1607,6 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
 #' Perform a backtest simulation of a trading strategy (model) over a vector of
 #' end points along a time series of prices.
 #'
-#' @export
 #' @param \code{xtsv} A time series of prices, asset returns, trading volumes, and
 #'   other data, in \emph{xts} format.
 #'   
@@ -1647,6 +1669,8 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
 #'     trading_params = trading_params,
 #'     xtsv=prices)
 #' }
+#' 
+#' @export
 
 roll_backtest <- function(xtsv,
                           train_func, trade_func,
@@ -1698,7 +1722,6 @@ roll_backtest <- function(xtsv,
 ##########################################################################
 #' Perform seasonality aggregations over a single-column \emph{xts} time series.
 #'
-#' @export
 #' @param \code{xtsv} A single-column \emph{xts} time series.
 #' 
 #' @param \code{indeks} A vector of \emph{character} strings representing points in
@@ -1724,6 +1747,8 @@ roll_backtest <- function(xtsv,
 #' var_seasonal <- season_ality(xtsv=xtsv)
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
+#'   
+#' @export
 
 season_ality <- function(xtsv, indeks=format(zoo::index(xtsv), "%H:%M")) {
 # Aggregate the mean

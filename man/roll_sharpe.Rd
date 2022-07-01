@@ -29,4 +29,5 @@ The function \code{roll_sharpe()} calculates the rolling Sharpe
 \examples{
 # Calculate rolling Sharpe ratio over SPY
 sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, look_back=11)
+
 }

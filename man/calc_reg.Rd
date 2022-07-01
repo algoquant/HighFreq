@@ -11,7 +11,7 @@ calc_reg(
   intercept = TRUE,
   method = "least_squares",
   eigen_thresh = 1e-05,
-  eigen_max = 0L,
+  dimax = 0L,
   confl = 0.1,
   alpha = 0
 )
@@ -34,9 +34,9 @@ model the default is \code{method = "least_squares"} - see Details).}
 small singular values in order to regularize the inverse of the
 \code{predictor} matrix (the default is \code{1e-5}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+\item{\code{dimax}}{An \emph{integer} equal to the number of singular
 values used for calculating the regularized inverse of the \code{predictor}
-matrix (the default is \code{0} - equivalent to \code{eigen_max} equal to
+matrix (the default is \code{0} - equivalent to \code{dimax} equal to
 the number of columns of \code{predictor}).}
 
 \item{\code{confl}}{The confidence level for calculating the
@@ -69,7 +69,7 @@ The function \code{calc_reg()} performs multivariate regression using
   If \code{method = "regular"} then it performs shrinkage regression.  It
   calculates the regularized inverse of the \code{predictor} matrix from its
   singular value decomposition.  It performs regularization by selecting
-  only the largest singular values equal in number to \code{eigen_max}.
+  only the largest singular values equal in number to \code{dimax}.
   
   If \code{method = "quantile"} then it performs quantile regression (not
   implemented yet).

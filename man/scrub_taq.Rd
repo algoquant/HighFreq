@@ -30,4 +30,5 @@ taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
 taq <- HighFreq::random_taq()
 taq <- HighFreq::scrub_taq(taq=taq)
 taq <- HighFreq::scrub_taq(taq=taq, look_back=11, vol_mult=1)
+
 }

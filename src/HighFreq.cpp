@@ -10,8 +10,9 @@ using namespace arma;
 ////////////////////////////////////////////////////////////
 
 
+
 ////////////////////////////////////////////////////////////
-// Functions for matrix algebra
+// Functions miscellaneous
 ////////////////////////////////////////////////////////////
 
 
@@ -152,8 +153,8 @@ arma::vec lag_vec(const arma::vec& tseries,
 //' @export
 // [[Rcpp::export]]
 arma::mat lagit(const arma::mat& tseries, 
-                 arma::sword lagg = 1, 
-                 bool pad_zeros = true) {
+                arma::sword lagg = 1, 
+                bool pad_zeros = true) {
   
   arma::uword nrows = (tseries.n_rows-1);
   arma::uword ncols = tseries.n_cols;
@@ -333,9 +334,7 @@ arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zero
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat diffit(const arma::mat& tseries, 
-                  arma::sword lagg = 1, 
-                  bool pad_zeros = true) {
+arma::mat diffit(const arma::mat& tseries, arma::sword lagg = 1, bool pad_zeros = true) {
   
   arma::uword nrows = (tseries.n_rows-1);
   arma::uword ncols = tseries.n_cols;
@@ -370,53 +369,90 @@ arma::mat diffit(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate a vector of end points that divides a vector into equal intervals.
+//' Calculate a vector of end points that divides an integer time sequence of
+//' time periods into equal time intervals.
 //'
-//' @param \code{length} An \emph{integer} equal to the length of the vector to
-//'   be divided into equal intervals.
+//' @param \code{length} An \emph{integer} equal to the length of the time
+//'   sequence to be divided into equal intervals.
 //'   
-//' @param \code{step} The number of elements in each interval between
-//'   neighboring end points.
+//' @param \code{step} The number of time periods in each interval between
+//'   neighboring end points (the default is \code{step = 1}).
 //' 
-//' @param \code{stub} An \emph{integer} value equal to the first end point for
-//'   calculating the end points.
+//' @param \code{stub} An \emph{integer} equal to the first non-zero end point
+//'   (the default is \code{stub = 0}).
+//'
+//' @param \code{stubs} A \emph{Boolean} specifying whether to include stub
+//'   intervals (the default is \code{stubs = TRUE}).
 //'
 //' @return A vector of equally spaced \emph{integers} representing the end
 //'   points.
 //'
 //' @details
-//'   The end points are a vector of integers which divide a vector of length
-//'   equal to \code{length} into equally spaced intervals. If a whole number of
-//'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
-//'   stub interval at the end.
+//'   The end points are a vector of integers which divide the sequence of time
+//'   periods of length equal to \code{length} into equally spaced time
+//'   intervals.
+//'   The number of time periods between neighboring end points is equal to the
+//'   argument \code{step}.
+//'   If a whole number of intervals doesn't fit over the whole sequence, then
+//'   \code{calc_endpoints()} adds a stub interval at the end.
+//'   A stub interval is one where the number of periods between neighboring end
+//'   points is less than the argument \code{step}.
+//'   
+//'   If \code{stubs = TRUE} (the default) then the first end point is 
+//'   equal to \code{0} (since indexing in \code{C++} code starts at \code{0}).
+//'   The first non-zero end point is equal to \code{step} or \code{stub} (if
+//'   it's not zero).
+//'   If \code{stub = 0} (the default) then the first end point is equal to
+//'   \code{0} (even if \code{stubs = FALSE}).
+//'   If \code{stubs = TRUE} (the default) then the last end point is always
+//'   equal to \code{length-1}.
+//'   The argument \code{stub} should be less than the \code{step}: \code{stub <
+//'   step}.
+//'   
+//'   If \code{step = 1} and \code{stub = 0} (the default), then the vector of
+//'   end points is simply equal to:
+//'   \deqn{
+//'     \{ 0, 1, 2, ..., length - 1 \}
+//'   }
 //'
-//'   The first end point is equal to the argument \code{step}, unless the
-//'   argument \code{stub} is provided, and then it becomes the first end point.
-//'
-//'   For example, consider the end points for a vector of length \code{20}
-//'   divided into intervals of length \code{step=5}: \code{0, 5, 10, 15, 20}.
-//'   In order for all the differences between neighboring end points to be
-//'   equal to \code{5}, the first end point is set equal to \code{0}. But
-//'   \code{0} doesn't correspond to any vector element, so
-//'   \code{calc_endpoints()} doesn't include it and it only retains the
-//'   non-zero end points equal to: \code{5, 10, 15, 20}. 
-//'
-//'   Since indexing in \code{C++} code starts at \code{0}, then
-//'   \code{calc_endpoints()} shifts the end points by \code{-1} and returns the
-//'   vector equal to \code{4, 9, 14, 19}.
-//'
-//'   If \code{stub = 1} then the first end point is equal to \code{1} and the
-//'   end points are equal to: \code{1, 6, 11, 16, 20}.
-//'   The extra stub interval at the end is equal to \code{4 = 20 - 16}.
-//'   And \code{calc_endpoints()} returns \code{0, 5, 10, 15, 19}. The first
-//'   value is equal to \code{0} which is the index of the first element in
-//'   \code{C++} code.
-//'
-//'   If \code{stub = 2} then the first end point is equal to \code{2}, with an
-//'   extra stub interval at the end, and the end points are equal to: \code{2,
-//'   7, 12, 17, 20}.
-//'   And \code{calc_endpoints()} returns \code{1, 6, 11, 16, 19}.
-//'
+//'   If \code{stub = 0} (the default) and \code{stubs = TRUE} (the default)
+//'   then the vector of end points is equal to:
+//'   \deqn{
+//'     \{ 0, step, 2*step, ..., length - 1 \}
+//'   }
+//'   
+//'   If \code{stub = 0} (the default) and \code{stubs = FALSE} then the vector
+//'   of end points is equal to:
+//'   \deqn{
+//'     \{ 0, step, 2*step, ..., n*step \}
+//'   }
+//'   
+//'   If \code{stub > 0} and \code{stubs = TRUE} (the default), then the vector
+//'   of end points is equal to:
+//'   \deqn{
+//'     \{ 0, stub, stub + step, ..., length - 1 \}
+//'   }
+//'   
+//'   For example, the end points for \code{length = 20}, divided into intervals
+//'   of \code{step = 5} are equal to: \code{0, 5, 10, 15, 19}.
+//'   
+//'   If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+//'   and the end points are equal to: \code{0, 1, 6, 11, 16, 19}.
+//'   The stub interval at the beginning is equal to \code{2} (including
+//'   \code{0} and \code{1}).
+//'   The stub interval at the end is equal to \code{3 = 19 - 16}.
+//'   
+//'   The end points for \code{length = 21} divided into intervals of length
+//'   \code{step = 5}, with \code{stub = 0}, are equal to: \code{0, 5, 10, 15,
+//'   20}.
+//'   The beginning interval is equal to \code{5}.
+//'   The end interval is equal to \code{5 = 20 - 15}.
+//'   
+//'   If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+//'   and the end points are equal to: \code{0, 1, 6, 11, 16, 20}.
+//'   The beginning stub interval is equal to \code{2}.
+//'   The end stub interval is equal to \code{4 = 20 - 16}.
+//'   
 //'   The function \code{calc_endpoints()} is similar to the function
 //'   \code{rutils::calc_endpoints()} from package
 //'   \href{https://github.com/algoquant/rutils}{rutils}.
@@ -426,58 +462,102 @@ arma::mat diffit(const arma::mat& tseries,
 //'   \code{1} in \code{R} code. So if \code{calc_endpoints()} is used in
 //'   \code{R} code then \code{1} should be added to it.
 //'   
-//'   This works in \code{R} code because the vector element corresponding to
-//'   index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
-//'   1)]} produces \code{4}.  So in \code{R} we can select vector elements
-//'   using the end points starting at zero.
-//'   
-//'   In \code{C++} the end points must be shifted by \code{-1} compared to
-//'   \code{R} code, because indexing starts at \code{0}: \code{-1, 4, 9, 14,
-//'   19}.  But there is no vector element corresponding to index \code{-1}. So
-//'   in \code{C++} we cannot select vector elements using the end points
-//'   starting at \code{-1}. The solution is to drop the first placeholder end
-//'   point.
-//'   
 //' @examples
-//' # Calculate end points without a stub interval
+//' # Calculate the end points without a stub interval
 //' HighFreq::calc_endpoints(length=20, step=5)
-//' # Calculate end points with a final stub interval
+//' # Calculate the end points with a final stub interval
 //' HighFreq::calc_endpoints(length=23, step=5)
-//' # Calculate end points with initial and final stub intervals
+//' # Calculate the end points with initial and final stub intervals
 //' HighFreq::calc_endpoints(length=20, step=5, stub=2)
-//' # Calculate end points with initial and final stub intervals
-//' HighFreq::calc_endpoints(length=20, step=5, stub=24)
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, arma::uword stub = 0) {
-  
-  arma::uword extra = length % step;
+arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
+                          arma::uword step = 1,  // The number of periods between neighboring end points
+                          arma::uword stub = 0,  // The first non-zero end point
+                          bool stubs = true) {  // Include stub intervals?
+
+  // Number of initial end points
+  arma::uword numpts = length / step + 3;
+  // Define the end points
   arma::uvec endp;
-  
-  if ((stub == 0) & (extra == 0)) {
-    // No stub interval
-    endp = arma::regspace<uvec>(step, step, length);
-  } else if ((stub == 0) & (extra > 0)) {
-    // Add stub interval at end
-    endp = arma::regspace<uvec>(step, step, length + step);
-    endp.back() = length;
-  } else if ((stub > 0) & (extra == 0)) {
-    // Add initial stub interval equal to stub
-    endp = arma::regspace<uvec>(stub, step, length + step);
-    endp.back() = length;
-  } else if ((stub > 0) & (extra > 0) & (stub == extra)) {
-    // Add initial stub interval equal to stub without stub at end
-    endp = arma::regspace<uvec>(stub, step, length);
+  endp.zeros(numpts);
+  // Define the last end point
+  int lastp = length - 1;
+
+  // Calculate the initial end points - including extra end points at the end
+  if (stub == 0) {
+    for (arma::uword it = 0; it < numpts; ++it) {
+      endp[it] = it*step;
+    }  // end for
+  } else if ((stub > 0) & (stubs)) {
+    for (arma::uword it = 1; it < numpts; ++it) {
+      endp[it] = stub + (it-1)*step;
+    }  // end for
   } else {
-    // Add initial stub interval equal to stub and with extra stub at end
-    endp = arma::regspace<uvec>(stub, step, length + step);
-    endp.back() = length;
+    for (arma::uword it = 0; it < numpts; ++it) {
+      endp[it] = stub + it*step;
+    }  // end for
+  }  // end if
+  // std::cout << "endp = " << arma::conv_to<rowvec>::from(endp) << std::endl;
+  
+  // arma::uvec endp = arma::regspace<uvec>(stub, step, lastp + step);
+  // Find the index of the largest element of endp which is less than lastp
+  arma::uword endpp = 0;
+  for (arma::uword it = 0; endp[it] < lastp; ++it) {
+    endpp++;
+  }  // end for
+  // std::cout << "endpp = " << endpp << std::endl;
+  
+  // Trim the initial end points at the end - remove extra end points at the end
+  // Subset endp to include the smallest element of endp which is equal to or greater than lastp
+  endp = endp.subvec(0, endpp);
+
+  // Set the stub intervals at the end
+  if (stubs) {
+    // Include stub intervals
+    // Set the last end point to lastp - last element of endp
+    endp[endpp] = lastp;
+  } else {
+    // Do not include the last end point - no stub interval at the end
+    // Exclude the last element greater than lastp
+    if (endp[endpp] > lastp) {
+      endp = endp.subvec(0, endpp-1);
+    }  // end if
   }  // end if
   
-  // Subtract 1 from endp because C++ indexing starts at 0
-  endp = endp - 1;
   return endp;
+  
+  // Old code below
+  // if ((stub == 0) & (remainp == 0)) {
+  //   std::cout << "(stub == 0) & (remainp == 0)" << std::endl;
+  //   // No stub interval
+  //   endp = arma::regspace<uvec>(0, step, length);
+  //   endp.back() = lastp;
+  //   // endp.transform([](arma::uword val) {return (val - 1);});
+  //   // endp.front() = 0;
+  // } else if ((stub == 0) & (remainp > 0)) {
+  //   std::cout << "(stub == 0) & (remainp > 0)" << std::endl;
+  //   // Add stub interval at end
+  //   endp = arma::regspace<uvec>(0, step, length + step);
+  //   // endp.transform([](arma::uword val) {return (val - 1);});
+  //   // endp.front() = 0;
+  //   endp.back() = lastp;
+  // } else if ((stub > 0) & (remainp == 0)) {
+  //   std::cout << "(stub > 0) & (remainp == 0)" << std::endl;
+  //   // Add initial stub interval equal to stub
+  //   arma::uvec endm = arma::regspace<uvec>(stub, step, length);
+  //   endm.back() = lastp;
+  //   endp.zeros(numpts+1);
+  //   endp.subvec(1, numpts) = endm;
+  // } else if ((stub > 0) & (remainp > 0)) {
+  //   std::cout << "(stub > 0) & (remainp > 0)" << std::endl;
+  //   // Add initial stub interval equal to stub
+  //   arma::uvec endm = arma::regspace<uvec>(stub, step, lastp + step);
+  //   endm.back() = lastp;
+  //   endp.zeros(numpts+1);
+  //   endp.subvec(1, numpts) = endm;
+  // }  // end if
   
 }  // end calc_endpoints
 
@@ -514,9 +594,9 @@ arma::uvec calc_endpoints(arma::uword length, arma::uword step = 1, arma::uword 
 //'   
 //' @examples
 //' # Calculate end points
-//' endp <- HighFreq::calc_endpoints(25, 5)
+//' endp <- HighFreq::calc_endpoints(length=55, step=5)
 //' # Calculate start points corresponding to the end points
-//' startp <- HighFreq::calc_startpoints(endp, 2)
+//' startp <- HighFreq::calc_startpoints(endp, look_back=5)
 //'
 //' @export
 // [[Rcpp::export]]
@@ -530,6 +610,396 @@ arma::uvec calc_startpoints(arma::uvec endp, arma::uword look_back) {
   
 }  // end calc_startpoints
 
+
+
+////////////////////////////////////////////////////////////
+//' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
+//' and reset the count to zero after every \code{FALSE} element.
+//' 
+//' @param \code{tseries} A \emph{Boolean vector} of data.
+//'
+//' @return An \emph{integer vector} of the same length as the argument
+//'   \code{tseries}.
+//'
+//' @details
+//'   The function \code{roll_count()} calculates the number of consecutive
+//'   \code{TRUE} elements in a Boolean vector, and it resets the count to zero
+//'   after every \code{FALSE} element.
+//'   
+//'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
+//'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
+//'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
+//'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
+//'   \code{4}, \code{5}, \code{0}}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate the number of consecutive TRUE elements
+//' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
+//' }
+//' @export
+// [[Rcpp::export]]
+arma::uvec roll_count(const arma::uvec& tseries) {
+  
+  arma::uword length = tseries.n_elem;
+  arma::uvec count_true(length);
+  
+  // Initialize count
+  count_true[0] = tseries[0];
+  // Loop over tseries
+  for (arma::uword it = 1; it < length; it++) {
+    if (tseries[it])
+      // Add count number
+      count_true[it] = count_true[it-1] + 1;
+    else
+      // Reset count to zero
+      count_true[it] = tseries[it];
+  }  // end for
+  
+  return count_true;
+  
+}  // end roll_count
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the run length encoding of a single-column \emph{time series},
+//' \emph{matrix}, or a \emph{vector}.
+//' 
+//' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+//'   a \emph{vector}.
+//'
+//' @return A \emph{list} with two \emph{vectors}: a \emph{vector} of encoded
+//'   data and an \emph{integer vector} of data counts (repeats).
+//'
+//' @details
+//'   The function \code{encode_it()} calculates the run length encoding of a
+//'   single-column \emph{time series}, \emph{matrix}, or a \emph{vector}.
+//'   
+//'   The run length encoding of a \emph{vector} consists of two \emph{vectors}:
+//'   a \emph{vector} of encoded data (consecutive data values) and of an
+//'   \emph{integer vector} of the data counts (the number of times the same
+//'   value repeats in succession).
+//'   
+//'   Run length encoding (RLE) is a data compression algorithm which encodes
+//'   the data in two \emph{vectors}: the consecutive data values and their
+//'   counts.  If a data value occurs several times in succession then it is
+//'   recorded only once and its corresponding count is equal to the number of
+//'   times it occurs. Run-length encoding is different from a contingency
+//'   table.
+//'   
+//' @examples
+//' \dontrun{
+//' # Create a vector of data
+//' datav <- sample(5, 31, replace=TRUE)
+//' # Calculate the run length encoding of datav
+//' HighFreq::encode_it(datav)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::List encode_it(arma::vec tseries) {
+  
+  // Define vector of encoded data
+  std::vector<double> codev;
+  codev.reserve(tseries.size());
+  // Define vector of data counts (repeats)
+  std::vector<int> countv;
+  countv.reserve(tseries.size());
+  
+  // Define iterators
+  std::vector<int>::reverse_iterator revit = countv.rbegin();
+  
+  // Initialize the data
+  // Copy the first element of tseries to previous value
+  double preval = tseries[0];
+  // std::cout << "Initialize the data, preval = " << preval << std::endl;
+  // Copy the previous value to the encoded data vector
+  codev.push_back(preval);
+  // Set the first counter vector value to 0
+  countv.push_back(0);
+  revit = countv.rbegin();
+  // std::cout << "Initialize the data, revit = " << *revit << std::endl;
+  
+  // Perform loop over tseries
+  for (auto inpit: tseries) {
+    // std::cout << "for loop, inpit = " << *inpit << std::endl;
+    if (preval == inpit) {
+      // Data was repeated - increment the current counter vector value by 1
+      (*revit)++;
+      // std::cout << "Data was repeated, inpit = " << inpit << std::endl;
+      // std::cout << "Data was repeated, preval = " << preval << std::endl;
+    } else {
+      // Data was not repeated
+      // std::cout << "Data was not repeated, inpit = " << inpit << std::endl;
+      // std::cout << "Data was not repeated, preval = " << preval << std::endl;
+      // Copy the tseries value to the previous value
+      preval = inpit;
+      // Copy the previous value to the encoded data vector
+      codev.push_back(preval);
+      // Set the next counter vector value to 1
+      countv.push_back(1);
+      // Reset the counter iterator
+      revit = countv.rbegin();
+    }  // end if
+    
+  }  // end for
+  
+  // Return a list with the encoded data and the counter vector
+  return Rcpp::List::create(
+    _["data"] = codev,
+    _["counts"] = countv
+  );
+  
+}  // end encode_it
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the \emph{vector} of data from its run length encoding.
+//' 
+//' @param \code{encodel} A \emph{list} with two \emph{vectors}: a \emph{numeric
+//'   vector} of encoded data and an \emph{integer vector} of data counts
+//'   (repeats).
+//'
+//' @return A \code{numeric vector}.
+//' 
+//' @details
+//'   The function \code{decode_it()} the \emph{vector} of data from its run
+//'   length encoding.
+//'   
+//'   The run length encoding of a \emph{vector} consists of two \emph{vectors}:
+//'   a \emph{numeric vector} of encoded data (consecutive data values) and of
+//'   an \emph{integer vector} of the data counts (the number of times the same
+//'   value repeats in succession).
+//'   
+//'   Run length encoding (RLE) is a data compression algorithm which encodes
+//'   the data in two \emph{vectors}: the consecutive data values and their
+//'   counts.  If a data value occurs several times in succession then it is
+//'   recorded only once and its corresponding count is equal to the number of
+//'   times it occurs. Run-length encoding is different from a contingency
+//'   table.
+//'   
+//' @examples
+//' \dontrun{
+//' # Create a vector of data
+//' datav <- sample(5, 31, replace=TRUE)
+//' # Calculate the run length encoding of datav
+//' rle <- HighFreq::encode_it(datav)
+//' # Decode the data from its run length encoding
+//' decodev <- HighFreq::decode_it(rle)
+//' all.equal(datav, decodev)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+std::vector<double> decode_it(Rcpp::List encodel) {
+  
+  // Extract vector of encoded data
+  std::vector<double> codev = encodel["data"];
+  // Extract vector of data counts (repeats)
+  std::vector<int> countv = encodel["counts"];
+  // Define the output decoded vector
+  std::vector<double> decodev;
+  decodev.reserve(std::accumulate(countv.begin(), countv.end(), 0));
+  
+  // Perform loop over the codev and countv vectors
+  for (int it = 0; it < codev.size(); it++) {
+    for (int j = 0; j < countv[it]; j++) {
+      decodev.push_back(codev[it]);
+    }  // end for
+  }  // end for
+  
+  return decodev;
+  
+}  // end decode_it
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the ranks of the elements of a single-column \emph{time series},
+//' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+//'   a \emph{vector}.
+//'
+//' @return An \emph{integer vector} with the ranks of the elements of the
+//'   \code{tseries}.
+//'
+//' @details
+//'   The function \code{calc_ranks()} calculates the ranks of the elements of a
+//'   single-column \emph{time series}, \emph{matrix}, or a \emph{vector}. 
+//'   
+//'   The permutation index is an integer vector which sorts a given vector into
+//'   ascending order. 
+//'   The permutation index of the permutation index is the \emph{reverse}
+//'   permutation index, because it sorts the vector from ascending order back
+//'   into its original unsorted order.
+//'   The ranks of the elements are equal to the \emph{reverse} permutation
+//'   index. The function \code{calc_ranks()} calculates the \emph{reverse}
+//'   permutation index.
+//'   
+//'   The ranks produced by \code{calc_ranks()} start at zero, following the 
+//'   \code{C++} convention.
+//'   
+//'   The \code{RcppArmadillo} function \code{arma::sort_index()} calculates the
+//'   permutation index which sorts a given vector into an ascending order.
+//'   Applying the function \code{arma::sort_index()} twice:
+//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+//'   permutation index to sort the vector from ascending order back into its
+//'   original unsorted order.
+//'   
+//'   The function \code{calc_ranks()} calls the \code{RcppArmadillo} function
+//'   \code{arma::sort_index()} twice to calculate the \emph{reverse}
+//'   permutation index, to sort the vector from ascending order back into its
+//'   original unsorted order.
+//'   
+//' @examples
+//' \dontrun{
+//' # Create a vector of data
+//' datav <- rnorm(1e3)
+//' # Calculate the ranks of the elements using R code and RcppArmadillo
+//' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav))+1)
+//' # Compare the speed of R code with RcppArmadillo
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcode=rank(datav),
+//'   Rcpp=calc_ranks(datav),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::uvec calc_ranks(arma::vec tseries) {
+  
+  return (arma::sort_index(arma::sort_index(tseries)));
+  
+}  // end calc_ranks
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the ranks of the elements of a single-column \emph{time series},
+//' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+//'   a \emph{vector}.
+//'
+//' @return An \emph{integer vector} with the ranks of the elements of
+//'   \code{tseries}.
+//'
+//' @details
+//'   The function \code{calc_ranks_stl()} calculates the ranks of the elements
+//'   of a single-column \emph{time series}, \emph{matrix}, or a \emph{vector}.
+//'   The function \code{calc_ranks_stl()} is slightly faster than the function
+//'   \code{calc_ranks()}.
+//'   
+//'   The permutation index is an integer vector which sorts a given vector into
+//'   ascending order. 
+//'   The permutation index of the permutation index is the \emph{reverse}
+//'   permutation index, because it sorts the vector from ascending order back
+//'   into its original unsorted order.
+//'   The ranks of the elements are equal to the \emph{reverse} permutation
+//'   index. The function \code{calc_ranks()} calculates the \emph{reverse}
+//'   permutation index.
+//'   
+//'   The ranks produced by \code{calc_ranks_stl()} start at zero, following the
+//'   \code{C++} convention.
+//'
+//'   The \code{STL} \code{C++} function \code{std::sort()} sorts a vector into
+//'   ascending order. It can also be used to calculate the permutation index
+//'   which sorts the vector into an ascending order.
+//'   
+//'   The function \code{calc_ranks_stl()} calls the function \code{std::sort()}
+//'   twice:
+//'   First, it calculates the permutation index which sorts the vector
+//'   \code{tseries} into ascending order.
+//'   Second, it calculates the permutation index of the permutation index,
+//'   which are the ranks (the \emph{reverse} permutation index) of the vector
+//'   \code{tseries}.
+//' 
+//' @examples
+//' \dontrun{
+//' # Create a vector of data
+//' datav <- rnorm(1e3)
+//' # Calculate the ranks of the elements using R code and RcppArmadillo
+//' all.equal(rank(datav), drop(HighFreq::calc_ranks_stl(datav))+1)
+//' # Compare the speed of R code with RcppArmadillo
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcode=rank(datav),
+//'   Rcpp=HighFreq::calc_ranks_stl(datav),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::uvec calc_ranks_stl(arma::vec tseries) {
+  
+  size_t ndata = tseries.size();
+  // size_t ndata = sizeof(tseries);
+  
+  // Define index of integers along tseries
+  arma::uvec indeks(ndata);
+  // Define the ranks of the vector elements
+  arma::uvec ranks(ndata);
+  // Fill the vectors with a sequence of consecutive integers
+  // The function std::iota() is simiar to the R function seq_along()
+  std::iota(indeks.begin(), indeks.end(), 0);
+  std::iota(ranks.begin(), ranks.end(), 0);
+  
+  // Calculate the permutation index by sorting the sequence of consecutive integers 
+  // according to the order of tseries.
+  std::sort(indeks.begin(), indeks.end(), 
+            // Lambda comparison function defines sorting order.
+            // The brackets [] are used to pass in variables from the outer scope of the lambda function.
+            // The "&" passes the outer scope variables by reference.
+            [&tseries](int i1, int i2) {return tseries[i1] < tseries[i2];});
+  
+  // Calculate the ranks (inverse permutation index) by sorting the sequence of consecutive integers 
+  // according to the order of the permutation index indeks.
+  std::sort(ranks.begin(), ranks.end(), 
+            // Lambda comparison function defines sorting order.
+            // The brackets [] are used to pass in variables from the outer scope of the lambda function.
+            // The "&" passes the outer scope variables by reference.
+            [&indeks](int i1, int i2) {return indeks[i1] < indeks[i2];});
+  
+  return ranks;
+  
+}  // end calc_ranks_stl
+
+
+
+// The function remove_dup() removes consecutive duplicate elements 
+// from the input vector of strings.
+// It doesn't remove all duplicate elements.  
+// It doesn't remove duplicate elements which don't neighbor each other.
+// It uses the STL algorithm std::unique().
+// [[Rcpp::export]]
+std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
+  
+  int ndata = stringv.size();
+  // Define vector iterator
+  std::vector<std::string>::iterator stringit;
+  // Define vector of output strings
+  std::vector<std::string> outv = stringv;
+  outv.reserve(ndata);
+  
+  // Remove consecutive duplicate elements
+  stringit = std::unique(outv.begin(), outv.end());
+  // Resize the output vector
+  outv.resize(std::distance(outv.begin(), stringit));
+  
+  return outv;
+  
+}  // end remove_dup
+
+
+
+
+////////////////////////////////////////////////////////////
+// Functions for matrix algebra
+////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
@@ -610,14 +1080,14 @@ arma::mat mult_mat(arma::vec vector,
                    arma::mat matrix,
                    bool byrow = true) {
   
-  arma::uword nelem = vector.n_elem;
+  arma::uword ndata = vector.n_elem;
   arma::uword nrows = matrix.n_rows;
   arma::uword ncols = matrix.n_cols;
   
-  if (byrow && (nelem == ncols)) {
+  if (byrow && (ndata == ncols)) {
     // Multiply every row of matrix by vector
     matrix = matrix.each_row() % vector.t();
-  } else if (!byrow && (nelem == nrows)) {
+  } else if (!byrow && (ndata == nrows)) {
     // Multiply every column of matrix by vector
     matrix = matrix.each_col() % vector;
   } else {
@@ -713,14 +1183,14 @@ void mult_mat_ref(arma::vec vector,
                   arma::mat matrix,
                   bool byrow = true) {
   
-  arma::uword nelem = vector.n_elem;
+  arma::uword ndata = vector.n_elem;
   arma::uword nrows = matrix.n_rows;
   arma::uword ncols = matrix.n_cols;
   
-  if (byrow && (nelem == ncols)) {
+  if (byrow && (ndata == ncols)) {
     // Multiply every row of matrix by vector
     matrix.each_row() %= vector.t();
-  } else if (!byrow && (nelem == nrows)) {
+  } else if (!byrow && (ndata == nrows)) {
     // Multiply every column of matrix by vector
     matrix.each_col() %= vector;
   } else {
@@ -953,7 +1423,7 @@ arma::mat calc_inv(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
+arma::mat calc_scaled(const arma::mat& tseries, bool use_median = false) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
@@ -989,65 +1459,6 @@ arma::mat calc_scaled(const arma::mat& tseries, bool use_median=false) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the ranks of the elements of a single-column \emph{time series} or
-//' a \emph{vector} using \code{RcppArmadillo}.
-//' 
-//' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
-//'
-//' @return An \emph{integer vector} with the ranks of the elements of the
-//'   \code{tseries}.
-//'
-//' @details
-//'   The function \code{calc_ranks()} calculates the ranks of the elements of a
-//'   single-column \emph{time series} or a \emph{vector}. It uses the
-//'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
-//'   \code{arma::sort_index()} calculates the permutation index to sort a given
-//'   vector into ascending order.
-//'   
-//'   Applying the function \code{arma::sort_index()} twice:
-//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-//'   permutation index to sort the vector from ascending order back into its
-//'   original unsorted order.
-//'   The permutation index produced by:
-//'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
-//'   permutation index produced by: \code{arma::sort_index()}.
-//'   
-//'   The ranks of the elements are equal to the \emph{reverse} permutation
-//'   index.
-//'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
-//'   index.
-//'
-//' @examples
-//' \dontrun{
-//' # Create a vector of random data
-//' datav <- round(runif(7), 2)
-//' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
-//' # Create a time series of random data
-//' datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
-//' # Calculate the ranks of the elements in two ways
-//' all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
-//' # Compare the speed of RcppArmadillo with R code
-//' datav <- runif(7)
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=calc_ranks(datav),
-//'   Rcode=rank(datav),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::uvec calc_ranks(const arma::vec& tseries) {
-  
-  return (arma::sort_index(arma::sort_index(tseries)) + 1);
-  
-}  // end calc_ranks
-
-
-
-
-////////////////////////////////////////////////////////////
 // Functions for rolling aggregations
 ////////////////////////////////////////////////////////////
 
@@ -1055,7 +1466,6 @@ arma::uvec calc_ranks(const arma::vec& tseries) {
 ////////////////////////////////////////////////////////////
 //' Aggregate a time series of data into a single bar of \emph{OHLC} data.
 //'
-//' @export
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
 //'   columns of data.
 //'
@@ -1136,57 +1546,6 @@ arma::mat agg_ohlc(const arma::mat& tseries) {
   return ohlc;
   
 }  // end agg_ohlc
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
-//' and reset the count to zero after every \code{FALSE} element.
-//' 
-//' @param \code{tseries} A \emph{Boolean vector} of data.
-//'
-//' @return An \emph{integer vector} of the same length as the argument
-//'   \code{tseries}.
-//'
-//' @details
-//'   The function \code{roll_count()} calculates the number of consecutive
-//'   \code{TRUE} elements in a Boolean vector, and it resets the count to zero
-//'   after every \code{FALSE} element.
-//'   
-//'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
-//'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
-//'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
-//'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
-//'   \code{4}, \code{5}, \code{0}}.
-//'   
-//' @examples
-//' \dontrun{
-//' # Calculate the number of consecutive TRUE elements
-//' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
-//' }
-//' @export
-// [[Rcpp::export]]
-arma::uvec roll_count(const arma::uvec& tseries) {
-  
-  arma::uword length = tseries.n_elem;
-  arma::uvec count_true(length);
-  
-  // Initialize count
-  count_true[0] = tseries[0];
-  // Loop over tseries
-  for (arma::uword it = 1; it < length; it++) {
-    if (tseries[it])
-      // Add count number
-      count_true[it] = count_true[it-1] + 1;
-    else
-      // Reset count to zero
-      count_true[it] = tseries[it];
-  }  // end for
-  
-  return count_true;
-  
-}  // end roll_count
 
 
 
@@ -1970,7 +2329,7 @@ arma::mat run_mean(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the running maximum of streaming \emph{time series} data.
+//' Calculate the running maximum values of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -1985,34 +2344,34 @@ arma::mat run_mean(const arma::mat& tseries,
 //'   \emph{time series} data by recursively weighing present and past values
 //'   using the decay factor \eqn{\lambda}.
 //'
-//'   It first calculates the running mean of streaming data:
+//'   It calculates the running maximum values \eqn{p^{max}_t} of the streaming
+//'   data \eqn{p_t} as follows:
 //'   \deqn{
-//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+//'     p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
 //'   }
-//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-//'   streaming data.
-//'
-//'   It then calculates the running maximums of streaming data, \eqn{p^{max}_t}:
-//'   \deqn{
-//'     p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
-//'   }
-//' 
-//'   The second term pulls the maximum value down to the mean value, allowing
-//'   it to gradually "forget" the maximum value from the more distant past.
-//' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
+//'   The first term in the sum is the maximum value multiplied by the decay
+//'   factor \eqn{\lambda}, so that the past maximum value is gradually
+//'   "forgotten". The second term pulls the maximum value to the current value
+//'   \eqn{p_t}.
 //'   
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
-//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the running maximum values have a stronger
-//'   dependence on past values.  This is equivalent to a long look-back
-//'   interval.
-//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the running maximum values have a
-//'   weaker dependence on past values.  This is equivalent to a short look-back
-//'   interval.
+//'   If \eqn{\lambda} is close to \code{1} then the past maximum values persist
+//'   for longer.  This is equivalent to a long look-back interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the past maximum values
+//'   decay quickly, and the running maximum depends on the more recent
+//'   streaming values.  This is equivalent to a short look-back interval.
+//' 
+//'   The above formula can also be expressed as:
+//'   \deqn{
+//'     p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1-\lambda) p_t
+//'   }
+//'   The first term is the maximum value multiplied by the decay factor
+//'   \eqn{\lambda}, so that the past maximum value is gradually "forgotten".
+//'   The second term pulls the maximum value to the current value \eqn{p_t}.
+//'   
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
 //' 
 //'   The function \code{run_max()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -2023,9 +2382,9 @@ arma::mat run_mean(const arma::mat& tseries,
 //' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running maximums
 //' lambda <- 0.9
-//' maxs <- HighFreq::run_max(prices, lambda=lambda)
+//' maxv <- HighFreq::run_max(prices, lambda=lambda)
 //' # Plot dygraph of VTI prices and running maximums
-//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
 //' colnames(datav) <- c("prices", "max")
 //' colnamev <- colnames(datav)
 //' dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") %>%
@@ -2038,21 +2397,19 @@ arma::mat run_mean(const arma::mat& tseries,
 arma::mat run_max(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat maxs = arma::zeros<mat>(nrows, tseries.n_cols);
-  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat maxv = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
-  means.row(0) = tseries.row(0);
-  maxs.row(0) = tseries.row(0);
+  maxv.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the means using the decay factor
-    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the max using the decay factor
-    maxs.row(it) = arma::max(tseries.row(it), maxs.row(it-1) + lambda1*(means.row(it-1) - maxs.row(it-1)));
+    maxv.row(it) = lambda*arma::max(tseries.row(it), maxv.row(it-1)) + lambda1*tseries.row(it);
+    // Alternative formula for the same:
+    // maxv.row(it) = arma::max(tseries.row(it), lambda*maxv.row(it-1) + lambda1*tseries.row(it));
   }  // end for
   
-  return maxs;
+  return maxv;
   
 }  // end run_max
 
@@ -2060,7 +2417,7 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the running minimum of streaming \emph{time series} data.
+//' Calculate the running minimum values of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -2075,34 +2432,34 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //'   \emph{time series} data by recursively weighing present and past values
 //'   using the decay factor \eqn{\lambda}.
 //'
-//'   It first calculates the running mean of streaming data:
+//'   It calculates the running minimum values \eqn{p^{min}_t} of the streaming
+//'   data \eqn{p_t} as follows:
 //'   \deqn{
-//'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+//'     p^{min}_t = min(p_t, \lambda p^{min}_{t-1} + (1-\lambda) p_t)
 //'   }
-//'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-//'   streaming data.
-//'
-//'   It then calculates the running minimums of streaming data, \eqn{p^{min}_t}:
-//'   \deqn{
-//'     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
-//'   }
-//' 
-//'   The second term pulls the minimum value up to the mean value, allowing
-//'   it to gradually "forget" the minimum value from the more distant past.
-//' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
-//' 
+//'   The first term in the sum is the minimum value multiplied by the decay
+//'   factor \eqn{\lambda}, so that the past minimum value is gradually
+//'   "forgotten". The second term pulls the minimum value to the current value
+//'   \eqn{p_t}.
+//'   
 //'   The value of the decay factor \eqn{\lambda} should be in the range between
 //'   \code{0} and \code{1}.  
-//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the running minimum values have a stronger
-//'   dependence on past values.  This is equivalent to a long look-back
-//'   interval.
-//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the running minimum values have a
-//'   weaker dependence on past values.  This is equivalent to a short look-back
-//'   interval.
+//'   If \eqn{\lambda} is close to \code{1} then the past minimum values persist
+//'   for longer.  This is equivalent to a long look-back interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the past minimum values
+//'   decay quickly, and the running minimum depends on the more recent
+//'   streaming values.  This is equivalent to a short look-back interval.
+//' 
+//'   The above formula can also be expressed as:
+//'   \deqn{
+//'     p^{min}_t = \lambda min(p_t, p^{min}_{t-1}) + (1-\lambda) p_t
+//'   }
+//'   The first term is the minimum value multiplied by the decay factor
+//'   \eqn{\lambda}, so that the past minimum value is gradually "forgotten".
+//'   The second term pulls the minimum value to the current value \eqn{p_t}.
+//'   
+//'   The above recursive formula is convenient for processing live streaming
+//'   data because it doesn't require maintaining a buffer of past data.
 //' 
 //'   The function \code{run_min()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
@@ -2113,9 +2470,9 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the running minimums
 //' lambda <- 0.9
-//' mins <- HighFreq::run_min(prices, lambda=lambda)
+//' minv <- HighFreq::run_min(prices, lambda=lambda)
 //' # Plot dygraph of VTI prices and running minimums
-//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
+//' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
 //' colnames(datav) <- c("prices", "min")
 //' colnamev <- colnames(datav)
 //' dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") %>%
@@ -2128,21 +2485,19 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 arma::mat run_min(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat mins = arma::zeros<mat>(nrows, tseries.n_cols);
-  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat minv = arma::zeros<mat>(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
-  means.row(0) = tseries.row(0);
-  mins.row(0) = tseries.row(0);
+  minv.row(0) = tseries.row(0);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the means using the decay factor
-    means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the min using the decay factor
-    mins.row(it) = arma::min(tseries.row(it), mins.row(it-1) + lambda1*(means.row(it-1) - mins.row(it-1)));
+    minv.row(it) = lambda*arma::min(tseries.row(it), minv.row(it-1)) + lambda1*tseries.row(it);
+    // Alternative formula for the same:
+    // minv.row(it) = arma::min(tseries.row(it), lambda*minv.row(it-1) + lambda1*tseries.row(it));
   }  // end for
   
-  return mins;
+  return minv;
   
 }  // end run_min
 
@@ -2163,14 +2518,14 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' @details
 //'   The function \code{run_var()} calculates the running variance of a
 //'   streaming \emph{time series} of returns, by recursively weighing the
-//'   squared returns \eqn{r^2_t} minus the squared means \eqn{\mu^2_t}, with
-//'   the past variance estimates \eqn{\sigma^2_{t-1}}, using the decay factor
-//'   \eqn{\lambda}:
+//'   squared differences of the returns minus the running means \eqn{(r_t -
+//'   \mu_t)^2}, with the past variance estimates \eqn{\sigma^2_{t-1}}, using
+//'   the decay factor \eqn{\lambda}:
 //'   \deqn{
 //'     \mu_t = (1-\lambda) r_t + \lambda \mu_{t-1}
 //'   }
 //'   \deqn{
-//'     \sigma^2_t = (1-\lambda) (r^2_t - \mu^2_t) + \lambda \sigma^2_{t-1}
+//'     \sigma^2_t = (1-\lambda) (r_t - \mu_t)^2 + \lambda \sigma^2_{t-1}
 //'   }
 //'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 //'   \eqn{r_t} are the streaming returns data.
@@ -2205,16 +2560,18 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' # Calculate the running variance
 //' lambda <- 0.9
 //' vars <- HighFreq::run_var(returns, lambda=lambda)
+//' # Calculate centered returns
+//' retc <- (returns - HighFreq::run_mean(returns, lambda=lambda))
 //' # Calculate running variance using R code
-//' filtered <- (1-lambda)*filter(returns^2, filter=lambda, 
-//'   init=as.numeric(returns[1, 1])^2/(1-lambda), 
+//' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+//'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 //'   method="recursive")
 //' all.equal(vars, unclass(filtered), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::run_var(returns, lambda=lambda),
-//'   Rcode=filter(returns^2, filter=lambda, init=as.numeric(returns[1, 1])^2/(1-lambda), method="recursive"),
+//'   Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -2223,8 +2580,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat vars = arma::square(tseries);
-  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::uword ncols = tseries.n_cols;
+  arma::mat vars = arma::zeros<mat>(nrows, ncols);
+  arma::mat means = arma::zeros<mat>(nrows, ncols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
@@ -2233,7 +2591,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
     // Calculate the means using the decay factor
     means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
     // Calculate the variance as the weighted sum of squared returns minus the squared means
-    vars.row(it) = lambda1*(vars.row(it) - arma::square(means.row(it))) + lambda*vars.row(it-1);
+    vars.row(it) = lambda1*arma::square(tseries.row(it) - means.row(it)) + lambda*vars.row(it-1);
   }  // end for
   
   return vars;
@@ -3234,44 +3592,41 @@ arma::mat calc_covar(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the variance of returns aggregated over end points. 
+//' Calculate the variance of returns aggregated over the end points. 
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 //'
-//' @param \code{step} The number of periods in each interval between
-//'   neighboring end points.
+//' @param \code{step} The number of time periods in each interval between
+//'   neighboring end points (the default is \code{step = 1}).
 //' 
 //' @return The variance of aggregated returns.
 //'
 //' @details
 //'   The function \code{calc_var_ag()} calculates the variance of returns
-//'   aggregated over end points.
+//'   aggregated over the end points.
 //'
 //'   It first calculates the end points spaced apart by the number of periods
 //'   equal to the argument \code{step}.  Then it calculates the aggregated
 //'   returns by differencing the prices \code{tseries} calculated at the end
 //'   points. Finally it calculates the variance of the returns.
 //'
-//'   If there are extra periods that don't fit over the length of
-//'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
-//'   intervals, then it calculates all the corresponding variance values, and
-//'   averages them.
+//'   The choice of the first end point is arbitrary, so \code{calc_var_ag()}
+//'   calculates the different end points for all the possible starting points.
+//'   It then calculates the variance values for all the different end points
+//'   and averages them.
 //'
-//'   For example, if the number of rows of \code{tseries} is equal to
-//'   \code{20}, and \code{step=3} then \code{6} end points fit over the length
-//'   of \code{tseries}, and there are \code{2} extra periods that must fit into
-//'   stubs, either at the beginning or at the end (or both).
-//' 
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
+//'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+//'   aggregation interval \eqn{\Delta t}.
+//'   The aggregated volatility increases as the length of the aggregation
+//'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+//'   \eqn{H}:
 //'     \deqn{
 //'       \sigma_t = \sigma {\Delta t}^H
 //'     }
 //'   Where \eqn{\sigma} is the daily return volatility.
 //' 
 //'   The function \code{calc_var_ag()} can therefore be used to calculate the
-//'   \emph{Hurst exponent} from the volatility ratio.
+//'   \emph{Hurst exponent} from the variance ratio.
 //'
 //' @examples
 //' \dontrun{
@@ -3297,17 +3652,15 @@ arma::mat calc_var_ag(const arma::mat& tseries,
     // Calculate the variance without aggregations.
     return arma::var(diffit(tseries, 1, false));
   else {
-    // Calculate the number of extra periods that don't fit over nrows.
-    arma::uword nrows = tseries.n_rows;
-    arma::uword remainder = nrows % step;
     // Allocate aggregations, end points, and variance.
+    arma::uword nrows = tseries.n_rows;
     arma::mat aggs;
     arma::uvec endp;
-    // The number of rows is (remainder+1) so that it works for remainder=0
-    arma::mat vars(remainder+1, tseries.n_cols);
+    // The number of rows is equal to step so that loop works for stub=0
+    arma::mat vars(step, tseries.n_cols);
     // Perform loop over the stubs
-    for (arma::uword stub = 0; stub <= remainder; stub++) {
-      endp = calc_endpoints(tseries.n_rows, step, stub);
+    for (arma::uword stub = 0; stub < step; stub++) {
+      endp = calc_endpoints(nrows, step, stub, false);
       // endp = arma::regspace<uvec>(stub, step, nrows + step);
       // endp = endp.elem(find(endp < nrows));
       aggs = tseries.rows(endp);
@@ -3505,7 +3858,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 //'   prices.
 //'
-//' @param \code{step} The number of periods in each interval between
+//' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points.
 //' 
 //' @param \code{method} A \emph{character} string representing the price range
@@ -3534,33 +3887,30 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //'
 //' @details
 //'   The function \code{calc_var_ohlc_ag()} calculates the variance of
-//'   \emph{OHLC} prices aggregated over end points.
+//'   \emph{OHLC} prices aggregated over the end points.
 //'
 //'   It first calculates the end points spaced apart by the number of periods
 //'   equal to the argument \code{step}.  Then it aggregates the \emph{OHLC}
 //'   prices to the end points. Finally it calculates the variance of the
 //'   aggregated \emph{OHLC} prices.
 //'
-//'   If there are extra periods that don't fit over the length of \code{ohlc},
-//'   then \code{calc_var_ohlc_ag()} loops over all possible stub intervals,
-//'   it calculates all the corresponding variance values, and it averages
-//'   them.
+//'   The choice of the first end point is arbitrary, so \code{calc_var_ohlc_ag()}
+//'   calculates the different end points for all the possible starting points.
+//'   It then calculates the variance values for all the different end points
+//'   and averages them.
 //'
-//'   For example, if the number of rows of \code{ohlc} is equal to \code{20},
-//'   and \code{step=3} then \code{6} end points fit over the length of
-//'   \code{ohlc}, and there are \code{2} extra periods that must fit into
-//'   stubs, either at the beginning or at the end (or both).
-//' 
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
+//'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+//'   aggregation interval \eqn{\Delta t}.
+//'   The aggregated volatility increases as the length of the aggregation
+//'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+//'   \eqn{H}:
 //'     \deqn{
 //'       \sigma_t = \sigma {\Delta t}^H
 //'     }
 //'   Where \eqn{\sigma} is the daily return volatility.
 //' 
-//'   The function \code{calc_var_ohlc_ag()} can therefore be used to calculate the
-//'   \emph{Hurst exponent} from the volatility ratio.
+//'   The function \code{calc_var_ohlc_ag()} can therefore be used to calculate
+//'   the \emph{Hurst exponent} from the variance ratio.
 //'
 //' @examples
 //' \dontrun{
@@ -3577,7 +3927,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //' @export
 // [[Rcpp::export]]
 double calc_var_ohlc_ag(const arma::mat& ohlc,
-                        arma::uword step = 1, 
+                        arma::uword step, 
                         std::string method = "yang_zhang", 
                         arma::colvec close_lag = 0, 
                         bool scale = true, // Divide the returns by time index
@@ -3587,19 +3937,14 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     // Calculate the variance without aggregations.
     return calc_var_ohlc(ohlc, method, close_lag, scale, index);
   else {
-    // Calculate the number of extra periods that don't fit over nrows.
-    arma::uword nrows = ohlc.n_rows;
-    arma::uword remainder = nrows % step;
     // Allocate aggregations, end points, and variance.
+    arma::uword nrows = ohlc.n_rows;
     arma::mat aggs;
     arma::uvec endp;
-    arma::mat vars(remainder, 1);
+    arma::mat vars(step, 1);
     // Perform loop over the stubs
-    for (arma::uword stub = 0; stub < remainder; stub++) {
-      endp = calc_endpoints(nrows, step, stub);
-      // endp = arma::regspace<uvec>(stub, step, nrows + step);
-      // endp = endp.elem(find(endp < nrows));
-      // roll_ohlc
+    for (arma::uword stub = 0; stub < step; stub++) {
+      endp = calc_endpoints(nrows, step, stub, false);
       aggs = roll_ohlc(ohlc, endp);
       vars.row(stub) = calc_var_ohlc(aggs, method, close_lag, scale, index);
     }  // end for
@@ -3884,19 +4229,21 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 //'
-//' @param \code{step} The number of periods in each interval between
+//' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points.
 //' 
-//' @return The Hurst exponent calculated from the variance of aggregated
-//'   returns.
+//' @return The Hurst exponent calculated from the volatility ratio of
+//'   aggregated returns.
 //'
 //' @details
 //'   The function \code{calc_hurst()} calculates the Hurst exponent from the
 //'   ratios of the volatilities of aggregated returns.
 //'
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
+//'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+//'   aggregation interval \eqn{\Delta t}.
+//'   The aggregated volatility increases as the length of the aggregation
+//'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+//'   \eqn{H}:
 //'     \deqn{
 //'       \sigma_t = \sigma {\Delta t}^H
 //'     }
@@ -3910,7 +4257,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //'     }
 //' 
 //'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-//'   to calculate the aggregated volatility \eqn{\sigma_t}.
+//'   to calculate the aggregated variance \eqn{\sigma^2_t}.
 //' 
 //' @examples
 //' \dontrun{
@@ -3924,7 +4271,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_hurst(const arma::mat& tseries, 
-                     arma::uword step = 1) {
+                     arma::uword step) {
   
   return 0.5*arma::log(calc_var_ag(tseries, step)/calc_var_ag(tseries, 1))/log(step);
   
@@ -3940,7 +4287,7 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 //'   prices.
 //'
-//' @param \code{step} The number of periods in each interval between
+//' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points.
 //' 
 //' @param \code{method} A \emph{character} string representing the price range
@@ -3965,16 +4312,18 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //' @param \code{index} A \emph{vector} with the time index of the \emph{time
 //'   series}.  This is an optional argument (the default is \code{index = 0}).
 //'   
-//' @return The Hurst exponent calculated from the variance ratio of aggregated
-//' \emph{OHLC} prices.
+//' @return The Hurst exponent calculated from the volatility ratio of
+//'   aggregated \emph{OHLC} prices.
 //'
 //' @details
 //' The function \code{calc_hurst_ohlc()} calculates the Hurst exponent from the
-//' ratios of the volatilities of aggregated \emph{OHLC} prices.
+//' ratios of the variances of aggregated \emph{OHLC} prices.
 //'
-//'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-//'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-//'   the \emph{Hurst exponent} \eqn{H}:
+//'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+//'   aggregation interval \eqn{\Delta t}.
+//'   The aggregated volatility increases as the length of the aggregation
+//'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+//'   \eqn{H}:
 //'     \deqn{
 //'       \sigma_t = \sigma {\Delta t}^H
 //'     }
@@ -3988,8 +4337,8 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //'     }
 //' 
 //'   The function \code{calc_hurst_ohlc()} calls the function
-//'   \code{calc_var_ohlc_ag()} to calculate the aggregated volatility
-//'   \eqn{\sigma_t}.
+//'   \code{calc_var_ohlc_ag()} to calculate the aggregated variance
+//'   \eqn{\sigma^2_t}.
 //' 
 //' @examples
 //' \dontrun{
@@ -4002,7 +4351,7 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //' @export
 // [[Rcpp::export]]
 double calc_hurst_ohlc(const arma::mat& ohlc,
-                       arma::uword step = 1, 
+                       arma::uword step, 
                        std::string method = "yang_zhang", 
                        arma::colvec close_lag = 0, 
                        bool scale = true, // Divide the returns by time index
@@ -5324,7 +5673,7 @@ arma::mat roll_reg(const arma::mat& response,
   //   responsi = response.rows(0, it);
   //   predicti = predictor.rows(0, it);
   //   reg_data = calc_reg(responsi, predicti);
-  //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
+  //   reg_stats.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
   
   // Remaining periods
@@ -5332,7 +5681,7 @@ arma::mat roll_reg(const arma::mat& response,
   //   responsi = response.rows(it-look_back+1, it);
   //   predicti = predictor.rows(it-look_back+1, it);
   //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, dimax, confl, alpha);
-  //   reg_stats.row(it) = conv_to<rowvec>::from(reg_data);
+  //   reg_stats.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
   
   return reg_stats;
@@ -6264,7 +6613,7 @@ double lik_garch(double omega,
   // Lag the variance
   variance = lagit(variance, 1, false);
   // Calculate the log-likelihood
-  double likelihood = -conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
+  double likelihood = -arma::conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
   
   return likelihood;
   
@@ -6519,7 +6868,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   case methodenum::quantile: {
     // Momentum weights equal to sum of quantiles for columns
     arma::vec levels = {confl, 1-confl};
-    weights = conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
+    weights = arma::conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
     break;
   }  // end quantile
   default : {
@@ -6530,7 +6879,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   
   if (rankw == TRUE) {
     // Convert the weights to their ranks
-    weights = conv_to<vec>::from(arma::sort_index(arma::sort_index(weights)));
+    weights = arma::conv_to<vec>::from(calc_ranks_stl(weights));
   }  // end if
   
   if (centerw == TRUE) {

@@ -5,7 +5,7 @@
 \title{Calculate the regularized inverse of a \emph{matrix} of data using Singular
 Value Decomposition (\emph{SVD}).}
 \usage{
-calc_inv(tseries, eigen_thresh = 0.01, eigen_max = 0L)
+calc_inv(tseries, eigen_thresh = 0.01, dimax = 0L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
@@ -14,10 +14,10 @@ calc_inv(tseries, eigen_thresh = 0.01, eigen_max = 0L)
 small singular values in order to regularize the inverse of the
 matrix \code{tseries} (the default is \code{0.01}).}
 
-\item{\code{eigen_max}}{An \emph{integer} equal to the number of singular
+\item{\code{dimax}}{An \emph{integer} equal to the number of singular
 values used for calculating the regularized inverse of the matrix
-\code{tseries} (the default is \code{eigen_max = 0} - equivalent to
-\code{eigen_max} equal to the number of columns of \code{tseries}).}
+\code{tseries} (the default is \code{dimax = 0} - equivalent to
+\code{dimax} equal to the number of columns of \code{tseries}).}
 }
 \value{
 A \emph{matrix} equal to the regularized inverse of the matrix
@@ -63,15 +63,15 @@ The function \code{calc_inv()} calculates the regularized inverse of the
   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
   
   It then discards additional singular values so that only the largest
-  \code{eigen_max} singular values remain.  
+  \code{dimax} singular values remain.  
   It calculates the regularized inverse from the \emph{SVD} matrices using
-  only the largest singular values up to \code{eigen_max}.  For example, if
-  \code{eigen_max = 3} then it only uses the \code{3} largest singular
-  values. This has the effect of dimension shrinkage.
+  only the largest singular values up to \code{dimax}.  For example, if
+  \code{dimax = 3} then it only uses the \code{3} largest singular
+  values. This has the effect of dimension reduction.
   
   If the matrix \code{tseries} has a large number of small singular values,
   then the number of remaining singular values may be less than
-  \code{eigen_max}.
+  \code{dimax}.
 }
 \examples{
 \dontrun{
@@ -80,11 +80,11 @@ returns <- na.omit(rutils::etfenv$returns)
 # Calculate covariance matrix
 covmat <- cov(returns)
 # Calculate regularized inverse using RcppArmadillo
-invmat <- HighFreq::calc_inv(covmat, eigen_max=3)
+invmat <- HighFreq::calc_inv(covmat, dimax=3)
 # Calculate regularized inverse from SVD in R
 svdec <- svd(covmat)
-eigen_max <- 1:3
-invsvd <- svdec$v[, eigen_max] \%*\% (t(svdec$u[, eigen_max]) / svdec$d[eigen_max])
+dimax <- 1:3
+invsvd <- svdec$v[, dimax] \%*\% (t(svdec$u[, dimax]) / svdec$d[dimax])
 # Compare RcppArmadillo with R
 all.equal(invmat, invsvd)
 }

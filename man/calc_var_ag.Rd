@@ -2,51 +2,48 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_var_ag}
 \alias{calc_var_ag}
-\title{Calculate the variance of returns aggregated over end points.}
+\title{Calculate the variance of returns aggregated over the end points.}
 \usage{
 calc_var_ag(tseries, step = 1L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of prices.}
 
-\item{\code{step}}{The number of periods in each interval between
-neighboring end points.}
+\item{\code{step}}{The number of time periods in each interval between
+neighboring end points (the default is \code{step = 1}).}
 }
 \value{
 The variance of aggregated returns.
 }
 \description{
-Calculate the variance of returns aggregated over end points.
+Calculate the variance of returns aggregated over the end points.
 }
 \details{
 The function \code{calc_var_ag()} calculates the variance of returns
-  aggregated over end points.
+  aggregated over the end points.
 
   It first calculates the end points spaced apart by the number of periods
   equal to the argument \code{step}.  Then it calculates the aggregated
   returns by differencing the prices \code{tseries} calculated at the end
   points. Finally it calculates the variance of the returns.
 
-  If there are extra periods that don't fit over the length of
-  \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
-  intervals, then it calculates all the corresponding variance values, and
-  averages them.
+  The choice of the first end point is arbitrary, so \code{calc_var_ag()}
+  calculates the different end points for all the possible starting points.
+  It then calculates the variance values for all the different end points
+  and averages them.
 
-  For example, if the number of rows of \code{tseries} is equal to
-  \code{20}, and \code{step=3} then \code{6} end points fit over the length
-  of \code{tseries}, and there are \code{2} extra periods that must fit into
-  stubs, either at the beginning or at the end (or both).
-
-  The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-  length of the aggregation interval \eqn{\Delta t} raised to the power of
-  the \emph{Hurst exponent} \eqn{H}:
+  The aggregated volatility \eqn{\sigma_t} increases with the length of the
+  aggregation interval \eqn{\Delta t}.
+  The aggregated volatility increases as the length of the aggregation
+  interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+  \eqn{H}:
     \deqn{
       \sigma_t = \sigma {\Delta t}^H
     }
   Where \eqn{\sigma} is the daily return volatility.
 
   The function \code{calc_var_ag()} can therefore be used to calculate the
-  \emph{Hurst exponent} from the volatility ratio.
+  \emph{Hurst exponent} from the variance ratio.
 }
 \examples{
 \dontrun{

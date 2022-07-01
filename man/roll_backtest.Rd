@@ -84,4 +84,5 @@ back_test <- roll_backtest(endpoints=endpoints,
     trading_params = trading_params,
     xtsv=prices)
 }
+
 }

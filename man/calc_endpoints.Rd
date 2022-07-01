@@ -2,60 +2,98 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_endpoints}
 \alias{calc_endpoints}
-\title{Calculate a vector of end points that divides a vector into equal intervals.}
+\title{Calculate a vector of end points that divides an integer time sequence of
+time periods into equal time intervals.}
 \usage{
-calc_endpoints(length, step = 1L, stub = 0L)
+calc_endpoints(length, step = 1L, stub = 0L, stubs = TRUE)
 }
 \arguments{
-\item{\code{length}}{An \emph{integer} equal to the length of the vector to
-be divided into equal intervals.}
+\item{\code{length}}{An \emph{integer} equal to the length of the time
+sequence to be divided into equal intervals.}
 
-\item{\code{step}}{The number of elements in each interval between
-neighboring end points.}
+\item{\code{step}}{The number of time periods in each interval between
+neighboring end points (the default is \code{step = 1}).}
 
-\item{\code{stub}}{An \emph{integer} value equal to the first end point for
-calculating the end points.}
+\item{\code{stub}}{An \emph{integer} equal to the first non-zero end point
+(the default is \code{stub = 0}).}
+
+\item{\code{stubs}}{A \emph{Boolean} specifying whether to include stub
+intervals (the default is \code{stubs = TRUE}).}
 }
 \value{
 A vector of equally spaced \emph{integers} representing the end
   points.
 }
 \description{
-Calculate a vector of end points that divides a vector into equal intervals.
+Calculate a vector of end points that divides an integer time sequence of
+time periods into equal time intervals.
 }
 \details{
-The end points are a vector of integers which divide a vector of length
-  equal to \code{length} into equally spaced intervals. If a whole number of
-  intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
-  stub interval at the end.
+The end points are a vector of integers which divide the sequence of time
+  periods of length equal to \code{length} into equally spaced time
+  intervals.
+  The number of time periods between neighboring end points is equal to the
+  argument \code{step}.
+  If a whole number of intervals doesn't fit over the whole sequence, then
+  \code{calc_endpoints()} adds a stub interval at the end.
+  A stub interval is one where the number of periods between neighboring end
+  points is less than the argument \code{step}.
+  
+  If \code{stubs = TRUE} (the default) then the first end point is 
+  equal to \code{0} (since indexing in \code{C++} code starts at \code{0}).
+  The first non-zero end point is equal to \code{step} or \code{stub} (if
+  it's not zero).
+  If \code{stub = 0} (the default) then the first end point is equal to
+  \code{0} (even if \code{stubs = FALSE}).
+  If \code{stubs = TRUE} (the default) then the last end point is always
+  equal to \code{length-1}.
+  The argument \code{stub} should be less than the \code{step}: \code{stub <
+  step}.
+  
+  If \code{step = 1} and \code{stub = 0} (the default), then the vector of
+  end points is simply equal to:
+  \deqn{
+    \{ 0, 1, 2, ..., length - 1 \}
+  }
 
-  The first end point is equal to the argument \code{step}, unless the
-  argument \code{stub} is provided, and then it becomes the first end point.
-
-  For example, consider the end points for a vector of length \code{20}
-  divided into intervals of length \code{step=5}: \code{0, 5, 10, 15, 20}.
-  In order for all the differences between neighboring end points to be
-  equal to \code{5}, the first end point is set equal to \code{0}. But
-  \code{0} doesn't correspond to any vector element, so
-  \code{calc_endpoints()} doesn't include it and it only retains the
-  non-zero end points equal to: \code{5, 10, 15, 20}. 
-
-  Since indexing in \code{C++} code starts at \code{0}, then
-  \code{calc_endpoints()} shifts the end points by \code{-1} and returns the
-  vector equal to \code{4, 9, 14, 19}.
-
-  If \code{stub = 1} then the first end point is equal to \code{1} and the
-  end points are equal to: \code{1, 6, 11, 16, 20}.
-  The extra stub interval at the end is equal to \code{4 = 20 - 16}.
-  And \code{calc_endpoints()} returns \code{0, 5, 10, 15, 19}. The first
-  value is equal to \code{0} which is the index of the first element in
-  \code{C++} code.
-
-  If \code{stub = 2} then the first end point is equal to \code{2}, with an
-  extra stub interval at the end, and the end points are equal to: \code{2,
-  7, 12, 17, 20}.
-  And \code{calc_endpoints()} returns \code{1, 6, 11, 16, 19}.
-
+  If \code{stub = 0} (the default) and \code{stubs = TRUE} (the default)
+  then the vector of end points is equal to:
+  \deqn{
+    \{ 0, step, 2*step, ..., length - 1 \}
+  }
+  
+  If \code{stub = 0} (the default) and \code{stubs = FALSE} then the vector
+  of end points is equal to:
+  \deqn{
+    \{ 0, step, 2*step, ..., n*step \}
+  }
+  
+  If \code{stub > 0} and \code{stubs = TRUE} (the default), then the vector
+  of end points is equal to:
+  \deqn{
+    \{ 0, stub, stub + step, ..., length - 1 \}
+  }
+  
+  For example, the end points for \code{length = 20}, divided into intervals
+  of \code{step = 5} are equal to: \code{0, 5, 10, 15, 19}.
+  
+  If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+  and the end points are equal to: \code{0, 1, 6, 11, 16, 19}.
+  The stub interval at the beginning is equal to \code{2} (including
+  \code{0} and \code{1}).
+  The stub interval at the end is equal to \code{3 = 19 - 16}.
+  
+  The end points for \code{length = 21} divided into intervals of length
+  \code{step = 5}, with \code{stub = 0}, are equal to: \code{0, 5, 10, 15,
+  20}.
+  The beginning interval is equal to \code{5}.
+  The end interval is equal to \code{5 = 20 - 15}.
+  
+  If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+  and the end points are equal to: \code{0, 1, 6, 11, 16, 20}.
+  The beginning stub interval is equal to \code{2}.
+  The end stub interval is equal to \code{4 = 20 - 16}.
+  
   The function \code{calc_endpoints()} is similar to the function
   \code{rutils::calc_endpoints()} from package
   \href{https://github.com/algoquant/rutils}{rutils}.
@@ -64,27 +102,13 @@ The end points are a vector of integers which divide a vector of length
   because indexing starts at \code{0} in \code{C++} code, while it starts at
   \code{1} in \code{R} code. So if \code{calc_endpoints()} is used in
   \code{R} code then \code{1} should be added to it.
-  
-  This works in \code{R} code because the vector element corresponding to
-  index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
-  1)]} produces \code{4}.  So in \code{R} we can select vector elements
-  using the end points starting at zero.
-  
-  In \code{C++} the end points must be shifted by \code{-1} compared to
-  \code{R} code, because indexing starts at \code{0}: \code{-1, 4, 9, 14,
-  19}.  But there is no vector element corresponding to index \code{-1}. So
-  in \code{C++} we cannot select vector elements using the end points
-  starting at \code{-1}. The solution is to drop the first placeholder end
-  point.
 }
 \examples{
-# Calculate end points without a stub interval
+# Calculate the end points without a stub interval
 HighFreq::calc_endpoints(length=20, step=5)
-# Calculate end points with a final stub interval
+# Calculate the end points with a final stub interval
 HighFreq::calc_endpoints(length=23, step=5)
-# Calculate end points with initial and final stub intervals
+# Calculate the end points with initial and final stub intervals
 HighFreq::calc_endpoints(length=20, step=5, stub=2)
-# Calculate end points with initial and final stub intervals
-HighFreq::calc_endpoints(length=20, step=5, stub=24)
 
 }

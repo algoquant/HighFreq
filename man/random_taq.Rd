@@ -48,4 +48,5 @@ The function \code{random_taq()} calculates an \emph{xts} time
 taq <- HighFreq::random_taq()
 # Create random TAQ time series from SPY index
 taq <- HighFreq::random_taq(indeks=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
+
 }

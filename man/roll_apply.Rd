@@ -109,4 +109,5 @@ agg_regations <- roll_apply(ohlc, agg_fun=sum, endpoints=endpoints, by_columns=T
 # using overlapping intervals
 agg_regations <- roll_apply(ohlc, agg_fun=agg_function,
                             look_back=5, endpoints=endpoints)
+                            
 }

@@ -36,4 +36,5 @@ The function \code{ohlc_sharpe()} calculates Sharpe-like statistics
 \examples{
 # Calculate time series of running Sharpe ratios for SPY
 sharpe_running <- ohlc_sharpe(HighFreq::SPY)
+
 }

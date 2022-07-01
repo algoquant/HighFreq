@@ -56,4 +56,5 @@ symbol <- "SPY"
 # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
 save_scrub_agg(symbol=symbol, data_dir=data_dir, output_dir=output_dir, period="15 min")
 }
+
 }

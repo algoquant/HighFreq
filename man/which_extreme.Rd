@@ -55,4 +55,5 @@ bid_offer <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
 sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
 # Remove suspect values
 taq <- taq[!sus_pect]
+
 }

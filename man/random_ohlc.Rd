@@ -62,4 +62,5 @@ If the input \code{ohlc} time series is \emph{NULL} (the default),
 ohlc <- HighFreq::random_ohlc()
 # Create random time series from SPY by randomly sampling it
 ohlc <- HighFreq::random_ohlc(ohlc=HighFreq::SPY["2012-02-13/2012-02-15"])
+
 }

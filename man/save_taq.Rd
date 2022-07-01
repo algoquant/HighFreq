@@ -37,4 +37,5 @@ The function \code{save_taq()} loads multiple days of \emph{TAQ}
 \dontrun{
 save_taq("SPY")
 }
+
 }

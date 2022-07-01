@@ -60,4 +60,5 @@ HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="yang_zhang")
 HighFreq::calc_var_ohlc_r(HighFreq::SPY, method="rogers_satchell")
 # Calculate the variance without scaling the returns
 HighFreq::calc_var_ohlc_r(HighFreq::SPY, scalit=FALSE)
+
 }

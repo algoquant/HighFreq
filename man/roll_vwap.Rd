@@ -43,4 +43,5 @@ col=c("black", "red"), bty="n")
 returns_running <- ohlc_returns(xtsv=HighFreq::SPY)
 # Calculate the rolling volume-weighted average returns
 roll_vwap(ohlc=HighFreq::SPY, close=returns_running, look_back=11)
+
 }

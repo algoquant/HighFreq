@@ -49,4 +49,5 @@ mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
 taq[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
 taq <- xts:::na.locf.xts(taq)
+
 }

@@ -59,4 +59,5 @@ returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY_TAQ)
 returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY)
 # Calculate open to open returns
 returns <- HighFreq::ohlc_returns(xtsv=HighFreq::SPY, colnum=1)
+
 }

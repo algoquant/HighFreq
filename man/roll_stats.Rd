@@ -53,4 +53,5 @@ skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", look_back
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)
+
 }

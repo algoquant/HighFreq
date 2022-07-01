@@ -39,8 +39,8 @@ The start points are equal to the values of the vector \code{endp} lagged
 }
 \examples{
 # Calculate end points
-endp <- HighFreq::calc_endpoints(25, 5)
+endp <- HighFreq::calc_endpoints(length=55, step=5)
 # Calculate start points corresponding to the end points
-startp <- HighFreq::calc_startpoints(endp, 2)
+startp <- HighFreq::calc_startpoints(endp, look_back=5)
 
 }

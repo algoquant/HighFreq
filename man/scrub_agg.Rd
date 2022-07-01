@@ -47,4 +47,5 @@ chart_Series(ohlc, name="random prices")
 # scrub and aggregate a single day of SPY TAQ data to OHLC
 ohlc <- HighFreq::scrub_agg(taq=HighFreq::SPY_TAQ)
 chart_Series(ohlc, name=symbol)
+
 }

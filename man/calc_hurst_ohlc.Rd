@@ -7,7 +7,7 @@
 \usage{
 calc_hurst_ohlc(
   ohlc,
-  step = 1L,
+  step,
   method = "yang_zhang",
   close_lag = 0L,
   scale = TRUE,
@@ -18,7 +18,7 @@ calc_hurst_ohlc(
 \item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 prices.}
 
-\item{\code{step}}{The number of periods in each interval between
+\item{\code{step}}{The number of time periods in each interval between
 neighboring end points.}
 
 \item{\code{method}}{A \emph{character} string representing the price range
@@ -44,8 +44,8 @@ by the time index, the number of seconds in each period? (The default is
 series}.  This is an optional argument (the default is \code{index = 0}).}
 }
 \value{
-The Hurst exponent calculated from the variance ratio of aggregated
-\emph{OHLC} prices.
+The Hurst exponent calculated from the volatility ratio of
+  aggregated \emph{OHLC} prices.
 }
 \description{
 Calculate the Hurst exponent from the volatility ratio of aggregated
@@ -53,11 +53,13 @@ Calculate the Hurst exponent from the volatility ratio of aggregated
 }
 \details{
 The function \code{calc_hurst_ohlc()} calculates the Hurst exponent from the
-ratios of the volatilities of aggregated \emph{OHLC} prices.
+ratios of the variances of aggregated \emph{OHLC} prices.
 
-  The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-  length of the aggregation interval \eqn{\Delta t} raised to the power of
-  the \emph{Hurst exponent} \eqn{H}:
+  The aggregated volatility \eqn{\sigma_t} increases with the length of the
+  aggregation interval \eqn{\Delta t}.
+  The aggregated volatility increases as the length of the aggregation
+  interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+  \eqn{H}:
     \deqn{
       \sigma_t = \sigma {\Delta t}^H
     }
@@ -71,8 +73,8 @@ ratios of the volatilities of aggregated \emph{OHLC} prices.
     }
 
   The function \code{calc_hurst_ohlc()} calls the function
-  \code{calc_var_ohlc_ag()} to calculate the aggregated volatility
-  \eqn{\sigma_t}.
+  \code{calc_var_ohlc_ag()} to calculate the aggregated variance
+  \eqn{\sigma^2_t}.
 }
 \examples{
 \dontrun{

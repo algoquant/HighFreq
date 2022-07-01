@@ -37,4 +37,5 @@ The function \code{ohlc_skew()} calculates a time series of skew
 \examples{
 # Calculate time series of skew estimates for SPY
 skew <- HighFreq::ohlc_skew(HighFreq::SPY)
+
 }

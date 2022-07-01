@@ -80,15 +80,31 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [x] Rename eigen_max to dimax
++ [ ] Rename miscellaneous functions as do*() ?
+For example, rename function diff_it() as do_diff() ?
 
-+ [x] Rename "eigen shrinkage" to "dimension reduction"
++ [ ] Finish the function remove_dup()
+
++ [ ] Create online function for scrubbing jumps from streaming prices
+
++ [ ] Create online function for Hampel filter
 
 + [ ] Switch terms around in running formulas:
 μt = (1 − λ)pt + λμt−1
 μt = λμt−1 + (1 − λ)pt
 
++ [ ] Create function to calculate the run length encoding of a vector
+Functions encode_it() and decode_it() in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
+File /Users/jerzy/Develop/Rcpp/drivers_stl.R
+
++ [ ] Create function calc_table() to calculate the contingency table 
+Function calc_table() in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
+
++ [ ] Make function back_test() parallel using package RcppParallel
+
 + [ ] Add argument control to function back_test() and pass it to calc_weights(), instead of passing many arguments - similar to RiskPortfolios by Ardia
+
++ [ ] Calculate the covariance matrix in two steps: first perform clustering and then calculate the covariance matrix of the clusters
 
 + [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Adapt function calc_var()
@@ -113,6 +129,13 @@ weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alp
 all.equal(weightcpp, weightsr)
 
 + [ ] In function calc_mean() add shrinkage of returns?
+
++ [ ] Implement incremental PCA IPCA
+Cardot Online Principal Component Analysis.pdf
+
++ [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
+Nadagouda Recursive Least Squares Regression Kalman Filter
+https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
 + [ ] Create the function run_covmat() - for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar()
 
@@ -146,9 +169,6 @@ predictor <- t(t(predictor) - colMeans(predictor))
 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
-+ [ ] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE
-Rename run_var() to roll_var_garch() ?
-
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
 + [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
@@ -173,9 +193,6 @@ Adapt from run_covar()
 + [ ] Create function calc_alpha() for calculating the alpha and beta, and their t-values and p-values
 
 + [ ] Create function calc_sharpe() for calculating the Sharpe, Sortino, Calmar, and ratios in R code
-
-+ [ ] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
-This avoids calling calc_var() in loop.
 
 + [ ] Create function fit_ar() to fit an AR process using matrix algebra
 
@@ -512,6 +529,33 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Fix the functions calc_var_ag() and calc_var_ohlc_ag() - use calc_endpoints() without stub intervals
+
++ [x] Modify the function calc_endpoints() to make stub intervals optional
+Add Boolean argument stubs: 
+If TRUE include stub intervals (the default) - then end points always start at zero and end at (length-1).
+If FALSE make all intervals equal to step (exclude some end points).
+
++ [x] Split the file HighFreq.cpp into multiple files - doesn't work
+The functions from the separate files are missing their default values.  Even though the default values are in the header definitions.
+https://stackoverflow.com/questions/56204031/rcpp-function-default-values-in-header-file
+
++ [x] Convert all std::vector to arma::vec 
+
++ [x] Fix run_max() and run_min() formulas
+
++ [x] Modify function run_var() so that it calculates the variance the same way as function sim_garch() with parameter is_random=FALSE - No
+Rename run_var() to roll_var_garch() ? No
+Instead, subtract the means from returns before squaring - otherwise it produces negative variance.
+
++ [x] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
+This avoids calling calc_var() in loop.
+Not necessary since calc_var() calls arma::var() so it's pretty fast.
+
++ [x] Rename eigen_max to dimax
+
++ [x] Rename "eigen shrinkage" to "dimension reduction"
 
 + [x] In function calc_weights() introduce independent ranking, centering and scaling of weights: rankw, centerw, rankcenterw, scalew, centerscalew
 Modify the argument scale from type Boolean to type methodenum.

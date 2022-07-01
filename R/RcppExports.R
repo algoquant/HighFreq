@@ -231,53 +231,90 @@ diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
     .Call('_HighFreq_diffit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
-#' Calculate a vector of end points that divides a vector into equal intervals.
+#' Calculate a vector of end points that divides an integer time sequence of
+#' time periods into equal time intervals.
 #'
-#' @param \code{length} An \emph{integer} equal to the length of the vector to
-#'   be divided into equal intervals.
+#' @param \code{length} An \emph{integer} equal to the length of the time
+#'   sequence to be divided into equal intervals.
 #'   
-#' @param \code{step} The number of elements in each interval between
-#'   neighboring end points.
+#' @param \code{step} The number of time periods in each interval between
+#'   neighboring end points (the default is \code{step = 1}).
 #' 
-#' @param \code{stub} An \emph{integer} value equal to the first end point for
-#'   calculating the end points.
+#' @param \code{stub} An \emph{integer} equal to the first non-zero end point
+#'   (the default is \code{stub = 0}).
+#'
+#' @param \code{stubs} A \emph{Boolean} specifying whether to include stub
+#'   intervals (the default is \code{stubs = TRUE}).
 #'
 #' @return A vector of equally spaced \emph{integers} representing the end
 #'   points.
 #'
 #' @details
-#'   The end points are a vector of integers which divide a vector of length
-#'   equal to \code{length} into equally spaced intervals. If a whole number of
-#'   intervals doesn't fit over the vector, then \code{calc_endpoints()} adds a
-#'   stub interval at the end.
+#'   The end points are a vector of integers which divide the sequence of time
+#'   periods of length equal to \code{length} into equally spaced time
+#'   intervals.
+#'   The number of time periods between neighboring end points is equal to the
+#'   argument \code{step}.
+#'   If a whole number of intervals doesn't fit over the whole sequence, then
+#'   \code{calc_endpoints()} adds a stub interval at the end.
+#'   A stub interval is one where the number of periods between neighboring end
+#'   points is less than the argument \code{step}.
+#'   
+#'   If \code{stubs = TRUE} (the default) then the first end point is 
+#'   equal to \code{0} (since indexing in \code{C++} code starts at \code{0}).
+#'   The first non-zero end point is equal to \code{step} or \code{stub} (if
+#'   it's not zero).
+#'   If \code{stub = 0} (the default) then the first end point is equal to
+#'   \code{0} (even if \code{stubs = FALSE}).
+#'   If \code{stubs = TRUE} (the default) then the last end point is always
+#'   equal to \code{length-1}.
+#'   The argument \code{stub} should be less than the \code{step}: \code{stub <
+#'   step}.
+#'   
+#'   If \code{step = 1} and \code{stub = 0} (the default), then the vector of
+#'   end points is simply equal to:
+#'   \deqn{
+#'     \{ 0, 1, 2, ..., length - 1 \}
+#'   }
 #'
-#'   The first end point is equal to the argument \code{step}, unless the
-#'   argument \code{stub} is provided, and then it becomes the first end point.
-#'
-#'   For example, consider the end points for a vector of length \code{20}
-#'   divided into intervals of length \code{step=5}: \code{0, 5, 10, 15, 20}.
-#'   In order for all the differences between neighboring end points to be
-#'   equal to \code{5}, the first end point is set equal to \code{0}. But
-#'   \code{0} doesn't correspond to any vector element, so
-#'   \code{calc_endpoints()} doesn't include it and it only retains the
-#'   non-zero end points equal to: \code{5, 10, 15, 20}. 
-#'
-#'   Since indexing in \code{C++} code starts at \code{0}, then
-#'   \code{calc_endpoints()} shifts the end points by \code{-1} and returns the
-#'   vector equal to \code{4, 9, 14, 19}.
-#'
-#'   If \code{stub = 1} then the first end point is equal to \code{1} and the
-#'   end points are equal to: \code{1, 6, 11, 16, 20}.
-#'   The extra stub interval at the end is equal to \code{4 = 20 - 16}.
-#'   And \code{calc_endpoints()} returns \code{0, 5, 10, 15, 19}. The first
-#'   value is equal to \code{0} which is the index of the first element in
-#'   \code{C++} code.
-#'
-#'   If \code{stub = 2} then the first end point is equal to \code{2}, with an
-#'   extra stub interval at the end, and the end points are equal to: \code{2,
-#'   7, 12, 17, 20}.
-#'   And \code{calc_endpoints()} returns \code{1, 6, 11, 16, 19}.
-#'
+#'   If \code{stub = 0} (the default) and \code{stubs = TRUE} (the default)
+#'   then the vector of end points is equal to:
+#'   \deqn{
+#'     \{ 0, step, 2*step, ..., length - 1 \}
+#'   }
+#'   
+#'   If \code{stub = 0} (the default) and \code{stubs = FALSE} then the vector
+#'   of end points is equal to:
+#'   \deqn{
+#'     \{ 0, step, 2*step, ..., n*step \}
+#'   }
+#'   
+#'   If \code{stub > 0} and \code{stubs = TRUE} (the default), then the vector
+#'   of end points is equal to:
+#'   \deqn{
+#'     \{ 0, stub, stub + step, ..., length - 1 \}
+#'   }
+#'   
+#'   For example, the end points for \code{length = 20}, divided into intervals
+#'   of \code{step = 5} are equal to: \code{0, 5, 10, 15, 19}.
+#'   
+#'   If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+#'   and the end points are equal to: \code{0, 1, 6, 11, 16, 19}.
+#'   The stub interval at the beginning is equal to \code{2} (including
+#'   \code{0} and \code{1}).
+#'   The stub interval at the end is equal to \code{3 = 19 - 16}.
+#'   
+#'   The end points for \code{length = 21} divided into intervals of length
+#'   \code{step = 5}, with \code{stub = 0}, are equal to: \code{0, 5, 10, 15,
+#'   20}.
+#'   The beginning interval is equal to \code{5}.
+#'   The end interval is equal to \code{5 = 20 - 15}.
+#'   
+#'   If \code{stub = 1} then the first non-zero end point is equal to \code{1}
+#'   and the end points are equal to: \code{0, 1, 6, 11, 16, 20}.
+#'   The beginning stub interval is equal to \code{2}.
+#'   The end stub interval is equal to \code{4 = 20 - 16}.
+#'   
 #'   The function \code{calc_endpoints()} is similar to the function
 #'   \code{rutils::calc_endpoints()} from package
 #'   \href{https://github.com/algoquant/rutils}{rutils}.
@@ -287,31 +324,17 @@ diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   \code{1} in \code{R} code. So if \code{calc_endpoints()} is used in
 #'   \code{R} code then \code{1} should be added to it.
 #'   
-#'   This works in \code{R} code because the vector element corresponding to
-#'   index \code{0} is empty.  For example, the \code{R} code: \code{(4:1)[c(0,
-#'   1)]} produces \code{4}.  So in \code{R} we can select vector elements
-#'   using the end points starting at zero.
-#'   
-#'   In \code{C++} the end points must be shifted by \code{-1} compared to
-#'   \code{R} code, because indexing starts at \code{0}: \code{-1, 4, 9, 14,
-#'   19}.  But there is no vector element corresponding to index \code{-1}. So
-#'   in \code{C++} we cannot select vector elements using the end points
-#'   starting at \code{-1}. The solution is to drop the first placeholder end
-#'   point.
-#'   
 #' @examples
-#' # Calculate end points without a stub interval
+#' # Calculate the end points without a stub interval
 #' HighFreq::calc_endpoints(length=20, step=5)
-#' # Calculate end points with a final stub interval
+#' # Calculate the end points with a final stub interval
 #' HighFreq::calc_endpoints(length=23, step=5)
-#' # Calculate end points with initial and final stub intervals
+#' # Calculate the end points with initial and final stub intervals
 #' HighFreq::calc_endpoints(length=20, step=5, stub=2)
-#' # Calculate end points with initial and final stub intervals
-#' HighFreq::calc_endpoints(length=20, step=5, stub=24)
 #'
 #' @export
-calc_endpoints <- function(length, step = 1L, stub = 0L) {
-    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub)
+calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
+    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub, stubs)
 }
 
 #' Calculate a vector of start points by lagging (shifting) a vector of end
@@ -343,13 +366,238 @@ calc_endpoints <- function(length, step = 1L, stub = 0L) {
 #'   
 #' @examples
 #' # Calculate end points
-#' endp <- HighFreq::calc_endpoints(25, 5)
+#' endp <- HighFreq::calc_endpoints(length=55, step=5)
 #' # Calculate start points corresponding to the end points
-#' startp <- HighFreq::calc_startpoints(endp, 2)
+#' startp <- HighFreq::calc_startpoints(endp, look_back=5)
 #'
 #' @export
 calc_startpoints <- function(endp, look_back) {
     .Call('_HighFreq_calc_startpoints', PACKAGE = 'HighFreq', endp, look_back)
+}
+
+#' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
+#' and reset the count to zero after every \code{FALSE} element.
+#' 
+#' @param \code{tseries} A \emph{Boolean vector} of data.
+#'
+#' @return An \emph{integer vector} of the same length as the argument
+#'   \code{tseries}.
+#'
+#' @details
+#'   The function \code{roll_count()} calculates the number of consecutive
+#'   \code{TRUE} elements in a Boolean vector, and it resets the count to zero
+#'   after every \code{FALSE} element.
+#'   
+#'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
+#'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
+#'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
+#'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
+#'   \code{4}, \code{5}, \code{0}}.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate the number of consecutive TRUE elements
+#' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
+#' }
+#' @export
+roll_count <- function(tseries) {
+    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', tseries)
+}
+
+#' Calculate the run length encoding of a single-column \emph{time series},
+#' \emph{matrix}, or a \emph{vector}.
+#' 
+#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#'   a \emph{vector}.
+#'
+#' @return A \emph{list} with two \emph{vectors}: a \emph{vector} of encoded
+#'   data and an \emph{integer vector} of data counts (repeats).
+#'
+#' @details
+#'   The function \code{encode_it()} calculates the run length encoding of a
+#'   single-column \emph{time series}, \emph{matrix}, or a \emph{vector}.
+#'   
+#'   The run length encoding of a \emph{vector} consists of two \emph{vectors}:
+#'   a \emph{vector} of encoded data (consecutive data values) and of an
+#'   \emph{integer vector} of the data counts (the number of times the same
+#'   value repeats in succession).
+#'   
+#'   Run length encoding (RLE) is a data compression algorithm which encodes
+#'   the data in two \emph{vectors}: the consecutive data values and their
+#'   counts.  If a data value occurs several times in succession then it is
+#'   recorded only once and its corresponding count is equal to the number of
+#'   times it occurs. Run-length encoding is different from a contingency
+#'   table.
+#'   
+#' @examples
+#' \dontrun{
+#' # Create a vector of data
+#' datav <- sample(5, 31, replace=TRUE)
+#' # Calculate the run length encoding of datav
+#' HighFreq::encode_it(datav)
+#' }
+#' 
+#' @export
+encode_it <- function(tseries) {
+    .Call('_HighFreq_encode_it', PACKAGE = 'HighFreq', tseries)
+}
+
+#' Calculate the \emph{vector} of data from its run length encoding.
+#' 
+#' @param \code{encodel} A \emph{list} with two \emph{vectors}: a \emph{numeric
+#'   vector} of encoded data and an \emph{integer vector} of data counts
+#'   (repeats).
+#'
+#' @return A \code{numeric vector}.
+#' 
+#' @details
+#'   The function \code{decode_it()} the \emph{vector} of data from its run
+#'   length encoding.
+#'   
+#'   The run length encoding of a \emph{vector} consists of two \emph{vectors}:
+#'   a \emph{numeric vector} of encoded data (consecutive data values) and of
+#'   an \emph{integer vector} of the data counts (the number of times the same
+#'   value repeats in succession).
+#'   
+#'   Run length encoding (RLE) is a data compression algorithm which encodes
+#'   the data in two \emph{vectors}: the consecutive data values and their
+#'   counts.  If a data value occurs several times in succession then it is
+#'   recorded only once and its corresponding count is equal to the number of
+#'   times it occurs. Run-length encoding is different from a contingency
+#'   table.
+#'   
+#' @examples
+#' \dontrun{
+#' # Create a vector of data
+#' datav <- sample(5, 31, replace=TRUE)
+#' # Calculate the run length encoding of datav
+#' rle <- HighFreq::encode_it(datav)
+#' # Decode the data from its run length encoding
+#' decodev <- HighFreq::decode_it(rle)
+#' all.equal(datav, decodev)
+#' }
+#' 
+#' @export
+decode_it <- function(encodel) {
+    .Call('_HighFreq_decode_it', PACKAGE = 'HighFreq', encodel)
+}
+
+#' Calculate the ranks of the elements of a single-column \emph{time series},
+#' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+#' 
+#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#'   a \emph{vector}.
+#'
+#' @return An \emph{integer vector} with the ranks of the elements of the
+#'   \code{tseries}.
+#'
+#' @details
+#'   The function \code{calc_ranks()} calculates the ranks of the elements of a
+#'   single-column \emph{time series}, \emph{matrix}, or a \emph{vector}. 
+#'   
+#'   The permutation index is an integer vector which sorts a given vector into
+#'   ascending order. 
+#'   The permutation index of the permutation index is the \emph{reverse}
+#'   permutation index, because it sorts the vector from ascending order back
+#'   into its original unsorted order.
+#'   The ranks of the elements are equal to the \emph{reverse} permutation
+#'   index. The function \code{calc_ranks()} calculates the \emph{reverse}
+#'   permutation index.
+#'   
+#'   The ranks produced by \code{calc_ranks()} start at zero, following the 
+#'   \code{C++} convention.
+#'   
+#'   The \code{RcppArmadillo} function \code{arma::sort_index()} calculates the
+#'   permutation index which sorts a given vector into an ascending order.
+#'   Applying the function \code{arma::sort_index()} twice:
+#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
+#'   permutation index to sort the vector from ascending order back into its
+#'   original unsorted order.
+#'   
+#'   The function \code{calc_ranks()} calls the \code{RcppArmadillo} function
+#'   \code{arma::sort_index()} twice to calculate the \emph{reverse}
+#'   permutation index, to sort the vector from ascending order back into its
+#'   original unsorted order.
+#'   
+#' @examples
+#' \dontrun{
+#' # Create a vector of data
+#' datav <- rnorm(1e3)
+#' # Calculate the ranks of the elements using R code and RcppArmadillo
+#' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav))+1)
+#' # Compare the speed of R code with RcppArmadillo
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcode=rank(datav),
+#'   Rcpp=calc_ranks(datav),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_ranks <- function(tseries) {
+    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
+}
+
+#' Calculate the ranks of the elements of a single-column \emph{time series},
+#' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+#' 
+#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#'   a \emph{vector}.
+#'
+#' @return An \emph{integer vector} with the ranks of the elements of
+#'   \code{tseries}.
+#'
+#' @details
+#'   The function \code{calc_ranks_stl()} calculates the ranks of the elements
+#'   of a single-column \emph{time series}, \emph{matrix}, or a \emph{vector}.
+#'   The function \code{calc_ranks_stl()} is slightly faster than the function
+#'   \code{calc_ranks()}.
+#'   
+#'   The permutation index is an integer vector which sorts a given vector into
+#'   ascending order. 
+#'   The permutation index of the permutation index is the \emph{reverse}
+#'   permutation index, because it sorts the vector from ascending order back
+#'   into its original unsorted order.
+#'   The ranks of the elements are equal to the \emph{reverse} permutation
+#'   index. The function \code{calc_ranks()} calculates the \emph{reverse}
+#'   permutation index.
+#'   
+#'   The ranks produced by \code{calc_ranks_stl()} start at zero, following the
+#'   \code{C++} convention.
+#'
+#'   The \code{STL} \code{C++} function \code{std::sort()} sorts a vector into
+#'   ascending order. It can also be used to calculate the permutation index
+#'   which sorts the vector into an ascending order.
+#'   
+#'   The function \code{calc_ranks_stl()} calls the function \code{std::sort()}
+#'   twice:
+#'   First, it calculates the permutation index which sorts the vector
+#'   \code{tseries} into ascending order.
+#'   Second, it calculates the permutation index of the permutation index,
+#'   which are the ranks (the \emph{reverse} permutation index) of the vector
+#'   \code{tseries}.
+#' 
+#' @examples
+#' \dontrun{
+#' # Create a vector of data
+#' datav <- rnorm(1e3)
+#' # Calculate the ranks of the elements using R code and RcppArmadillo
+#' all.equal(rank(datav), drop(HighFreq::calc_ranks_stl(datav))+1)
+#' # Compare the speed of R code with RcppArmadillo
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcode=rank(datav),
+#'   Rcpp=HighFreq::calc_ranks_stl(datav),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_ranks_stl <- function(tseries) {
+    .Call('_HighFreq_calc_ranks_stl', PACKAGE = 'HighFreq', tseries)
+}
+
+remove_dup <- function(stringv) {
+    .Call('_HighFreq_remove_dup', PACKAGE = 'HighFreq', stringv)
 }
 
 #' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
@@ -603,7 +851,7 @@ calc_eigen <- function(tseries) {
 #'   It calculates the regularized inverse from the \emph{SVD} matrices using
 #'   only the largest singular values up to \code{dimax}.  For example, if
 #'   \code{dimax = 3} then it only uses the \code{3} largest singular
-#'   values. This has the effect of dimension shrinkage.
+#'   values. This has the effect of dimension reduction.
 #'   
 #'   If the matrix \code{tseries} has a large number of small singular values,
 #'   then the number of remaining singular values may be less than
@@ -686,61 +934,8 @@ calc_scaled <- function(tseries, use_median = FALSE) {
     .Call('_HighFreq_calc_scaled', PACKAGE = 'HighFreq', tseries, use_median)
 }
 
-#' Calculate the ranks of the elements of a single-column \emph{time series} or
-#' a \emph{vector} using \code{RcppArmadillo}.
-#' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
-#'
-#' @return An \emph{integer vector} with the ranks of the elements of the
-#'   \code{tseries}.
-#'
-#' @details
-#'   The function \code{calc_ranks()} calculates the ranks of the elements of a
-#'   single-column \emph{time series} or a \emph{vector}. It uses the
-#'   \code{RcppArmadillo} function \code{arma::sort_index()}. The function
-#'   \code{arma::sort_index()} calculates the permutation index to sort a given
-#'   vector into ascending order.
-#'   
-#'   Applying the function \code{arma::sort_index()} twice:
-#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-#'   permutation index to sort the vector from ascending order back into its
-#'   original unsorted order.
-#'   The permutation index produced by:
-#'   \code{arma::sort_index(arma::sort_index())} is the \emph{reverse} of the
-#'   permutation index produced by: \code{arma::sort_index()}.
-#'   
-#'   The ranks of the elements are equal to the \emph{reverse} permutation
-#'   index.
-#'   The function \code{calc_ranks()} calculates the \emph{reverse} permutation
-#'   index.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a vector of random data
-#' datav <- round(runif(7), 2)
-#' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(datav), drop(HighFreq::calc_ranks(datav)))
-#' # Create a time series of random data
-#' datav <- xts::xts(runif(7), seq.Date(Sys.Date(), by=1, length.out=7))
-#' # Calculate the ranks of the elements in two ways
-#' all.equal(rank(coredata(datav)), drop(HighFreq::calc_ranks(datav)))
-#' # Compare the speed of RcppArmadillo with R code
-#' datav <- runif(7)
-#' library(microbenchmark)
-#' summary(microbenchmark(
-#'   Rcpp=calc_ranks(datav),
-#'   Rcode=rank(datav),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-calc_ranks <- function(tseries) {
-    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
-}
-
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
 #'
-#' @export
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'
@@ -784,35 +979,6 @@ calc_ranks <- function(tseries) {
 #' @export
 agg_ohlc <- function(tseries) {
     .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', tseries)
-}
-
-#' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
-#' and reset the count to zero after every \code{FALSE} element.
-#' 
-#' @param \code{tseries} A \emph{Boolean vector} of data.
-#'
-#' @return An \emph{integer vector} of the same length as the argument
-#'   \code{tseries}.
-#'
-#' @details
-#'   The function \code{roll_count()} calculates the number of consecutive
-#'   \code{TRUE} elements in a Boolean vector, and it resets the count to zero
-#'   after every \code{FALSE} element.
-#'   
-#'   For example, the Boolean vector {\code{FALSE}, \code{TRUE}, \code{TRUE},
-#'   \code{FALSE}, \code{FALSE}, \code{TRUE}, \code{TRUE}, \code{TRUE},
-#'   \code{TRUE}, \code{TRUE}, \code{FALSE}}, is translated into {\code{0},
-#'   \code{1}, \code{2}, \code{0}, \code{0}, \code{1}, \code{2}, \code{3},
-#'   \code{4}, \code{5}, \code{0}}.
-#'   
-#' @examples
-#' \dontrun{
-#' # Calculate the number of consecutive TRUE elements
-#' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
-#' }
-#' @export
-roll_count <- function(tseries) {
-    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Aggregate a time series to an \emph{OHLC} time series with lower
@@ -1340,7 +1506,7 @@ run_mean <- function(tseries, lambda, weights = 0L) {
     .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda, weights)
 }
 
-#' Calculate the running maximum of streaming \emph{time series} data.
+#' Calculate the running maximum values of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1355,34 +1521,34 @@ run_mean <- function(tseries, lambda, weights = 0L) {
 #'   \emph{time series} data by recursively weighing present and past values
 #'   using the decay factor \eqn{\lambda}.
 #'
-#'   It first calculates the running mean of streaming data:
+#'   It calculates the running maximum values \eqn{p^{max}_t} of the streaming
+#'   data \eqn{p_t} as follows:
 #'   \deqn{
-#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+#'     p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
 #'   }
-#'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-#'   streaming data.
-#'
-#'   It then calculates the running maximums of streaming data, \eqn{p^{max}_t}:
-#'   \deqn{
-#'     p^{max}_t = max(p_t, p^{max}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{max}_{t-1})
-#'   }
-#' 
-#'   The second term pulls the maximum value down to the mean value, allowing
-#'   it to gradually "forget" the maximum value from the more distant past.
-#' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
+#'   The first term in the sum is the maximum value multiplied by the decay
+#'   factor \eqn{\lambda}, so that the past maximum value is gradually
+#'   "forgotten". The second term pulls the maximum value to the current value
+#'   \eqn{p_t}.
 #'   
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
-#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-#'   values have a greater weight, and the running maximum values have a stronger
-#'   dependence on past values.  This is equivalent to a long look-back
-#'   interval.
-#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-#'   past values have a smaller weight, and the running maximum values have a
-#'   weaker dependence on past values.  This is equivalent to a short look-back
-#'   interval.
+#'   If \eqn{\lambda} is close to \code{1} then the past maximum values persist
+#'   for longer.  This is equivalent to a long look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the past maximum values
+#'   decay quickly, and the running maximum depends on the more recent
+#'   streaming values.  This is equivalent to a short look-back interval.
+#' 
+#'   The above formula can also be expressed as:
+#'   \deqn{
+#'     p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1-\lambda) p_t
+#'   }
+#'   The first term is the maximum value multiplied by the decay factor
+#'   \eqn{\lambda}, so that the past maximum value is gradually "forgotten".
+#'   The second term pulls the maximum value to the current value \eqn{p_t}.
+#'   
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_max()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1393,9 +1559,9 @@ run_mean <- function(tseries, lambda, weights = 0L) {
 #' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the running maximums
 #' lambda <- 0.9
-#' maxs <- HighFreq::run_max(prices, lambda=lambda)
+#' maxv <- HighFreq::run_max(prices, lambda=lambda)
 #' # Plot dygraph of VTI prices and running maximums
-#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxs)
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
 #' colnames(datav) <- c("prices", "max")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") %>%
@@ -1408,7 +1574,7 @@ run_max <- function(tseries, lambda) {
     .Call('_HighFreq_run_max', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
-#' Calculate the running minimum of streaming \emph{time series} data.
+#' Calculate the running minimum values of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1423,34 +1589,34 @@ run_max <- function(tseries, lambda) {
 #'   \emph{time series} data by recursively weighing present and past values
 #'   using the decay factor \eqn{\lambda}.
 #'
-#'   It first calculates the running mean of streaming data:
+#'   It calculates the running minimum values \eqn{p^{min}_t} of the streaming
+#'   data \eqn{p_t} as follows:
 #'   \deqn{
-#'     \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1}
+#'     p^{min}_t = min(p_t, \lambda p^{min}_{t-1} + (1-\lambda) p_t)
 #'   }
-#'   Where \eqn{\mu_t} is the mean value at time \eqn{t}, and \eqn{p_t} is the
-#'   streaming data.
-#'
-#'   It then calculates the running minimums of streaming data, \eqn{p^{min}_t}:
-#'   \deqn{
-#'     p^{min}_t = min(p_t, p^{min}_{t-1}) + (1-\lambda) (\mu_{t-1} - p^{min}_{t-1})
-#'   }
-#' 
-#'   The second term pulls the minimum value up to the mean value, allowing
-#'   it to gradually "forget" the minimum value from the more distant past.
-#' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
-#' 
+#'   The first term in the sum is the minimum value multiplied by the decay
+#'   factor \eqn{\lambda}, so that the past minimum value is gradually
+#'   "forgotten". The second term pulls the minimum value to the current value
+#'   \eqn{p_t}.
+#'   
 #'   The value of the decay factor \eqn{\lambda} should be in the range between
 #'   \code{0} and \code{1}.  
-#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-#'   values have a greater weight, and the running minimum values have a stronger
-#'   dependence on past values.  This is equivalent to a long look-back
-#'   interval.
-#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-#'   past values have a smaller weight, and the running minimum values have a
-#'   weaker dependence on past values.  This is equivalent to a short look-back
-#'   interval.
+#'   If \eqn{\lambda} is close to \code{1} then the past minimum values persist
+#'   for longer.  This is equivalent to a long look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the past minimum values
+#'   decay quickly, and the running minimum depends on the more recent
+#'   streaming values.  This is equivalent to a short look-back interval.
+#' 
+#'   The above formula can also be expressed as:
+#'   \deqn{
+#'     p^{min}_t = \lambda min(p_t, p^{min}_{t-1}) + (1-\lambda) p_t
+#'   }
+#'   The first term is the minimum value multiplied by the decay factor
+#'   \eqn{\lambda}, so that the past minimum value is gradually "forgotten".
+#'   The second term pulls the minimum value to the current value \eqn{p_t}.
+#'   
+#'   The above recursive formula is convenient for processing live streaming
+#'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_min()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
@@ -1461,9 +1627,9 @@ run_max <- function(tseries, lambda) {
 #' prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the running minimums
 #' lambda <- 0.9
-#' mins <- HighFreq::run_min(prices, lambda=lambda)
+#' minv <- HighFreq::run_min(prices, lambda=lambda)
 #' # Plot dygraph of VTI prices and running minimums
-#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), mins)
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
 #' colnames(datav) <- c("prices", "min")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") %>%
@@ -1489,14 +1655,14 @@ run_min <- function(tseries, lambda) {
 #' @details
 #'   The function \code{run_var()} calculates the running variance of a
 #'   streaming \emph{time series} of returns, by recursively weighing the
-#'   squared returns \eqn{r^2_t} minus the squared means \eqn{\mu^2_t}, with
-#'   the past variance estimates \eqn{\sigma^2_{t-1}}, using the decay factor
-#'   \eqn{\lambda}:
+#'   squared differences of the returns minus the running means \eqn{(r_t -
+#'   \mu_t)^2}, with the past variance estimates \eqn{\sigma^2_{t-1}}, using
+#'   the decay factor \eqn{\lambda}:
 #'   \deqn{
 #'     \mu_t = (1-\lambda) r_t + \lambda \mu_{t-1}
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = (1-\lambda) (r^2_t - \mu^2_t) + \lambda \sigma^2_{t-1}
+#'     \sigma^2_t = (1-\lambda) (r_t - \mu_t)^2 + \lambda \sigma^2_{t-1}
 #'   }
 #'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 #'   \eqn{r_t} are the streaming returns data.
@@ -1531,16 +1697,18 @@ run_min <- function(tseries, lambda) {
 #' # Calculate the running variance
 #' lambda <- 0.9
 #' vars <- HighFreq::run_var(returns, lambda=lambda)
+#' # Calculate centered returns
+#' retc <- (returns - HighFreq::run_mean(returns, lambda=lambda))
 #' # Calculate running variance using R code
-#' filtered <- (1-lambda)*filter(returns^2, filter=lambda, 
-#'   init=as.numeric(returns[1, 1])^2/(1-lambda), 
+#' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+#'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 #'   method="recursive")
 #' all.equal(vars, unclass(filtered), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::run_var(returns, lambda=lambda),
-#'   Rcode=filter(returns^2, filter=lambda, init=as.numeric(returns[1, 1])^2/(1-lambda), method="recursive"),
+#'   Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
@@ -2195,44 +2363,41 @@ calc_covar <- function(tseries, method = "moment", confl = 0.75) {
     .Call('_HighFreq_calc_covar', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
-#' Calculate the variance of returns aggregated over end points. 
+#' Calculate the variance of returns aggregated over the end points. 
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 #'
-#' @param \code{step} The number of periods in each interval between
-#'   neighboring end points.
+#' @param \code{step} The number of time periods in each interval between
+#'   neighboring end points (the default is \code{step = 1}).
 #' 
 #' @return The variance of aggregated returns.
 #'
 #' @details
 #'   The function \code{calc_var_ag()} calculates the variance of returns
-#'   aggregated over end points.
+#'   aggregated over the end points.
 #'
 #'   It first calculates the end points spaced apart by the number of periods
 #'   equal to the argument \code{step}.  Then it calculates the aggregated
 #'   returns by differencing the prices \code{tseries} calculated at the end
 #'   points. Finally it calculates the variance of the returns.
 #'
-#'   If there are extra periods that don't fit over the length of
-#'   \code{tseries}, then \code{calc_var_ag()} loops over all possible stub
-#'   intervals, then it calculates all the corresponding variance values, and
-#'   averages them.
+#'   The choice of the first end point is arbitrary, so \code{calc_var_ag()}
+#'   calculates the different end points for all the possible starting points.
+#'   It then calculates the variance values for all the different end points
+#'   and averages them.
 #'
-#'   For example, if the number of rows of \code{tseries} is equal to
-#'   \code{20}, and \code{step=3} then \code{6} end points fit over the length
-#'   of \code{tseries}, and there are \code{2} extra periods that must fit into
-#'   stubs, either at the beginning or at the end (or both).
-#' 
-#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-#'   the \emph{Hurst exponent} \eqn{H}:
+#'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+#'   aggregation interval \eqn{\Delta t}.
+#'   The aggregated volatility increases as the length of the aggregation
+#'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+#'   \eqn{H}:
 #'     \deqn{
 #'       \sigma_t = \sigma {\Delta t}^H
 #'     }
 #'   Where \eqn{\sigma} is the daily return volatility.
 #' 
 #'   The function \code{calc_var_ag()} can therefore be used to calculate the
-#'   \emph{Hurst exponent} from the volatility ratio.
+#'   \emph{Hurst exponent} from the variance ratio.
 #'
 #' @examples
 #' \dontrun{
@@ -2369,7 +2534,7 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = T
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 #'   prices.
 #'
-#' @param \code{step} The number of periods in each interval between
+#' @param \code{step} The number of time periods in each interval between
 #'   neighboring end points.
 #' 
 #' @param \code{method} A \emph{character} string representing the price range
@@ -2398,33 +2563,30 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = T
 #'
 #' @details
 #'   The function \code{calc_var_ohlc_ag()} calculates the variance of
-#'   \emph{OHLC} prices aggregated over end points.
+#'   \emph{OHLC} prices aggregated over the end points.
 #'
 #'   It first calculates the end points spaced apart by the number of periods
 #'   equal to the argument \code{step}.  Then it aggregates the \emph{OHLC}
 #'   prices to the end points. Finally it calculates the variance of the
 #'   aggregated \emph{OHLC} prices.
 #'
-#'   If there are extra periods that don't fit over the length of \code{ohlc},
-#'   then \code{calc_var_ohlc_ag()} loops over all possible stub intervals,
-#'   it calculates all the corresponding variance values, and it averages
-#'   them.
+#'   The choice of the first end point is arbitrary, so \code{calc_var_ohlc_ag()}
+#'   calculates the different end points for all the possible starting points.
+#'   It then calculates the variance values for all the different end points
+#'   and averages them.
 #'
-#'   For example, if the number of rows of \code{ohlc} is equal to \code{20},
-#'   and \code{step=3} then \code{6} end points fit over the length of
-#'   \code{ohlc}, and there are \code{2} extra periods that must fit into
-#'   stubs, either at the beginning or at the end (or both).
-#' 
-#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-#'   the \emph{Hurst exponent} \eqn{H}:
+#'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+#'   aggregation interval \eqn{\Delta t}.
+#'   The aggregated volatility increases as the length of the aggregation
+#'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+#'   \eqn{H}:
 #'     \deqn{
 #'       \sigma_t = \sigma {\Delta t}^H
 #'     }
 #'   Where \eqn{\sigma} is the daily return volatility.
 #' 
-#'   The function \code{calc_var_ohlc_ag()} can therefore be used to calculate the
-#'   \emph{Hurst exponent} from the volatility ratio.
+#'   The function \code{calc_var_ohlc_ag()} can therefore be used to calculate
+#'   the \emph{Hurst exponent} from the variance ratio.
 #'
 #' @examples
 #' \dontrun{
@@ -2439,7 +2601,7 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = T
 #' }
 #' 
 #' @export
-calc_var_ohlc_ag <- function(ohlc, step = 1L, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
+calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
     .Call('_HighFreq_calc_var_ohlc_ag', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 
@@ -2631,19 +2793,21 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 #'
-#' @param \code{step} The number of periods in each interval between
+#' @param \code{step} The number of time periods in each interval between
 #'   neighboring end points.
 #' 
-#' @return The Hurst exponent calculated from the variance of aggregated
-#'   returns.
+#' @return The Hurst exponent calculated from the volatility ratio of
+#'   aggregated returns.
 #'
 #' @details
 #'   The function \code{calc_hurst()} calculates the Hurst exponent from the
 #'   ratios of the volatilities of aggregated returns.
 #'
-#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-#'   the \emph{Hurst exponent} \eqn{H}:
+#'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+#'   aggregation interval \eqn{\Delta t}.
+#'   The aggregated volatility increases as the length of the aggregation
+#'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+#'   \eqn{H}:
 #'     \deqn{
 #'       \sigma_t = \sigma {\Delta t}^H
 #'     }
@@ -2657,7 +2821,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #'     }
 #' 
 #'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-#'   to calculate the aggregated volatility \eqn{\sigma_t}.
+#'   to calculate the aggregated variance \eqn{\sigma^2_t}.
 #' 
 #' @examples
 #' \dontrun{
@@ -2669,7 +2833,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' }
 #' 
 #' @export
-calc_hurst <- function(tseries, step = 1L) {
+calc_hurst <- function(tseries, step) {
     .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, step)
 }
 
@@ -2679,7 +2843,7 @@ calc_hurst <- function(tseries, step = 1L) {
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 #'   prices.
 #'
-#' @param \code{step} The number of periods in each interval between
+#' @param \code{step} The number of time periods in each interval between
 #'   neighboring end points.
 #' 
 #' @param \code{method} A \emph{character} string representing the price range
@@ -2704,16 +2868,18 @@ calc_hurst <- function(tseries, step = 1L) {
 #' @param \code{index} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument (the default is \code{index = 0}).
 #'   
-#' @return The Hurst exponent calculated from the variance ratio of aggregated
-#' \emph{OHLC} prices.
+#' @return The Hurst exponent calculated from the volatility ratio of
+#'   aggregated \emph{OHLC} prices.
 #'
 #' @details
 #' The function \code{calc_hurst_ohlc()} calculates the Hurst exponent from the
-#' ratios of the volatilities of aggregated \emph{OHLC} prices.
+#' ratios of the variances of aggregated \emph{OHLC} prices.
 #'
-#'   The aggregated volatility \eqn{\sigma_t} scales (increases) with the
-#'   length of the aggregation interval \eqn{\Delta t} raised to the power of
-#'   the \emph{Hurst exponent} \eqn{H}:
+#'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
+#'   aggregation interval \eqn{\Delta t}.
+#'   The aggregated volatility increases as the length of the aggregation
+#'   interval \eqn{\Delta t} raised to the power of the \emph{Hurst exponent}
+#'   \eqn{H}:
 #'     \deqn{
 #'       \sigma_t = \sigma {\Delta t}^H
 #'     }
@@ -2727,8 +2893,8 @@ calc_hurst <- function(tseries, step = 1L) {
 #'     }
 #' 
 #'   The function \code{calc_hurst_ohlc()} calls the function
-#'   \code{calc_var_ohlc_ag()} to calculate the aggregated volatility
-#'   \eqn{\sigma_t}.
+#'   \code{calc_var_ohlc_ag()} to calculate the aggregated variance
+#'   \eqn{\sigma^2_t}.
 #' 
 #' @examples
 #' \dontrun{
@@ -2739,7 +2905,7 @@ calc_hurst <- function(tseries, step = 1L) {
 #' }
 #' 
 #' @export
-calc_hurst_ohlc <- function(ohlc, step = 1L, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
+calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
     .Call('_HighFreq_calc_hurst_ohlc', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 

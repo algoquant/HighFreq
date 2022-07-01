@@ -95,4 +95,5 @@ var_running <- HighFreq::ohlc_variance(ohlc)
 var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="yang_zhang")
 # Calculate SPY variance without overnight jumps
 var_running <- HighFreq::ohlc_variance(HighFreq::SPY, method="rogers_satchell")
+
 }

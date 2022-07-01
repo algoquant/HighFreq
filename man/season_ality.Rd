@@ -37,4 +37,5 @@ xtsv <- xtsv[!indeks=="09:31", ]
 var_seasonal <- season_ality(xtsv=xtsv)
 chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
   "daily seasonality of variance"))
+  
 }
