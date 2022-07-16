@@ -17,9 +17,9 @@ data.}
 \item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
 estimates.}
 
-\item{\code{method}}{A \emph{string} specifying the method for scaling the
-residuals (see Details) (the default is \code{method = "none"} - no
-scaling)}
+\item{\code{method}}{A \emph{character string} specifying the method for
+scaling the residuals (the default is \code{method = "none"} - no
+scaling).}
 }
 \value{
 A \emph{matrix} with the regression alphas, betas, and residuals.

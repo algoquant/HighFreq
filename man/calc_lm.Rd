@@ -46,11 +46,11 @@ predictor <- returns[, -1]
 lmod <- lm(response ~ predictor)
 lmodsum <- summary(lmod)
 # Perform multivariate regression using calc_lm()
-reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
+regarma <- HighFreq::calc_lm(response=response, predictor=predictor)
 # Compare the outputs of both functions
-all.equal(reg_arma$coefficients[, "coeff"], unname(coef(lmod)))
-all.equal(unname(reg_arma$coefficients), unname(lmodsum$coefficients))
-all.equal(unname(reg_arma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
+all.equal(regarma$coefficients[, "coeff"], unname(coef(lmod)))
+all.equal(unname(regarma$coefficients), unname(lmodsum$coefficients))
+all.equal(unname(regarma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),

@@ -17,7 +17,7 @@ calc_var_ohlc(
 \item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 prices.}
 
-\item{\code{method}}{A \emph{character} string representing the price range
+\item{\code{method}}{A \emph{character string} representing the price range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,

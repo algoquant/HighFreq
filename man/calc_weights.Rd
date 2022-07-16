@@ -5,54 +5,14 @@
 \title{Calculate the optimal portfolio weights using a variety of different
 objective functions.}
 \usage{
-calc_weights(
-  returns,
-  method = "maxsharpe",
-  eigen_thresh = 1e-05,
-  dimax = 0L,
-  confl = 0.1,
-  alpha = 0,
-  rankw = FALSE,
-  centerw = FALSE,
-  scalew = "voltarget",
-  vol_target = 0.01
-)
+calc_weights(returns, controlv)
 }
 \arguments{
 \item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{method}}{A \emph{string} specifying the method for
-calculating the weights (see Details) (the default is \code{method =
-"sharpem"})}
-
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
-\code{covariance matrix} of \code{returns} (the default is \code{1e-5}).}
-
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the
-\code{covariance matrix} of \code{returns} (the default is \code{0} -
-equivalent to \code{dimax} equal to the number of columns of
-\code{returns}).}
-
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
-
-\item{\code{alpha}}{The shrinkage intensity of \code{returns}.
-(values between \code{0} and \code{1} - the default is \code{0}).}
-
-\item{\code{rankw}}{A \emph{Boolean} specifying whether the weights should
-be ranked (the default is \code{rankw = FALSE}).}
-
-\item{\code{centerw}}{A \emph{Boolean} specifying whether the weights should
-be centered (the default is \code{centerw = FALSE}).}
-
-\item{\code{scalew}}{A \emph{string} specifying the method for scaling
-the weights (the default is \code{scalew = "voltarget"}).}
-
-\item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
-weights (the default is \code{0.001})}
+\item{\code{controlv}}{A \emph{list} of portfolio optimization model
+parameters (see Details).}
 }
 \value{
 A column \emph{vector} of the same length as the number of columns
@@ -65,6 +25,12 @@ objective functions.
 \details{
 The function \code{calc_weights()} calculates the optimal portfolio
   weights using a variety of different objective functions.
+
+  The function \code{calc_weights()} accepts a list of portfolio
+  optimization parameters through the argument \code{controlv}.
+  The list of portfolio optimization parameters can be created using
+  the function \code{param_portf()}.  Below is a description of the
+  parameters.
 
   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
   calculates the weights of the maximum Sharpe portfolio, by multiplying the
@@ -165,8 +131,10 @@ weightsr <- drop(invmat \%*\% colmeans)
 weightsr <- weightsr*sd(rowMeans(returns))/sd(returns \%*\% weightsr)
 weightsr <- 0.01*weightsr/sd(returns \%*\% weightsr)
 weightsr <- weightsr/sqrt(sum(weightsr^2))
+# Create a list of portfolio optimization parameters
+controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
 # Calculate weights using RcppArmadillo
-weightcpp <- drop(HighFreq::calc_weights(returns, dimax=dimax, alpha=alpha, scalew="sumsq"))
+weightcpp <- drop(HighFreq::calc_weights(returns, controlv=controlv))
 all.equal(weightcpp, weightsr)
 }
 

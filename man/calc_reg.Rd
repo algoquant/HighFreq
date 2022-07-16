@@ -5,16 +5,7 @@
 \title{Perform multivariate regression using different methods, and return a vector
 of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
-calc_reg(
-  response,
-  predictor,
-  intercept = TRUE,
-  method = "least_squares",
-  eigen_thresh = 1e-05,
-  dimax = 0L,
-  confl = 0.1,
-  alpha = 0
-)
+calc_reg(response, predictor, controlv)
 }
 \arguments{
 \item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
@@ -23,32 +14,11 @@ of response data.}
 \item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
-term should be added to the predictor (the default is \code{intercept =
-TRUE}).}
-
-\item{\code{method}}{A \emph{string} specifying the type of the regression
-model the default is \code{method = "least_squares"} - see Details).}
-
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
-\code{predictor} matrix (the default is \code{1e-5}).}
-
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{predictor}
-matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-the number of columns of \code{predictor}).}
-
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
-
-\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
-(the default is \code{0}).}
+\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
 }
 \value{
-A single-row matrix with
-A vector with the regression coefficients, their t-values, and the
-  last residual z-score.
+A single-row matrix with the regression coefficients, their
+  t-values, and the last residual z-score.
 }
 \description{
 Perform multivariate regression using different methods, and return a vector
@@ -58,6 +28,11 @@ of regression coefficients, their t-values, and the last residual z-score.
 The function \code{calc_reg()} performs multivariate regression using
   different methods, and returns a vector of regression coefficients, their
   t-values, and the last residual z-score.
+  
+  The function \code{calc_reg()} accepts a list of regression model
+  parameters through the argument \code{controlv}.
+  The list of model parameters can be created using the function
+  \code{param_reg()}.  Below is a description of the model parameters.
 
   If \code{method = "least_squares"} (the default) then it performs the
   standard least squares regression, the same as the function
@@ -75,7 +50,7 @@ The function \code{calc_reg()} performs multivariate regression using
   implemented yet).
 
   If \code{intercept = TRUE} then an extra intercept column (unit column) is
-  added to the predictor matrix (the default is \code{intercept = FALSE}).
+  added to the predictor matrix (the default is \code{intercept = TRUE}).
   
   The length of the return vector depends on the number of columns of the
   \code{predictor} matrix (including the intercept column, if it's added).
@@ -109,15 +84,17 @@ predictor <- returns[, -1]
 lmod <- lm(response ~ predictor)
 lmodsum <- summary(lmod)
 coeff <- lmodsum$coefficients
+# Create a default list of regression parameters
+controlv <- HighFreq::param_reg()
 # Perform multivariate regression using calc_reg()
-reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
+regarma <- drop(HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv))
 # Compare the outputs of both functions
-all.equal(reg_arma[1:(2*(1+NCOL(predictor)))], 
+all.equal(regarma[1:(2*(1+NCOL(predictor)))], 
   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(response=response, predictor=predictor),
+  Rcpp=HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv),
   Rcode=lm(response ~ predictor),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

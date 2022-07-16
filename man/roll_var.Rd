@@ -35,7 +35,7 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{character} string representing the type of the
+\item{\code{method}}{A \emph{character string} representing the type of the
 measure of dispersion (the default is \code{method = "moment"}).}
 }
 \value{

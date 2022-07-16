@@ -35,11 +35,11 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{string} specifying the type of the skewness
-model (the default is \code{method = "moment"} - see Details).}
+\item{\code{method}}{A \emph{character string} specifying the type of the
+skewness model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the quantiles of
+returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A \emph{matrix} of skewness estimates with the same number of

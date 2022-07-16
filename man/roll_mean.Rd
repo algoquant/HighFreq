@@ -35,7 +35,7 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{character} string representing the type of mean 
+\item{\code{method}}{A \emph{character string} representing the type of mean 
 measure of (the default is \code{method = "moment"}).}
 }
 \value{

@@ -17,6 +17,164 @@ using namespace arma;
 
 
 ////////////////////////////////////////////////////////////
+//' Create a named list of model parameters that can be passed into regression
+//' and machine learning functions.
+//' 
+//' @param \code{method} A \emph{character string} specifying the type of
+//'   regression model (the default is \code{method = "least_squares"}).
+//'   
+//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+//'   term should be added to the predictor (the default is \code{intercept =
+//'   TRUE}).
+//'
+//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//'   small singular values in order to regularize the inverse of the
+//'   \code{predictor} matrix (the default is \code{1e-5}).
+//'   
+//' @param \code{dimax} An \emph{integer} equal to the number of singular values
+//'   used for calculating the regularized inverse of the \code{predictor}
+//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to the
+//'   number of columns of the \code{predictor} matrix).
+//'   
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
+//'
+//' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+//'   between \code{0} and \code{1} - the default is \code{0}).
+//' 
+//' 
+//' @return A named list of model parameters that can be passed into regression
+//' and machine learning functions.
+//'
+//' @details
+//'   The function \code{param_reg()} creates a named list of model parameters
+//'   that can be passed into regression and machine learning functions.  For
+//'   example into the functions \code{calc_reg()} and \code{roll_reg()}.
+//'   
+//'   The function \code{param_reg()} simplifies the creation of regression
+//'   parameter lists.  The users can create a parameter list with the default
+//'   values, or they can specify custom parameter values.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a default list of regression parameters
+//' controlv <- HighFreq::param_reg()
+//' unlist(controlv)
+//' # Create a custom list of regression parameters
+//' controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+//' unlist(controlv)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::List param_reg(std::string method = "least_squares",  // Type of regression model
+                     bool intercept = true,  // Add intercept column to the predictor matrix?
+                     double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                     arma::uword dimax = 0, // Dimension reduction
+                     double confl = 0.1, // Confidence level for calculating the quantiles of returns
+                     double alpha = 0.0) {  // Shrinkage intensity of returns
+  
+  Rcpp::List controlv = Rcpp::List::create(Named("method") = method,
+                                           Named("intercept") = intercept,
+                                           Named("eigen_thresh") = eigen_thresh,
+                                           Named("dimax") = dimax,
+                                           Named("confl") = confl,
+                                           Named("alpha") = alpha);
+  
+  return controlv;
+  
+}  // end param_reg
+
+
+////////////////////////////////////////////////////////////
+//' Create a named list of model parameters that can be passed into portfolio
+//' optimization functions.
+//' 
+//' @param \code{method} A \emph{character string} specifying the method for
+//'   calculating the portfolio weights (the default is \code{method =
+//'   "sharpem"}).
+//'   
+//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//'   small singular values in order to regularize the inverse of the
+//'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
+//'   
+//' @param \code{dimax} An \emph{integer} equal to the number of singular
+//'   values used for calculating the regularized inverse of the
+//'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
+//'   equivalent to \code{dimax} equal to the number of columns of
+//'   \code{returns}).
+//'   
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
+//'
+//' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+//'   between \code{0} and \code{1} - the default is \code{0}).
+//' 
+//' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
+//'   be ranked (the default is \code{rankw = FALSE}).
+//'
+//' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
+//'   be centered (the default is \code{centerw = FALSE}).
+//'
+//' @param \code{scalew} A \emph{character string} specifying the method for
+//'   scaling the weights (the default is \code{scalew = "voltarget"}).
+//'
+//' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
+//'   weights (the default is \code{0.001})
+//' 
+//' 
+//' @return A named list of model parameters that can be passed into portfolio
+//'   optimization functions.
+//'
+//' @details
+//'   The function \code{param_portf()} creates a named list of model parameters
+//'   that can be passed into portfolio optimization functions.  For example
+//'   into the functions \code{calc_weights()} and \code{back_test()}.
+//'   See the function \code{calc_weights()} for more details.
+//'   
+//'   The function \code{param_portf()} simplifies the creation of portfolio
+//'   optimization parameter lists.  The users can create a parameter list with
+//'   the default values, or they can specify custom parameter values.
+//'
+//' @examples
+//' \dontrun{
+//' # Create a default list of portfolio optimization parameters
+//' controlv <- HighFreq::param_portf()
+//' unlist(controlv)
+//' # Create a custom list of portfolio optimization parameters
+//' controlv <- HighFreq::param_portf(intercept=FALSE, method="regular", dimax=4)
+//' unlist(controlv)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio optimization model
+                       double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                       arma::uword dimax = 0, // Dimension reduction
+                       double confl = 0.1, // Confidence level for calculating the quantiles of returns
+                       double alpha = 0.0, // Shrinkage intensity of returns
+                       bool rankw = false, // Should the weights be ranked?
+                       bool centerw = false, // Should the weights be centered?
+                       std::string scalew = "voltarget", // Method for scaling the weights
+                       double vol_target = 0.001) { // Volatility target for scaling the weights
+
+  Rcpp::List controlv = Rcpp::List::create(Named("method") = method,
+                                           Named("eigen_thresh") = eigen_thresh,
+                                           Named("dimax") = dimax,
+                                           Named("confl") = confl,
+                                           Named("alpha") = alpha,
+                                           Named("rankw") = rankw,
+                                           Named("centerw") = centerw,
+                                           Named("scalew") = scalew,
+                                           Named("vol_target") = vol_target);
+  
+  return controlv;
+  
+}  // end param_portf
+
+
+
+////////////////////////////////////////////////////////////
 //' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 //' using \code{RcppArmadillo}.
 //' 
@@ -978,7 +1136,7 @@ arma::uvec calc_ranks_stl(arma::vec tseries) {
 // [[Rcpp::export]]
 std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
   
-  int ndata = stringv.size();
+  std::size_t ndata = stringv.size();
   // Define vector iterator
   std::vector<std::string>::iterator stringit;
   // Define vector of output strings
@@ -1349,6 +1507,7 @@ arma::mat calc_inv(const arma::mat& tseries,
   // Calculate the number of non-small singular values
   arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
   
+  // If no regularization then set dimax to (svdnum - 1)
   if (dimax == 0) {
     // Set dimax
     dimax = svdnum - 1;
@@ -2292,7 +2451,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat run_mean(const arma::mat& tseries, 
                    double lambda, 
-                   const arma::colvec& weights = 0) {
+                   const arma::colvec& weights) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword weights_rows = weights.n_elem;
@@ -2837,9 +2996,9 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' @param \code{lambda} A \emph{numeric} decay factor to multiply past
 //'   estimates.
 //'   
-//' @param \code{method} A \emph{string} specifying the method for scaling the
-//'   residuals (see Details) (the default is \code{method = "none"} - no
-//'   scaling)
+//' @param \code{method} A \emph{character string} specifying the method for
+//'   scaling the residuals (the default is \code{method = "none"} - no
+//'   scaling).
 //'   
 //' @return A \emph{matrix} with the regression alphas, betas, and residuals.
 //'
@@ -3206,11 +3365,12 @@ methodenum calc_method(std::string method) {
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'
-//' @param \code{method} A \emph{string} specifying the type of the mean
-//'   (location) model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   mean (location) model (the default is \code{method = "moment"} - see
+//'   Details).
 //'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the mean (location) of the columns of
 //'   \code{tseries}.
@@ -3355,11 +3515,11 @@ double calc_varvec(const arma::vec& tseries) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'   
-//' @param \code{method} A \emph{string} specifying the type of the dispersion
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   dispersion model (the default is \code{method = "moment"} - see Details).
 //'    
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A row vector equal to the dispersion of the columns of the matrix
 //'   \code{tseries}.
@@ -3479,11 +3639,11 @@ arma::mat calc_var(const arma::mat& tseries,
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'   
-//' @param \code{method} A \emph{string} specifying the type of the covariance
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   covariance model (the default is \code{method = "moment"} - see Details).
 //'    
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A square matrix with the covariance coefficients of the columns of
 //'   the \emph{time series} \code{tseries}.
@@ -3681,7 +3841,7 @@ arma::mat calc_var_ag(const arma::mat& tseries,
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
 //'   prices.
 //'   
-//' @param \code{method} A \emph{character} string representing the price range
+//' @param \code{method} A \emph{character string} representing the price range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -3861,7 +4021,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points.
 //' 
-//' @param \code{method} A \emph{character} string representing the price range
+//' @param \code{method} A \emph{character string} representing the price range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -3962,11 +4122,11 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'
-//' @param \code{method} A \emph{string} specifying the type of the skewness
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   skewness model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the skewness of the columns of
 //'   \code{tseries}.
@@ -3983,7 +4143,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'   \eqn{\varsigma} from the differences between the quantiles of the data as
 //'   follows:
 //'   \deqn{
-//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2*q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
+//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2 q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
 //'   }
 //'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 //'
@@ -4094,11 +4254,11 @@ arma::mat calc_skew(const arma::mat& tseries,
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'
-//' @param \code{method} A \emph{string} specifying the type of the kurtosis
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   kurtosis model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A single-row matrix with the kurtosis of the columns of
 //'   \code{tseries}.
@@ -4290,7 +4450,7 @@ arma::mat calc_hurst(const arma::mat& tseries,
 //' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points.
 //' 
-//' @param \code{method} A \emph{character} string representing the price range
+//' @param \code{method} A \emph{character string} representing the price range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -4402,11 +4562,11 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' lmod <- lm(response ~ predictor)
 //' lmodsum <- summary(lmod)
 //' # Perform multivariate regression using calc_lm()
-//' reg_arma <- HighFreq::calc_lm(response=response, predictor=predictor)
+//' regarma <- HighFreq::calc_lm(response=response, predictor=predictor)
 //' # Compare the outputs of both functions
-//' all.equal(reg_arma$coefficients[, "coeff"], unname(coef(lmod)))
-//' all.equal(unname(reg_arma$coefficients), unname(lmodsum$coefficients))
-//' all.equal(unname(reg_arma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
+//' all.equal(regarma$coefficients[, "coeff"], unname(coef(lmod)))
+//' all.equal(unname(regarma$coefficients), unname(lmodsum$coefficients))
+//' all.equal(unname(regarma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
 //' # Compare the speed of RcppArmadillo with R code
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
@@ -4470,36 +4630,20 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //' 
-//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
-//'   term should be added to the predictor (the default is \code{intercept =
-//'   TRUE}).
+//' @param \code{controlv} A \emph{list} of model parameters (see Details).
 //'
-//' @param \code{method} A \emph{string} specifying the type of the regression
-//'   model the default is \code{method = "least_squares"} - see Details).
-//'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{predictor} matrix (the default is \code{1e-5}).
-//'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the \code{predictor}
-//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-//'   the number of columns of \code{predictor}).
-//'   
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
-//'
-//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-//'   (the default is \code{0}).
-//' 
-//' @return A single-row matrix with
-//' A vector with the regression coefficients, their t-values, and the
-//'   last residual z-score.
+//' @return A single-row matrix with the regression coefficients, their
+//'   t-values, and the last residual z-score.
 //'
 //' @details
 //'   The function \code{calc_reg()} performs multivariate regression using
 //'   different methods, and returns a vector of regression coefficients, their
 //'   t-values, and the last residual z-score.
+//'   
+//'   The function \code{calc_reg()} accepts a list of regression model
+//'   parameters through the argument \code{controlv}.
+//'   The list of model parameters can be created using the function
+//'   \code{param_reg()}.  Below is a description of the model parameters.
 //'
 //'   If \code{method = "least_squares"} (the default) then it performs the
 //'   standard least squares regression, the same as the function
@@ -4517,7 +4661,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //'   implemented yet).
 //' 
 //'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
-//'   added to the predictor matrix (the default is \code{intercept = FALSE}).
+//'   added to the predictor matrix (the default is \code{intercept = TRUE}).
 //'   
 //'   The length of the return vector depends on the number of columns of the
 //'   \code{predictor} matrix (including the intercept column, if it's added).
@@ -4551,15 +4695,17 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 //' lmod <- lm(response ~ predictor)
 //' lmodsum <- summary(lmod)
 //' coeff <- lmodsum$coefficients
+//' # Create a default list of regression parameters
+//' controlv <- HighFreq::param_reg()
 //' # Perform multivariate regression using calc_reg()
-//' reg_arma <- drop(HighFreq::calc_reg(response=response, predictor=predictor))
+//' regarma <- drop(HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv))
 //' # Compare the outputs of both functions
-//' all.equal(reg_arma[1:(2*(1+NCOL(predictor)))], 
+//' all.equal(regarma[1:(2*(1+NCOL(predictor)))], 
 //'   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_reg(response=response, predictor=predictor),
+//'   Rcpp=HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv),
 //'   Rcode=lm(response ~ predictor),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -4568,19 +4714,28 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
 // [[Rcpp::export]]
 arma::mat calc_reg(const arma::mat& response, 
                    const arma::mat& predictor,
-                   bool intercept = true,
-                   std::string method = "least_squares",
-                   double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                   arma::uword dimax = 0, // Regularization intensity
-                   double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                   double alpha = 0.0) {
+                   Rcpp::List controlv) { // List of regression model parameters
+  
+  // Unpack the control list
+  // Type of regression model
+  std::string method = as<std::string>(controlv["method"]);
+  // Add intercept column to the predictor matrix?
+  bool intercept = as<int>(controlv["intercept"]);
+  // Threshold level for discarding small singular values
+  double eigen_thresh = as<double>(controlv["eigen_thresh"]);
+  // Dimension reduction
+  arma::uword dimax = as<int>(controlv["dimax"]);
+  // Confidence level for calculating the quantiles of returns
+  double confl = as<double>(controlv["confl"]);
+  // Shrinkage intensity of returns
+  double alpha = as<double>(controlv["alpha"]);
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predictor.n_rows;
   arma::mat predictori = predictor;
   if (intercept)
     predictori = join_rows(ones(nrows), predictor);
-
+  
   arma::uword ncols = predictori.n_cols;
   arma::uword deg_free = (nrows - ncols);
   arma::vec coeff;
@@ -4664,7 +4819,7 @@ arma::mat calc_reg(const arma::mat& response,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{character} string representing the type of mean 
+//' @param \code{method} A \emph{character string} representing the type of mean 
 //'   measure of (the default is \code{method = "moment"}).
 //'
 //' @return A \emph{matrix} of mean (location) estimates with the same number of
@@ -4880,7 +5035,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{character} string representing the type of the
+//' @param \code{method} A \emph{character string} representing the type of the
 //'   measure of dispersion (the default is \code{method = "moment"}).
 //'
 //' @return A \emph{matrix} dispersion (variance) estimates with the same number
@@ -5019,7 +5174,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{character} string representing the price range
+//' @param \code{method} A \emph{character string} representing the price range
 //'   estimator for calculating the variance.  The estimators include:
 //'   \itemize{
 //'     \item "close" close-to-close estimator,
@@ -5247,11 +5402,11 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{string} specifying the type of the skewness
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   skewness model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} of skewness estimates with the same number of
 //'   columns as the input time series \code{tseries}, and the number of rows
@@ -5382,11 +5537,11 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{method} A \emph{string} specifying the type of the kurtosis
-//'   model (the default is \code{method = "moment"} - see Details).
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   kurtosis model (the default is \code{method = "moment"} - see Details).
 //'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} of kurtosis estimates with the same number of
 //'   columns as the input time series \code{tseries}, and the number of rows
@@ -5504,9 +5659,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{predictor} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //'   
-//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
-//'   term should be added to the predictor (the default is \code{intercept =
-//'   FALSE}).
+//' @param \code{controlv} A \emph{list} of model parameters (see Details).
 //'
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
@@ -5523,28 +5676,6 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
 //' 
-//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
-//'   term should be added to the predictor (the default is \code{intercept =
-//'   TRUE}).
-//'
-//' @param \code{method} A \emph{string} specifying the type of the regression
-//'   model the default is \code{method = "least_squares"} - see Details).
-//'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{predictor} matrix (the default is \code{1e-5}).
-//'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the \code{predictor}
-//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-//'   the number of columns of \code{predictor}).
-//'   
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
-//'
-//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-//'   (the default is \code{0}).
-//' 
 //' @return A \emph{matrix} with the regression coefficients, their t-values,
 //'   and z-scores, and with the same number of rows as \code{predictor} a
 //'   number of columns equal to \code{2n+3}, where \code{n} is the number of
@@ -5552,8 +5683,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'
 //' @details
 //'   The function \code{roll_reg()} calculates a \emph{matrix} of regression
-//'   coefficients, their t-values, and z-scores at the end points of the predictor
-//'   matrix.
+//'   coefficients, their t-values, and z-scores at the end points of the
+//'   predictor matrix.
 //'   
 //'   The function \code{roll_reg()} performs a loop over the end points, and at
 //'   each end point it subsets the time series \code{predictor} over a look-back
@@ -5571,9 +5702,12 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'
 //'   It passes the subset time series to the function \code{calc_reg()}, which
 //'   calculates the regression coefficients, their t-values, and the z-score.
-//'   
-//'   If \code{intercept = TRUE} (the default) then an extra intercept column
-//'   (unit column) is added to the predictor matrix.
+//'   The function \code{roll_reg()} accepts a list of model parameters
+//'   through the argument \code{controlv}, and passes it to the function
+//'   \code{calc_reg()}.
+//'   The list of model parameters can be created using the function
+//'   \code{param_reg()}.  See the function \code{param_reg()} for a
+//'   description of the model parameters.
 //'   
 //'   The number of columns of the return matrix depends on the number of
 //'   columns of the \code{predictor} matrix (including the intercept column, if
@@ -5598,8 +5732,10 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' endp <- xts::endpoints(returns, on="months")[-1]
 //' look_back <- 12
 //' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
+//' # Create a default list of regression parameters
+//' controlv <- HighFreq::param_reg()
 //' # Calculate rolling betas using RcppArmadillo
-//' reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
+//' reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 //' betas <- reg_stats[, 2]
 //' # Calculate rolling betas in R
 //' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
@@ -5613,18 +5749,13 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_reg(const arma::mat& response, 
-                   const arma::mat& predictor, 
-                   bool intercept = true,
+                   const arma::mat& predictor,
+                   Rcpp::List controlv, 
                    arma::uvec startp = 0, 
                    arma::uvec endp = 0, 
                    arma::uword step = 1, 
                    arma::uword look_back = 1, 
-                   arma::uword stub = 0,
-                   std::string method = "least_squares",
-                   double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                   arma::uword dimax = 0, // Regularization intensity
-                   double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                   double alpha = 0.0) {
+                   arma::uword stub = 0) {
   
   // Allocate end points
   arma::uword nrows = predictor.n_rows;
@@ -5654,16 +5785,18 @@ arma::mat roll_reg(const arma::mat& response,
   arma::mat predicti;
   arma::uword numpts = endpts.n_elem;
   arma::uword ncols = predictor.n_cols;
+  // Add intercept column to the predictor matrix?
+  bool intercept = as<int>(controlv["intercept"]);
   if (intercept) ncols += 1;
   arma::mat reg_stats(numpts, (2*ncols + 1), fill::zeros);
-
+  
   // Perform loop over the endpts
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate regression coefficients
     if (endpts(ep) > startpts(ep)) {
       responsi = response.rows(startpts(ep), endpts(ep));
       predicti = predictor.rows(startpts(ep), endpts(ep));
-      reg_stats.row(ep) = calc_reg(responsi, predicti, intercept, method, eigen_thresh, dimax, confl, alpha);
+      reg_stats.row(ep) = calc_reg(responsi, predicti, controlv);
     }  // end if
   }  // end for
   
@@ -5909,16 +6042,70 @@ arma::vec roll_zscores(const arma::mat& response,
 
 
 
+// Define type for pointer to calc_* function
+typedef arma::mat (*momptr)(const arma::mat&, std::string, double);
+
 
 ////////////////////////////////////////////////////////////
-//' Calculate a \emph{matrix} of estimator values over a rolling look-back
+//' Calculate a pointer to a moment function from the function name (string).
+//' 
+//' @param \code{funname} A \emph{character} \emph{string} specifying the
+//'   function name.
+//'   
+//' @return A pointer to a moment function.
+//'
+//' @details
+//'   The function \code{calc_momptr()} calculates a pointer to a moment
+//'   function from the function name (string).
+//'   The function pointer is used internally in the \code{C++} code, but it's
+//'   not exported to \code{R}.
+//'   A moment function takes three arguments:
+//'   \itemize{
+//'     \item A \emph{time series} or a \emph{matrix} of data,
+//'     \item A \emph{character string} specifying the type of the moment,
+//'     \item A number specifying the confidence level for calculating the
+//'   quantiles of returns.
+//'   The function name must be one of the following:
+//'   \itemize{
+//'     \item "calc_mean" for the estimator of the mean (location),
+//'     \item "calc_var" for the estimator of the dispersion (variance),
+//'     \item "calc_skew" for the estimator of the skewness,
+//'     \item "calc_kurtosis" for the estimator of the kurtosis.
+//'    }
+//'    (The default is the \code{funname = "calc_mean"}.)
+//'    }
+//'
+//' @export
+momptr calc_momptr(std::string funname = "calc_mean") {
+  if (funname == "calc_mean")
+    return (&calc_mean);
+  else if (funname == "calc_var")
+    return (&calc_var);
+  else if (funname == "calc_skew")
+    return (&calc_skew);
+  else if (funname == "calc_kurtosis")
+    return (&calc_kurtosis);
+  else
+    throw std::invalid_argument("No such function!");
+}  // end calc_momptr
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate a \emph{matrix} of moment values over a rolling look-back
 //' interval attached at the end points of a \emph{time series} or a
 //' \emph{matrix}.
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'    
-//' @param \code{fun} A \emph{string} specifying the estimator function (the
-//'   default is \code{fun = "calc_var"}.)
+//' @param \code{funname} A \emph{character string} specifying the moment
+//'   function (the default is \code{funname = "calc_mean"}).
+//' 
+//' @param \code{method} A \emph{character string} specifying the type of the
+//'   model for the moment (the default is \code{method = "moment"}).
+//'
+//' @param \code{confl} The confidence level for calculating the quantiles of
+//'   returns (the default is \code{confl = 0.75}).
 //'
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
@@ -5934,30 +6121,32 @@ arma::vec roll_zscores(const arma::mat& response,
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
-//' 
-//' @param \code{method} A \emph{string} specifying the type of the model for the
-//'   estimator (the default is \code{method = "moment"}.)
-//'
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
 //'
 //' @return A \emph{matrix} with the same number of columns as the input time
 //'   series \code{tseries}, and the number of rows equal to the number of end
 //'   points.
 //'   
 //' @details
-//'   The function \code{roll_fun()} calculates a \emph{matrix} of estimator
+//'   The function \code{roll_moment()} calculates a \emph{matrix} of moment
 //'   values, over rolling look-back intervals attached at the end points of the
 //'   \emph{time series} \code{tseries}.
 //'   
-//'   The function \code{roll_fun()} performs a loop over the end points, and at
-//'   each end point it subsets the time series \code{tseries} over a look-back
-//'   interval equal to \code{look_back} number of end points.
+//'   The function \code{roll_moment()} performs a loop over the end points, and
+//'   at each end point it subsets the time series \code{tseries} over a
+//'   look-back interval equal to \code{look_back} number of end points.
 //'   
 //'   It passes the subset time series to the function specified by the argument
-//'   \code{fun}, which calculates the statistic.
+//'   \code{funname}, which calculates the statistic.
 //'   See the functions \code{calc_*()} for a description of the different
-//'   estimators.
+//'   moments.
+//'   The function name must be one of the following:
+//'   \itemize{
+//'     \item "calc_mean" for the estimator of the mean (location),
+//'     \item "calc_var" for the estimator of the dispersion (variance),
+//'     \item "calc_skew" for the estimator of the skewness,
+//'     \item "calc_kurtosis" for the estimator of the kurtosis.
+//'    }
+//'    (The default is the \code{funname = "calc_mean"}).
 //'   
 //'   If the arguments \code{endp} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
@@ -5969,7 +6158,7 @@ arma::vec roll_zscores(const arma::mat& response,
 //'   \code{75} day look-back, can be calculated using the parameters
 //'   \code{step = 25} and \code{look_back = 3}.
 //'
-//'   The function \code{roll_fun()} is implemented in \code{RcppArmadillo}
+//'   The function \code{roll_moment()} is implemented in \code{RcppArmadillo}
 //'   \code{C++} code, so it's many times faster than the equivalent \code{R}
 //'   code.
 //'
@@ -5978,7 +6167,7 @@ arma::vec roll_zscores(const arma::mat& response,
 //' # Define time series of returns using package rutils
 //' returns <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", step=25, look_back=3)
+//' var_rollfun <- HighFreq::roll_moment(returns, fun="calc_var", step=25, look_back=3)
 //' # Calculate the rolling variance using roll_var()
 //' var_roll <- HighFreq::roll_var(returns, step=25, look_back=3)
 //' # Compare the two methods
@@ -5987,17 +6176,18 @@ arma::vec roll_zscores(const arma::mat& response,
 //' endp <- HighFreq::calc_endpoints(NROW(returns), step=25)
 //' startp <- HighFreq::calc_startpoints(endp, look_back=3)
 //' # Calculate the rolling variance using RcppArmadillo
-//' var_rollfun <- HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp)
+//' var_rollfun <- HighFreq::roll_moment(returns, fun="calc_var", startp=startp, endp=endp)
 //' # Calculate the rolling variance using R code
 //' var_roll <- sapply(1:NROW(endp), function(it) {
 //'   var(returns[startp[it]:endp[it]+1, ])
 //' })  # end sapply
+//' var_roll[1] <- 0
 //' # Compare the two methods
 //' all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_fun(returns, fun="calc_var", startp=startp, endp=endp),
+//'   Rcpp=HighFreq::roll_moment(returns, fun="calc_var", startp=startp, endp=endp),
 //'   Rcode=sapply(1:NROW(endp), function(it) {
 //'     var(returns[startp[it]:endp[it]+1, ])
 //'   }),
@@ -6005,22 +6195,22 @@ arma::vec roll_zscores(const arma::mat& response,
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_fun(const arma::mat& tseries, 
-                   std::string fun = "calc_var", 
-                   arma::uvec startp = 0, 
-                   arma::uvec endp = 0, 
-                   arma::uword step = 1, 
-                   arma::uword look_back = 1, 
-                   arma::uword stub = 0,
-                   std::string method = "moment", 
-                   double confl = 0.75) {
+arma::mat roll_moment(const arma::mat& tseries, 
+                      std::string funname = "calc_mean",
+                      std::string method = "moment", 
+                      double confl = 0.75, 
+                      arma::uvec startp = 0, 
+                      arma::uvec endp = 0, 
+                      arma::uword step = 1, 
+                      arma::uword look_back = 1, 
+                      arma::uword stub = 0) {
   
   // Allocate end points
   arma::uword nrows = tseries.n_rows;
   arma::uvec endpts;
   arma::uvec startpts;
   
-  // Calculate end points if missing
+  // Calculate the end points if missing
   if (sum(endp) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
@@ -6028,7 +6218,7 @@ arma::mat roll_fun(const arma::mat& tseries,
     endpts = endp;
   }  // end if
   
-  // Calculate start points if missing
+  // Calculate the start points if missing
   if (sum(startp) == 0) {
     // Start points equal to end points lagged by look_back
     startpts = calc_startpoints(endpts, look_back);
@@ -6041,47 +6231,21 @@ arma::mat roll_fun(const arma::mat& tseries,
   arma::uword numpts = endpts.n_elem;
   arma::mat stats = arma::zeros<mat>(numpts, tseries.n_cols);
   
+  // Calculate a function pointer from the function name (string)
+  momptr momfun = calc_momptr(funname);
+  // momptr momfun = *momptr;
+  
   // Perform loop over the end points
-  if (fun == "calc_mean") {
-    // Calculate the dispersion (variance)
-    for (arma::uword ep = 0; ep < numpts; ep++) {
-      // Calculate kurtosis
-      if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_mean(tseries.rows(startpts(ep), endpts(ep)), method, confl);
-      }  // end if
-    }  // end for
-  } else if (fun == "calc_var") {
-    // Calculate the dispersion (variance)
-    for (arma::uword ep = 0; ep < numpts; ep++) {
-      // Calculate kurtosis
-      if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, confl);
-      }  // end if
-    }  // end for
-  } else if (fun == "calc_skew") {
-    // Perform loop over the end points
-    for (arma::uword ep = 0; ep < numpts; ep++) {
-      // Calculate kurtosis
-      if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_skew(tseries.rows(startpts(ep), endpts(ep)), method, confl);
-      }  // end if
-    }  // end for
-  } else if (fun == "calc_kurtosis") {
-    // Perform loop over the end points
-    for (arma::uword ep = 0; ep < numpts; ep++) {
-      // Calculate kurtosis
-      if (endpts(ep) > startpts(ep)) {
-        stats.row(ep) = calc_kurtosis(tseries.rows(startpts(ep), endpts(ep)), method, confl);
-      }  // end if
-    }  // end for
-  } else {
-    cout << "Wrong calc method!" << endl;
-    return stats;
-  }  // end if
+  for (arma::uword ep = 0; ep < numpts; ep++) {
+    // Calculate the statistics at the end point
+    if (endpts(ep) > startpts(ep)) {
+      stats.row(ep) = momfun(tseries.rows(startpts(ep), endpts(ep)), method, confl);
+    }  // end if
+  }  // end for
   
   return stats;
   
-}  // end roll_fun
+}  // end roll_moment
 
 
 
@@ -6633,37 +6797,9 @@ double lik_garch(double omega,
 //' @param \code{returns} A \emph{time series} or a \emph{matrix} of returns
 //'   data (the returns in excess of the risk-free rate).
 //'   
-//' @param \code{method} A \emph{string} specifying the method for
-//'   calculating the weights (see Details) (the default is \code{method =
-//'   "sharpem"})
-//'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
-//'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the
-//'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
-//'   equivalent to \code{dimax} equal to the number of columns of
-//'   \code{returns}).
-//'   
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
+//' @param \code{controlv} A \emph{list} of portfolio optimization model
+//'   parameters (see Details).
 //'
-//' @param \code{alpha} The shrinkage intensity of \code{returns}.
-//'   (values between \code{0} and \code{1} - the default is \code{0}).
-//' 
-//' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
-//'   be ranked (the default is \code{rankw = FALSE}).
-//'
-//' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
-//'   be centered (the default is \code{centerw = FALSE}).
-//'
-//' @param \code{scalew} A \emph{string} specifying the method for scaling
-//'   the weights (the default is \code{scalew = "voltarget"}).
-//'
-//' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-//'   weights (the default is \code{0.001})
 //'   
 //' @return A column \emph{vector} of the same length as the number of columns
 //'   of \code{returns}.
@@ -6672,6 +6808,12 @@ double lik_garch(double omega,
 //'   The function \code{calc_weights()} calculates the optimal portfolio
 //'   weights using a variety of different objective functions.
 //' 
+//'   The function \code{calc_weights()} accepts a list of portfolio
+//'   optimization parameters through the argument \code{controlv}.
+//'   The list of portfolio optimization parameters can be created using
+//'   the function \code{param_portf()}.  Below is a description of the
+//'   parameters.
+//'
 //'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
 //'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
 //'   regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
@@ -6771,28 +6913,42 @@ double lik_garch(double omega,
 //' weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
 //' weightsr <- 0.01*weightsr/sd(returns %*% weightsr)
 //' weightsr <- weightsr/sqrt(sum(weightsr^2))
+//' # Create a list of portfolio optimization parameters
+//' controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
 //' # Calculate weights using RcppArmadillo
-//' weightcpp <- drop(HighFreq::calc_weights(returns, dimax=dimax, alpha=alpha, scalew="sumsq"))
+//' weightcpp <- drop(HighFreq::calc_weights(returns, controlv=controlv))
 //' all.equal(weightcpp, weightsr)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::vec calc_weights(const arma::mat& returns, // Asset returns
-                       std::string method = "maxsharpe", // Method for calculating the weights
-                       double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                       arma::uword dimax = 0, // Regularization intensity
-                       double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                       double alpha = 0.0, // Return shrinkage intensity
-                       bool rankw = false, // Rank the weights
-                       bool centerw = false, // Center the weights
-                       std::string scalew = "voltarget", // Method for scaling the weights
-                       double vol_target = 0.01) { // Target volatility for scaling the weights
+                       Rcpp::List controlv) { // List of portfolio optimization parameters
   
-  // Initialize
+  // Unpack the control list of portfolio optimization parameters
+  // Type of portfolio optimization model
+  std::string method = as<std::string>(controlv["method"]);
+  // Threshold level for discarding small singular values
+  double eigen_thresh = as<double>(controlv["eigen_thresh"]);
+  // Dimension reduction
+  arma::uword dimax = as<int>(controlv["dimax"]);
+  // Confidence level for calculating the quantiles of returns
+  double confl = as<double>(controlv["confl"]);
+  // Shrinkage intensity of returns
+  double alpha = as<double>(controlv["alpha"]);
+  // Should the weights be ranked?
+  bool rankw = as<int>(controlv["rankw"]);
+  // Should the weights be centered?
+  bool centerw = as<int>(controlv["centerw"]);
+  // Method for scaling the weights
+  std::string scalew = as<std::string>(controlv["scalew"]);
+  // Volatility target for scaling the weights
+  double vol_target = as<double>(controlv["vol_target"]);
+
+  // Initialize the variables
   arma::uword ncols = returns.n_cols;
   arma::vec weights(ncols, fill::zeros);
-  // No regularization so set dimax to ncols
+  // If no regularization then set dimax to ncols
   if (dimax == 0)  dimax = ncols;
   // Calculate the covariance matrix
   arma::mat covmat = calc_covar(returns);
@@ -6931,6 +7087,9 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' @param \code{excess} A \emph{time series} or a \emph{matrix} of excess
 //'   returns data (the returns in excess of the risk-free rate).
 //'   
+//' @param \code{controlv} A \emph{list} of portfolio optimization model
+//'   parameters (see Details).
+//'
 //' @param \code{startp} An \emph{integer vector} of start points.
 //' 
 //' @param \code{endp} An \emph{integer vector} of end points.
@@ -6943,36 +7102,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   
 //' @param \code{bid_offer} A \emph{numeric} bid-offer spread (the default is
 //'   \code{0})
-//'
-//' @param \code{method} A \emph{string} specifying the method for calculating
-//'   the weights (see Details) (the default is \code{method = "sharpem"})
 //'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{covariance matrix} (the default is \code{1e-5}).
-//'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the \code{returns}
-//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-//'   the number of columns of \code{returns}).
-//'   
-//' @param \code{confl} The confidence level for calculating the
-//'   quantiles of returns (the default is \code{confl = 0.75}).
-//'
-//' @param \code{alpha} The shrinkage intensity between \code{0} and \code{1}.
-//'   (the default is \code{0}).
-//' 
-//' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
-//'   be ranked (the default is \code{rankw = FALSE}).
-//'
-//' @param \code{centerw} A \emph{Boolean} specifying whether the weights should
-//'   be centered (the default is \code{centerw = FALSE}).
-//'
-//' @param \code{scalew} A \emph{string} specifying the method for scaling
-//'   the weights (the default is \code{scalew = "voltarget"}).
-//'
-//' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-//'   weights (the default is \code{1e-5})
 //'   
 //' @return A column \emph{vector} of strategy returns, with the same length as
 //'   the number of rows of \code{returns}.
@@ -6984,20 +7114,25 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   
 //'   It performs a loop over the end points \code{endp}, and subsets the
 //'   \emph{matrix} of the excess asset returns \code{excess} along its rows,
-//'   between the corresponding \emph{start point} and the \emph{end point}. It
-//'   passes the subset matrix of excess returns into the function
-//'   \code{calc_weights()}, which calculates the optimal portfolio weights at
-//'   each \emph{end point}. The arguments \code{dimax}, \code{alpha},
-//'   \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
-//'   also passed to the function \code{calc_weights()}.
+//'   between the corresponding \emph{start point} and the \emph{end point}. 
 //'   
-//'   It then recursively averages the weights \eqn{w_i} at the \emph{end point
-//'   = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
-//'   (i-1)}, using the decay factor \code{lambda = \eqn{\lambda}}:
+//'   The function \code{back_test()} passes the subset matrix of excess returns
+//'   into the function \code{calc_weights()}, which calculates the optimal
+//'   portfolio weights at each \emph{end point}.
+//'   It also passes to \code{calc_weights()} the argument \code{controlv},
+//'   which is the list of portfolio optimization parameters.
+//'   See the function \code{calc_weights()} for more details.
+//'   The list of portfolio optimization parameters can be created using the
+//'   function \code{param_portf()}.
+//'   
+//'   The function \code{back_test()} then recursively averages the weights
+//'   \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
+//'   the previous \emph{end point = (i-1)}, using the decay factor \code{lambda
+//'   = \eqn{\lambda}}:
 //'   \deqn{
 //'     w_i = (1-\lambda) w_i + \lambda w_{i-1}
 //'   }
-//'   The purpose of averaging the weights is to reduce their variance, to
+//'   The purpose of averaging the weights is to reduce their variance, and
 //'   improve their out-of-sample performance.  It is equivalent to extending
 //'   the portfolio holding period beyond the time interval between neighboring
 //'   \emph{end points}.
@@ -7034,14 +7169,13 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
 //' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
-//' # Define return shrinkage and regularization intensities
+//' # Define return shrinkage and dimension reduction
 //' alpha <- 0.5
 //' dimax <- 3
+//' # Create a list of portfolio optimization parameters
+//' controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
 //' # Simulate a monthly rolling portfolio optimization strategy
-//' pnls <- HighFreq::back_test(excess, returns, 
-//'                             startp-1, endp-1, 
-//'                             dimax = dimax, 
-//'                             alpha = alpha)
+//' pnls <- HighFreq::back_test(excess, returns, controlv=controlv, startp=(startp-1), endp=(endp-1))
 //' pnls <- xts::xts(pnls, index(returns))
 //' colnames(pnls) <- "strat_rets"
 //' # Plot dygraph of strategy
@@ -7053,20 +7187,12 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 // [[Rcpp::export]]
 arma::mat back_test(const arma::mat& excess, // Asset excess returns
                     const arma::mat& returns, // Asset returns
+                    Rcpp::List controlv, // List of portfolio optimization model parameters
                     arma::uvec startp, // Start points
                     arma::uvec endp, // End points
                     double lambda = 0.0, // Decay factor for averaging the portfolio weights
-                    std::string method = "sharpem", // Method for calculating the weights
-                    double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                    arma::uword dimax = 0, // Regularization intensity
-                    double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                    double alpha = 0.0, // Return shrinkage intensity
-                    bool rankw = false, // Rank the weights
-                    bool centerw = false, // Center the weights
-                    std::string scalew = "voltarget", // Method for scaling the weights
-                    double vol_target = 0.01, // Target volatility for scaling the weights
-                    double coeff = 1.0, // Multiplier strategy returns
-                    double bid_offer = 0.0) {
+                    double coeff = 1.0, // Multiplier of strategy returns
+                    double bid_offer = 0.0) { // The bid-offer spread
   
   double lambda1 = 1-lambda;
   arma::uword nweights = returns.n_cols;
@@ -7077,9 +7203,8 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   // Perform loop over the end points
   for (arma::uword it = 1; it < endp.size(); it++) {
     // cout << "it: " << it << endl;
-    // Calculate portfolio weights
-    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), method, eigen_thresh, dimax, 
-                                 confl, alpha, rankw, centerw, scalew, vol_target);
+    // Calculate the portfolio weights
+    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), controlv);
     // Calculate the weights as the weighted sum with past weights
     weights = lambda1*weights + lambda*weights_past;
     // Calculate out-of-sample returns

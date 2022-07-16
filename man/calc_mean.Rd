@@ -10,11 +10,12 @@ calc_mean(tseries, method = "moment", confl = 0.75)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{string} specifying the type of the mean
-(location) model (the default is \code{method = "moment"} - see Details).}
+\item{\code{method}}{A \emph{character string} specifying the type of the
+mean (location) model (the default is \code{method = "moment"} - see
+Details).}
 
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the quantiles of
+returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the mean (location) of the columns of

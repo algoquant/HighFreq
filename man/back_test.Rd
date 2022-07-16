@@ -8,18 +8,10 @@
 back_test(
   excess,
   returns,
+  controlv,
   startp,
   endp,
   lambda = 0,
-  method = "sharpem",
-  eigen_thresh = 1e-05,
-  dimax = 0L,
-  confl = 0.1,
-  alpha = 0,
-  rankw = FALSE,
-  centerw = FALSE,
-  scalew = "voltarget",
-  vol_target = 0.01,
   coeff = 1,
   bid_offer = 0
 )
@@ -30,6 +22,9 @@ returns data.}
 
 \item{\code{excess}}{A \emph{time series} or a \emph{matrix} of excess
 returns data (the returns in excess of the risk-free rate).}
+
+\item{\code{controlv}}{A \emph{list} of portfolio optimization model
+parameters (see Details).}
 
 \item{\code{startp}}{An \emph{integer vector} of start points.}
 
@@ -43,36 +38,6 @@ default is \code{1})}
 
 \item{\code{bid_offer}}{A \emph{numeric} bid-offer spread (the default is
 \code{0})}
-
-\item{\code{method}}{A \emph{string} specifying the method for calculating
-the weights (see Details) (the default is \code{method = "sharpem"})}
-
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
-\code{covariance matrix} (the default is \code{1e-5}).}
-
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{returns}
-matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-the number of columns of \code{returns}).}
-
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
-
-\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
-(the default is \code{0}).}
-
-\item{\code{rankw}}{A \emph{Boolean} specifying whether the weights should
-be ranked (the default is \code{rankw = FALSE}).}
-
-\item{\code{centerw}}{A \emph{Boolean} specifying whether the weights should
-be centered (the default is \code{centerw = FALSE}).}
-
-\item{\code{scalew}}{A \emph{string} specifying the method for scaling
-the weights (the default is \code{scalew = "voltarget"}).}
-
-\item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
-weights (the default is \code{1e-5})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as
@@ -89,20 +54,25 @@ The function \code{back_test()} performs a backtest simulation of a
   
   It performs a loop over the end points \code{endp}, and subsets the
   \emph{matrix} of the excess asset returns \code{excess} along its rows,
-  between the corresponding \emph{start point} and the \emph{end point}. It
-  passes the subset matrix of excess returns into the function
-  \code{calc_weights()}, which calculates the optimal portfolio weights at
-  each \emph{end point}. The arguments \code{dimax}, \code{alpha},
-  \code{method}, \code{rankw}, \code{centerw}, and \code{scalew} are
-  also passed to the function \code{calc_weights()}.
+  between the corresponding \emph{start point} and the \emph{end point}. 
   
-  It then recursively averages the weights \eqn{w_i} at the \emph{end point
-  = i} with the weights \eqn{w_{i-1}} from the previous \emph{end point =
-  (i-1)}, using the decay factor \code{lambda = \eqn{\lambda}}:
+  The function \code{back_test()} passes the subset matrix of excess returns
+  into the function \code{calc_weights()}, which calculates the optimal
+  portfolio weights at each \emph{end point}.
+  It also passes to \code{calc_weights()} the argument \code{controlv},
+  which is the list of portfolio optimization parameters.
+  See the function \code{calc_weights()} for more details.
+  The list of portfolio optimization parameters can be created using the
+  function \code{param_portf()}.
+  
+  The function \code{back_test()} then recursively averages the weights
+  \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
+  the previous \emph{end point = (i-1)}, using the decay factor \code{lambda
+  = \eqn{\lambda}}:
   \deqn{
     w_i = (1-\lambda) w_i + \lambda w_{i-1}
   }
-  The purpose of averaging the weights is to reduce their variance, to
+  The purpose of averaging the weights is to reduce their variance, and
   improve their out-of-sample performance.  It is equivalent to extending
   the portfolio holding period beyond the time interval between neighboring
   \emph{end points}.
@@ -139,14 +109,13 @@ nrows <- NROW(endp)
 # Define 12-month look-back interval and start points over sliding window
 look_back <- 12
 startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
-# Define return shrinkage and regularization intensities
+# Define return shrinkage and dimension reduction
 alpha <- 0.5
 dimax <- 3
+# Create a list of portfolio optimization parameters
+controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
-pnls <- HighFreq::back_test(excess, returns, 
-                            startp-1, endp-1, 
-                            dimax = dimax, 
-                            alpha = alpha)
+pnls <- HighFreq::back_test(excess, returns, controlv=controlv, startp=(startp-1), endp=(endp-1))
 pnls <- xts::xts(pnls, index(returns))
 colnames(pnls) <- "strat_rets"
 # Plot dygraph of strategy

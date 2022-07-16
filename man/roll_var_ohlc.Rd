@@ -37,7 +37,7 @@ default is \code{step = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
 
-\item{\code{method}}{A \emph{character} string representing the price range
+\item{\code{method}}{A \emph{character string} representing the price range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,

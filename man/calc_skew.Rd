@@ -10,11 +10,11 @@ calc_skew(tseries, method = "moment", confl = 0.75)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{string} specifying the type of the skewness
-model (the default is \code{method = "moment"} - see Details).}
+\item{\code{method}}{A \emph{character string} specifying the type of the
+skewness model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the quantiles of
+returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the skewness of the columns of
@@ -36,7 +36,7 @@ The function \code{calc_skew()} calculates the skewness of the columns of
   \eqn{\varsigma} from the differences between the quantiles of the data as
   follows:
   \deqn{
-    \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2*q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
+    \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2 q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
   }
   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 

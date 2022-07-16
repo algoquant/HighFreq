@@ -8,17 +8,12 @@ z-scores, at the end points of the predictor matrix.}
 roll_reg(
   response,
   predictor,
-  intercept = TRUE,
+  controlv,
   startp = 0L,
   endp = 0L,
   step = 1L,
   look_back = 1L,
-  stub = 0L,
-  method = "least_squares",
-  eigen_thresh = 1e-05,
-  dimax = 0L,
-  confl = 0.1,
-  alpha = 0
+  stub = 0L
 )
 }
 \arguments{
@@ -27,6 +22,8 @@ of response data.}
 
 \item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
+
+\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -42,28 +39,6 @@ default is \code{step = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
-
-\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
-term should be added to the predictor (the default is \code{intercept =
-TRUE}).}
-
-\item{\code{method}}{A \emph{string} specifying the type of the regression
-model the default is \code{method = "least_squares"} - see Details).}
-
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
-\code{predictor} matrix (the default is \code{1e-5}).}
-
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the \code{predictor}
-matrix (the default is \code{0} - equivalent to \code{dimax} equal to
-the number of columns of \code{predictor}).}
-
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
-
-\item{\code{alpha}}{The shrinkage intensity between \code{0} and \code{1}.
-(the default is \code{0}).}
 }
 \value{
 A \emph{matrix} with the regression coefficients, their t-values,
@@ -77,8 +52,8 @@ z-scores, at the end points of the predictor matrix.
 }
 \details{
 The function \code{roll_reg()} calculates a \emph{matrix} of regression
-  coefficients, their t-values, and z-scores at the end points of the predictor
-  matrix.
+  coefficients, their t-values, and z-scores at the end points of the
+  predictor matrix.
   
   The function \code{roll_reg()} performs a loop over the end points, and at
   each end point it subsets the time series \code{predictor} over a look-back
@@ -96,9 +71,12 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
 
   It passes the subset time series to the function \code{calc_reg()}, which
   calculates the regression coefficients, their t-values, and the z-score.
-  
-  If \code{intercept = TRUE} (the default) then an extra intercept column
-  (unit column) is added to the predictor matrix.
+  The function \code{roll_reg()} accepts a list of model parameters
+  through the argument \code{controlv}, and passes it to the function
+  \code{calc_reg()}.
+  The list of model parameters can be created using the function
+  \code{param_reg()}.  See the function \code{param_reg()} for a
+  description of the model parameters.
   
   The number of columns of the return matrix depends on the number of
   columns of the \code{predictor} matrix (including the intercept column, if
@@ -123,8 +101,10 @@ returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 endp <- xts::endpoints(returns, on="months")[-1]
 look_back <- 12
 startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
+# Create a default list of regression parameters
+controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1))
+reg_stats <- HighFreq::roll_reg(response=returns[, 1], predictor=returns[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 betas <- reg_stats[, 2]
 # Calculate rolling betas in R
 betas_r <- sapply(1:NROW(endp), FUN=function(ep) {

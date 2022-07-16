@@ -10,11 +10,11 @@ calc_var(tseries, method = "moment", confl = 0.75)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{method}}{A \emph{string} specifying the type of the dispersion
-model (the default is \code{method = "moment"} - see Details).}
+\item{\code{method}}{A \emph{character string} specifying the type of the
+dispersion model (the default is \code{method = "moment"} - see Details).}
 
-\item{\code{confl}}{The confidence level for calculating the
-quantiles of returns (the default is \code{confl = 0.75}).}
+\item{\code{confl}}{The confidence level for calculating the quantiles of
+returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix

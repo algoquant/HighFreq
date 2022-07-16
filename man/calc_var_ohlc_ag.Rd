@@ -21,7 +21,7 @@ prices.}
 \item{\code{step}}{The number of time periods in each interval between
 neighboring end points.}
 
-\item{\code{method}}{A \emph{character} string representing the price range
+\item{\code{method}}{A \emph{character string} representing the price range
 estimator for calculating the variance.  The estimators include:
 \itemize{
   \item "close" close-to-close estimator,

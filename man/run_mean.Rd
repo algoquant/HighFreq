@@ -4,7 +4,7 @@
 \alias{run_mean}
 \title{Calculate the running weighted means of streaming \emph{time series} data.}
 \usage{
-run_mean(tseries, lambda, weights = 0L)
+run_mean(tseries, lambda, weights)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
