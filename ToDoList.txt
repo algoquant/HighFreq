@@ -87,46 +87,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Update roll_stats() to use function pointers
++ [x] Update function calc_hurst() to use a vector of aggregation intervals
 
-+ [ ] Introduce a control argument in functions calc_mean(), calc_var(), calc_skew() and calc_kurtosis()?
-
-+ [ ] Create a function called calc_regptr() for calculating a pointer to a regression function from a function name (string)
-It should accept a string with a function name and return a pointer to the function with that name.
-It should return a pointer to one of the regression functions: calc_reg(), calc_var(), calc_skew() or calc_kurtosis().
-
-+ [ ] Adapt from package roll parallel rolling aggregations
-https://github.com/jjf234/roll
-
-+ [ ] Add rolling rank regression from package roll:
-https://github.com/jjf234/roll
-
-+ [ ] Modify function calc_weights(): 
-Rename model_type == "rank" to model_type == "rank_sharpe"
-Add model_type == "rank" for ranking the re_turns directly.
-
-+ [ ] Introduce shrinkage of returns to the PCAs - is it equivalent to parameter shrinkage (dimension reduction)? Maybe, even if it's not equivalent it's good anyway
-
-+ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
-https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
-http://bytes.com/forum/thread656124.html
-
-+ [ ] Pass a function pointer
-https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
-test_xptr.cpp
-xptr_drivers.R
-
-+ [ ] Pass a function to a function using Numerical Template Toolbox (NT2) - Nobody uses NT2
-http://gallery.rcpp.org/articles/rcppnt2-introduction/
-
-+ [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
-https://stackoverflow.com/questions/2537942/nullable-values-in-c
-https://en.cppreference.com/w/cpp/named_req/NullablePointer
-
-+ [ ] Add argument control to function back_test() and pass it to calc_weights(), instead of passing many arguments - similar to RiskPortfolios by Ardia
-
-+ [ ] Make function back_test() parallel using package RcppParallel
++ [ ] Update function roll_stats() to use function pointers
 
 + [ ] Pass model function and its parameters into back_test() as a vector or a list
 http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
@@ -146,21 +109,13 @@ https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-te
 https://en.cppreference.com/w/cpp/language/parameter_pack
 https://stackoverflow.com/questions/3351056/create-va-list-dynamically
 
-+ [ ] Convert some loops to STL iterators: iterators are pointers to vector and matrix elements
-It may be simpler to use std::accumulate().
-https://www.geeksforgeeks.org/iterators-c-stl/
++ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
+https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
+http://bytes.com/forum/thread656124.html
 
-+ [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
-There are several advantages of using Rcpp::NumericVector instead of std::vector<double> :
-NumericVector avoids deep copy of data between R and C++
-NumericVector provides access to Sugar functions.
-For example, if you replace NumericVector with std::vector<double> then you lose flexibility and need two copies of every function - one for integer and one for double.
-cpp::NumericVector over std::vector<double>
-https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
-
-+ [ ] Switch terms around in running formulas:
-μt = (1 − λ)pt + λμt−1
-μt = λμt−1 + (1 − λ)pt
++ [ ] Create a function called calc_regptr() for calculating a pointer to a regression function from a function name (string)
+It should accept a string with a function name and return a pointer to the function with that name.
+It should return a pointer to one of the regression functions: calc_reg(), calc_var(), calc_skew() or calc_kurtosis().
 
 + [ ] Create function calc_table() to calculate the contingency table 
 Function calc_table() in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
@@ -180,6 +135,37 @@ Hodges-Lehmann estimator:
 + [ ] Add Portfolio Optimization using the Gerber Statistic
 http://nextlevelanalytics.github.io/2016/05/26/Gerber/
 Gerber Statistic Portfolio Optimization.pdf
+
+
++ [ ] Adapt from package RiskPortfolios by Ardia - it's pure R code
+
++ [ ] Make function back_test() parallel using package RcppParallel
+
++ [ ] Adapt from package roll parallel rolling aggregations
+https://github.com/jjf234/roll
+
++ [ ] Add rolling rank regression from package roll:
+https://github.com/jjf234/roll
+
++ [ ] Introduce a control argument in functions calc_mean(), calc_var(), calc_skew() and calc_kurtosis()?
+
++ [ ] Introduce shrinkage of returns to the PCAs - is it equivalent to parameter shrinkage (dimension reduction)? Maybe, even if it's not equivalent it's good anyway
+
++ [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
+https://stackoverflow.com/questions/2537942/nullable-values-in-c
+https://en.cppreference.com/w/cpp/named_req/NullablePointer
+
++ [ ] Convert some loops to STL iterators: iterators are pointers to vector and matrix elements
+It may be simpler to use std::accumulate().
+https://www.geeksforgeeks.org/iterators-c-stl/
+
++ [ ] Replace only some Rcpp syntax with Armadillo or Boost or STL
+There are several advantages of using Rcpp::NumericVector instead of std::vector<double> :
+NumericVector avoids deep copy of data between R and C++
+NumericVector provides access to Sugar functions.
+For example, if you replace NumericVector with std::vector<double> then you lose flexibility and need two copies of every function - one for integer and one for double.
+cpp::NumericVector over std::vector<double>
+https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
 + [ ] In function calc_var() add robust dispersion estimators
 
@@ -522,18 +508,29 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 + [x] Introduce control arguments in functions calc_reg() and roll_reg()
 
-+ [x] Introduce control arguments in functions calc_weights() and back_test()
++ [x] Add control list argument to function back_test() and pass it to calc_weights(), instead of passing many arguments
 
-+ [x] Create a function called calc_momptr() for calculating a pointer to a moment function from a function name (string)
-It should accept a string with a function name and return a pointer to the function with that name.
-It should return a pointer to one of the moment functions: calc_mean(), calc_var(), calc_skew() or calc_kurtosis().
++ [x] Introduce control arguments in functions calc_weights() and back_test()
 
 + [x] Modify the function roll_fun() for rolling aggregations of functions 
 Rename roll_fun() to roll_moment().
 It should accept a string with a function name, and use the pointer to that function to calculate rolling aggregations over end points.
 It should dispatch the moment function: calc_mean(), calc_var(), calc_skew() and calc_kurtosis().
 
-+ [x] Adapt function pointers - examples in test_funptr.cpp and funptr_drivers.R
++ [x] Create a function called calc_momptr() for calculating a pointer to a moment function from a function name (string)
+It should accept a string with a function name and return a pointer to the function with that name.
+It should return a pointer to one of the moment functions: calc_mean(), calc_var(), calc_skew() or calc_kurtosis().
+Implemented in calc_momptr() and roll_moment().
+
++ [x] Pass a function pointer as an argument to a C++ function (functional)
+Examples for straight C++ functions are in test_funptr.cpp and funptr_drivers.R
+Functionals can be created in straight C++, but they can't be exported to R, because the R interface to C doesn't have a notion of functionals.
+The package RcppXPtrUtils can create pointers to R functions that can be passed to C++ functionals.  But the functions can only be created from text code using RcppXPtrUtils::cppXPtr().
+Examples are in xptr_drivers.R and test_xptr.cpp.
+
++ [x] Adapt function pointers - examples for straight C++ functions are in test_funptr.cpp and funptr_drivers.R
+https://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://en.wikipedia.org/wiki/Function_pointer#Example_in_C
 
 + [x] Adapt STL code from util_stl_fun.cpp
 
@@ -751,6 +748,10 @@ It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 + [x] Rename roll_sum() to roll_wsum()
 
 + [x] Create function roll_sum() for calculating a simple rolling sum over the columns of a matrix, without weighting or end points
+
++ [x] Modify function calc_weights(): 
+Rename model_type == "rank" to model_type == "rank_sharpe"
+Add model_type == "rank" for ranking the re_turns directly.
 
 + [x] Modify functions back_test() and calc_weights(): rename argument typ_e to model_type
 
@@ -1112,6 +1113,13 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
+
++ [ ] Switch terms around in running formulas?
+μt = (1 − λ)pt + λμt−1
+μt = λμt−1 + (1 − λ)pt
+
++ [ ] Pass a function to a function using Numerical Template Toolbox (NT2) - Nobody uses NT2
+http://gallery.rcpp.org/articles/rcppnt2-introduction/
 
 + [ ] Rename roll_moment(): it doesn't calculate moments, because it doesn't subtract the rolling means
 Deprecate function roll_moment() because it's similar to roll_vwap() ?

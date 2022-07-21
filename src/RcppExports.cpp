@@ -574,14 +574,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_hurst
-arma::mat calc_hurst(const arma::mat& tseries, arma::uword step);
-RcppExport SEXP _HighFreq_calc_hurst(SEXP tseriesSEXP, SEXP stepSEXP) {
+arma::mat calc_hurst(const arma::mat& tseries, const arma::vec& aggv);
+RcppExport SEXP _HighFreq_calc_hurst(SEXP tseriesSEXP, SEXP aggvSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_hurst(tseries, step));
+    Rcpp::traits::input_parameter< const arma::vec& >::type aggv(aggvSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_hurst(tseries, aggv));
     return rcpp_result_gen;
 END_RCPP
 }

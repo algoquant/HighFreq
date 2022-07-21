@@ -641,7 +641,7 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
   arma::uvec endp;
   endp.zeros(numpts);
   // Define the last end point
-  int lastp = length - 1;
+  arma::uword lastp = length - 1;
 
   // Calculate the initial end points - including extra end points at the end
   if (stub == 0) {
@@ -962,7 +962,7 @@ std::vector<double> decode_it(Rcpp::List encodel) {
   decodev.reserve(std::accumulate(countv.begin(), countv.end(), 0));
   
   // Perform loop over the codev and countv vectors
-  for (int it = 0; it < codev.size(); it++) {
+  for (std::size_t it = 0; it < codev.size(); it++) {
     for (int j = 0; j < countv[it]; j++) {
       decodev.push_back(codev[it]);
     }  // end for
@@ -3142,10 +3142,10 @@ arma::mat run_reg(const arma::mat& response,
   
   if (method == "scale") {
     // Divide the residuals by their volatility
-    resids = resids/sqrt(varz);
+    resids = resids/arma::sqrt(varz);
   } else if (method == "standardize") {
     // De-mean the residuals and divide them by their volatility
-    resids = (resids - meanz)/sqrt(varz);
+    resids = (resids - meanz)/arma::sqrt(varz);
   }  // end if
   
   return join_rows(resids, alphas, betas);
@@ -3299,9 +3299,9 @@ arma::mat run_zscores(const arma::mat& response,
   }  // end for
   
   if (demean)
-    return join_rows((zscores - meanz)/sqrt(varz), betas, vars);
+    return join_rows((zscores - meanz)/arma::sqrt(varz), betas, vars);
   else
-    return join_rows(zscores/sqrt(varz), betas, vars);
+    return join_rows(zscores/arma::sqrt(varz), betas, vars);
 
 }  // end run_zscores
 
@@ -4389,15 +4389,19 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 //'
-//' @param \code{step} The number of time periods in each interval between
-//'   neighboring end points.
+//' @param \code{aggv} A \emph{vector} of aggregation intervals.
 //' 
 //' @return The Hurst exponent calculated from the volatility ratio of
-//'   aggregated returns.
+//'   aggregated returns.  If \code{tseries} contains multiple columns, then the
+//'   function \code{calc_hurst()} returns a single-row matrix of Hurst
+//'   exponents.
 //'
 //' @details
 //'   The function \code{calc_hurst()} calculates the Hurst exponent from the
 //'   ratios of the volatilities of aggregated returns.
+//'   
+//'   An aggregation interval is equal to the number of time periods between the
+//'   neighboring aggregation end points.
 //'
 //'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
 //'   aggregation interval \eqn{\Delta t}.
@@ -4409,11 +4413,20 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //'     }
 //'   Where \eqn{\sigma} is the daily return volatility.
 //' 
-//'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
-//'   of the volatilities divided by the logarithm of the time interval
+//'   For a single aggregation interval \eqn{\Delta t}, the \emph{Hurst
+//'   exponent} \eqn{H} is equal to the logarithm of the ratio of the
+//'   volatilities divided by the logarithm of the aggregation interval
 //'   \eqn{\Delta t}:
 //'     \deqn{
 //'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+//'     }
+//' 
+//'   For a \emph{vector} of aggregation intervals \eqn{\Delta t_i}, the
+//'   \emph{Hurst exponent} \eqn{H} is equal to the regression slope between the
+//'   logarithms of the aggregated volatilities \eqn{\sigma_i} versus the
+//'   logarithms of the aggregation intervals \eqn{\Delta t_i}:
+//'     \deqn{
+//'       H = \frac{\code{cov}(\log{\sigma_i}, \log{\Delta t_i})}{\code{var}(\log{\Delta t_i})}
 //'     }
 //' 
 //'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
@@ -4424,19 +4437,40 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //' # Calculate the log prices
 //' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 //' prices <- log(prices)
-//' # Calculate the Hurst exponent from 21 day aggregations
-//' calc_hurst(prices, step=21)
+//' # Calculate the Hurst exponents for a 21 day aggregation interval
+//' HighFreq::calc_hurst(prices, aggv=21)
+//' # Calculate the Hurst exponents for a vector of aggregation intervals
+//' aggv <- seq.int(from=3, to=35, length.out=9)^2
+//' HighFreq::calc_hurst(prices, aggv=aggv)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat calc_hurst(const arma::mat& tseries, 
-                     arma::uword step) {
+                     const arma::vec& aggv) {
   
-  return 0.5*arma::log(calc_var_ag(tseries, step)/calc_var_ag(tseries, 1))/log(step);
+  // If only single agg value then calculate the Hurst exponent from a single data point
+  if (aggv.n_rows == 1) {
+    return 0.5*arma::log(calc_var_ag(tseries, aggv[0])/calc_var_ag(tseries, 1))/log(aggv[0]);
+  }  // end if
+  
+  // Allocate the objects
+  arma::uword nrows = aggv.n_rows;
+  arma::mat volv(nrows, tseries.n_cols, fill::zeros);
+  
+  // Calculate the log volatility at the agg points
+  for (arma::uword it=0; it < nrows; it++) {
+    volv.row(it) = 0.5*arma::log(calc_var_ag(tseries, aggv[it]));
+  }  // end for
+  
+  // Calculate the log of the agg points
+  arma::mat agglog = arma::log(aggv);
+  
+  // Calculate the Hurst exponent from the regression slopes
+  arma::mat varagg = arma::var(agglog);
+  return (arma::cov(volv, agglog).t())/varagg[0];
   
 }  // end calc_hurst
-
 
 
 
@@ -7197,7 +7231,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   double lambda1 = 1-lambda;
   arma::uword nweights = returns.n_cols;
   arma::vec weights(nweights, fill::zeros);
-  arma::vec weights_past = ones(nweights)/sqrt(nweights);
+  arma::vec weights_past = ones(nweights)/std::sqrt(nweights);
   arma::mat pnls = zeros(returns.n_rows, 1);
 
   // Perform loop over the end points

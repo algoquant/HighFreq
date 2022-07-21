@@ -2942,15 +2942,19 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
 #'
-#' @param \code{step} The number of time periods in each interval between
-#'   neighboring end points.
+#' @param \code{aggv} A \emph{vector} of aggregation intervals.
 #' 
 #' @return The Hurst exponent calculated from the volatility ratio of
-#'   aggregated returns.
+#'   aggregated returns.  If \code{tseries} contains multiple columns, then the
+#'   function \code{calc_hurst()} returns a single-row matrix of Hurst
+#'   exponents.
 #'
 #' @details
 #'   The function \code{calc_hurst()} calculates the Hurst exponent from the
 #'   ratios of the volatilities of aggregated returns.
+#'   
+#'   An aggregation interval is equal to the number of time periods between the
+#'   neighboring aggregation end points.
 #'
 #'   The aggregated volatility \eqn{\sigma_t} increases with the length of the
 #'   aggregation interval \eqn{\Delta t}.
@@ -2962,11 +2966,20 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #'     }
 #'   Where \eqn{\sigma} is the daily return volatility.
 #' 
-#'   The \emph{Hurst exponent} \eqn{H} is equal to the logarithm of the ratio
-#'   of the volatilities divided by the logarithm of the time interval
+#'   For a single aggregation interval \eqn{\Delta t}, the \emph{Hurst
+#'   exponent} \eqn{H} is equal to the logarithm of the ratio of the
+#'   volatilities divided by the logarithm of the aggregation interval
 #'   \eqn{\Delta t}:
 #'     \deqn{
 #'       H = \frac{\log{\sigma_t} - \log{\sigma}}{\log{\Delta t}}
+#'     }
+#' 
+#'   For a \emph{vector} of aggregation intervals \eqn{\Delta t_i}, the
+#'   \emph{Hurst exponent} \eqn{H} is equal to the regression slope between the
+#'   logarithms of the aggregated volatilities \eqn{\sigma_i} versus the
+#'   logarithms of the aggregation intervals \eqn{\Delta t_i}:
+#'     \deqn{
+#'       H = \frac{\code{cov}(\log{\sigma_i}, \log{\Delta t_i})}{\code{var}(\log{\Delta t_i})}
 #'     }
 #' 
 #'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
@@ -2977,16 +2990,19 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' # Calculate the log prices
 #' prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 #' prices <- log(prices)
-#' # Calculate the Hurst exponent from 21 day aggregations
-#' calc_hurst(prices, step=21)
+#' # Calculate the Hurst exponents for a 21 day aggregation interval
+#' HighFreq::calc_hurst(prices, aggv=21)
+#' # Calculate the Hurst exponents for a vector of aggregation intervals
+#' aggv <- seq.int(from=3, to=35, length.out=9)^2
+#' HighFreq::calc_hurst(prices, aggv=aggv)
 #' }
 #' 
 #' @export
-calc_hurst <- function(tseries, step) {
-    .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, step)
+calc_hurst <- function(tseries, aggv) {
+    .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, aggv)
 }
 
-#' Calculate the Hurst exponent from the volatility ratio of aggregated
+#' Calculate the Hurst exponent from the volatility ratios of aggregated
 #' \emph{OHLC} prices.
 #'
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
