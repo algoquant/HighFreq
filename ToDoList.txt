@@ -87,7 +87,7 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [x] Update function calc_hurst() to use a vector of aggregation intervals
++ [ ] Create function calc_hurst_range() for the Hurst using the rescaled range
 
 + [ ] Update function roll_stats() to use function pointers
 
@@ -501,6 +501,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Update function calc_hurst() to use a vector of aggregation intervals
 
 + [x] Create a function called param_reg() for creating a named control list of regression parameters that can be passed as an argument to the functions calc_reg() and roll_reg()
 

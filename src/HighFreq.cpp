@@ -2,7 +2,6 @@
 #include <RcppArmadillo.h>
 #include <vector>
 using namespace std;
-using namespace Rcpp;
 using namespace arma;
 
 ////////////////////////////////////////////////////////////
@@ -74,12 +73,12 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
                      double confl = 0.1, // Confidence level for calculating the quantiles of returns
                      double alpha = 0.0) {  // Shrinkage intensity of returns
   
-  Rcpp::List controlv = Rcpp::List::create(Named("method") = method,
-                                           Named("intercept") = intercept,
-                                           Named("eigen_thresh") = eigen_thresh,
-                                           Named("dimax") = dimax,
-                                           Named("confl") = confl,
-                                           Named("alpha") = alpha);
+  Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("method") = method,
+                                           Rcpp::Named("intercept") = intercept,
+                                           Rcpp::Named("eigen_thresh") = eigen_thresh,
+                                           Rcpp::Named("dimax") = dimax,
+                                           Rcpp::Named("confl") = confl,
+                                           Rcpp::Named("alpha") = alpha);
   
   return controlv;
   
@@ -158,15 +157,15 @@ Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio opt
                        std::string scalew = "voltarget", // Method for scaling the weights
                        double vol_target = 0.001) { // Volatility target for scaling the weights
 
-  Rcpp::List controlv = Rcpp::List::create(Named("method") = method,
-                                           Named("eigen_thresh") = eigen_thresh,
-                                           Named("dimax") = dimax,
-                                           Named("confl") = confl,
-                                           Named("alpha") = alpha,
-                                           Named("rankw") = rankw,
-                                           Named("centerw") = centerw,
-                                           Named("scalew") = scalew,
-                                           Named("vol_target") = vol_target);
+  Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("method") = method,
+                                           Rcpp::Named("eigen_thresh") = eigen_thresh,
+                                           Rcpp::Named("dimax") = dimax,
+                                           Rcpp::Named("confl") = confl,
+                                           Rcpp::Named("alpha") = alpha,
+                                           Rcpp::Named("rankw") = rankw,
+                                           Rcpp::Named("centerw") = centerw,
+                                           Rcpp::Named("scalew") = scalew,
+                                           Rcpp::Named("vol_target") = vol_target);
   
   return controlv;
   
@@ -905,8 +904,8 @@ Rcpp::List encode_it(arma::vec tseries) {
   
   // Return a list with the encoded data and the counter vector
   return Rcpp::List::create(
-    _["data"] = codev,
-    _["counts"] = countv
+    Rcpp::_["data"] = codev,
+    Rcpp::_["counts"] = countv
   );
   
 }  // end encode_it
@@ -1405,8 +1404,8 @@ Rcpp::List calc_eigen(const arma::mat& tseries) {
   arma::eig_sym(eigenval, eigenvec, arma::cov(tseries));
   
   // Reverse the order of elements from largest eigenvalue to smallest, similar to R
-  return Rcpp::List::create(Named("values") = arma::flipud(eigenval),
-                            Named("vectors") = arma::fliplr(eigenvec));
+  return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
+                            Rcpp::Named("vectors") = arma::fliplr(eigenvec));
   
 }  // end calc_eigen
 
@@ -3148,7 +3147,7 @@ arma::mat run_reg(const arma::mat& response,
     resids = (resids - meanz)/arma::sqrt(varz);
   }  // end if
   
-  return join_rows(resids, alphas, betas);
+  return arma::join_rows(resids, alphas, betas);
 
 }  // end run_reg
 
@@ -3299,9 +3298,9 @@ arma::mat run_zscores(const arma::mat& response,
   }  // end for
   
   if (demean)
-    return join_rows((zscores - meanz)/arma::sqrt(varz), betas, vars);
+    return arma::join_rows((zscores - meanz)/arma::sqrt(varz), betas, vars);
   else
-    return join_rows(zscores/arma::sqrt(varz), betas, vars);
+    return arma::join_rows(zscores/arma::sqrt(varz), betas, vars);
 
 }  // end run_zscores
 
@@ -3754,7 +3753,7 @@ arma::mat calc_covar(const arma::mat& tseries,
 ////////////////////////////////////////////////////////////
 //' Calculate the variance of returns aggregated over the end points. 
 //'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
 //'
 //' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points (the default is \code{step = 1}).
@@ -4387,7 +4386,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 ////////////////////////////////////////////////////////////
 //' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
 //'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
 //'
 //' @param \code{aggv} A \emph{vector} of aggregation intervals.
 //' 
@@ -4430,7 +4429,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //'     }
 //' 
 //'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-//'   to calculate the aggregated variance \eqn{\sigma^2_t}.
+//'   to calculate the variance of aggregated returns \eqn{\sigma^2_t}.
 //' 
 //' @examples
 //' \dontrun{
@@ -4614,7 +4613,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predictor.n_rows;
-  arma::mat predictori = join_rows(ones(nrows), predictor);
+  arma::mat predictori = arma::join_rows(ones(nrows), predictor);
   arma::uword ncols = predictori.n_cols;
   arma::uword deg_free = (nrows - ncols);
   
@@ -4642,7 +4641,7 @@ Rcpp::List calc_lm(const arma::vec& response, const arma::mat& predictor) {
   // Calculate t-values and p-values of beta coefficients
   arma::colvec tvals = coeff/stderrv;
   arma::colvec pvals = 2*Rcpp::pt(-Rcpp::abs(Rcpp::wrap(tvals)), deg_free);
-  Rcpp::NumericMatrix coeffmat = Rcpp::wrap(join_rows(join_rows(join_rows(coeff, stderrv), tvals), pvals));
+  Rcpp::NumericMatrix coeffmat = Rcpp::wrap(arma::join_rows(arma::join_rows(arma::join_rows(coeff, stderrv), tvals), pvals));
   Rcpp::colnames(coeffmat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
   
   return Rcpp::List::create(Rcpp::Named("coefficients") = coeffmat,
@@ -4752,23 +4751,23 @@ arma::mat calc_reg(const arma::mat& response,
   
   // Unpack the control list
   // Type of regression model
-  std::string method = as<std::string>(controlv["method"]);
+  std::string method = Rcpp::as<std::string>(controlv["method"]);
   // Add intercept column to the predictor matrix?
-  bool intercept = as<int>(controlv["intercept"]);
+  bool intercept = Rcpp::as<int>(controlv["intercept"]);
   // Threshold level for discarding small singular values
-  double eigen_thresh = as<double>(controlv["eigen_thresh"]);
+  double eigen_thresh = Rcpp::as<double>(controlv["eigen_thresh"]);
   // Dimension reduction
-  arma::uword dimax = as<int>(controlv["dimax"]);
+  arma::uword dimax = Rcpp::as<int>(controlv["dimax"]);
   // Confidence level for calculating the quantiles of returns
-  double confl = as<double>(controlv["confl"]);
+  double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  double alpha = as<double>(controlv["alpha"]);
+  double alpha = Rcpp::as<double>(controlv["alpha"]);
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predictor.n_rows;
   arma::mat predictori = predictor;
   if (intercept)
-    predictori = join_rows(ones(nrows), predictor);
+    predictori = arma::join_rows(ones(nrows), predictor);
   
   arma::uword ncols = predictori.n_cols;
   arma::uword deg_free = (nrows - ncols);
@@ -5820,7 +5819,7 @@ arma::mat roll_reg(const arma::mat& response,
   arma::uword numpts = endpts.n_elem;
   arma::uword ncols = predictor.n_cols;
   // Add intercept column to the predictor matrix?
-  bool intercept = as<int>(controlv["intercept"]);
+  bool intercept = Rcpp::as<int>(controlv["intercept"]);
   if (intercept) ncols += 1;
   arma::mat reg_stats(numpts, (2*ncols + 1), fill::zeros);
   
@@ -6398,7 +6397,7 @@ arma::mat sim_garch(double omega,
       returns[it] = std::sqrt(variance[it-1])*innov[it];
       variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
     }  // end for
-    return join_rows(returns, variance);
+    return arma::join_rows(returns, variance);
   } else {
     // The innovations are historical returns
     arma::mat variance = arma::square(innov);
@@ -6406,7 +6405,7 @@ arma::mat sim_garch(double omega,
     for (arma::uword it = 1; it < nrows; it++) {
       variance[it] = omega + alpha*variance[it] + beta*variance[it-1];
     }  // end for
-    return join_rows(innov, variance);
+    return arma::join_rows(innov, variance);
   }  // end if
   
 }  // end sim_garch
@@ -6961,23 +6960,23 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   
   // Unpack the control list of portfolio optimization parameters
   // Type of portfolio optimization model
-  std::string method = as<std::string>(controlv["method"]);
+  std::string method = Rcpp::as<std::string>(controlv["method"]);
   // Threshold level for discarding small singular values
-  double eigen_thresh = as<double>(controlv["eigen_thresh"]);
+  double eigen_thresh = Rcpp::as<double>(controlv["eigen_thresh"]);
   // Dimension reduction
-  arma::uword dimax = as<int>(controlv["dimax"]);
+  arma::uword dimax = Rcpp::as<int>(controlv["dimax"]);
   // Confidence level for calculating the quantiles of returns
-  double confl = as<double>(controlv["confl"]);
+  double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  double alpha = as<double>(controlv["alpha"]);
+  double alpha = Rcpp::as<double>(controlv["alpha"]);
   // Should the weights be ranked?
-  bool rankw = as<int>(controlv["rankw"]);
+  bool rankw = Rcpp::as<int>(controlv["rankw"]);
   // Should the weights be centered?
-  bool centerw = as<int>(controlv["centerw"]);
+  bool centerw = Rcpp::as<int>(controlv["centerw"]);
   // Method for scaling the weights
-  std::string scalew = as<std::string>(controlv["scalew"]);
+  std::string scalew = Rcpp::as<std::string>(controlv["scalew"]);
   // Volatility target for scaling the weights
-  double vol_target = as<double>(controlv["vol_target"]);
+  double vol_target = Rcpp::as<double>(controlv["vol_target"]);
 
   // Initialize the variables
   arma::uword ncols = returns.n_cols;

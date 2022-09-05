@@ -2514,7 +2514,7 @@ calc_covar <- function(tseries, method = "moment", confl = 0.75) {
 
 #' Calculate the variance of returns aggregated over the end points. 
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
 #'
 #' @param \code{step} The number of time periods in each interval between
 #'   neighboring end points (the default is \code{step = 1}).
@@ -2940,7 +2940,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of prices.
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
 #'
 #' @param \code{aggv} A \emph{vector} of aggregation intervals.
 #' 
@@ -2983,7 +2983,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #'     }
 #' 
 #'   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-#'   to calculate the aggregated variance \eqn{\sigma^2_t}.
+#'   to calculate the variance of aggregated returns \eqn{\sigma^2_t}.
 #' 
 #' @examples
 #' \dontrun{
@@ -3002,7 +3002,7 @@ calc_hurst <- function(tseries, aggv) {
     .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, aggv)
 }
 
-#' Calculate the Hurst exponent from the volatility ratios of aggregated
+#' Calculate the Hurst exponent from the volatility ratio of aggregated
 #' \emph{OHLC} prices.
 #'
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} of \emph{OHLC}
