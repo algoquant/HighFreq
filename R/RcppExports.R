@@ -82,7 +82,7 @@ NULL
 #' 
 #' @export
 param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0) {
-    .Call(`_HighFreq_param_reg`, method, intercept, eigen_thresh, dimax, confl, alpha)
+    .Call('_HighFreq_param_reg', PACKAGE = 'HighFreq', method, intercept, eigen_thresh, dimax, confl, alpha)
 }
 
 #' Create a named list of model parameters that can be passed into portfolio
@@ -146,7 +146,7 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #' 
 #' @export
 param_portf <- function(method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.001) {
-    .Call(`_HighFreq_param_portf`, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
+    .Call('_HighFreq_param_portf', PACKAGE = 'HighFreq', method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
 }
 
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
@@ -201,7 +201,7 @@ param_portf <- function(method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, con
 #' 
 #' @export
 lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_lag_vec`, tseries, lagg, pad_zeros)
+    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
@@ -253,7 +253,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_lagit`, tseries, lagg, pad_zeros)
+    .Call('_HighFreq_lagit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
@@ -307,7 +307,7 @@ lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_diff_vec`, tseries, lagg, pad_zeros)
+    .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Calculate the row differences of a \emph{time series} or a \emph{matrix}
@@ -376,7 +376,7 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_diffit`, tseries, lagg, pad_zeros)
+    .Call('_HighFreq_diffit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
 }
 
 #' Calculate a vector of end points that divides an integer time sequence of
@@ -482,7 +482,7 @@ diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'
 #' @export
 calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
-    .Call(`_HighFreq_calc_endpoints`, length, step, stub, stubs)
+    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub, stubs)
 }
 
 #' Calculate a vector of start points by lagging (shifting) a vector of end
@@ -520,7 +520,7 @@ calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
 #'
 #' @export
 calc_startpoints <- function(endp, look_back) {
-    .Call(`_HighFreq_calc_startpoints`, endp, look_back)
+    .Call('_HighFreq_calc_startpoints', PACKAGE = 'HighFreq', endp, look_back)
 }
 
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
@@ -549,7 +549,7 @@ calc_startpoints <- function(endp, look_back) {
 #' }
 #' @export
 roll_count <- function(tseries) {
-    .Call(`_HighFreq_roll_count`, tseries)
+    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the run length encoding of a single-column \emph{time series},
@@ -587,7 +587,7 @@ roll_count <- function(tseries) {
 #' 
 #' @export
 encode_it <- function(tseries) {
-    .Call(`_HighFreq_encode_it`, tseries)
+    .Call('_HighFreq_encode_it', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the \emph{vector} of data from its run length encoding.
@@ -627,7 +627,7 @@ encode_it <- function(tseries) {
 #' 
 #' @export
 decode_it <- function(encodel) {
-    .Call(`_HighFreq_decode_it`, encodel)
+    .Call('_HighFreq_decode_it', PACKAGE = 'HighFreq', encodel)
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
@@ -683,7 +683,7 @@ decode_it <- function(encodel) {
 #' 
 #' @export
 calc_ranks <- function(tseries) {
-    .Call(`_HighFreq_calc_ranks`, tseries)
+    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
@@ -741,11 +741,11 @@ calc_ranks <- function(tseries) {
 #' 
 #' @export
 calc_ranks_stl <- function(tseries) {
-    .Call(`_HighFreq_calc_ranks_stl`, tseries)
+    .Call('_HighFreq_calc_ranks_stl', PACKAGE = 'HighFreq', tseries)
 }
 
 remove_dup <- function(stringv) {
-    .Call(`_HighFreq_remove_dup`, stringv)
+    .Call('_HighFreq_remove_dup', PACKAGE = 'HighFreq', stringv)
 }
 
 #' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
@@ -821,7 +821,7 @@ remove_dup <- function(stringv) {
 #' 
 #' @export
 mult_mat <- function(vector, matrix, byrow = TRUE) {
-    .Call(`_HighFreq_mult_mat`, vector, matrix, byrow)
+    .Call('_HighFreq_mult_mat', PACKAGE = 'HighFreq', vector, matrix, byrow)
 }
 
 #' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
@@ -901,7 +901,7 @@ mult_mat <- function(vector, matrix, byrow = TRUE) {
 #' 
 #' @export
 mult_mat_ref <- function(vector, matrix, byrow = TRUE) {
-    invisible(.Call(`_HighFreq_mult_mat_ref`, vector, matrix, byrow))
+    invisible(.Call('_HighFreq_mult_mat_ref', PACKAGE = 'HighFreq', vector, matrix, byrow))
 }
 
 #' Calculate the eigen decomposition of the \emph{covariance matrix} of returns
@@ -939,7 +939,7 @@ mult_mat_ref <- function(vector, matrix, byrow = TRUE) {
 #' 
 #' @export
 calc_eigen <- function(tseries) {
-    .Call(`_HighFreq_calc_eigen`, tseries)
+    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the regularized inverse of a \emph{matrix} of data using Singular
@@ -1023,7 +1023,7 @@ calc_eigen <- function(tseries) {
 #' 
 #' @export
 calc_inv <- function(tseries, eigen_thresh = 0.01, dimax = 0L) {
-    .Call(`_HighFreq_calc_inv`, tseries, eigen_thresh, dimax)
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', tseries, eigen_thresh, dimax)
 }
 
 #' Scale (standardize) the columns of a \emph{matrix} of data using
@@ -1079,7 +1079,7 @@ calc_inv <- function(tseries, eigen_thresh = 0.01, dimax = 0L) {
 #' 
 #' @export
 calc_scaled <- function(tseries, use_median = FALSE) {
-    .Call(`_HighFreq_calc_scaled`, tseries, use_median)
+    .Call('_HighFreq_calc_scaled', PACKAGE = 'HighFreq', tseries, use_median)
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -1126,7 +1126,7 @@ calc_scaled <- function(tseries, use_median = FALSE) {
 #' 
 #' @export
 agg_ohlc <- function(tseries) {
-    .Call(`_HighFreq_agg_ohlc`, tseries)
+    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Aggregate a time series to an \emph{OHLC} time series with lower
@@ -1174,7 +1174,7 @@ agg_ohlc <- function(tseries) {
 #' 
 #' @export
 roll_ohlc <- function(tseries, endp) {
-    .Call(`_HighFreq_roll_ohlc`, tseries, endp)
+    .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', tseries, endp)
 }
 
 #' Calculate the rolling sums over a single-column \emph{time series} or a
@@ -1216,7 +1216,7 @@ roll_ohlc <- function(tseries, endp) {
 #' 
 #' @export
 roll_vec <- function(tseries, look_back) {
-    .Call(`_HighFreq_roll_vec`, tseries, look_back)
+    .Call('_HighFreq_roll_vec', PACKAGE = 'HighFreq', tseries, look_back)
 }
 
 #' Calculate the rolling weighted sums over a single-column \emph{time series}
@@ -1270,7 +1270,7 @@ roll_vec <- function(tseries, look_back) {
 #' 
 #' @export
 roll_vecw <- function(tseries, weights) {
-    .Call(`_HighFreq_roll_vecw`, tseries, weights)
+    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', tseries, weights)
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -1321,7 +1321,7 @@ roll_vecw <- function(tseries, weights) {
 #' 
 #' @export
 roll_conv <- function(tseries, weights) {
-    .Call(`_HighFreq_roll_conv`, tseries, weights)
+    .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', tseries, weights)
 }
 
 #' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -1367,7 +1367,7 @@ roll_conv <- function(tseries, weights) {
 #' 
 #' @export
 roll_sum <- function(tseries, look_back = 1L) {
-    .Call(`_HighFreq_roll_sum`, tseries, look_back)
+    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', tseries, look_back)
 }
 
 #' Calculate the rolling sums at the end points of a \emph{time series} or a
@@ -1421,7 +1421,7 @@ roll_sum <- function(tseries, look_back = 1L) {
 #' 
 #' @export
 roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_sumep`, tseries, startp, endp, step, look_back, stub)
+    .Call('_HighFreq_roll_sumep', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub)
 }
 
 #' Calculate the rolling weighted sums over a \emph{time series} or a
@@ -1540,7 +1540,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' 
 #' @export
 roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights = NULL) {
-    .Call(`_HighFreq_roll_wsum`, tseries, endp, look_back, stub, weights)
+    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', tseries, endp, look_back, stub, weights)
 }
 
 #' Calculate the running weighted means of streaming \emph{time series} data.
@@ -1651,7 +1651,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #' 
 #' @export
 run_mean <- function(tseries, lambda, weights) {
-    .Call(`_HighFreq_run_mean`, tseries, lambda, weights)
+    .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda, weights)
 }
 
 #' Calculate the running maximum values of streaming \emph{time series} data.
@@ -1719,7 +1719,7 @@ run_mean <- function(tseries, lambda, weights) {
 #' 
 #' @export
 run_max <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_max`, tseries, lambda)
+    .Call('_HighFreq_run_max', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Calculate the running minimum values of streaming \emph{time series} data.
@@ -1787,7 +1787,7 @@ run_max <- function(tseries, lambda) {
 #' 
 #' @export
 run_min <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_min`, tseries, lambda)
+    .Call('_HighFreq_run_min', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Calculate the running variance of streaming \emph{time series} of returns.
@@ -1862,7 +1862,7 @@ run_min <- function(tseries, lambda) {
 #' 
 #' @export
 run_var <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_var`, tseries, lambda)
+    .Call('_HighFreq_run_var', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Calculate the running variance of streaming \emph{OHLC} price data.
@@ -1933,7 +1933,7 @@ run_var <- function(tseries, lambda) {
 #' }
 #' @export
 run_var_ohlc <- function(ohlc, lambda) {
-    .Call(`_HighFreq_run_var_ohlc`, ohlc, lambda)
+    .Call('_HighFreq_run_var_ohlc', PACKAGE = 'HighFreq', ohlc, lambda)
 }
 
 #' Calculate the running covariance of two streaming \emph{time series} of
@@ -2004,7 +2004,7 @@ run_var_ohlc <- function(ohlc, lambda) {
 #' 
 #' @export
 run_covar <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_covar`, tseries, lambda)
+    .Call('_HighFreq_run_covar', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
 #' Perform running regressions of streaming \emph{time series} of response and
@@ -2120,7 +2120,7 @@ run_covar <- function(tseries, lambda) {
 #' 
 #' @export
 run_reg <- function(response, predictor, lambda, method = "none") {
-    .Call(`_HighFreq_run_reg`, response, predictor, lambda, method)
+    .Call('_HighFreq_run_reg', PACKAGE = 'HighFreq', response, predictor, lambda, method)
 }
 
 #' Calculate the z-scores of running regressions of streaming \emph{time
@@ -2230,7 +2230,7 @@ run_reg <- function(response, predictor, lambda, method = "none") {
 #' 
 #' @export
 run_zscores <- function(response, predictor, lambda, demean = TRUE) {
-    .Call(`_HighFreq_run_zscores`, response, predictor, lambda, demean)
+    .Call('_HighFreq_run_zscores', PACKAGE = 'HighFreq', response, predictor, lambda, demean)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -2315,7 +2315,7 @@ run_zscores <- function(response, predictor, lambda, demean = TRUE) {
 #' 
 #' @export
 calc_mean <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_mean`, tseries, method, confl)
+    .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the variance of a single-column \emph{time series} or a
@@ -2347,7 +2347,7 @@ calc_mean <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_varvec <- function(tseries) {
-    .Call(`_HighFreq_calc_varvec`, tseries)
+    .Call('_HighFreq_calc_varvec', PACKAGE = 'HighFreq', tseries)
 }
 
 #' Calculate the dispersion (variance) of the columns of a \emph{time series}
@@ -2431,7 +2431,7 @@ calc_varvec <- function(tseries) {
 #' 
 #' @export
 calc_var <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_var`, tseries, method, confl)
+    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the covariance matrix of the columns of a \emph{time series}
@@ -2509,7 +2509,7 @@ calc_var <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_covar <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_covar`, tseries, method, confl)
+    .Call('_HighFreq_calc_covar', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the variance of returns aggregated over the end points. 
@@ -2565,7 +2565,7 @@ calc_covar <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_var_ag <- function(tseries, step = 1L) {
-    .Call(`_HighFreq_calc_var_ag`, tseries, step)
+    .Call('_HighFreq_calc_var_ag', PACKAGE = 'HighFreq', tseries, step)
 }
 
 #' Calculate the variance of returns from \emph{OHLC} prices using different
@@ -2674,7 +2674,7 @@ calc_var_ag <- function(tseries, step = 1L) {
 #' }
 #' @export
 calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_var_ohlc`, ohlc, method, close_lag, scale, index)
+    .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', ohlc, method, close_lag, scale, index)
 }
 
 #' Calculate the variance of aggregated \emph{OHLC} prices using different
@@ -2751,7 +2751,7 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", close_lag = 0L, scale = T
 #' 
 #' @export
 calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_var_ohlc_ag`, ohlc, step, method, close_lag, scale, index)
+    .Call('_HighFreq_calc_var_ohlc_ag', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
@@ -2842,7 +2842,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, 
 #' 
 #' @export
 calc_skew <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_skew`, tseries, method, confl)
+    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -2935,7 +2935,7 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_kurtosis`, tseries, method, confl)
+    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, confl)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
@@ -2999,7 +2999,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_hurst <- function(tseries, aggv) {
-    .Call(`_HighFreq_calc_hurst`, tseries, aggv)
+    .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, aggv)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated
@@ -3071,7 +3071,7 @@ calc_hurst <- function(tseries, aggv) {
 #' 
 #' @export
 calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_hurst_ohlc`, ohlc, step, method, close_lag, scale, index)
+    .Call('_HighFreq_calc_hurst_ohlc', PACKAGE = 'HighFreq', ohlc, step, method, close_lag, scale, index)
 }
 
 #' Perform multivariate linear regression using least squares and return a
@@ -3124,7 +3124,7 @@ calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", close_lag = 0L, s
 #' 
 #' @export
 calc_lm <- function(response, predictor) {
-    .Call(`_HighFreq_calc_lm`, response, predictor)
+    .Call('_HighFreq_calc_lm', PACKAGE = 'HighFreq', response, predictor)
 }
 
 #' Perform multivariate regression using different methods, and return a vector
@@ -3218,7 +3218,7 @@ calc_lm <- function(response, predictor) {
 #' 
 #' @export
 calc_reg <- function(response, predictor, controlv) {
-    .Call(`_HighFreq_calc_reg`, response, predictor, controlv)
+    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', response, predictor, controlv)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -3316,7 +3316,7 @@ calc_reg <- function(response, predictor, controlv) {
 #' }
 #' @export
 roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_mean`, tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call('_HighFreq_roll_mean', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3365,7 +3365,7 @@ roll_mean <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' }
 #' @export
 roll_varvec <- function(tseries, look_back = 1L) {
-    .Call(`_HighFreq_roll_varvec`, tseries, look_back)
+    .Call('_HighFreq_roll_varvec', PACKAGE = 'HighFreq', tseries, look_back)
 }
 
 #' Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
@@ -3454,7 +3454,7 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #' }
 #' @export
 roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_var`, tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3599,7 +3599,7 @@ roll_var <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L,
 #' }
 #' @export
 roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endp, step, look_back, stub, method, scale, index)
+    .Call('_HighFreq_roll_var_ohlc', PACKAGE = 'HighFreq', ohlc, startp, endp, step, look_back, stub, method, scale, index)
 }
 
 #' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
@@ -3687,7 +3687,7 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' }
 #' @export
 roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_skew`, tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
@@ -3774,7 +3774,7 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' }
 #' @export
 roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -3875,7 +3875,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' 
 #' @export
 roll_reg <- function(response, predictor, controlv, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_reg`, response, predictor, controlv, startp, endp, step, look_back, stub)
+    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, controlv, startp, endp, step, look_back, stub)
 }
 
 #' Perform a rolling scaling (standardization) of the columns of a
@@ -3923,7 +3923,7 @@ roll_reg <- function(response, predictor, controlv, startp = 0L, endp = 0L, step
 #' 
 #' @export
 roll_scale <- function(matrix, look_back, use_median = FALSE) {
-    .Call(`_HighFreq_roll_scale`, matrix, look_back, use_median)
+    .Call('_HighFreq_roll_scale', PACKAGE = 'HighFreq', matrix, look_back, use_median)
 }
 
 #' Calculate a \emph{vector} of z-scores of the residuals of rolling
@@ -4003,7 +4003,7 @@ roll_scale <- function(matrix, look_back, use_median = FALSE) {
 #' 
 #' @export
 roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_zscores`, response, predictor, startp, endp, step, look_back, stub)
+    .Call('_HighFreq_roll_zscores', PACKAGE = 'HighFreq', response, predictor, startp, endp, step, look_back, stub)
 }
 
 #' Calculate a \emph{matrix} of moment values over a rolling look-back
@@ -4109,7 +4109,7 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #' }
 #' @export
 roll_moment <- function(tseries, funname = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_moment`, tseries, funname, method, confl, startp, endp, step, look_back, stub)
+    .Call('_HighFreq_roll_moment', PACKAGE = 'HighFreq', tseries, funname, method, confl, startp, endp, step, look_back, stub)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
@@ -4200,7 +4200,7 @@ roll_moment <- function(tseries, funname = "calc_mean", method = "moment", confl
 #' 
 #' @export
 sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
-    .Call(`_HighFreq_sim_garch`, omega, alpha, beta, innov, is_random)
+    .Call('_HighFreq_sim_garch', PACKAGE = 'HighFreq', omega, alpha, beta, innov, is_random)
 }
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
@@ -4259,7 +4259,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' 
 #' @export
 sim_ou <- function(init_price, eq_price, theta, innov) {
-    .Call(`_HighFreq_sim_ou`, init_price, eq_price, theta, innov)
+    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
 }
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -4308,7 +4308,7 @@ sim_ou <- function(init_price, eq_price, theta, innov) {
 #' 
 #' @export
 sim_schwartz <- function(init_price, eq_price, theta, innov) {
-    .Call(`_HighFreq_sim_schwartz`, init_price, eq_price, theta, innov)
+    .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
 }
 
 #' Simulate \emph{autoregressive} returns by recursively filtering a
@@ -4368,7 +4368,7 @@ sim_schwartz <- function(init_price, eq_price, theta, innov) {
 #' 
 #' @export
 sim_ar <- function(coeff, innov) {
-    .Call(`_HighFreq_sim_ar`, coeff, innov)
+    .Call('_HighFreq_sim_ar', PACKAGE = 'HighFreq', coeff, innov)
 }
 
 #' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
@@ -4432,7 +4432,7 @@ sim_ar <- function(coeff, innov) {
 #' 
 #' @export
 sim_df <- function(init_price, eq_price, theta, coeff, innov) {
-    .Call(`_HighFreq_sim_df`, init_price, eq_price, theta, coeff, innov)
+    .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', init_price, eq_price, theta, coeff, innov)
 }
 
 #' Calculate the log-likelihood of a time series of returns assuming a
@@ -4490,7 +4490,7 @@ sim_df <- function(init_price, eq_price, theta, coeff, innov) {
 #' 
 #' @export
 lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
-    .Call(`_HighFreq_lik_garch`, omega, alpha, beta, returns, minval)
+    .Call('_HighFreq_lik_garch', PACKAGE = 'HighFreq', omega, alpha, beta, returns, minval)
 }
 
 #' Calculate the optimal portfolio weights using a variety of different
@@ -4624,7 +4624,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' 
 #' @export
 calc_weights <- function(returns, controlv) {
-    .Call(`_HighFreq_calc_weights`, returns, controlv)
+    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, controlv)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -4734,22 +4734,6 @@ calc_weights <- function(returns, controlv) {
 #' 
 #' @export
 back_test <- function(excess, returns, controlv, startp, endp, lambda = 0.0, coeff = 1.0, bid_offer = 0.0) {
-    .Call(`_HighFreq_back_test`, excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
-}
-
-rcpparma_hello_world <- function() {
-    .Call(`_HighFreq_rcpparma_hello_world`)
-}
-
-rcpparma_outerproduct <- function(x) {
-    .Call(`_HighFreq_rcpparma_outerproduct`, x)
-}
-
-rcpparma_innerproduct <- function(x) {
-    .Call(`_HighFreq_rcpparma_innerproduct`, x)
-}
-
-rcpparma_bothproducts <- function(x) {
-    .Call(`_HighFreq_rcpparma_bothproducts`, x)
+    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
 }
 

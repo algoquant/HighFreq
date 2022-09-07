@@ -7,7 +7,7 @@
 # .First <- function() cat("n   Welcome to R!nn")
 # .Last <- function()  cat("n   Goodbye!nn")
 
-library(HighFreq)
+# library(HighFreq)
 options(rgl.useNULL=TRUE)
 
 # Suppress spurious timezone warning message: "timezone of object is different than current timezone"
