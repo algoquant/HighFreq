@@ -4737,19 +4737,3 @@ back_test <- function(excess, returns, controlv, startp, endp, lambda = 0.0, coe
     .Call(`_HighFreq_back_test`, excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
 }
 
-rcpparma_hello_world <- function() {
-    .Call(`_HighFreq_rcpparma_hello_world`)
-}
-
-rcpparma_outerproduct <- function(x) {
-    .Call(`_HighFreq_rcpparma_outerproduct`, x)
-}
-
-rcpparma_innerproduct <- function(x) {
-    .Call(`_HighFreq_rcpparma_innerproduct`, x)
-}
-
-rcpparma_bothproducts <- function(x) {
-    .Call(`_HighFreq_rcpparma_bothproducts`, x)
-}
-
