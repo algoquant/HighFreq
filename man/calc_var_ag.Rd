@@ -7,7 +7,7 @@
 calc_var_ag(tseries, step = 1L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of prices.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of log prices.}
 
 \item{\code{step}}{The number of time periods in each interval between
 neighboring end points (the default is \code{step = 1}).}

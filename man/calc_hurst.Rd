@@ -7,7 +7,7 @@
 calc_hurst(tseries, aggv)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of prices.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of log prices.}
 
 \item{\code{aggv}}{A \emph{vector} of aggregation intervals.}
 }
@@ -54,7 +54,7 @@ The function \code{calc_hurst()} calculates the Hurst exponent from the
     }
 
   The function \code{calc_hurst()} calls the function \code{calc_var_ag()}
-  to calculate the aggregated variance \eqn{\sigma^2_t}.
+  to calculate the variance of aggregated returns \eqn{\sigma^2_t}.
 }
 \examples{
 \dontrun{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_hurst_ohlc}
 \alias{calc_hurst_ohlc}
-\title{Calculate the Hurst exponent from the volatility ratios of aggregated
+\title{Calculate the Hurst exponent from the volatility ratio of aggregated
 \emph{OHLC} prices.}
 \usage{
 calc_hurst_ohlc(
@@ -48,7 +48,7 @@ The Hurst exponent calculated from the volatility ratio of
   aggregated \emph{OHLC} prices.
 }
 \description{
-Calculate the Hurst exponent from the volatility ratios of aggregated
+Calculate the Hurst exponent from the volatility ratio of aggregated
 \emph{OHLC} prices.
 }
 \details{
