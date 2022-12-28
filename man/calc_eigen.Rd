@@ -5,10 +5,10 @@
 \title{Calculate the eigen decomposition of the \emph{covariance matrix} of returns
 data using \code{RcppArmadillo}.}
 \usage{
-calc_eigen(tseries)
+calc_eigen(matrixv)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of returns
+\item{\code{matrixv}}{A \emph{time series} or \emph{matrix} of returns
 data.}
 }
 \value{
@@ -22,7 +22,7 @@ data using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_eigen()} first calculates the \emph{covariance
-  matrix} of \code{tseries}, and then calculates the eigen
+  matrix} of \code{matrixv}, and then calculates the eigen
   decomposition of the \emph{covariance matrix}.
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_zscores}
 \alias{run_zscores}
-\title{Calculate the z-scores of running regressions of streaming \emph{time
+\title{Calculate the z-scores of trailing regressions of streaming \emph{time
 series} of returns.}
 \usage{
 run_zscores(response, predictor, lambda, demean = TRUE)
@@ -25,14 +25,14 @@ A \emph{matrix} with the z-scores, betas, and the variances of the
   predictor data.
 }
 \description{
-Calculate the z-scores of running regressions of streaming \emph{time
+Calculate the z-scores of trailing regressions of streaming \emph{time
 series} of returns.
 }
 \details{
 The function \code{run_zscores()} calculates the vectors of \emph{betas}
-  \eqn{\beta_t} and the residuals \eqn{\epsilon_t} of running regressions by
-  recursively weighing the current estimates with past estimates, using the
-  decay factor \eqn{\lambda}:
+  \eqn{\beta_t} and the residuals \eqn{\epsilon_t} of trailing regressions
+  by recursively weighing the current estimates with past estimates, using
+  the decay factor \eqn{\lambda}:
   \deqn{
     \sigma^2_t = (1-\lambda) {r^p_t}^2 + \lambda \sigma^2_{t-1}
   }
@@ -79,16 +79,16 @@ The function \code{run_zscores()} calculates the vectors of \emph{betas}
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the running \emph{z-score} values have a
-  stronger dependence on past values.  This is equivalent to a long
+  values have a greater weight, and the trailing \emph{z-score} values have
+  a stronger dependence on past values.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the running \emph{z-score} values
+  past values have a smaller weight, and the trailing \emph{z-score} values
   have a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
 
-  The function \code{run_zscores()} returns multiple columns of data. 
-  If the matrix \code{predictor} has \code{n} columns then \code{run_zscores()}
+  The function \code{run_zscores()} returns multiple columns of data. If the
+  matrix \code{predictor} has \code{n} columns then \code{run_zscores()}
   returns a matrix with \code{2n+1} columns.  The first column contains the
   \emph{z-scores}, and the remaining columns contain the \emph{betas} and
   the \emph{variances} of the predictor data.
@@ -101,10 +101,10 @@ returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
-# Calculate the running z-scores
+# Calculate the trailing z-scores
 lambda <- 0.9
 zscores <- HighFreq::run_zscores(response=response, predictor=predictor, lambda=lambda)
-# Plot the running z-scores
+# Plot the trailing z-scores
 datav <- cbind(cumsum(response), zscores[, 1])
 colnames(datav) <- c("XLF", "zscores")
 colnamev <- colnames(datav)

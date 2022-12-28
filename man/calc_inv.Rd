@@ -5,23 +5,23 @@
 \title{Calculate the regularized inverse of a \emph{matrix} of data using Singular
 Value Decomposition (\emph{SVD}).}
 \usage{
-calc_inv(tseries, eigen_thresh = 0.01, dimax = 0L)
+calc_inv(matrixv, eigen_thresh = 0.01, dimax = 0L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{matrixv}}{A \emph{time series} or \emph{matrix} of data.}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
 small singular values in order to regularize the inverse of the
-matrix \code{tseries} (the default is \code{0.01}).}
+matrix \code{matrixv} (the default is \code{0.01}).}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of singular
 values used for calculating the regularized inverse of the matrix
-\code{tseries} (the default is \code{dimax = 0} - equivalent to
-\code{dimax} equal to the number of columns of \code{tseries}).}
+\code{matrixv} (the default is \code{dimax = 0} - equivalent to
+\code{dimax} equal to the number of columns of \code{matrixv}).}
 }
 \value{
 A \emph{matrix} equal to the regularized inverse of the matrix
-  \code{tseries}.
+  \code{matrixv}.
 }
 \description{
 Calculate the regularized inverse of a \emph{matrix} of data using Singular
@@ -29,10 +29,10 @@ Value Decomposition (\emph{SVD}).
 }
 \details{
 The function \code{calc_inv()} calculates the regularized inverse of the
-  matrix \code{tseries} using Singular Value Decomposition (\emph{SVD}).
+  matrix \code{matrixv} using Singular Value Decomposition (\emph{SVD}).
   
   The function \code{calc_inv()} first performs Singular Value Decomposition
-  (\emph{SVD}) of the matrix \code{tseries}.  
+  (\emph{SVD}) of the matrix \code{matrixv}.  
   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
   factorization:
   \deqn{
@@ -69,7 +69,7 @@ The function \code{calc_inv()} calculates the regularized inverse of the
   \code{dimax = 3} then it only uses the \code{3} largest singular
   values. This has the effect of dimension reduction.
   
-  If the matrix \code{tseries} has a large number of small singular values,
+  If the matrix \code{matrixv} has a large number of small singular values,
   then the number of remaining singular values may be less than
   \code{dimax}.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_min}
 \alias{run_min}
-\title{Calculate the running minimum values of streaming \emph{time series} data.}
+\title{Calculate the trailing minimum values of streaming \emph{time series} data.}
 \usage{
 run_min(tseries, lambda)
 }
@@ -17,14 +17,14 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the running minimum values of streaming \emph{time series} data.
+Calculate the trailing minimum values of streaming \emph{time series} data.
 }
 \details{
-The function \code{run_min()} calculates the running minimum of streaming
-  \emph{time series} data by recursively weighing present and past values
-  using the decay factor \eqn{\lambda}.
+The function \code{run_min()} calculates the trailing minimum values of
+  streaming \emph{time series} data by recursively weighing present and past
+  values using the decay factor \eqn{\lambda}.
 
-  It calculates the running minimum values \eqn{p^{min}_t} of the streaming
+  It calculates the trailing minimum values \eqn{p^{min}_t} of the streaming
   data \eqn{p_t} as follows:
   \deqn{
     p^{min}_t = min(p_t, \lambda p^{min}_{t-1} + (1-\lambda) p_t)
@@ -39,7 +39,7 @@ The function \code{run_min()} calculates the running minimum of streaming
   If \eqn{\lambda} is close to \code{1} then the past minimum values persist
   for longer.  This is equivalent to a long look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the past minimum values
-  decay quickly, and the running minimum depends on the more recent
+  decay quickly, and the trailing minimum depends on the more recent
   streaming values.  This is equivalent to a short look-back interval.
 
   The above formula can also be expressed as:
@@ -60,14 +60,14 @@ The function \code{run_min()} calculates the running minimum of streaming
 \dontrun{
 # Calculate historical prices
 prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
-# Calculate the running minimums
+# Calculate the trailing minimums
 lambda <- 0.9
 minv <- HighFreq::run_min(prices, lambda=lambda)
-# Plot dygraph of VTI prices and running minimums
+# Plot dygraph of VTI prices and trailing minimums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
 colnames(datav) <- c("prices", "min")
 colnamev <- colnames(datav)
-dygraphs::dygraph(datav, main="VTI Prices and Running Minimums") \%>\%
+dygraphs::dygraph(datav, main="VTI Prices and Trailing Minimums") \%>\%
   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 }

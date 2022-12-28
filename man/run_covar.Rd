@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_covar}
 \alias{run_covar}
-\title{Calculate the running covariance of two streaming \emph{time series} of
-returns.}
+\title{Calculate the realized covariance of two streaming
+\emph{time series} of returns.}
 \usage{
 run_covar(tseries, lambda)
 }
@@ -19,22 +19,22 @@ A \emph{matrix} with three columns of data: the covariance and the
   variances of the two columns of the argument \code{tseries}.
 }
 \description{
-Calculate the running covariance of two streaming \emph{time series} of
-returns.
+Calculate the realized covariance of two streaming
+\emph{time series} of returns.
 }
 \details{
-The function \code{run_covar()} calculates the running covariance of two
-  streaming \emph{time series} of returns, by recursively weighing the
-  products of their returns minus their means, with past covariance
-  estimates \eqn{\sigma^{cov}_{t-1}}, using the decay factor \eqn{\lambda}:
+The function \code{run_covar()} calculates the trailing covariance of two
+  streaming \emph{time series} of returns, by recursively weighing the past
+  covariance estimates \eqn{\sigma^{cov}_{t-1}}, with the products of their
+  returns minus their means, using the decay factor \eqn{\lambda}:
   \deqn{
-    \mu^1_t = (1-\lambda) r^1_t + \lambda \mu^1_{t-1}
+    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \mu^1_t) (r^2_t - \mu^2_t)
   }
   \deqn{
-    \mu^2_t = (1-\lambda) r^2_t + \lambda \mu^2_{t-1}
+    \mu^1_t = \lambda \mu^1_{t-1} + (1-\lambda) r^1_t
   }
   \deqn{
-    \sigma^{cov}_t = (1-\lambda) (r^1_t - \mu^1_t) (r^2_t - \mu^2_t) + \lambda \sigma^{cov}_{t-1}
+    \mu^2_t = \lambda \mu^2_{t-1} + (1-\lambda) r^2_t
   }
   Where \eqn{\sigma^{cov}_t} is the covariance estimate at time \eqn{t},
   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
@@ -48,31 +48,31 @@ The function \code{run_covar()} calculates the running covariance of two
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the running covariance values have a
+  values have a greater weight, and the trailing covariance values have a
   stronger dependence on past values.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the running covariance values have
+  past values have a smaller weight, and the trailing covariance values have
   a weaker dependence on past values.  This is equivalent to a short
   look-back interval.
 
   The function \code{run_covar()} returns three columns of data: the
   covariance and the variances of the two columns of the argument
-  \code{tseries}.  This allows calculating the running correlation.
+  \code{tseries}.  This allows calculating the trailing correlation.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
 returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-# Calculate the running covariance
+# Calculate the trailing covariance
 lambda <- 0.9
 covars <- HighFreq::run_covar(returns, lambda=lambda)
-# Calculate running covariance using R code
+# Calculate trailing covariance using R code
 filtered <- (1-lambda)*filter(returns[, 1]*returns[, 2], 
   filter=lambda, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambda), 
   method="recursive")
 all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
-# Calculate the running correlation
+# Calculate the trailing correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 }
 

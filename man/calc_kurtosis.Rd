@@ -32,7 +32,7 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns
   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
   calculates the fourth moment of the data.
   But it doesn't de-mean the columns of \code{tseries} because that requires
-  copying the matrix \code{tseries}, so it's time-consuming.
+  copying the matrix \code{tseries} in memory, so it's time-consuming.
 
   If \code{method = "quantile"} then it calculates the skewness
   \eqn{\kappa} from the differences between the quantiles of the data as

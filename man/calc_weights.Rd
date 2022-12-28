@@ -132,7 +132,7 @@ weightsr <- weightsr*sd(rowMeans(returns))/sd(returns \%*\% weightsr)
 weightsr <- 0.01*weightsr/sd(returns \%*\% weightsr)
 weightsr <- weightsr/sqrt(sum(weightsr^2))
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
+controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Calculate weights using RcppArmadillo
 weightcpp <- drop(HighFreq::calc_weights(returns, controlv=controlv))
 all.equal(weightcpp, weightsr)

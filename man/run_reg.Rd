@@ -2,8 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_reg}
 \alias{run_reg}
-\title{Perform running regressions of streaming \emph{time series} of response and
-predictor data, and calculate the alphas, betas, and the residuals.}
+\title{Calculate recursively the trailing regressions of streaming \emph{time
+series} of response and predictor data, and calculate the alphas, betas, and
+the residuals.}
 \usage{
 run_reg(response, predictor, lambda, method = "none")
 }
@@ -25,32 +26,33 @@ scaling).}
 A \emph{matrix} with the regression alphas, betas, and residuals.
 }
 \description{
-Perform running regressions of streaming \emph{time series} of response and
-predictor data, and calculate the alphas, betas, and the residuals.
+Calculate recursively the trailing regressions of streaming \emph{time
+series} of response and predictor data, and calculate the alphas, betas, and
+the residuals.
 }
 \details{
 The function \code{run_reg()} calculates the vectors of \emph{alphas}
   \eqn{\alpha_t}, \emph{betas} \eqn{\beta_t}, and the \emph{residuals}
-  \eqn{\epsilon_t} of running regressions, by recursively weighing the
+  \eqn{\epsilon_t} of trailing regressions, by recursively weighing the
   current estimates with past estimates, using the decay factor
   \eqn{\lambda}:
   \deqn{
-    \mu^r_t = (1-\lambda) r^r_t + \lambda \mu^r_{t-1}
+    \mu^r_t = \lambda \mu^r_{t-1} + (1-\lambda) r^r_t
   }
   \deqn{
-    \mu^p_t = (1-\lambda) r^p_t + \lambda \mu^p_{t-1}
+    \mu^p_t = \lambda \mu^p_{t-1} + (1-\lambda) r^p_t
   }
   \deqn{
-    \sigma^2_t = (1-\lambda) ({r^p_t}^2 - {\mu^p_t}^2) + \lambda \sigma^2_{t-1}
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) ({r^p_t}^2 - {\mu^p_t}^2)
   }
   \deqn{
-    \sigma^{cov}_t = (1-\lambda) (r^r_t - \mu^r_t) (r^p_t - \mu^p_t) + \lambda \sigma^{cov}_{t-1}
+    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^r_t - \mu^r_t) (r^p_t - \mu^p_t)
   }
   \deqn{
-    \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
+    \beta_t = \lambda \beta_{t-1} + (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t}
   }
   \deqn{
-    \epsilon_t = (1-\lambda) (r^r_t - \beta_t r^p_t) + \lambda \epsilon_{t-1}
+    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r^r_t - \beta_t r^p_t)
   }
   Where \eqn{\sigma^{cov}_t} are the covariances between the response and
   predictor data at time \eqn{t};
@@ -69,11 +71,11 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, so the running values have a greater
+  values have a greater weight, so the trailing values have a greater
   dependence on past values.  This is equivalent to a long look-back
   interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, so the running values have a weaker
+  past values have a smaller weight, so the trailing values have a weaker
   dependence on past values.  This is equivalent to a short look-back
   interval.
 
@@ -107,10 +109,10 @@ returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 response <- returns[, 1]
 # Predictor matrix equals VTI and IEF returns
 predictor <- returns[, -1]
-# Calculate the running regressions
+# Calculate the trailing regressions
 lambda <- 0.9
 regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
-# Plot the running residuals
+# Plot the trailing residuals
 datav <- cbind(cumsum(response), regs[, 1])
 colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)

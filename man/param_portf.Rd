@@ -74,7 +74,7 @@ The function \code{param_portf()} creates a named list of model parameters
 controlv <- HighFreq::param_portf()
 unlist(controlv)
 # Create a custom list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(intercept=FALSE, method="regular", dimax=4)
+controlv <- HighFreq::param_portf(method="regular", dimax=4)
 unlist(controlv)
 }
 

@@ -49,7 +49,7 @@ The function \code{diffit()} calculates the differences between the rows
   The default is \code{pad_zeros = TRUE}. If \code{pad_zeros = FALSE} then
   the return \emph{matrix} has a smaller number of rows than the input
   \code{tseries}. The padding operation can be time-consuming, because it
-  requires the copying of data.
+  requires the copying the data in memory.
   
   The function \code{diffit()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it much faster than \code{R} code.

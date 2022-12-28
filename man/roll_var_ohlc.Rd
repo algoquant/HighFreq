@@ -133,7 +133,7 @@ ohlc <- log(HighFreq::SPY)
 # Extract the time index of SPY prices
 indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at minutely end points, with a 21 minute look-back
-var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
+varoll <- HighFreq::roll_var_ohlc(ohlc, 
                               step=1, look_back=21, 
                               method="yang_zhang", 
                               index=indeks, scale=TRUE)
@@ -141,24 +141,24 @@ var_rolling <- HighFreq::roll_var_ohlc(ohlc,
 ohlc <- rutils::etfenv$VTI
 indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
-var_rolling <- HighFreq::roll_var_ohlc(ohlc, 
+varoll <- HighFreq::roll_var_ohlc(ohlc, 
                               step=5, look_back=4, 
                               method="yang_zhang", 
                               index=indeks, scale=TRUE)
 # Same calculation in R
 nrows <- NROW(ohlc)
-close_lag = HighFreq::lagit(ohlc[, 4])
+closel = HighFreq::lagit(ohlc[, 4])
 endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
 startp <- drop(HighFreq::calc_startpoints(endp, 2))
-n_pts <- NROW(endp)
-var_rollingr <- sapply(2:n_pts, function(it) {
+npts <- NROW(endp)
+varollr <- sapply(2:npts, function(it) {
   rangev <- startp[it]:endp[it]
   sub_ohlc = ohlc[rangev, ]
-  sub_close = close_lag[rangev]
+  sub_close = closel[rangev]
   sub_index = indeks[rangev]
-  HighFreq::calc_var_ohlc(sub_ohlc, close_lag=sub_close, scale=TRUE, index=sub_index)
+  HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scale=TRUE, index=sub_index)
 })  # end sapply
-var_rollingr <- c(0, var_rollingr)
-all.equal(drop(var_rolling), var_rollingr)
+varollr <- c(0, varollr)
+all.equal(drop(var_rolling), varollr)
 }
 }

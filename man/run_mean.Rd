@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_mean}
 \alias{run_mean}
-\title{Calculate the running weighted means of streaming \emph{time series} data.}
+\title{Calculate the trailing weighted means of streaming \emph{time series} data.}
 \usage{
 run_mean(tseries, lambda, weights)
 }
@@ -19,17 +19,17 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the running weighted means of streaming \emph{time series} data.
+Calculate the trailing weighted means of streaming \emph{time series} data.
 }
 \details{
-The function \code{run_mean()} calculates the running weighted means of
+The function \code{run_mean()} calculates the trailing weighted means of
   the streaming \emph{time series} data \eqn{p_t} by recursively weighing
-  present and past values using the decay factor \eqn{\lambda}.
-  If the \code{weights} argument is omitted, then the function
-  \code{run_mean()} simply calculates the exponentially weighted moving
-  average value of the streaming \emph{time series} data \eqn{p_t}:
+  present and past values using the decay factor \eqn{\lambda}. If the
+  \code{weights} argument is omitted, then the function \code{run_mean()}
+  simply calculates the exponentially weighted moving average value of the
+  streaming \emph{time series} data \eqn{p_t}:
   \deqn{
-    \mu_t = (1-\lambda) p_t + \lambda \mu_{t-1} = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+    \mu_t = \lambda \mu_{t-1} + (1-\lambda) p_t = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
   }
   
   Some applications require applying additional weight factors, like for
@@ -37,23 +37,23 @@ The function \code{run_mean()} calculates the running weighted means of
   are multiplied by the streaming trading volumes.
   
   If the \code{weights} argument is included, then the function
-  \code{run_mean()} calculates the running weighted means in two steps.
+  \code{run_mean()} calculates the trailing weighted means in two steps.
   
-  First it calculates the running mean weights \eqn{\mu^w_t}:
+  First it calculates the trailing mean weights \eqn{\mu^w_t}:
   \deqn{
-    \mu^w_t = (1-\lambda) w_t + \lambda \mu^w_{t-1}
+    \mu^w_t = \lambda \mu^w_{t-1} + (1-\lambda) w_t
   }
   
-  Second it calculates the the running mean products \eqn{\mu^p_t} of the
+  Second it calculates the the trailing mean products \eqn{\mu^p_t} of the
   weights \eqn{w_t} and the data \eqn{p_t}:
   \deqn{
-    \mu^p_t = (1-\lambda) w_t p_t + \lambda \mu^p_{t-1}
+    \mu^p_t = \lambda \mu^p_{t-1} + (1-\lambda) w_t p_t
   }
   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
-  weights, \eqn{\mu^w_t} are the running mean weights, and \eqn{\mu^p_t} are
-  the running mean products of the data and the weights. 
+  weights, \eqn{\mu^w_t} are the trailing mean weights, and \eqn{\mu^p_t}
+  are the trailing mean products of the data and the weights.
   
-  The running mean weighted value \eqn{\mu_t} is equal to the ratio of the
+  The trailing mean weighted value \eqn{\mu_t} is equal to the ratio of the
   data and weights products, divided by the mean weights:
   \deqn{
     \mu_t = \frac{\mu^p_t}{\mu^w_t}
@@ -67,11 +67,11 @@ The function \code{run_mean()} calculates the running weighted means of
   The value of the decay factor \eqn{\lambda} should be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-  values have a greater weight, and the running mean values have a stronger
+  values have a greater weight, and the trailing mean values have a stronger
   dependence on past values.  This is equivalent to a long look-back
   interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-  past values have a smaller weight, and the running mean values have a
+  past values have a smaller weight, and the trailing mean values have a
   weaker dependence on past values.  This is equivalent to a short look-back
   interval.
 
@@ -87,10 +87,10 @@ The function \code{run_mean()} calculates the running weighted means of
 # Calculate historical prices
 ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
-# Calculate the running means
+# Calculate the trailing means
 lambda <- 0.95
 means <- HighFreq::run_mean(closep, lambda=lambda)
-# Calculate running means using R code
+# Calculate trailing means using R code
 filtered <- (1-lambda)*filter(prices, 
   filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
   method="recursive")
@@ -105,12 +105,12 @@ summary(microbenchmark(
   
 # Create weights equal to the trading volumes
 weights <- quantmod::Vo(ohlc)
-# Calculate the running weighted means
+# Calculate the trailing weighted means
 meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
-# Plot dygraph of the running weighted means
+# Plot dygraph of the trailing weighted means
 datav <- xts(cbind(means, meanw), zoo::index(ohlc))
-colnames(datav) <- c("means running", "means weighted")
-dygraphs::dygraph(datav, main="Running Means") \%>\%
+colnames(datav) <- c("means trailing", "means weighted")
+dygraphs::dygraph(datav, main="Trailing Means") \%>\%
   dyOptions(colors=c("blue", "red"), strokeWidth=1) \%>\%
   dyLegend(show="always", width=500)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_max}
 \alias{run_max}
-\title{Calculate the running maximum values of streaming \emph{time series} data.}
+\title{Calculate the trailing maximum values of streaming \emph{time series} data.}
 \usage{
 run_max(tseries, lambda)
 }
@@ -17,14 +17,14 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the running maximum values of streaming \emph{time series} data.
+Calculate the trailing maximum values of streaming \emph{time series} data.
 }
 \details{
-The function \code{run_max()} calculates the running maximum of streaming
-  \emph{time series} data by recursively weighing present and past values
-  using the decay factor \eqn{\lambda}.
+The function \code{run_max()} calculates the trailing maximum values of
+  streaming \emph{time series} data by recursively weighing present and past
+  values using the decay factor \eqn{\lambda}.
 
-  It calculates the running maximum values \eqn{p^{max}_t} of the streaming
+  It calculates the trailing maximum values \eqn{p^{max}_t} of the streaming
   data \eqn{p_t} as follows:
   \deqn{
     p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
@@ -39,7 +39,7 @@ The function \code{run_max()} calculates the running maximum of streaming
   If \eqn{\lambda} is close to \code{1} then the past maximum values persist
   for longer.  This is equivalent to a long look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the past maximum values
-  decay quickly, and the running maximum depends on the more recent
+  decay quickly, and the trailing maximum depends on the more recent
   streaming values.  This is equivalent to a short look-back interval.
 
   The above formula can also be expressed as:
@@ -60,14 +60,14 @@ The function \code{run_max()} calculates the running maximum of streaming
 \dontrun{
 # Calculate historical prices
 prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
-# Calculate the running maximums
+# Calculate the trailing maximums
 lambda <- 0.9
 maxv <- HighFreq::run_max(prices, lambda=lambda)
-# Plot dygraph of VTI prices and running maximums
+# Plot dygraph of VTI prices and trailing maximums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
 colnames(datav) <- c("prices", "max")
 colnamev <- colnames(datav)
-dygraphs::dygraph(datav, main="VTI Prices and Running Maximums") \%>\%
+dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") \%>\%
   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
 }

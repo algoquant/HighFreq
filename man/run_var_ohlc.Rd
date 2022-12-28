@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var_ohlc}
 \alias{run_var_ohlc}
-\title{Calculate the running variance of streaming \emph{OHLC} price data.}
+\title{Calculate the realized variance of streaming
+\emph{OHLC} price data.}
 \usage{
 run_var_ohlc(ohlc, lambda)
 }
@@ -18,7 +19,8 @@ A single-column \emph{matrix} of variance estimates, with the same
   number of rows as the input \code{ohlc} price data.
 }
 \description{
-Calculate the running variance of streaming \emph{OHLC} price data.
+Calculate the realized variance of streaming
+\emph{OHLC} price data.
 }
 \details{
 The function \code{run_var_ohlc()} calculates a single-column
@@ -56,22 +58,22 @@ The function \code{run_var_ohlc()} calculates a single-column
 \dontrun{
 # Extract the log OHLC prices of VTI
 ohlc <- log(rutils::etfenv$VTI)
-# Calculate the running variance
-var_running <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
+# Calculate the trailing variance
+vart <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
 # Calculate the rolling variance
-var_rolling <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
-datav <- cbind(var_running, var_rolling)
-colnames(datav) <- c("running", "rolling")
+varoll <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
+datav <- cbind(vart, varoll)
+colnames(datav) <- c("trailing", "rolling")
 colnamev <- colnames(datav)
 datav <- xts::xts(datav, index(ohlc))
-# dygraph plot of VTI running versus rolling volatility
-dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Running and Rolling Volatility of VTI") \%>\%
+# dygraph plot of VTI trailing versus rolling volatility
+dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility of VTI") \%>\%
   dyOptions(colors=c("red", "blue"), strokeWidth=1) \%>\%
   dyLegend(show="always", width=500)
-# Compare the speed of running versus rolling volatility
+# Compare the speed of trailing versus rolling volatility
 library(microbenchmark)
 summary(microbenchmark(
-  running=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+  trailing=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
   rolling=HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE),
   times=10))[, c(1, 4, 5)]
 }

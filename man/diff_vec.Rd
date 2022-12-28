@@ -39,7 +39,7 @@ The function \code{diff_vec()} calculates the differences between the
   should be padded (extended) with zeros at the front, in order to
   return a \emph{vector} of the same length as the input.  The default is
   \code{pad_zeros = TRUE}. The padding operation can be time-consuming,
-  because it requires the copying of data.
+  because it requires the copying the data in memory.
   
   The function \code{diff_vec()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.

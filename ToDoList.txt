@@ -87,7 +87,76 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
+should be in the range
+must be in the range
+
++ [ ] Modify all the calc_*() and run_*() functions to remove zero values from the data since these are missing values, so they skew the outputs
+
++ [ ] Fix run_reg() - the regression formula is only valid for a single predictor or for several orthogonal predictors
+
++ [ ] In run_reg() define alphas
+Express alpha as the exponential average of the residuals?
+
++ [ ] Replace the word "running" with "online" or "streaming"
+
++ [ ] Update the documentation for all the running functions run_*() - switch terms in the online formulas
+
++ [ ] Deprecate run_zscores() because run_reg() is the new version?
+
++ [ ] Add t-values of the alpha and betas to run_reg()
+
++ [ ] Compare the outputs of functions run_reg() versus roll_reg()
+Find the lambda parameter which produces similar values for a given look_back parameter.
+
+
++ [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
+Nadagouda Recursive Least Squares Regression Kalman Filter
+https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
+
++ [ ] Create the function run_covmat() - for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar()
+
+
++ [ ] Calculate the mean portfolio returns ignoring zero stock returns, because including zero returns biases the estimate away from the actual mean portfolio returns
+
++ [ ] Create online functions run_sharpe() and run_kelly()
+Apply volume weighting.
+Add minvol parameter equal to the floor of the volatility, to prevent the ratios from blowing up when the volatility is very small or zero.
+
++ [ ] Implement incremental PCA IPCA
+Cardot Online Principal Component Analysis.pdf
+
++ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
+calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
+One robust method should be the Wilcoxon W statistic.
+Another robust method should be the Kruskal-Wallis H statistic as follows:
+Combine the given asset returns with the index returns into a single vector.
+Rank the vector of combined returns.
+Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
+The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
+
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
+
++ [ ] Create a function that de-means the columns of a matrix in-place
+Performs these operations:
+predictor <- apply(predictor, 2, function(x) (x-mean(x)))
+Or
+predictor <- t(t(predictor) - colMeans(predictor))
+
++ [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
+
++ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
+
++ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
+Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
+Adapt from run_covar()
+
++ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
+
++ [ ] Make function back_test() parallel using package RcppParallel
+
 + [ ] Create function calc_hurst_range() for the Hurst using the rescaled range
+
++ [ ] Enhance the function diffit() to calculate the fractional differencing scaled by the square root of the volume - to make it more stationary
 
 + [ ] Update function roll_stats() to use function pointers
 
@@ -118,7 +187,7 @@ It should accept a string with a function name and return a pointer to the funct
 It should return a pointer to one of the regression functions: calc_reg(), calc_var(), calc_skew() or calc_kurtosis().
 
 + [ ] Create function calc_table() to calculate the contingency table 
-Function calc_table() in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
+Function calc_table() is in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
 
 + [ ] Calculate the covariance matrix in two steps: first perform clustering and then calculate the covariance matrix of the clusters
 
@@ -136,10 +205,7 @@ Hodges-Lehmann estimator:
 http://nextlevelanalytics.github.io/2016/05/26/Gerber/
 Gerber Statistic Portfolio Optimization.pdf
 
-
 + [ ] Adapt from package RiskPortfolios by Ardia - it's pure R code
-
-+ [ ] Make function back_test() parallel using package RcppParallel
 
 + [ ] Adapt from package roll parallel rolling aggregations
 https://github.com/jjf234/roll
@@ -184,15 +250,6 @@ It should return a named vector of coefficients, tvals, and zscore - works only 
 + [ ] Deprecate function roll_conv_ref() ?
 Does it actually calculate by reference?
 
-+ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
-calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
-One robust method should be the Wilcoxon W statistic.
-Another robust method should be the Kruskal-Wallis H statistic as follows:
-Combine the given asset returns with the index returns into a single vector.
-Rank the vector of combined returns.
-Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
-The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
-
 + [ ] Modify function back_test() so it returns a matrix of strategy returns and positions, not just returns
 
 + [ ] Modify back_test() add parameter for lagging the weights - for applying the weights with an extra lag
@@ -209,9 +266,6 @@ Apply it to the calculation or rolling quantiles.
 + [ ] Create function calc_ret_stats() for calculating aggregations (statistics) over a vector of returns
 Examples of statistics are the mean, median, Sharpe ratio (t-value), Wilcoxon statistic, etc.
 
-+ [ ] Compare the outputs of functions run_reg() versus roll_reg()
-Find the lambda parameter which produces similar values for a given look_back parameter.
-
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
 
@@ -221,40 +275,16 @@ https://www.johndcook.com/blog/standard_deviation/
 
 + [ ] Combine functions sim_ou() and sim_schwartz() into a single function
 
-+ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
-
-+ [ ] Deprecate run_zscores() because run_reg() is the new version
-
-+ [ ] Add t-values to run_reg()
-
 + [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory
 That may not always be correct, for example in the case of rolling calculations.
 
 + [ ] Fix function mult_mat_ref() - it doesn't do anything - it doesn't multiply the matrix
 Is it a problem only on the Mac because of incompatible compiler?
 
-+ [ ] Create a function that de-means the columns of a matrix
-Performs these operations:
-predictor <- apply(predictor, 2, function(x) (x-mean(x)))
-Or
-predictor <- t(t(predictor) - colMeans(predictor))
-
 + [ ] In functions calc_reg() and roll_reg() add an argument called "method" for scaling the residuals
-
-+ [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
-
-+ [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
 + [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
 Worker agg_ohlc()
-
-+ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
-Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
-Adapt from run_covar()
-
-+ [ ] Create function run_sharpe()
-
-+ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] Fix scaling in calc_weights() ?
 
@@ -298,15 +328,6 @@ weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alp
 all.equal(weightcpp, weightsr)
 
 + [ ] In function calc_mean() add shrinkage of returns?
-
-+ [ ] Implement incremental PCA IPCA
-Cardot Online Principal Component Analysis.pdf
-
-+ [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
-Nadagouda Recursive Least Squares Regression Kalman Filter
-https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
-
-+ [ ] Create the function run_covmat() - for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar()
 
 + [ ] In function back_test(), scale the weights to match the volatility of the equally weighted portfolio?  No - that belongs to calc_weights()
 
@@ -501,6 +522,22 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Create the function calc_invrec() for calculating the inverse of a matrix recursively using the Schulz formula
+
++ [x] Create the function calc_invref() for calculating the inverse of a matrix in place (pass by reference) using arma::inv()
+
++ [x] Add sandbox folder for testing code to be incorporated into production
+
++ [x] Rename variable "matrix" to "matrixv"
+
++ [x] Rename variable "tseries" to "matrixv" or "vectorv" - in matrix functions
+
++ [x] Rename variable "vector" to "vectorv"
+
++ [x] Replace the word "running" with "trailing"
+
++ [x] Modify the running functions run_var() and run_covar() to avoid leading zeros in volatility, skewness, kurtosis
 
 + [x] Update function calc_hurst() to use a vector of aggregation intervals
 

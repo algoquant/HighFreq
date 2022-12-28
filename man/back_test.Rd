@@ -113,7 +113,7 @@ startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
 alpha <- 0.5
 dimax <- 3
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(dimax=dimax, alpha=alpha, scalew="sumsq")
+controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
 pnls <- HighFreq::back_test(excess, returns, controlv=controlv, startp=(startp-1), endp=(endp-1))
 pnls <- xts::xts(pnls, index(returns))

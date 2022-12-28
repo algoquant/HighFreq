@@ -3,17 +3,17 @@
 \name{mult_mat_ref}
 \alias{mult_mat_ref}
 \title{Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise and in place (without copying).}
+element-wise and in place (without copying the data in memory).}
 \usage{
-mult_mat_ref(vector, matrix, byrow = TRUE)
+mult_mat_ref(vectorv, matrixv, byrow = TRUE)
 }
 \arguments{
-\item{\code{vector}}{A \emph{numeric} \emph{vector}.}
+\item{\code{vectorv}}{A \emph{numeric} \emph{vector}.}
 
-\item{\code{matrix}}{A \emph{numeric} \emph{matrix}.}
+\item{\code{matrixv}}{A \emph{numeric} \emph{matrix}.}
 
 \item{\code{byrow}}{A \emph{Boolean} argument: if \code{TRUE} then multiply
-the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
+the rows of \code{matrixv} by \code{vectorv}, otherwise multiply the columns
 (the default is \code{byrow = TRUE}.)}
 }
 \value{
@@ -21,22 +21,22 @@ Void (no return value).
 }
 \description{
 Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise and in place (without copying).
+element-wise and in place (without copying the data in memory).
 }
 \details{
 The function \code{mult_mat_ref()} multiplies the rows or columns of a
   \emph{matrix} times a \emph{vector}, element-wise and in place (without
-  copying).
+  copying the data in memory).
 
-  It accepts a \emph{pointer} to the argument \code{matrix}, and replaces
-  the old \code{matrix} values with the new values. It performs the
-  calculation in place, without copying the \emph{matrix} in memory, which
-  can significantly increase the computation speed for large matrices.
+  It accepts a \emph{pointer} to the argument \code{matrixv}, and it
+  overwrites the old \code{matrix} values with the new values. It performs
+  the calculation in place, without copying the \emph{matrix} in memory,
+  which can significantly increase the computation speed for large matrices.
 
   If \code{byrow = TRUE} (the default), then function \code{mult_mat_ref()}
-  multiplies the rows of the argument \code{matrix} times the argument
-  \code{vector}.
-  Otherwise it multiplies the columns of \code{matrix}.
+  multiplies the rows of the argument \code{matrixv} times the argument
+  \code{vectorv}.
+  Otherwise it multiplies the columns of \code{matrixv}.
 
   In \code{R}, \emph{matrix} multiplication is performed by columns.
   Performing multiplication by rows is often required, for example when
@@ -49,10 +49,10 @@ The function \code{mult_mat_ref()} multiplies the rows or columns of a
   faster than vectorized \code{R} code, and it's even much faster compared
   to \code{R} when multiplying the \emph{matrix} rows.
 
-  The function \code{mult_mat_ref()} performs loops over the \emph{matrix} rows
-  and columns using the \emph{Armadillo} operators \code{each_row()} and
-  \code{each_col()}, instead of performing explicit \code{for()} loops (both
-  methods are equally fast).
+  The function \code{mult_mat_ref()} performs loops over the \emph{matrix}
+  rows and columns using the \emph{Armadillo} operators \code{each_row()}
+  and \code{each_col()}, instead of performing explicit \code{for()} loops
+  (both methods are equally fast).
 }
 \examples{
 \dontrun{

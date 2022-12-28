@@ -9,7 +9,7 @@ calc_hurst_ohlc(
   ohlc,
   step,
   method = "yang_zhang",
-  close_lag = 0L,
+  closel = 0L,
   scale = TRUE,
   index = 0L
 )
@@ -32,9 +32,9 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \code{method = "yang_zhang"}.)}
 
-\item{\code{close_lag}}{A \emph{vector} with the lagged \emph{close} prices
+\item{\code{closel}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{close_lag = 0}).}
+default is \code{closel = 0}).}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is

@@ -8,7 +8,7 @@ price range estimators.}
 calc_var_ohlc(
   ohlc,
   method = "yang_zhang",
-  close_lag = 0L,
+  closel = 0L,
   scale = TRUE,
   index = 0L
 )
@@ -28,9 +28,9 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \code{method = "yang_zhang"}.)}
 
-\item{\code{close_lag}}{A \emph{vector} with the lagged \emph{close} prices
+\item{\code{closel}}{A \emph{vector} with the lagged \emph{close} prices
 of the \emph{OHLC time series}.  This is an optional argument. (The
-default is \code{close_lag = 0}).}
+default is \code{closel = 0}).}
 
 \item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
@@ -84,7 +84,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   period.  If the time index is in days, then the differences are equal to
   the number of days in each time period.
   
-  The optional argument \code{close_lag} are the lagged \emph{close} prices
+  The optional argument \code{closel} are the lagged \emph{close} prices
   of the \emph{OHLC time series}.  Passing in the lagged \emph{close} prices
   speeds up the calculation, so it's useful for rolling calculations.
   
@@ -107,9 +107,9 @@ HighFreq::calc_var_ohlc(ohlc,
 # Calculate the variance without scaling the returns
 HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
 # Calculate the variance by passing in the lagged close prices
-close_lag <- HighFreq::lagit(ohlc[, 4])
+closel <- HighFreq::lagit(ohlc[, 4])
 all.equal(HighFreq::calc_var_ohlc(ohlc), 
-  HighFreq::calc_var_ohlc(ohlc, close_lag=close_lag))
+  HighFreq::calc_var_ohlc(ohlc, closel=closel))
 # Compare with HighFreq::calc_var_ohlc_r()
 all.equal(HighFreq::calc_var_ohlc(ohlc, index=indeks), 
   HighFreq::calc_var_ohlc_r(ohlc))

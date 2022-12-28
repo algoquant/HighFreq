@@ -5,7 +5,7 @@
 \title{Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
 element-wise.}
 \usage{
-mult_mat(vector, matrix, byrow = TRUE)
+mult_mat(vectorv, matrixv, byrow = TRUE)
 }
 \arguments{
 \item{\code{vector}}{A \emph{numeric} \emph{vector}.}
