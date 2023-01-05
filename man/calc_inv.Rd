@@ -76,9 +76,9 @@ The function \code{calc_inv()} calculates the regularized inverse of the
 \examples{
 \dontrun{
 # Calculate ETF returns
-returns <- na.omit(rutils::etfenv$returns)
+retsp <- na.omit(rutils::etfenv$returns)
 # Calculate covariance matrix
-covmat <- cov(returns)
+covmat <- cov(retsp)
 # Calculate regularized inverse using RcppArmadillo
 invmat <- HighFreq::calc_inv(covmat, dimax=3)
 # Calculate regularized inverse from SVD in R

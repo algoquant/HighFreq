@@ -23,48 +23,50 @@ Calculate the trailing weighted means of streaming \emph{time series} data.
 }
 \details{
 The function \code{run_mean()} calculates the trailing weighted means of
-  the streaming \emph{time series} data \eqn{p_t} by recursively weighing
+  the streaming \emph{time series} data \eqn{p_t} by recursively weighting
   present and past values using the decay factor \eqn{\lambda}. If the
-  \code{weights} argument is omitted, then the function \code{run_mean()}
-  simply calculates the exponentially weighted moving average value of the
-  streaming \emph{time series} data \eqn{p_t}:
+  \code{weights} argument is equal to zero, then the function
+  \code{run_mean()} simply calculates the exponentially weighted moving
+  average value of the streaming \emph{time series} data \eqn{p_t}:
   \deqn{
-    \mu_t = \lambda \mu_{t-1} + (1-\lambda) p_t = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+    \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
   }
   
   Some applications require applying additional weight factors, like for
-  example the volume-weighted average price indicator.  The streaming prices
-  are multiplied by the streaming trading volumes.
+  example the volume-weighted average price indicator (VWAP).  Then the
+  streaming prices are multiplied by the streaming trading volumes.
   
-  If the \code{weights} argument is included, then the function
+  If the \code{weights} argument is not zero, then the function
   \code{run_mean()} calculates the trailing weighted means in two steps.
   
-  First it calculates the trailing mean weights \eqn{\mu^w_t}:
+  First it calculates the trailing mean weights \eqn{\bar{w}_t}:
   \deqn{
-    \mu^w_t = \lambda \mu^w_{t-1} + (1-\lambda) w_t
+    \bar{w}_t = \lambda \bar{w}_{t-1} + (1-\lambda) w_t
   }
   
-  Second it calculates the the trailing mean products \eqn{\mu^p_t} of the
+  Second it calculates the the trailing mean products \eqn{\bar{w p}_t} of the
   weights \eqn{w_t} and the data \eqn{p_t}:
   \deqn{
-    \mu^p_t = \lambda \mu^p_{t-1} + (1-\lambda) w_t p_t
+    \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1-\lambda) w_t p_t
   }
   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
-  weights, \eqn{\mu^w_t} are the trailing mean weights, and \eqn{\mu^p_t}
+  weights, \eqn{\bar{w}_t} are the trailing mean weights, and \eqn{\bar{w p}_t}
   are the trailing mean products of the data and the weights.
   
-  The trailing mean weighted value \eqn{\mu_t} is equal to the ratio of the
+  The trailing mean weighted value \eqn{\bar{p}_t} is equal to the ratio of the
   data and weights products, divided by the mean weights:
   \deqn{
-    \mu_t = \frac{\mu^p_t}{\mu^w_t}
+    \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
   }
 
   The above recursive formulas are convenient for processing live streaming
   data because they don't require maintaining a buffer of past data.
   The formulas are equivalent to a convolution with exponentially decaying
-  weights, but they're faster to calculate.
+  weights, but they're much faster to calculate.
+  Using exponentially decaying weights is more natural than using a sliding
+  look-back interval, because it gradually "forgets" about the past data.
   
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing mean values have a stronger
@@ -89,29 +91,29 @@ ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
 lambda <- 0.95
-means <- HighFreq::run_mean(closep, lambda=lambda)
+meanv <- HighFreq::run_mean(closep, lambda=lambda, weights=0)
 # Calculate trailing means using R code
-filtered <- (1-lambda)*filter(prices, 
-  filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), 
+filtered <- (1-lambda)*filter(closep, 
+  filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
   method="recursive")
-all.equal(drop(means), unclass(filtered), check.attributes=FALSE)
+all.equal(drop(meanv), unclass(filtered), check.attributes=FALSE)
 
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(prices, lambda=lambda),
-  Rcode=filter(prices, filter=lambda, init=as.numeric(prices[1, 1])/(1-lambda), method="recursive"),
+  Rcpp=HighFreq::run_mean(closep, lambda=lambda, weights=0),
+  Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Create weights equal to the trading volumes
-weights <- quantmod::Vo(ohlc)
+weightv <- quantmod::Vo(ohlc)
 # Calculate the trailing weighted means
-meanw <- HighFreq::run_mean(prices, lambda=lambda, weights=weights)
+meanw <- HighFreq::run_mean(closep, lambda=lambda, weights=weightv)
 # Plot dygraph of the trailing weighted means
-datav <- xts(cbind(means, meanw), zoo::index(ohlc))
+datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means trailing", "means weighted")
 dygraphs::dygraph(datav, main="Trailing Means") \%>\%
-  dyOptions(colors=c("blue", "red"), strokeWidth=1) \%>\%
+  dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\%
   dyLegend(show="always", width=500)
 }
 

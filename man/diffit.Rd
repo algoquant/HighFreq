@@ -52,7 +52,7 @@ The function \code{diffit()} calculates the differences between the rows
   requires the copying the data in memory.
   
   The function \code{diffit()} is implemented in \code{RcppArmadillo}
-  \code{C++} code, which makes it much faster than \code{R} code.
+  \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{

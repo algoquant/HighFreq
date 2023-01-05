@@ -59,8 +59,8 @@ The function \code{calc_hurst()} calculates the Hurst exponent from the
 \examples{
 \dontrun{
 # Calculate the log prices
-prices <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
-prices <- log(prices)
+closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
+closep <- log(closep)
 # Calculate the Hurst exponents for a 21 day aggregation interval
 HighFreq::calc_hurst(prices, aggv=21)
 # Calculate the Hurst exponents for a vector of aggregation intervals

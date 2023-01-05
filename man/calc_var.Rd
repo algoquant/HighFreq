@@ -33,8 +33,7 @@ The function \code{calc_var()} calculates the dispersion of the
   dispersion are the variance and the Median Absolute Deviation (\emph{MAD}).
 
   If \code{method = "moment"} (the default) then \code{calc_var()}
-  calculates the dispersion as the second moment of the data \eqn{\sigma^2}
-  (the variance).
+  calculates the dispersion as the second moment of the data (the variance).
   Then \code{calc_var()} performs the same calculation as the function
   \code{colVars()} from package
   \href{https://cran.r-project.org/web/packages/matrixStats/index.html}{matrixStats},
@@ -43,7 +42,7 @@ The function \code{calc_var()} calculates the dispersion of the
   If \code{method = "quantile"} then it calculates the dispersion as the
   difference between the quantiles as follows:
   \deqn{
-    \mu = q_{\alpha} - q_{1-\alpha}
+    \sigma = q_{\alpha} - q_{1-\alpha}
   }
   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
   
@@ -65,27 +64,27 @@ The function \code{calc_var()} calculates the dispersion of the
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-returns <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
+retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 # Compare HighFreq::calc_var() with standard var()
-all.equal(drop(HighFreq::calc_var(returns)), 
-  apply(returns, 2, var), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retsp)), 
+  apply(retsp, 2, var), check.attributes=FALSE)
 # Compare HighFreq::calc_var() with matrixStats
-all.equal(drop(HighFreq::calc_var(returns)), 
-  matrixStats::colVars(returns), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retsp)), 
+  matrixStats::colVars(retsp), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(returns),
-  matrixStats=matrixStats::colVars(returns),
-  Rcode=apply(returns, 2, var),
+  Rcpp=HighFreq::calc_var(retsp),
+  matrixStats=matrixStats::colVars(retsp),
+  Rcode=apply(retsp, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_var() with stats::mad()
-all.equal(drop(HighFreq::calc_var(returns, method="nonparametric")), 
-  sapply(returns, mad), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retsp, method="nonparametric")), 
+  sapply(retsp, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(returns, method="nonparametric"),
-  Rcode=sapply(returns, mad),
+  Rcpp=HighFreq::calc_var(retsp, method="nonparametric"),
+  Rcode=sapply(retsp, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

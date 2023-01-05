@@ -37,11 +37,11 @@ The function \code{calc_lm()} performs the same calculations as the
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
+retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-response <- returns[, 1]
+response <- retsp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predictor <- returns[, -1]
+predictor <- retsp[, -1]
 # Perform multivariate regression using lm()
 lmod <- lm(response ~ predictor)
 lmodsum <- summary(lmod)

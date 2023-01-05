@@ -21,7 +21,7 @@ Calculate the trailing maximum values of streaming \emph{time series} data.
 }
 \details{
 The function \code{run_max()} calculates the trailing maximum values of
-  streaming \emph{time series} data by recursively weighing present and past
+  streaming \emph{time series} data by recursively weighting present and past
   values using the decay factor \eqn{\lambda}.
 
   It calculates the trailing maximum values \eqn{p^{max}_t} of the streaming
@@ -34,7 +34,7 @@ The function \code{run_max()} calculates the trailing maximum values of
   "forgotten". The second term pulls the maximum value to the current value
   \eqn{p_t}.
   
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the past maximum values persist
   for longer.  This is equivalent to a long look-back interval.
@@ -59,10 +59,10 @@ The function \code{run_max()} calculates the trailing maximum values of
 \examples{
 \dontrun{
 # Calculate historical prices
-prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
+closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing maximums
 lambda <- 0.9
-maxv <- HighFreq::run_max(prices, lambda=lambda)
+maxv <- HighFreq::run_max(closep, lambda=lambda)
 # Plot dygraph of VTI prices and trailing maximums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
 colnames(datav) <- c("prices", "max")

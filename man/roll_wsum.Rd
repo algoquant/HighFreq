@@ -39,7 +39,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
   convolutions of the columns of \code{tseries} with the \emph{column
   vector} of weights using the \code{RcppArmadillo} function
   \code{arma::conv2()}.  It performs a similar calculation to the standard
-  \code{R} function \cr\code{stats::filter(x=returns, filter=weights,
+  \code{R} function \cr\code{stats::filter(x=retsp, filter=weightv,
   method="convolution", sides=1)}, but it can be many times faster, and it
   doesn't produce any leading \code{NA} values.
   
@@ -75,53 +75,53 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
 \dontrun{
 # First example
 # Calculate historical returns
-returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
+retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
 # Calculate rolling sums and compare with rutils::roll_sum()
-c_sum <- HighFreq::roll_sum(returns, look_back)
-r_sum <- rutils::roll_sum(returns, look_back)
-all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+sumc <- HighFreq::roll_sum(retsp, look_back)
+sumr <- rutils::roll_sum(retsp, look_back)
+all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
-r_sum <- apply(zoo::coredata(returns), 2, cumsum)
-lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
-r_sum <- (r_sum - lag_sum)
-all.equal(c_sum, r_sum, check.attributes=FALSE)
+sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+sumr <- (sumr - sumlag)
+all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Calculate rolling sums at end points
-stu_b <- 21
-c_sum <- HighFreq::roll_wsum(returns, look_back, stub=stu_b)
-endp <- (stu_b + look_back*(0:(NROW(returns) \%/\% look_back)))
-endp <- endp[endp < NROW(returns)]
-r_sum <- apply(zoo::coredata(returns), 2, cumsum)
-r_sum <- r_sum[endp+1, ]
-lag_sum <- rbind(numeric(2), r_sum[1:(NROW(r_sum) - 1), ])
-r_sum <- (r_sum - lag_sum)
-all.equal(c_sum, r_sum, check.attributes=FALSE)
+stubv <- 21
+sumc <- HighFreq::roll_wsum(retsp, look_back, stub=stubv)
+endp <- (stubv + look_back*(0:(NROW(retsp) \%/\% look_back)))
+endp <- endp[endp < NROW(retsp)]
+sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumr <- sumr[endp+1, ]
+sumlag <- rbind(numeric(2), sumr[1:(NROW(sumr) - 1), ])
+sumr <- (sumr - sumlag)
+all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Calculate rolling sums at end points - pass in endp
-c_sum <- HighFreq::roll_wsum(returns, endp=endp)
-all.equal(c_sum, r_sum, check.attributes=FALSE)
+sumc <- HighFreq::roll_wsum(retsp, endp=endp)
+all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Create exponentially decaying weights
-weights <- exp(-0.2*(1:11))
-weights <- matrix(weights/sum(weights), nc=1)
+weightv <- exp(-0.2*(1:11))
+weightv <- matrix(weightv/sum(weightv), nc=1)
 # Calculate rolling weighted sum
-c_sum <- HighFreq::roll_wsum(returns, weights=weights)
+sumc <- HighFreq::roll_wsum(retsp, weights=weightv)
 # Calculate rolling weighted sum using filter()
-filtered <- filter(x=returns, filter=weights, method="convolution", sides=1)
-all.equal(c_sum[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
+filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
+all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-c_sum <- HighFreq::roll_wsum(returns, endp=endp, weights=weights)
-all.equal(c_sum, filtered[endp+1, ], check.attributes=FALSE)
+sumc <- HighFreq::roll_wsum(retsp, endp=endp, weights=weightv)
+all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
-weights <- matrix(c(1, rep(0, 10)), nc=1)
+weightv <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weighted <- HighFreq::roll_wsum(returns, weights=weights)
+weighted <- HighFreq::roll_wsum(retsp, weights=weightv)
 # Compare with original
-all.equal(coredata(returns), weighted, check.attributes=FALSE)
+all.equal(coredata(retsp), weighted, check.attributes=FALSE)
 }
 
 }

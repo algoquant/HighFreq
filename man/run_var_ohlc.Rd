@@ -42,6 +42,8 @@ The function \code{run_var_ohlc()} calculates a single-column
   data because it doesn't require maintaining a buffer of past data.
   The formula is equivalent to a convolution with exponentially decaying
   weights, but it's faster.
+  Using exponentially decaying weights is more natural than using a sliding
+  look-back interval, because it gradually "forgets" about the past data.
   
   The function \code{run_var_ohlc()} does not calculate the logarithm of
   the prices.
@@ -51,8 +53,7 @@ The function \code{run_var_ohlc()} calculates a single-column
   \code{run_var_ohlc()} calculates the percentage variance.
   
   The function \code{run_var_ohlc()} is implemented in \code{RcppArmadillo}
-  \code{C++} code, so it's many times faster than the equivalent \code{R}
-  code.
+  \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{
@@ -68,7 +69,7 @@ colnamev <- colnames(datav)
 datav <- xts::xts(datav, index(ohlc))
 # dygraph plot of VTI trailing versus rolling volatility
 dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility of VTI") \%>\%
-  dyOptions(colors=c("red", "blue"), strokeWidth=1) \%>\%
+  dyOptions(colors=c("red", "blue"), strokeWidth=2) \%>\%
   dyLegend(show="always", width=500)
 # Compare the speed of trailing versus rolling volatility
 library(microbenchmark)

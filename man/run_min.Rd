@@ -21,7 +21,7 @@ Calculate the trailing minimum values of streaming \emph{time series} data.
 }
 \details{
 The function \code{run_min()} calculates the trailing minimum values of
-  streaming \emph{time series} data by recursively weighing present and past
+  streaming \emph{time series} data by recursively weighting present and past
   values using the decay factor \eqn{\lambda}.
 
   It calculates the trailing minimum values \eqn{p^{min}_t} of the streaming
@@ -34,7 +34,7 @@ The function \code{run_min()} calculates the trailing minimum values of
   "forgotten". The second term pulls the minimum value to the current value
   \eqn{p_t}.
   
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the past minimum values persist
   for longer.  This is equivalent to a long look-back interval.
@@ -59,10 +59,10 @@ The function \code{run_min()} calculates the trailing minimum values of
 \examples{
 \dontrun{
 # Calculate historical prices
-prices <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
+closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing minimums
 lambda <- 0.9
-minv <- HighFreq::run_min(prices, lambda=lambda)
+minv <- HighFreq::run_min(closep, lambda=lambda)
 # Plot dygraph of VTI prices and trailing minimums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
 colnames(datav) <- c("prices", "min")

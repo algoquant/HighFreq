@@ -87,21 +87,27 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-should be in the range
-must be in the range
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
+
++ [ ] Create a function that de-means the columns of a matrix in-place
+Performs these operations:
+predictor <- apply(predictor, 2, function(x) (x-mean(x)))
+Or
+predictor <- t(t(predictor) - colMeans(predictor))
+
++ [ ] Modify HighFreq::roll_sum() - add weights
+
++ [ ] Modify HighFreq::run_var() - add weights - calculate the trailing weighted variance if the weight vector is passed as an argument - similar to HighFreq::run_mean()
 
 + [ ] Modify all the calc_*() and run_*() functions to remove zero values from the data since these are missing values, so they skew the outputs
 
-+ [ ] Fix run_reg() - the regression formula is only valid for a single predictor or for several orthogonal predictors
-
-+ [ ] In run_reg() define alphas
-Express alpha as the exponential average of the residuals?
-
 + [ ] Replace the word "running" with "online" or "streaming"
 
-+ [ ] Update the documentation for all the running functions run_*() - switch terms in the online formulas
++ [ ] Update the documentation for all the online functions run_*() - switch terms in the online formulas
 
-+ [ ] Deprecate run_zscores() because run_reg() is the new version?
++ [ ] Deprecate run_zscores() because run_reg() is the new version
+run_zscores() has errors in the code and in the documentation.
+For example, the means are not subtracted from the returns before squaring them.
 
 + [ ] Add t-values of the alpha and betas to run_reg()
 
@@ -133,14 +139,6 @@ Combine the given asset returns with the index returns into a single vector.
 Rank the vector of combined returns.
 Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
 The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
-
-+ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
-
-+ [ ] Create a function that de-means the columns of a matrix in-place
-Performs these operations:
-predictor <- apply(predictor, 2, function(x) (x-mean(x)))
-Or
-predictor <- t(t(predictor) - colMeans(predictor))
 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
@@ -523,6 +521,19 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] Fix run_reg() - the regression formula is only valid for a single predictor or for several orthogonal predictors
+The betas are equal to the Kelly ratios when the predictors are orthogonal.
+If the predictors are not orthogonal then the covariance matrix of the predictors must be inverted.
+This is only very slightly slower than using the Kelly ratios.
+
++ [x] In run_reg() modify the calculation of the alphas to be equal to the average of the residuals minus beta times the average of the predictors (α = rm − β pm)
+
++ [x] Fix HighFreq::calc_mean() method="quantile" - the location should be the average of the quantiles not their sum
+
++ [x] Switch terms around in online formulas?
+From: μt = (1 − λ)pt + λμt−1
+To: μt = λμt−1 + (1 − λ)pt
+
 + [x] Create the function calc_invrec() for calculating the inverse of a matrix recursively using the Schulz formula
 
 + [x] Create the function calc_invref() for calculating the inverse of a matrix in place (pass by reference) using arma::inv()
@@ -537,7 +548,7 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 + [x] Replace the word "running" with "trailing"
 
-+ [x] Modify the running functions run_var() and run_covar() to avoid leading zeros in volatility, skewness, kurtosis
++ [x] Modify the online functions run_var() and run_covar() to avoid leading zeros in volatility, skewness, kurtosis
 
 + [x] Update function calc_hurst() to use a vector of aggregation intervals
 
@@ -642,7 +653,7 @@ Run shell script:
 chmod +x run.sh
 ./run.sh
 
-+ [x] Modify function run_mean() to calculate the running weighted mean if the weight vector is passed as an argument
++ [x] Modify function run_mean() to calculate the trailing weighted mean if the weight vector is passed as an argument
 
 + [x] Fix run_reg() - keep old version as run_rego()
 Replace
@@ -1152,10 +1163,6 @@ created function save_rets_OHLC()
 
 
 ### Tasks deprecated
-
-+ [ ] Switch terms around in running formulas?
-μt = (1 − λ)pt + λμt−1
-μt = λμt−1 + (1 − λ)pt
 
 + [ ] Pass a function to a function using Numerical Template Toolbox (NT2) - Nobody uses NT2
 http://gallery.rcpp.org/articles/rcppnt2-introduction/

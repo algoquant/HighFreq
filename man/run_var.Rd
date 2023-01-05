@@ -23,15 +23,15 @@ Calculate the realized variance of streaming
 }
 \details{
 The function \code{run_var()} calculates the trailing variance of
-  streaming \emph{time series} of returns, by recursively weighing the past
+  streaming \emph{time series} of returns, by recursively weighting the past
   variance estimates \eqn{\sigma^2_{t-1}}, with the squared differences of
-  the returns minus the trailing means \eqn{(r_t - \mu_t)^2}, using the
+  the returns minus the trailing means \eqn{(r_t - \bar{r}_t)^2}, using the
   decay factor \eqn{\lambda}:
   \deqn{
-    \mu_t = \lambda \mu_{t-1} + (1-\lambda) r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \mu_t)^2
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
   }
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
@@ -39,9 +39,11 @@ The function \code{run_var()} calculates the trailing variance of
   The above recursive formulas are convenient for processing live streaming
   data because they don't require maintaining a buffer of past data.
   The formulas are equivalent to a convolution with exponentially decaying
-  weights, but they're faster to calculate.
+  weights, but they're much faster to calculate.
+  Using exponentially decaying weights is more natural than using a sliding
+  look-back interval, because it gradually "forgets" about the past data.
 
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing variance values have a
@@ -54,7 +56,7 @@ The function \code{run_var()} calculates the trailing variance of
 
   The function \code{run_var()} performs the same calculation as the
   standard \code{R} function\cr\code{stats::filter(x=series,
-  filter=weights, method="recursive")}, but it's several times faster.
+  filter=weightv, method="recursive")}, but it's several times faster.
 
   The function \code{run_var()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
@@ -62,12 +64,12 @@ The function \code{run_var()} calculates the trailing variance of
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
+retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing variance
 lambda <- 0.9
-varv <- HighFreq::run_var(returns, lambda=lambda)
+varv <- HighFreq::run_var(retsp, lambda=lambda)
 # Calculate centered returns
-retc <- (returns - HighFreq::run_mean(returns, lambda=lambda))
+retc <- (retsp - HighFreq::run_mean(retsp, lambda=lambda))
 # Calculate trailing variance using R code
 filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
   init=as.numeric(retc[1, 1])^2/(1-lambda), 
@@ -76,7 +78,7 @@ all.equal(varv, unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_var(returns, lambda=lambda),
+  Rcpp=HighFreq::run_var(retsp, lambda=lambda),
   Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

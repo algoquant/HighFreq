@@ -25,15 +25,14 @@ The function \code{calc_varvec()} calculates the variance of a
 \examples{
 \dontrun{
 # Create a vector of random returns
-returns <- rnorm(1e6)
+retsp <- rnorm(1e6)
 # Compare calc_varvec() with standard var()
-all.equal(HighFreq::calc_varvec(returns), 
-  var(returns))
+all.equal(HighFreq::calc_varvec(retsp), var(retsp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_varvec(returns),
-  Rcode=var(returns),
+  Rcpp=HighFreq::calc_varvec(retsp),
+  Rcode=var(retsp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

@@ -3,8 +3,8 @@
 \name{run_reg}
 \alias{run_reg}
 \title{Calculate recursively the trailing regressions of streaming \emph{time
-series} of response and predictor data, and calculate the alphas, betas, and
-the residuals.}
+series} of response and predictor data, and calculate the residuals, alphas,
+and betas.}
 \usage{
 run_reg(response, predictor, lambda, method = "none")
 }
@@ -23,52 +23,61 @@ scaling the residuals (the default is \code{method = "none"} - no
 scaling).}
 }
 \value{
-A \emph{matrix} with the regression alphas, betas, and residuals.
+A \emph{matrix} with the regression residuals, alphas, and betas.
 }
 \description{
 Calculate recursively the trailing regressions of streaming \emph{time
-series} of response and predictor data, and calculate the alphas, betas, and
-the residuals.
+series} of response and predictor data, and calculate the residuals, alphas,
+and betas.
 }
 \details{
 The function \code{run_reg()} calculates the vectors of \emph{alphas}
   \eqn{\alpha_t}, \emph{betas} \eqn{\beta_t}, and the \emph{residuals}
-  \eqn{\epsilon_t} of trailing regressions, by recursively weighing the
-  current estimates with past estimates, using the decay factor
-  \eqn{\lambda}:
+  \eqn{\epsilon_t} of trailing regressions, by recursively weighting the
+  current estimates with past estimates, using the decay factor \eqn{\lambda}:
   \deqn{
-    \mu^r_t = \lambda \mu^r_{t-1} + (1-\lambda) r^r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
   }
   \deqn{
-    \mu^p_t = \lambda \mu^p_{t-1} + (1-\lambda) r^p_t
+    \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) ({r^p_t}^2 - {\mu^p_t}^2)
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^2
   }
   \deqn{
-    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^r_t - \mu^r_t) (r^p_t - \mu^p_t)
+    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r_t - \bar{r}_t) (p_t - \bar{p}_t)
   }
   \deqn{
     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t}
   }
   \deqn{
-    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r^r_t - \beta_t r^p_t)
+    \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
+  }
+  \deqn{
+    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
   }
   Where \eqn{\sigma^{cov}_t} are the covariances between the response and
   predictor data at time \eqn{t};
   \eqn{\sigma^2_t} is the vector of predictor variances,
-  and \eqn{r^r_t} and \eqn{r^p_t} are the streaming data of the response
+  and \eqn{r_t} and \eqn{p_t} are the streaming data of the response
   and predictor data.
 
-  The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
-  same number of rows as the input argument \code{predictor}.
+  The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\alpha}, and
+  \eqn{\beta} have the same number of rows as the input argument
+  \code{predictor}.
 
-  The above recursive formulas are convenient for processing live streaming
-  data because they don't require maintaining a buffer of past data.
-  The formulas are equivalent to a convolution with exponentially decaying
-  weights, but they're faster to calculate.
+  The function \code{run_reg()} calculates the regressions without an
+  intercept term. The vector of \emph{alphas} \eqn{\alpha_t} is the
+  intercept value.
 
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The above recursive formulas are equivalent to a convolution with
+  exponentially decaying weights, but they're much faster to calculate.
+  The recursive formulas are convenient for processing live streaming data
+  because they don't require maintaining a buffer of past data.
+  Using exponentially decaying weights is more natural than using a sliding
+  look-back interval, because it gradually "forgets" about the past data.
+
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, so the trailing values have a greater
@@ -104,11 +113,11 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
+retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-response <- returns[, 1]
+response <- retsp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predictor <- returns[, -1]
+predictor <- retsp[, -1]
 # Calculate the trailing regressions
 lambda <- 0.9
 regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
@@ -119,8 +128,8 @@ colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") \%>\%
   dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%
   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
-  dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=1, col="blue") \%>\%
-  dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=1, col="red")
+  dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") \%>\%
+  dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
 }
 
 }

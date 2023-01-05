@@ -123,8 +123,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   the number of days in each time period.
   
   The function \code{roll_var_ohlc()} is implemented in \code{RcppArmadillo}
-  \code{C++} code, so it's many times faster than the equivalent \code{R}
-  code.
+  \code{C++} code, which makes it several times faster than \code{R} code.
 }
 \examples{
 \dontrun{

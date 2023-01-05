@@ -76,32 +76,32 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   performs the same calculation as the function \code{roll_var()} from
   package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-  but it's several times faster because it uses \code{RcppArmadillo}
-  \code{C++} code.
+  but it's several times faster because it uses \code{RcppArmadillo} \code{C++}
+  code.
 
   The function \code{roll_var()} is implemented in \code{RcppArmadillo}
-  \code{C++} code, so it's many times faster than the equivalent \code{R}
-  code.
+  \code{RcppArmadillo} \code{C++} code, which makes it several times faster
+  than \code{R} code.
 }
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-returns <- na.omit(rutils::etfenv$returns$VTI)
+retsp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-variance <- HighFreq::roll_var(returns, step=25, look_back=3)
+variance <- HighFreq::roll_var(retsp, step=25, look_back=3)
 # Compare the variance estimates over 11-period look-back intervals
-all.equal(HighFreq::roll_var(returns, look_back=11)[-(1:10), ], 
-  drop(RcppRoll::roll_var(returns, n=11)), check.attributes=FALSE)
+all.equal(HighFreq::roll_var(retsp, look_back=11)[-(1:10), ], 
+  drop(RcppRoll::roll_var(retsp, n=11)), check.attributes=FALSE)
 # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_var(returns, look_back=11),
-  RcppRoll=RcppRoll::roll_var(returns, n=11),
+  Rcpp=HighFreq::roll_var(retsp, look_back=11),
+  RcppRoll=RcppRoll::roll_var(retsp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
 summary(microbenchmark(
-    Rcpp=HighFreq::roll_var(returns, look_back=11, method="quantile"),
-    TTR=TTR::runMAD(returns, n = 11),
+    Rcpp=HighFreq::roll_var(retsp, look_back=11, method="quantile"),
+    TTR=TTR::runMAD(retsp, n = 11),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

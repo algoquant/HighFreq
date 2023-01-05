@@ -28,8 +28,8 @@ interval for a single-column \emph{time series} or a single-column
 \details{
 The function \code{roll_varvec()} calculates a \emph{vector} of variance
   estimates over a rolling look-back interval for a single-column \emph{time
-  series} or a single-column \emph{matrix}, using \code{RcppArmadillo}
-  \code{C++} code.
+  series} or a single-column \emph{matrix}, using \code{RcppArmadillo} \code{C++}
+  code.
   
   The function \code{roll_varvec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the
@@ -38,21 +38,21 @@ The function \code{roll_varvec()} calculates a \emph{vector} of variance
   The function \code{roll_varvec()} performs the same calculation as the
   function \code{roll_var()} from package
   \href{https://cran.r-project.org/web/packages/RcppRoll/index.html}{RcppRoll},
-  but it's several times faster because it uses \code{RcppArmadillo}
-  \code{C++} code.
+  but it's several times faster because it uses \code{RcppArmadillo} \code{C++}
+  code.
 }
 \examples{
 \dontrun{
 # Create a vector of random returns
-returns <- rnorm(1e6)
+retsp <- rnorm(1e6)
 # Compare the variance estimates over 11-period look-back intervals
-all.equal(drop(HighFreq::roll_varvec(returns, look_back=11))[-(1:10)], 
-  RcppRoll::roll_var(returns, n=11))
+all.equal(drop(HighFreq::roll_varvec(retsp, look_back=11))[-(1:10)], 
+  RcppRoll::roll_var(retsp, n=11))
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_varvec(returns, look_back=11),
-  RcppRoll=RcppRoll::roll_var(returns, n=11),
+  Rcpp=HighFreq::roll_varvec(retsp, look_back=11),
+  RcppRoll=RcppRoll::roll_var(retsp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

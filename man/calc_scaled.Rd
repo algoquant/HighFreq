@@ -49,15 +49,15 @@ The function \code{calc_scaled()} scales (standardizes) the columns of the
 \examples{
 \dontrun{
 # Create a matrix of random data
-returns <- matrix(rnorm(20000), nc=20)
-scaled <- calc_scaled(tseries=returns, use_median=FALSE)
-scaled2 <- scale(returns)
+retsp <- matrix(rnorm(20000), nc=20)
+scaled <- calc_scaled(tseries=retsp, use_median=FALSE)
+scaled2 <- scale(retsp)
 all.equal(scaled, scaled2, check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=calc_scaled(tseries=returns, use_median=FALSE),
-  Rcode=scale(returns),
+  Rcpp=calc_scaled(tseries=retsp, use_median=FALSE),
+  Rcode=scale(retsp),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

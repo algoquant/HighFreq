@@ -27,18 +27,19 @@ Calculate the mean (location) of the columns of a \emph{time series} or a
 }
 \details{
 The function \code{calc_mean()} calculates the mean (location) values of
-  the columns of the \emph{time series} \code{tseries} using
-  \code{RcppArmadillo} \code{C++} code.
+  the columns of the \emph{time series} \code{tseries} using \code{C++}
+  \code{RcppArmadillo} code.
 
   If \code{method = "moment"} (the default) then \code{calc_mean()}
   calculates the location as the mean - the first moment of the data.
 
-  If \code{method = "quantile"} then it calculates the location \eqn{\mu} as
-  the sum of the quantiles as follows:
+  If \code{method = "quantile"} then it calculates the location
+  \eqn{\bar{r}} as the average of the quantiles as follows:
   \deqn{
-    \mu = q_{\alpha} + q_{1-\alpha}
+    \bar{r} = \frac{q_{\alpha} + q_{1-\alpha}}{2}
   }
-  Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+  Where \eqn{\alpha} is the confidence level for calculating the quantiles
+  (argument \code{confl}).
 
   If \code{method = "nonparametric"} then it calculates the location as the
   median.
@@ -49,44 +50,44 @@ The function \code{calc_mean()} calculates the mean (location) values of
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+retsp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Calculate the column means in RcppArmadillo
-HighFreq::calc_mean(returns)
+HighFreq::calc_mean(retsp)
 # Calculate the column means in R
-sapply(returns, mean)
+sapply(retsp, mean)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(returns)), 
-  sapply(returns, mean), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(retsp)), 
+  sapply(retsp, mean), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(returns),
-  Rcode=sapply(returns, mean),
+  Rcpp=HighFreq::calc_mean(retsp),
+  Rcode=sapply(retsp, mean),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile mean (location)
-HighFreq::calc_mean(returns, method="quantile", confl=0.9)
+HighFreq::calc_mean(retsp, method="quantile", confl=0.9)
 # Calculate the quantile mean (location) in R
-colSums(sapply(returns, quantile, c(0.9, 0.1), type=5))
+colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5))
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(returns, method="quantile", confl=0.9)), 
-  colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)), 
+all.equal(drop(HighFreq::calc_mean(retsp, method="quantile", confl=0.9)), 
+  colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5)), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(returns, method="quantile", confl=0.9),
-  Rcode=colSums(sapply(returns, quantile, c(0.9, 0.1), type=5)),
+  Rcpp=HighFreq::calc_mean(retsp, method="quantile", confl=0.9),
+  Rcode=colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5)),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the column medians in RcppArmadillo
-HighFreq::calc_mean(returns, method="nonparametric")
+HighFreq::calc_mean(retsp, method="nonparametric")
 # Calculate the column medians in R
-sapply(returns, median)
+sapply(retsp, median)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(returns, method="nonparametric")), 
-  sapply(returns, median), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(retsp, method="nonparametric")), 
+  sapply(retsp, median), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(returns, method="nonparametric"),
-  Rcode=sapply(returns, median),
+  Rcpp=HighFreq::calc_mean(retsp, method="nonparametric"),
+  Rcode=sapply(retsp, median),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

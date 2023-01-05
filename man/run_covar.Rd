@@ -24,28 +24,30 @@ Calculate the realized covariance of two streaming
 }
 \details{
 The function \code{run_covar()} calculates the trailing covariance of two
-  streaming \emph{time series} of returns, by recursively weighing the past
+  streaming \emph{time series} of returns, by recursively weighting the past
   covariance estimates \eqn{\sigma^{cov}_{t-1}}, with the products of their
   returns minus their means, using the decay factor \eqn{\lambda}:
   \deqn{
-    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \mu^1_t) (r^2_t - \mu^2_t)
+    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
   }
   \deqn{
-    \mu^1_t = \lambda \mu^1_{t-1} + (1-\lambda) r^1_t
+    \bar{r}^1_t = \lambda \bar{r}^1_{t-1} + (1-\lambda) r^1_t
   }
   \deqn{
-    \mu^2_t = \lambda \mu^2_{t-1} + (1-\lambda) r^2_t
+    \bar{r}^2_t = \lambda \bar{r}^2_{t-1} + (1-\lambda) r^2_t
   }
   Where \eqn{\sigma^{cov}_t} is the covariance estimate at time \eqn{t},
   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
-  \eqn{\mu^1_t} and \eqn{\mu^2_t} are the means of the returns.
+  \eqn{\bar{r}^1_t} and \eqn{\bar{r}^2_t} are the means of the returns.
 
   The above recursive formulas are convenient for processing live streaming
   data because they don't require maintaining a buffer of past data.
   The formulas are equivalent to a convolution with exponentially decaying
-  weights, but they're faster to calculate.
+  weights, but they're much faster to calculate.
+  Using exponentially decaying weights is more natural than using a sliding
+  look-back interval, because it gradually "forgets" about the past data.
 
-  The value of the decay factor \eqn{\lambda} should be in the range between
+  The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing covariance values have a
@@ -63,13 +65,13 @@ The function \code{run_covar()} calculates the trailing covariance of two
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the trailing covariance
 lambda <- 0.9
-covars <- HighFreq::run_covar(returns, lambda=lambda)
+covars <- HighFreq::run_covar(retsp, lambda=lambda)
 # Calculate trailing covariance using R code
-filtered <- (1-lambda)*filter(returns[, 1]*returns[, 2], 
-  filter=lambda, init=as.numeric(returns[1, 1]*returns[1, 2])/(1-lambda), 
+filtered <- (1-lambda)*filter(retsp[, 1]*retsp[, 2], 
+  filter=lambda, init=as.numeric(retsp[1, 1]*retsp[1, 2])/(1-lambda), 
   method="recursive")
 all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
 # Calculate the trailing correlation

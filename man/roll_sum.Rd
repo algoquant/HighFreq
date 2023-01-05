@@ -37,18 +37,18 @@ The function \code{roll_sum()} calculates the rolling sums over the
 \examples{
 \dontrun{
 # Calculate historical returns
-returns <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
+retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 22
 # Calculate rolling sums and compare with rutils::roll_sum()
-c_sum <- HighFreq::roll_sum(returns, look_back)
-r_sum <- rutils::roll_sum(returns, look_back)
-all.equal(c_sum, coredata(r_sum), check.attributes=FALSE)
+sumc <- HighFreq::roll_sum(retsp, look_back)
+sumr <- rutils::roll_sum(retsp, look_back)
+all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
-r_sum <- apply(zoo::coredata(returns), 2, cumsum)
-lag_sum <- rbind(matrix(numeric(2*look_back), nc=2), r_sum[1:(NROW(r_sum) - look_back), ])
-r_sum <- (r_sum - lag_sum)
-all.equal(c_sum, r_sum, check.attributes=FALSE)
+sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+sumr <- (sumr - sumlag)
+all.equal(sumc, sumr, check.attributes=FALSE)
 }
 
 }

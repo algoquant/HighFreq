@@ -107,15 +107,15 @@ The function \code{calc_weights()} calculates the optimal portfolio
   sum of squares is equal to \code{1}.
   If \code{scalew = "none"} then the weights are not scaled.
 
-  The function \code{calc_weights()} is written in \code{RcppArmadillo}
-  \code{C++} code.
+  The function \code{calc_weights()} is written in \code{C++}
+  \code{RcppArmadillo} code.
 }
 \examples{
 \dontrun{
 # Calculate covariance matrix and eigen decomposition of ETF returns
-returns <- na.omit(rutils::etfenv$returns[, 1:16])
-ncols <- NCOL(returns)
-eigend <- eigen(cov(returns))
+retsp <- na.omit(rutils::etfenv$returns[, 1:16])
+ncols <- NCOL(retsp)
+eigend <- eigen(cov(retsp))
 # Calculate regularized inverse of covariance matrix
 dimax <- 3
 eigenvec <- eigend$vectors[, 1:dimax]
@@ -123,19 +123,19 @@ eigenval <- eigend$values[1:dimax]
 invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 alpha <- 0.5
-colmeans <- colMeans(returns)
+colmeans <- colMeans(retsp)
 colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
-weightsr <- drop(invmat \%*\% colmeans)
+weightr <- drop(invmat \%*\% colmeans)
 # Apply weights scaling
-weightsr <- weightsr*sd(rowMeans(returns))/sd(returns \%*\% weightsr)
-weightsr <- 0.01*weightsr/sd(returns \%*\% weightsr)
-weightsr <- weightsr/sqrt(sum(weightsr^2))
+weightr <- weightr*sd(rowMeans(retsp))/sd(retsp \%*\% weightr)
+weightr <- 0.01*weightr/sd(retsp \%*\% weightr)
+weightr <- weightr/sqrt(sum(weightr^2))
 # Create a list of portfolio optimization parameters
 controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Calculate weights using RcppArmadillo
-weightcpp <- drop(HighFreq::calc_weights(returns, controlv=controlv))
-all.equal(weightcpp, weightsr)
+weightcpp <- drop(HighFreq::calc_weights(retsp, controlv=controlv))
+all.equal(weightcpp, weightr)
 }
 
 }

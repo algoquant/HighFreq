@@ -46,14 +46,14 @@ The function \code{lagit()} applies a lag to the input \emph{matrix} by
 \examples{
 \dontrun{
 # Create a matrix of random returns
-returns <- matrix(rnorm(5e6), nc=5)
+retsp <- matrix(rnorm(5e6), nc=5)
 # Compare lagit() with rutils::lagit()
-all.equal(HighFreq::lagit(returns), rutils::lagit(returns))
+all.equal(HighFreq::lagit(retsp), rutils::lagit(retsp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::lagit(returns),
-  Rcode=rutils::lagit(returns),
+  Rcpp=HighFreq::lagit(retsp),
+  Rcode=rutils::lagit(retsp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

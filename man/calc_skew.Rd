@@ -26,8 +26,8 @@ Calculate the skewness of the columns of a \emph{time series} or a
 }
 \details{
 The function \code{calc_skew()} calculates the skewness of the columns of
-  a \emph{time series} or a \emph{matrix} of data using \code{RcppArmadillo}
-  \code{C++} code.
+  a \emph{time series} or a \emph{matrix} of data using \code{C++}
+  \code{RcppArmadillo} code.
 
   If \code{method = "moment"} (the default) then \code{calc_skew()}
   calculates the skewness as the third moment of the data.
@@ -53,46 +53,46 @@ The function \code{calc_skew()} calculates the skewness of the columns of
 \examples{
 \dontrun{
 # Define a single-column time series of returns
-returns <- na.omit(rutils::etfenv$returns$VTI)
+retsp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the moment skewness
-HighFreq::calc_skew(returns)
+HighFreq::calc_skew(retsp)
 # Calculate the moment skewness in R
 calc_skewr <- function(x) {
   x <- (x-mean(x))
   sum(x^3)/var(x)^1.5/NROW(x)
 }  # end calc_skewr
-all.equal(HighFreq::calc_skew(returns), 
-  calc_skewr(returns), check.attributes=FALSE)
+all.equal(HighFreq::calc_skew(retsp), 
+  calc_skewr(retsp), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_skew(returns),
-  Rcode=calc_skewr(returns),
+  Rcpp=HighFreq::calc_skew(retsp),
+  Rcode=calc_skewr(retsp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile skewness
-HighFreq::calc_skew(returns, method="quantile", confl=0.9)
+HighFreq::calc_skew(retsp, method="quantile", confl=0.9)
 # Calculate the quantile skewness in R
 calc_skewq <- function(x, a = 0.75) {
   	quantiles <- quantile(x, c(1-a, 0.5, a), type=5)
   	(quantiles[3] + quantiles[1] - 2*quantiles[2])/(quantiles[3] - quantiles[1])
 }  # end calc_skewq
-all.equal(drop(HighFreq::calc_skew(returns, method="quantile", confl=0.9)), 
-  calc_skewq(returns, a=0.9), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_skew(retsp, method="quantile", confl=0.9)), 
+  calc_skewq(retsp, a=0.9), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_skew(returns, method="quantile"),
-  Rcode=calc_skewq(returns),
+  Rcpp=HighFreq::calc_skew(retsp, method="quantile"),
+  Rcode=calc_skewq(retsp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the nonparametric skewness
-HighFreq::calc_skew(returns, method="nonparametric")
+HighFreq::calc_skew(retsp, method="nonparametric")
 # Compare HighFreq::calc_skew() with R nonparametric skewness
-all.equal(drop(HighFreq::calc_skew(returns, method="nonparametric")), 
-  (mean(returns)-median(returns))/sd(returns), 
+all.equal(drop(HighFreq::calc_skew(retsp, method="nonparametric")), 
+  (mean(retsp)-median(retsp))/sd(retsp), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_skew(returns, method="nonparametric"),
-  Rcode=(mean(returns)-median(returns))/sd(returns),
+  Rcpp=HighFreq::calc_skew(retsp, method="nonparametric"),
+  Rcode=(mean(retsp)-median(retsp))/sd(retsp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
