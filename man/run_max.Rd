@@ -40,7 +40,7 @@ The function \code{run_max()} calculates the trailing maximum values of
   for longer.  This is equivalent to a long look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the past maximum values
   decay quickly, and the trailing maximum depends on the more recent
-  streaming values.  This is equivalent to a short look-back interval.
+  streaming data.  This is equivalent to a short look-back interval.
 
   The above formula can also be expressed as:
   \deqn{

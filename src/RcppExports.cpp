@@ -261,16 +261,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// calc_scaled
-arma::mat calc_scaled(const arma::mat& tseries, bool use_median);
-RcppExport SEXP _HighFreq_calc_scaled(SEXP tseriesSEXP, SEXP use_medianSEXP) {
+// calc_scale
+void calc_scale(arma::mat& tseries, bool center, bool scale, bool use_median);
+RcppExport SEXP _HighFreq_calc_scale(SEXP tseriesSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP use_medianSEXP) {
 BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< bool >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
     Rcpp::traits::input_parameter< bool >::type use_median(use_medianSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_scaled(tseries, use_median));
-    return rcpp_result_gen;
+    calc_scale(tseries, center, scale, use_median);
+    return R_NilValue;
 END_RCPP
 }
 // agg_ohlc
@@ -309,25 +310,25 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_vecw
-arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights);
+arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights);
 RcppExport SEXP _HighFreq_roll_vecw(SEXP tseriesSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type weights(weightsSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_vecw(tseries, weights));
     return rcpp_result_gen;
 END_RCPP
 }
 // roll_conv
-arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights);
+arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weights);
 RcppExport SEXP _HighFreq_roll_conv(SEXP tseriesSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type weights(weightsSEXP);
     rcpp_result_gen = Rcpp::wrap(roll_conv(tseries, weights));
     return rcpp_result_gen;
 END_RCPP
@@ -376,14 +377,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_mean
-arma::mat run_mean(const arma::mat& tseries, double lambda, const arma::mat& weights);
+arma::mat run_mean(const arma::mat& tseries, double lambda, const arma::colvec& weights);
 RcppExport SEXP _HighFreq_run_mean(SEXP tseriesSEXP, SEXP lambdaSEXP, SEXP weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type weights(weightsSEXP);
     rcpp_result_gen = Rcpp::wrap(run_mean(tseries, lambda, weights));
     return rcpp_result_gen;
 END_RCPP
@@ -756,16 +757,31 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_scale
-arma::mat roll_scale(const arma::mat& matrix, arma::uword look_back, bool use_median);
-RcppExport SEXP _HighFreq_roll_scale(SEXP matrixSEXP, SEXP look_backSEXP, SEXP use_medianSEXP) {
+arma::mat roll_scale(const arma::mat& matrix, arma::uword look_back, bool center, bool scale, bool use_median);
+RcppExport SEXP _HighFreq_roll_scale(SEXP matrixSEXP, SEXP look_backSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP use_medianSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type matrix(matrixSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
+    Rcpp::traits::input_parameter< bool >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
     Rcpp::traits::input_parameter< bool >::type use_median(use_medianSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_scale(matrix, look_back, use_median));
+    rcpp_result_gen = Rcpp::wrap(roll_scale(matrix, look_back, center, scale, use_median));
     return rcpp_result_gen;
+END_RCPP
+}
+// run_scale
+void run_scale(arma::mat& tseries, double lambda, bool center, bool scale);
+RcppExport SEXP _HighFreq_run_scale(SEXP tseriesSEXP, SEXP lambdaSEXP, SEXP centerSEXP, SEXP scaleSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< bool >::type scale(scaleSEXP);
+    run_scale(tseries, lambda, center, scale);
+    return R_NilValue;
 END_RCPP
 }
 // roll_zscores
@@ -786,13 +802,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_moment
-arma::mat roll_moment(const arma::mat& tseries, std::string funname, std::string method, double confl, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub);
-RcppExport SEXP _HighFreq_roll_moment(SEXP tseriesSEXP, SEXP funnameSEXP, SEXP methodSEXP, SEXP conflSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
+arma::mat roll_moment(const arma::mat& tseries, std::string funame, std::string method, double confl, arma::uvec startp, arma::uvec endp, arma::uword step, arma::uword look_back, arma::uword stub);
+RcppExport SEXP _HighFreq_roll_moment(SEXP tseriesSEXP, SEXP funameSEXP, SEXP methodSEXP, SEXP conflSEXP, SEXP startpSEXP, SEXP endpSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< std::string >::type funname(funnameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type funame(funameSEXP);
     Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type startp(startpSEXP);
@@ -800,7 +816,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_moment(tseries, funname, method, confl, startp, endp, step, look_back, stub));
+    rcpp_result_gen = Rcpp::wrap(roll_moment(tseries, funame, method, confl, startp, endp, step, look_back, stub));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -941,7 +957,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_calc_invref", (DL_FUNC) &_HighFreq_calc_invref, 1},
     {"_HighFreq_calc_eigen", (DL_FUNC) &_HighFreq_calc_eigen, 1},
     {"_HighFreq_calc_inv", (DL_FUNC) &_HighFreq_calc_inv, 3},
-    {"_HighFreq_calc_scaled", (DL_FUNC) &_HighFreq_calc_scaled, 2},
+    {"_HighFreq_calc_scale", (DL_FUNC) &_HighFreq_calc_scale, 4},
     {"_HighFreq_agg_ohlc", (DL_FUNC) &_HighFreq_agg_ohlc, 1},
     {"_HighFreq_roll_ohlc", (DL_FUNC) &_HighFreq_roll_ohlc, 2},
     {"_HighFreq_roll_vec", (DL_FUNC) &_HighFreq_roll_vec, 2},
@@ -977,7 +993,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_roll_skew", (DL_FUNC) &_HighFreq_roll_skew, 8},
     {"_HighFreq_roll_kurtosis", (DL_FUNC) &_HighFreq_roll_kurtosis, 8},
     {"_HighFreq_roll_reg", (DL_FUNC) &_HighFreq_roll_reg, 8},
-    {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 3},
+    {"_HighFreq_roll_scale", (DL_FUNC) &_HighFreq_roll_scale, 5},
+    {"_HighFreq_run_scale", (DL_FUNC) &_HighFreq_run_scale, 4},
     {"_HighFreq_roll_zscores", (DL_FUNC) &_HighFreq_roll_zscores, 7},
     {"_HighFreq_roll_moment", (DL_FUNC) &_HighFreq_roll_moment, 9},
     {"_HighFreq_sim_garch", (DL_FUNC) &_HighFreq_sim_garch, 5},

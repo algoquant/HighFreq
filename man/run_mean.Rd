@@ -70,11 +70,11 @@ The function \code{run_mean()} calculates the trailing weighted means of
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing mean values have a stronger
-  dependence on past values.  This is equivalent to a long look-back
+  dependence on past data.  This is equivalent to a long look-back
   interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
   past values have a smaller weight, and the trailing mean values have a
-  weaker dependence on past values.  This is equivalent to a short look-back
+  weaker dependence on past data.  This is equivalent to a short look-back
   interval.
 
   The function \code{run_mean()} performs the same calculation as the

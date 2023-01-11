@@ -23,7 +23,8 @@ scaling the residuals (the default is \code{method = "none"} - no
 scaling).}
 }
 \value{
-A \emph{matrix} with the regression residuals, alphas, and betas.
+A \emph{matrix} with the regression residuals, alphas, and betas,
+  with the same number of rows as the input argument \code{predictor}.
 }
 \description{
 Calculate recursively the trailing regressions of streaming \emph{time
@@ -42,13 +43,13 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^2
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
   }
   \deqn{
-    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r_t - \bar{r}_t) (p_t - \bar{p}_t)
+    cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
   }
   \deqn{
-    \beta_t = \lambda \beta_{t-1} + (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t}
+    \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
   }
   \deqn{
     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
@@ -56,18 +57,22 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   \deqn{
     \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
   }
-  Where \eqn{\sigma^{cov}_t} are the covariances between the response and
-  predictor data at time \eqn{t};
-  \eqn{\sigma^2_t} is the vector of predictor variances,
-  and \eqn{r_t} and \eqn{p_t} are the streaming data of the response
-  and predictor data.
+  \deqn{
+    \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) \epsilon^2_t
+  }
+  Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+  \eqn{cov_t} is the covariance matrix between the response and the
+  predictor data,
+  \eqn{\sigma^2_t} is the covariance matrix of the predictors (\eqn{\sigma^{-2}_t}
+  is the inverse of the covariance), and \eqn{\varsigma^2_t} is the
+  residual variance.
 
-  The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\alpha}, and
+  The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and
   \eqn{\beta} have the same number of rows as the input argument
   \code{predictor}.
 
-  The function \code{run_reg()} calculates the regressions without an
-  intercept term. The vector of \emph{alphas} \eqn{\alpha_t} is the
+  The function \code{run_reg()} calculates the regressions with an intercept
+  (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
   intercept value.
 
   The above recursive formulas are equivalent to a convolution with
@@ -81,32 +86,33 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   \code{0} and \code{1}.
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, so the trailing values have a greater
-  dependence on past values.  This is equivalent to a long look-back
+  dependence on past data.  This is equivalent to a long look-back
   interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
   past values have a smaller weight, so the trailing values have a weaker
-  dependence on past values.  This is equivalent to a short look-back
+  dependence on past data.  This is equivalent to a short look-back
   interval.
 
   The \emph{residuals} may be scaled by their volatilities to obtain the
   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
   If the argument \code{method = "scale"} then the \emph{residuals}
-  \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma^{\epsilon}}
+  \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
   without subtracting their means:
   \deqn{
-    \epsilon_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
+    \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
   }
-  If the argument \code{method = "standardize"} then the means
-  \eqn{\mu_{\epsilon}} are subtracted from the \emph{residuals}, and then
-  they are divided by their volatilities \eqn{\sigma^{\epsilon}}:
+  If the argument \code{method = "standardize"} then the residual means
+  \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+  they are divided by their volatilities \eqn{\varsigma_t}:
   \deqn{
-    \epsilon_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+    \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
   }
   Which are equal to the \emph{z-scores}.
 
-  The function \code{run_reg()} returns multiple columns of data. If the
-  matrix \code{predictor} has \code{n} columns then \code{run_reg()} returns
-  a matrix with \code{n+2} columns.  The first column contains the
+  The function \code{run_reg()} returns multiple columns of data, with the
+  same number of rows as the input argument \code{predictor}. If the matrix
+  \code{predictor} has \code{n} columns then \code{run_reg()} returns a
+  matrix with \code{n+2} columns.  The first column contains the
   \emph{residuals}, the second the \emph{alphas}, and the remaining columns
   contain the \emph{betas}.
 }

@@ -107,12 +107,12 @@ controlv <- HighFreq::param_reg()
 reg_stats <- HighFreq::roll_reg(response=retsp[, 1], predictor=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 betas <- reg_stats[, 2]
 # Calculate rolling betas in R
-betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+betar <- sapply(1:NROW(endp), FUN=function(ep) {
   datav <- retsp[startp[ep]:endp[ep], ]
   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 })  # end sapply
 # Compare the outputs of both functions
-all.equal(betas, betas_r, check.attributes=FALSE)
+all.equal(betas, betar, check.attributes=FALSE)
 }
 
 }

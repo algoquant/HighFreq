@@ -60,6 +60,8 @@ Functors are C++ class objects that act like functions.
 
 # Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.  But it can make it harder to pass in arguments when calling them from inside other functions.  The solution is to avoid nesting function calls, and instead create intermediate variables, and pass them into functions.  Passing in pointers also allows using const arguments so that they can't be modified inside the function.
 
+# You can pass scalar numbers as double instead of arma::mat
+
 # Volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
 
 # The yang_zhang method has the lowest standard error assuming normal distribution, but not necessarily for fat-tailed distributions.
@@ -87,17 +89,13 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
-
-+ [ ] Create a function that de-means the columns of a matrix in-place
-Performs these operations:
-predictor <- apply(predictor, 2, function(x) (x-mean(x)))
-Or
-predictor <- t(t(predictor) - colMeans(predictor))
-
 + [ ] Modify HighFreq::roll_sum() - add weights
 
 + [ ] Modify HighFreq::run_var() - add weights - calculate the trailing weighted variance if the weight vector is passed as an argument - similar to HighFreq::run_mean()
+
++ [ ] Create the function run_skew()
+
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
 
 + [ ] Modify all the calc_*() and run_*() functions to remove zero values from the data since these are missing values, so they skew the outputs
 
@@ -272,9 +270,6 @@ Calculate rolling variance efficiently (used by package fromo):
 https://www.johndcook.com/blog/standard_deviation/
 
 + [ ] Combine functions sim_ou() and sim_schwartz() into a single function
-
-+ [ ] Modify function calc_scaled() so it performs the calculation in place, without copying the matrix in memory
-That may not always be correct, for example in the case of rolling calculations.
 
 + [ ] Fix function mult_mat_ref() - it doesn't do anything - it doesn't multiply the matrix
 Is it a problem only on the Mac because of incompatible compiler?
@@ -521,8 +516,14 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
-+ [x] Fix run_reg() - the regression formula is only valid for a single predictor or for several orthogonal predictors
-The betas are equal to the Kelly ratios when the predictors are orthogonal.
++ [x] Create the function run_scale() for recursively calculating the trailing standardized columns (centered and scaled) of a time series
+
++ [x] Modify calc_scale() so it performs the calculation in place, without copying the matrix in memory
+That may not always be correct, for example in the case of rolling calculations - actually it's OK.
+
++ [x] Modify weighted functions: pass weights as arma::colvec instead of arma::mat
+
++ [x] Fix run_reg() - the betas are equal to the Kelly ratios only for a single predictor or when the predictors are orthogonal
 If the predictors are not orthogonal then the covariance matrix of the predictors must be inverted.
 This is only very slightly slower than using the Kelly ratios.
 
@@ -1000,7 +1001,7 @@ Adapt code from /Users/jerzy/Develop/lecture_slides/scripts/sim_arima.cpp
 
 + [x] Add sim_* functions using RcppArmadillo: sim_arima(), sim_garch()
 
-+ [x] Add calc_* functions using RcppArmadillo: calc_eigen(), calc_inv(), calc_scaled(), calc_lm(), calc_weights()
++ [x] Add calc_* functions using RcppArmadillo: calc_eigen(), calc_inv(), calc_scale(), calc_lm(), calc_weights()
 
 + [x] Add roll_* functions using RcppArmadillo: roll_wsum(), roll_zscores(), roll_scale(), roll_portf()
 
@@ -1204,8 +1205,6 @@ instead of:
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
 
 + [ ] Modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
-
-+ [ ] Subtract mean in functions run_variance() and run_skew() - no  
 
 + [ ] Convert function season_ality() to use split.xts() (?)  
 

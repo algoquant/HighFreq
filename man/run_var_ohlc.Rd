@@ -2,8 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var_ohlc}
 \alias{run_var_ohlc}
-\title{Calculate the realized variance of streaming
-\emph{OHLC} price data.}
+\title{Calculate the trailing variance of streaming \emph{OHLC} price data.}
 \usage{
 run_var_ohlc(ohlc, lambda)
 }
@@ -19,8 +18,7 @@ A single-column \emph{matrix} of variance estimates, with the same
   number of rows as the input \code{ohlc} price data.
 }
 \description{
-Calculate the realized variance of streaming
-\emph{OHLC} price data.
+Calculate the trailing variance of streaming \emph{OHLC} price data.
 }
 \details{
 The function \code{run_var_ohlc()} calculates a single-column

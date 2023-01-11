@@ -28,38 +28,38 @@
 #'     \sigma^2_t = (1-\lambda) p^2_t + \lambda \sigma^2_{t-1}
 #'   }
 #'   \deqn{
-#'     \sigma^{cov}_t = (1-\lambda) r_t p_t + \lambda \sigma^{cov}_{t-1}
+#'     cov_t = (1-\lambda) r_t p_t + \lambda cov_{t-1}
 #'   }
 #'   \deqn{
-#'     \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
+#'     \beta_t = (1-\lambda) \frac{cov_t}{\sigma^2_t} + \lambda \beta_{t-1}
 #'   }
 #'   \deqn{
 #'     \epsilon_t = (1-\lambda) (r_t - \beta_t p_t) + \lambda \epsilon_{t-1}
 #'   }
-#'   Where \eqn{\sigma^{cov}_t} is the vector of covariances between the
+#'   Where \eqn{cov_t} is the vector of covariances between the
 #'   response and predictor returns, at time \eqn{t};
-#'   \eqn{\sigma^2_t} is the vector of predictor variances,
+#'   \eqn{\sigma^2_t} is the predictor variance,
 #'   and \eqn{r_t} and \eqn{p_t} are the streaming returns of the response
 #'   and predictor data.
 #' 
-#'   The above formulas for \eqn{\sigma^2} and \eqn{\sigma^{cov}} are
+#'   The above formulas for \eqn{\sigma^2} and \eqn{cov} are
 #'   approximate because they don't subtract the means before squaring the
 #'   returns.  But they're very good approximations for daily returns.
 #' 
-#'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
+#'   The matrices \eqn{\sigma^2}, \eqn{cov}, and \eqn{\beta} have the
 #'   same number of rows as the input argument \code{predictor}.
 #'
 #'   If the argument \code{demean = TRUE} (the default) then the
 #'   \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
-#'   \eqn{\epsilon_t} minus their means \eqn{\mu_{\epsilon}}, divided by their
-#'   volatilities \eqn{\sigma^{\epsilon}}:
+#'   \eqn{\epsilon_t} minus their means \eqn{\bar{\epsilon}}, divided by their
+#'   volatilities \eqn{\varsigma_t}:
 #'   \deqn{
-#'     z_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+#'     z_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
 #'   }
 #'   If the argument \code{demean = FALSE} then the \emph{z-scores} are
 #'   only divided by their volatilities without subtracting their means:
 #'   \deqn{
-#'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
+#'     z_t = \frac{\epsilon_t}{\varsigma_t}
 #'   }
 #' 
 #'   The above recursive formulas are convenient for processing live streaming
@@ -73,11 +73,11 @@
 #'   \code{0} and \code{1}.
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, and the trailing \emph{z-score} values have
-#'   a stronger dependence on past values.  This is equivalent to a long
+#'   a stronger dependence on past data.  This is equivalent to a long
 #'   look-back interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 #'   past values have a smaller weight, and the trailing \emph{z-score} values
-#'   have a weaker dependence on past values.  This is equivalent to a short
+#'   have a weaker dependence on past data.  This is equivalent to a short
 #'   look-back interval.
 #' 
 #'   The function \code{run_zscores()} returns multiple columns of data. If the
@@ -112,7 +112,7 @@ NULL
 
 #' Calculate a pointer to a moment function from the function name (string).
 #' 
-#' @param \code{funname} A \emph{character} \emph{string} specifying the
+#' @param \code{funame} A \emph{character} \emph{string} specifying the
 #'   function name.
 #'   
 #' @return A pointer to a moment function.
@@ -135,7 +135,7 @@ NULL
 #'     \item "calc_skew" for the estimator of the skewness,
 #'     \item "calc_kurtosis" for the estimator of the kurtosis.
 #'    }
-#'    (The default is the \code{funname = "calc_mean"}.)
+#'    (The default is the \code{funame = "calc_mean"}.)
 #'    }
 #'
 #' @export
@@ -1251,60 +1251,89 @@ calc_inv <- function(matrixv, eigen_thresh = 0.01, dimax = 0L) {
     .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', matrixv, eigen_thresh, dimax)
 }
 
-#' Scale (standardize) the columns of a \emph{matrix} of data using
-#' \code{RcppArmadillo}.
+#' Standardize (center and scale) the columns of a \emph{time series} of data
+#' in place (without copying the data in memory), using \code{RcppArmadillo}.
 #' 
 #' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+#' 
+#' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+#'   the columns so that they have zero mean or median (the default is
+#'   \code{TRUE}).
+#' 
+#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+#'   columns so that they have unit standard deviation or MAD (the default is
+#'   \code{TRUE}).
 #' 
 #' @param \code{use_median} A \emph{Boolean} argument: if \code{TRUE} then the 
 #'   centrality (central tendency) is calculated as the \emph{median} and the 
 #'   dispersion is calculated as the \emph{median absolute deviation}
-#'   (\emph{MAD}).
+#'   (\emph{MAD}) (the default is \code{FALSE}).
 #'   If \code{use_median = FALSE} then the centrality is calculated as the
 #'   \emph{mean} and the dispersion is calculated as the \emph{standard
-#'   deviation} (the default is \code{FALSE})
+#'   deviation}.
 #'
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
+#' @return Void (no return value).
 #'
 #' @details
-#'   The function \code{calc_scaled()} scales (standardizes) the columns of the
-#'   \code{tseries} argument using \code{RcppArmadillo}.
+#'   The function \code{calc_scale()} standardizes (centers and scales) the
+#'   columns of a \emph{time series} of data in place (without copying the data
+#'   in memory), using \code{RcppArmadillo}.
 #'
-#'   If the argument \code{use_median} is \code{FALSE} (the default), then it
+#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+#'   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
 #'   performs the same calculation as the standard \code{R} function
 #'   \code{scale()}, and it calculates the centrality (central tendency) as the
 #'   \emph{mean} and the dispersion as the \emph{standard deviation}.
 #'
+#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   defaults), then \code{calc_scale()} standardizes the data.
+#'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+#'   only scales the data (divides it by the standard deviations).
+#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   only demeans the data (subtracts the means).
+#'   
 #'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
 #'   centrality as the \emph{median} and the dispersion as the \emph{median
 #'   absolute deviation} (\emph{MAD}).
 #'
 #'   If the number of rows of \code{tseries} is less than \code{3} then it
-#'   returns \code{tseries} unscaled.
+#'   does nothing and \code{tseries} is not scaled.
 #'   
-#'   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
-#'   code and is about \emph{5} times faster than function \code{scale()}, for
-#'   a \emph{matrix} with \emph{1,000} rows and \emph{20} columns.
+#'   The function \code{calc_scale()} accepts a \emph{pointer} to the argument
+#'   \code{tseries}, and it overwrites the old data with the standardized data.
+#'   It performs the calculation in place, without copying the data in memory,
+#'   which can significantly increase the computation speed for large time
+#'   series.
+#'
+#'   The function \code{calc_scale()} uses \code{RcppArmadillo} \code{C++}
+#'   code, so on a typical time series it can be over \emph{10} times faster
+#'   than the function \code{scale()}.
 #'   
 #' @examples
 #' \dontrun{
-#' # Create a matrix of random data
-#' retsp <- matrix(rnorm(20000), nc=20)
-#' scaled <- calc_scaled(tseries=retsp, use_median=FALSE)
-#' scaled2 <- scale(retsp)
-#' all.equal(scaled, scaled2, check.attributes=FALSE)
+#' # Calculate a time series of returns
+#' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+#' # Demean the returns
+#' demeaned <- apply(retsp, 2, function(x) (x-mean(x)))
+#' HighFreq::calc_scale(retsp, scale=FALSE)
+#' all.equal(demeaned, retsp, check.attributes=FALSE)
+#' # Calculate a time series of returns
+#' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+#' # Standardize the returns
+#' scaled <- scale(retsp)
+#' HighFreq::calc_scale(retsp)
+#' all.equal(scaled, retsp, check.attributes=FALSE)
 #' # Compare the speed of Rcpp with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=calc_scaled(tseries=retsp, use_median=FALSE),
 #'   Rcode=scale(retsp),
+#'   Rcpp=HighFreq::calc_scale(retsp),
 #'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_scaled <- function(tseries, use_median = FALSE) {
-    .Call('_HighFreq_calc_scaled', PACKAGE = 'HighFreq', tseries, use_median)
+calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE) {
+    invisible(.Call('_HighFreq_calc_scale', PACKAGE = 'HighFreq', tseries, center, scale, use_median))
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -1470,14 +1499,14 @@ roll_vec <- function(tseries, look_back) {
 #' # Define a single-column matrix of returns
 #' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Create simple weights
-#' weightv <- matrix(c(1, rep(0, 10)))
+#' weightv <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sums
 #' weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
 #' # Compare with original
 #' all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
 #' # Second example
 #' # Create exponentially decaying weights
-#' weightv <- matrix(exp(-0.2*1:11))
+#' weightv <- exp(-0.2*1:11)
 #' weightv <- weightv/sum(weightv)
 #' # Calculate rolling weighted sums
 #' weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
@@ -1505,15 +1534,15 @@ roll_vecw <- function(tseries, weights) {
 #' 
 #' @param \code{weights} A single-column \emph{matrix} of weights.
 #'
-#' @return A \emph{matrix} with the same dimensions as the input
-#'   argument \code{tseries}.
+#' @return A \emph{matrix} with the same dimensions as the input argument
+#'   \code{tseries}.
 #'
 #' @details
 #'   The function \code{roll_conv()} calculates the convolutions of the
 #'   \emph{matrix} columns with a single-column \emph{matrix} of weights.  It
 #'   performs a loop over the \emph{matrix} rows and multiplies the past
 #'   (higher) values by the weights.  It calculates the rolling weighted sums
-#'   of the past values.
+#'   of the past data.
 #'   
 #'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 #'   \code{arma::conv2()}. It performs a similar calculation to the standard
@@ -1527,7 +1556,7 @@ roll_vecw <- function(tseries, weights) {
 #' # Calculate a time series of returns
 #' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 #' # Create simple weights equal to a 1 value plus zeros
-#' weightv <- matrix(c(1, rep(0, 10)), nc=1)
+#' weightv <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sums
 #' weighted <- HighFreq::roll_conv(retsp, weightv)
 #' # Compare with original
@@ -1535,7 +1564,7 @@ roll_vecw <- function(tseries, weights) {
 #' # Second example
 #' # Calculate exponentially decaying weights
 #' weightv <- exp(-0.2*(1:11))
-#' weightv <- matrix(weightv/sum(weightv), nc=1)
+#' weightv <- weightv/sum(weightv)
 #' # Calculate rolling weighted sums
 #' weighted <- HighFreq::roll_conv(retsp, weightv)
 #' # Calculate rolling weighted sums using filter()
@@ -1829,11 +1858,11 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weights
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, and the trailing mean values have a stronger
-#'   dependence on past values.  This is equivalent to a long look-back
+#'   dependence on past data.  This is equivalent to a long look-back
 #'   interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 #'   past values have a smaller weight, and the trailing mean values have a
-#'   weaker dependence on past values.  This is equivalent to a short look-back
+#'   weaker dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
 #'   The function \code{run_mean()} performs the same calculation as the
@@ -1912,7 +1941,7 @@ run_mean <- function(tseries, lambda, weights) {
 #'   for longer.  This is equivalent to a long look-back interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the past maximum values
 #'   decay quickly, and the trailing maximum depends on the more recent
-#'   streaming values.  This is equivalent to a short look-back interval.
+#'   streaming data.  This is equivalent to a short look-back interval.
 #' 
 #'   The above formula can also be expressed as:
 #'   \deqn{
@@ -1980,7 +2009,7 @@ run_max <- function(tseries, lambda) {
 #'   for longer.  This is equivalent to a long look-back interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the past minimum values
 #'   decay quickly, and the trailing minimum depends on the more recent
-#'   streaming values.  This is equivalent to a short look-back interval.
+#'   streaming data.  This is equivalent to a short look-back interval.
 #' 
 #'   The above formula can also be expressed as:
 #'   \deqn{
@@ -2017,8 +2046,7 @@ run_min <- function(tseries, lambda) {
     .Call('_HighFreq_run_min', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
-#' Calculate the realized variance of streaming
-#' \emph{time series} of returns.
+#' Calculate the trailing variance of streaming \emph{time series} of returns.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 #' 
@@ -2054,11 +2082,11 @@ run_min <- function(tseries, lambda) {
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, and the trailing variance values have a
-#'   stronger dependence on past values.  This is equivalent to a long
+#'   stronger dependence on past data.  This is equivalent to a long
 #'   look-back interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 #'   past values have a smaller weight, and the trailing variance values have a
-#'   weaker dependence on past values.  This is equivalent to a short look-back
+#'   weaker dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
 #'   The function \code{run_var()} performs the same calculation as the
@@ -2074,14 +2102,14 @@ run_min <- function(tseries, lambda) {
 #' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate the trailing variance
 #' lambda <- 0.9
-#' varv <- HighFreq::run_var(retsp, lambda=lambda)
+#' vars <- HighFreq::run_var(retsp, lambda=lambda)
 #' # Calculate centered returns
 #' retc <- (retsp - HighFreq::run_mean(retsp, lambda=lambda))
 #' # Calculate trailing variance using R code
 #' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
 #'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 #'   method="recursive")
-#' all.equal(varv, unclass(filtered), check.attributes=FALSE)
+#' all.equal(vars, unclass(filtered), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -2095,8 +2123,7 @@ run_var <- function(tseries, lambda) {
     .Call('_HighFreq_run_var', PACKAGE = 'HighFreq', tseries, lambda)
 }
 
-#' Calculate the realized variance of streaming
-#' \emph{OHLC} price data.
+#' Calculate the trailing variance of streaming \emph{OHLC} price data.
 #' 
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 #'   price data.
@@ -2168,8 +2195,8 @@ run_var_ohlc <- function(ohlc, lambda) {
     .Call('_HighFreq_run_var_ohlc', PACKAGE = 'HighFreq', ohlc, lambda)
 }
 
-#' Calculate the realized covariance of two streaming
-#' \emph{time series} of returns.
+#' Calculate the trailing covariance of two streaming \emph{time series} of
+#' returns.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 #'   columns of returns data.
@@ -2183,18 +2210,18 @@ run_var_ohlc <- function(ohlc, lambda) {
 #' @details
 #'   The function \code{run_covar()} calculates the trailing covariance of two
 #'   streaming \emph{time series} of returns, by recursively weighting the past
-#'   covariance estimates \eqn{\sigma^{cov}_{t-1}}, with the products of their
+#'   covariance estimates \eqn{cov_{t-1}}, with the products of their
 #'   returns minus their means, using the decay factor \eqn{\lambda}:
-#'   \deqn{
-#'     \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
-#'   }
 #'   \deqn{
 #'     \bar{r}^1_t = \lambda \bar{r}^1_{t-1} + (1-\lambda) r^1_t
 #'   }
 #'   \deqn{
 #'     \bar{r}^2_t = \lambda \bar{r}^2_{t-1} + (1-\lambda) r^2_t
 #'   }
-#'   Where \eqn{\sigma^{cov}_t} is the covariance estimate at time \eqn{t},
+#'   \deqn{
+#'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
+#'   }
+#'   Where \eqn{cov_t} is the covariance estimate at time \eqn{t},
 #'   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
 #'   \eqn{\bar{r}^1_t} and \eqn{\bar{r}^2_t} are the means of the returns.
 #' 
@@ -2209,11 +2236,11 @@ run_var_ohlc <- function(ohlc, lambda) {
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, and the trailing covariance values have a
-#'   stronger dependence on past values.  This is equivalent to a long
+#'   stronger dependence on past data.  This is equivalent to a long
 #'   look-back interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 #'   past values have a smaller weight, and the trailing covariance values have
-#'   a weaker dependence on past values.  This is equivalent to a short
+#'   a weaker dependence on past data.  This is equivalent to a short
 #'   look-back interval.
 #' 
 #'   The function \code{run_covar()} returns three columns of data: the
@@ -2258,7 +2285,8 @@ run_covar <- function(tseries, lambda) {
 #'   scaling the residuals (the default is \code{method = "none"} - no
 #'   scaling).
 #'   
-#' @return A \emph{matrix} with the regression residuals, alphas, and betas.
+#' @return A \emph{matrix} with the regression residuals, alphas, and betas,
+#'   with the same number of rows as the input argument \code{predictor}.
 #'
 #' @details
 #'   The function \code{run_reg()} calculates the vectors of \emph{alphas}
@@ -2272,13 +2300,13 @@ run_covar <- function(tseries, lambda) {
 #'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^2
+#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
 #'   }
 #'   \deqn{
-#'     \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r_t - \bar{r}_t) (p_t - \bar{p}_t)
+#'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
 #'   }
 #'   \deqn{
-#'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t}
+#'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
 #'   }
 #'   \deqn{
 #'     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
@@ -2286,18 +2314,22 @@ run_covar <- function(tseries, lambda) {
 #'   \deqn{
 #'     \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
 #'   }
-#'   Where \eqn{\sigma^{cov}_t} are the covariances between the response and
-#'   predictor data at time \eqn{t};
-#'   \eqn{\sigma^2_t} is the vector of predictor variances,
-#'   and \eqn{r_t} and \eqn{p_t} are the streaming data of the response
-#'   and predictor data.
+#'   \deqn{
+#'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) \epsilon^2_t
+#'   }
+#'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+#'   \eqn{cov_t} is the covariance matrix between the response and the
+#'   predictor data,
+#'   \eqn{\sigma^2_t} is the covariance matrix of the predictors (\eqn{\sigma^{-2}_t}
+#'   is the inverse of the covariance), and \eqn{\varsigma^2_t} is the
+#'   residual variance.
 #' 
-#'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\alpha}, and
+#'   The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and
 #'   \eqn{\beta} have the same number of rows as the input argument
 #'   \code{predictor}.
 #'
-#'   The function \code{run_reg()} calculates the regressions without an
-#'   intercept term. The vector of \emph{alphas} \eqn{\alpha_t} is the
+#'   The function \code{run_reg()} calculates the regressions with an intercept
+#'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
 #'   intercept value.
 #'
 #'   The above recursive formulas are equivalent to a convolution with
@@ -2311,32 +2343,33 @@ run_covar <- function(tseries, lambda) {
 #'   \code{0} and \code{1}.
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, so the trailing values have a greater
-#'   dependence on past values.  This is equivalent to a long look-back
+#'   dependence on past data.  This is equivalent to a long look-back
 #'   interval.
 #'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 #'   past values have a smaller weight, so the trailing values have a weaker
-#'   dependence on past values.  This is equivalent to a short look-back
+#'   dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
 #'   The \emph{residuals} may be scaled by their volatilities to obtain the
 #'   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
 #'   If the argument \code{method = "scale"} then the \emph{residuals}
-#'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma^{\epsilon}}
+#'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
 #'   without subtracting their means:
 #'   \deqn{
-#'     \epsilon_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
+#'     \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
 #'   }
-#'   If the argument \code{method = "standardize"} then the means
-#'   \eqn{\mu_{\epsilon}} are subtracted from the \emph{residuals}, and then
-#'   they are divided by their volatilities \eqn{\sigma^{\epsilon}}:
+#'   If the argument \code{method = "standardize"} then the residual means
+#'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+#'   they are divided by their volatilities \eqn{\varsigma_t}:
 #'   \deqn{
-#'     \epsilon_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+#'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
 #'   }
 #'   Which are equal to the \emph{z-scores}.
 #' 
-#'   The function \code{run_reg()} returns multiple columns of data. If the
-#'   matrix \code{predictor} has \code{n} columns then \code{run_reg()} returns
-#'   a matrix with \code{n+2} columns.  The first column contains the
+#'   The function \code{run_reg()} returns multiple columns of data, with the
+#'   same number of rows as the input argument \code{predictor}. If the matrix
+#'   \code{predictor} has \code{n} columns then \code{run_reg()} returns a
+#'   matrix with \code{n+2} columns.  The first column contains the
 #'   \emph{residuals}, the second the \emph{alphas}, and the remaining columns
 #'   contain the \emph{betas}.
 #' 
@@ -3995,12 +4028,12 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' reg_stats <- HighFreq::roll_reg(response=retsp[, 1], predictor=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 #' betas <- reg_stats[, 2]
 #' # Calculate rolling betas in R
-#' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+#' betar <- sapply(1:NROW(endp), FUN=function(ep) {
 #'   datav <- retsp[startp[ep]:endp[ep], ]
 #'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
-#' all.equal(betas, betas_r, check.attributes=FALSE)
+#' all.equal(betas, betar, check.attributes=FALSE)
 #' }
 #' 
 #' @export
@@ -4008,52 +4041,188 @@ roll_reg <- function(response, predictor, controlv, startp = 0L, endp = 0L, step
     .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', response, predictor, controlv, startp, endp, step, look_back, stub)
 }
 
-#' Perform a rolling scaling (standardization) of the columns of a
-#' \emph{matrix} of data using \code{RcppArmadillo}.
+#' Perform a rolling standardization (centering and scaling) of the columns of
+#' a \emph{time series} of data using \code{RcppArmadillo}.
 #' 
-#' @param \code{matrix} A \emph{matrix} of data.
+#' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 #' 
-#' @param \code{look_back} The length of the look-back interval, equal to the number 
-#'   of rows of data used in the scaling.
+#' @param \code{look_back} The length of the look-back interval, equal to the
+#'   number of rows of data used in the scaling.
 #'   
-#' @param use_median A \emph{Boolean} argument: if \code{TRUE} then the 
+#' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+#'   the columns so that they have zero mean or median (the default is
+#'   \code{TRUE}).
+#' 
+#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+#'   columns so that they have unit standard deviation or MAD (the default is
+#'   \code{TRUE}).
+#' 
+#' @param \code{use_median} A \emph{Boolean} argument: if \code{TRUE} then the 
 #'   centrality (central tendency) is calculated as the \emph{median} and the 
 #'   dispersion is calculated as the \emph{median absolute deviation}
-#'   (\emph{MAD}).
-#'   If \code{use_median} is \code{FALSE} then the centrality is calculated as 
-#'   the \emph{mean} and the dispersion is calculated as the \emph{standard
-#'   deviation} (the default is \code{use_median = FALSE})
+#'   (\emph{MAD}) (the default is \code{FALSE}).
+#'   If \code{use_median = FALSE} then the centrality is calculated as the
+#'   \emph{mean} and the dispersion is calculated as the \emph{standard
+#'   deviation}.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{matrix}.
+#'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{roll_scale()} performs a rolling scaling
-#'   (standardization) of the columns of the \code{matrix} argument using
-#'   \code{RcppArmadillo}.
-#'   The function \code{roll_scale()} performs a loop over the rows of 
-#'   \code{matrix}, subsets a number of previous (past) rows equal to 
-#'   \code{look_back}, and scales the subset matrix.  It assigns the last row
-#'   of the scaled subset \emph{matrix} to the return matrix.
+#'   The function \code{roll_scale()} performs a rolling standardization
+#'   (centering and scaling) of the columns of the \code{tseries} argument
+#'   using \code{RcppArmadillo}.
+#'   The function \code{roll_scale()} performs a loop over the rows of
+#'   \code{tseries}, subsets a number of previous (past) rows equal to
+#'   \code{look_back}, and standardizes the subset matrix by calling the
+#'   function \code{calc_scale()}.  It assigns the last row of the standardized
+#'   subset \emph{matrix} to the return matrix.
 #'   
-#'   If the argument \code{use_median} is \code{FALSE} (the default), then it
-#'   performs the same calculation as the function \code{roll::roll_scale()}.
+#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+#'   \code{use_median} is \code{FALSE} (the defaults), then
+#'   \code{calc_scale()} performs the same calculation as the function
+#'   \code{roll::roll_scale()}.
+#'   
+#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   defaults), then \code{calc_scale()} standardizes the data.
+#'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+#'   only scales the data (divides it by the standard deviations).
+#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   only demeans the data (subtracts the means).
+#'   
 #'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
 #'   centrality as the \emph{median} and the dispersion as the \emph{median
 #'   absolute deviation} (\emph{MAD}).
 #'   
 #' @examples
 #' \dontrun{
-#' matrixv <- matrix(rnorm(20000), nc=2)
+#' # Calculate a time series of returns
+#' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 #' look_back <- 11
-#' rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
-#' rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
-#' all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
+#' rolled_scaled <- roll::roll_scale(retsp, width=look_back, min_obs=1)
+#' rolled_scaled2 <- HighFreq::roll_scale(retsp, look_back=look_back)
+#' all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
+#'   check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_scale <- function(matrix, look_back, use_median = FALSE) {
-    .Call('_HighFreq_roll_scale', PACKAGE = 'HighFreq', matrix, look_back, use_median)
+roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_median = FALSE) {
+    .Call('_HighFreq_roll_scale', PACKAGE = 'HighFreq', matrix, look_back, center, scale, use_median)
+}
+
+#' Standardize (center and scale) the columns of a \emph{time series} of data
+#' over time and in place (without copying the data in memory), using
+#' \code{RcppArmadillo}.
+#' 
+#' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+#' 
+#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+#'   estimates.
+#' 
+#' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+#'   the columns so that they have zero mean or median (the default is
+#'   \code{TRUE}).
+#' 
+#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+#'   columns so that they have unit standard deviation or MAD (the default is
+#'   \code{TRUE}).
+#' 
+#' @return Void (no return value).
+#'
+#' @details
+#'   The function \code{run_scale()} performs a trailing standardization
+#'   (centering and scaling) of the columns of the \code{tseries} argument
+#'   using \code{RcppArmadillo}.
+#' 
+#'   The function \code{run_scale()} accepts a \emph{pointer} to the argument
+#'   \code{tseries}, and it overwrites the old data with the standardized
+#'   data. It performs the calculation in place, without copying the data in
+#'   memory, which can significantly increase the computation speed for large
+#'   time series.
+#'
+#'   The function \code{run_scale()} performs a loop over the rows of
+#'   \code{tseries}, and standardizes the data using its trailing means and
+#'   standard deviations.
+#'
+#'   The function \code{run_scale()} calculates the trailing mean and variance
+#'   of streaming \emph{time series} data \eqn{r_t}, by recursively weighting
+#'   the past estimates with the new data, using the decay factor \eqn{\lambda}:
+#'   \deqn{
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'   }
+#'   \deqn{
+#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+#'   }
+#'   Where \eqn{\bar{r}_t} is the trailing mean and \eqn{\sigma^2_t} is the
+#'   trailing variance.
+#'   
+#'   It then calculates the standardized data as follows:
+#'   \deqn{
+#'     r^{\prime}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
+#'   }
+#'
+#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   defaults), then \code{calc_scale()} standardizes the data.
+#'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+#'   only scales the data (divides it by the standard deviations).
+#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   only demeans the data (subtracts the means).
+#'   
+#'   The value of the decay factor \eqn{\lambda} must be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the trailing variance values have a
+#'   stronger dependence on past data.  This is equivalent to a long
+#'   look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the trailing variance values have a
+#'   weaker dependence on past data.  This is equivalent to a short look-back
+#'   interval.
+#' 
+#'   The above recursive formulas are convenient for processing live streaming
+#'   data because they don't require maintaining a buffer of past data.
+#'   The formulas are equivalent to a convolution with exponentially decaying
+#'   weights, but they're much faster to calculate.
+#'   Using exponentially decaying weights is more natural than using a sliding
+#'   look-back interval, because it gradually "forgets" about the past data.
+#' 
+#'   The function \code{run_scale()} uses \code{RcppArmadillo} \code{C++} code,
+#'   so it can be over \code{100} times faster than the equivalent \code{R}
+#'   code.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
+#' # Calculate the trailing standardized returns using R code
+#' lambda <- 0.9
+#' lambda1 <- 1 - lambda
+#' scaled <- zoo::coredata(retsp)
+#' means = scaled[1, ];
+#' vars = scaled[1, ]^2;
+#' for (it in 2:NROW(retsp)) {
+#'   means = lambda*means + lambda1*scaled[it, ];
+#'   vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
+#'   scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+#' }  # end for
+#' # Calculate the trailing standardized returns using C++ code
+#' HighFreq::run_scale(retsp, lambda=lambda)
+#' all.equal(zoo::coredata(retsp), scaled, check.attributes=FALSE)
+#' # Compare the speed of RcppArmadillo with R code
+#' library(microbenchmark)
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::run_scale(retsp, lambda=lambda),
+#'   Rcode={for (it in 2:NROW(retsp)) {
+#'    means = lambda*means + lambda1*scaled[it, ];
+#'    vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
+#'    scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+#'   }},  # end for
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
+    invisible(.Call('_HighFreq_run_scale', PACKAGE = 'HighFreq', tseries, lambda, center, scale))
 }
 
 #' Calculate a \emph{vector} of z-scores of the residuals of rolling
@@ -4142,8 +4311,8 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #'    
-#' @param \code{funname} A \emph{character string} specifying the moment
-#'   function (the default is \code{funname = "calc_mean"}).
+#' @param \code{funame} A \emph{character string} specifying the moment
+#'   function (the default is \code{funame = "calc_mean"}).
 #' 
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   model for the moment (the default is \code{method = "moment"}).
@@ -4180,7 +4349,7 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'   look-back interval equal to \code{look_back} number of end points.
 #'   
 #'   It passes the subset time series to the function specified by the argument
-#'   \code{funname}, which calculates the statistic.
+#'   \code{funame}, which calculates the statistic.
 #'   See the functions \code{calc_*()} for a description of the different
 #'   moments.
 #'   The function name must be one of the following:
@@ -4190,7 +4359,7 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'     \item "calc_skew" for the estimator of the skewness,
 #'     \item "calc_kurtosis" for the estimator of the kurtosis.
 #'    }
-#'    (The default is the \code{funname = "calc_mean"}).
+#'    (The default is the \code{funame = "calc_mean"}).
 #'   
 #'   If the arguments \code{endp} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
@@ -4202,6 +4371,12 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'   \code{75} day look-back, can be calculated using the parameters
 #'   \code{step = 25} and \code{look_back = 3}.
 #'
+#'   The function \code{roll_moment()} calls the function \code{calc_momptr()}
+#'   to calculate a pointer to a moment function from the function name
+#'   \code{funame} (string). The function pointer is used internally in the
+#'   \code{C++} code, but the function \code{calc_momptr()} is not exported to
+#'   \code{R}.
+#'   
 #'   The function \code{roll_moment()} is implemented in \code{RcppArmadillo}
 #'   \code{C++} code, which makes it several times faster than \code{R} code.
 #'
@@ -4237,8 +4412,8 @@ roll_zscores <- function(response, predictor, startp = 0L, endp = 0L, step = 1L,
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_moment <- function(tseries, funname = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call('_HighFreq_roll_moment', PACKAGE = 'HighFreq', tseries, funname, method, confl, startp, endp, step, look_back, stub)
+roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call('_HighFreq_roll_moment', PACKAGE = 'HighFreq', tseries, funame, method, confl, startp, endp, step, look_back, stub)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process

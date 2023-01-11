@@ -36,14 +36,14 @@ The function \code{roll_vecw()} calculates the rolling weighted sums of a
 # Define a single-column matrix of returns
 retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Create simple weights
-weightv <- matrix(c(1, rep(0, 10)))
+weightv <- c(1, rep(0, 10))
 # Calculate rolling weighted sums
 weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
 # Compare with original
 all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
 # Second example
 # Create exponentially decaying weights
-weightv <- matrix(exp(-0.2*1:11))
+weightv <- exp(-0.2*1:11)
 weightv <- weightv/sum(weightv)
 # Calculate rolling weighted sums
 weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)

@@ -40,7 +40,7 @@ The function \code{run_min()} calculates the trailing minimum values of
   for longer.  This is equivalent to a long look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the past minimum values
   decay quickly, and the trailing minimum depends on the more recent
-  streaming values.  This is equivalent to a short look-back interval.
+  streaming data.  This is equivalent to a short look-back interval.
 
   The above formula can also be expressed as:
   \deqn{

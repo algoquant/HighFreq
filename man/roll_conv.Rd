@@ -13,8 +13,8 @@ roll_conv(tseries, weights)
 \item{\code{weights}}{A single-column \emph{matrix} of weights.}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input
-  argument \code{tseries}.
+A \emph{matrix} with the same dimensions as the input argument
+  \code{tseries}.
 }
 \description{
 Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -25,7 +25,7 @@ The function \code{roll_conv()} calculates the convolutions of the
   \emph{matrix} columns with a single-column \emph{matrix} of weights.  It
   performs a loop over the \emph{matrix} rows and multiplies the past
   (higher) values by the weights.  It calculates the rolling weighted sums
-  of the past values.
+  of the past data.
   
   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
@@ -39,7 +39,7 @@ The function \code{roll_conv()} calculates the convolutions of the
 # Calculate a time series of returns
 retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 # Create simple weights equal to a 1 value plus zeros
-weightv <- matrix(c(1, rep(0, 10)), nc=1)
+weightv <- c(1, rep(0, 10))
 # Calculate rolling weighted sums
 weighted <- HighFreq::roll_conv(retsp, weightv)
 # Compare with original
@@ -47,7 +47,7 @@ all.equal(coredata(retsp), weighted, check.attributes=FALSE)
 # Second example
 # Calculate exponentially decaying weights
 weightv <- exp(-0.2*(1:11))
-weightv <- matrix(weightv/sum(weightv), nc=1)
+weightv <- weightv/sum(weightv)
 # Calculate rolling weighted sums
 weighted <- HighFreq::roll_conv(retsp, weightv)
 # Calculate rolling weighted sums using filter()

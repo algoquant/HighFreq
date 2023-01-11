@@ -1658,90 +1658,134 @@ arma::mat calc_inv(const arma::mat& matrixv,
 
 
 ////////////////////////////////////////////////////////////
-//' Scale (standardize) the columns of a \emph{matrix} of data using
-//' \code{RcppArmadillo}.
+//' Standardize (center and scale) the columns of a \emph{time series} of data
+//' in place (without copying the data in memory), using \code{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+//' 
+//' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+//'   the columns so that they have zero mean or median (the default is
+//'   \code{TRUE}).
+//' 
+//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+//'   columns so that they have unit standard deviation or MAD (the default is
+//'   \code{TRUE}).
 //' 
 //' @param \code{use_median} A \emph{Boolean} argument: if \code{TRUE} then the 
 //'   centrality (central tendency) is calculated as the \emph{median} and the 
 //'   dispersion is calculated as the \emph{median absolute deviation}
-//'   (\emph{MAD}).
+//'   (\emph{MAD}) (the default is \code{FALSE}).
 //'   If \code{use_median = FALSE} then the centrality is calculated as the
 //'   \emph{mean} and the dispersion is calculated as the \emph{standard
-//'   deviation} (the default is \code{FALSE})
+//'   deviation}.
 //'
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
+//' @return Void (no return value).
 //'
 //' @details
-//'   The function \code{calc_scaled()} scales (standardizes) the columns of the
-//'   \code{tseries} argument using \code{RcppArmadillo}.
+//'   The function \code{calc_scale()} standardizes (centers and scales) the
+//'   columns of a \emph{time series} of data in place (without copying the data
+//'   in memory), using \code{RcppArmadillo}.
 //'
-//'   If the argument \code{use_median} is \code{FALSE} (the default), then it
+//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+//'   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
 //'   performs the same calculation as the standard \code{R} function
 //'   \code{scale()}, and it calculates the centrality (central tendency) as the
 //'   \emph{mean} and the dispersion as the \emph{standard deviation}.
 //'
+//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   defaults), then \code{calc_scale()} standardizes the data.
+//'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+//'   only scales the data (divides it by the standard deviations).
+//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   only demeans the data (subtracts the means).
+//'   
 //'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
 //'   centrality as the \emph{median} and the dispersion as the \emph{median
 //'   absolute deviation} (\emph{MAD}).
 //'
 //'   If the number of rows of \code{tseries} is less than \code{3} then it
-//'   returns \code{tseries} unscaled.
+//'   does nothing and \code{tseries} is not scaled.
 //'   
-//'   The function \code{calc_scaled()} uses \code{RcppArmadillo} \code{C++}
-//'   code and is about \emph{5} times faster than function \code{scale()}, for
-//'   a \emph{matrix} with \emph{1,000} rows and \emph{20} columns.
+//'   The function \code{calc_scale()} accepts a \emph{pointer} to the argument
+//'   \code{tseries}, and it overwrites the old data with the standardized data.
+//'   It performs the calculation in place, without copying the data in memory,
+//'   which can significantly increase the computation speed for large time
+//'   series.
+//'
+//'   The function \code{calc_scale()} uses \code{RcppArmadillo} \code{C++}
+//'   code, so on a typical time series it can be over \emph{10} times faster
+//'   than the function \code{scale()}.
 //'   
 //' @examples
 //' \dontrun{
-//' # Create a matrix of random data
-//' retsp <- matrix(rnorm(20000), nc=20)
-//' scaled <- calc_scaled(tseries=retsp, use_median=FALSE)
-//' scaled2 <- scale(retsp)
-//' all.equal(scaled, scaled2, check.attributes=FALSE)
+//' # Calculate a time series of returns
+//' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+//' # Demean the returns
+//' demeaned <- apply(retsp, 2, function(x) (x-mean(x)))
+//' HighFreq::calc_scale(retsp, scale=FALSE)
+//' all.equal(demeaned, retsp, check.attributes=FALSE)
+//' # Calculate a time series of returns
+//' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+//' # Standardize the returns
+//' scaled <- scale(retsp)
+//' HighFreq::calc_scale(retsp)
+//' all.equal(scaled, retsp, check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=calc_scaled(tseries=retsp, use_median=FALSE),
 //'   Rcode=scale(retsp),
+//'   Rcpp=HighFreq::calc_scale(retsp),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_scaled(const arma::mat& tseries, bool use_median = false) {
+void calc_scale(arma::mat& tseries, 
+                 bool center = true, 
+                 bool scale = true, 
+                 bool use_median = false) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::mat scaledmat(nrows, ncols, fill::zeros);
-  arma::vec scaled(nrows, fill::zeros);
-  double center;
-  
-  // Return zeros if not enough data
-  if (nrows < 3) {
-    return tseries;
-  }  // end if
   
   // Perform a loop over the columns
-  for (arma::uword it=0; it < ncols; it++) {
-    if (use_median) {
-      center = arma::median(tseries.col(it));
-      scaled = (tseries.col(it) - center);
-      scaled = scaled/arma::median(arma::abs(scaled));
-      scaledmat.col(it) = scaled;
-    } else {
-      center = arma::mean(tseries.col(it));
-      scaled = (tseries.col(it) - center);
-      scaled = scaled/arma::stddev(scaled);
-      scaledmat.col(it) = scaled;
+  if (nrows > 2) {
+    if (scale and center) {
+      if (use_median) {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = (tseries.col(it) - center*arma::median(tseries.col(it)));
+          tseries.col(it) = tseries.col(it)/arma::median(arma::abs(tseries.col(it)));
+        }  // end for
+      } else {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = (tseries.col(it) - center*arma::mean(tseries.col(it)));
+          tseries.col(it) = tseries.col(it)/arma::stddev(tseries.col(it));
+        }  // end for
+      }  // end if
+    } else if (scale and (not center)) {
+      if (use_median) {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = tseries.col(it)/arma::median(arma::abs(tseries.col(it)));
+        }  // end for
+      } else {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = tseries.col(it)/arma::stddev(tseries.col(it));
+        }  // end for
+      }  // end if
+    } else if ((not scale) and center) {
+      if (use_median) {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = (tseries.col(it) - center*arma::median(tseries.col(it)));
+        }  // end for
+      } else {
+        for (arma::uword it=0; it < ncols; it++) {
+          tseries.col(it) = (tseries.col(it) - center*arma::mean(tseries.col(it)));
+        }  // end for
+      }  // end if
     }  // end if
-  }  // end for
+  }  // end if
   
-  return scaledmat;
-  
-}  // end calc_scaled
+}  // end calc_scale
 
 
 
@@ -1996,14 +2040,14 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' # Define a single-column matrix of returns
 //' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Create simple weights
-//' weightv <- matrix(c(1, rep(0, 10)))
+//' weightv <- c(1, rep(0, 10))
 //' # Calculate rolling weighted sums
 //' weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
 //' # Compare with original
 //' all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
 //' # Second example
 //' # Create exponentially decaying weights
-//' weightv <- matrix(exp(-0.2*1:11))
+//' weightv <- exp(-0.2*1:11)
 //' weightv <- weightv/sum(weightv)
 //' # Calculate rolling weighted sums
 //' weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
@@ -2021,7 +2065,7 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
+arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword look_back = weights.n_rows;
@@ -2052,15 +2096,15 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' 
 //' @param \code{weights} A single-column \emph{matrix} of weights.
 //'
-//' @return A \emph{matrix} with the same dimensions as the input
-//'   argument \code{tseries}.
+//' @return A \emph{matrix} with the same dimensions as the input argument
+//'   \code{tseries}.
 //'
 //' @details
 //'   The function \code{roll_conv()} calculates the convolutions of the
 //'   \emph{matrix} columns with a single-column \emph{matrix} of weights.  It
 //'   performs a loop over the \emph{matrix} rows and multiplies the past
 //'   (higher) values by the weights.  It calculates the rolling weighted sums
-//'   of the past values.
+//'   of the past data.
 //'   
 //'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
@@ -2074,7 +2118,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' # Calculate a time series of returns
 //' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 //' # Create simple weights equal to a 1 value plus zeros
-//' weightv <- matrix(c(1, rep(0, 10)), nc=1)
+//' weightv <- c(1, rep(0, 10))
 //' # Calculate rolling weighted sums
 //' weighted <- HighFreq::roll_conv(retsp, weightv)
 //' # Compare with original
@@ -2082,7 +2126,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' # Second example
 //' # Calculate exponentially decaying weights
 //' weightv <- exp(-0.2*(1:11))
-//' weightv <- matrix(weightv/sum(weightv), nc=1)
+//' weightv <- weightv/sum(weightv)
 //' # Calculate rolling weighted sums
 //' weighted <- HighFreq::roll_conv(retsp, weightv)
 //' # Calculate rolling weighted sums using filter()
@@ -2093,7 +2137,7 @@ arma::mat roll_vecw(const arma::mat& tseries, arma::mat& weights) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_conv(const arma::mat& tseries, const arma::mat& weights) {
+arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weights) {
   
   arma::uword look_back = weights.n_rows-2;
   arma::uword nrows = tseries.n_rows-1;
@@ -2531,11 +2575,11 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, and the trailing mean values have a stronger
-//'   dependence on past values.  This is equivalent to a long look-back
+//'   dependence on past data.  This is equivalent to a long look-back
 //'   interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 //'   past values have a smaller weight, and the trailing mean values have a
-//'   weaker dependence on past values.  This is equivalent to a short look-back
+//'   weaker dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
 //'   The function \code{run_mean()} performs the same calculation as the
@@ -2582,7 +2626,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat run_mean(const arma::mat& tseries, 
                    double lambda, 
-                   const arma::mat& weights) {
+                   const arma::colvec& weights) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword weights_rows = weights.n_elem;
@@ -2650,7 +2694,7 @@ arma::mat run_mean(const arma::mat& tseries,
 //'   for longer.  This is equivalent to a long look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the past maximum values
 //'   decay quickly, and the trailing maximum depends on the more recent
-//'   streaming values.  This is equivalent to a short look-back interval.
+//'   streaming data.  This is equivalent to a short look-back interval.
 //' 
 //'   The above formula can also be expressed as:
 //'   \deqn{
@@ -2738,7 +2782,7 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //'   for longer.  This is equivalent to a long look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the past minimum values
 //'   decay quickly, and the trailing minimum depends on the more recent
-//'   streaming values.  This is equivalent to a short look-back interval.
+//'   streaming data.  This is equivalent to a short look-back interval.
 //' 
 //'   The above formula can also be expressed as:
 //'   \deqn{
@@ -2793,10 +2837,8 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 
 
 
-
 ////////////////////////////////////////////////////////////
-//' Calculate the realized variance of streaming
-//' \emph{time series} of returns.
+//' Calculate the trailing variance of streaming \emph{time series} of returns.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 //' 
@@ -2832,11 +2874,11 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, and the trailing variance values have a
-//'   stronger dependence on past values.  This is equivalent to a long
+//'   stronger dependence on past data.  This is equivalent to a long
 //'   look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 //'   past values have a smaller weight, and the trailing variance values have a
-//'   weaker dependence on past values.  This is equivalent to a short look-back
+//'   weaker dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
 //'   The function \code{run_var()} performs the same calculation as the
@@ -2852,14 +2894,14 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate the trailing variance
 //' lambda <- 0.9
-//' varv <- HighFreq::run_var(retsp, lambda=lambda)
+//' vars <- HighFreq::run_var(retsp, lambda=lambda)
 //' # Calculate centered returns
 //' retc <- (retsp - HighFreq::run_mean(retsp, lambda=lambda))
 //' # Calculate trailing variance using R code
 //' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
 //'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 //'   method="recursive")
-//' all.equal(varv, unclass(filtered), check.attributes=FALSE)
+//' all.equal(vars, unclass(filtered), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -2874,21 +2916,21 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::mat varv = arma::zeros<mat>(nrows, ncols);
+  arma::mat vars = arma::zeros<mat>(nrows, ncols);
   arma::mat means = arma::zeros<mat>(nrows, ncols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   means.row(0) = tseries.row(0);
-  varv.row(0) = arma::square(tseries.row(0));
+  vars.row(0) = arma::square(tseries.row(0));
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the means using the decay factor
     means.row(it) = lambda*means.row(it-1) + lambda1*tseries.row(it);
     // Variance is the weighted sum of the past variance and the square of returns minus the means
-    varv.row(it) = lambda*varv.row(it-1) + lambda1*arma::square(tseries.row(it) - means.row(it));
+    vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(tseries.row(it) - means.row(it));
   }  // end for
   
-  return varv;
+  return vars;
   
 }  // end run_var
 
@@ -2896,8 +2938,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the realized variance of streaming
-//' \emph{OHLC} price data.
+//' Calculate the trailing variance of streaming \emph{OHLC} price data.
 //' 
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 //'   price data.
@@ -2971,7 +3012,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
   
   // Allocate variance matrix
   arma::uword nrows = ohlc.n_rows;
-  arma::mat varv = arma::zeros<mat>(nrows, 1);
+  arma::mat vars = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   double coeff = 0.134;
 
@@ -2988,15 +3029,15 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
   arma::mat low_open = (ohlc.col(2) - ohlc.col(0));
   
   // Perform loop over the rows
-  varv.row(0) = arma::square(open_close.row(0)) + coeff*arma::square(close_open.row(0)) +
+  vars.row(0) = arma::square(open_close.row(0)) + coeff*arma::square(close_open.row(0)) +
     (coeff-1)*(close_high.row(0)*high_open.row(0) + close_low.row(0)*low_open.row(0));
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the variance as the weighted sum of squared returns minus the squared means
-    varv.row(it) = lambda1*(arma::square(open_close.row(it)) + coeff*arma::square(close_open.row(it)) +
-      (coeff-1)*(close_high.row(it)*high_open.row(it) + close_low.row(it)*low_open.row(it))) + lambda*varv.row(it-1);
+    vars.row(it) = lambda1*(arma::square(open_close.row(it)) + coeff*arma::square(close_open.row(it)) +
+      (coeff-1)*(close_high.row(it)*high_open.row(it) + close_low.row(it)*low_open.row(it))) + lambda*vars.row(it-1);
   }  // end for
   
-  return varv;
+  return vars;
   
 }  // end run_var_ohlc
 
@@ -3004,8 +3045,8 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the realized covariance of two streaming
-//' \emph{time series} of returns.
+//' Calculate the trailing covariance of two streaming \emph{time series} of
+//' returns.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 //'   columns of returns data.
@@ -3019,18 +3060,18 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //' @details
 //'   The function \code{run_covar()} calculates the trailing covariance of two
 //'   streaming \emph{time series} of returns, by recursively weighting the past
-//'   covariance estimates \eqn{\sigma^{cov}_{t-1}}, with the products of their
+//'   covariance estimates \eqn{cov_{t-1}}, with the products of their
 //'   returns minus their means, using the decay factor \eqn{\lambda}:
-//'   \deqn{
-//'     \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
-//'   }
 //'   \deqn{
 //'     \bar{r}^1_t = \lambda \bar{r}^1_{t-1} + (1-\lambda) r^1_t
 //'   }
 //'   \deqn{
 //'     \bar{r}^2_t = \lambda \bar{r}^2_{t-1} + (1-\lambda) r^2_t
 //'   }
-//'   Where \eqn{\sigma^{cov}_t} is the covariance estimate at time \eqn{t},
+//'   \deqn{
+//'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
+//'   }
+//'   Where \eqn{cov_t} is the covariance estimate at time \eqn{t},
 //'   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
 //'   \eqn{\bar{r}^1_t} and \eqn{\bar{r}^2_t} are the means of the returns.
 //' 
@@ -3045,11 +3086,11 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //'   \code{0} and \code{1}.  
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, and the trailing covariance values have a
-//'   stronger dependence on past values.  This is equivalent to a long
+//'   stronger dependence on past data.  This is equivalent to a long
 //'   look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 //'   past values have a smaller weight, and the trailing covariance values have
-//'   a weaker dependence on past values.  This is equivalent to a short
+//'   a weaker dependence on past data.  This is equivalent to a short
 //'   look-back interval.
 //' 
 //'   The function \code{run_covar()} returns three columns of data: the
@@ -3077,49 +3118,28 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 arma::mat run_covar(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat varv = arma::square(tseries);
-  arma::mat covar = arma::zeros<mat>(nrows, 1);
-  arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::uword ncols = tseries.n_cols;
+  arma::mat means = tseries.row(0);
+  arma::mat meand(1, ncols);
+  arma::mat vars(nrows, ncols);
+  arma::mat covar(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
-  means.row(0) = tseries.row(0);
-  varv.row(0) = arma::square(tseries.row(0));
-  covar(0) = tseries(0, 0)*tseries(0, 1);
+  vars.row(0) = arma::square(tseries.row(0));
+  covar.row(0) = tseries(0, 0)*tseries(0, 1);
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the means using the decay factor
-    means.row(it) = lambda*means.row(it-1) + lambda1*tseries.row(it);
+    // Calculate the mean as the weighted sum
+    means = lambda*means + lambda1*tseries.row(it);
+    meand = tseries.row(it) - means;
     // Calculate the covariance as the weighted sum of products of returns
-    varv.row(it) = lambda*varv.row(it-1) + lambda1*arma::square(tseries.row(it) - means.row(it));
-    covar.row(it) = lambda*covar.row(it-1) + lambda1*((tseries(it, 0)-means(it, 0))*(tseries(it, 1)-means(it, 1)));
+    vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand);
+    covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand(0)*meand(1));
   }  // end for
   
-  return arma::join_rows(covar, varv);
-  
-  // Old code version below - produces same output and it's slightly faster, but less elegant
-  // arma::uword nrows = tseries.n_rows;
-  // arma::mat var1 = arma::square(tseries.col(0));
-  // arma::mat var2 = arma::square(tseries.col(1));
-  // arma::mat covar = arma::zeros<mat>(nrows, 1);
-  // arma::mat means = arma::zeros<mat>(nrows, tseries.n_cols);
-  // double lambda1 = 1-lambda;
-  // 
-  // // Perform loop over the rows
-  // means.row(0) = tseries.row(0);
-  // covar(0) = tseries(0, 0)*tseries(0, 1);
-  // for (arma::uword it = 1; it < nrows; it++) {
-  //   // Calculate the mean as the weighted sum
-  //   means.row(it) = lambda1*tseries.row(it) + lambda*means.row(it-1);
-  //   // Calculate the covariance as the weighted sum of products of returns
-  //   var1(it) = lambda1*(var1(it) - pow(means(it, 0), 2)) + lambda*var1(it-1);
-  //   var2(it) = lambda1*(var2(it) - pow(means(it, 1), 2)) + lambda*var2(it-1);
-  //   covar.row(it) = lambda1*((tseries(it, 0)-means(it, 0))*(tseries(it, 1)-means(it, 1))) + lambda*covar.row(it-1);
-  // }  // end for
-  // 
-  // return arma::join_rows(covar, var1, var2);
+  return arma::join_rows(covar, vars);
   
 }  // end run_covar
-
 
 
 
@@ -3141,7 +3161,8 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   scaling the residuals (the default is \code{method = "none"} - no
 //'   scaling).
 //'   
-//' @return A \emph{matrix} with the regression residuals, alphas, and betas.
+//' @return A \emph{matrix} with the regression residuals, alphas, and betas,
+//'   with the same number of rows as the input argument \code{predictor}.
 //'
 //' @details
 //'   The function \code{run_reg()} calculates the vectors of \emph{alphas}
@@ -3155,13 +3176,13 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
 //'   }
 //'   \deqn{
-//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^2
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
 //'   }
 //'   \deqn{
-//'     \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r_t - \bar{r}_t) (p_t - \bar{p}_t)
+//'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
 //'   }
 //'   \deqn{
-//'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t}
+//'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
 //'   }
 //'   \deqn{
 //'     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
@@ -3169,18 +3190,22 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   \deqn{
 //'     \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
 //'   }
-//'   Where \eqn{\sigma^{cov}_t} are the covariances between the response and
-//'   predictor data at time \eqn{t};
-//'   \eqn{\sigma^2_t} is the vector of predictor variances,
-//'   and \eqn{r_t} and \eqn{p_t} are the streaming data of the response
-//'   and predictor data.
+//'   \deqn{
+//'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) \epsilon^2_t
+//'   }
+//'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+//'   \eqn{cov_t} is the covariance matrix between the response and the
+//'   predictor data,
+//'   \eqn{\sigma^2_t} is the covariance matrix of the predictors (\eqn{\sigma^{-2}_t}
+//'   is the inverse of the covariance), and \eqn{\varsigma^2_t} is the
+//'   residual variance.
 //' 
-//'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, \eqn{\alpha}, and
+//'   The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and
 //'   \eqn{\beta} have the same number of rows as the input argument
 //'   \code{predictor}.
 //'
-//'   The function \code{run_reg()} calculates the regressions without an
-//'   intercept term. The vector of \emph{alphas} \eqn{\alpha_t} is the
+//'   The function \code{run_reg()} calculates the regressions with an intercept
+//'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
 //'   intercept value.
 //'
 //'   The above recursive formulas are equivalent to a convolution with
@@ -3194,32 +3219,33 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, so the trailing values have a greater
-//'   dependence on past values.  This is equivalent to a long look-back
+//'   dependence on past data.  This is equivalent to a long look-back
 //'   interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 //'   past values have a smaller weight, so the trailing values have a weaker
-//'   dependence on past values.  This is equivalent to a short look-back
+//'   dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
 //'   The \emph{residuals} may be scaled by their volatilities to obtain the
 //'   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
 //'   If the argument \code{method = "scale"} then the \emph{residuals}
-//'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma^{\epsilon}}
+//'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
 //'   without subtracting their means:
 //'   \deqn{
-//'     \epsilon_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
+//'     \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
 //'   }
-//'   If the argument \code{method = "standardize"} then the means
-//'   \eqn{\mu_{\epsilon}} are subtracted from the \emph{residuals}, and then
-//'   they are divided by their volatilities \eqn{\sigma^{\epsilon}}:
+//'   If the argument \code{method = "standardize"} then the residual means
+//'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+//'   they are divided by their volatilities \eqn{\varsigma_t}:
 //'   \deqn{
-//'     \epsilon_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+//'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
 //'   }
 //'   Which are equal to the \emph{z-scores}.
 //' 
-//'   The function \code{run_reg()} returns multiple columns of data. If the
-//'   matrix \code{predictor} has \code{n} columns then \code{run_reg()} returns
-//'   a matrix with \code{n+2} columns.  The first column contains the
+//'   The function \code{run_reg()} returns multiple columns of data, with the
+//'   same number of rows as the input argument \code{predictor}. If the matrix
+//'   \code{predictor} has \code{n} columns then \code{run_reg()} returns a
+//'   matrix with \code{n+2} columns.  The first column contains the
 //'   \emph{residuals}, the second the \emph{alphas}, and the remaining columns
 //'   contain the \emph{betas}.
 //' 
@@ -3259,14 +3285,14 @@ arma::mat run_reg(const arma::mat& response,
   // Predictor means
   arma::mat predmeans = arma::zeros<mat>(1, ncols);
   arma::mat predz = arma::zeros<mat>(1, ncols);
-  // arma::mat varv = arma::square(predictor);
+  // arma::mat vars = arma::square(predictor);
   arma::mat covarespred = arma::zeros<mat>(1, ncols);
   arma::mat covarpred = arma::zeros<mat>(ncols, ncols);
   arma::mat betas = arma::ones<mat>(nrows, ncols);
   arma::mat alphas = arma::zeros<mat>(nrows, 1);
   arma::mat resids = arma::zeros<mat>(nrows, 1);
-  arma::mat varz = arma::ones<mat>(nrows, 1);
-  arma::mat meanz = arma::zeros<mat>(nrows, 1);
+  arma::mat vars = arma::ones<mat>(nrows, 1);
+  arma::mat means = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Initialize the variables
@@ -3285,24 +3311,26 @@ arma::mat run_reg(const arma::mat& response,
     // cout << "Calculating betas: " << it << endl;
     // Calculate the betas and alphas
     betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred*arma::inv(covarpred);
-    alphas.row(it) = respmeans - arma::dot(betas.row(it), predmeans);
+    alphas.row(it) = respmeans - arma::trans(predmeans)*betas.row(it);
     // Calculate the betas and alphas assuming predictors are orthogonal - old method - only slightly faster
-    // varv.row(it) = lambda*varv.row(it-1) + lambda1*arma::square(predz);
-    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred/varv.row(it);
+    // vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(predz);
+    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred/vars.row(it);
     // Calculate the residuals
     // cout << "Calculating resids: " << it << endl;
-    resids.row(it) = lambda*resids.row(it-1) + lambda1*(response.row(it) - arma::dot(betas.row(it), predictor.row(it)));
+    // resids.row(it) = lambda*resids.row(it-1) + lambda1*(response.row(it) - arma::dot(betas.row(it), predictor.row(it)));
+    resids.row(it) = lambda*resids.row(it-1) + lambda1*(response.row(it) - arma::trans(predictor.row(it))*betas.row(it));
     // Calculate the mean and variance of the residuals
-    meanz.row(it) = lambda*meanz.row(it-1) + lambda1*resids.row(it);
-    varz.row(it) = lambda*varz.row(it-1) + lambda1*arma::square(resids.row(it) - meanz.row(it));
+    // means.row(it) = lambda*means.row(it-1) + lambda1*resids.row(it);
+    // vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(resids.row(it) - means.row(it));
+    vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(resids.row(it));
   }  // end for
   
   if (method == "scale") {
     // Divide the residuals by their volatility
-    resids = resids/arma::sqrt(varz);
+    resids = resids/arma::sqrt(vars);
   } else if (method == "standardize") {
     // De-mean the residuals and divide them by their volatility
-    resids = (resids - meanz)/arma::sqrt(varz);
+    resids = (resids - means)/arma::sqrt(vars);
   }  // end if
   
   return arma::join_rows(resids, alphas, betas);
@@ -3311,7 +3339,7 @@ arma::mat run_reg(const arma::mat& response,
 
 
 
-// Deprecated run_zscores() because run_reg() is the new version
+// run_zscores() is deprecated because run_reg() is the new version
 ////////////////////////////////////////////////////////////
 //' Calculate the z-scores of trailing regressions of streaming \emph{time
 //' series} of returns.
@@ -3340,38 +3368,38 @@ arma::mat run_reg(const arma::mat& response,
 //'     \sigma^2_t = (1-\lambda) p^2_t + \lambda \sigma^2_{t-1}
 //'   }
 //'   \deqn{
-//'     \sigma^{cov}_t = (1-\lambda) r_t p_t + \lambda \sigma^{cov}_{t-1}
+//'     cov_t = (1-\lambda) r_t p_t + \lambda cov_{t-1}
 //'   }
 //'   \deqn{
-//'     \beta_t = (1-\lambda) \frac{\sigma^{cov}_t}{\sigma^2_t} + \lambda \beta_{t-1}
+//'     \beta_t = (1-\lambda) \frac{cov_t}{\sigma^2_t} + \lambda \beta_{t-1}
 //'   }
 //'   \deqn{
 //'     \epsilon_t = (1-\lambda) (r_t - \beta_t p_t) + \lambda \epsilon_{t-1}
 //'   }
-//'   Where \eqn{\sigma^{cov}_t} is the vector of covariances between the
+//'   Where \eqn{cov_t} is the vector of covariances between the
 //'   response and predictor returns, at time \eqn{t};
-//'   \eqn{\sigma^2_t} is the vector of predictor variances,
+//'   \eqn{\sigma^2_t} is the predictor variance,
 //'   and \eqn{r_t} and \eqn{p_t} are the streaming returns of the response
 //'   and predictor data.
 //' 
-//'   The above formulas for \eqn{\sigma^2} and \eqn{\sigma^{cov}} are
+//'   The above formulas for \eqn{\sigma^2} and \eqn{cov} are
 //'   approximate because they don't subtract the means before squaring the
 //'   returns.  But they're very good approximations for daily returns.
 //' 
-//'   The matrices \eqn{\sigma^2}, \eqn{\sigma^{cov}}, and \eqn{\beta} have the
+//'   The matrices \eqn{\sigma^2}, \eqn{cov}, and \eqn{\beta} have the
 //'   same number of rows as the input argument \code{predictor}.
 //'
 //'   If the argument \code{demean = TRUE} (the default) then the
 //'   \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
-//'   \eqn{\epsilon_t} minus their means \eqn{\mu_{\epsilon}}, divided by their
-//'   volatilities \eqn{\sigma^{\epsilon}}:
+//'   \eqn{\epsilon_t} minus their means \eqn{\bar{\epsilon}}, divided by their
+//'   volatilities \eqn{\varsigma_t}:
 //'   \deqn{
-//'     z_t = \frac{\epsilon_t - \mu_{\epsilon}}{\sigma^{\epsilon}}
+//'     z_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
 //'   }
 //'   If the argument \code{demean = FALSE} then the \emph{z-scores} are
 //'   only divided by their volatilities without subtracting their means:
 //'   \deqn{
-//'     z_t = \frac{\epsilon_t}{\sigma^{\epsilon}}
+//'     z_t = \frac{\epsilon_t}{\varsigma_t}
 //'   }
 //' 
 //'   The above recursive formulas are convenient for processing live streaming
@@ -3385,11 +3413,11 @@ arma::mat run_reg(const arma::mat& response,
 //'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, and the trailing \emph{z-score} values have
-//'   a stronger dependence on past values.  This is equivalent to a long
+//'   a stronger dependence on past data.  This is equivalent to a long
 //'   look-back interval.
 //'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
 //'   past values have a smaller weight, and the trailing \emph{z-score} values
-//'   have a weaker dependence on past values.  This is equivalent to a short
+//'   have a weaker dependence on past data.  This is equivalent to a short
 //'   look-back interval.
 //' 
 //'   The function \code{run_zscores()} returns multiple columns of data. If the
@@ -3431,8 +3459,8 @@ arma::mat run_zscores(const arma::mat& response,
   arma::mat varv = arma::square(predictor);
   arma::mat betas = arma::ones<mat>(nrows, ncols);
   arma::mat zscores = arma::ones<mat>(nrows, 1);
-  arma::mat varz = arma::ones<mat>(nrows, 1);
-  arma::mat meanz = arma::zeros<mat>(nrows, 1);
+  arma::mat vars = arma::ones<mat>(nrows, 1);
+  arma::mat means = arma::zeros<mat>(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Multiply each column of predictor by the response.
@@ -3443,22 +3471,22 @@ arma::mat run_zscores(const arma::mat& response,
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the z-score as the weighted sum of products of returns.
     // cout << "Calculating vars: " << it << endl;
-    varv.row(it) = lambda1*varv.row(it) + lambda*varv.row(it-1);
+    varv.row(it) = lambda1*varv.row(it) + lambda*varv.row(it-1);  // this is wrong
     // cout << "Calculating covars: " << it << endl;
     covars.row(it) = lambda1*covars.row(it) + lambda*covars.row(it-1);
     // cout << "Calculating betas: " << it << endl;
-    betas.row(it) = lambda1*covars.row(it)/varv.row(it) + lambda*betas.row(it-1);
+    betas.row(it) = lambda1*covars.row(it)/vars.row(it) + lambda*betas.row(it-1);
     // cout << "Calculating zscores: " << it << endl;
     zscores.row(it) = lambda1*(response.row(it) - arma::dot(betas.row(it), predictor.row(it))) + lambda*zscores.row(it-1);
     // Calculate the mean and variance of the z-scores.
-    meanz.row(it) = lambda1*zscores.row(it) + lambda*meanz.row(it-1);
-    varz.row(it) = lambda1*arma::square(zscores.row(it) - zscores.row(it-1)) + lambda*varz.row(it-1);
+    means.row(it) = lambda1*zscores.row(it) + lambda*means.row(it-1);
+    vars.row(it) = lambda1*arma::square(zscores.row(it) - zscores.row(it-1)) + lambda*vars.row(it-1);
   }  // end for
   
   if (demean)
-    return arma::join_rows((zscores - meanz)/arma::sqrt(varz), betas, varv);
+    return arma::join_rows((zscores - means)/arma::sqrt(vars), betas, vars);
   else
-    return arma::join_rows(zscores/arma::sqrt(varz), betas, varv);
+    return arma::join_rows(zscores/arma::sqrt(vars), betas, vars);
 
 }  // end run_zscores
 
@@ -3971,16 +3999,16 @@ arma::mat calc_var_ag(const arma::mat& tseries,
     arma::mat aggs;
     arma::uvec endp;
     // The number of rows is equal to step so that loop works for stub=0
-    arma::mat varv(step, tseries.n_cols);
+    arma::mat vars(step, tseries.n_cols);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < step; stub++) {
       endp = calc_endpoints(nrows, step, stub, false);
       // endp = arma::regspace<uvec>(stub, step, nrows + step);
       // endp = endp.elem(find(endp < nrows));
       aggs = tseries.rows(endp);
-      varv.row(stub) = arma::var(diffit(aggs, 1, false));
+      vars.row(stub) = arma::var(diffit(aggs, 1, false));
     }  // end for
-    return mean(varv);
+    return mean(vars);
   }  // end if
   
 }  // end calc_var_ag
@@ -4255,14 +4283,14 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     arma::uword nrows = ohlc.n_rows;
     arma::mat aggs;
     arma::uvec endp;
-    arma::mat varv(step, 1);
+    arma::mat vars(step, 1);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < step; stub++) {
       endp = calc_endpoints(nrows, step, stub, false);
       aggs = roll_ohlc(ohlc, endp);
-      varv.row(stub) = calc_var_ohlc(aggs, method, closel, scale, index);
+      vars.row(stub) = calc_var_ohlc(aggs, method, closel, scale, index);
     }  // end for
-    return arma::as_scalar(mean(varv));
+    return arma::as_scalar(mean(vars));
   }  // end if
   
 }  // end calc_var_ohlc_ag
@@ -4374,13 +4402,13 @@ arma::mat calc_skew(const arma::mat& tseries,
     arma::uword nrows = tseries.n_rows;
     arma::uword ncols = tseries.n_cols;
     arma::mat means = arma::mean(tseries);
-    arma::mat varv = arma::var(tseries);
+    arma::mat vars = arma::var(tseries);
     arma::mat skewness(1, ncols);
     // De-mean the columns of tseries
     // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 3))/arma::pow(varv, 1.5)/nrows;
+    // return arma::sum(arma::pow(tseries, 3))/arma::pow(vars, 1.5)/nrows;
     for (arma::uword it = 0; it < ncols; it++) {
-      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(varv.col(it), 1.5)/nrows;
+      skewness.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 3))/arma::pow(vars.col(it), 1.5)/nrows;
     }  // end for
     return skewness;
   }  // end moment
@@ -4508,15 +4536,15 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
     arma::uword nrows = tseries.n_rows;
     arma::uword ncols = tseries.n_cols;
     arma::mat means = arma::mean(tseries);
-    arma::mat varv = arma::var(tseries);
+    arma::mat vars = arma::var(tseries);
     arma::mat kurtosis(1, ncols);
     // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
     // Loop over columns of tseries
     for (arma::uword it = 0; it < ncols; it++) {
-      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(varv.col(it), 2)/nrows;
+      kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(means.col(it)), 4))/arma::pow(vars.col(it), 2)/nrows;
     }  // end for
     // tseries.each_row() -= means;
-    // return arma::sum(arma::pow(tseries, 4))/arma::pow(varv, 2)/nrows;
+    // return arma::sum(arma::pow(tseries, 4))/arma::pow(vars, 2)/nrows;
     return kurtosis;
   }  // end moment
   case methodenum::quantile: {  // quantile
@@ -5182,19 +5210,19 @@ arma::mat roll_mean(const arma::mat& tseries,
 arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
   
   arma::uword length = tseries.n_elem;
-  arma::vec varvec = arma::zeros<vec>(length);
+  arma::vec vars = arma::zeros<vec>(length);
   
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
-    varvec(it) = arma::var(tseries.subvec(0, it));
+    vars(it) = arma::var(tseries.subvec(0, it));
   }  // end for
   
   // Remaining period
   for (arma::uword it = look_back; it < length; it++) {
-    varvec(it) = arma::var(tseries.subvec(it-look_back+1, it));
+    vars(it) = arma::var(tseries.subvec(it-look_back+1, it));
   }  // end for
   
-  return varvec;
+  return vars;
   
 }  // end roll_varvec
 
@@ -5923,12 +5951,12 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' reg_stats <- HighFreq::roll_reg(response=retsp[, 1], predictor=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 //' betas <- reg_stats[, 2]
 //' # Calculate rolling betas in R
-//' betas_r <- sapply(1:NROW(endp), FUN=function(ep) {
+//' betar <- sapply(1:NROW(endp), FUN=function(ep) {
 //'   datav <- retsp[startp[ep]:endp[ep], ]
 //'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 //' })  # end sapply
 //' # Compare the outputs of both functions
-//' all.equal(betas, betas_r, check.attributes=FALSE)
+//' all.equal(betas, betar, check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -6009,54 +6037,77 @@ arma::mat roll_reg(const arma::mat& response,
 
 
 ////////////////////////////////////////////////////////////
-//' Perform a rolling scaling (standardization) of the columns of a
-//' \emph{matrix} of data using \code{RcppArmadillo}.
+//' Perform a rolling standardization (centering and scaling) of the columns of
+//' a \emph{time series} of data using \code{RcppArmadillo}.
 //' 
-//' @param \code{matrix} A \emph{matrix} of data.
+//' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 //' 
-//' @param \code{look_back} The length of the look-back interval, equal to the number 
-//'   of rows of data used in the scaling.
+//' @param \code{look_back} The length of the look-back interval, equal to the
+//'   number of rows of data used in the scaling.
 //'   
-//' @param use_median A \emph{Boolean} argument: if \code{TRUE} then the 
+//' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+//'   the columns so that they have zero mean or median (the default is
+//'   \code{TRUE}).
+//' 
+//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+//'   columns so that they have unit standard deviation or MAD (the default is
+//'   \code{TRUE}).
+//' 
+//' @param \code{use_median} A \emph{Boolean} argument: if \code{TRUE} then the 
 //'   centrality (central tendency) is calculated as the \emph{median} and the 
 //'   dispersion is calculated as the \emph{median absolute deviation}
-//'   (\emph{MAD}).
-//'   If \code{use_median} is \code{FALSE} then the centrality is calculated as 
-//'   the \emph{mean} and the dispersion is calculated as the \emph{standard
-//'   deviation} (the default is \code{use_median = FALSE})
+//'   (\emph{MAD}) (the default is \code{FALSE}).
+//'   If \code{use_median = FALSE} then the centrality is calculated as the
+//'   \emph{mean} and the dispersion is calculated as the \emph{standard
+//'   deviation}.
 //'
 //' @return A \emph{matrix} with the same dimensions as the input argument
-//'   \code{matrix}.
+//'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{roll_scale()} performs a rolling scaling
-//'   (standardization) of the columns of the \code{matrix} argument using
-//'   \code{RcppArmadillo}.
-//'   The function \code{roll_scale()} performs a loop over the rows of 
-//'   \code{matrix}, subsets a number of previous (past) rows equal to 
-//'   \code{look_back}, and scales the subset matrix.  It assigns the last row
-//'   of the scaled subset \emph{matrix} to the return matrix.
+//'   The function \code{roll_scale()} performs a rolling standardization
+//'   (centering and scaling) of the columns of the \code{tseries} argument
+//'   using \code{RcppArmadillo}.
+//'   The function \code{roll_scale()} performs a loop over the rows of
+//'   \code{tseries}, subsets a number of previous (past) rows equal to
+//'   \code{look_back}, and standardizes the subset matrix by calling the
+//'   function \code{calc_scale()}.  It assigns the last row of the standardized
+//'   subset \emph{matrix} to the return matrix.
 //'   
-//'   If the argument \code{use_median} is \code{FALSE} (the default), then it
-//'   performs the same calculation as the function \code{roll::roll_scale()}.
+//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+//'   \code{use_median} is \code{FALSE} (the defaults), then
+//'   \code{calc_scale()} performs the same calculation as the function
+//'   \code{roll::roll_scale()}.
+//'   
+//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   defaults), then \code{calc_scale()} standardizes the data.
+//'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+//'   only scales the data (divides it by the standard deviations).
+//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   only demeans the data (subtracts the means).
+//'   
 //'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
 //'   centrality as the \emph{median} and the dispersion as the \emph{median
 //'   absolute deviation} (\emph{MAD}).
 //'   
 //' @examples
 //' \dontrun{
-//' matrixv <- matrix(rnorm(20000), nc=2)
+//' # Calculate a time series of returns
+//' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' look_back <- 11
-//' rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
-//' rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
-//' all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
+//' rolled_scaled <- roll::roll_scale(retsp, width=look_back, min_obs=1)
+//' rolled_scaled2 <- HighFreq::roll_scale(retsp, look_back=look_back)
+//' all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
+//'   check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_scale(const arma::mat& matrix, 
                      arma::uword look_back,
-                     bool use_median=false) {
+                     bool center = true, 
+                     bool scale = true, 
+                     bool use_median = false) {
   
   arma::uword nrows = matrix.n_rows;
   arma::mat scaledmat(nrows, matrix.n_cols);
@@ -6066,19 +6117,165 @@ arma::mat roll_scale(const arma::mat& matrix,
   scaledmat.row(0) = matrix.row(0);
   for (arma::uword it = 1; it < look_back; it++) {
     sub_mat = matrix.rows(0, it);
-    sub_mat = calc_scaled(sub_mat, use_median);
+    calc_scale(sub_mat, center, scale, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   // Remaining periods
   for (arma::uword it = look_back; it < nrows; it++) {
     sub_mat = matrix.rows(it-look_back+1, it);
-    sub_mat = calc_scaled(sub_mat, use_median);
+    calc_scale(sub_mat, center, scale, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   return scaledmat;
 }  // end roll_scale
+
+
+
+////////////////////////////////////////////////////////////
+//' Standardize (center and scale) the columns of a \emph{time series} of data
+//' over time and in place (without copying the data in memory), using
+//' \code{RcppArmadillo}.
+//' 
+//' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+//'   estimates.
+//' 
+//' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
+//'   the columns so that they have zero mean or median (the default is
+//'   \code{TRUE}).
+//' 
+//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+//'   columns so that they have unit standard deviation or MAD (the default is
+//'   \code{TRUE}).
+//' 
+//' @return Void (no return value).
+//'
+//' @details
+//'   The function \code{run_scale()} performs a trailing standardization
+//'   (centering and scaling) of the columns of the \code{tseries} argument
+//'   using \code{RcppArmadillo}.
+//' 
+//'   The function \code{run_scale()} accepts a \emph{pointer} to the argument
+//'   \code{tseries}, and it overwrites the old data with the standardized
+//'   data. It performs the calculation in place, without copying the data in
+//'   memory, which can significantly increase the computation speed for large
+//'   time series.
+//'
+//'   The function \code{run_scale()} performs a loop over the rows of
+//'   \code{tseries}, and standardizes the data using its trailing means and
+//'   standard deviations.
+//'
+//'   The function \code{run_scale()} calculates the trailing mean and variance
+//'   of streaming \emph{time series} data \eqn{r_t}, by recursively weighting
+//'   the past estimates with the new data, using the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+//'   }
+//'   \deqn{
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+//'   }
+//'   Where \eqn{\bar{r}_t} is the trailing mean and \eqn{\sigma^2_t} is the
+//'   trailing variance.
+//'   
+//'   It then calculates the standardized data as follows:
+//'   \deqn{
+//'     r^{\prime}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
+//'   }
+//'
+//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   defaults), then \code{calc_scale()} standardizes the data.
+//'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+//'   only scales the data (divides it by the standard deviations).
+//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   only demeans the data (subtracts the means).
+//'   
+//'   The value of the decay factor \eqn{\lambda} must be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the trailing variance values have a
+//'   stronger dependence on past data.  This is equivalent to a long
+//'   look-back interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the trailing variance values have a
+//'   weaker dependence on past data.  This is equivalent to a short look-back
+//'   interval.
+//' 
+//'   The above recursive formulas are convenient for processing live streaming
+//'   data because they don't require maintaining a buffer of past data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're much faster to calculate.
+//'   Using exponentially decaying weights is more natural than using a sliding
+//'   look-back interval, because it gradually "forgets" about the past data.
+//' 
+//'   The function \code{run_scale()} uses \code{RcppArmadillo} \code{C++} code,
+//'   so it can be over \code{100} times faster than the equivalent \code{R}
+//'   code.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
+//' # Calculate the trailing standardized returns using R code
+//' lambda <- 0.9
+//' lambda1 <- 1 - lambda
+//' scaled <- zoo::coredata(retsp)
+//' means = scaled[1, ];
+//' vars = scaled[1, ]^2;
+//' for (it in 2:NROW(retsp)) {
+//'   means = lambda*means + lambda1*scaled[it, ];
+//'   vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
+//'   scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+//' }  # end for
+//' # Calculate the trailing standardized returns using C++ code
+//' HighFreq::run_scale(retsp, lambda=lambda)
+//' all.equal(zoo::coredata(retsp), scaled, check.attributes=FALSE)
+//' # Compare the speed of RcppArmadillo with R code
+//' library(microbenchmark)
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::run_scale(retsp, lambda=lambda),
+//'   Rcode={for (it in 2:NROW(retsp)) {
+//'    means = lambda*means + lambda1*scaled[it, ];
+//'    vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
+//'    scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+//'   }},  # end for
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void run_scale(arma::mat& tseries, 
+                    double lambda,
+                    bool center = true, 
+                    bool scale = true) {
+  
+  arma::uword nrows = tseries.n_rows;
+  double lambda1 = 1-lambda;
+  arma::mat means = tseries.row(0);
+  arma::mat vars = arma::square(tseries.row(0));
+  
+  if (scale and center) {
+    for (arma::uword it = 1; it < nrows; it++) {
+      means = lambda*means + lambda1*tseries.row(it);
+      vars = lambda*vars + lambda1*arma::square(tseries.row(it) - means);
+      tseries.row(it) = (tseries.row(it) - means)/arma::sqrt(vars);
+    }  // end for
+  } else if (scale and (not center)) {
+    for (arma::uword it = 1; it < nrows; it++) {
+      means = lambda*means + lambda1*tseries.row(it);
+      vars = lambda*vars + lambda1*arma::square(tseries.row(it) - means);
+      tseries.row(it) = tseries.row(it)/arma::sqrt(vars);
+    }  // end for
+  } else if ((not scale) and center) {
+    for (arma::uword it = 1; it < nrows; it++) {
+      means = lambda*means + lambda1*tseries.row(it);
+      tseries.row(it) = (tseries.row(it) - means);
+    }  // end for
+  }  // end if
+  
+}  // end run_scale
 
 
 
@@ -6234,7 +6431,7 @@ typedef arma::mat (*momptr)(const arma::mat&, std::string, double);
 ////////////////////////////////////////////////////////////
 //' Calculate a pointer to a moment function from the function name (string).
 //' 
-//' @param \code{funname} A \emph{character} \emph{string} specifying the
+//' @param \code{funame} A \emph{character} \emph{string} specifying the
 //'   function name.
 //'   
 //' @return A pointer to a moment function.
@@ -6257,18 +6454,18 @@ typedef arma::mat (*momptr)(const arma::mat&, std::string, double);
 //'     \item "calc_skew" for the estimator of the skewness,
 //'     \item "calc_kurtosis" for the estimator of the kurtosis.
 //'    }
-//'    (The default is the \code{funname = "calc_mean"}.)
+//'    (The default is the \code{funame = "calc_mean"}.)
 //'    }
 //'
 //' @export
-momptr calc_momptr(std::string funname = "calc_mean") {
-  if (funname == "calc_mean")
+momptr calc_momptr(std::string funame = "calc_mean") {
+  if (funame == "calc_mean")
     return (&calc_mean);
-  else if (funname == "calc_var")
+  else if (funame == "calc_var")
     return (&calc_var);
-  else if (funname == "calc_skew")
+  else if (funame == "calc_skew")
     return (&calc_skew);
-  else if (funname == "calc_kurtosis")
+  else if (funame == "calc_kurtosis")
     return (&calc_kurtosis);
   else
     throw std::invalid_argument("No such function!");
@@ -6283,8 +6480,8 @@ momptr calc_momptr(std::string funname = "calc_mean") {
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'    
-//' @param \code{funname} A \emph{character string} specifying the moment
-//'   function (the default is \code{funname = "calc_mean"}).
+//' @param \code{funame} A \emph{character string} specifying the moment
+//'   function (the default is \code{funame = "calc_mean"}).
 //' 
 //' @param \code{method} A \emph{character string} specifying the type of the
 //'   model for the moment (the default is \code{method = "moment"}).
@@ -6321,7 +6518,7 @@ momptr calc_momptr(std::string funname = "calc_mean") {
 //'   look-back interval equal to \code{look_back} number of end points.
 //'   
 //'   It passes the subset time series to the function specified by the argument
-//'   \code{funname}, which calculates the statistic.
+//'   \code{funame}, which calculates the statistic.
 //'   See the functions \code{calc_*()} for a description of the different
 //'   moments.
 //'   The function name must be one of the following:
@@ -6331,7 +6528,7 @@ momptr calc_momptr(std::string funname = "calc_mean") {
 //'     \item "calc_skew" for the estimator of the skewness,
 //'     \item "calc_kurtosis" for the estimator of the kurtosis.
 //'    }
-//'    (The default is the \code{funname = "calc_mean"}).
+//'    (The default is the \code{funame = "calc_mean"}).
 //'   
 //'   If the arguments \code{endp} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
@@ -6343,6 +6540,12 @@ momptr calc_momptr(std::string funname = "calc_mean") {
 //'   \code{75} day look-back, can be calculated using the parameters
 //'   \code{step = 25} and \code{look_back = 3}.
 //'
+//'   The function \code{roll_moment()} calls the function \code{calc_momptr()}
+//'   to calculate a pointer to a moment function from the function name
+//'   \code{funame} (string). The function pointer is used internally in the
+//'   \code{C++} code, but the function \code{calc_momptr()} is not exported to
+//'   \code{R}.
+//'   
 //'   The function \code{roll_moment()} is implemented in \code{RcppArmadillo}
 //'   \code{C++} code, which makes it several times faster than \code{R} code.
 //'
@@ -6380,7 +6583,7 @@ momptr calc_momptr(std::string funname = "calc_mean") {
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_moment(const arma::mat& tseries, 
-                      std::string funname = "calc_mean",
+                      std::string funame = "calc_mean",
                       std::string method = "moment", 
                       double confl = 0.75, 
                       arma::uvec startp = 0, 
@@ -6416,7 +6619,7 @@ arma::mat roll_moment(const arma::mat& tseries,
   arma::mat stats = arma::zeros<mat>(numpts, tseries.n_cols);
   
   // Calculate a function pointer from the function name (string)
-  momptr momfun = calc_momptr(funname);
+  momptr momfun = calc_momptr(funame);
   // momptr momfun = *momptr;
   
   // Perform loop over the end points

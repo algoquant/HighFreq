@@ -2,8 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var}
 \alias{run_var}
-\title{Calculate the realized variance of streaming
-\emph{time series} of returns.}
+\title{Calculate the trailing variance of streaming \emph{time series} of returns.}
 \usage{
 run_var(tseries, lambda)
 }
@@ -18,8 +17,7 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the realized variance of streaming
-\emph{time series} of returns.
+Calculate the trailing variance of streaming \emph{time series} of returns.
 }
 \details{
 The function \code{run_var()} calculates the trailing variance of
@@ -47,11 +45,11 @@ The function \code{run_var()} calculates the trailing variance of
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing variance values have a
-  stronger dependence on past values.  This is equivalent to a long
+  stronger dependence on past data.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
   past values have a smaller weight, and the trailing variance values have a
-  weaker dependence on past values.  This is equivalent to a short look-back
+  weaker dependence on past data.  This is equivalent to a short look-back
   interval.
 
   The function \code{run_var()} performs the same calculation as the
@@ -67,14 +65,14 @@ The function \code{run_var()} calculates the trailing variance of
 retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing variance
 lambda <- 0.9
-varv <- HighFreq::run_var(retsp, lambda=lambda)
+vars <- HighFreq::run_var(retsp, lambda=lambda)
 # Calculate centered returns
 retc <- (retsp - HighFreq::run_mean(retsp, lambda=lambda))
 # Calculate trailing variance using R code
 filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
   init=as.numeric(retc[1, 1])^2/(1-lambda), 
   method="recursive")
-all.equal(varv, unclass(filtered), check.attributes=FALSE)
+all.equal(vars, unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

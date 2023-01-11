@@ -2,55 +2,76 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_scale}
 \alias{roll_scale}
-\title{Perform a rolling scaling (standardization) of the columns of a
-\emph{matrix} of data using \code{RcppArmadillo}.}
+\title{Perform a rolling standardization (centering and scaling) of the columns of
+a \emph{time series} of data using \code{RcppArmadillo}.}
 \usage{
-roll_scale(matrix, look_back, use_median = FALSE)
+roll_scale(matrix, look_back, center = TRUE, scale = TRUE, use_median = FALSE)
 }
 \arguments{
-\item{use_median}{A \emph{Boolean} argument: if \code{TRUE} then the 
+\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
+
+\item{\code{look_back}}{The length of the look-back interval, equal to the
+number of rows of data used in the scaling.}
+
+\item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center
+the columns so that they have zero mean or median (the default is
+\code{TRUE}).}
+
+\item{\code{scale}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
+columns so that they have unit standard deviation or MAD (the default is
+\code{TRUE}).}
+
+\item{\code{use_median}}{A \emph{Boolean} argument: if \code{TRUE} then the 
 centrality (central tendency) is calculated as the \emph{median} and the 
 dispersion is calculated as the \emph{median absolute deviation}
-(\emph{MAD}).
-If \code{use_median} is \code{FALSE} then the centrality is calculated as 
-the \emph{mean} and the dispersion is calculated as the \emph{standard
-deviation} (the default is \code{use_median = FALSE})}
-
-\item{\code{matrix}}{A \emph{matrix} of data.}
-
-\item{\code{look_back}}{The length of the look-back interval, equal to the number 
-of rows of data used in the scaling.}
+(\emph{MAD}) (the default is \code{FALSE}).
+If \code{use_median = FALSE} then the centrality is calculated as the
+\emph{mean} and the dispersion is calculated as the \emph{standard
+deviation}.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{matrix}.
+  \code{tseries}.
 }
 \description{
-Perform a rolling scaling (standardization) of the columns of a
-\emph{matrix} of data using \code{RcppArmadillo}.
+Perform a rolling standardization (centering and scaling) of the columns of
+a \emph{time series} of data using \code{RcppArmadillo}.
 }
 \details{
-The function \code{roll_scale()} performs a rolling scaling
-  (standardization) of the columns of the \code{matrix} argument using
-  \code{RcppArmadillo}.
-  The function \code{roll_scale()} performs a loop over the rows of 
-  \code{matrix}, subsets a number of previous (past) rows equal to 
-  \code{look_back}, and scales the subset matrix.  It assigns the last row
-  of the scaled subset \emph{matrix} to the return matrix.
+The function \code{roll_scale()} performs a rolling standardization
+  (centering and scaling) of the columns of the \code{tseries} argument
+  using \code{RcppArmadillo}.
+  The function \code{roll_scale()} performs a loop over the rows of
+  \code{tseries}, subsets a number of previous (past) rows equal to
+  \code{look_back}, and standardizes the subset matrix by calling the
+  function \code{calc_scale()}.  It assigns the last row of the standardized
+  subset \emph{matrix} to the return matrix.
   
-  If the argument \code{use_median} is \code{FALSE} (the default), then it
-  performs the same calculation as the function \code{roll::roll_scale()}.
+  If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+  \code{use_median} is \code{FALSE} (the defaults), then
+  \code{calc_scale()} performs the same calculation as the function
+  \code{roll::roll_scale()}.
+  
+  If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+  defaults), then \code{calc_scale()} standardizes the data.
+  If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
+  only scales the data (divides it by the standard deviations).
+  If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+  only demeans the data (subtracts the means).
+  
   If the argument \code{use_median} is \code{TRUE}, then it calculates the
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
 }
 \examples{
 \dontrun{
-matrixv <- matrix(rnorm(20000), nc=2)
+# Calculate a time series of returns
+retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 look_back <- 11
-rolled_scaled <- roll::roll_scale(data=matrixv, width = look_back, min_obs=1)
-rolled_scaled2 <- roll_scale(matrix=matrixv, look_back = look_back, use_median=FALSE)
-all.equal(rolled_scaled[-1, ], rolled_scaled2[-1, ])
+rolled_scaled <- roll::roll_scale(retsp, width=look_back, min_obs=1)
+rolled_scaled2 <- HighFreq::roll_scale(retsp, look_back=look_back)
+all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
+  check.attributes=FALSE)
 }
 
 }

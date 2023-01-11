@@ -43,3 +43,4 @@ arma::mat calc_betas(const arma::mat& response,
   
 }  // end calc_betas
 
+

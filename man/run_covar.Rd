@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_covar}
 \alias{run_covar}
-\title{Calculate the realized covariance of two streaming
-\emph{time series} of returns.}
+\title{Calculate the trailing covariance of two streaming \emph{time series} of
+returns.}
 \usage{
 run_covar(tseries, lambda)
 }
@@ -19,24 +19,24 @@ A \emph{matrix} with three columns of data: the covariance and the
   variances of the two columns of the argument \code{tseries}.
 }
 \description{
-Calculate the realized covariance of two streaming
-\emph{time series} of returns.
+Calculate the trailing covariance of two streaming \emph{time series} of
+returns.
 }
 \details{
 The function \code{run_covar()} calculates the trailing covariance of two
   streaming \emph{time series} of returns, by recursively weighting the past
-  covariance estimates \eqn{\sigma^{cov}_{t-1}}, with the products of their
+  covariance estimates \eqn{cov_{t-1}}, with the products of their
   returns minus their means, using the decay factor \eqn{\lambda}:
-  \deqn{
-    \sigma^{cov}_t = \lambda \sigma^{cov}_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
-  }
   \deqn{
     \bar{r}^1_t = \lambda \bar{r}^1_{t-1} + (1-\lambda) r^1_t
   }
   \deqn{
     \bar{r}^2_t = \lambda \bar{r}^2_{t-1} + (1-\lambda) r^2_t
   }
-  Where \eqn{\sigma^{cov}_t} is the covariance estimate at time \eqn{t},
+  \deqn{
+    cov_t = \lambda cov_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
+  }
+  Where \eqn{cov_t} is the covariance estimate at time \eqn{t},
   \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
   \eqn{\bar{r}^1_t} and \eqn{\bar{r}^2_t} are the means of the returns.
 
@@ -51,11 +51,11 @@ The function \code{run_covar()} calculates the trailing covariance of two
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
   values have a greater weight, and the trailing covariance values have a
-  stronger dependence on past values.  This is equivalent to a long
+  stronger dependence on past data.  This is equivalent to a long
   look-back interval.
   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
   past values have a smaller weight, and the trailing covariance values have
-  a weaker dependence on past values.  This is equivalent to a short
+  a weaker dependence on past data.  This is equivalent to a short
   look-back interval.
 
   The function \code{run_covar()} returns three columns of data: the

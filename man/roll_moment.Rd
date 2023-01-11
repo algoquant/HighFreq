@@ -8,7 +8,7 @@ interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_moment(
   tseries,
-  funname = "calc_mean",
+  funame = "calc_mean",
   method = "moment",
   confl = 0.75,
   startp = 0L,
@@ -21,8 +21,8 @@ roll_moment(
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{funname}}{A \emph{character string} specifying the moment
-function (the default is \code{funname = "calc_mean"}).}
+\item{\code{funame}}{A \emph{character string} specifying the moment
+function (the default is \code{funame = "calc_mean"}).}
 
 \item{\code{method}}{A \emph{character string} specifying the type of the
 model for the moment (the default is \code{method = "moment"}).}
@@ -65,7 +65,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
   look-back interval equal to \code{look_back} number of end points.
   
   It passes the subset time series to the function specified by the argument
-  \code{funname}, which calculates the statistic.
+  \code{funame}, which calculates the statistic.
   See the functions \code{calc_*()} for a description of the different
   moments.
   The function name must be one of the following:
@@ -75,7 +75,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
     \item "calc_skew" for the estimator of the skewness,
     \item "calc_kurtosis" for the estimator of the kurtosis.
    }
-   (The default is the \code{funname = "calc_mean"}).
+   (The default is the \code{funame = "calc_mean"}).
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
@@ -87,6 +87,12 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
   \code{75} day look-back, can be calculated using the parameters
   \code{step = 25} and \code{look_back = 3}.
 
+  The function \code{roll_moment()} calls the function \code{calc_momptr()}
+  to calculate a pointer to a moment function from the function name
+  \code{funame} (string). The function pointer is used internally in the
+  \code{C++} code, but the function \code{calc_momptr()} is not exported to
+  \code{R}.
+  
   The function \code{roll_moment()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.
 }
