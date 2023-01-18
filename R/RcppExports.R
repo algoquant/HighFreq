@@ -893,7 +893,7 @@ remove_dup <- function(stringv) {
 #'   to \code{R} when multiplying the \emph{matrix} rows.
 #' 
 #'   The function \code{mult_mat()} performs loops over the \emph{matrix} rows
-#'   and columns using the \emph{Armadillo} operators \code{each_row()} and
+#'   and columns using the \code{Armadillo} operators \code{each_row()} and
 #'   \code{each_col()}, instead of performing explicit \code{for()} loops (both
 #'   methods are equally fast).
 #'   
@@ -973,7 +973,7 @@ mult_mat <- function(vectorv, matrixv, byrow = TRUE) {
 #'   to \code{R} when multiplying the \emph{matrix} rows.
 #' 
 #'   The function \code{mult_mat_ref()} performs loops over the \emph{matrix}
-#'   rows and columns using the \emph{Armadillo} operators \code{each_row()}
+#'   rows and columns using the \code{Armadillo} operators \code{each_row()}
 #'   and \code{each_col()}, instead of performing explicit \code{for()} loops
 #'   (both methods are equally fast).
 #'   
@@ -1049,7 +1049,7 @@ mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
 #'   
 #'   The function \code{calc_invrec()} doesn't return a value.
 #'   The function \code{calc_invrec()} performs the calculations using
-#'   \code{C++} \emph{Armadillo} code.
+#'   \code{C++} \code{Armadillo} code.
 #'   
 #' @examples
 #' \dontrun{
@@ -1098,7 +1098,7 @@ calc_invrec <- function(matrixv, invmat, niter = 1L) {
 #'   large matrices.
 #'
 #'   The function \code{calc_invref()} doesn't return a value.
-#'   The function \code{calc_invref()} calls the \code{C++} \emph{Armadillo}
+#'   The function \code{calc_invref()} calls the \code{C++} \code{Armadillo}
 #'   function \code{arma::inv()} to calculate the matrix inverse.
 #'   
 #' @examples
@@ -1129,36 +1129,38 @@ calc_invref <- function(matrixv) {
     invisible(.Call('_HighFreq_calc_invref', PACKAGE = 'HighFreq', matrixv))
 }
 
-#' Calculate the eigen decomposition of the \emph{covariance matrix} of returns
-#' data using \code{RcppArmadillo}.
+#' Calculate the eigen decomposition of a square matrix using
+#' \code{RcppArmadillo}.
 #' 
-#' @param \code{matrixv} A \emph{time series} or \emph{matrix} of returns
-#'   data.
+#' @param \code{matrixv} A square matrix.
 #'
-#' @return A list with two elements: a \emph{vector} of eigenvalues 
-#'   (named "values"), and a \emph{matrix} of eigenvectors (named
-#'   "vectors").
+#' @return A list with two elements: a \emph{vector} of eigenvalues (named
+#'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
 #'
 #' @details
-#'   The function \code{calc_eigen()} first calculates the \emph{covariance
-#'   matrix} of \code{matrixv}, and then calculates the eigen
-#'   decomposition of the \emph{covariance matrix}.
+#'   The function \code{calc_eigen()} calls the \code{Armadillo} function
+#'   \code{arma::eig_sym()} to calculate the eigen decomposition.
+#'   For small matrices, the function \code{calc_eigen()} is several times
+#'   faster than the \code{R} function \code{eigen()}, since
+#'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
+#'   matrices, they are about the same, since both call \code{C++} code.
 #'
 #' @examples
 #' \dontrun{
-#' # Create matrix of random data
-#' datav <- matrix(rnorm(5e6), nc=5)
-#' # Calculate eigen decomposition
-#' eigend <- HighFreq::calc_eigen(scale(datav, scale=FALSE))
-#' # Calculate PCA
-#' pcad <- prcomp(datav)
-#' # Compare PCA with eigen decomposition
-#' all.equal(pcad$sdev^2, drop(eigend$values))
-#' all.equal(abs(unname(pcad$rotation)), abs(eigend$vectors))
+#' # Create random positive semi-definite matrix
+#' matrixv <- matrix(runif(25), nc=5)
+#' matrixv <- t(matrixv) %*% matrixv
+#' # Calculate the eigen decomposition using RcppArmadillo
+#' eigend <- HighFreq::calc_eigen(matrixv)
+#' # Calculate the eigen decomposition using R
+#' eigenr <- eigen(matrixv)
+#' # Compare the eigen decompositions
+#' all.equal(eigenr$values, drop(eigend$values))
+#' all.equal(abs(eigenr$vectors), abs(eigend$vectors))
 #' # Compare the speed of Rcpp with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_eigen(datav),
-#'   Rcode=prcomp(datav),
+#'   Rcpp=HighFreq::calc_eigen(matrixv),
+#'   Rcode=eigen(matrixv),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 

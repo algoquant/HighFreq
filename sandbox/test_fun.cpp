@@ -44,3 +44,19 @@ arma::mat calc_betas(const arma::mat& response,
 }  // end calc_betas
 
 
+// Calculate a limited number of eigen values.
+// Works only for sparse matrices which are not standard R matrices.
+// [[Rcpp::export]]
+Rcpp::List calc_eigensp(const arma::sp_mat& matrixv, const arma::uword& neigen) {
+  
+  arma::mat eigenvec;
+  arma::vec eigenval;
+  arma::eigs_sym(eigenval, eigenvec, matrixv, neigen);
+
+  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
+  return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
+                            Rcpp::Named("vectors") = arma::fliplr(eigenvec));
+  
+}  // end calc_eigensp
+
+

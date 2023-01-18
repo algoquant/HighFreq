@@ -46,7 +46,7 @@ The function \code{mult_mat()} multiplies the rows or columns of a
   to \code{R} when multiplying the \emph{matrix} rows.
 
   The function \code{mult_mat()} performs loops over the \emph{matrix} rows
-  and columns using the \emph{Armadillo} operators \code{each_row()} and
+  and columns using the \code{Armadillo} operators \code{each_row()} and
   \code{each_col()}, instead of performing explicit \code{for()} loops (both
   methods are equally fast).
 }

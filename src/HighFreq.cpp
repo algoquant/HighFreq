@@ -1196,7 +1196,7 @@ std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
 //'   to \code{R} when multiplying the \emph{matrix} rows.
 //' 
 //'   The function \code{mult_mat()} performs loops over the \emph{matrix} rows
-//'   and columns using the \emph{Armadillo} operators \code{each_row()} and
+//'   and columns using the \code{Armadillo} operators \code{each_row()} and
 //'   \code{each_col()}, instead of performing explicit \code{for()} loops (both
 //'   methods are equally fast).
 //'   
@@ -1299,7 +1299,7 @@ arma::mat mult_mat(arma::vec vectorv,
 //'   to \code{R} when multiplying the \emph{matrix} rows.
 //' 
 //'   The function \code{mult_mat_ref()} performs loops over the \emph{matrix}
-//'   rows and columns using the \emph{Armadillo} operators \code{each_row()}
+//'   rows and columns using the \code{Armadillo} operators \code{each_row()}
 //'   and \code{each_col()}, instead of performing explicit \code{for()} loops
 //'   (both methods are equally fast).
 //'   
@@ -1398,7 +1398,7 @@ void mult_mat_ref(arma::vec vectorv,
 //'   
 //'   The function \code{calc_invrec()} doesn't return a value.
 //'   The function \code{calc_invrec()} performs the calculations using
-//'   \code{C++} \emph{Armadillo} code.
+//'   \code{C++} \code{Armadillo} code.
 //'   
 //' @examples
 //' \dontrun{
@@ -1456,7 +1456,7 @@ void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=
 //'   large matrices.
 //'
 //'   The function \code{calc_invref()} doesn't return a value.
-//'   The function \code{calc_invref()} calls the \code{C++} \emph{Armadillo}
+//'   The function \code{calc_invref()} calls the \code{C++} \code{Armadillo}
 //'   function \code{arma::inv()} to calculate the matrix inverse.
 //'   
 //' @examples
@@ -1493,36 +1493,38 @@ void calc_invref(arma::mat& matrixv) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the eigen decomposition of the \emph{covariance matrix} of returns
-//' data using \code{RcppArmadillo}.
+//' Calculate the eigen decomposition of a square matrix using
+//' \code{RcppArmadillo}.
 //' 
-//' @param \code{matrixv} A \emph{time series} or \emph{matrix} of returns
-//'   data.
+//' @param \code{matrixv} A square matrix.
 //'
-//' @return A list with two elements: a \emph{vector} of eigenvalues 
-//'   (named "values"), and a \emph{matrix} of eigenvectors (named
-//'   "vectors").
+//' @return A list with two elements: a \emph{vector} of eigenvalues (named
+//'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
 //'
 //' @details
-//'   The function \code{calc_eigen()} first calculates the \emph{covariance
-//'   matrix} of \code{matrixv}, and then calculates the eigen
-//'   decomposition of the \emph{covariance matrix}.
+//'   The function \code{calc_eigen()} calls the \code{Armadillo} function
+//'   \code{arma::eig_sym()} to calculate the eigen decomposition.
+//'   For small matrices, the function \code{calc_eigen()} is several times
+//'   faster than the \code{R} function \code{eigen()}, since
+//'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
+//'   matrices, they are about the same, since both call \code{C++} code.
 //'
 //' @examples
 //' \dontrun{
-//' # Create matrix of random data
-//' datav <- matrix(rnorm(5e6), nc=5)
-//' # Calculate eigen decomposition
-//' eigend <- HighFreq::calc_eigen(scale(datav, scale=FALSE))
-//' # Calculate PCA
-//' pcad <- prcomp(datav)
-//' # Compare PCA with eigen decomposition
-//' all.equal(pcad$sdev^2, drop(eigend$values))
-//' all.equal(abs(unname(pcad$rotation)), abs(eigend$vectors))
+//' # Create random positive semi-definite matrix
+//' matrixv <- matrix(runif(25), nc=5)
+//' matrixv <- t(matrixv) %*% matrixv
+//' # Calculate the eigen decomposition using RcppArmadillo
+//' eigend <- HighFreq::calc_eigen(matrixv)
+//' # Calculate the eigen decomposition using R
+//' eigenr <- eigen(matrixv)
+//' # Compare the eigen decompositions
+//' all.equal(eigenr$values, drop(eigend$values))
+//' all.equal(abs(eigenr$vectors), abs(eigend$vectors))
 //' # Compare the speed of Rcpp with R code
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_eigen(datav),
-//'   Rcode=prcomp(datav),
+//'   Rcpp=HighFreq::calc_eigen(matrixv),
+//'   Rcode=eigen(matrixv),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -1532,7 +1534,7 @@ Rcpp::List calc_eigen(const arma::mat& matrixv) {
   
   arma::mat eigenvec;
   arma::vec eigenval;
-  arma::eig_sym(eigenval, eigenvec, arma::cov(matrixv));
+  arma::eig_sym(eigenval, eigenvec, matrixv);
   
   // Reverse the order of elements from largest eigenvalue to smallest, similar to R
   return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
@@ -5144,6 +5146,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   // Allocate mean matrix
   arma::uword numpts = endpts.n_elem;
   arma::mat means = arma::zeros<mat>(numpts, tseries.n_cols);
+  means.row(0) = tseries.row(0);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
@@ -5350,17 +5353,19 @@ arma::mat roll_var(const arma::mat& tseries,
   
   // Allocate variance matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat variance = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat varm = arma::zeros<mat>(numpts, tseries.n_cols);
+  varm.row(0) = arma::square(tseries.row(0));
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
     // Calculate variance
     if (endpts(ep) > startpts(ep)) {
-      variance.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, confl);
+      varm.row(ep) = calc_var(tseries.rows(startpts(ep), endpts(ep)), method, confl);
     }  // end if
   }  // end for
+  varm.row(1) = arma::square(tseries.row(1));
   
-  return variance;
+  return varm;
   
 }  // end roll_var
 
@@ -5543,7 +5548,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   
   // Allocate variance matrix
   arma::uword numpts = endpts.n_elem;
-  arma::vec variance = arma::zeros<vec>(numpts);
+  arma::vec varm = arma::zeros<vec>(numpts);
   
   // Extract OHLC close prices
   arma::colvec closep = ohlc.col(3);
@@ -5566,7 +5571,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
       sub_close = closel.rows(startpts(ep), endpts(ep));
       sub_index = index.subvec(startpts(ep), endpts(ep));
       // Calculate variance
-      variance.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
+      varm.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
     }  // end if
   }  // end for
   
@@ -5588,7 +5593,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
   // }  // end for
   
-  return variance;
+  return varm;
   
 }  // end roll_var_ohlc
 
@@ -6742,24 +6747,24 @@ arma::mat sim_garch(double omega,
   
   if (is_random) {
     // The innovations are random numbers
-    arma::mat variance(nrows, 1);
-    variance[0] = omega/(1-alpha-beta);
+    arma::mat varm(nrows, 1);
+    varm[0] = omega/(1-alpha-beta);
     arma::mat returns(nrows, 1);
-    returns[0] = std::sqrt(variance[0])*innov[0];
+    returns[0] = std::sqrt(varm[0])*innov[0];
     
     for (arma::uword it = 1; it < nrows; it++) {
-      returns[it] = std::sqrt(variance[it-1])*innov[it];
-      variance[it] = omega + alpha*pow(returns[it], 2) + beta*variance[it-1];
+      returns[it] = std::sqrt(varm[it-1])*innov[it];
+      varm[it] = omega + alpha*pow(returns[it], 2) + beta*varm[it-1];
     }  // end for
-    return arma::join_rows(returns, variance);
+    return arma::join_rows(returns, varm);
   } else {
     // The innovations are historical returns
-    arma::mat variance = arma::square(innov);
-    variance[0] = omega/(1-alpha-beta);
+    arma::mat varm = arma::square(innov);
+    varm[0] = omega/(1-alpha-beta);
     for (arma::uword it = 1; it < nrows; it++) {
-      variance[it] = omega + alpha*variance[it] + beta*variance[it-1];
+      varm[it] = omega + alpha*varm[it] + beta*varm[it-1];
     }  // end for
-    return arma::join_rows(innov, variance);
+    return arma::join_rows(innov, varm);
   }  // end if
   
 }  // end sim_garch
@@ -7158,13 +7163,13 @@ double lik_garch(double omega,
   // Calculate the rolling variance of returns using function sim_garch()
   arma::mat garch_data = sim_garch(omega, alpha,  beta, returns, false);
   // Select the second column containing the variance of returns
-  arma::mat variance = garch_data.col(1);
+  arma::mat varm = garch_data.col(1);
   // Apply floor to variance
-  variance.transform([&minval](double x) {return max(x, minval);});
+  varm.transform([&minval](double x) {return max(x, minval);});
   // Lag the variance
-  variance = lagit(variance, 1, false);
+  varm = lagit(varm, 1, false);
   // Calculate the log-likelihood
-  double likelihood = -arma::conv_to<double>::from(arma::sum(pow(returns, 2)/variance + log(variance)));
+  double likelihood = -arma::conv_to<double>::from(arma::sum(pow(returns, 2)/varm + log(varm)));
   
   return likelihood;
   

@@ -89,6 +89,43 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create the function run_portf() to simulate a running portfolio optimization strategy - clone run_reg()
+
++ [ ] Export from HighFreq the utility functions into a separate header-only package, and source them in HighFreq
+Compile HighFreq on command line using make and Makevars files.
+Olmsted Combining Rcpp Packages.pdf
+https://stackoverflow.com/questions/19384376/using-multiple-source-files-with-rcpp
+https://stackoverflow.com/questions/13995266/using-3rd-party-header-files-with-rcpp
+https://stackoverflow.com/questions/14268245/using-header-h-files-with-cpp-files-in-an-r-package-with-rcpp
+https://stackoverflow.com/questions/50413660/linking-to-another-package-undefined-symbol
+
++ [ ] Modify calc_eigen() to calculate only the lowest order principal components (with the largest eigenvalues) using partial eigen decomposition
+But RSpectra uses the Eigen library not Armadillo.
+https://spectralib.org
+
++ [ ] Link HighFreq to ARPACK-Armadillo library
+Use ARPACK-Armadillo - but how to link it with Armadillo?
+I'd like to call your ARPACK-Armadillo functions in my RcppArmadillo package.
+Can you provide more information how I can do that?  I'm compiling my RcppArmadillo package in RStudio.
+Where should I save the ARPACK-Armadillo files on my drive?
+How should I modify my Makevars files?
+https://github.com/yixuan/arpack-arma
+https://yixuan.blog/arpack-arma/doc/index.html
+https://stackoverflow.com/questions/35829372/adding-arpack-armadillo-in-cmakelist
+
++ [ ] Modify the function calc_eigen() to calculate a limited number of eigen values
+Call arma::eigs_sym() to calculate a limited number of eigen values.
+Use arma::eigs_sym() for partial eigen decomposition.
+But arma::eigs_sym() only works with Armadillo sparse matrices which are not standard R matrices.
+So has to convert an R matrix into an Armadillo sparse matrix:
+https://gallery.rcpp.org/articles/armadillo-sparse-matrix/
+
++ [ ] Apply the package onlinePCA with the Generalized Hebbian Algorithm (GHA) to update the eigenvalues and eigenvectors
+https://github.com/cran/onlinePCA
+https://cran.r-project.org/web/packages/onlinePCA/index.html
+
++ [x] Modify calc_eigen(): it shouldn't calculate the covariance
+
 + [ ] Modify HighFreq::roll_sum() - add weights
 
 + [ ] Modify HighFreq::run_var() - add weights - calculate the trailing weighted variance if the weight vector is passed as an argument - similar to HighFreq::run_mean()
@@ -127,6 +164,7 @@ Apply volume weighting.
 Add minvol parameter equal to the floor of the volatility, to prevent the ratios from blowing up when the volatility is very small or zero.
 
 + [ ] Implement incremental PCA IPCA
+Weng Incremental IPCA.pdf
 Cardot Online Principal Component Analysis.pdf
 
 + [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 

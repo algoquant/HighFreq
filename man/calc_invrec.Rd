@@ -46,7 +46,7 @@ The function \code{calc_invrec()} calculates the approximate inverse
   
   The function \code{calc_invrec()} doesn't return a value.
   The function \code{calc_invrec()} performs the calculations using
-  \code{C++} \emph{Armadillo} code.
+  \code{C++} \code{Armadillo} code.
 }
 \examples{
 \dontrun{

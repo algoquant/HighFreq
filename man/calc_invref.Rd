@@ -29,7 +29,7 @@ The function \code{calc_invref()} calculates the inverse of a square
   large matrices.
 
   The function \code{calc_invref()} doesn't return a value.
-  The function \code{calc_invref()} calls the \code{C++} \emph{Armadillo}
+  The function \code{calc_invref()} calls the \code{C++} \code{Armadillo}
   function \code{arma::inv()} to calculate the matrix inverse.
 }
 \examples{
