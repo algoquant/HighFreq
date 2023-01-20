@@ -10,7 +10,7 @@ roll_conv(tseries, weights)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{weights}}{A single-column \emph{matrix} of weights.}
+\item{\code{weightv}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument

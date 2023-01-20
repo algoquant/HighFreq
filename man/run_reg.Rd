@@ -6,13 +6,13 @@
 series} of response and predictor data, and calculate the residuals, alphas,
 and betas.}
 \usage{
-run_reg(response, predictor, lambda, method = "none")
+run_reg(respv, predv, lambda, method = "none")
 }
 \arguments{
-\item{\code{response}}{A single-column \emph{time series} or a single-column
+\item{\code{respv}}{A single-column \emph{time series} or a single-column
 \emph{matrix} of response data.}
 
-\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
@@ -24,7 +24,7 @@ scaling).}
 }
 \value{
 A \emph{matrix} with the regression residuals, alphas, and betas,
-  with the same number of rows as the input argument \code{predictor}.
+  with the same number of rows as the input argument \code{predv}.
 }
 \description{
 Calculate recursively the trailing regressions of streaming \emph{time
@@ -69,7 +69,7 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
 
   The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and
   \eqn{\beta} have the same number of rows as the input argument
-  \code{predictor}.
+  \code{predv}.
 
   The function \code{run_reg()} calculates the regressions with an intercept
   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
@@ -110,8 +110,8 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   Which are equal to the \emph{z-scores}.
 
   The function \code{run_reg()} returns multiple columns of data, with the
-  same number of rows as the input argument \code{predictor}. If the matrix
-  \code{predictor} has \code{n} columns then \code{run_reg()} returns a
+  same number of rows as the input argument \code{predv}. If the matrix
+  \code{predv} has \code{n} columns then \code{run_reg()} returns a
   matrix with \code{n+2} columns.  The first column contains the
   \emph{residuals}, the second the \emph{alphas}, and the remaining columns
   contain the \emph{betas}.
@@ -121,14 +121,14 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
 # Calculate historical returns
 retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-response <- retsp[, 1]
+respv <- retsp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predictor <- retsp[, -1]
+predv <- retsp[, -1]
 # Calculate the trailing regressions
 lambda <- 0.9
-regs <- HighFreq::run_reg(response=response, predictor=predictor, lambda=lambda)
+regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
 # Plot the trailing residuals
-datav <- cbind(cumsum(response), regs[, 1])
+datav <- cbind(cumsum(respv), regs[, 1])
 colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") \%>\%

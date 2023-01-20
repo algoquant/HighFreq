@@ -27,7 +27,7 @@ small singular values in order to regularize the inverse of the
 \code{predictor} matrix (the default is \code{1e-5}).}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of singular values
-used for calculating the regularized inverse of the \code{predictor}
+used for calculating the regularized inverse of the \code{predv}
 matrix (the default is \code{0} - equivalent to \code{dimax} equal to the
 number of columns of the \code{predictor} matrix).}
 

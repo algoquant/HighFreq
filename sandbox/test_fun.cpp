@@ -5,10 +5,8 @@
 // Compile this file in R by running this command:
 // Rcpp::sourceCpp(file="/Users/jerzy/Develop/HighFreq/sandbox/test_fun.cpp")
 
-
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h> // include RcppArmadillo header file
-using namespace arma; // use Armadillo C++ namespace
 
 
 // [[Rcpp::export]]
@@ -58,5 +56,4 @@ Rcpp::List calc_eigensp(const arma::sp_mat& matrixv, const arma::uword& neigen) 
                             Rcpp::Named("vectors") = arma::fliplr(eigenvec));
   
 }  // end calc_eigensp
-
 

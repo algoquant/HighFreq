@@ -4,7 +4,7 @@
 \alias{run_mean}
 \title{Calculate the trailing weighted means of streaming \emph{time series} data.}
 \usage{
-run_mean(tseries, lambda, weights)
+run_mean(tseries, lambda, weightv)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -12,7 +12,7 @@ run_mean(tseries, lambda, weights)
 \item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
 estimates.}
 
-\item{\code{weights}}{A single-column \emph{matrix} of weights.}
+\item{\code{weightv}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
@@ -25,7 +25,7 @@ Calculate the trailing weighted means of streaming \emph{time series} data.
 The function \code{run_mean()} calculates the trailing weighted means of
   the streaming \emph{time series} data \eqn{p_t} by recursively weighting
   present and past values using the decay factor \eqn{\lambda}. If the
-  \code{weights} argument is equal to zero, then the function
+  \code{weightv} argument is equal to zero, then the function
   \code{run_mean()} simply calculates the exponentially weighted moving
   average value of the streaming \emph{time series} data \eqn{p_t}:
   \deqn{
@@ -36,7 +36,7 @@ The function \code{run_mean()} calculates the trailing weighted means of
   example the volume-weighted average price indicator (VWAP).  Then the
   streaming prices are multiplied by the streaming trading volumes.
   
-  If the \code{weights} argument is not zero, then the function
+  If the \code{weightv} argument is not zero, then the function
   \code{run_mean()} calculates the trailing weighted means in two steps.
   
   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
@@ -91,7 +91,7 @@ ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
 lambda <- 0.95
-meanv <- HighFreq::run_mean(closep, lambda=lambda, weights=0)
+meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv=0)
 # Calculate trailing means using R code
 filtered <- (1-lambda)*filter(closep, 
   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
@@ -101,14 +101,14 @@ all.equal(drop(meanv), unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(closep, lambda=lambda, weights=0),
+  Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv=0),
   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Create weights equal to the trading volumes
 weightv <- quantmod::Vo(ohlc)
 # Calculate the trailing weighted means
-meanw <- HighFreq::run_mean(closep, lambda=lambda, weights=weightv)
+meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
 # Plot dygraph of the trailing weighted means
 datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means trailing", "means weighted")

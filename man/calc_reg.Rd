@@ -5,13 +5,13 @@
 \title{Perform multivariate regression using different methods, and return a vector
 of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
-calc_reg(response, predictor, controlv)
+calc_reg(respv, predv, controlv)
 }
 \arguments{
-\item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
+\item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
@@ -77,25 +77,25 @@ The function \code{calc_reg()} performs multivariate regression using
 # Calculate historical returns
 retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-response <- retsp[, 1]
+respv <- retsp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predictor <- retsp[, -1]
+predv <- retsp[, -1]
 # Perform multivariate regression using lm()
-lmod <- lm(response ~ predictor)
+lmod <- lm(respv ~ predv)
 lmodsum <- summary(lmod)
 coeff <- lmodsum$coefficients
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Perform multivariate regression using calc_reg()
-regarma <- drop(HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv))
+regarma <- drop(HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv))
 # Compare the outputs of both functions
-all.equal(regarma[1:(2*(1+NCOL(predictor)))], 
+all.equal(regarma[1:(2*(1+NCOL(predv)))], 
   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(response=response, predictor=predictor, controlv=controlv),
-  Rcode=lm(response ~ predictor),
+  Rcpp=HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv),
+  Rcode=lm(respv ~ predv),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

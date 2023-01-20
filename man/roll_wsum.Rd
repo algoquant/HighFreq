@@ -5,7 +5,7 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_wsum(tseries, endp = NULL, look_back = 1L, stub = NULL, weights = NULL)
+roll_wsum(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -20,7 +20,7 @@ is \code{look_back = 1}).}
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = NULL}).}
 
-\item{\code{weights}}{A single-column \emph{matrix} of weights (the default
+\item{\code{weightv}}{A single-column \emph{matrix} of weights (the default
 is \code{weights = NULL}).}
 }
 \value{
@@ -46,10 +46,10 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
   The function \code{roll_wsum()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
 
-  The arguments \code{weights}, \code{endp}, and \code{stub} are
+  The arguments \code{weightv}, \code{endp}, and \code{stub} are
   optional.
   
-  If the argument \code{weights} is not supplied, then simple sums are
+  If the argument \code{weightv} is not supplied, then simple sums are
   calculated, not weighted sums.
   
   If either the \code{stub} or \code{endp} arguments are supplied,
@@ -60,7 +60,7 @@ The function \code{roll_wsum()} calculates the rolling weighted sums over
   end point is equal to \code{stub} and the end points are spaced
   \code{look_back} periods apart.
   
-  If the arguments \code{weights}, \code{endp}, and \code{stub} are
+  If the arguments \code{weightv}, \code{endp}, and \code{stub} are
   not supplied, then the sums are calculated over a number of data points
   equal to \code{look_back}.
   
@@ -107,19 +107,19 @@ all.equal(sumc, sumr, check.attributes=FALSE)
 weightv <- exp(-0.2*(1:11))
 weightv <- matrix(weightv/sum(weightv), nc=1)
 # Calculate rolling weighted sum
-sumc <- HighFreq::roll_wsum(retsp, weights=weightv)
+sumc <- HighFreq::roll_wsum(retsp, weightv=weightv)
 # Calculate rolling weighted sum using filter()
 filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
 all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-sumc <- HighFreq::roll_wsum(retsp, endp=endp, weights=weightv)
+sumc <- HighFreq::roll_wsum(retsp, endp=endp, weightv=weightv)
 all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weightv <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weighted <- HighFreq::roll_wsum(retsp, weights=weightv)
+weighted <- HighFreq::roll_wsum(retsp, weightv=weightv)
 # Compare with original
 all.equal(coredata(retsp), weighted, check.attributes=FALSE)
 }

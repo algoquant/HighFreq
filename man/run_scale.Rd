@@ -99,12 +99,12 @@ retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 lambda <- 0.9
 lambda1 <- 1 - lambda
 scaled <- zoo::coredata(retsp)
-means = scaled[1, ];
-vars = scaled[1, ]^2;
+meanm <- scaled[1, ];
+vars <- scaled[1, ]^2;
 for (it in 2:NROW(retsp)) {
-  means = lambda*means + lambda1*scaled[it, ];
-  vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
-  scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+  meanm <- lambda*meanm + lambda1*scaled[it, ];
+  vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+  scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 }  # end for
 # Calculate the trailing standardized returns using C++ code
 HighFreq::run_scale(retsp, lambda=lambda)
@@ -114,9 +114,9 @@ library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::run_scale(retsp, lambda=lambda),
   Rcode={for (it in 2:NROW(retsp)) {
-   means = lambda*means + lambda1*scaled[it, ];
-   vars = lambda*vars + lambda1*(scaled[it, ] - means)^2;
-   scaled[it, ] <- (scaled[it, ] - means)/sqrt(vars)
+   meanm <- lambda*meanm + lambda1*scaled[it, ];
+   vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
   }},  # end for
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

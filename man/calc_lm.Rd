@@ -5,13 +5,13 @@
 \title{Perform multivariate linear regression using least squares and return a
 named list of regression coefficients, their t-values, and p-values.}
 \usage{
-calc_lm(response, predictor)
+calc_lm(respv, predv)
 }
 \arguments{
-\item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
+\item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 }
 \value{
@@ -39,22 +39,22 @@ The function \code{calc_lm()} performs the same calculations as the
 # Calculate historical returns
 retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-response <- retsp[, 1]
+respv <- retsp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predictor <- retsp[, -1]
+predv <- retsp[, -1]
 # Perform multivariate regression using lm()
-lmod <- lm(response ~ predictor)
+lmod <- lm(respv ~ predv)
 lmodsum <- summary(lmod)
 # Perform multivariate regression using calc_lm()
-regarma <- HighFreq::calc_lm(response=response, predictor=predictor)
+regarma <- HighFreq::calc_lm(respv=respv, predv=predv)
 # Compare the outputs of both functions
 all.equal(regarma$coefficients[, "coeff"], unname(coef(lmod)))
 all.equal(unname(regarma$coefficients), unname(lmodsum$coefficients))
 all.equal(unname(regarma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_lm(response=response, predictor=predictor),
-  Rcode=lm(response ~ predictor),
+  Rcpp=HighFreq::calc_lm(respv=respv, predv=predv),
+  Rcode=lm(respv ~ predv),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

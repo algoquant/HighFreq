@@ -6,8 +6,8 @@
 z-scores, at the end points of the predictor matrix.}
 \usage{
 roll_reg(
-  response,
-  predictor,
+  respv,
+  predv,
   controlv,
   startp = 0L,
   endp = 0L,
@@ -17,10 +17,10 @@ roll_reg(
 )
 }
 \arguments{
-\item{\code{response}}{A single-column \emph{time series} or a \emph{vector}
+\item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predictor}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
@@ -42,9 +42,9 @@ calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A \emph{matrix} with the regression coefficients, their t-values,
-  and z-scores, and with the same number of rows as \code{predictor} a
+  and z-scores, and with the same number of rows as \code{predv} a
   number of columns equal to \code{2n+3}, where \code{n} is the number of
-  columns of \code{predictor}.
+  columns of \code{predv}.
 }
 \description{
 Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -56,12 +56,12 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   predictor matrix.
   
   The function \code{roll_reg()} performs a loop over the end points, and at
-  each end point it subsets the time series \code{predictor} over a look-back
+  each end point it subsets the time series \code{predv} over a look-back
   interval equal to \code{look_back} number of end points.
   
   If the arguments \code{endp} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{predictor}
+  periods. It calculates the end points along the rows of \code{predv}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
   
@@ -104,7 +104,7 @@ startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(response=retsp[, 1], predictor=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
+reg_stats <- HighFreq::roll_reg(respv=retsp[, 1], predv=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 betas <- reg_stats[, 2]
 # Calculate rolling betas in R
 betar <- sapply(1:NROW(endp), FUN=function(ep) {

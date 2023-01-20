@@ -19,8 +19,9 @@ Calculate the eigen decomposition of a square matrix using
 \code{RcppArmadillo}.
 }
 \details{
-The function \code{calc_eigen()} calls the \code{Armadillo} function
-  \code{arma::eig_sym()} to calculate the eigen decomposition.
+The function \code{calc_eigen()} calculates the eigen decomposition of a
+  square matrix using \code{RcppArmadillo}.  It calls the \code{Armadillo}
+  function \code{arma::eig_sym()} to calculate the eigen decomposition.
   For small matrices, the function \code{calc_eigen()} is several times
   faster than the \code{R} function \code{eigen()}, since
   \code{calc_eigen()} has no overhead in \code{R} code. But for large

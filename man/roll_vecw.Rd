@@ -11,7 +11,7 @@ roll_vecw(tseries, weights)
 \item{\code{tseries}}{A single-column \emph{time series} or a single-column
 \emph{matrix}.}
 
-\item{\code{weights}}{A single-column \emph{matrix} of weights.}
+\item{\code{weightv}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A single-column \emph{matrix} of the same length as the argument
@@ -38,7 +38,7 @@ retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Create simple weights
 weightv <- c(1, rep(0, 10))
 # Calculate rolling weighted sums
-weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
+weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
 # Compare with original
 all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
 # Second example
@@ -46,7 +46,7 @@ all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
 weightv <- exp(-0.2*1:11)
 weightv <- weightv/sum(weightv)
 # Calculate rolling weighted sums
-weighted <- HighFreq::roll_vecw(tseries=retsp, weights=weightv)
+weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
 # Calculate rolling weighted sums using filter()
 filtered <- stats::filter(x=retsp, filter=weightv, method="convolution", sides=1)
 # Compare both methods
@@ -54,7 +54,7 @@ all.equal(filtered[-(1:11)], weighted[-(1:11)], check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_vecw(tseries=retsp, weights=weightv),
+  Rcpp=HighFreq::roll_vecw(tseries=retsp, weightv=weightv),
   Rcode=stats::filter(x=retsp, filter=weightv, method="convolution", sides=1),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
