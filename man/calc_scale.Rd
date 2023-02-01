@@ -3,7 +3,7 @@
 \name{calc_scale}
 \alias{calc_scale}
 \title{Standardize (center and scale) the columns of a \emph{time series} of data
-in place (without copying the data in memory), using \code{RcppArmadillo}.}
+in place, without copying the data in memory, using \code{RcppArmadillo}.}
 \usage{
 calc_scale(tseries, center = TRUE, scale = TRUE, use_median = FALSE)
 }
@@ -27,16 +27,16 @@ If \code{use_median = FALSE} then the centrality is calculated as the
 deviation}.}
 }
 \value{
-Void (no return value).
+Void (no return value - modifies the data in place).
 }
 \description{
 Standardize (center and scale) the columns of a \emph{time series} of data
-in place (without copying the data in memory), using \code{RcppArmadillo}.
+in place, without copying the data in memory, using \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_scale()} standardizes (centers and scales) the
-  columns of a \emph{time series} of data in place (without copying the data
-  in memory), using \code{RcppArmadillo}.
+  columns of a \emph{time series} of data in place, without copying the data
+  in memory, using \code{RcppArmadillo}.
 
   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
@@ -79,9 +79,9 @@ all.equal(demeaned, retsp, check.attributes=FALSE)
 # Calculate a time series of returns
 retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Standardize the returns
-scaled <- scale(retsp)
+retss <- scale(retsp)
 HighFreq::calc_scale(retsp)
-all.equal(scaled, retsp, check.attributes=FALSE)
+all.equal(retss, retsp, check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(

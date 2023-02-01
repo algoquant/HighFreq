@@ -36,7 +36,7 @@ The function \code{mult_mat()} multiplies the rows or columns of a
 
   In \code{R}, \emph{matrix} multiplication is performed by columns.
   Performing multiplication by rows is often required, for example when
-  multiplying stock returns by portfolio weights.
+  multiplying asset returns by portfolio weights.
   But performing multiplication by rows requires explicit loops in \code{R},
   or it requires \emph{matrix} transpose.  And both are slow.
 

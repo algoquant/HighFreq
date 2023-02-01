@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_invref}
 \alias{calc_invref}
-\title{Calculate the inverse of a square \emph{matrix} in place (without copying
-the data in memory).}
+\title{Calculate the inverse of a square \emph{matrix} in place, without copying
+the data in memory.}
 \usage{
 calc_invref(matrixv)
 }
@@ -16,12 +16,12 @@ overwritten with the inverse matrix.)}
 No return value.
 }
 \description{
-Calculate the inverse of a square \emph{matrix} in place (without copying
-the data in memory).
+Calculate the inverse of a square \emph{matrix} in place, without copying
+the data in memory.
 }
 \details{
 The function \code{calc_invref()} calculates the inverse of a square
-  \emph{matrix} in place (without copying the data in memory). It accepts a
+  \emph{matrix} in place, without copying the data in memory. It accepts a
   \emph{pointer} to the argument \code{matrixv} (which is the \code{matrix}
   to be inverted), and it overwrites the old matrix values with the inverse
   matrix values. It performs the calculation in place, without copying the

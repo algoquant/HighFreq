@@ -35,14 +35,14 @@ The function \code{calc_ranks()} calculates the ranks of the elements of a
   The ranks produced by \code{calc_ranks()} start at zero, following the 
   \code{C++} convention.
   
-  The \code{RcppArmadillo} function \code{arma::sort_index()} calculates the
+  The \code{Armadillo} function \code{arma::sort_index()} calculates the
   permutation index which sorts a given vector into an ascending order.
   Applying the function \code{arma::sort_index()} twice:
   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
   permutation index to sort the vector from ascending order back into its
   original unsorted order.
   
-  The function \code{calc_ranks()} calls the \code{RcppArmadillo} function
+  The function \code{calc_ranks()} calls the \code{Armadillo} function
   \code{arma::sort_index()} twice to calculate the \emph{reverse}
   permutation index, to sort the vector from ascending order back into its
   original unsorted order.

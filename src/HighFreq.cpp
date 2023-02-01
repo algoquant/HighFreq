@@ -1,8 +1,10 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 #include <vector>
-using namespace std;
 using namespace arma;
+// Use STL
+using namespace std;
+// For eigen solver SymEigsSolver
 using namespace arma::newarp;
 
 ////////////////////////////////////////////////////////////
@@ -1000,14 +1002,14 @@ std::vector<double> decode_it(Rcpp::List encodel) {
 //'   The ranks produced by \code{calc_ranks()} start at zero, following the 
 //'   \code{C++} convention.
 //'   
-//'   The \code{RcppArmadillo} function \code{arma::sort_index()} calculates the
+//'   The \code{Armadillo} function \code{arma::sort_index()} calculates the
 //'   permutation index which sorts a given vector into an ascending order.
 //'   Applying the function \code{arma::sort_index()} twice:
 //'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
 //'   permutation index to sort the vector from ascending order back into its
 //'   original unsorted order.
 //'   
-//'   The function \code{calc_ranks()} calls the \code{RcppArmadillo} function
+//'   The function \code{calc_ranks()} calls the \code{Armadillo} function
 //'   \code{arma::sort_index()} twice to calculate the \emph{reverse}
 //'   permutation index, to sort the vector from ascending order back into its
 //'   original unsorted order.
@@ -1187,7 +1189,7 @@ std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
 //' 
 //'   In \code{R}, \emph{matrix} multiplication is performed by columns.
 //'   Performing multiplication by rows is often required, for example when
-//'   multiplying stock returns by portfolio weights.
+//'   multiplying asset returns by portfolio weights.
 //'   But performing multiplication by rows requires explicit loops in \code{R},
 //'   or it requires \emph{matrix} transpose.  And both are slow.
 //'
@@ -1261,7 +1263,7 @@ arma::mat mult_mat(arma::vec vectorv,
 
 ////////////////////////////////////////////////////////////
 //' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-//' element-wise and in place (without copying the data in memory).
+//' element-wise and in place, without copying the data in memory.
 //' 
 //' @param \code{vectorv} A \emph{numeric} \emph{vector}.
 //' 
@@ -1271,12 +1273,12 @@ arma::mat mult_mat(arma::vec vectorv,
 //'   the rows of \code{matrixv} by \code{vectorv}, otherwise multiply the columns
 //'   (the default is \code{byrow = TRUE}.)
 //' 
-//' @return Void (no return value).
+//' @return Void (no return value - modifies the data in place).
 //' 
 //' @details
 //'   The function \code{mult_mat_ref()} multiplies the rows or columns of a
-//'   \emph{matrix} times a \emph{vector}, element-wise and in place (without
-//'   copying the data in memory).
+//'   \emph{matrix} times a \emph{vector}, element-wise and in place, without
+//'   copying the data in memory.
 //'
 //'   It accepts a \emph{pointer} to the argument \code{matrixv}, and it
 //'   overwrites the old \code{matrix} values with the new values. It performs
@@ -1290,7 +1292,7 @@ arma::mat mult_mat(arma::vec vectorv,
 //' 
 //'   In \code{R}, \emph{matrix} multiplication is performed by columns.
 //'   Performing multiplication by rows is often required, for example when
-//'   multiplying stock returns by portfolio weights.
+//'   multiplying asset returns by portfolio weights.
 //'   But performing multiplication by rows requires explicit loops in \code{R},
 //'   or it requires \emph{matrix} transpose.  And both are slow.
 //'
@@ -1438,8 +1440,8 @@ void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the inverse of a square \emph{matrix} in place (without copying
-//' the data in memory).
+//' Calculate the inverse of a square \emph{matrix} in place, without copying
+//' the data in memory.
 //' 
 //' @param \code{matrixv} A \emph{matrix} of data to be inverted.  (The argument
 //'   is interpreted as a \emph{pointer} to a \emph{matrix}, and it is
@@ -1449,7 +1451,7 @@ void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=
 //'
 //' @details
 //'   The function \code{calc_invref()} calculates the inverse of a square
-//'   \emph{matrix} in place (without copying the data in memory). It accepts a
+//'   \emph{matrix} in place, without copying the data in memory. It accepts a
 //'   \emph{pointer} to the argument \code{matrixv} (which is the \code{matrix}
 //'   to be inverted), and it overwrites the old matrix values with the inverse
 //'   matrix values. It performs the calculation in place, without copying the
@@ -1749,7 +1751,7 @@ arma::mat calc_inv(const arma::mat& matrixv,
 
 ////////////////////////////////////////////////////////////
 //' Standardize (center and scale) the columns of a \emph{time series} of data
-//' in place (without copying the data in memory), using \code{RcppArmadillo}.
+//' in place, without copying the data in memory, using \code{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 //' 
@@ -1769,12 +1771,12 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //'   \emph{mean} and the dispersion is calculated as the \emph{standard
 //'   deviation}.
 //'
-//' @return Void (no return value).
+//' @return Void (no return value - modifies the data in place).
 //'
 //' @details
 //'   The function \code{calc_scale()} standardizes (centers and scales) the
-//'   columns of a \emph{time series} of data in place (without copying the data
-//'   in memory), using \code{RcppArmadillo}.
+//'   columns of a \emph{time series} of data in place, without copying the data
+//'   in memory, using \code{RcppArmadillo}.
 //'
 //'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
 //'   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
@@ -1817,9 +1819,9 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //' # Calculate a time series of returns
 //' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' # Standardize the returns
-//' scaled <- scale(retsp)
+//' retss <- scale(retsp)
 //' HighFreq::calc_scale(retsp)
-//' all.equal(scaled, retsp, check.attributes=FALSE)
+//' all.equal(retss, retsp, check.attributes=FALSE)
 //' # Compare the speed of Rcpp with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -1831,9 +1833,9 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //' @export
 // [[Rcpp::export]]
 void calc_scale(arma::mat& tseries, 
-                 bool center = true, 
-                 bool scale = true, 
-                 bool use_median = false) {
+                bool center = true, 
+                bool scale = true, 
+                bool use_median = false) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
@@ -2196,7 +2198,7 @@ arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights) {
 //'   (higher) values by the weights.  It calculates the rolling weighted sums
 //'   of the past data.
 //'   
-//'   The function \code{roll_conv()} uses the \code{RcppArmadillo} function
+//'   The function \code{roll_conv()} uses the \code{Armadillo} function
 //'   \code{arma::conv2()}. It performs a similar calculation to the standard
 //'   \code{R} function \cr\code{filter(x=tseries, filter=weightv,
 //'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
@@ -2265,7 +2267,7 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weights) {
 //'   The function \code{roll_sum()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
 //' 
-//'   The function \code{roll_sum()} uses the fast \code{RcppArmadillo} function
+//'   The function \code{roll_sum()} uses the fast \code{Armadillo} function
 //'   \code{arma::cumsum()}, without explicit loops.
 //'   The function \code{roll_sum()} is several times faster than
 //'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
@@ -2445,7 +2447,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' 
 //'   The function \code{roll_wsum()} calculates the rolling weighted sums as
 //'   convolutions of the columns of \code{tseries} with the \emph{column
-//'   vector} of weights using the \code{RcppArmadillo} function
+//'   vector} of weights using the \code{Armadillo} function
 //'   \code{arma::conv2()}.  It performs a similar calculation to the standard
 //'   \code{R} function \cr\code{stats::filter(x=retsp, filter=weightv,
 //'   method="convolution", sides=1)}, but it can be many times faster, and it
@@ -3132,6 +3134,434 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 }  // end run_var_ohlc
 
 
+////////////////////////////////////////////////////////////
+//' Calculate the correlation matrix from the covariance matrix.
+//' 
+//' @param \code{covmat} A \emph{matrix} of covariances.
+//' 
+//' @return Void (no return value - modifies the covariance matrix in place).
+//' 
+//' @details
+//'   The function \code{push_cov2cor()} calculates the correlation matrix from
+//'   the covariance matrix, in place, without copying the data in memory.
+//'   
+//'   The function \code{push_cov2cor()} accepts a \emph{pointer} to the the
+//'   covariance matrix, and it overwrites it with the correlation matrix.
+//'
+//'   The function \code{push_cov2cor()} is written in \code{RcppArmadillo}
+//'   \code{C++} so it's much faster than \code{R} code.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate a time series of returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+//' # Calculate the covariance matrix of returns
+//' covmat <- cov(retsp)
+//' # Calculate the correlation matrix of returns
+//' push_cov2cor(covmat)
+//' all.equal(covmat, cor(retsp))
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void push_cov2cor(arma::mat& covmat) {
+  
+  arma::vec volv = arma::sqrt(covmat.diag());
+  covmat = covmat/(volv*arma::trans(volv));
+  
+}  // end push_cov2cor
+
+
+
+////////////////////////////////////////////////////////////
+//' Update the trailing covariance matrix of streaming asset returns,
+//' with a row of new returns.
+//' 
+//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' 
+//' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
+//' 
+//' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//'   mean and covariance.
+//' 
+//' @return Void (no return value - modifies the trailing covariance matrix
+//'   and the return means in place).
+//' 
+//' @details
+//'   The function \code{push_covar()} updates the trailing covariance matrix of
+//'   streaming asset returns, with a row of new returns.  It updates the
+//'   covariance matrix in place, without copying the data in memory.
+//'   
+//'   The streaming asset returns \eqn{r_t} contain multiple columns and the
+//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata} and 
+//'   \code{meanv} represent single rows of data with multiple columns.
+//'   
+//'   The function \code{push_covar()} accepts \emph{pointers} to the arguments
+//'   \code{covmat} and \code{meanv}, 
+//'   and it overwrites the old values with the new values. It performs the
+//'   calculation in place, without copying the data in memory, which can
+//'   significantly increase the computation speed for large matrices.
+//'
+//'   First, the function \code{push_covar()} updates the trailing means
+//'   \eqn{\bar{r}_t} of the streaming asset returns \eqn{r_t} by recursively
+//'   weighting present and past values using the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+//'   }
+//'   This recursive formula is equivalent to the exponentially weighted moving
+//'   average of the streaming asset returns \eqn{r_t}.
+//'
+//'   It then calculates the demeaned returns:
+//'   \deqn{
+//'     \hat{r}_t = r_t - \bar{r}_t
+//'   }
+//'   
+//'   Finally, it updates the trailing covariance matrix of the returns:
+//'   \deqn{
+//'     cov_t = \lambda cov_{t-1} + (1-\lambda) \hat{r}^T_t \hat{r}_t
+//'   }
+//'   
+//'   The decay factor \eqn{\lambda} determines the strength of the updates,
+//'   with smaller \eqn{\lambda} values giving more weight to the new data. If
+//'   the asset returns are not stationary, then applying more weight to the new
+//'   returns reduces the bias of the trailing covariance matrix, but it also
+//'   increases its variance. Simulation can be used to find the value of the
+//'   \eqn{\lambda} parameter to achieve the best bias-variance tradeoff.
+//'   
+//'   The function \code{push_covar()} is written in \code{RcppArmadillo}
+//'   \code{C++} so it's much faster than \code{R} code.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate a time series of returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+//' # Calculate the returns without last row
+//' nrows <- NROW(retsp)
+//' retss <- retsp[-nrows]
+//' # Calculate the covariance of returns
+//' meanv <- colMeans(retss)
+//' covmat <- cov(retss)
+//' # Update the covariance of returns
+//' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambda=0.9)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void push_covar(const arma::rowvec& newdata, // Row of new asset returns
+                arma::mat& covmat,  // Covariance matrix
+                arma::rowvec& meanv, // Trailing means of the returns
+                const double& lambda) { // Decay factor to multiply the past values
+  
+  double lambda1 = 1-lambda;
+  
+  // Update the means of the returns
+  meanv = lambda*meanv + lambda1*newdata;
+  // Calculate the de-meaned returns
+  arma::rowvec datav = (newdata - meanv);
+  
+  // Update the covariance of the returns
+  covmat = lambda*covmat + lambda1*arma::trans(datav)*datav;
+  
+}  // end push_covar
+
+
+
+//' Update the trailing eigen values and eigen vectors of streaming asset return
+//' data, with a row of new returns.
+//' 
+//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' 
+//' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
+//' 
+//' @param \code{eigenval} A \emph{vector} of eigen values.
+//' 
+//' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
+//' 
+//' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+//' 
+//' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//'   mean and variance.
+//' 
+//' @return Void (no return value - modifies the trailing eigen values, eigen
+//'   vectors, the eigen portfolio returns, and the return means in place).
+//' 
+//' @details
+//'   The function \code{push_eigen()} updates the trailing eigen values, eigen
+//'   vectors, and the eigen portfolio returns of streaming asset returns, with
+//'   a row of new data.  It updates the eigenelements in place, without copying
+//'   the data in memory.
+//'   
+//'   The streaming asset returns \eqn{r_t} contain multiple columns and the
+//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+//'   \code{reteigen}, and \code{meanv} represent single rows of data with
+//'   multiple columns.
+//'   
+//'   The function \code{push_eigen()} accepts \emph{pointers} to the arguments
+//'   \code{eigenval}, \code{eigenval}, \code{eigenvec}, \code{meanv}, and
+//'   \code{reteigen}, and it overwrites the old values with the new values. It
+//'   performs the calculation in place, without copying the data in memory,
+//'   which can significantly increase the computation speed for large matrices.
+//'
+//'   First, the function \code{push_eigen()} calls the function
+//'   \code{HighFreq::push_covar()} to update the trailing covariance matrix of
+//'   streaming asset returns, with a row of new returns.  It updates the
+//'   covariance matrix in place, without copying the data in memory.
+//'   
+//'   It then calls the \code{Armadillo} function \code{arma::eig_sym} to
+//'   calculate the eigen decomposition of the trailing covariance matrix.
+//'   
+//'   The function \code{push_eigen()} calculates the eigen portfolio returns by
+//'   multiplying the scaled asset returns times the eigen vectors
+//'   \eqn{\strong{v}_{t-1}}:
+//'   \deqn{
+//'     r^{eigen}_t = \strong{v}_{t-1} \frac{r_t}{\sigma_{t-1}}
+//'   }
+//'   Where \eqn{\strong{v}_{t-1}} is the matrix of previous eigen vectors that
+//'   are passed by reference through the parameter \code{eigenvec}. The eigen
+//'   returns \eqn{r^{eigen}_t} are the returns of the eigen portfolios, with
+//'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
+//'   weights are applied to the asset returns scaled by their volatilities.
+//'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
+//'   parameter \code{reteigen}. 
+//'   
+//'   The decay factor \eqn{\lambda} determines the strength of the updates,
+//'   with smaller \eqn{\lambda} values giving more weight to the new data. If
+//'   the asset returns are not stationary, then applying more weight to the new
+//'   returns reduces the bias of the trailing covariance matrix, but it also
+//'   increases its variance. Simulation can be used to find the value of the
+//'   \eqn{\lambda} parameter to achieve the best bias-variance tradeoff.
+//'   
+//'   The function \code{push_eigen()} is written in \code{RcppArmadillo}
+//'   \code{C++} so it's much faster than \code{R} code.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate a time series of returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+//' # Calculate the returns without the last row
+//' nrows <- NROW(retsp)
+//' retss <- retsp[-nrows]
+//' # Calculate the previous covariance of returns
+//' meanv <- colMeans(retss)
+//' covmat <- cov(retss)
+//' # Update the covariance of returns
+//' reteigen <- numeric(NCOL(retsp))
+//' HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
+//'   eigenval=eigenval, eigenvec=eigenvec, 
+//'   reteigen=reteigen, meanv=meanv, lambda=0.9)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
+               arma::mat& covmat,  // Covariance matrix
+               arma::vec& eigenval, // Eigen values
+               arma::mat& eigenvec, // Eigen vectors
+               arma::rowvec& reteigen, // Row of eigen portfolio returns
+               arma::rowvec& meanv, // Trailing means of the returns
+               const double& lambda) { // Decay factor to multiply the past values
+  
+  // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
+  reteigen = (newdata/arma::trans(arma::sqrt(covmat.diag())))*eigenvec;
+  // Update the covariance matrix
+  push_covar(newdata, covmat, meanv, lambda);
+  // Calculate the eigen decomposition
+  arma::eig_sym(eigenval, eigenvec, covmat);
+  
+}  // end push_eigen
+
+
+
+////////////////////////////////////////////////////////////
+//' Update the trailing eigen values and eigen vectors of streaming asset return
+//' data, with a row of new returns, using the \emph{SGA} algorithm.
+//' 
+//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' 
+//' @param \code{eigenval} A \emph{vector} of eigen values.
+//' 
+//' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
+//' 
+//' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+//' 
+//' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
+//' 
+//' @param \code{varv} A \emph{vector} of the trailing asset variances.
+//' 
+//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//'   mean and variance.
+//' 
+//' @param \code{gamma} A \emph{numeric} gain factor to multiply the past
+//'   eigenelements.
+//' 
+//' @return Void (no return value - modifies the trailing eigen values, eigen
+//'   vectors, the return means, and the return variances in place).
+//' 
+//' @details
+//'   The function \code{push_sga()} updates the trailing eigen values, eigen
+//'   vectors, and the eigen portfolio returns of streaming asset returns, with
+//'   a row of new data, using the \emph{SGA} algorithm. It updates the
+//'   eigenelements in place, without copying the data in memory.
+//'   
+//'   The streaming asset returns \eqn{r_t} contain multiple columns and the
+//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+//'   \code{meanv}, and \code{varv} represent single rows of data with multiple
+//'   columns.
+//'   
+//'   The function \code{push_sga()} accepts \emph{pointers} to the arguments
+//'   \code{eigenval}, \code{eigenvec}, \code{meanv}, and \code{varv},
+//'   and it overwrites the old values with the new values. It performs the
+//'   calculation in place, without copying the data in memory, which can
+//'   significantly increase the computation speed for large matrices.
+//'
+//'   First, the function \code{push_sga()} updates the trailing means
+//'   \eqn{\bar{r}_t} and variances \eqn{\sigma^2_t} of the streaming asset
+//'   returns \eqn{r_t} by recursively weighting present and past values
+//'   using the decay factor \eqn{\lambda}:
+//'   \deqn{
+//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+//'   }
+//'   \deqn{
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+//'   }
+//'   The past values \eqn{\bar{r}_{t-1}} and \eqn{\sigma^2_{t-1}} are passed in
+//'   by reference through the variables \code{meanv} and \code{varv}. The
+//'   updated values are then passed out by reference.
+//'
+//'   These recursive formulas are equivalent to the exponentially weighted
+//'   moving averages of the streaming asset returns \eqn{r_t}.
+//'
+//'   It then calculates a vector of the eigen portfolio returns:
+//'   \deqn{
+//'     r^{eigen}_t = \strong{v}_{t-1} \frac{r_t}{\sigma_{t-1}}
+//'   }
+//'   Where \eqn{\strong{v}_{t-1}} is the matrix of previous eigen vectors that
+//'   are passed by reference through the parameter \code{eigenvec}. The eigen
+//'   returns \eqn{r^{eigen}_t} are the returns of the eigen portfolios, with
+//'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
+//'   weights are applied to the asset returns scaled by their volatilities.
+//'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
+//'   parameter \code{reteigen}. 
+//'   
+//'   The function \code{push_sga()} then standardizes the columns of the new
+//'   returns:
+//'   \deqn{
+//'     \hat{r}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
+//'   }
+//'   
+//'   Finally, the vector of eigen values \eqn{\Lambda_{j, t}} and the matrix of
+//'   eigen vectors \eqn{\strong{v}_{j, t}} (\eqn{j} is the column index) are
+//'   then updated using the \emph{SGA} algorithm:
+//'   \deqn{
+//'     \Lambda_{j, t} = (1-\gamma) \Lambda_{j, t-1} + \gamma \phi_{j, t-1}
+//'   }
+//'   \deqn{
+//'     \strong{v}_{j, t} = \strong{v}_{j, t-1} + \gamma \phi_{j, t-1} (\hat{r}_{t} - \phi_{j, t-1} \strong{v}_{j, t-1} - 2 \sum_{i=1}^{j-1} \phi_{i, t-1} \strong{v}_{i, t-1})
+//'   }
+//'   Where \eqn{\phi_{j, t-1} = \hat{r}_{t} \strong{v}_{j, t-1}} are the matrix
+//'   products of the new data times the previous eigen vectors. 
+//'   
+//'   The gain factor \eqn{\gamma} determines the strength of the updates, with
+//'   larger \eqn{\gamma} values giving more weight to the new data. If the
+//'   asset returns are not stationary, then applying more weight to the new
+//'   returns reduces the bias of the trailing eigen vectors, but it also
+//'   increases their variance. Simulation can be used to find the value of the
+//'   \eqn{\gamma} parameter to achieve the best bias-variance tradeoff.
+//'   
+//'   A description of the \emph{SGA} algorithm can be found in the package
+//'   \href{https://cran.r-project.org/web/packages/onlinePCA/index.html}{onlinePCA} and in the 
+//'   \href{https://paperswithcode.com/paper/online-principal-component-analysis-in-high}{Online PCA paper}.
+//'   
+//'   The function \code{push_sga()} is written in \code{RcppArmadillo}
+//'   \code{C++} code and it calls the \code{Armadillo} function
+//'   \code{arma::qr_econ()} to perform the QR decomposition, to calculate the
+//'   eigen vectors.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate a time series of returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+//' # Calculate the covariance of returns without the last row
+//' nrows <- NROW(retsp)
+//' retss <- retsp[-nrows]
+//' HighFreq::calc_scale(retss)
+//' meanv <- colMeans(retss)
+//' varv <- sapply(retss, var)
+//' covmat <- cov(retss)
+//' # Calculate the eigen decomposition using RcppArmadillo
+//' eigend <- HighFreq::calc_eigen(covmat)
+//' eigenval <- eigend$values
+//' eigenvec <- eigend$vectors
+//' # Update the eigen decomposition using SGA
+//' reteigen <- numeric(NCOL(retsp))
+//' HighFreq::push_sga(newdata=retsp[nrows], 
+//'   eigenval=eigenval, eigenvec=eigenvec, 
+//'   reteigen=reteigen, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void push_sga(const arma::rowvec& newdata, // Row of new asset returns
+              arma::rowvec& eigenval, // Eigen values
+              arma::mat& eigenvec, // Eigen vectors
+              arma::rowvec& reteigen, // Row of eigen portfolio returns
+              arma::rowvec& meanv, // Trailing means of the returns
+              arma::rowvec& varv, // Trailing variances of the returns
+              const double& lambda, // Decay factor to multiply the past mean and variance
+              const double& gamma) { // Gain factor to multiply the past eigenelements
+  
+  double lambda1 = 1-lambda;
+  
+  // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
+  arma::rowvec volv = arma::sqrt(varv);
+  reteigen = (newdata/volv)*eigenvec;
+  
+  // Update the mean and variance of the returns
+  meanv = lambda*meanv + lambda1*newdata;
+  varv = lambda*varv + lambda1*arma::square(newdata-meanv);
+  // Calculate the standardized returns
+  volv = arma::sqrt(varv);
+  arma::rowvec datav = (newdata-meanv)/volv;
+  // arma::rowvec datav = (newdata-meanv);
+  // std::cout << "datav: " << std::endl << datav << std::endl;
+  // std::cout << "arma::trans(datav): " << std::endl << arma::trans(datav) << std::endl;
+  
+  // Calculate the phis - the products of the eigen vectors times the standardized returns
+  // arma::rowvec vecd = arma::trans(eigenvec)*arma::trans(datav);
+  arma::rowvec vecd = datav*eigenvec;
+  // std::cout << "vecd: " << std::endl << arma::trans(vecd) << std::endl;
+  // std::cout << "vecd: " << std::endl << vecd << std::endl;
+  // Calculate the updated eigen values
+  arma::rowvec neigenval = (1-gamma)*eigenval + gamma*arma::square(vecd);
+  // std::cout << "eigenval: " << std::endl << eigenval << std::endl;
+  // std::cout << "neigenval: " << std::endl << neigenval << std::endl;
+  
+  // Calculate diagonal matrix of gain factors
+  arma::uword ncols = eigenvec.n_rows;
+  arma::mat dgamma = arma::mat(ncols, ncols, arma::fill::zeros);
+  dgamma.diag().fill(gamma);
+  
+  // Perform QR decomposition of Q to get the eigen vectors W
+  arma::mat W, R, Q = eigenvec;
+  Q += arma::trans(datav)*vecd*dgamma;
+  // std::cout << "Q: " << std::endl << Q << std::endl;
+  arma::qr_econ(W, R, Q);
+  
+  // Sort the eigen values and eigen vectors
+  arma::uvec sorti = arma::sort_index(neigenval, "descend");
+  // std::cout << "sorti: " << std::endl << sorti << std::endl;
+  eigenval = neigenval.cols(sorti);
+  eigenvec = W.cols(sorti);
+  
+}  // end push_sga
+
 
 
 ////////////////////////////////////////////////////////////
@@ -3214,7 +3644,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   arma::mat vars(nrows, ncols);
   arma::mat covar(nrows, 1);
   double lambda1 = 1-lambda;
-  
+
   // Perform loop over the rows
   vars.row(0) = arma::square(tseries.row(0));
   covar.row(0) = tseries(0, 0)*tseries(0, 1);
@@ -3226,8 +3656,32 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand);
     covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand(0)*meand(1));
   }  // end for
-  
+
   return arma::join_rows(covar, vars);
+
+  // Slower code below - because push_covar() calls arma::trans()
+  // 
+  // arma::uword nrows = tseries.n_rows;
+  // arma::uword ncols = tseries.n_cols;
+  // arma::mat vars(nrows, ncols);
+  // arma::mat covar(nrows, 1);
+  // arma::rowvec meanv = tseries.row(0);
+  // arma::mat covmat = arma::trans(tseries.row(0))*tseries.row(0);
+  // 
+  // // Copy the covariance data
+  // vars.row(0) = arma::trans(covmat.diag());
+  // covar.row(0) = covmat(0, 1);
+  // 
+  // // Perform loop over the rows
+  // for (arma::uword it = 1; it < nrows; it++) {
+  //   // Update the covariance matrix
+  //   push_covar(tseries.row(it), covmat, meanv, lambda);
+  //   // Copy the covariance data
+  //   vars.row(it) = arma::trans(covmat.diag());
+  //   covar.row(it) = covmat(0, 1);
+  // }  // end for
+  // 
+  // return arma::join_rows(covar, vars);
   
 }  // end run_covar
 
@@ -6228,7 +6682,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 
 ////////////////////////////////////////////////////////////
 //' Standardize (center and scale) the columns of a \emph{time series} of data
-//' over time and in place (without copying the data in memory), using
+//' over time and in place, without copying the data in memory, using
 //' \code{RcppArmadillo}.
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
@@ -6244,7 +6698,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //'   columns so that they have unit standard deviation or MAD (the default is
 //'   \code{TRUE}).
 //' 
-//' @return Void (no return value).
+//' @return Void (no return value - modifies the data in place).
 //'
 //' @details
 //'   The function \code{run_scale()} performs a trailing standardization
@@ -6340,9 +6794,9 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' @export
 // [[Rcpp::export]]
 void run_scale(arma::mat& tseries, 
-                    double lambda,
-                    bool center = true, 
-                    bool scale = true) {
+               double lambda,
+               bool center = true, 
+               bool scale = true) {
   
   arma::uword nrows = tseries.n_rows;
   double lambda1 = 1-lambda;

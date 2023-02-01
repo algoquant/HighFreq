@@ -89,6 +89,25 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Create the function run_eigen() to perform loop over push_eigen() - clone run_covar()
+
++ [ ] Create the function run_portf() to simulate a running portfolio optimization strategy - clone run_reg()
+
++ [ ] Modify calc_eigen() - pass the eigenvalues and eigenvectors by reference instead of returning list
+
++ [ ] In function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
+
++ [ ] Create the function roll_eigen() - clone roll_reg()
+
++ [ ] Rewrite the function run_reg() to perform loop over push_reg()
+
++ [ ] Create the function push_reg()
+
++ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
+Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
+Adapt from run_covar()
+
+
 + [ ] Calculate update the largest principal components approximately using recursive Lanczos iteration and LOBPCG
 https://en.wikipedia.org/wiki/Power_iteration
 https://en.wikipedia.org/wiki/LOBPCG
@@ -96,8 +115,6 @@ https://en.wikipedia.org/wiki/LOBPCG
 + [ ] Apply the package onlinePCA with the Generalized Hebbian Algorithm (GHA) to update the eigenvalues and eigenvectors
 https://github.com/cran/onlinePCA
 https://cran.r-project.org/web/packages/onlinePCA/index.html
-
-+ [ ] Create the function run_portf() to simulate a running portfolio optimization strategy - clone run_reg()
 
 + [ ] Export from HighFreq the utility functions into a separate header-only package, and source them in HighFreq
 Compile HighFreq on command line using make and Makevars files.
@@ -135,9 +152,6 @@ Find the lambda parameter which produces similar values for a given look_back pa
 Nadagouda Recursive Least Squares Regression Kalman Filter
 https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
-+ [ ] Create the function run_covmat() - for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar()
-
-
 + [ ] Calculate the mean portfolio returns ignoring zero stock returns, because including zero returns biases the estimate away from the actual mean portfolio returns
 
 + [ ] Create online functions run_sharpe() and run_kelly()
@@ -160,10 +174,6 @@ The H statistic is reminiscent of the difference between the mean asset returns 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
-
-+ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
-Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
-Adapt from run_covar()
 
 + [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
 
@@ -292,8 +302,6 @@ https://www.johndcook.com/blog/standard_deviation/
 
 + [ ] Fix function mult_mat_ref() - it doesn't do anything - it doesn't multiply the matrix
 Is it a problem only on the Mac because of incompatible compiler?
-
-+ [ ] In functions calc_reg() and roll_reg() add an argument called "method" for scaling the residuals
 
 + [ ] Create aggregation function agg_regate() similar to roll_ohlc(), which aggregates returns, prices, etc. to time series with lower periodicity.
 Worker agg_ohlc()
@@ -534,6 +542,16 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Create the function push_sga() - finish examples documentation
+
++ [x] Create the function push_eigen() - clone push_covar() and push_sga()
+
++ [x] Create the function push_cov2cor() for calculating the correlation matrix from the covariance matrix
+
++ [x] Modify run_covar() to use push_covar() - no - it's slower because it calls arma::trans() in the loop
+
++ [x] Create the function push_covar(), for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar() - clone run_covar() and push_sga()
 
 + [x] Create calc_eigenp() to calculate the partial eigen decomposition - only the lowest order principal components with the largest eigenvalues)
 

@@ -449,6 +449,62 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// push_cov2cor
+void push_cov2cor(arma::mat& covmat);
+RcppExport SEXP _HighFreq_push_cov2cor(SEXP covmatSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type covmat(covmatSEXP);
+    push_cov2cor(covmat);
+    return R_NilValue;
+END_RCPP
+}
+// push_covar
+void push_covar(const arma::rowvec& newdata, arma::mat& covmat, arma::rowvec& meanv, const double& lambda);
+RcppExport SEXP _HighFreq_push_covar(SEXP newdataSEXP, SEXP covmatSEXP, SEXP meanvSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type covmat(covmatSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    push_covar(newdata, covmat, meanv, lambda);
+    return R_NilValue;
+END_RCPP
+}
+// push_eigen
+void push_eigen(const arma::rowvec& newdata, arma::mat& covmat, arma::vec& eigenval, arma::mat& eigenvec, arma::rowvec& reteigen, arma::rowvec& meanv, const double& lambda);
+RcppExport SEXP _HighFreq_push_eigen(SEXP newdataSEXP, SEXP covmatSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP reteigenSEXP, SEXP meanvSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type covmat(covmatSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type eigenval(eigenvalSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type eigenvec(eigenvecSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type reteigen(reteigenSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    push_eigen(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda);
+    return R_NilValue;
+END_RCPP
+}
+// push_sga
+void push_sga(const arma::rowvec& newdata, arma::rowvec& eigenval, arma::mat& eigenvec, arma::rowvec& reteigen, arma::rowvec& meanv, arma::rowvec& varv, const double& lambda, const double& gamma);
+RcppExport SEXP _HighFreq_push_sga(SEXP newdataSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP reteigenSEXP, SEXP meanvSEXP, SEXP varvSEXP, SEXP lambdaSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type eigenval(eigenvalSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type eigenvec(eigenvecSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type reteigen(reteigenSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type varv(varvSEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type gamma(gammaSEXP);
+    push_sga(newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma);
+    return R_NilValue;
+END_RCPP
+}
 // run_covar
 arma::mat run_covar(const arma::mat& tseries, double lambda);
 RcppExport SEXP _HighFreq_run_covar(SEXP tseriesSEXP, SEXP lambdaSEXP) {
@@ -984,6 +1040,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_run_min", (DL_FUNC) &_HighFreq_run_min, 2},
     {"_HighFreq_run_var", (DL_FUNC) &_HighFreq_run_var, 2},
     {"_HighFreq_run_var_ohlc", (DL_FUNC) &_HighFreq_run_var_ohlc, 2},
+    {"_HighFreq_push_cov2cor", (DL_FUNC) &_HighFreq_push_cov2cor, 1},
+    {"_HighFreq_push_covar", (DL_FUNC) &_HighFreq_push_covar, 4},
+    {"_HighFreq_push_eigen", (DL_FUNC) &_HighFreq_push_eigen, 7},
+    {"_HighFreq_push_sga", (DL_FUNC) &_HighFreq_push_sga, 8},
     {"_HighFreq_run_covar", (DL_FUNC) &_HighFreq_run_covar, 2},
     {"_HighFreq_run_reg", (DL_FUNC) &_HighFreq_run_reg, 4},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},

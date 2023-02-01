@@ -29,7 +29,7 @@ The function \code{roll_sum()} calculates the rolling sums over the
   The function \code{roll_sum()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
 
-  The function \code{roll_sum()} uses the fast \code{RcppArmadillo} function
+  The function \code{roll_sum()} uses the fast \code{Armadillo} function
   \code{arma::cumsum()}, without explicit loops.
   The function \code{roll_sum()} is several times faster than
   \code{rutils::roll_sum()} which uses vectorized \code{R} code.

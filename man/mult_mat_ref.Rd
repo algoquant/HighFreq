@@ -3,7 +3,7 @@
 \name{mult_mat_ref}
 \alias{mult_mat_ref}
 \title{Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise and in place (without copying the data in memory).}
+element-wise and in place, without copying the data in memory.}
 \usage{
 mult_mat_ref(vectorv, matrixv, byrow = TRUE)
 }
@@ -17,16 +17,16 @@ the rows of \code{matrixv} by \code{vectorv}, otherwise multiply the columns
 (the default is \code{byrow = TRUE}.)}
 }
 \value{
-Void (no return value).
+Void (no return value - modifies the data in place).
 }
 \description{
 Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise and in place (without copying the data in memory).
+element-wise and in place, without copying the data in memory.
 }
 \details{
 The function \code{mult_mat_ref()} multiplies the rows or columns of a
-  \emph{matrix} times a \emph{vector}, element-wise and in place (without
-  copying the data in memory).
+  \emph{matrix} times a \emph{vector}, element-wise and in place, without
+  copying the data in memory.
 
   It accepts a \emph{pointer} to the argument \code{matrixv}, and it
   overwrites the old \code{matrix} values with the new values. It performs
@@ -40,7 +40,7 @@ The function \code{mult_mat_ref()} multiplies the rows or columns of a
 
   In \code{R}, \emph{matrix} multiplication is performed by columns.
   Performing multiplication by rows is often required, for example when
-  multiplying stock returns by portfolio weights.
+  multiplying asset returns by portfolio weights.
   But performing multiplication by rows requires explicit loops in \code{R},
   or it requires \emph{matrix} transpose.  And both are slow.
 

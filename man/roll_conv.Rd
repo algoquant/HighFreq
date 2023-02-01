@@ -27,7 +27,7 @@ The function \code{roll_conv()} calculates the convolutions of the
   (higher) values by the weights.  It calculates the rolling weighted sums
   of the past data.
   
-  The function \code{roll_conv()} uses the \code{RcppArmadillo} function
+  The function \code{roll_conv()} uses the \code{Armadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
   \code{R} function \cr\code{filter(x=tseries, filter=weightv,
   method="convolution", sides=1)}, but it's over \code{6} times faster, and

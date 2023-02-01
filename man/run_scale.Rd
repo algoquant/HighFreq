@@ -3,7 +3,7 @@
 \name{run_scale}
 \alias{run_scale}
 \title{Standardize (center and scale) the columns of a \emph{time series} of data
-over time and in place (without copying the data in memory), using
+over time and in place, without copying the data in memory, using
 \code{RcppArmadillo}.}
 \usage{
 run_scale(tseries, lambda, center = TRUE, scale = TRUE)
@@ -23,11 +23,11 @@ columns so that they have unit standard deviation or MAD (the default is
 \code{TRUE}).}
 }
 \value{
-Void (no return value).
+Void (no return value - modifies the data in place).
 }
 \description{
 Standardize (center and scale) the columns of a \emph{time series} of data
-over time and in place (without copying the data in memory), using
+over time and in place, without copying the data in memory, using
 \code{RcppArmadillo}.
 }
 \details{
