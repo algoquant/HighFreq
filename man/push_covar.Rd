@@ -5,7 +5,7 @@
 \title{Update the trailing covariance matrix of streaming asset returns,
 with a row of new returns.}
 \usage{
-push_covar(newdata, covmat, meanv, lambda)
+push_covar(newdata, covmat, meanv, lambdacov)
 }
 \arguments{
 \item{\code{newdata}}{A \emph{vector} of new asset returns.}
@@ -14,7 +14,7 @@ push_covar(newdata, covmat, meanv, lambda)
 
 \item{\code{meanv}}{A \emph{vector} of trailing means of asset returns.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply the past
+\item{\code{lambdacov}}{A \emph{numeric} decay factor to multiply the past
 mean and covariance.}
 }
 \value{
@@ -81,7 +81,7 @@ retss <- retsp[-nrows]
 meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
-HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambda=0.9)
+HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 }
 
 }

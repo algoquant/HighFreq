@@ -21,7 +21,7 @@ is \code{look_back = 1}).}
 calculating the end points (the default is \code{stub = NULL}).}
 
 \item{\code{weightv}}{A single-column \emph{matrix} of weights (the default
-is \code{weights = NULL}).}
+is \code{weightv = NULL}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument

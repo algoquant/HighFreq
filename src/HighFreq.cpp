@@ -2157,13 +2157,13 @@ arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights) {
+arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weightv) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::uword look_back = weights.n_rows;
+  arma::uword look_back = weightv.n_rows;
   arma::mat rolling_sum(nrows, 1);
-  arma::mat weightr = arma::reverse(weights);
-  // arma::mat weightr = weights;
+  arma::mat weightr = arma::reverse(weightv);
+  // arma::mat weightr = weightv;
   
   // Warmup period
   rolling_sum.rows(0, look_back-2) = tseries.rows(0, look_back-2);
@@ -2229,13 +2229,13 @@ arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weights) {
+arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
   
-  arma::uword look_back = weights.n_rows-2;
+  arma::uword look_back = weightv.n_rows-2;
   arma::uword nrows = tseries.n_rows-1;
   
   // Calculate the convolutions
-  arma::mat convmat = arma::conv2(tseries, weights, "full");
+  arma::mat convmat = arma::conv2(tseries, weightv, "full");
   
   // Copy the warmup period
   convmat.rows(0, look_back) = tseries.rows(0, look_back);
@@ -2436,7 +2436,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   calculating the end points (the default is \code{stub = NULL}).
 //' 
 //' @param \code{weightv} A single-column \emph{matrix} of weights (the default
-//'   is \code{weights = NULL}).
+//'   is \code{weightv = NULL}).
 //'
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
@@ -3183,7 +3183,7 @@ void push_cov2cor(arma::mat& covmat) {
 //' 
 //' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
 //'   mean and covariance.
 //' 
 //' @return Void (no return value - modifies the trailing covariance matrix
@@ -3245,7 +3245,7 @@ void push_cov2cor(arma::mat& covmat) {
 //' meanv <- colMeans(retss)
 //' covmat <- cov(retss)
 //' # Update the covariance of returns
-//' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambda=0.9)
+//' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 //' }
 //' 
 //' @export
@@ -3253,17 +3253,17 @@ void push_cov2cor(arma::mat& covmat) {
 void push_covar(const arma::rowvec& newdata, // Row of new asset returns
                 arma::mat& covmat,  // Covariance matrix
                 arma::rowvec& meanv, // Trailing means of the returns
-                const double& lambda) { // Decay factor to multiply the past values
+                const double& lambdacov) { // Covariance decay factor
   
-  double lambda1 = 1-lambda;
+  double lambda1 = 1-lambdacov;
   
   // Update the means of the returns
-  meanv = lambda*meanv + lambda1*newdata;
+  meanv = lambdacov*meanv + lambda1*newdata;
   // Calculate the de-meaned returns
   arma::rowvec datav = (newdata - meanv);
   
   // Update the covariance of the returns
-  covmat = lambda*covmat + lambda1*arma::trans(datav)*datav;
+  covmat = lambdacov*covmat + lambda1*arma::trans(datav)*datav;
   
 }  // end push_covar
 
@@ -3280,11 +3280,11 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //' 
 //' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
 //' 
-//' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+//' @param \code{eigenret} A \emph{vector} of eigen portfolio returns.
 //' 
 //' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
 //'   mean and variance.
 //' 
 //' @return Void (no return value - modifies the trailing eigen values, eigen
@@ -3299,12 +3299,12 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //'   The streaming asset returns \eqn{r_t} contain multiple columns and the
 //'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
 //'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
-//'   \code{reteigen}, and \code{meanv} represent single rows of data with
+//'   \code{eigenret}, and \code{meanv} represent single rows of data with
 //'   multiple columns.
 //'   
 //'   The function \code{push_eigen()} accepts \emph{pointers} to the arguments
 //'   \code{eigenval}, \code{eigenval}, \code{eigenvec}, \code{meanv}, and
-//'   \code{reteigen}, and it overwrites the old values with the new values. It
+//'   \code{eigenret}, and it overwrites the old values with the new values. It
 //'   performs the calculation in place, without copying the data in memory,
 //'   which can significantly increase the computation speed for large matrices.
 //'
@@ -3328,7 +3328,7 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
 //'   weights are applied to the asset returns scaled by their volatilities.
 //'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-//'   parameter \code{reteigen}. 
+//'   parameter \code{eigenret}. 
 //'   
 //'   The decay factor \eqn{\lambda} determines the strength of the updates,
 //'   with smaller \eqn{\lambda} values giving more weight to the new data. If
@@ -3351,26 +3351,30 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //' meanv <- colMeans(retss)
 //' covmat <- cov(retss)
 //' # Update the covariance of returns
-//' reteigen <- numeric(NCOL(retsp))
+//' eigenret <- numeric(NCOL(retsp))
 //' HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
-//'   reteigen=reteigen, meanv=meanv, lambda=0.9)
+//'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
 void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
-               arma::mat& covmat,  // Covariance matrix
-               arma::vec& eigenval, // Eigen values
-               arma::mat& eigenvec, // Eigen vectors
-               arma::rowvec& reteigen, // Row of eigen portfolio returns
-               arma::rowvec& meanv, // Trailing means of the returns
-               const double& lambda) { // Decay factor to multiply the past values
+                arma::mat& covmat,  // Covariance matrix
+                arma::vec& eigenval, // Eigen values
+                arma::mat& eigenvec, // Eigen vectors
+                arma::rowvec& eigenret, // Row of eigen portfolio returns
+                arma::rowvec& meanv, // Trailing means of the returns
+                const double& lambdacov) { // Covariance decay factor
   
+  // Scale the returns by the volatility
+  arma::rowvec varv = arma::trans(covmat.diag());
+  varv.replace(0, 1);
+  arma::rowvec newdatas = newdata/arma::sqrt(varv);
   // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
-  reteigen = (newdata/arma::trans(arma::sqrt(covmat.diag())))*eigenvec;
+  eigenret = newdatas*eigenvec;
   // Update the covariance matrix
-  push_covar(newdata, covmat, meanv, lambda);
+  push_covar(newdatas, covmat, meanv, lambdacov);
   // Calculate the eigen decomposition
   arma::eig_sym(eigenval, eigenvec, covmat);
   
@@ -3388,7 +3392,7 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //' 
 //' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
 //' 
-//' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+//' @param \code{eigenret} A \emph{vector} of eigen portfolio returns.
 //' 
 //' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 //' 
@@ -3448,7 +3452,7 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
 //'   weights are applied to the asset returns scaled by their volatilities.
 //'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-//'   parameter \code{reteigen}. 
+//'   parameter \code{eigenret}. 
 //'   
 //'   The function \code{push_sga()} then standardizes the columns of the new
 //'   returns:
@@ -3500,10 +3504,10 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //' eigenval <- eigend$values
 //' eigenvec <- eigend$vectors
 //' # Update the eigen decomposition using SGA
-//' reteigen <- numeric(NCOL(retsp))
+//' eigenret <- numeric(NCOL(retsp))
 //' HighFreq::push_sga(newdata=retsp[nrows], 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
-//'   reteigen=reteigen, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+//'   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 //' }
 //' 
 //' @export
@@ -3511,7 +3515,7 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 void push_sga(const arma::rowvec& newdata, // Row of new asset returns
               arma::rowvec& eigenval, // Eigen values
               arma::mat& eigenvec, // Eigen vectors
-              arma::rowvec& reteigen, // Row of eigen portfolio returns
+              arma::rowvec& eigenret, // Row of eigen portfolio returns
               arma::rowvec& meanv, // Trailing means of the returns
               arma::rowvec& varv, // Trailing variances of the returns
               const double& lambda, // Decay factor to multiply the past mean and variance
@@ -3521,7 +3525,7 @@ void push_sga(const arma::rowvec& newdata, // Row of new asset returns
   
   // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
   arma::rowvec volv = arma::sqrt(varv);
-  reteigen = (newdata/volv)*eigenvec;
+  eigenret = (newdata/volv)*eigenvec;
   
   // Update the mean and variance of the returns
   meanv = lambda*meanv + lambda1*newdata;
@@ -7881,7 +7885,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 
   // Initialize the variables
   arma::uword ncols = returns.n_cols;
-  arma::vec weights(ncols, fill::zeros);
+  arma::vec weightv(ncols, fill::zeros);
   // If no regularization then set dimax to ncols
   if (dimax == 0)  dimax = ncols;
   // Calculate the covariance matrix
@@ -7895,7 +7899,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
     // Calculate weights using regularized inverse
-    weights = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
+    weightv = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
     break;
   }  // end maxsharpe
   case methodenum::maxsharpemed: {
@@ -7904,13 +7908,13 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the median of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
     // Calculate weights using regularized inverse
-    weights = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
+    weightv = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
     break;
   }  // end maxsharpemed
   case methodenum::minvarlin: {
     // Minimum variance weights under linear constraint
     // Multiply regularized inverse times unit vector
-    weights = calc_inv(covmat, eigen_thresh, dimax)*arma::ones(ncols);
+    weightv = calc_inv(covmat, eigen_thresh, dimax)*arma::ones(ncols);
     break;
   }  // end minvarlin
   case methodenum::minvarquad: {
@@ -7919,7 +7923,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec eigenval;
     arma::mat eigenvec;
     arma::eig_sym(eigenval, eigenvec, covmat);
-    weights = eigenvec.col(ncols-1);
+    weightv = eigenvec.col(ncols-1);
     break;
   }  // end minvarquad
   case methodenum::sharpem: {
@@ -7930,7 +7934,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colsd = arma::sqrt(covmat.diag());
     colsd.replace(0, 1);
     // Momentum weights equal to Sharpe ratios
-    weights = colmeans/colsd;
+    weightv = colmeans/colsd;
     break;
   }  // end sharpem
   case methodenum::kellym: {
@@ -7941,7 +7945,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colvar = covmat.diag();
     colvar.replace(0, 1);
     // Momentum weights equal to Kelly ratios
-    weights = colmeans/colvar;
+    weightv = colmeans/colvar;
     break;
   }  // end kellym
   case methodenum::robustm: {
@@ -7958,7 +7962,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   case methodenum::quantile: {
     // Momentum weights equal to sum of quantiles for columns
     arma::vec levels = {confl, 1-confl};
-    weights = arma::conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
+    weightv = arma::conv_to<vec>::from(arma::sum(arma::quantile(returns, levels, 0), 0));
     break;
   }  // end quantile
   default : {
@@ -7969,34 +7973,34 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   
   if (rankw == TRUE) {
     // Convert the weights to their ranks
-    weights = arma::conv_to<vec>::from(calc_ranks_stl(weights));
+    weightv = arma::conv_to<vec>::from(calc_ranks_stl(weightv));
   }  // end if
   
   if (centerw == TRUE) {
     // Center the weights so their sum is equal to zero
-    weights = (weights - arma::mean(weights));
+    weightv = (weightv - arma::mean(weightv));
   }  // end if
   
   // Apply different scaling methods for the weights
   switch(calc_method(scalew)) {
   case methodenum::voltarget: {
     // Scale the weights so the portfolio has the volatility equal to vol_target
-    weights = weights*vol_target/arma::stddev(returns*weights);
+    weightv = weightv*vol_target/arma::stddev(returns*weightv);
     break;
   }  // end voltarget
   case methodenum::voleqw: {
     // Scale the weights to the volatility of the equal weight portfolio
-    weights = weights*arma::stddev(arma::mean(returns, 1))/arma::stddev(returns*weights);
+    weightv = weightv*arma::stddev(arma::mean(returns, 1))/arma::stddev(returns*weightv);
     break;
   }  // end voleqw
   case methodenum::sumone: {
     // Scale the weights so their sum of squares is equal to one
-    weights = weights/arma::sum(weights*arma::ones(ncols));
+    weightv = weightv/arma::sum(weightv*arma::ones(ncols));
     break;
   }  // end sumone
   case methodenum::sumsq: {
     // Scale the weights so their sum of squares is equal to one
-    weights = weights/std::sqrt(arma::sum(square(weights)));
+    weightv = weightv/std::sqrt(arma::sum(arma::square(weightv)));
     break;
   }  // end sumsq
   default : {
@@ -8005,7 +8009,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   }  // end default
   }  // end switch
   
-  return weights;
+  return weightv;
   
 }  // end calc_weights
 
@@ -8130,7 +8134,7 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   
   double lambda1 = 1-lambda;
   arma::uword nweights = returns.n_cols;
-  arma::vec weights(nweights, fill::zeros);
+  arma::vec weightv(nweights, fill::zeros);
   arma::vec weights_past = ones(nweights)/std::sqrt(nweights);
   arma::mat pnls = zeros(returns.n_rows, 1);
 
@@ -8138,15 +8142,15 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   for (arma::uword it = 1; it < endp.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate the portfolio weights
-    weights = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), controlv);
+    weightv = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), controlv);
     // Calculate the weights as the weighted sum with past weights
-    weights = lambda1*weights + lambda*weights_past;
+    weightv = lambda1*weightv + lambda*weights_past;
     // Calculate out-of-sample returns
-    pnls.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weights;
+    pnls.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weightv;
     // Add transaction costs
-    pnls.row(endp(it-1)+1) -= bid_offer*sum(abs(weights - weights_past))/2;
+    pnls.row(endp(it-1)+1) -= bid_offer*sum(abs(weightv - weights_past))/2;
     // Copy the weights
-    weights_past = weights;
+    weights_past = weightv;
   }  // end for
   
   // Return the strategy pnls

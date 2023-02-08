@@ -1584,8 +1584,8 @@ roll_vec <- function(tseries, look_back) {
 #' }
 #' 
 #' @export
-roll_vecw <- function(tseries, weights) {
-    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', tseries, weights)
+roll_vecw <- function(tseries, weightv) {
+    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', tseries, weightv)
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -1635,8 +1635,8 @@ roll_vecw <- function(tseries, weights) {
 #' }
 #' 
 #' @export
-roll_conv <- function(tseries, weights) {
-    .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', tseries, weights)
+roll_conv <- function(tseries, weightv) {
+    .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', tseries, weightv)
 }
 
 #' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -1755,7 +1755,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   calculating the end points (the default is \code{stub = NULL}).
 #' 
 #' @param \code{weightv} A single-column \emph{matrix} of weights (the default
-#'   is \code{weights = NULL}).
+#'   is \code{weightv = NULL}).
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
@@ -2297,7 +2297,7 @@ push_cov2cor <- function(covmat) {
 #' 
 #' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+#' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
 #'   mean and covariance.
 #' 
 #' @return Void (no return value - modifies the trailing covariance matrix
@@ -2359,12 +2359,12 @@ push_cov2cor <- function(covmat) {
 #' meanv <- colMeans(retss)
 #' covmat <- cov(retss)
 #' # Update the covariance of returns
-#' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambda=0.9)
+#' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 #' }
 #' 
 #' @export
-push_covar <- function(newdata, covmat, meanv, lambda) {
-    invisible(.Call('_HighFreq_push_covar', PACKAGE = 'HighFreq', newdata, covmat, meanv, lambda))
+push_covar <- function(newdata, covmat, meanv, lambdacov) {
+    invisible(.Call('_HighFreq_push_covar', PACKAGE = 'HighFreq', newdata, covmat, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
@@ -2378,11 +2378,11 @@ push_covar <- function(newdata, covmat, meanv, lambda) {
 #' 
 #' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
 #' 
-#' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+#' @param \code{eigenret} A \emph{vector} of eigen portfolio returns.
 #' 
 #' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+#' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
 #'   mean and variance.
 #' 
 #' @return Void (no return value - modifies the trailing eigen values, eigen
@@ -2397,12 +2397,12 @@ push_covar <- function(newdata, covmat, meanv, lambda) {
 #'   The streaming asset returns \eqn{r_t} contain multiple columns and the
 #'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
 #'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
-#'   \code{reteigen}, and \code{meanv} represent single rows of data with
+#'   \code{eigenret}, and \code{meanv} represent single rows of data with
 #'   multiple columns.
 #'   
 #'   The function \code{push_eigen()} accepts \emph{pointers} to the arguments
 #'   \code{eigenval}, \code{eigenval}, \code{eigenvec}, \code{meanv}, and
-#'   \code{reteigen}, and it overwrites the old values with the new values. It
+#'   \code{eigenret}, and it overwrites the old values with the new values. It
 #'   performs the calculation in place, without copying the data in memory,
 #'   which can significantly increase the computation speed for large matrices.
 #'
@@ -2426,7 +2426,7 @@ push_covar <- function(newdata, covmat, meanv, lambda) {
 #'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
 #'   weights are applied to the asset returns scaled by their volatilities.
 #'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-#'   parameter \code{reteigen}. 
+#'   parameter \code{eigenret}. 
 #'   
 #'   The decay factor \eqn{\lambda} determines the strength of the updates,
 #'   with smaller \eqn{\lambda} values giving more weight to the new data. If
@@ -2449,15 +2449,15 @@ push_covar <- function(newdata, covmat, meanv, lambda) {
 #' meanv <- colMeans(retss)
 #' covmat <- cov(retss)
 #' # Update the covariance of returns
-#' reteigen <- numeric(NCOL(retsp))
+#' eigenret <- numeric(NCOL(retsp))
 #' HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
-#'   reteigen=reteigen, meanv=meanv, lambda=0.9)
+#'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 #' }
 #' 
 #' @export
-push_eigen <- function(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda) {
-    invisible(.Call('_HighFreq_push_eigen', PACKAGE = 'HighFreq', newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda))
+push_eigen <- function(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov) {
+    invisible(.Call('_HighFreq_push_eigen', PACKAGE = 'HighFreq', newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
@@ -2469,7 +2469,7 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lam
 #' 
 #' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
 #' 
-#' @param \code{reteigen} A \emph{vector} of eigen portfolio returns.
+#' @param \code{eigenret} A \emph{vector} of eigen portfolio returns.
 #' 
 #' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 #' 
@@ -2529,7 +2529,7 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lam
 #'   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
 #'   weights are applied to the asset returns scaled by their volatilities.
 #'   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-#'   parameter \code{reteigen}. 
+#'   parameter \code{eigenret}. 
 #'   
 #'   The function \code{push_sga()} then standardizes the columns of the new
 #'   returns:
@@ -2581,15 +2581,15 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lam
 #' eigenval <- eigend$values
 #' eigenvec <- eigend$vectors
 #' # Update the eigen decomposition using SGA
-#' reteigen <- numeric(NCOL(retsp))
+#' eigenret <- numeric(NCOL(retsp))
 #' HighFreq::push_sga(newdata=retsp[nrows], 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
-#'   reteigen=reteigen, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+#'   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 #' }
 #' 
 #' @export
-push_sga <- function(newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma) {
-    invisible(.Call('_HighFreq_push_sga', PACKAGE = 'HighFreq', newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma))
+push_sga <- function(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma) {
+    invisible(.Call('_HighFreq_push_sga', PACKAGE = 'HighFreq', newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
 }
 
 #' Calculate the trailing covariance of two streaming \emph{time series} of

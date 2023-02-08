@@ -5,7 +5,7 @@
 \title{Update the trailing eigen values and eigen vectors of streaming asset return
 data, with a row of new returns, using the \emph{SGA} algorithm.}
 \usage{
-push_sga(newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma)
+push_sga(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
 }
 \arguments{
 \item{\code{newdata}}{A \emph{vector} of new asset returns.}
@@ -14,7 +14,7 @@ push_sga(newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma)
 
 \item{\code{eigenvec}}{A \emph{matrix} of eigen vectors.}
 
-\item{\code{reteigen}}{A \emph{vector} of eigen portfolio returns.}
+\item{\code{eigenret}}{A \emph{vector} of eigen portfolio returns.}
 
 \item{\code{meanv}}{A \emph{vector} of trailing means of asset returns.}
 
@@ -79,7 +79,7 @@ The function \code{push_sga()} updates the trailing eigen values, eigen
   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
   weights are applied to the asset returns scaled by their volatilities.
   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-  parameter \code{reteigen}. 
+  parameter \code{eigenret}. 
   
   The function \code{push_sga()} then standardizes the columns of the new
   returns:
@@ -131,10 +131,10 @@ eigend <- HighFreq::calc_eigen(covmat)
 eigenval <- eigend$values
 eigenvec <- eigend$vectors
 # Update the eigen decomposition using SGA
-reteigen <- numeric(NCOL(retsp))
+eigenret <- numeric(NCOL(retsp))
 HighFreq::push_sga(newdata=retsp[nrows], 
   eigenval=eigenval, eigenvec=eigenvec, 
-  reteigen=reteigen, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+  eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 }
 
 }

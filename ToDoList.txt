@@ -89,13 +89,42 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Create the function run_eigen() to perform loop over push_eigen() - clone run_covar()
++ [ ] Create the function run_pca() to perform loop over push_eigen(), push_sga(), and push_cci() - clone run_covar()
 
 + [ ] Create the function run_portf() to simulate a running portfolio optimization strategy - clone run_reg()
+Validate the principal components produced by push_eigen().
+The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So run_portf() needs logic that ensures that the weights change gradually.
 
 + [ ] Modify calc_eigen() - pass the eigenvalues and eigenvectors by reference instead of returning list
 
 + [ ] In function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
+
++ [ ] Modify push_sga() 
+Rename existing push_sga() to push_sgao(). 
+Eliminate parameter gamma - use lambda. 
+Apply lambda to past estimates.
+
++ [ ] Create the function push_cci() to implement candid covariance-free incremental PCA (CCIPCA)
+Cardot Online Principal Component Analysis.pdf
+
++ [ ] Implement incremental PCA IPCA
+Weng Incremental IPCA.pdf
+Cardot Online Principal Component Analysis.pdf
+
++ [ ] Create online functions run_sharpe() and run_kelly()
+Apply volume weighting.
+Add minvol parameter equal to the floor of the volatility, to prevent the ratios from blowing up when the volatility is very small or zero.
+
++ [ ] Create the function sgapca_exCn() - but don't export it
+
++ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
+calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
+One robust method should be the Wilcoxon W statistic.
+Another robust method should be the Kruskal-Wallis H statistic as follows:
+Combine the given asset returns with the index returns into a single vector.
+Rank the vector of combined returns.
+Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
+The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
 
 + [ ] Create the function roll_eigen() - clone roll_reg()
 
@@ -153,23 +182,6 @@ Nadagouda Recursive Least Squares Regression Kalman Filter
 https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
 + [ ] Calculate the mean portfolio returns ignoring zero stock returns, because including zero returns biases the estimate away from the actual mean portfolio returns
-
-+ [ ] Create online functions run_sharpe() and run_kelly()
-Apply volume weighting.
-Add minvol parameter equal to the floor of the volatility, to prevent the ratios from blowing up when the volatility is very small or zero.
-
-+ [ ] Implement incremental PCA IPCA
-Weng Incremental IPCA.pdf
-Cardot Online Principal Component Analysis.pdf
-
-+ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
-calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
-One robust method should be the Wilcoxon W statistic.
-Another robust method should be the Kruskal-Wallis H statistic as follows:
-Combine the given asset returns with the index returns into a single vector.
-Rank the vector of combined returns.
-Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
-The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
 
 + [ ] Create function to calculate the rolling variance and covariance from the rolling sums of returns and squared returns
 

@@ -58,24 +58,24 @@ Rcpp::List calc_eigensp(const arma::sp_mat& matrixv, const arma::uword& neigen) 
 void push_covar(const arma::rowvec& newdata, // Row of new asset returns
                 arma::mat& covmat,  // Covariance matrix
                 arma::rowvec& meanv, // Trailing means of the returns
-                const double& lambda) { // Decay factor to multiply the past values
+                const double& lambdacov) { // Covariance decay factor
   
-  double lambda1 = 1-lambda;
+  double lambda1 = 1-lambdacov;
   
   // Update the means of the returns
-  meanv = lambda*meanv + lambda1*newdata;
+  meanv = lambdacov*meanv + lambda1*newdata;
   // Calculate the de-meaned returns
   arma::rowvec datav = (newdata - meanv);
   
   // Update the covariance of the returns
-  covmat = lambda*covmat + lambda1*arma::trans(datav)*datav;
+  covmat = lambdacov*covmat + lambda1*arma::trans(datav)*datav;
   
 }  // end push_covar
 
 
 // Slower version below - because push_covar() calls arma::trans()
 // [[Rcpp::export]]
-arma::mat run_covar(const arma::mat& tseries, double lambda) {
+arma::mat run_covar(const arma::mat& tseries, double lambdacov) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
@@ -91,7 +91,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   // Perform loop over the rows
   for (arma::uword it = 1; it < nrows; it++) {
     // Update the covariance matrix
-    push_covar(tseries.row(it), covmat, meanv, lambda);
+    push_covar(tseries.row(it), covmat, meanv, lambdacov);
     // Copy the covariance data
     vars.row(it) = arma::trans(covmat.diag());
     covar.row(it) = covmat(0, 1);
@@ -132,14 +132,18 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
                 arma::mat& covmat,  // Covariance matrix
                 arma::vec& eigenval, // Eigen values
                 arma::mat& eigenvec, // Eigen vectors
-                arma::rowvec& reteigen, // Row of eigen portfolio returns
+                arma::rowvec& eigenret, // Row of eigen portfolio returns
                 arma::rowvec& meanv, // Trailing means of the returns
-                const double& lambda) { // Decay factor to multiply the past values
+                const double& lambdacov) { // Covariance decay factor
   
+  // Scale the returns by the volatility
+  arma::rowvec varv = arma::trans(covmat.diag());
+  varv.replace(0, 1);
+  arma::rowvec newdatas = newdata/arma::sqrt(varv);
   // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
-  reteigen = (newdata/arma::trans(arma::sqrt(covmat.diag())))*eigenvec;
+  eigenret = newdatas*eigenvec;
   // Update the covariance matrix
-  push_covar(newdata, covmat, meanv, lambda);
+  push_covar(newdatas, covmat, meanv, lambdacov);
   // Calculate the eigen decomposition
   arma::eig_sym(eigenval, eigenvec, covmat);
   
@@ -147,28 +151,114 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 
 
 // [[Rcpp::export]]
-arma::mat run_eigen(const arma::mat& tseries, 
-                    const double& lambda) {
+arma::mat run_pca(const arma::mat& tseries, 
+                  const double& lambdacov) { // Covariance decay factor
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::mat eigenvec(nrows, ncols);
-  arma::vec eigenval(nrows);
-  arma::rowvec meanv = tseries.row(0);
-  arma::mat retmat(nrows, ncols);
-  arma::rowvec reteigen(nrows);
-  arma::mat covmat = arma::trans(meanv)*meanv;
+  arma::vec eigenval(ncols);
+  arma::mat eigenvec(ncols, ncols);
+  arma::rowvec eigenret(ncols);
+  arma::mat eigenretmat(nrows, ncols);
   
+  // Initialize with first row of data
+  arma::rowvec meanv = tseries.row(0);
+  arma::mat covmat = arma::trans(meanv)*meanv;
+
   // Perform loop over the rows
   for (arma::uword it = 0; it < nrows; it++) {
     // Update the covariance matrix
-    push_eigen(tseries.row(it), covmat, eigenval, eigenvec, reteigen, meanv, lambda);
-    retmat.row(it) = reteigen;
+    push_eigen(tseries.row(it), covmat, eigenval, eigenvec, eigenret, meanv, lambdacov);
+    eigenretmat.row(it) = eigenret;
   }  // end for
 
-  return retmat;
+  return eigenretmat;
   
-}  // end run_eigen
+}  // end run_pca
+
+
+// [[Rcpp::export]]
+arma::mat run_portf(const arma::mat& tseries, 
+                       const arma::uword& dimax, // Dimension reduction
+                       const double& lambda, // Returns decay factor
+                       const double& lambdacov, // Covariance decay factor
+                       bool scalit = true, // Scale the returns by the volatility?
+                       bool flipc = true) { // Flip the signs of the principal component weights (eigenvectors)?
+  
+  arma::uword nrows = tseries.n_rows;
+  arma::uword ncols = tseries.n_cols;
+  arma::vec eigenval(ncols); // Eigen values
+  arma::mat eigenvec(ncols, ncols); // Eigen vectors
+  arma::mat eigenvecp(nrows, 2*ncols+2); // Past eigen vectors
+  arma::mat eigenout(nrows, 2*ncols+2); // First two eigen vectors
+  arma::rowvec eigenret(ncols, fill::zeros); // Returns of principal components
+  arma::rowvec eigenretm(ncols, fill::zeros); // Average of principal components returns
+  arma::rowvec eigenvar(ncols, fill::zeros); // Variance of principal component returns
+  arma::rowvec weightv(ncols, fill::ones); // Principal component weights
+  arma::rowvec weightp(ncols, fill::ones); // Past principal component weights
+  arma::rowvec weightpp(ncols, fill::ones); // Past past principal component weights
+  arma::colvec portfret(nrows); // Portfolio strategy returns
+  double weightd; // Sum of squared principal component weights
+  double lambda1 = 1-lambda;
+  
+  // Initialize the covariance matrix with first row of data
+  arma::rowvec meanv = tseries.row(0);
+  arma::mat covmat = arma::trans(meanv)*meanv;
+  // Initialize the eigen decomposition
+  arma::eig_sym(eigenval, eigenvecp, covmat);
+  
+  // Perform loop over the rows
+  for (arma::uword it = 0; it < nrows; it++) {
+    // Scale the returns by the volatility
+    arma::rowvec varv = arma::trans(covmat.diag());
+    varv.replace(0, 1);
+    arma::rowvec newdatas = tseries.row(it)/arma::sqrt(varv);
+    // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
+    eigenret = newdatas*eigenvec;
+    // Calculate the portfolio returns - the products of the previous weights times the eigen portfolio returns
+    portfret(it) = arma::dot(eigenret, weightpp);
+    // Update the covariance matrix
+    if (scalit) {
+      push_covar(newdatas, covmat, meanv, lambdacov);
+    } else {
+      push_covar(tseries.row(it), covmat, meanv, lambdacov);
+    }  // end if
+    // Calculate the eigen decomposition
+    arma::eig_sym(eigenval, eigenvec, covmat);
+    // Calculate the trailing mean and variance of eigen returns
+    eigenretm = lambda*eigenretm + lambda1*eigenret;
+    eigenvar = lambda*eigenvar + lambda1*arma::square(eigenret - eigenretm);
+    eigenvar.replace(0, 1);
+    // Calculate the principal component weights equal to the Kelly ratios
+    weightv = eigenretm/eigenvar;
+    // Apply dimension reduction to the weights
+    weightv.subvec(dimax, ncols-1).fill(0);
+    // Scale the weights so their sum of squares is equal to one
+    weightd = std::sqrt(arma::sum(arma::square(weightv)));
+    if (weightd == 0) weightd = 1;
+    weightv = weightv/weightd;
+    // Remember the past weights
+    weightpp = weightp;
+    weightp = weightv;
+    // Flip the eigen vector signs if the eigen vectors change too much
+    if (flipc) {
+      for (arma::uword it=0; it < ncols; it++) {
+        if (arma::sum(arma::square(eigenvec.col(it) - eigenvecp.col(it))) > 2.0)
+          eigenvec.col(it) = -eigenvec.col(it);
+      }  // end for
+      eigenvecp = eigenvec;
+    } // end if 
+    // Copy the first two eigen vectors
+    eigenout.row(it)(0) = eigenval(0);
+    eigenout.row(it).subvec(1, ncols) = arma::trans(eigenvec.col(0));
+    eigenout.row(it)(ncols) = eigenval(1);
+    eigenout.row(it).subvec(ncols+1, 2*ncols) = arma::trans(eigenvec.col(1));
+  }  // end for
+  
+  // Return the portfolio returns and the first two eigen vectors
+  return arma::join_rows(portfret, eigenout);
+  
+}  // end run_portf
 
 
 // [[Rcpp::export]]

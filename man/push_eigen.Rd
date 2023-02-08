@@ -5,7 +5,7 @@
 \title{Update the trailing eigen values and eigen vectors of streaming asset return
 data, with a row of new returns.}
 \usage{
-push_eigen(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda)
+push_eigen(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov)
 }
 \arguments{
 \item{\code{newdata}}{A \emph{vector} of new asset returns.}
@@ -16,11 +16,11 @@ push_eigen(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda)
 
 \item{\code{eigenvec}}{A \emph{matrix} of eigen vectors.}
 
-\item{\code{reteigen}}{A \emph{vector} of eigen portfolio returns.}
+\item{\code{eigenret}}{A \emph{vector} of eigen portfolio returns.}
 
 \item{\code{meanv}}{A \emph{vector} of trailing means of asset returns.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply the past
+\item{\code{lambdacov}}{A \emph{numeric} decay factor to multiply the past
 mean and variance.}
 }
 \value{
@@ -40,12 +40,12 @@ The function \code{push_eigen()} updates the trailing eigen values, eigen
   The streaming asset returns \eqn{r_t} contain multiple columns and the
   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
-  \code{reteigen}, and \code{meanv} represent single rows of data with
+  \code{eigenret}, and \code{meanv} represent single rows of data with
   multiple columns.
   
   The function \code{push_eigen()} accepts \emph{pointers} to the arguments
   \code{eigenval}, \code{eigenval}, \code{eigenvec}, \code{meanv}, and
-  \code{reteigen}, and it overwrites the old values with the new values. It
+  \code{eigenret}, and it overwrites the old values with the new values. It
   performs the calculation in place, without copying the data in memory,
   which can significantly increase the computation speed for large matrices.
 
@@ -69,7 +69,7 @@ The function \code{push_eigen()} updates the trailing eigen values, eigen
   weights equal to the eigen vectors \eqn{\strong{v}_{t-1}}. The eigen
   weights are applied to the asset returns scaled by their volatilities.
   The eigen returns \eqn{r^{eigen}_t} are passed by reference through the
-  parameter \code{reteigen}. 
+  parameter \code{eigenret}. 
   
   The decay factor \eqn{\lambda} determines the strength of the updates,
   with smaller \eqn{\lambda} values giving more weight to the new data. If
@@ -92,10 +92,10 @@ retss <- retsp[-nrows]
 meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
-reteigen <- numeric(NCOL(retsp))
+eigenret <- numeric(NCOL(retsp))
 HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
   eigenval=eigenval, eigenvec=eigenvec, 
-  reteigen=reteigen, meanv=meanv, lambda=0.9)
+  eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 }
 
 }

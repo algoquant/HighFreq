@@ -5,7 +5,7 @@
 \title{Calculate the rolling convolutions (weighted sums) of a \emph{time series}
 with a single-column \emph{matrix} of weights.}
 \usage{
-roll_conv(tseries, weights)
+roll_conv(tseries, weightv)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}

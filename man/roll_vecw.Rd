@@ -5,7 +5,7 @@
 \title{Calculate the rolling weighted sums over a single-column \emph{time series}
 or a single-column \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-roll_vecw(tseries, weights)
+roll_vecw(tseries, weightv)
 }
 \arguments{
 \item{\code{tseries}}{A single-column \emph{time series} or a single-column

@@ -322,26 +322,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_vecw
-arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weights);
-RcppExport SEXP _HighFreq_roll_vecw(SEXP tseriesSEXP, SEXP weightsSEXP) {
+arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weightv);
+RcppExport SEXP _HighFreq_roll_vecw(SEXP tseriesSEXP, SEXP weightvSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_vecw(tseries, weights));
+    Rcpp::traits::input_parameter< const arma::colvec& >::type weightv(weightvSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_vecw(tseries, weightv));
     return rcpp_result_gen;
 END_RCPP
 }
 // roll_conv
-arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weights);
-RcppExport SEXP _HighFreq_roll_conv(SEXP tseriesSEXP, SEXP weightsSEXP) {
+arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv);
+RcppExport SEXP _HighFreq_roll_conv(SEXP tseriesSEXP, SEXP weightvSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_conv(tseries, weights));
+    Rcpp::traits::input_parameter< const arma::colvec& >::type weightv(weightvSEXP);
+    rcpp_result_gen = Rcpp::wrap(roll_conv(tseries, weightv));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -460,48 +460,48 @@ BEGIN_RCPP
 END_RCPP
 }
 // push_covar
-void push_covar(const arma::rowvec& newdata, arma::mat& covmat, arma::rowvec& meanv, const double& lambda);
-RcppExport SEXP _HighFreq_push_covar(SEXP newdataSEXP, SEXP covmatSEXP, SEXP meanvSEXP, SEXP lambdaSEXP) {
+void push_covar(const arma::rowvec& newdata, arma::mat& covmat, arma::rowvec& meanv, const double& lambdacov);
+RcppExport SEXP _HighFreq_push_covar(SEXP newdataSEXP, SEXP covmatSEXP, SEXP meanvSEXP, SEXP lambdacovSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type covmat(covmatSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
-    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
-    push_covar(newdata, covmat, meanv, lambda);
+    Rcpp::traits::input_parameter< const double& >::type lambdacov(lambdacovSEXP);
+    push_covar(newdata, covmat, meanv, lambdacov);
     return R_NilValue;
 END_RCPP
 }
 // push_eigen
-void push_eigen(const arma::rowvec& newdata, arma::mat& covmat, arma::vec& eigenval, arma::mat& eigenvec, arma::rowvec& reteigen, arma::rowvec& meanv, const double& lambda);
-RcppExport SEXP _HighFreq_push_eigen(SEXP newdataSEXP, SEXP covmatSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP reteigenSEXP, SEXP meanvSEXP, SEXP lambdaSEXP) {
+void push_eigen(const arma::rowvec& newdata, arma::mat& covmat, arma::vec& eigenval, arma::mat& eigenvec, arma::rowvec& eigenret, arma::rowvec& meanv, const double& lambdacov);
+RcppExport SEXP _HighFreq_push_eigen(SEXP newdataSEXP, SEXP covmatSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP eigenretSEXP, SEXP meanvSEXP, SEXP lambdacovSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type covmat(covmatSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type eigenval(eigenvalSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type eigenvec(eigenvecSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec& >::type reteigen(reteigenSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type eigenret(eigenretSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
-    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
-    push_eigen(newdata, covmat, eigenval, eigenvec, reteigen, meanv, lambda);
+    Rcpp::traits::input_parameter< const double& >::type lambdacov(lambdacovSEXP);
+    push_eigen(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov);
     return R_NilValue;
 END_RCPP
 }
 // push_sga
-void push_sga(const arma::rowvec& newdata, arma::rowvec& eigenval, arma::mat& eigenvec, arma::rowvec& reteigen, arma::rowvec& meanv, arma::rowvec& varv, const double& lambda, const double& gamma);
-RcppExport SEXP _HighFreq_push_sga(SEXP newdataSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP reteigenSEXP, SEXP meanvSEXP, SEXP varvSEXP, SEXP lambdaSEXP, SEXP gammaSEXP) {
+void push_sga(const arma::rowvec& newdata, arma::rowvec& eigenval, arma::mat& eigenvec, arma::rowvec& eigenret, arma::rowvec& meanv, arma::rowvec& varv, const double& lambda, const double& gamma);
+RcppExport SEXP _HighFreq_push_sga(SEXP newdataSEXP, SEXP eigenvalSEXP, SEXP eigenvecSEXP, SEXP eigenretSEXP, SEXP meanvSEXP, SEXP varvSEXP, SEXP lambdaSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::rowvec& >::type newdata(newdataSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type eigenval(eigenvalSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type eigenvec(eigenvecSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec& >::type reteigen(reteigenSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec& >::type eigenret(eigenretSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type meanv(meanvSEXP);
     Rcpp::traits::input_parameter< arma::rowvec& >::type varv(varvSEXP);
     Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< const double& >::type gamma(gammaSEXP);
-    push_sga(newdata, eigenval, eigenvec, reteigen, meanv, varv, lambda, gamma);
+    push_sga(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma);
     return R_NilValue;
 END_RCPP
 }
