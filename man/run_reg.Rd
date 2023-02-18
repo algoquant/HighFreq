@@ -15,7 +15,7 @@ run_reg(respv, predv, lambda, method = "none")
 \item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
+\item{\code{lambda}}{A decay factor which multiplies past
 estimates.}
 
 \item{\code{method}}{A \emph{character string} specifying the method for
@@ -43,10 +43,10 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) p^T_t p_t
   }
   \deqn{
-    cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
+    cov_t = \lambda cov_{t-1} + (1-\lambda) r^T_t p_t
   }
   \deqn{
     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t

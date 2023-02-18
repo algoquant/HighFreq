@@ -5,17 +5,16 @@
 \title{Update the trailing covariance matrix of streaming asset returns,
 with a row of new returns.}
 \usage{
-push_covar(newdata, covmat, meanv, lambdacov)
+push_covar(retsn, covmat, meanv, lambdacov)
 }
 \arguments{
-\item{\code{newdata}}{A \emph{vector} of new asset returns.}
+\item{\code{retsn}}{A \emph{vector} of new asset returns.}
 
 \item{\code{covmat}}{A trailing covariance \emph{matrix} of asset returns.}
 
 \item{\code{meanv}}{A \emph{vector} of trailing means of asset returns.}
 
-\item{\code{lambdacov}}{A \emph{numeric} decay factor to multiply the past
-mean and covariance.}
+\item{\code{lambdacov}}{A decay factor which multiplies the past covariance.}
 }
 \value{
 Void (no return value - modifies the trailing covariance matrix
@@ -31,8 +30,8 @@ The function \code{push_covar()} updates the trailing covariance matrix of
   covariance matrix in place, without copying the data in memory.
   
   The streaming asset returns \eqn{r_t} contain multiple columns and the
-  parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-  returns at time \eqn{t}.  The elements of the vectors \code{newdata} and 
+  parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+  returns at time \eqn{t}.  The elements of the vectors \code{retsn} and 
   \code{meanv} represent single rows of data with multiple columns.
   
   The function \code{push_covar()} accepts \emph{pointers} to the arguments
@@ -81,7 +80,7 @@ retss <- retsp[-nrows]
 meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
-HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
+HighFreq::push_covar(retsn=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 }
 
 }

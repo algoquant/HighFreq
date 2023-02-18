@@ -10,8 +10,7 @@ run_var_ohlc(ohlc, lambda)
 \item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 price data.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
-estimates.}
+\item{\code{lambda}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A single-column \emph{matrix} of variance estimates, with the same

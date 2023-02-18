@@ -2,91 +2,98 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_inv}
 \alias{calc_inv}
-\title{Calculate the regularized inverse of a \emph{matrix} of data using Singular
-Value Decomposition (\emph{SVD}).}
+\title{Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+data using eigen decomposition.}
 \usage{
-calc_inv(matrixv, eigen_thresh = 0.01, dimax = 0L)
+calc_inv(matrixv, dimax = 0L, eigen_thresh = 0)
 }
 \arguments{
-\item{\code{matrixv}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{matrixv}}{A symmetric \emph{matrix} of data.}
+
+\item{\code{dimax}}{An \emph{integer} equal to the number of \emph{eigen
+values} used for calculating the \emph{regularized inverse} of the matrix
+\code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
+using all the \emph{eigen values}).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
-matrix \code{matrixv} (the default is \code{0.01}).}
-
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the matrix
-\code{matrixv} (the default is \code{dimax = 0} - equivalent to
-\code{dimax} equal to the number of columns of \code{matrixv}).}
+small \emph{eigen values} in order to regularize the inverse of the matrix
+\code{matrixv} (the default is \code{0.0}).}
 }
 \value{
-A \emph{matrix} equal to the regularized inverse of the matrix
-  \code{matrixv}.
+A \emph{matrix} equal to the \emph{regularized inverse} of the
+  matrix \code{matrixv}.
 }
 \description{
-Calculate the regularized inverse of a \emph{matrix} of data using Singular
-Value Decomposition (\emph{SVD}).
+Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+data using eigen decomposition.
 }
 \details{
-The function \code{calc_inv()} calculates the regularized inverse of the
-  matrix \code{matrixv} using Singular Value Decomposition (\emph{SVD}).
+The function \code{calc_inv()} calculates the \emph{regularized inverse}
+  of the matrix \code{matrixv} using eigen decomposition.
   
-  The function \code{calc_inv()} first performs Singular Value Decomposition
-  (\emph{SVD}) of the matrix \code{matrixv}.  
-  The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
+  The function \code{calc_inv()} first performs eigen decomposition of the
+  matrix \code{matrixv}.
+  The eigen decomposition of a matrix \eqn{\strong{C}} is defined as the
   factorization:
   \deqn{
-    \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
-  }
-  Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
-  \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
-  \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
+    \strong{C} = \strong{O}  \, \Sigma  \, \strong{O}^T
+  } Where \eqn{\strong{O}} is the matrix of \emph{eigen vectors} and
+  \eqn{\Sigma} is a diagonal matrix of \emph{eigen values}.
   
   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
-  calculated from the \emph{SVD} matrices as:
+  calculated from the eigen decomposition as:
   \deqn{
-    \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+    \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
   }
   
-  The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is given
-  by:
+  The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+  by removing \emph{eigen vectors} with very small \emph{eigen values}:
   \deqn{
-    \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+    \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
   }
-  Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
-  \emph{SVD} matrices with the rows and columns corresponding to zero
-  \emph{singular values} removed.
+  Where \eqn{\strong{O}_{dimax}} is the matrix of \emph{eigen vectors} 
+  that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
   
-  The function \code{calc_inv()} performs regularization by discarding the
-  smallest singular values \eqn{\sigma_i} that are less than the threshold
-  level \code{eigen_thresh} times the sum of all the singular values:
-  \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
+  The function \code{calc_inv()} applies regularization to the matrix
+  inverse using the arguments \code{dimax} and \code{eigen_thresh}.
   
-  It then discards additional singular values so that only the largest
-  \code{dimax} singular values remain.  
-  It calculates the regularized inverse from the \emph{SVD} matrices using
-  only the largest singular values up to \code{dimax}.  For example, if
-  \code{dimax = 3} then it only uses the \code{3} largest singular
-  values. This has the effect of dimension reduction.
+  The function \code{calc_inv()} applies regularization by discarding the
+  smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
+  threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+  values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
   
-  If the matrix \code{matrixv} has a large number of small singular values,
-  then the number of remaining singular values may be less than
+  It also discards additional \emph{eigen vectors} so that only the highest
+  order \emph{eigen vectors} remain, up to order \code{dimax}.
+  It calculates the \emph{regularized inverse} from the eigen decomposition
+  using only the largest \emph{eigen values} up to \code{dimax}.  For
+  example, if
+  \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
+  vectors}, with the largest \emph{eigen values}. This has the effect of
+  dimension reduction.
+  
+  If the matrix \code{matrixv} has a large number of small \emph{eigen
+  values}, then the number of remaining \emph{eigen values} may be less than
   \code{dimax}.
 }
 \examples{
 \dontrun{
 # Calculate ETF returns
-retsp <- na.omit(rutils::etfenv$returns)
+retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
 # Calculate covariance matrix
 covmat <- cov(retsp)
+# Calculate matrix inverse using RcppArmadillo
+invmat <- HighFreq::calc_inv(covmat)
+# Calculate matrix inverse in R
+invr <- solve(covmat)
+all.equal(invmat, invr, check.attributes=FALSE)
 # Calculate regularized inverse using RcppArmadillo
 invmat <- HighFreq::calc_inv(covmat, dimax=3)
-# Calculate regularized inverse from SVD in R
-svdec <- svd(covmat)
+# Calculate regularized inverse using eigen decomposition in R
+eigend <- eigen(covmat)
 dimax <- 1:3
-invsvd <- svdec$v[, dimax] \%*\% (t(svdec$u[, dimax]) / svdec$d[dimax])
+invr <- eigend$vectors[, dimax] \%*\% (t(eigend$vectors[, dimax])/eigend$values[dimax])
 # Compare RcppArmadillo with R
-all.equal(invmat, invsvd)
+all.equal(invmat, invr)
 }
 
 }

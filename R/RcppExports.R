@@ -10,7 +10,7 @@
 #' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+#' @param \code{lambda} A decay factor which multiplies past
 #'   estimates.
 #'   
 #' @param \code{demean} A \emph{Boolean} specifying whether the \emph{z-scores}
@@ -152,24 +152,23 @@ NULL
 #'   TRUE}).
 #'
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small singular values in order to regularize the inverse of the
-#'   \code{predictor} matrix (the default is \code{1e-5}).
+#'   small \emph{singular values} in order to regularize the inverse of the
+#'   predictor matrix (the default is \code{1e-5}).
 #'   
-#' @param \code{dimax} An \emph{integer} equal to the number of singular values
-#'   used for calculating the regularized inverse of the \code{predv}
-#'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to the
-#'   number of columns of the \code{predictor} matrix).
+#' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+#'   values} used for calculating the \emph{regularized inverse} of the
+#'   predictor matrix (the default is \code{dimax = 0} - standard matrix
+#'   inverse using all the \emph{singular values}).
 #'   
 #' @param \code{confl} The confidence level for calculating the quantiles of
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
 #'   between \code{0} and \code{1} - the default is \code{0}).
-#' 
-#' 
+#'   
 #' @return A named list of model parameters that can be passed into regression
 #' and machine learning functions.
-#'
+#'   
 #' @details
 #'   The function \code{param_reg()} creates a named list of model parameters
 #'   that can be passed into regression and machine learning functions.  For
@@ -202,14 +201,14 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #'   "sharpem"}).
 #'   
 #' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small singular values in order to regularize the inverse of the
+#'   small \emph{singular values} in order to regularize the inverse of the
 #'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 #'   
-#' @param \code{dimax} An \emph{integer} equal to the number of singular
-#'   values used for calculating the regularized inverse of the
-#'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
-#'   equivalent to \code{dimax} equal to the number of columns of
-#'   \code{returns}).
+#' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+#'   values} used for calculating the \emph{regularized inverse} of the
+#'   \code{covariance matrix} of \code{returns} matrix (the default is
+#'   \code{dimax = 0} - standard matrix inverse using all the \emph{singular
+#'   values}).
 #'   
 #' @param \code{confl} The confidence level for calculating the quantiles of
 #'   returns (the default is \code{confl = 0.75}).
@@ -1013,6 +1012,301 @@ mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
     invisible(.Call('_HighFreq_mult_mat_ref', PACKAGE = 'HighFreq', vectorv, matrixv, byrow))
 }
 
+#' Calculate the eigen decomposition of a square, symmetric matrix using
+#' \code{RcppArmadillo}.
+#' 
+#' @param \code{matrixv} A square, symmetric matrix.
+#'
+#' @param \code{eigenval} A \emph{vector} of eigen values.
+#' 
+#' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
+#' 
+#' @return Void (no return value - passes the eigen values and eigen vectors by
+#'   reference).
+#'
+#' @details
+#'   The function \code{calc_eigen()} calculates the eigen decomposition of a
+#'   square, symmetric matrix using \code{RcppArmadillo}.  It calls the
+#'   \code{Armadillo} function \code{arma::eig_sym()} to calculate the eigen
+#'   decomposition. 
+#'   
+#'   For small matrices, the function \code{calc_eigen()} is several times
+#'   faster than the \code{R} function \code{eigen()}, since
+#'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
+#'   matrices, they are about the same, since both call \code{C++} code.
+#'
+#' @examples
+#' \dontrun{
+#' # Create random positive semi-definite matrix
+#' matrixv <- matrix(runif(25), nc=5)
+#' matrixv <- t(matrixv) %*% matrixv
+#' # Calculate the eigen decomposition using RcppArmadillo
+#' eigenval <- numeric(5) # Allocate eigen values
+#' eigenvec <- matrix(numeric(25), nc=5) # Allocate eigen vectors
+#' HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
+#' # Calculate the eigen decomposition using R
+#' eigenr <- eigen(matrixv)
+#' # Compare the eigen decompositions
+#' all.equal(eigenr$values, drop(eigenval))
+#' all.equal(abs(eigenr$vectors), abs(eigenvec))
+#' # Compare the speed of Rcpp with R code
+#' summary(microbenchmark(
+#'   Rcpp=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
+#'   Rcode=eigen(matrixv),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_eigen <- function(matrixv, eigenval, eigenvec) {
+    invisible(.Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', matrixv, eigenval, eigenvec))
+}
+
+#' Calculate the partial eigen decomposition of a dense symmetric matrix using
+#' \code{RcppArmadillo}.
+#' 
+#' @param \code{matrixv} A square matrix.
+#'
+#' @param \code{neigen} An \emph{integer} equal to the number of eigenvalues
+#'   to be calculated.
+#'
+#' @return A list with two elements: a \emph{vector} of eigenvalues (named
+#'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
+#'
+#' @details
+#'   The function \code{calc_eigenp()} calculates the partial eigen
+#'   decomposition (the lowest order principal components, with the largest
+#'   eigenvalues) of a dense matrix using RcppArmadillo.  It calls the internal
+#'   \code{Armadillo} eigen solver \code{SymEigsSolver} in the namespace
+#'   \code{arma::newarp} to calculate the partial eigen decomposition.
+#'   
+#'   The eigen solver \code{SymEigsSolver} uses the Implicitly Restarted
+#'   Lanczos Method (IRLM) which was adapted from the
+#'   \href{https://en.wikipedia.org/wiki/ARPACK}{ARPACK} library. The eigen
+#'   solver \code{SymEigsSolver} was implemented by
+#'   \href{https://github.com/yixuan/arpack-arma}{Yixuan Qiu}.
+#'   
+#'   The function \code{arma::eigs_sym()} also calculates the partial eigen
+#'   decomposition using the eigen solver \code{SymEigsSolver}, but it only
+#'   works for sparse matrices which are not standard R matrices.
+#'   
+#'   For matrices smaller than \code{100} rows, the function
+#'   \code{calc_eigenp()} is slower than the function \code{calc_eigen()} which
+#'   calculates the full eigen decomposition.  But it's faster for very large
+#'   matrices.
+#'
+#' @examples
+#' \dontrun{
+#' # Create random positive semi-definite matrix
+#' matrixv <- matrix(runif(100), nc=10)
+#' matrixv <- t(matrixv) %*% matrixv
+#' # Calculate the partial eigen decomposition
+#' neigen <- 5
+#' eigenp <- HighFreq::calc_eigenp(matrixv, neigen)
+#' # Calculate the eigen decomposition using RcppArmadillo
+#' eigenval <- numeric(10) # Allocate eigen values
+#' eigenvec <- matrix(numeric(100), nc=10) # Allocate eigen vectors
+#' HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
+#' # Compare the eigen decompositions
+#' all.equal(eigenp$values[1:neigen], eigenval[1:neigen])
+#' all.equal(abs(eigenp$vectors), abs(eigenvec[, 1:neigen]))
+#' # Compare the speed of partial versus full decomposition
+#' summary(microbenchmark(
+#'   partial=HighFreq::calc_eigenp(matrixv, neigen),
+#'   full=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
+#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+#' }
+#' 
+#' @export
+calc_eigenp <- function(matrixv, neigen) {
+    .Call('_HighFreq_calc_eigenp', PACKAGE = 'HighFreq', matrixv, neigen)
+}
+
+#' Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+#' data using eigen decomposition.
+#' 
+#' @param \code{matrixv} A symmetric \emph{matrix} of data.
+#'   
+#' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
+#'   values} used for calculating the \emph{regularized inverse} of the matrix
+#'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
+#'   using all the \emph{eigen values}).
+#' 
+#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#'   small \emph{eigen values} in order to regularize the inverse of the matrix
+#'   \code{matrixv} (the default is \code{0.0}).
+#'
+#' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+#'   matrix \code{matrixv}.
+#'
+#' @details
+#'   The function \code{calc_inv()} calculates the \emph{regularized inverse}
+#'   of the matrix \code{matrixv} using eigen decomposition.
+#'   
+#'   The function \code{calc_inv()} first performs eigen decomposition of the
+#'   matrix \code{matrixv}.
+#'   The eigen decomposition of a matrix \eqn{\strong{C}} is defined as the
+#'   factorization:
+#'   \deqn{
+#'     \strong{C} = \strong{O}  \, \Sigma  \, \strong{O}^T
+#'   } Where \eqn{\strong{O}} is the matrix of \emph{eigen vectors} and
+#'   \eqn{\Sigma} is a diagonal matrix of \emph{eigen values}.
+#'   
+#'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
+#'   calculated from the eigen decomposition as:
+#'   \deqn{
+#'     \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
+#'   }
+#'   
+#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+#'   by removing \emph{eigen vectors} with very small \emph{eigen values}:
+#'   \deqn{
+#'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
+#'   }
+#'   Where \eqn{\strong{O}_{dimax}} is the matrix of \emph{eigen vectors} 
+#'   that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
+#'   
+#'   The function \code{calc_inv()} applies regularization to the matrix
+#'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+#'   
+#'   The function \code{calc_inv()} applies regularization by discarding the
+#'   smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
+#'   threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+#'   values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
+#'   
+#'   It also discards additional \emph{eigen vectors} so that only the highest
+#'   order \emph{eigen vectors} remain, up to order \code{dimax}.
+#'   It calculates the \emph{regularized inverse} from the eigen decomposition
+#'   using only the largest \emph{eigen values} up to \code{dimax}.  For
+#'   example, if
+#'   \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
+#'   vectors}, with the largest \emph{eigen values}. This has the effect of
+#'   dimension reduction.
+#'   
+#'   If the matrix \code{matrixv} has a large number of small \emph{eigen
+#'   values}, then the number of remaining \emph{eigen values} may be less than
+#'   \code{dimax}.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate ETF returns
+#' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
+#' # Calculate covariance matrix
+#' covmat <- cov(retsp)
+#' # Calculate matrix inverse using RcppArmadillo
+#' invmat <- HighFreq::calc_inv(covmat)
+#' # Calculate matrix inverse in R
+#' invr <- solve(covmat)
+#' all.equal(invmat, invr, check.attributes=FALSE)
+#' # Calculate regularized inverse using RcppArmadillo
+#' invmat <- HighFreq::calc_inv(covmat, dimax=3)
+#' # Calculate regularized inverse using eigen decomposition in R
+#' eigend <- eigen(covmat)
+#' dimax <- 1:3
+#' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
+#' # Compare RcppArmadillo with R
+#' all.equal(invmat, invr)
+#' }
+#' 
+#' @examples
+calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
+    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', matrixv, dimax, eigen_thresh)
+}
+
+#' Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+#' Singular Value Decomposition (\emph{SVD}).
+#' 
+#' @param \code{matrixv} A \emph{matrix} of data.
+#'   
+#' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+#'   values} used for calculating the \emph{regularized inverse} of the matrix
+#'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
+#'   using all the \emph{singular values}).
+#' 
+#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#'   small \emph{singular values} in order to regularize the inverse of the
+#'   matrix \code{matrixv} (the default is \code{0.0}).
+#'
+#' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+#'   matrix \code{matrixv}.
+#'
+#' @details
+#'   The function \code{calc_invsvd()} calculates the \emph{regularized
+#'   inverse} of the matrix \code{matrixv} using Singular Value Decomposition
+#'   (\emph{SVD}).
+#'   
+#'   The function \code{calc_invsvd()} first performs Singular Value
+#'   Decomposition (\emph{SVD}) of the matrix \code{matrixv}.
+#'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
+#'   factorization:
+#'   \deqn{
+#'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
+#'   }
+#'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
+#'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
+#'   \emph{singular values}.
+#'   
+#'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
+#'   calculated from the \emph{SVD} matrices as:
+#'   \deqn{
+#'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+#'   }
+#'   
+#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+#'   by removing \emph{singular vectors} with very small \emph{singular values}:
+#'   \deqn{
+#'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+#'   }
+#'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
+#'   \emph{SVD} matrices with the rows and columns corresponding to very small
+#'   \emph{singular values} removed.
+#'   
+#'   The function \code{calc_invsvd()} applies regularization to the matrix
+#'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+#'   
+#'   The function \code{calc_invsvd()} applies regularization by discarding the
+#'   smallest \emph{singular values} \eqn{\sigma_i} that are less than the
+#'   threshold level \code{eigen_thresh} times the sum of all the
+#'   \emph{singular values}: \deqn{\sigma_i < eigen\_thresh \cdot
+#'   (\sum{\sigma_i})}
+#'   
+#'   It also discards additional \emph{singular vectors} so that only the
+#'   highest order \emph{singular vectors} remain, up to order \code{dimax}. It
+#'   calculates the \emph{regularized inverse} from the \emph{SVD} matrices
+#'   using only the largest \emph{singular values} up to order \code{dimax}.
+#'   For example, if \code{dimax = 3} then it only uses the \code{3} highest
+#'   order \emph{singular vectors}, with the largest \emph{singular values}.
+#'   This has the effect of dimension reduction.
+#'   
+#'   If the matrix \code{matrixv} has a large number of small \emph{singular
+#'   values}, then the number of remaining \emph{singular values} may be less
+#'   than \code{dimax}.
+#'   
+#' @examples
+#' \dontrun{
+#' # Calculate ETF returns
+#' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
+#' # Calculate covariance matrix
+#' covmat <- cov(retsp)
+#' # Calculate matrix inverse using RcppArmadillo
+#' invmat <- HighFreq::calc_invsvd(covmat)
+#' # Calculate matrix inverse in R
+#' invr <- solve(covmat)
+#' all.equal(invmat, invr, check.attributes=FALSE)
+#' # Calculate regularized inverse using RcppArmadillo
+#' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
+#' # Calculate regularized inverse from SVD in R
+#' svdec <- svd(covmat)
+#' dimax <- 1:3
+#' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
+#' # Compare RcppArmadillo with R
+#' all.equal(invmat, invr)
+#' }
+#' 
+#' @export
+calc_invsvd <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
+    .Call('_HighFreq_calc_invsvd', PACKAGE = 'HighFreq', matrixv, dimax, eigen_thresh)
+}
+
 #' Calculate the approximate inverse of a square \emph{matrix} recursively
 #' using the Schulz formula (without copying the data in memory).
 #' 
@@ -1127,189 +1421,6 @@ calc_invrec <- function(matrixv, invmat, niter = 1L) {
 #' @export
 calc_invref <- function(matrixv) {
     invisible(.Call('_HighFreq_calc_invref', PACKAGE = 'HighFreq', matrixv))
-}
-
-#' Calculate the eigen decomposition of a square matrix using
-#' \code{RcppArmadillo}.
-#' 
-#' @param \code{matrixv} A square matrix.
-#'
-#' @return A list with two elements: a \emph{vector} of eigenvalues (named
-#'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
-#'
-#' @details
-#'   The function \code{calc_eigen()} calculates the eigen decomposition of a
-#'   square matrix using \code{RcppArmadillo}.  It calls the \code{Armadillo}
-#'   function \code{arma::eig_sym()} to calculate the eigen decomposition.
-#'   For small matrices, the function \code{calc_eigen()} is several times
-#'   faster than the \code{R} function \code{eigen()}, since
-#'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
-#'   matrices, they are about the same, since both call \code{C++} code.
-#'
-#' @examples
-#' \dontrun{
-#' # Create random positive semi-definite matrix
-#' matrixv <- matrix(runif(25), nc=5)
-#' matrixv <- t(matrixv) %*% matrixv
-#' # Calculate the eigen decomposition using RcppArmadillo
-#' eigend <- HighFreq::calc_eigen(matrixv)
-#' # Calculate the eigen decomposition using R
-#' eigenr <- eigen(matrixv)
-#' # Compare the eigen decompositions
-#' all.equal(eigenr$values, drop(eigend$values))
-#' all.equal(abs(eigenr$vectors), abs(eigend$vectors))
-#' # Compare the speed of Rcpp with R code
-#' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_eigen(matrixv),
-#'   Rcode=eigen(matrixv),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-calc_eigen <- function(matrixv) {
-    .Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', matrixv)
-}
-
-#' Calculate the partial eigen decomposition of a dense symmetric matrix using
-#' \code{RcppArmadillo}.
-#' 
-#' @param \code{matrixv} A square matrix.
-#'
-#' @param \code{neigen} An \emph{integer} equal to the number of eigenvalues
-#'   to be calculated.
-#'
-#' @return A list with two elements: a \emph{vector} of eigenvalues (named
-#'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
-#'
-#' @details
-#'   The function \code{calc_eigenp()} calculates the partial eigen
-#'   decomposition (the lowest order principal components, with the largest
-#'   eigenvalues) of a dense matrix using RcppArmadillo.  It calls the internal
-#'   \code{Armadillo} eigen solver \code{SymEigsSolver} in the namespace
-#'   \code{arma::newarp} to calculate the partial eigen decomposition.
-#'   
-#'   The eigen solver \code{SymEigsSolver} uses the Implicitly Restarted
-#'   Lanczos Method (IRLM) which was adapted from the
-#'   \href{https://en.wikipedia.org/wiki/ARPACK}{ARPACK} library. The eigen
-#'   solver \code{SymEigsSolver} was implemented by
-#'   \href{https://github.com/yixuan/arpack-arma}{Yixuan Qiu}.
-#'   
-#'   The function \code{arma::eigs_sym()} also calculates the partial eigen
-#'   decomposition using the eigen solver \code{SymEigsSolver}, but it only
-#'   works for sparse matrices which are not standard R matrices.
-#'   
-#'   For matrices smaller than \code{100} rows, the function
-#'   \code{calc_eigenp()} is slower than the function \code{calc_eigen()} which
-#'   calculates the full eigen decomposition.  But it's faster for very large
-#'   matrices.
-#'
-#' @examples
-#' \dontrun{
-#' # Create random positive semi-definite matrix
-#' matrixv <- matrix(runif(100), nc=10)
-#' matrixv <- t(matrixv) %*% matrixv
-#' # Calculate the partial eigen decomposition
-#' neigen <- 5
-#' eigenp <- HighFreq::calc_eigenp(matrixv, neigen)
-#' # Calculate the full eigen decomposition
-#' eigend <- HighFreq::calc_eigen(matrixv)
-#' # Compare the eigen decompositions
-#' all.equal(eigenp$values[1:neigen], eigend$values[1:neigen])
-#' all.equal(abs(eigenp$vectors), abs(eigend$vectors[, 1:neigen]))
-#' # Compare the speed of partial versus full decomposition
-#' summary(microbenchmark(
-#'   partial=HighFreq::calc_eigenp(matrixv, neigen),
-#'   full=HighFreq::calc_eigen(matrixv),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-calc_eigenp <- function(matrixv, neigen) {
-    .Call('_HighFreq_calc_eigenp', PACKAGE = 'HighFreq', matrixv, neigen)
-}
-
-#' Calculate the regularized inverse of a \emph{matrix} of data using Singular
-#' Value Decomposition (\emph{SVD}).
-#' 
-#' @param \code{matrixv} A \emph{time series} or \emph{matrix} of data.
-#' 
-#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-#'   small singular values in order to regularize the inverse of the
-#'   matrix \code{matrixv} (the default is \code{0.01}).
-#'   
-#' @param \code{dimax} An \emph{integer} equal to the number of singular
-#'   values used for calculating the regularized inverse of the matrix
-#'   \code{matrixv} (the default is \code{dimax = 0} - equivalent to
-#'   \code{dimax} equal to the number of columns of \code{matrixv}).
-#'
-#' @return A \emph{matrix} equal to the regularized inverse of the matrix
-#'   \code{matrixv}.
-#'
-#' @details
-#'   The function \code{calc_inv()} calculates the regularized inverse of the
-#'   matrix \code{matrixv} using Singular Value Decomposition (\emph{SVD}).
-#'   
-#'   The function \code{calc_inv()} first performs Singular Value Decomposition
-#'   (\emph{SVD}) of the matrix \code{matrixv}.  
-#'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
-#'   factorization:
-#'   \deqn{
-#'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
-#'   }
-#'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
-#'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
-#'   \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
-#'   
-#'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
-#'   calculated from the \emph{SVD} matrices as:
-#'   \deqn{
-#'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
-#'   }
-#'   
-#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is given
-#'   by:
-#'   \deqn{
-#'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
-#'   }
-#'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
-#'   \emph{SVD} matrices with the rows and columns corresponding to zero
-#'   \emph{singular values} removed.
-#'   
-#'   The function \code{calc_inv()} performs regularization by discarding the
-#'   smallest singular values \eqn{\sigma_i} that are less than the threshold
-#'   level \code{eigen_thresh} times the sum of all the singular values:
-#'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
-#'   
-#'   It then discards additional singular values so that only the largest
-#'   \code{dimax} singular values remain.  
-#'   It calculates the regularized inverse from the \emph{SVD} matrices using
-#'   only the largest singular values up to \code{dimax}.  For example, if
-#'   \code{dimax = 3} then it only uses the \code{3} largest singular
-#'   values. This has the effect of dimension reduction.
-#'   
-#'   If the matrix \code{matrixv} has a large number of small singular values,
-#'   then the number of remaining singular values may be less than
-#'   \code{dimax}.
-#'   
-#' @examples
-#' \dontrun{
-#' # Calculate ETF returns
-#' retsp <- na.omit(rutils::etfenv$returns)
-#' # Calculate covariance matrix
-#' covmat <- cov(retsp)
-#' # Calculate regularized inverse using RcppArmadillo
-#' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-#' # Calculate regularized inverse from SVD in R
-#' svdec <- svd(covmat)
-#' dimax <- 1:3
-#' invsvd <- svdec$v[, dimax] %*% (t(svdec$u[, dimax]) / svdec$d[dimax])
-#' # Compare RcppArmadillo with R
-#' all.equal(invmat, invsvd)
-#' }
-#' 
-#' @export
-calc_inv <- function(matrixv, eigen_thresh = 0.01, dimax = 0L) {
-    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', matrixv, eigen_thresh, dimax)
 }
 
 #' Standardize (center and scale) the columns of a \emph{time series} of data
@@ -1492,102 +1603,6 @@ roll_ohlc <- function(tseries, endp) {
     .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', tseries, endp)
 }
 
-#' Calculate the rolling sums over a single-column \emph{time series} or a
-#' single-column \emph{matrix} using \emph{Rcpp}.
-#' 
-#' @param \code{tseries} A single-column \emph{time series} or a single-column
-#'   \emph{matrix}.
-#' 
-#' @param \code{look_back} The length of the look-back interval, equal to the
-#'   number of elements of data used for calculating the sum.
-#'
-#' @return A single-column \emph{matrix} of the same length as the argument
-#'   \code{tseries}.
-#'
-#' @details
-#'   The function \code{roll_vec()} calculates a single-column \emph{matrix} of
-#'   rolling sums, over a single-column \emph{matrix} of data, using fast
-#'   \emph{Rcpp} \code{C++} code.  The function \code{roll_vec()} is several
-#'   times faster than \code{rutils::roll_sum()} which uses vectorized \code{R}
-#'   code.
-#'
-#' @examples
-#' \dontrun{
-#' # Define a single-column matrix of returns
-#' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
-#' # Calculate rolling sums over 11-period look-back intervals
-#' sum_rolling <- HighFreq::roll_vec(retsp, look_back=11)
-#' # Compare HighFreq::roll_vec() with rutils::roll_sum()
-#' all.equal(HighFreq::roll_vec(retsp, look_back=11), 
-#'          rutils::roll_sum(retsp, look_back=11), 
-#'          check.attributes=FALSE)
-#' # Compare the speed of Rcpp with R code
-#' library(microbenchmark)
-#' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_vec(retsp, look_back=11),
-#'   Rcode=rutils::roll_sum(retsp, look_back=11),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-roll_vec <- function(tseries, look_back) {
-    .Call('_HighFreq_roll_vec', PACKAGE = 'HighFreq', tseries, look_back)
-}
-
-#' Calculate the rolling weighted sums over a single-column \emph{time series}
-#' or a single-column \emph{matrix} using \code{RcppArmadillo}.
-#' 
-#' @param \code{tseries} A single-column \emph{time series} or a single-column
-#'   \emph{matrix}.
-#' 
-#' @param \code{weightv} A single-column \emph{matrix} of weights.
-#'
-#' @return A single-column \emph{matrix} of the same length as the argument
-#'   \code{tseries}.
-#'
-#' @details
-#'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
-#'   single-column \emph{matrix} over its past values (a convolution with the
-#'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
-#'   performs a similar calculation as the standard \code{R} function
-#'   \cr\code{stats::filter(x=series, filter=weightv, method="convolution",
-#'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-#'   \code{NA} values.
-#'   
-#' @examples
-#' \dontrun{
-#' # First example
-#' # Define a single-column matrix of returns
-#' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
-#' # Create simple weights
-#' weightv <- c(1, rep(0, 10))
-#' # Calculate rolling weighted sums
-#' weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
-#' # Compare with original
-#' all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
-#' # Second example
-#' # Create exponentially decaying weights
-#' weightv <- exp(-0.2*1:11)
-#' weightv <- weightv/sum(weightv)
-#' # Calculate rolling weighted sums
-#' weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
-#' # Calculate rolling weighted sums using filter()
-#' filtered <- stats::filter(x=retsp, filter=weightv, method="convolution", sides=1)
-#' # Compare both methods
-#' all.equal(filtered[-(1:11)], weighted[-(1:11)], check.attributes=FALSE)
-#' # Compare the speed of Rcpp with R code
-#' library(microbenchmark)
-#' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_vecw(tseries=retsp, weightv=weightv),
-#'   Rcode=stats::filter(x=retsp, filter=weightv, method="convolution", sides=1),
-#'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
-#' 
-#' @export
-roll_vecw <- function(tseries, weightv) {
-    .Call('_HighFreq_roll_vecw', PACKAGE = 'HighFreq', tseries, weightv)
-}
-
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
 #' with a single-column \emph{matrix} of weights.
 #' 
@@ -1648,27 +1663,56 @@ roll_conv <- function(tseries, weightv) {
 #'   number of data points included in calculating the rolling sum (the default
 #'   is \code{look_back = 1}).
 #'   
+#' @param \code{weightv} A single-column \emph{matrix} of weights (the default
+#'   is \code{weightv = 0}).
+#'
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{roll_sum()} calculates the rolling sums over the
-#'   columns of the data \code{tseries}.
+#'   The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
+#'   over the columns of the data \code{tseries}.
+#'   
+#'   If the argument \code{weightv} is equal to zero (the default), then the
+#'   function \code{roll_sum()} calculates the simple rolling sums of the 
+#'   \emph{time series} data \eqn{p_t} over the look-back interval \eqn{\Delta}:
+#'   \deqn{
+#'     \bar{p}_t = \sum_{j=(t-\Delta+1)}^{t} p_j
+#'   }
+#'   
+#'   If the \code{weightv} argument has the same number of rows as the argument
+#'   \code{tseries}, then the function \code{roll_sum()} calculates rolling 
+#'   \emph{weighted} sums of the \emph{time series} data \eqn{p_t} in two steps.
+#'   
+#'   It first calculates the rolling sums of the products of the weights
+#'   \eqn{w_t} times the \emph{time series} data \eqn{p_t} over the look-back
+#'   interval \eqn{\Delta}:
+#'   \deqn{
+#'     \bar{w}_t = \sum_{j=(t-\Delta+1)}^{t} w_j
+#'   }
+#'   \deqn{
+#'     \bar{p}^w_t = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
+#'   }
+#'   
+#'   It then calculates the rolling \emph{weighted} sums \eqn{\bar{p}_t} as the
+#'   ratio of the sum products of the weights and the data, divided by the sums
+#'   of the weights:
+#'   \deqn{
+#'     \bar{p}_t = \frac{\bar{p}^w_t}{\bar{w}_t}
+#'   }
 #'   
 #'   The function \code{roll_sum()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
 #' 
-#'   The function \code{roll_sum()} uses the fast \code{Armadillo} function
-#'   \code{arma::cumsum()}, without explicit loops.
-#'   The function \code{roll_sum()} is several times faster than
-#'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+#'   The function \code{roll_sum()} is written in \code{C++} \code{Armadillo}
+#'   code, so it's much faster than equivalent \code{R} code.
 #'   
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
 #' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define parameters
-#' look_back <- 22
+#' look_back <- 11
 #' # Calculate rolling sums and compare with rutils::roll_sum()
 #' sumc <- HighFreq::roll_sum(retsp, look_back)
 #' sumr <- rutils::roll_sum(retsp, look_back)
@@ -1678,11 +1722,23 @@ roll_conv <- function(tseries, weightv) {
 #' sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
 #' sumr <- (sumr - sumlag)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
+#' # Calculate weights equal to the trading volumes
+#' weightv <- quantmod::Vo(rutils::etfenv$VTI)
+#' weightv <- weightv[zoo::index(retsp)]
+#' # Calculate rolling weighted sums
+#' sumc <- HighFreq::roll_sum(retsp, look_back, 1/weightv)
+#' # Plot dygraph of the weighted sums
+#' datav <- cbind(retsp$VTI, sumc[, 1])
+#' colnames(datav) <- c("VTI", "Weighted")
+#' endp <- rutils::calc_endpoints(datav, interval="weeks")
+#' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) %>% 
+#'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
+#'   dyLegend(width=300)
 #' }
 #' 
 #' @export
-roll_sum <- function(tseries, look_back = 1L) {
-    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', tseries, look_back)
+roll_sum <- function(tseries, look_back = 1L, weightv = 0L) {
+    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', tseries, look_back, weightv)
 }
 
 #' Calculate the rolling sums at the end points of a \emph{time series} or a
@@ -1761,10 +1817,10 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   \code{tseries}.
 #'
 #' @details
-#'   The function \code{roll_wsum()} calculates the rolling weighted sums over
+#'   The function \code{roll_sumw()} calculates the rolling weighted sums over
 #'   the columns of the data \code{tseries}.
 #' 
-#'   The function \code{roll_wsum()} calculates the rolling weighted sums as
+#'   The function \code{roll_sumw()} calculates the rolling weighted sums as
 #'   convolutions of the columns of \code{tseries} with the \emph{column
 #'   vector} of weights using the \code{Armadillo} function
 #'   \code{arma::conv2()}.  It performs a similar calculation to the standard
@@ -1772,7 +1828,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   method="convolution", sides=1)}, but it can be many times faster, and it
 #'   doesn't produce any leading \code{NA} values.
 #'   
-#'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
+#'   The function \code{roll_sumw()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
 #' 
 #'   The arguments \code{weightv}, \code{endp}, and \code{stub} are
@@ -1793,11 +1849,11 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   not supplied, then the sums are calculated over a number of data points
 #'   equal to \code{look_back}.
 #'   
-#'   The function \code{roll_wsum()} is also several times faster than
+#'   The function \code{roll_sumw()} is also several times faster than
 #'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 #'   
 #'   Technical note:
-#'   The function \code{roll_wsum()} has arguments with default values equal to
+#'   The function \code{roll_sumw()} has arguments with default values equal to
 #'   \code{NULL}, which are implemented in \code{Rcpp} code.
 #'   
 #' @examples
@@ -1806,7 +1862,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' # Calculate historical returns
 #' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define parameters
-#' look_back <- 22
+#' look_back <- 11
 #' # Calculate rolling sums and compare with rutils::roll_sum()
 #' sumc <- HighFreq::roll_sum(retsp, look_back)
 #' sumr <- rutils::roll_sum(retsp, look_back)
@@ -1819,7 +1875,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' 
 #' # Calculate rolling sums at end points
 #' stubv <- 21
-#' sumc <- HighFreq::roll_wsum(retsp, look_back, stub=stubv)
+#' sumc <- HighFreq::roll_sumw(retsp, look_back, stub=stubv)
 #' endp <- (stubv + look_back*(0:(NROW(retsp) %/% look_back)))
 #' endp <- endp[endp < NROW(retsp)]
 #' sumr <- apply(zoo::coredata(retsp), 2, cumsum)
@@ -1829,41 +1885,40 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' all.equal(sumc, sumr, check.attributes=FALSE)
 #' 
 #' # Calculate rolling sums at end points - pass in endp
-#' sumc <- HighFreq::roll_wsum(retsp, endp=endp)
+#' sumc <- HighFreq::roll_sumw(retsp, endp=endp)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
 #' 
 #' # Create exponentially decaying weights
 #' weightv <- exp(-0.2*(1:11))
 #' weightv <- matrix(weightv/sum(weightv), nc=1)
 #' # Calculate rolling weighted sum
-#' sumc <- HighFreq::roll_wsum(retsp, weightv=weightv)
+#' sumc <- HighFreq::roll_sumw(retsp, weightv=weightv)
 #' # Calculate rolling weighted sum using filter()
 #' filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
 #' all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 #' 
 #' # Calculate rolling weighted sums at end points
-#' sumc <- HighFreq::roll_wsum(retsp, endp=endp, weightv=weightv)
+#' sumc <- HighFreq::roll_sumw(retsp, endp=endp, weightv=weightv)
 #' all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
 #' 
 #' # Create simple weights equal to a 1 value plus zeros
 #' weightv <- matrix(c(1, rep(0, 10)), nc=1)
 #' # Calculate rolling weighted sum
-#' weighted <- HighFreq::roll_wsum(retsp, weightv=weightv)
+#' weighted <- HighFreq::roll_sumw(retsp, weightv=weightv)
 #' # Compare with original
 #' all.equal(coredata(retsp), weighted, check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL) {
-    .Call('_HighFreq_roll_wsum', PACKAGE = 'HighFreq', tseries, endp, look_back, stub, weightv)
+roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL) {
+    .Call('_HighFreq_roll_sumw', PACKAGE = 'HighFreq', tseries, endp, look_back, stub, weightv)
 }
 
 #' Calculate the trailing weighted means of streaming \emph{time series} data.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
 #' @param \code{weightv} A single-column \emph{matrix} of weights.
 #'
@@ -1883,17 +1938,18 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #'   
 #'   Some applications require applying additional weight factors, like for
 #'   example the volume-weighted average price indicator (VWAP).  Then the
-#'   streaming prices are multiplied by the streaming trading volumes.
+#'   streaming prices can be multiplied by the streaming trading volumes.
 #'   
-#'   If the \code{weightv} argument is not zero, then the function
-#'   \code{run_mean()} calculates the trailing weighted means in two steps.
+#'   If the argument \code{weightv} has the same number of rows as the argument
+#'   \code{tseries}, then the function \code{run_mean()} calculates the
+#'   trailing weighted means in two steps.
 #'   
 #'   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
 #'   \deqn{
 #'     \bar{w}_t = \lambda \bar{w}_{t-1} + (1-\lambda) w_t
 #'   }
 #'   
-#'   Second it calculates the the trailing mean products \eqn{\bar{w p}_t} of the
+#'   Second it calculates the trailing mean products \eqn{\bar{w p}_t} of the
 #'   weights \eqn{w_t} and the data \eqn{p_t}:
 #'   \deqn{
 #'     \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1-\lambda) w_t p_t
@@ -1940,7 +1996,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' closep <- quantmod::Cl(ohlc)
 #' # Calculate the trailing means
 #' lambda <- 0.95
-#' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv=0)
+#' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
 #' # Calculate trailing means using R code
 #' filtered <- (1-lambda)*filter(closep, 
 #'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
@@ -1950,11 +2006,11 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv=0),
+#'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv = 0),
 #'   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #'   
-#' # Create weights equal to the trading volumes
+#' # Calculate weights equal to the trading volumes
 #' weightv <- quantmod::Vo(ohlc)
 #' # Calculate the trailing weighted means
 #' meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
@@ -1967,7 +2023,7 @@ roll_wsum <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' }
 #' 
 #' @export
-run_mean <- function(tseries, lambda, weightv) {
+run_mean <- function(tseries, lambda, weightv = 0L) {
     .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda, weightv)
 }
 
@@ -1975,8 +2031,7 @@ run_mean <- function(tseries, lambda, weightv) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
@@ -2043,8 +2098,7 @@ run_max <- function(tseries, lambda) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
@@ -2111,8 +2165,7 @@ run_min <- function(tseries, lambda) {
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
 #'   \code{tseries}.
@@ -2189,8 +2242,7 @@ run_var <- function(tseries, lambda) {
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 #'   price data.
 #'   
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'
 #' @return A single-column \emph{matrix} of variance estimates, with the same
 #'   number of rows as the input \code{ohlc} price data.
@@ -2266,7 +2318,7 @@ run_var_ohlc <- function(ohlc, lambda) {
 #'   The function \code{push_cov2cor()} calculates the correlation matrix from
 #'   the covariance matrix, in place, without copying the data in memory.
 #'   
-#'   The function \code{push_cov2cor()} accepts a \emph{pointer} to the the
+#'   The function \code{push_cov2cor()} accepts a \emph{pointer} to the
 #'   covariance matrix, and it overwrites it with the correlation matrix.
 #'
 #'   The function \code{push_cov2cor()} is written in \code{RcppArmadillo}
@@ -2291,14 +2343,13 @@ push_cov2cor <- function(covmat) {
 #' Update the trailing covariance matrix of streaming asset returns,
 #' with a row of new returns.
 #' 
-#' @param \code{newdata} A \emph{vector} of new asset returns.
+#' @param \code{retsn} A \emph{vector} of new asset returns.
 #' 
 #' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
 #' 
 #' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 #' 
-#' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
-#'   mean and covariance.
+#' @param \code{lambdacov} A decay factor which multiplies the past covariance.
 #' 
 #' @return Void (no return value - modifies the trailing covariance matrix
 #'   and the return means in place).
@@ -2309,8 +2360,8 @@ push_cov2cor <- function(covmat) {
 #'   covariance matrix in place, without copying the data in memory.
 #'   
 #'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-#'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-#'   returns at time \eqn{t}.  The elements of the vectors \code{newdata} and 
+#'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+#'   returns at time \eqn{t}.  The elements of the vectors \code{retsn} and 
 #'   \code{meanv} represent single rows of data with multiple columns.
 #'   
 #'   The function \code{push_covar()} accepts \emph{pointers} to the arguments
@@ -2359,18 +2410,18 @@ push_cov2cor <- function(covmat) {
 #' meanv <- colMeans(retss)
 #' covmat <- cov(retss)
 #' # Update the covariance of returns
-#' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
+#' HighFreq::push_covar(retsn=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 #' }
 #' 
 #' @export
-push_covar <- function(newdata, covmat, meanv, lambdacov) {
-    invisible(.Call('_HighFreq_push_covar', PACKAGE = 'HighFreq', newdata, covmat, meanv, lambdacov))
+push_covar <- function(retsn, covmat, meanv, lambdacov) {
+    invisible(.Call('_HighFreq_push_covar', PACKAGE = 'HighFreq', retsn, covmat, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
 #' data, with a row of new returns.
 #' 
-#' @param \code{newdata} A \emph{vector} of new asset returns.
+#' @param \code{retsn} A \emph{vector} of new asset returns.
 #' 
 #' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
 #' 
@@ -2382,8 +2433,7 @@ push_covar <- function(newdata, covmat, meanv, lambdacov) {
 #' 
 #' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 #' 
-#' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
-#'   mean and variance.
+#' @param \code{lambdacov} A decay factor which multiplies the past covariance.
 #' 
 #' @return Void (no return value - modifies the trailing eigen values, eigen
 #'   vectors, the eigen portfolio returns, and the return means in place).
@@ -2395,8 +2445,8 @@ push_covar <- function(newdata, covmat, meanv, lambdacov) {
 #'   the data in memory.
 #'   
 #'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-#'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-#'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+#'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+#'   returns at time \eqn{t}.  The elements of the vectors \code{retsn},
 #'   \code{eigenret}, and \code{meanv} represent single rows of data with
 #'   multiple columns.
 #'   
@@ -2450,20 +2500,20 @@ push_covar <- function(newdata, covmat, meanv, lambdacov) {
 #' covmat <- cov(retss)
 #' # Update the covariance of returns
 #' eigenret <- numeric(NCOL(retsp))
-#' HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
+#' HighFreq::push_eigen(retsn=retsp[nrows], covmat=covmat, 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
 #'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 #' }
 #' 
 #' @export
-push_eigen <- function(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov) {
-    invisible(.Call('_HighFreq_push_eigen', PACKAGE = 'HighFreq', newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov))
+push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov) {
+    invisible(.Call('_HighFreq_push_eigen', PACKAGE = 'HighFreq', retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
 #' data, with a row of new returns, using the \emph{SGA} algorithm.
 #' 
-#' @param \code{newdata} A \emph{vector} of new asset returns.
+#' @param \code{retsn} A \emph{vector} of new asset returns.
 #' 
 #' @param \code{eigenval} A \emph{vector} of eigen values.
 #' 
@@ -2475,10 +2525,10 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lam
 #' 
 #' @param \code{varv} A \emph{vector} of the trailing asset variances.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+#' @param \code{lambda} A decay factor which multiplies the past
 #'   mean and variance.
 #' 
-#' @param \code{gamma} A \emph{numeric} gain factor to multiply the past
+#' @param \code{gamma} A \emph{numeric} gain factor which multiplies the past
 #'   eigenelements.
 #' 
 #' @return Void (no return value - modifies the trailing eigen values, eigen
@@ -2491,8 +2541,8 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lam
 #'   eigenelements in place, without copying the data in memory.
 #'   
 #'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-#'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-#'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+#'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+#'   returns at time \eqn{t}.  The elements of the vectors \code{retsn},
 #'   \code{meanv}, and \code{varv} represent single rows of data with multiple
 #'   columns.
 #'   
@@ -2576,20 +2626,21 @@ push_eigen <- function(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lam
 #' meanv <- colMeans(retss)
 #' varv <- sapply(retss, var)
 #' covmat <- cov(retss)
+#' ncols <- NCOL(retss)
 #' # Calculate the eigen decomposition using RcppArmadillo
-#' eigend <- HighFreq::calc_eigen(covmat)
-#' eigenval <- eigend$values
-#' eigenvec <- eigend$vectors
+#' eigenval <- numeric(ncols) # Allocate eigen values
+#' eigenvec <- matrix(numeric(ncols^2), nc=ncols) # Allocate eigen vectors
+#' HighFreq::calc_eigen(covmat, eigenval, eigenvec)
 #' # Update the eigen decomposition using SGA
 #' eigenret <- numeric(NCOL(retsp))
-#' HighFreq::push_sga(newdata=retsp[nrows], 
+#' HighFreq::push_sga(retsn=retsp[nrows], 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
 #'   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 #' }
 #' 
 #' @export
-push_sga <- function(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma) {
-    invisible(.Call('_HighFreq_push_sga', PACKAGE = 'HighFreq', newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
+push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma) {
+    invisible(.Call('_HighFreq_push_sga', PACKAGE = 'HighFreq', retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
 }
 
 #' Calculate the trailing covariance of two streaming \emph{time series} of
@@ -2598,7 +2649,7 @@ push_sga <- function(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda,
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 #'   columns of returns data.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+#' @param \code{lambda} A decay factor which multiplies past
 #'   estimates.
 #'   
 #' @return A \emph{matrix} with three columns of data: the covariance and the
@@ -2675,7 +2726,7 @@ run_covar <- function(tseries, lambda) {
 #' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+#' @param \code{lambda} A decay factor which multiplies past
 #'   estimates.
 #'   
 #' @param \code{method} A \emph{character string} specifying the method for
@@ -2697,10 +2748,10 @@ run_covar <- function(tseries, lambda) {
 #'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
+#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) p^T_t p_t
 #'   }
 #'   \deqn{
-#'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
+#'     cov_t = \lambda cov_{t-1} + (1-\lambda) r^T_t p_t
 #'   }
 #'   \deqn{
 #'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
@@ -3722,9 +3773,9 @@ calc_lm <- function(respv, predv) {
 #'   faster than \code{lm()}.
 #'
 #'   If \code{method = "regular"} then it performs shrinkage regression.  It
-#'   calculates the regularized inverse of the \code{predictor} matrix from its
+#'   calculates the \emph{regularized inverse} of the predictor matrix from its
 #'   singular value decomposition.  It performs regularization by selecting
-#'   only the largest singular values equal in number to \code{dimax}.
+#'   only the largest \emph{singular values} equal in number to \code{dimax}.
 #'   
 #'   If \code{method = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
@@ -3733,15 +3784,15 @@ calc_lm <- function(respv, predv) {
 #'   added to the predictor matrix (the default is \code{intercept = TRUE}).
 #'   
 #'   The length of the return vector depends on the number of columns of the
-#'   \code{predictor} matrix (including the intercept column, if it's added).
+#'   predictor matrix (including the intercept column, if it's added).
 #'   The length of the return vector is equal to the number of regression
 #'   coefficients, plus their t-values, plus the z-score.
 #'   The number of regression coefficients is equal to the number of columns of
-#'   the \code{predictor} matrix (including the intercept column, if it's
+#'   the predictor matrix (including the intercept column, if it's
 #'   added).
 #'   The number of t-values is equal to the number of coefficients.
 #' 
-#'   For example, if the number of columns of the \code{predictor} matrix is
+#'   For example, if the number of columns of the predictor matrix is
 #'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
 #'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
 #'   regression coefficients (including the intercept coefficient), \code{n+1}
@@ -4397,15 +4448,15 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   description of the model parameters.
 #'   
 #'   The number of columns of the return matrix depends on the number of
-#'   columns of the \code{predictor} matrix (including the intercept column, if
+#'   columns of the predictor matrix (including the intercept column, if
 #'   it's added).
 #'   The number of columns of the return matrix is equal to the number of
 #'   regression coefficients, plus their t-values, plus the z-score column.
 #'   The number of regression coefficients is equal to the number of columns of
-#'   the \code{predictor} matrix (including the intercept column, if it's
+#'   the predictor matrix (including the intercept column, if it's
 #'   added).
 #'   The number of t-values is equal to the number of coefficients.
-#'   For example, if the number of columns of the \code{predictor} matrix is
+#'   For example, if the number of columns of the predictor matrix is
 #'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
 #'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
 #'   regression coefficients (including the intercept coefficient), \code{n+1}
@@ -4513,7 +4564,7 @@ roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_media
 #' 
 #' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+#' @param \code{lambda} A decay factor which multiplies past
 #'   estimates.
 #' 
 #' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
@@ -5194,6 +5245,159 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
     .Call('_HighFreq_lik_garch', PACKAGE = 'HighFreq', omega, alpha, beta, returns, minval)
 }
 
+#' Simulate a portfolio optimization strategy using online (recursive) updating
+#' of the covariance matrix.
+#' 
+#' @param \code{rets} A \emph{time series} or \emph{matrix} of asset returns.
+#' 
+#' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
+#'   values} used for calculating the regularized inverse of the covariance
+#'   matrix (the default is \code{dimax = 0} - standard matrix inverse using
+#'   all the \emph{eigen values}).
+#'   
+#' @param \code{lambda} A decay factor which multiplies the past asset returns.
+#'   
+#' @param \code{lambdacov} A decay factor which multiplies the past covariance.
+#'   
+#' @param \code{lambdaw} A decay factor which multiplies the past portfolio
+#'   weights.
+#'   
+#' @return A \emph{matrix} of strategy returns and the portfolio weights, with
+#'   the same number of rows as the argument \code{rets}.
+#'   
+#' @details
+#'   The function \code{run_portf()} simulates a portfolio optimization
+#'   strategy. The strategy calculates the maximum Sharpe portfolio weights
+#'   \emph{in-sample} at every point in time, and applies them in the
+#'   \emph{out-of-sample} time interval.  It updates the trailing covariance
+#'   matrix recursively, instead of using past batches of data. The function
+#'   \code{run_portf()} uses three different decay factors for averaging past
+#'   values, to reduce the variance of its forecasts.
+#'   
+#'   The function \code{run_portf()} first scales the returns by their trailing
+#'   volatilities:
+#'   \deqn{
+#'     r^s_t = \frac{r_t}{\sigma_{t-1}}
+#'   }
+#'   Returns scaled by their volatility are more stationary so they're easier
+#'   to model.
+#'   
+#'   Then at every point in time, the function \code{run_portf()} calls the
+#'   function \code{HighFreq::push_covar()} to update the trailing covariance
+#'   matrix of the returns:
+#'   \deqn{
+#'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
+#'   }
+#'   \deqn{
+#'     \hat{r}_t = r^s_t - \bar{r}_t
+#'   }
+#'   \deqn{
+#'     cov_t = \lambda_c cov_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
+#'   }
+#'   Where \eqn{\lambda_c} is the decay factor which multiplies the past mean
+#'   and covariance.
+#'   
+#'   It then calls the function \code{HighFreq::calc_inv()} to calculate the
+#'   \emph{regularized inverse} of the covariance matrix using its eigen
+#'   decomposition:
+#'   \deqn{
+#'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
+#'   }
+#'   See the function \code{HighFreq::calc_inv()} for details.
+#'   
+#'   It then calculates the \emph{in-sample} weights of the maximum Sharpe
+#'   portfolio, by multiplying the inverse covariance matrix times the trailing
+#'   means of the asset returns:
+#'   \deqn{
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r^s_t
+#'   }
+#'   \deqn{
+#'     \strong{w}_t = \strong{C}^{-1} \bar{r}_t
+#'   }
+#'   Note that the decay factor \eqn{\lambda} is different from the decay
+#'   factor \eqn{\lambda_c} used for updating the trailing covariance
+#'   matrix.
+#'   
+#'   It then scales the weights so their sum of squares is equal to one:
+#'   \deqn{
+#'     \strong{w}_t = \frac{\strong{w}_t}{\sqrt{\sum{\strong{w}^2_t}}}
+#'   }
+#'   
+#'   It then calculates the trailing mean of the weights:
+#'   \deqn{
+#'     \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1-\lambda_w) \strong{w}_t
+#'   }
+#'   Note that the decay factor \eqn{\lambda_w} is different from the decay
+#'   factor \eqn{\lambda} used for updating the trailing means.
+#'   
+#'   It finally calculates the \emph{out-of-sample} portfolio returns by
+#'   multiplying the trailing mean weights times the scaled asset returns:
+#'   \deqn{
+#'     r^p_t = \bar{\strong{w}}_{t-1} r^s_t
+#'   }
+#'   Applying weights to scaled returns means trading stock amounts with unit
+#'   dollar volatility.  So if the weight is equal to \code{2} then we should
+#'   purchase an amount of stock with dollar volatility equal to \code{2}
+#'   dollars.  Trading stock amounts with unit dollar volatility improves
+#'   portfolio diversification.
+#'   
+#'   The function \code{run_portf()} uses three different decay factors for
+#'   averaging past values, to reduce the variance of its forecasts. The value
+#'   of the decay factor \eqn{\lambda} must be in the range between \code{0}
+#'   and \code{1}.
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, so the trailing values have a greater
+#'   dependence on past data.  This is equivalent to a long look-back
+#'   interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, so the trailing values have a weaker
+#'   dependence on past data.  This is equivalent to a short look-back
+#'   interval.
+#' 
+#'   The function \code{run_portf()} returns multiple columns of data, with the
+#'   same number of rows as the input argument \code{rets}. The first column
+#'   contains the strategy returns and the remaining columns contain the
+#'   portfolio weights.
+#'   
+#' @examples
+#' \dontrun{
+#' # Load ETF returns
+#' retsp <- rutils::etfenv$returns[, c("VTI", "TLT", "DBC", "USO", "XLF", "XLK")]
+#' retsp <- na.omit(retsp)
+#' datev <- zoo::index(retsp) # dates
+#' # Simulate a portfolio optimization strategy
+#' dimax <- 6
+#' lambda <- 0.978
+#' lambdacov <- 0.995
+#' lambdaw <- 0.9
+#' pnls <- HighFreq::run_portf(retsp, dimax, lambda, lambdacov, lambdaw)
+#' colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
+#' pnls <- xts::xts(pnls, order.by=datev)
+#' # Plot dygraph of strategy
+#' wealthv <- cbind(retsp$VTI, pnls$pnls*sd(retsp$VTI)/sd(pnls$pnls))
+#' colnames(wealthv) <- c("VTI", "Strategy")
+#' endd <- rutils::calc_endpoints(wealthv, interval="weeks")
+#' dygraphs::dygraph(cumsum(wealthv)[endd], main="Portfolio Optimization Strategy Returns") %>%
+#'  dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
+#'  dyLegend(width=300)
+#' # Plot dygraph of weights
+#' symbolv <- "VTI"
+#' stockweights <- cbind(cumsum(get(symbolv, retsp)), get(symbolv, pnls))
+#' colnames(stockweights)[2] <- "Weight"
+#' colnamev <- colnames(stockweights)
+#' endd <- rutils::calc_endpoints(pnls, interval="weeks")
+#' dygraphs::dygraph(stockweights[endd], main="Returns and Weight") %>%
+#'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+#'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+#'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
+#'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+#' }
+#' 
+#' @export
+run_portf <- function(rets, dimax, lambda, lambdacov, lambdaw) {
+    .Call('_HighFreq_run_portf', PACKAGE = 'HighFreq', rets, dimax, lambda, lambdacov, lambdaw)
+}
+
 #' Calculate the optimal portfolio weights using a variety of different
 #' objective functions.
 #' 
@@ -5219,10 +5423,10 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'
 #'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
 #'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-#'   regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
-#'   times the mean column returns \eqn{\mu}:
+#'   \emph{regularized inverse} of the \emph{covariance matrix}
+#'   \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
 #'   \deqn{
-#'     \strong{w} = \strong{C}^{-1} \mu
+#'     \strong{w} = \strong{C}^{-1} \bar{r}
 #'   }
 #'   
 #'   If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
@@ -5230,7 +5434,8 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   
 #'   If \code{method = "minvarlin"} then it calculates the weights of the
 #'   minimum variance portfolio under linear constraint, by multiplying the
-#'   regularized inverse of the \emph{covariance matrix} times the unit vector:
+#'   \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+#'   vector:
 #'   \deqn{
 #'     \strong{w} = \strong{C}^{-1} \strong{1}
 #'   }
@@ -5243,32 +5448,32 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   to the Sharpe ratios (the \code{returns} divided by their standard
 #'   deviations):
 #'   \deqn{
-#'     \strong{w} = \frac{\mu}{\sigma}
+#'     \strong{w} = \frac{\bar{r}}{\sigma}
 #'   }
 #'
 #'   If \code{method = "kellym"} then it calculates the momentum weights equal
 #'   to the Kelly ratios (the \code{returns} divided by their variance):
 #'   \deqn{
-#'     \strong{w} = \frac{\mu}{\sigma^2}
+#'     \strong{w} = \frac{\bar{r}}{\sigma^2}
 #'   }
 #'
 #'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-#'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
-#'   It performs regularization by selecting only the largest eigenvalues equal
-#'   in number to \code{dimax}.
+#'   the \emph{regularized inverse} of the \emph{covariance matrix} of
+#'   \code{returns}. It performs regularization by selecting only the largest
+#'   eigenvalues equal in number to \code{dimax}.
 #'   
 #'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 #'   \code{returns}, by shrinking their means to their common mean value:
 #'   \deqn{
-#'     r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+#'     r^{\prime}_i = (1 - \alpha) \, \bar{r}_i + \alpha \, \mu
 #'   }
-#'   Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
-#'   mean of all the columns.
+#'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
+#'   average of all the column means.
 #'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
 #'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
-#'   column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+#'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
 #'   complete shrinkage (with the column means all equal to the single mean of
-#'   all the columns: \eqn{r_i = \bar{r}}).
+#'   all the columns: \eqn{\bar{r}_i = \mu}).
 #'
 #'   After the weights are calculated, they are scaled, depending on several
 #'   arguments.
@@ -5344,8 +5549,8 @@ calc_weights <- function(returns, controlv) {
 #' 
 #' @param \code{endp} An \emph{integer vector} of end points.
 #' 
-#' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
-#'   portfolio weights.  (The default is \code{lambda = 0} - no memory.)
+#' @param \code{lambda} A decay factor which multiplies the past portfolio
+#'   weights.  (The default is \code{lambda = 0} - no memory.)
 #'   
 #' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 #'   default is \code{1})

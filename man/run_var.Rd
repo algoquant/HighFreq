@@ -9,8 +9,7 @@ run_var(tseries, lambda)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of returns.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
-estimates.}
+\item{\code{lambda}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument

@@ -79,15 +79,15 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   description of the model parameters.
   
   The number of columns of the return matrix depends on the number of
-  columns of the \code{predictor} matrix (including the intercept column, if
+  columns of the predictor matrix (including the intercept column, if
   it's added).
   The number of columns of the return matrix is equal to the number of
   regression coefficients, plus their t-values, plus the z-score column.
   The number of regression coefficients is equal to the number of columns of
-  the \code{predictor} matrix (including the intercept column, if it's
+  the predictor matrix (including the intercept column, if it's
   added).
   The number of t-values is equal to the number of coefficients.
-  For example, if the number of columns of the \code{predictor} matrix is
+  For example, if the number of columns of the predictor matrix is
   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
   regression coefficients (including the intercept coefficient), \code{n+1}

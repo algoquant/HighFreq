@@ -19,7 +19,7 @@ Calculate the correlation matrix from the covariance matrix.
 The function \code{push_cov2cor()} calculates the correlation matrix from
   the covariance matrix, in place, without copying the data in memory.
   
-  The function \code{push_cov2cor()} accepts a \emph{pointer} to the the
+  The function \code{push_cov2cor()} accepts a \emph{pointer} to the
   covariance matrix, and it overwrites it with the correlation matrix.
 
   The function \code{push_cov2cor()} is written in \code{RcppArmadillo}

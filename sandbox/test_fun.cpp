@@ -13,6 +13,22 @@ using namespace arma;
 using namespace std;
 
 
+// [[Rcpp::export]]
+arma::mat calc_eigen(const arma::mat& covmat) {
+  
+  arma::uword ncols = covmat.n_cols;
+  arma::vec eigenval(ncols); // Eigen values
+  arma::mat eigenvec(ncols, ncols); // Eigen vectors
+  
+  // Calculate the eigen decomposition
+  arma::eig_sym(eigenval, eigenvec, covmat);
+  
+  // Return the portfolio returns and the first two eigen vectors
+  return arma::join_rows(eigenval, eigenvec);
+  
+}  // end calc_eigen
+
+
 // Calculate the alpha and beta regression coefficients
 // without using the Moore-Penrose inverse arma::pinv().
 // [[Rcpp::export]]
@@ -177,16 +193,18 @@ arma::mat run_pca(const arma::mat& tseries,
 }  // end run_pca
 
 
+// Simulate a PCA momentum strategy - experimental function similar to run_portf()
 // [[Rcpp::export]]
-arma::mat run_portf(const arma::mat& tseries, 
-                       const arma::uword& dimax, // Dimension reduction
-                       const double& lambda, // Returns decay factor
-                       const double& lambdacov, // Covariance decay factor
-                       bool scalit = true, // Scale the returns by the volatility?
-                       bool flipc = true) { // Flip the signs of the principal component weights (eigenvectors)?
+arma::mat run_pca_momentum(const arma::mat& returnm, // Asset returns
+                           const arma::uword& dimax, // Max number of PCA for dimension reduction
+                           const double& lambda, // Returns decay factor
+                           const double& lambdacov, // Covariance decay factor
+                           bool scalit = true, // Scale the returns by the volatility?
+                           bool flipc = true) { // Flip the signs of the principal component weights (eigenvectors)?
   
-  arma::uword nrows = tseries.n_rows;
-  arma::uword ncols = tseries.n_cols;
+  arma::uword nrows = returnm.n_rows;
+  arma::uword ncols = returnm.n_cols;
+  arma::rowvec newdata;
   arma::vec eigenval(ncols); // Eigen values
   arma::mat eigenvec(ncols, ncols); // Eigen vectors
   arma::mat eigenvecp(nrows, 2*ncols+2); // Past eigen vectors
@@ -194,61 +212,64 @@ arma::mat run_portf(const arma::mat& tseries,
   arma::rowvec eigenret(ncols, fill::zeros); // Returns of principal components
   arma::rowvec eigenretm(ncols, fill::zeros); // Average of principal components returns
   arma::rowvec eigenvar(ncols, fill::zeros); // Variance of principal component returns
+  arma::rowvec varv; // Variance of asset returns
   arma::rowvec weightv(ncols, fill::ones); // Principal component weights
   arma::rowvec weightp(ncols, fill::ones); // Past principal component weights
-  arma::rowvec weightpp(ncols, fill::ones); // Past past principal component weights
-  arma::colvec portfret(nrows); // Portfolio strategy returns
+  arma::rowvec weightl(ncols, fill::ones); // Lagged principal component weights
+  arma::colvec stratret(nrows); // Portfolio strategy returns
   double weightd; // Sum of squared principal component weights
   double lambda1 = 1-lambda;
   
   // Initialize the covariance matrix with first row of data
-  arma::rowvec meanv = tseries.row(0);
+  arma::rowvec meanv = returnm.row(0);
   arma::mat covmat = arma::trans(meanv)*meanv;
   // Initialize the eigen decomposition
   arma::eig_sym(eigenval, eigenvecp, covmat);
   
-  // Perform loop over the rows
+  // Perform loop over the rows (time)
   for (arma::uword it = 0; it < nrows; it++) {
-    // Scale the returns by the volatility
-    arma::rowvec varv = arma::trans(covmat.diag());
+    // Scale the returns by the trailing volatility
+    varv = arma::trans(covmat.diag());
     varv.replace(0, 1);
-    arma::rowvec newdatas = tseries.row(it)/arma::sqrt(varv);
+    newdata = returnm.row(it)/arma::sqrt(varv);
     // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
-    eigenret = newdatas*eigenvec;
-    // Calculate the portfolio returns - the products of the previous weights times the eigen portfolio returns
-    portfret(it) = arma::dot(eigenret, weightpp);
-    // Update the covariance matrix
+    eigenret = newdata*eigenvec;
+    // Calculate the strategy returns - the products of the lagged weights times the eigen returns
+    stratret(it) = arma::dot(newdata, weightl);
+    // Update the covariance matrix with new row of eigen returns
     if (scalit) {
-      push_covar(newdatas, covmat, meanv, lambdacov);
+      push_covar(newdata, covmat, meanv, lambdacov);
     } else {
-      push_covar(tseries.row(it), covmat, meanv, lambdacov);
+      push_covar(returnm.row(it), covmat, meanv, lambdacov);
     }  // end if
-    // Calculate the eigen decomposition
+    // Calculate the eigen decomposition - the eigenvalues are in ascending order
     arma::eig_sym(eigenval, eigenvec, covmat);
     // Calculate the trailing mean and variance of eigen returns
     eigenretm = lambda*eigenretm + lambda1*eigenret;
     eigenvar = lambda*eigenvar + lambda1*arma::square(eigenret - eigenretm);
     eigenvar.replace(0, 1);
     // Calculate the principal component weights equal to the Kelly ratios
-    weightv = eigenretm/eigenvar;
+    // weightv = eigenretm/eigenvar;
+    weightv = eigenretm/arma::trans(eigenval);
     // Apply dimension reduction to the weights
-    weightv.subvec(dimax, ncols-1).fill(0);
+    weightv.subvec(0, ncols-dimax).fill(0);
     // Scale the weights so their sum of squares is equal to one
     weightd = std::sqrt(arma::sum(arma::square(weightv)));
     if (weightd == 0) weightd = 1;
     weightv = weightv/weightd;
-    // Remember the past weights
-    weightpp = weightp;
+    // Copy the past weights into lagged weights
+    weightl = weightp;
     weightp = weightv;
     // Flip the eigen vector signs if the eigen vectors change too much
     if (flipc) {
-      for (arma::uword it=0; it < ncols; it++) {
+      for (arma::uword it = 0; it < ncols; it++) {
         if (arma::sum(arma::square(eigenvec.col(it) - eigenvecp.col(it))) > 2.0)
           eigenvec.col(it) = -eigenvec.col(it);
       }  // end for
+      // Copy the past eigen vectors
       eigenvecp = eigenvec;
     } // end if 
-    // Copy the first two eigen vectors
+    // Copy the first two eigen vectors for output
     eigenout.row(it)(0) = eigenval(0);
     eigenout.row(it).subvec(1, ncols) = arma::trans(eigenvec.col(0));
     eigenout.row(it)(ncols) = eigenval(1);
@@ -256,11 +277,126 @@ arma::mat run_portf(const arma::mat& tseries,
   }  // end for
   
   // Return the portfolio returns and the first two eigen vectors
-  return arma::join_rows(portfret, eigenout);
+  return arma::join_rows(stratret, eigenout);
+  
+}  // end run_pca_momentum
+
+
+// [[Rcpp::export]]
+arma::mat calc_inv(const arma::mat& matrixv, 
+                   arma::uword dimax = 0, // Max number of PCA for dimension reduction
+                   double eigen_thresh = 0.0) { // Threshold for discarding small singular values
+  
+  // Allocate Eigen variables
+  arma::uword ncols = matrixv.n_cols;
+  arma::vec eigenval; // Eigen values
+  arma::mat eigenvec; // Eigen vectors
+  // Calculate the eigen decomposition - the eigenvalues are in ascending order
+  arma::eig_sym(eigenval, eigenvec, matrixv);
+  // Calculate the number of non-small singular values
+  arma::uword neigen = arma::sum(eigenval > eigen_thresh*arma::sum(eigenval));
+  
+  // If no regularization then set dimax to neigen
+  if (dimax == 0) {
+    // Set dimax
+    dimax = neigen;
+  } else {
+    // Adjust dimax
+    dimax = std::min(dimax, neigen);
+  }  // end if
+  
+  // Remove all small singular values
+  eigenval = eigenval.subvec(ncols-dimax, ncols-1);
+  eigenvec = eigenvec.cols(ncols-dimax, ncols-1);
+
+  // Calculate the regularized inverse from the eigen decomposition
+  return eigenvec*arma::diagmat(1/eigenval)*eigenvec.t();
+  
+}  // end calc_inv
+
+
+// [[Rcpp::export]]
+void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=1) {
+  
+  // Calculate the inverse of matrixv recursively
+  for (arma::uword it = 0; it < niter; it++) {
+    invmat = 2*invmat - invmat*matrixv*invmat;
+  }  // end for
+  
+}  // end calc_invrec
+
+
+
+// [[Rcpp::export]]
+arma::mat run_portf(const arma::mat& returnm, // Asset returns
+                    const arma::uword& dimax, // Number of eigen vectors for dimension reduction
+                    const double& lambda, // Returns decay factor
+                    const double& lambdacov, // Covariance decay factor
+                    const double& lambdaw, // Weight decay factor
+                    bool scalit = true, // Scale the returns by the volatility?
+                    bool flipc = true) { // Flip the signs of the weights
+  
+  arma::uword nrows = returnm.n_rows;
+  arma::uword ncols = returnm.n_cols;
+  arma::rowvec newdata; // Row of asset returns
+  arma::rowvec retm(ncols, fill::zeros); // Trailing average of asset returns
+  arma::rowvec varv; // Variance of asset returns
+  arma::mat invmat(ncols, ncols, fill::ones); // Inverse covariance matrix
+  arma::mat weightv(nrows, ncols, fill::zeros); // Portfolio weights
+  arma::colvec stratret(nrows, fill::zeros); // Strategy returns
+  double weightd; // Sum of squared weights
+  double lambda1 = 1-lambda;
+  double lambdaw1 = 1-lambdaw;
+
+  // Initialize the covariance matrix with first row of data
+  arma::rowvec meanv = returnm.row(0);
+  arma::mat covmat = arma::trans(meanv)*meanv;
+  // invmat.diag() = 1/covmat.diag();
+  // invmat.diag() = ones(ncols);
+  // calc_invrec(covmat, invmat);
+  // invmat = calc_inv(covmat);
+  // Initialize the eigen decomposition
+
+  // Perform loop over the rows (time)
+  for (arma::uword it = 1; it < nrows; it++) {
+    // Scale the returns by the trailing volatility
+    // newdata = returnm.row(it);
+    varv = arma::trans(covmat.diag());
+    varv.replace(0, 1);
+    newdata = returnm.row(it)/arma::sqrt(varv);
+    // Calculate the strategy returns - the products of the lagged weights times the asset returns
+    stratret(it) = arma::dot(newdata, weightv.row(it-1));
+    // Update the covariance matrix with new row of asset returns
+    if (scalit) {
+      push_covar(newdata, covmat, meanv, lambdacov);
+    } else {
+      push_covar(returnm.row(it), covmat, meanv, lambdacov);
+    }  // end if
+    // Calculate the trailing mean of asset returns
+    retm = lambda*retm + lambda1*returnm.row(it);
+    // Calculate weights using regularized inverse
+    invmat = calc_inv(covmat, dimax);
+    // Calculate weights using recursive inverse
+    // calc_invrec(covmat, invmat);
+    // weightv.row(it) = retm*invmat;
+    weightv.row(it) = lambdaw*weightv.row(it-1) + lambdaw1*retm*invmat;
+    // Scale the weights so their sum of squares is equal to one
+    weightd = std::sqrt(arma::sum(arma::square(weightv.row(it))));
+    if (weightd == 0) weightd = 1;
+    weightv.row(it) = weightv.row(it)/weightd;
+    // Copy the past weights into lagged weights
+    // weightl = weightp;
+    // weightp = weightv;
+  }  // end for
+  
+  // Return the portfolio returns and the first two eigen vectors
+  // Return the portfolio returns and the first two eigen vectors
+  // return stratret;
+  return arma::join_rows(stratret, weightv);
   
 }  // end run_portf
-
-
+  
+  
 // [[Rcpp::export]]
 void run_sgao(arma::colvec& eigenval, // eigen values
              arma::mat& eigenvec, // eigen vectors
@@ -304,8 +440,6 @@ void run_sgao(arma::colvec& eigenval, // eigen values
   eigenvec = W;
   
 }  // end run_sgao
-
-
 
 
 
@@ -353,8 +487,8 @@ void sgapca_exCn(arma::colvec& eigenval,
 
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix sgapca_nnC (const arma::mat& Q, const arma::colvec& x, 
-                                const arma::colvec& y, const arma::colvec& gamma) {
+Rcpp::NumericMatrix sgapca_nnC(const arma::mat& Q, const arma::colvec& x, 
+                               const arma::colvec& y, const arma::colvec& gamma) {
   
   int m = Q.n_rows, n = Q.n_cols;
   arma::colvec gamy = gamma % y;
@@ -368,13 +502,13 @@ Rcpp::NumericMatrix sgapca_nnC (const arma::mat& Q, const arma::colvec& x,
   A += x*arma::trans(gamy);
   return Rcpp::wrap(A);
   
-}  // end calc_eigensp
+}  // end sgapca_nnC
 
 
 
 // [[Rcpp::export]]
-Rcpp::NumericMatrix ghapca_C (const arma::mat& Q, const arma::colvec& x, 
-                              const arma::colvec& y, const arma::colvec& gamma) {
+Rcpp::NumericMatrix ghapca_C(const arma::mat& Q, const arma::colvec& x, 
+                             const arma::colvec& y, const arma::colvec& gamma) {
   
   int m = Q.n_rows, n = Q.n_cols;
   arma::colvec gamy = gamma % y;
@@ -388,12 +522,12 @@ Rcpp::NumericMatrix ghapca_C (const arma::mat& Q, const arma::colvec& x,
   A += x*arma::trans(gamy);
   return Rcpp::wrap(A);
   
-}  // end calc_eigensp
+}  // end ghapca_C
 
 
 // [[Rcpp::export]]
-Rcpp::List ccipca_C (arma::colvec lambda, arma::mat U, 
-                     arma::colvec x, int n, int q, double l, double tol) {
+Rcpp::List ccipca_C(arma::colvec lambda, arma::mat U, 
+                    arma::colvec x, int n, int q, double l, double tol) {
   
   int i, d = x.n_elem, k = lambda.n_elem;
   if (q != k) {
@@ -438,6 +572,5 @@ Rcpp::List ccipca_C (arma::colvec lambda, arma::mat U,
   return Rcpp::List::create(Rcpp::Named("values") = lambda, 
                             Rcpp::Named("vectors") = U);
   
-}  // end calc_eigensp
-
+}  // end ccipca_C
 

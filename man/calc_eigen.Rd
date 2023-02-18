@@ -2,26 +2,32 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_eigen}
 \alias{calc_eigen}
-\title{Calculate the eigen decomposition of a square matrix using
+\title{Calculate the eigen decomposition of a square, symmetric matrix using
 \code{RcppArmadillo}.}
 \usage{
-calc_eigen(matrixv)
+calc_eigen(matrixv, eigenval, eigenvec)
 }
 \arguments{
-\item{\code{matrixv}}{A square matrix.}
+\item{\code{matrixv}}{A square, symmetric matrix.}
+
+\item{\code{eigenval}}{A \emph{vector} of eigen values.}
+
+\item{\code{eigenvec}}{A \emph{matrix} of eigen vectors.}
 }
 \value{
-A list with two elements: a \emph{vector} of eigenvalues (named
-  "values"), and a \emph{matrix} of eigenvectors (named "vectors").
+Void (no return value - passes the eigen values and eigen vectors by
+  reference).
 }
 \description{
-Calculate the eigen decomposition of a square matrix using
+Calculate the eigen decomposition of a square, symmetric matrix using
 \code{RcppArmadillo}.
 }
 \details{
 The function \code{calc_eigen()} calculates the eigen decomposition of a
-  square matrix using \code{RcppArmadillo}.  It calls the \code{Armadillo}
-  function \code{arma::eig_sym()} to calculate the eigen decomposition.
+  square, symmetric matrix using \code{RcppArmadillo}.  It calls the
+  \code{Armadillo} function \code{arma::eig_sym()} to calculate the eigen
+  decomposition. 
+  
   For small matrices, the function \code{calc_eigen()} is several times
   faster than the \code{R} function \code{eigen()}, since
   \code{calc_eigen()} has no overhead in \code{R} code. But for large
@@ -33,15 +39,17 @@ The function \code{calc_eigen()} calculates the eigen decomposition of a
 matrixv <- matrix(runif(25), nc=5)
 matrixv <- t(matrixv) \%*\% matrixv
 # Calculate the eigen decomposition using RcppArmadillo
-eigend <- HighFreq::calc_eigen(matrixv)
+eigenval <- numeric(5) # Allocate eigen values
+eigenvec <- matrix(numeric(25), nc=5) # Allocate eigen vectors
+HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
 # Calculate the eigen decomposition using R
 eigenr <- eigen(matrixv)
 # Compare the eigen decompositions
-all.equal(eigenr$values, drop(eigend$values))
-all.equal(abs(eigenr$vectors), abs(eigend$vectors))
+all.equal(eigenr$values, drop(eigenval))
+all.equal(abs(eigenr$vectors), abs(eigenvec))
 # Compare the speed of Rcpp with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_eigen(matrixv),
+  Rcpp=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
   Rcode=eigen(matrixv),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

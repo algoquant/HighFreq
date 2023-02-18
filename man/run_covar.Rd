@@ -11,7 +11,7 @@ run_covar(tseries, lambda)
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with two
 columns of returns data.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
+\item{\code{lambda}}{A decay factor which multiplies past
 estimates.}
 }
 \value{

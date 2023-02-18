@@ -23,14 +23,14 @@ calculating the portfolio weights (the default is \code{method =
 "sharpem"}).}
 
 \item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
-small singular values in order to regularize the inverse of the
+small \emph{singular values} in order to regularize the inverse of the
 \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).}
 
-\item{\code{dimax}}{An \emph{integer} equal to the number of singular
-values used for calculating the regularized inverse of the
-\code{covariance matrix} of \code{returns} (the default is \code{0} -
-equivalent to \code{dimax} equal to the number of columns of
-\code{returns}).}
+\item{\code{dimax}}{An \emph{integer} equal to the number of \emph{singular
+values} used for calculating the \emph{regularized inverse} of the
+\code{covariance matrix} of \code{returns} matrix (the default is
+\code{dimax = 0} - standard matrix inverse using all the \emph{singular
+values}).}
 
 \item{\code{confl}}{The confidence level for calculating the quantiles of
 returns (the default is \code{confl = 0.75}).}

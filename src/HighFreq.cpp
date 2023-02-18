@@ -30,24 +30,23 @@ using namespace arma::newarp;
 //'   TRUE}).
 //'
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   \code{predictor} matrix (the default is \code{1e-5}).
+//'   small \emph{singular values} in order to regularize the inverse of the
+//'   predictor matrix (the default is \code{1e-5}).
 //'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular values
-//'   used for calculating the regularized inverse of the \code{predv}
-//'   matrix (the default is \code{0} - equivalent to \code{dimax} equal to the
-//'   number of columns of the \code{predictor} matrix).
+//' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+//'   values} used for calculating the \emph{regularized inverse} of the
+//'   predictor matrix (the default is \code{dimax = 0} - standard matrix
+//'   inverse using all the \emph{singular values}).
 //'   
 //' @param \code{confl} The confidence level for calculating the quantiles of
 //'   returns (the default is \code{confl = 0.75}).
 //'
 //' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
 //'   between \code{0} and \code{1} - the default is \code{0}).
-//' 
-//' 
+//'   
 //' @return A named list of model parameters that can be passed into regression
 //' and machine learning functions.
-//'
+//'   
 //' @details
 //'   The function \code{param_reg()} creates a named list of model parameters
 //'   that can be passed into regression and machine learning functions.  For
@@ -72,7 +71,7 @@ using namespace arma::newarp;
 Rcpp::List param_reg(std::string method = "least_squares",  // Type of regression model
                      bool intercept = true,  // Add intercept column to the predictor matrix?
                      double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                     arma::uword dimax = 0, // Dimension reduction
+                     arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
                      double confl = 0.1, // Confidence level for calculating the quantiles of returns
                      double alpha = 0.0) {  // Shrinkage intensity of returns
   
@@ -97,14 +96,14 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
 //'   "sharpem"}).
 //'   
 //' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
+//'   small \emph{singular values} in order to regularize the inverse of the
 //'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 //'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the
-//'   \code{covariance matrix} of \code{returns} (the default is \code{0} -
-//'   equivalent to \code{dimax} equal to the number of columns of
-//'   \code{returns}).
+//' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+//'   values} used for calculating the \emph{regularized inverse} of the
+//'   \code{covariance matrix} of \code{returns} matrix (the default is
+//'   \code{dimax = 0} - standard matrix inverse using all the \emph{singular
+//'   values}).
 //'   
 //' @param \code{confl} The confidence level for calculating the quantiles of
 //'   returns (the default is \code{confl = 0.75}).
@@ -152,7 +151,7 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
 // [[Rcpp::export]]
 Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio optimization model
                        double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
-                       arma::uword dimax = 0, // Dimension reduction
+                       arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
                        double confl = 0.1, // Confidence level for calculating the quantiles of returns
                        double alpha = 0.0, // Shrinkage intensity of returns
                        bool rankw = false, // Should the weights be ranked?
@@ -648,15 +647,15 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
   // Calculate the initial end points - including extra end points at the end
   if (stub == 0) {
     for (arma::uword it = 0; it < numpts; ++it) {
-      endp[it] = it*step;
+      endp(it) = it*step;
     }  // end for
   } else if ((stub > 0) & (stubs)) {
     for (arma::uword it = 1; it < numpts; ++it) {
-      endp[it] = stub + (it-1)*step;
+      endp(it) = stub + (it-1)*step;
     }  // end for
   } else {
     for (arma::uword it = 0; it < numpts; ++it) {
-      endp[it] = stub + it*step;
+      endp(it) = stub + it*step;
     }  // end for
   }  // end if
   // std::cout << "endp = " << arma::conv_to<rowvec>::from(endp) << std::endl;
@@ -664,7 +663,7 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
   // arma::uvec endp = arma::regspace<uvec>(stub, step, lastp + step);
   // Find the index of the largest element of endp which is less than lastp
   arma::uword endpp = 0;
-  for (arma::uword it = 0; endp[it] < lastp; ++it) {
+  for (arma::uword it = 0; endp(it) < lastp; ++it) {
     endpp++;
   }  // end for
   // std::cout << "endpp = " << endpp << std::endl;
@@ -805,15 +804,15 @@ arma::uvec roll_count(const arma::uvec& tseries) {
   arma::uvec count_true(length);
   
   // Initialize count
-  count_true[0] = tseries[0];
+  count_true(0) = tseries(0);
   // Loop over tseries
   for (arma::uword it = 1; it < length; it++) {
-    if (tseries[it])
+    if (tseries(it))
       // Add count number
-      count_true[it] = count_true[it-1] + 1;
+      count_true(it) = count_true(it-1) + 1;
     else
       // Reset count to zero
-      count_true[it] = tseries[it];
+      count_true(it) = tseries(it);
   }  // end for
   
   return count_true;
@@ -872,7 +871,7 @@ Rcpp::List encode_it(arma::vec tseries) {
   
   // Initialize the data
   // Copy the first element of tseries to previous value
-  double preval = tseries[0];
+  double preval = tseries(0);
   // std::cout << "Initialize the data, preval = " << preval << std::endl;
   // Copy the previous value to the encoded data vector
   codev.push_back(preval);
@@ -1364,6 +1363,410 @@ void mult_mat_ref(arma::vec vectorv,
 
 
 
+
+////////////////////////////////////////////////////////////
+//' Calculate the eigen decomposition of a square, symmetric matrix using
+//' \code{RcppArmadillo}.
+//' 
+//' @param \code{matrixv} A square, symmetric matrix.
+//'
+//' @param \code{eigenval} A \emph{vector} of eigen values.
+//' 
+//' @param \code{eigenvec} A \emph{matrix} of eigen vectors.
+//' 
+//' @return Void (no return value - passes the eigen values and eigen vectors by
+//'   reference).
+//'
+//' @details
+//'   The function \code{calc_eigen()} calculates the eigen decomposition of a
+//'   square, symmetric matrix using \code{RcppArmadillo}.  It calls the
+//'   \code{Armadillo} function \code{arma::eig_sym()} to calculate the eigen
+//'   decomposition. 
+//'   
+//'   For small matrices, the function \code{calc_eigen()} is several times
+//'   faster than the \code{R} function \code{eigen()}, since
+//'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
+//'   matrices, they are about the same, since both call \code{C++} code.
+//'
+//' @examples
+//' \dontrun{
+//' # Create random positive semi-definite matrix
+//' matrixv <- matrix(runif(25), nc=5)
+//' matrixv <- t(matrixv) %*% matrixv
+//' # Calculate the eigen decomposition using RcppArmadillo
+//' eigenval <- numeric(5) # Allocate eigen values
+//' eigenvec <- matrix(numeric(25), nc=5) # Allocate eigen vectors
+//' HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
+//' # Calculate the eigen decomposition using R
+//' eigenr <- eigen(matrixv)
+//' # Compare the eigen decompositions
+//' all.equal(eigenr$values, drop(eigenval))
+//' all.equal(abs(eigenr$vectors), abs(eigenvec))
+//' # Compare the speed of Rcpp with R code
+//' summary(microbenchmark(
+//'   Rcpp=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
+//'   Rcode=eigen(matrixv),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+void calc_eigen(const arma::mat& matrixv,
+                arma::vec& eigenval, // Eigen values
+                arma::mat& eigenvec) { // Eigen vectors
+  
+  // arma::mat eigenvec;
+  // arma::vec eigenval;
+  arma::eig_sym(eigenval, eigenvec, matrixv);
+  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
+  eigenval = arma::flipud(eigenval);
+  eigenvec = arma::fliplr(eigenvec);
+  
+  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
+  // return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
+  //                           Rcpp::Named("vectors") = arma::fliplr(eigenvec));
+  
+}  // end calc_eigen
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the partial eigen decomposition of a dense symmetric matrix using
+//' \code{RcppArmadillo}.
+//' 
+//' @param \code{matrixv} A square matrix.
+//'
+//' @param \code{neigen} An \emph{integer} equal to the number of eigenvalues
+//'   to be calculated.
+//'
+//' @return A list with two elements: a \emph{vector} of eigenvalues (named
+//'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
+//'
+//' @details
+//'   The function \code{calc_eigenp()} calculates the partial eigen
+//'   decomposition (the lowest order principal components, with the largest
+//'   eigenvalues) of a dense matrix using RcppArmadillo.  It calls the internal
+//'   \code{Armadillo} eigen solver \code{SymEigsSolver} in the namespace
+//'   \code{arma::newarp} to calculate the partial eigen decomposition.
+//'   
+//'   The eigen solver \code{SymEigsSolver} uses the Implicitly Restarted
+//'   Lanczos Method (IRLM) which was adapted from the
+//'   \href{https://en.wikipedia.org/wiki/ARPACK}{ARPACK} library. The eigen
+//'   solver \code{SymEigsSolver} was implemented by
+//'   \href{https://github.com/yixuan/arpack-arma}{Yixuan Qiu}.
+//'   
+//'   The function \code{arma::eigs_sym()} also calculates the partial eigen
+//'   decomposition using the eigen solver \code{SymEigsSolver}, but it only
+//'   works for sparse matrices which are not standard R matrices.
+//'   
+//'   For matrices smaller than \code{100} rows, the function
+//'   \code{calc_eigenp()} is slower than the function \code{calc_eigen()} which
+//'   calculates the full eigen decomposition.  But it's faster for very large
+//'   matrices.
+//'
+//' @examples
+//' \dontrun{
+//' # Create random positive semi-definite matrix
+//' matrixv <- matrix(runif(100), nc=10)
+//' matrixv <- t(matrixv) %*% matrixv
+//' # Calculate the partial eigen decomposition
+//' neigen <- 5
+//' eigenp <- HighFreq::calc_eigenp(matrixv, neigen)
+//' # Calculate the eigen decomposition using RcppArmadillo
+//' eigenval <- numeric(10) # Allocate eigen values
+//' eigenvec <- matrix(numeric(100), nc=10) # Allocate eigen vectors
+//' HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
+//' # Compare the eigen decompositions
+//' all.equal(eigenp$values[1:neigen], eigenval[1:neigen])
+//' all.equal(abs(eigenp$vectors), abs(eigenvec[, 1:neigen]))
+//' # Compare the speed of partial versus full decomposition
+//' summary(microbenchmark(
+//'   partial=HighFreq::calc_eigenp(matrixv, neigen),
+//'   full=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
+//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
+  
+  arma::uword nrows = matrixv.n_rows;
+  arma::mat eigenvec;
+  arma::vec eigenval;
+  
+  // Construct matrix operation object using the wrapper class DenseGenMatProd
+  DenseGenMatProd<double> matop(matrixv);
+  
+  // Construct eigen solver object, requesting the largest three eigenvalues
+  SymEigsSolver <double, EigsSelect::LARGEST_ALGE, DenseGenMatProd<double>> eigs(matop, neigen, nrows);
+  
+  // Initialize and compute
+  eigs.init();
+  int nconv = eigs.compute();
+  
+  // Retrieve results
+  if (nconv > 0) {
+    eigenval = eigs.eigenvalues();
+    eigenvec = eigs.eigenvectors();
+  }  // end if
+  
+  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
+  return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
+                            Rcpp::Named("vectors") = arma::fliplr(eigenvec));
+  
+}  // end calc_eigenp
+
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+//' data using eigen decomposition.
+//' 
+//' @param \code{matrixv} A symmetric \emph{matrix} of data.
+//'   
+//' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
+//'   values} used for calculating the \emph{regularized inverse} of the matrix
+//'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
+//'   using all the \emph{eigen values}).
+//' 
+//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//'   small \emph{eigen values} in order to regularize the inverse of the matrix
+//'   \code{matrixv} (the default is \code{0.0}).
+//'
+//' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+//'   matrix \code{matrixv}.
+//'
+//' @details
+//'   The function \code{calc_inv()} calculates the \emph{regularized inverse}
+//'   of the matrix \code{matrixv} using eigen decomposition.
+//'   
+//'   The function \code{calc_inv()} first performs eigen decomposition of the
+//'   matrix \code{matrixv}.
+//'   The eigen decomposition of a matrix \eqn{\strong{C}} is defined as the
+//'   factorization:
+//'   \deqn{
+//'     \strong{C} = \strong{O}  \, \Sigma  \, \strong{O}^T
+//'   } Where \eqn{\strong{O}} is the matrix of \emph{eigen vectors} and
+//'   \eqn{\Sigma} is a diagonal matrix of \emph{eigen values}.
+//'   
+//'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
+//'   calculated from the eigen decomposition as:
+//'   \deqn{
+//'     \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
+//'   }
+//'   
+//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+//'   by removing \emph{eigen vectors} with very small \emph{eigen values}:
+//'   \deqn{
+//'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
+//'   }
+//'   Where \eqn{\strong{O}_{dimax}} is the matrix of \emph{eigen vectors} 
+//'   that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
+//'   
+//'   The function \code{calc_inv()} applies regularization to the matrix
+//'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+//'   
+//'   The function \code{calc_inv()} applies regularization by discarding the
+//'   smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
+//'   threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+//'   values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
+//'   
+//'   It also discards additional \emph{eigen vectors} so that only the highest
+//'   order \emph{eigen vectors} remain, up to order \code{dimax}.
+//'   It calculates the \emph{regularized inverse} from the eigen decomposition
+//'   using only the largest \emph{eigen values} up to \code{dimax}.  For
+//'   example, if
+//'   \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
+//'   vectors}, with the largest \emph{eigen values}. This has the effect of
+//'   dimension reduction.
+//'   
+//'   If the matrix \code{matrixv} has a large number of small \emph{eigen
+//'   values}, then the number of remaining \emph{eigen values} may be less than
+//'   \code{dimax}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate ETF returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
+//' # Calculate covariance matrix
+//' covmat <- cov(retsp)
+//' # Calculate matrix inverse using RcppArmadillo
+//' invmat <- HighFreq::calc_inv(covmat)
+//' # Calculate matrix inverse in R
+//' invr <- solve(covmat)
+//' all.equal(invmat, invr, check.attributes=FALSE)
+//' # Calculate regularized inverse using RcppArmadillo
+//' invmat <- HighFreq::calc_inv(covmat, dimax=3)
+//' # Calculate regularized inverse using eigen decomposition in R
+//' eigend <- eigen(covmat)
+//' dimax <- 1:3
+//' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
+//' # Compare RcppArmadillo with R
+//' all.equal(invmat, invr)
+//' }
+//' 
+//' @examples
+// [[Rcpp::export]]
+arma::mat calc_inv(const arma::mat& matrixv, 
+                   arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
+                   double eigen_thresh = 0.0) { // Threshold for discarding small eigen values
+  
+  // Allocate Eigen variables
+  arma::uword ncols = matrixv.n_cols;
+  arma::vec eigenval(ncols, fill::zeros); // Eigen values
+  arma::mat eigenvec(ncols, ncols, fill::zeros); // Eigen vectors
+  // Calculate the eigen decomposition - the eigenvalues are in ascending order
+  arma::eig_sym(eigenval, eigenvec, matrixv);
+  // Calculate the number of non-small singular values
+  arma::uword neigen = arma::sum(eigenval > eigen_thresh*arma::sum(eigenval));
+  
+  // If no regularization then set dimax to neigen
+  if (dimax == 0) {
+    // Set dimax
+    dimax = neigen;
+  } else {
+    // Adjust dimax
+    dimax = std::min(dimax, neigen);
+  }  // end if
+  
+  // Remove all small singular values
+  eigenval = eigenval.subvec(ncols-dimax, ncols-1);
+  eigenvec = eigenvec.cols(ncols-dimax, ncols-1);
+  
+  // Calculate the regularized inverse from the eigen decomposition
+  return eigenvec*arma::diagmat(1/eigenval)*eigenvec.t();
+  
+}  // end calc_inv
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+//' Singular Value Decomposition (\emph{SVD}).
+//' 
+//' @param \code{matrixv} A \emph{matrix} of data.
+//'   
+//' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
+//'   values} used for calculating the \emph{regularized inverse} of the matrix
+//'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
+//'   using all the \emph{singular values}).
+//' 
+//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//'   small \emph{singular values} in order to regularize the inverse of the
+//'   matrix \code{matrixv} (the default is \code{0.0}).
+//'
+//' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+//'   matrix \code{matrixv}.
+//'
+//' @details
+//'   The function \code{calc_invsvd()} calculates the \emph{regularized
+//'   inverse} of the matrix \code{matrixv} using Singular Value Decomposition
+//'   (\emph{SVD}).
+//'   
+//'   The function \code{calc_invsvd()} first performs Singular Value
+//'   Decomposition (\emph{SVD}) of the matrix \code{matrixv}.
+//'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
+//'   factorization:
+//'   \deqn{
+//'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
+//'   }
+//'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
+//'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
+//'   \emph{singular values}.
+//'   
+//'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
+//'   calculated from the \emph{SVD} matrices as:
+//'   \deqn{
+//'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
+//'   }
+//'   
+//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+//'   by removing \emph{singular vectors} with very small \emph{singular values}:
+//'   \deqn{
+//'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
+//'   }
+//'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
+//'   \emph{SVD} matrices with the rows and columns corresponding to very small
+//'   \emph{singular values} removed.
+//'   
+//'   The function \code{calc_invsvd()} applies regularization to the matrix
+//'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+//'   
+//'   The function \code{calc_invsvd()} applies regularization by discarding the
+//'   smallest \emph{singular values} \eqn{\sigma_i} that are less than the
+//'   threshold level \code{eigen_thresh} times the sum of all the
+//'   \emph{singular values}: \deqn{\sigma_i < eigen\_thresh \cdot
+//'   (\sum{\sigma_i})}
+//'   
+//'   It also discards additional \emph{singular vectors} so that only the
+//'   highest order \emph{singular vectors} remain, up to order \code{dimax}. It
+//'   calculates the \emph{regularized inverse} from the \emph{SVD} matrices
+//'   using only the largest \emph{singular values} up to order \code{dimax}.
+//'   For example, if \code{dimax = 3} then it only uses the \code{3} highest
+//'   order \emph{singular vectors}, with the largest \emph{singular values}.
+//'   This has the effect of dimension reduction.
+//'   
+//'   If the matrix \code{matrixv} has a large number of small \emph{singular
+//'   values}, then the number of remaining \emph{singular values} may be less
+//'   than \code{dimax}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate ETF returns
+//' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
+//' # Calculate covariance matrix
+//' covmat <- cov(retsp)
+//' # Calculate matrix inverse using RcppArmadillo
+//' invmat <- HighFreq::calc_invsvd(covmat)
+//' # Calculate matrix inverse in R
+//' invr <- solve(covmat)
+//' all.equal(invmat, invr, check.attributes=FALSE)
+//' # Calculate regularized inverse using RcppArmadillo
+//' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
+//' # Calculate regularized inverse from SVD in R
+//' svdec <- svd(covmat)
+//' dimax <- 1:3
+//' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
+//' # Compare RcppArmadillo with R
+//' all.equal(invmat, invr)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat calc_invsvd(const arma::mat& matrixv, 
+                      arma::uword dimax = 0, // The number of singular vectors for dimension reduction
+                      double eigen_thresh = 0.0) { // Threshold for discarding small singular values
+  
+  // Allocate SVD variables
+  arma::vec svdval;  // Singular values
+  arma::mat svdu, svdv;  // Singular matrices
+  // Calculate the SVD - the singular values are in ascending order
+  arma::svd(svdu, svdval, svdv, matrixv);
+  // Calculate the number of non-small singular values
+  arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
+  
+  // If no regularization then set dimax to (svdnum - 1)
+  if (dimax == 0) {
+    // Set dimax
+    dimax = svdnum - 1;
+  } else {
+    // Adjust dimax
+    dimax = std::min(dimax - 1, svdnum - 1);
+  }  // end if
+  
+  // Remove all small singular values
+  svdval = svdval.subvec(0, dimax);
+  svdu = svdu.cols(0, dimax);
+  svdv = svdv.cols(0, dimax);
+  
+  // Calculate the regularized inverse from the SVD decomposition
+  return svdv*arma::diagmat(1/svdval)*svdu.t();
+  
+}  // end calc_invsvd
+
+
+
 ////////////////////////////////////////////////////////////
 //' Calculate the approximate inverse of a square \emph{matrix} recursively
 //' using the Schulz formula (without copying the data in memory).
@@ -1428,13 +1831,15 @@ void mult_mat_ref(arma::vec vectorv,
 //' 
 //' @export
 // [[Rcpp::export]]
-void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=1) {
- 
- // Calculate the inverse of matrixv recursively
- for (arma::uword it=0; it < niter; it++) {
-   invmat = 2*invmat - invmat*matrixv*invmat;
- }  // end for
- 
+void calc_invrec(const arma::mat& matrixv, 
+                arma::mat& invmat, 
+                arma::uword niter=1) {
+  
+  // Calculate the inverse of matrixv recursively
+  for (arma::uword it = 0; it < niter; it++) {
+    invmat = 2*invmat - invmat*matrixv*invmat;
+  }  // end for
+  
 }  // end calc_invrec
 
 
@@ -1488,264 +1893,10 @@ void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=
 //' @export
 // [[Rcpp::export]]
 void calc_invref(arma::mat& matrixv) {
- 
+  
   matrixv = arma::inv(matrixv);
- 
+  
 }  // end calc_invref
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the eigen decomposition of a square matrix using
-//' \code{RcppArmadillo}.
-//' 
-//' @param \code{matrixv} A square matrix.
-//'
-//' @return A list with two elements: a \emph{vector} of eigenvalues (named
-//'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
-//'
-//' @details
-//'   The function \code{calc_eigen()} calculates the eigen decomposition of a
-//'   square matrix using \code{RcppArmadillo}.  It calls the \code{Armadillo}
-//'   function \code{arma::eig_sym()} to calculate the eigen decomposition.
-//'   For small matrices, the function \code{calc_eigen()} is several times
-//'   faster than the \code{R} function \code{eigen()}, since
-//'   \code{calc_eigen()} has no overhead in \code{R} code. But for large
-//'   matrices, they are about the same, since both call \code{C++} code.
-//'
-//' @examples
-//' \dontrun{
-//' # Create random positive semi-definite matrix
-//' matrixv <- matrix(runif(25), nc=5)
-//' matrixv <- t(matrixv) %*% matrixv
-//' # Calculate the eigen decomposition using RcppArmadillo
-//' eigend <- HighFreq::calc_eigen(matrixv)
-//' # Calculate the eigen decomposition using R
-//' eigenr <- eigen(matrixv)
-//' # Compare the eigen decompositions
-//' all.equal(eigenr$values, drop(eigend$values))
-//' all.equal(abs(eigenr$vectors), abs(eigend$vectors))
-//' # Compare the speed of Rcpp with R code
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::calc_eigen(matrixv),
-//'   Rcode=eigen(matrixv),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-Rcpp::List calc_eigen(const arma::mat& matrixv) {
-  
-  arma::mat eigenvec;
-  arma::vec eigenval;
-  arma::eig_sym(eigenval, eigenvec, matrixv);
-  
-  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
-  return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
-                            Rcpp::Named("vectors") = arma::fliplr(eigenvec));
-  
-}  // end calc_eigen
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the partial eigen decomposition of a dense symmetric matrix using
-//' \code{RcppArmadillo}.
-//' 
-//' @param \code{matrixv} A square matrix.
-//'
-//' @param \code{neigen} An \emph{integer} equal to the number of eigenvalues
-//'   to be calculated.
-//'
-//' @return A list with two elements: a \emph{vector} of eigenvalues (named
-//'   "values"), and a \emph{matrix} of eigenvectors (named "vectors").
-//'
-//' @details
-//'   The function \code{calc_eigenp()} calculates the partial eigen
-//'   decomposition (the lowest order principal components, with the largest
-//'   eigenvalues) of a dense matrix using RcppArmadillo.  It calls the internal
-//'   \code{Armadillo} eigen solver \code{SymEigsSolver} in the namespace
-//'   \code{arma::newarp} to calculate the partial eigen decomposition.
-//'   
-//'   The eigen solver \code{SymEigsSolver} uses the Implicitly Restarted
-//'   Lanczos Method (IRLM) which was adapted from the
-//'   \href{https://en.wikipedia.org/wiki/ARPACK}{ARPACK} library. The eigen
-//'   solver \code{SymEigsSolver} was implemented by
-//'   \href{https://github.com/yixuan/arpack-arma}{Yixuan Qiu}.
-//'   
-//'   The function \code{arma::eigs_sym()} also calculates the partial eigen
-//'   decomposition using the eigen solver \code{SymEigsSolver}, but it only
-//'   works for sparse matrices which are not standard R matrices.
-//'   
-//'   For matrices smaller than \code{100} rows, the function
-//'   \code{calc_eigenp()} is slower than the function \code{calc_eigen()} which
-//'   calculates the full eigen decomposition.  But it's faster for very large
-//'   matrices.
-//'
-//' @examples
-//' \dontrun{
-//' # Create random positive semi-definite matrix
-//' matrixv <- matrix(runif(100), nc=10)
-//' matrixv <- t(matrixv) %*% matrixv
-//' # Calculate the partial eigen decomposition
-//' neigen <- 5
-//' eigenp <- HighFreq::calc_eigenp(matrixv, neigen)
-//' # Calculate the full eigen decomposition
-//' eigend <- HighFreq::calc_eigen(matrixv)
-//' # Compare the eigen decompositions
-//' all.equal(eigenp$values[1:neigen], eigend$values[1:neigen])
-//' all.equal(abs(eigenp$vectors), abs(eigend$vectors[, 1:neigen]))
-//' # Compare the speed of partial versus full decomposition
-//' summary(microbenchmark(
-//'   partial=HighFreq::calc_eigenp(matrixv, neigen),
-//'   full=HighFreq::calc_eigen(matrixv),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
-  
-  arma::uword nrows = matrixv.n_rows;
-  arma::mat eigenvec;
-  arma::vec eigenval;
-  
-  // Construct matrix operation object using the wrapper class DenseGenMatProd
-  DenseGenMatProd<double> matop(matrixv);
-  
-  // Construct eigen solver object, requesting the largest three eigenvalues
-  SymEigsSolver <double, EigsSelect::LARGEST_ALGE, DenseGenMatProd<double>> eigs(matop, neigen, nrows);
-  
-  // Initialize and compute
-  eigs.init();
-  int nconv = eigs.compute();
-  
-  // Retrieve results
-  if (nconv > 0) {
-    eigenval = eigs.eigenvalues();
-    eigenvec = eigs.eigenvectors();
-  }  // end if
-  
-  // Reverse the order of elements from largest eigenvalue to smallest, similar to R
-  return Rcpp::List::create(Rcpp::Named("values") = arma::flipud(eigenval),
-                            Rcpp::Named("vectors") = arma::fliplr(eigenvec));
-  
-}  // end calc_eigenp
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the regularized inverse of a \emph{matrix} of data using Singular
-//' Value Decomposition (\emph{SVD}).
-//' 
-//' @param \code{matrixv} A \emph{time series} or \emph{matrix} of data.
-//' 
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
-//'   small singular values in order to regularize the inverse of the
-//'   matrix \code{matrixv} (the default is \code{0.01}).
-//'   
-//' @param \code{dimax} An \emph{integer} equal to the number of singular
-//'   values used for calculating the regularized inverse of the matrix
-//'   \code{matrixv} (the default is \code{dimax = 0} - equivalent to
-//'   \code{dimax} equal to the number of columns of \code{matrixv}).
-//'
-//' @return A \emph{matrix} equal to the regularized inverse of the matrix
-//'   \code{matrixv}.
-//'
-//' @details
-//'   The function \code{calc_inv()} calculates the regularized inverse of the
-//'   matrix \code{matrixv} using Singular Value Decomposition (\emph{SVD}).
-//'   
-//'   The function \code{calc_inv()} first performs Singular Value Decomposition
-//'   (\emph{SVD}) of the matrix \code{matrixv}.  
-//'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
-//'   factorization:
-//'   \deqn{
-//'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
-//'   }
-//'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
-//'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
-//'   \emph{singular values} \eqn{\Sigma = \{\sigma_i\}}.
-//'   
-//'   The inverse \eqn{\strong{C}^{-1}} of the matrix \eqn{\strong{C}} can be
-//'   calculated from the \emph{SVD} matrices as:
-//'   \deqn{
-//'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
-//'   }
-//'   
-//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is given
-//'   by:
-//'   \deqn{
-//'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
-//'   }
-//'   Where \eqn{\strong{U}_n}, \eqn{\strong{V}_n} and \eqn{\Sigma_n} are the
-//'   \emph{SVD} matrices with the rows and columns corresponding to zero
-//'   \emph{singular values} removed.
-//'   
-//'   The function \code{calc_inv()} performs regularization by discarding the
-//'   smallest singular values \eqn{\sigma_i} that are less than the threshold
-//'   level \code{eigen_thresh} times the sum of all the singular values:
-//'   \deqn{\sigma_i < eigen\_thresh \cdot (\sum{\sigma_i})}
-//'   
-//'   It then discards additional singular values so that only the largest
-//'   \code{dimax} singular values remain.  
-//'   It calculates the regularized inverse from the \emph{SVD} matrices using
-//'   only the largest singular values up to \code{dimax}.  For example, if
-//'   \code{dimax = 3} then it only uses the \code{3} largest singular
-//'   values. This has the effect of dimension reduction.
-//'   
-//'   If the matrix \code{matrixv} has a large number of small singular values,
-//'   then the number of remaining singular values may be less than
-//'   \code{dimax}.
-//'   
-//' @examples
-//' \dontrun{
-//' # Calculate ETF returns
-//' retsp <- na.omit(rutils::etfenv$returns)
-//' # Calculate covariance matrix
-//' covmat <- cov(retsp)
-//' # Calculate regularized inverse using RcppArmadillo
-//' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-//' # Calculate regularized inverse from SVD in R
-//' svdec <- svd(covmat)
-//' dimax <- 1:3
-//' invsvd <- svdec$v[, dimax] %*% (t(svdec$u[, dimax]) / svdec$d[dimax])
-//' # Compare RcppArmadillo with R
-//' all.equal(invmat, invsvd)
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat calc_inv(const arma::mat& matrixv,
-                   double eigen_thresh = 0.01, 
-                   arma::uword dimax = 0) {
-  
-  // Allocate SVD variables
-  arma::vec svdval;  // Singular values
-  arma::mat svdu, svdv;  // Singular matrices
-  // Calculate the SVD
-  arma::svd(svdu, svdval, svdv, matrixv);
-  // Calculate the number of non-small singular values
-  arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
-  
-  // If no regularization then set dimax to (svdnum - 1)
-  if (dimax == 0) {
-    // Set dimax
-    dimax = svdnum - 1;
-  } else {
-    // Adjust dimax
-    dimax = std::min(dimax - 1, svdnum - 1);
-  }  // end if
-  
-  // Remove all small singular values
-  svdval = svdval.subvec(0, dimax);
-  svdu = svdu.cols(0, dimax);
-  svdv = svdv.cols(0, dimax);
-  
-  // Calculate the regularized inverse from the SVD decomposition
-  return svdv*arma::diagmat(1/svdval)*svdu.t();
-  
-}  // end calc_inv
 
 
 
@@ -1844,33 +1995,33 @@ void calc_scale(arma::mat& tseries,
   if (nrows > 2) {
     if (scale and center) {
       if (use_median) {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = (tseries.col(it) - center*arma::median(tseries.col(it)));
           tseries.col(it) = tseries.col(it)/arma::median(arma::abs(tseries.col(it)));
         }  // end for
       } else {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = (tseries.col(it) - center*arma::mean(tseries.col(it)));
           tseries.col(it) = tseries.col(it)/arma::stddev(tseries.col(it));
         }  // end for
       }  // end if
     } else if (scale and (not center)) {
       if (use_median) {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = tseries.col(it)/arma::median(arma::abs(tseries.col(it)));
         }  // end for
       } else {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = tseries.col(it)/arma::stddev(tseries.col(it));
         }  // end for
       }  // end if
     } else if ((not scale) and center) {
       if (use_median) {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = (tseries.col(it) - center*arma::median(tseries.col(it)));
         }  // end for
       } else {
-        for (arma::uword it=0; it < ncols; it++) {
+        for (arma::uword it = 0; it < ncols; it++) {
           tseries.col(it) = (tseries.col(it) - center*arma::mean(tseries.col(it)));
         }  // end for
       }  // end if
@@ -2041,145 +2192,6 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
 
 
 
-
-////////////////////////////////////////////////////////////
-//' Calculate the rolling sums over a single-column \emph{time series} or a
-//' single-column \emph{matrix} using \emph{Rcpp}.
-//' 
-//' @param \code{tseries} A single-column \emph{time series} or a single-column
-//'   \emph{matrix}.
-//' 
-//' @param \code{look_back} The length of the look-back interval, equal to the
-//'   number of elements of data used for calculating the sum.
-//'
-//' @return A single-column \emph{matrix} of the same length as the argument
-//'   \code{tseries}.
-//'
-//' @details
-//'   The function \code{roll_vec()} calculates a single-column \emph{matrix} of
-//'   rolling sums, over a single-column \emph{matrix} of data, using fast
-//'   \emph{Rcpp} \code{C++} code.  The function \code{roll_vec()} is several
-//'   times faster than \code{rutils::roll_sum()} which uses vectorized \code{R}
-//'   code.
-//'
-//' @examples
-//' \dontrun{
-//' # Define a single-column matrix of returns
-//' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
-//' # Calculate rolling sums over 11-period look-back intervals
-//' sum_rolling <- HighFreq::roll_vec(retsp, look_back=11)
-//' # Compare HighFreq::roll_vec() with rutils::roll_sum()
-//' all.equal(HighFreq::roll_vec(retsp, look_back=11), 
-//'          rutils::roll_sum(retsp, look_back=11), 
-//'          check.attributes=FALSE)
-//' # Compare the speed of Rcpp with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_vec(retsp, look_back=11),
-//'   Rcode=rutils::roll_sum(retsp, look_back=11),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat roll_vec(const arma::mat& tseries, arma::uword look_back) {
-  
-  arma::uword nrows = tseries.n_rows;
-  arma::mat rolling_sum(nrows, 1);
-  
-  // Warmup period
-  rolling_sum[0] = tseries[0];
-  for (arma::uword it = 1; it < look_back; it++) {
-    rolling_sum[it] = rolling_sum[it-1] + tseries[it];
-  }  // end for
-  
-  // Remaining period
-  for (arma::uword it = look_back; it < nrows; it++) {
-    rolling_sum[it] = rolling_sum[it-1] + tseries[it] - tseries[it-look_back];
-  }  // end for
-  
-  return rolling_sum;
-  
-}  // end roll_vec
-
-
-
-
-////////////////////////////////////////////////////////////
-//' Calculate the rolling weighted sums over a single-column \emph{time series}
-//' or a single-column \emph{matrix} using \code{RcppArmadillo}.
-//' 
-//' @param \code{tseries} A single-column \emph{time series} or a single-column
-//'   \emph{matrix}.
-//' 
-//' @param \code{weightv} A single-column \emph{matrix} of weights.
-//'
-//' @return A single-column \emph{matrix} of the same length as the argument
-//'   \code{tseries}.
-//'
-//' @details
-//'   The function \code{roll_vecw()} calculates the rolling weighted sums of a
-//'   single-column \emph{matrix} over its past values (a convolution with the
-//'   single-column \emph{matrix} of weights), using \code{RcppArmadillo}. It
-//'   performs a similar calculation as the standard \code{R} function
-//'   \cr\code{stats::filter(x=series, filter=weightv, method="convolution",
-//'   sides=1)}, but it's over \code{6} times faster, and it doesn't produce any
-//'   \code{NA} values.
-//'   
-//' @examples
-//' \dontrun{
-//' # First example
-//' # Define a single-column matrix of returns
-//' retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
-//' # Create simple weights
-//' weightv <- c(1, rep(0, 10))
-//' # Calculate rolling weighted sums
-//' weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
-//' # Compare with original
-//' all.equal(zoo::coredata(retsp), weighted, check.attributes=FALSE)
-//' # Second example
-//' # Create exponentially decaying weights
-//' weightv <- exp(-0.2*1:11)
-//' weightv <- weightv/sum(weightv)
-//' # Calculate rolling weighted sums
-//' weighted <- HighFreq::roll_vecw(tseries=retsp, weightv=weightv)
-//' # Calculate rolling weighted sums using filter()
-//' filtered <- stats::filter(x=retsp, filter=weightv, method="convolution", sides=1)
-//' # Compare both methods
-//' all.equal(filtered[-(1:11)], weighted[-(1:11)], check.attributes=FALSE)
-//' # Compare the speed of Rcpp with R code
-//' library(microbenchmark)
-//' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_vecw(tseries=retsp, weightv=weightv),
-//'   Rcode=stats::filter(x=retsp, filter=weightv, method="convolution", sides=1),
-//'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
-//' 
-//' @export
-// [[Rcpp::export]]
-arma::mat roll_vecw(const arma::mat& tseries, const arma::colvec& weightv) {
-  
-  arma::uword nrows = tseries.n_rows;
-  arma::uword look_back = weightv.n_rows;
-  arma::mat rolling_sum(nrows, 1);
-  arma::mat weightr = arma::reverse(weightv);
-  // arma::mat weightr = weightv;
-  
-  // Warmup period
-  rolling_sum.rows(0, look_back-2) = tseries.rows(0, look_back-2);
-  
-  // Remaining periods
-  for (arma::uword it = look_back-1; it < nrows; it++) {
-    rolling_sum(it) = arma::dot(weightr, tseries.rows(it-look_back+1, it));
-  }  // end for
-  
-  return rolling_sum;
-  
-}  // end roll_vecw
-
-
-
-
 ////////////////////////////////////////////////////////////
 //' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
 //' with a single-column \emph{matrix} of weights.
@@ -2257,27 +2269,56 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //'   number of data points included in calculating the rolling sum (the default
 //'   is \code{look_back = 1}).
 //'   
+//' @param \code{weightv} A single-column \emph{matrix} of weights (the default
+//'   is \code{weightv = 0}).
+//'
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{roll_sum()} calculates the rolling sums over the
-//'   columns of the data \code{tseries}.
+//'   The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
+//'   over the columns of the data \code{tseries}.
+//'   
+//'   If the argument \code{weightv} is equal to zero (the default), then the
+//'   function \code{roll_sum()} calculates the simple rolling sums of the 
+//'   \emph{time series} data \eqn{p_t} over the look-back interval \eqn{\Delta}:
+//'   \deqn{
+//'     \bar{p}_t = \sum_{j=(t-\Delta+1)}^{t} p_j
+//'   }
+//'   
+//'   If the \code{weightv} argument has the same number of rows as the argument
+//'   \code{tseries}, then the function \code{roll_sum()} calculates rolling 
+//'   \emph{weighted} sums of the \emph{time series} data \eqn{p_t} in two steps.
+//'   
+//'   It first calculates the rolling sums of the products of the weights
+//'   \eqn{w_t} times the \emph{time series} data \eqn{p_t} over the look-back
+//'   interval \eqn{\Delta}:
+//'   \deqn{
+//'     \bar{w}_t = \sum_{j=(t-\Delta+1)}^{t} w_j
+//'   }
+//'   \deqn{
+//'     \bar{p}^w_t = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
+//'   }
+//'   
+//'   It then calculates the rolling \emph{weighted} sums \eqn{\bar{p}_t} as the
+//'   ratio of the sum products of the weights and the data, divided by the sums
+//'   of the weights:
+//'   \deqn{
+//'     \bar{p}_t = \frac{\bar{p}^w_t}{\bar{w}_t}
+//'   }
 //'   
 //'   The function \code{roll_sum()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
 //' 
-//'   The function \code{roll_sum()} uses the fast \code{Armadillo} function
-//'   \code{arma::cumsum()}, without explicit loops.
-//'   The function \code{roll_sum()} is several times faster than
-//'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+//'   The function \code{roll_sum()} is written in \code{C++} \code{Armadillo}
+//'   code, so it's much faster than equivalent \code{R} code.
 //'   
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
 //' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
-//' look_back <- 22
+//' look_back <- 11
 //' # Calculate rolling sums and compare with rutils::roll_sum()
 //' sumc <- HighFreq::roll_sum(retsp, look_back)
 //' sumr <- rutils::roll_sum(retsp, look_back)
@@ -2287,17 +2328,74 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
 //' sumr <- (sumr - sumlag)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
+//' # Calculate weights equal to the trading volumes
+//' weightv <- quantmod::Vo(rutils::etfenv$VTI)
+//' weightv <- weightv[zoo::index(retsp)]
+//' # Calculate rolling weighted sums
+//' sumc <- HighFreq::roll_sum(retsp, look_back, 1/weightv)
+//' # Plot dygraph of the weighted sums
+//' datav <- cbind(retsp$VTI, sumc[, 1])
+//' colnames(datav) <- c("VTI", "Weighted")
+//' endp <- rutils::calc_endpoints(datav, interval="weeks")
+//' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) %>% 
+//'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
+//'   dyLegend(width=300)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_sum(const arma::mat& tseries, arma::uword look_back = 1) {
+arma::mat roll_sum(const arma::mat& tseries, 
+                   arma::uword look_back = 1,
+                   const arma::colvec& weightv = 0) {
   
-  // Calculate the cumulative sum
-  arma::mat cumsumv = arma::cumsum(tseries, 0);
+  arma::uword startp;
+  arma::uword nrows = tseries.n_rows;
+  arma::uword nweights = weightv.n_elem;
+  arma::mat sumr(nrows, tseries.n_cols);
   
-  // Return the differences of the cumulative sum
-  return diffit(cumsumv, look_back, true);
+  if (nweights == 1) { // Calculate sums without weights
+    // Warmup period
+    sumr.row(0) = tseries.row(0);
+    for (arma::uword it = 1; it < look_back; it++) {
+      sumr.row(it) = sumr.row(it-1) + tseries.row(it);
+    }  // end for
+    // Remaining periods
+    for (arma::uword it = look_back; it < nrows; it++) {
+      startp = it - look_back;
+      sumr.row(it) = sumr.row(it-1) + tseries.row(it) - tseries.row(startp);
+    }  // end for
+    // Old, clever code - doesn't produce correct warmup values
+    // Calculate the cumulative sum
+    // arma::mat cumsumv = arma::cumsum(tseries, 0);
+    // Return the differences of the cumulative sum
+    // sumr = diffit(cumsumv, look_back, true);
+  } else if (nweights == nrows) { // Calculate sums with weights
+    // Calculate means with weights
+    double weightr = weightv(0);
+    double weightrr;
+    sumr.row(0) = weightr*tseries.row(0);
+    // Warmup period
+    for (arma::uword it = 1; it < look_back; it++) {
+      weightrr = weightr;
+      weightr = weightr + weightv(it);
+      sumr.row(it) = sumr.row(it-1) + weightv(it)*tseries.row(it);
+      // Divide by the mean weight
+      sumr.row(it-1) = sumr.row(it-1)/weightrr;
+    }  // end for
+    // Remaining periods
+    for (arma::uword it = look_back; it < nrows; it++) {
+      startp = it - look_back;
+      weightrr = weightr;
+      // Calculate the means using the decay factor
+      weightr = weightr + weightv(it) - weightv(startp);
+      sumr.row(it) = sumr.row(it-1) + weightv(it)*tseries.row(it) - weightv(startp)*tseries.row(startp);
+      // Divide by the mean weight
+      sumr.row(it-1) = sumr.row(it-1)/weightrr;
+    }  // end for
+    sumr.row(nrows-1) = sumr.row(nrows-1)/weightr;
+  }  // end if
+  
+  return sumr;
   
 }  // end roll_sum
 
@@ -2392,7 +2490,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
   
   // Allocate sums matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat sums = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat sums = arma::zeros(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
@@ -2442,10 +2540,10 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{roll_wsum()} calculates the rolling weighted sums over
+//'   The function \code{roll_sumw()} calculates the rolling weighted sums over
 //'   the columns of the data \code{tseries}.
 //' 
-//'   The function \code{roll_wsum()} calculates the rolling weighted sums as
+//'   The function \code{roll_sumw()} calculates the rolling weighted sums as
 //'   convolutions of the columns of \code{tseries} with the \emph{column
 //'   vector} of weights using the \code{Armadillo} function
 //'   \code{arma::conv2()}.  It performs a similar calculation to the standard
@@ -2453,7 +2551,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   method="convolution", sides=1)}, but it can be many times faster, and it
 //'   doesn't produce any leading \code{NA} values.
 //'   
-//'   The function \code{roll_wsum()} returns a \emph{matrix} with the same
+//'   The function \code{roll_sumw()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
 //' 
 //'   The arguments \code{weightv}, \code{endp}, and \code{stub} are
@@ -2474,11 +2572,11 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   not supplied, then the sums are calculated over a number of data points
 //'   equal to \code{look_back}.
 //'   
-//'   The function \code{roll_wsum()} is also several times faster than
+//'   The function \code{roll_sumw()} is also several times faster than
 //'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
 //'   
 //'   Technical note:
-//'   The function \code{roll_wsum()} has arguments with default values equal to
+//'   The function \code{roll_sumw()} has arguments with default values equal to
 //'   \code{NULL}, which are implemented in \code{Rcpp} code.
 //'   
 //' @examples
@@ -2487,7 +2585,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Calculate historical returns
 //' retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
-//' look_back <- 22
+//' look_back <- 11
 //' # Calculate rolling sums and compare with rutils::roll_sum()
 //' sumc <- HighFreq::roll_sum(retsp, look_back)
 //' sumr <- rutils::roll_sum(retsp, look_back)
@@ -2500,7 +2598,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' 
 //' # Calculate rolling sums at end points
 //' stubv <- 21
-//' sumc <- HighFreq::roll_wsum(retsp, look_back, stub=stubv)
+//' sumc <- HighFreq::roll_sumw(retsp, look_back, stub=stubv)
 //' endp <- (stubv + look_back*(0:(NROW(retsp) %/% look_back)))
 //' endp <- endp[endp < NROW(retsp)]
 //' sumr <- apply(zoo::coredata(retsp), 2, cumsum)
@@ -2510,33 +2608,33 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' 
 //' # Calculate rolling sums at end points - pass in endp
-//' sumc <- HighFreq::roll_wsum(retsp, endp=endp)
+//' sumc <- HighFreq::roll_sumw(retsp, endp=endp)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' 
 //' # Create exponentially decaying weights
 //' weightv <- exp(-0.2*(1:11))
 //' weightv <- matrix(weightv/sum(weightv), nc=1)
 //' # Calculate rolling weighted sum
-//' sumc <- HighFreq::roll_wsum(retsp, weightv=weightv)
+//' sumc <- HighFreq::roll_sumw(retsp, weightv=weightv)
 //' # Calculate rolling weighted sum using filter()
 //' filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
 //' all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
-//' sumc <- HighFreq::roll_wsum(retsp, endp=endp, weightv=weightv)
+//' sumc <- HighFreq::roll_sumw(retsp, endp=endp, weightv=weightv)
 //' all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
 //' weightv <- matrix(c(1, rep(0, 10)), nc=1)
 //' # Calculate rolling weighted sum
-//' weighted <- HighFreq::roll_wsum(retsp, weightv=weightv)
+//' weighted <- HighFreq::roll_sumw(retsp, weightv=weightv)
 //' # Compare with original
 //' all.equal(coredata(retsp), weighted, check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_wsum(const arma::mat& tseries,
+arma::mat roll_sumw(const arma::mat& tseries,
                     Rcpp::Nullable<Rcpp::IntegerVector> endp = R_NilValue, 
                     arma::uword look_back = 1,
                     Rcpp::Nullable<int> stub = R_NilValue, 
@@ -2595,13 +2693,13 @@ arma::mat roll_wsum(const arma::mat& tseries,
   
   return cumsumv;
   
-}  // end roll_wsum
+}  // end roll_sumw
 
 
 
 
 ////////////////////////////////////////////////////////////
-// Functions for rolling aggregations of streaming data
+// Functions for online aggregations of streaming data
 ////////////////////////////////////////////////////////////
 
 
@@ -2610,8 +2708,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
 //' @param \code{weightv} A single-column \emph{matrix} of weights.
 //'
@@ -2631,17 +2728,18 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //'   
 //'   Some applications require applying additional weight factors, like for
 //'   example the volume-weighted average price indicator (VWAP).  Then the
-//'   streaming prices are multiplied by the streaming trading volumes.
+//'   streaming prices can be multiplied by the streaming trading volumes.
 //'   
-//'   If the \code{weightv} argument is not zero, then the function
-//'   \code{run_mean()} calculates the trailing weighted means in two steps.
+//'   If the argument \code{weightv} has the same number of rows as the argument
+//'   \code{tseries}, then the function \code{run_mean()} calculates the
+//'   trailing weighted means in two steps.
 //'   
 //'   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
 //'   \deqn{
 //'     \bar{w}_t = \lambda \bar{w}_{t-1} + (1-\lambda) w_t
 //'   }
 //'   
-//'   Second it calculates the the trailing mean products \eqn{\bar{w p}_t} of the
+//'   Second it calculates the trailing mean products \eqn{\bar{w p}_t} of the
 //'   weights \eqn{w_t} and the data \eqn{p_t}:
 //'   \deqn{
 //'     \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1-\lambda) w_t p_t
@@ -2688,7 +2786,7 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' closep <- quantmod::Cl(ohlc)
 //' # Calculate the trailing means
 //' lambda <- 0.95
-//' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv=0)
+//' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
 //' # Calculate trailing means using R code
 //' filtered <- (1-lambda)*filter(closep, 
 //'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
@@ -2698,11 +2796,11 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv=0),
+//'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv = 0),
 //'   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //'   
-//' # Create weights equal to the trading volumes
+//' # Calculate weights equal to the trading volumes
 //' weightv <- quantmod::Vo(ohlc)
 //' # Calculate the trailing weighted means
 //' meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
@@ -2717,12 +2815,12 @@ arma::mat roll_wsum(const arma::mat& tseries,
 //' @export
 // [[Rcpp::export]]
 arma::mat run_mean(const arma::mat& tseries, 
-                   double lambda, 
-                   const arma::colvec& weightv) {
+                   double lambda, // Decay factor which multiplies the past values 
+                   const arma::colvec& weightv = 0) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword nweights = weightv.n_elem;
-  arma::mat meanm = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat meanm(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   if (nweights == 1) {
@@ -2734,17 +2832,18 @@ arma::mat run_mean(const arma::mat& tseries,
     }  // end for
   } else if (nweights == nrows) {
     // Calculate means with weights
-    arma::mat meanw = arma::zeros<mat>(nrows, 1);
-    meanm.row(0) = weightv.row(0)*tseries.row(0);
-    meanw.row(0) = weightv.row(0);
+    double meanw = weightv(0);
+    double meanww;
+    meanm.row(0) = meanw*tseries.row(0);
     for (arma::uword it = 1; it < nrows; it++) {
       // Calculate the means using the decay factor
-      meanw.row(it) = lambda*meanw.row(it-1) + lambda1*weightv.row(it);
-      meanm.row(it) = lambda*meanm.row(it-1) + lambda1*weightv.row(it)*tseries.row(it);
+      meanww = meanw;
+      meanw = lambda*meanw + lambda1*weightv(it);
+      meanm.row(it) = lambda*meanm.row(it-1) + lambda1*weightv(it)*tseries.row(it);
       // Divide by the mean weight
-      meanm.row(it-1) = meanm.row(it-1)/meanw.row(it-1);
+      meanm.row(it-1) = meanm.row(it-1)/meanww;
     }  // end for
-    meanm.row(nrows-1) = meanm.row(nrows-1)/meanw.row(nrows-1);
+    meanm.row(nrows-1) = meanm.row(nrows-1)/meanw;
   }  // end if
   
   return meanm;
@@ -2753,14 +2852,12 @@ arma::mat run_mean(const arma::mat& tseries,
 
 
 
-
 ////////////////////////////////////////////////////////////
 //' Calculate the trailing maximum values of streaming \emph{time series} data.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
@@ -2823,7 +2920,7 @@ arma::mat run_mean(const arma::mat& tseries,
 arma::mat run_max(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat maxv = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat maxv = arma::zeros(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
@@ -2847,8 +2944,7 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
@@ -2911,7 +3007,7 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 arma::mat run_min(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
-  arma::mat minv = arma::zeros<mat>(nrows, tseries.n_cols);
+  arma::mat minv = arma::zeros(nrows, tseries.n_cols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
@@ -2934,8 +3030,7 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
 //' @return A \emph{matrix} with the same dimensions as the input argument
 //'   \code{tseries}.
@@ -3008,8 +3103,8 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::mat vars = arma::zeros<mat>(nrows, ncols);
-  arma::mat meanm = arma::zeros<mat>(nrows, ncols);
+  arma::mat vars = arma::zeros(nrows, ncols);
+  arma::mat meanm = arma::zeros(nrows, ncols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
@@ -3035,8 +3130,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 //'   price data.
 //'   
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'
 //' @return A single-column \emph{matrix} of variance estimates, with the same
 //'   number of rows as the input \code{ohlc} price data.
@@ -3104,7 +3198,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
   
   // Allocate variance matrix
   arma::uword nrows = ohlc.n_rows;
-  arma::mat vars = arma::zeros<mat>(nrows, 1);
+  arma::mat vars = arma::zeros(nrows, 1);
   double lambda1 = 1-lambda;
   double coeff = 0.134;
 
@@ -3145,7 +3239,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //'   The function \code{push_cov2cor()} calculates the correlation matrix from
 //'   the covariance matrix, in place, without copying the data in memory.
 //'   
-//'   The function \code{push_cov2cor()} accepts a \emph{pointer} to the the
+//'   The function \code{push_cov2cor()} accepts a \emph{pointer} to the
 //'   covariance matrix, and it overwrites it with the correlation matrix.
 //'
 //'   The function \code{push_cov2cor()} is written in \code{RcppArmadillo}
@@ -3177,14 +3271,13 @@ void push_cov2cor(arma::mat& covmat) {
 //' Update the trailing covariance matrix of streaming asset returns,
 //' with a row of new returns.
 //' 
-//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' @param \code{retsn} A \emph{vector} of new asset returns.
 //' 
 //' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
 //' 
 //' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 //' 
-//' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
-//'   mean and covariance.
+//' @param \code{lambdacov} A decay factor which multiplies the past covariance.
 //' 
 //' @return Void (no return value - modifies the trailing covariance matrix
 //'   and the return means in place).
@@ -3195,8 +3288,8 @@ void push_cov2cor(arma::mat& covmat) {
 //'   covariance matrix in place, without copying the data in memory.
 //'   
 //'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata} and 
+//'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{retsn} and 
 //'   \code{meanv} represent single rows of data with multiple columns.
 //'   
 //'   The function \code{push_covar()} accepts \emph{pointers} to the arguments
@@ -3245,12 +3338,12 @@ void push_cov2cor(arma::mat& covmat) {
 //' meanv <- colMeans(retss)
 //' covmat <- cov(retss)
 //' # Update the covariance of returns
-//' HighFreq::push_covar(newdata=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
+//' HighFreq::push_covar(retsn=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-void push_covar(const arma::rowvec& newdata, // Row of new asset returns
+void push_covar(const arma::rowvec& retsn, // Row of new asset returns
                 arma::mat& covmat,  // Covariance matrix
                 arma::rowvec& meanv, // Trailing means of the returns
                 const double& lambdacov) { // Covariance decay factor
@@ -3258,9 +3351,9 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
   double lambda1 = 1-lambdacov;
   
   // Update the means of the returns
-  meanv = lambdacov*meanv + lambda1*newdata;
+  meanv = lambdacov*meanv + lambda1*retsn;
   // Calculate the de-meaned returns
-  arma::rowvec datav = (newdata - meanv);
+  arma::rowvec datav = (retsn - meanv);
   
   // Update the covariance of the returns
   covmat = lambdacov*covmat + lambda1*arma::trans(datav)*datav;
@@ -3269,10 +3362,11 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 
 
 
+////////////////////////////////////////////////////////////
 //' Update the trailing eigen values and eigen vectors of streaming asset return
 //' data, with a row of new returns.
 //' 
-//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' @param \code{retsn} A \emph{vector} of new asset returns.
 //' 
 //' @param \code{covmat} A trailing covariance \emph{matrix} of asset returns.
 //' 
@@ -3284,8 +3378,7 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //' 
 //' @param \code{meanv} A \emph{vector} of trailing means of asset returns.
 //' 
-//' @param \code{lambdacov} A \emph{numeric} decay factor to multiply the past
-//'   mean and variance.
+//' @param \code{lambdacov} A decay factor which multiplies the past covariance.
 //' 
 //' @return Void (no return value - modifies the trailing eigen values, eigen
 //'   vectors, the eigen portfolio returns, and the return means in place).
@@ -3297,8 +3390,8 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //'   the data in memory.
 //'   
 //'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+//'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{retsn},
 //'   \code{eigenret}, and \code{meanv} represent single rows of data with
 //'   multiple columns.
 //'   
@@ -3352,14 +3445,14 @@ void push_covar(const arma::rowvec& newdata, // Row of new asset returns
 //' covmat <- cov(retss)
 //' # Update the covariance of returns
 //' eigenret <- numeric(NCOL(retsp))
-//' HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
+//' HighFreq::push_eigen(retsn=retsp[nrows], covmat=covmat, 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
 //'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
+void push_eigen(const arma::rowvec& retsn, // Row of new asset returns
                 arma::mat& covmat,  // Covariance matrix
                 arma::vec& eigenval, // Eigen values
                 arma::mat& eigenvec, // Eigen vectors
@@ -3367,14 +3460,14 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
                 arma::rowvec& meanv, // Trailing means of the returns
                 const double& lambdacov) { // Covariance decay factor
   
-  // Scale the returns by the volatility
+  // Scale the returns by their volatility
   arma::rowvec varv = arma::trans(covmat.diag());
   varv.replace(0, 1);
-  arma::rowvec newdatas = newdata/arma::sqrt(varv);
+  arma::rowvec retsc = retsn/arma::sqrt(varv);
   // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
-  eigenret = newdatas*eigenvec;
+  eigenret = retsc*eigenvec;
   // Update the covariance matrix
-  push_covar(newdatas, covmat, meanv, lambdacov);
+  push_covar(retsc, covmat, meanv, lambdacov);
   // Calculate the eigen decomposition
   arma::eig_sym(eigenval, eigenvec, covmat);
   
@@ -3386,7 +3479,7 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //' Update the trailing eigen values and eigen vectors of streaming asset return
 //' data, with a row of new returns, using the \emph{SGA} algorithm.
 //' 
-//' @param \code{newdata} A \emph{vector} of new asset returns.
+//' @param \code{retsn} A \emph{vector} of new asset returns.
 //' 
 //' @param \code{eigenval} A \emph{vector} of eigen values.
 //' 
@@ -3398,10 +3491,10 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //' 
 //' @param \code{varv} A \emph{vector} of the trailing asset variances.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
+//' @param \code{lambda} A decay factor which multiplies the past
 //'   mean and variance.
 //' 
-//' @param \code{gamma} A \emph{numeric} gain factor to multiply the past
+//' @param \code{gamma} A \emph{numeric} gain factor which multiplies the past
 //'   eigenelements.
 //' 
 //' @return Void (no return value - modifies the trailing eigen values, eigen
@@ -3414,8 +3507,8 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //'   eigenelements in place, without copying the data in memory.
 //'   
 //'   The streaming asset returns \eqn{r_t} contain multiple columns and the
-//'   parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-//'   returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+//'   parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+//'   returns at time \eqn{t}.  The elements of the vectors \code{retsn},
 //'   \code{meanv}, and \code{varv} represent single rows of data with multiple
 //'   columns.
 //'   
@@ -3499,41 +3592,42 @@ void push_eigen(const arma::rowvec& newdata, // Row of new asset returns
 //' meanv <- colMeans(retss)
 //' varv <- sapply(retss, var)
 //' covmat <- cov(retss)
+//' ncols <- NCOL(retss)
 //' # Calculate the eigen decomposition using RcppArmadillo
-//' eigend <- HighFreq::calc_eigen(covmat)
-//' eigenval <- eigend$values
-//' eigenvec <- eigend$vectors
+//' eigenval <- numeric(ncols) # Allocate eigen values
+//' eigenvec <- matrix(numeric(ncols^2), nc=ncols) # Allocate eigen vectors
+//' HighFreq::calc_eigen(covmat, eigenval, eigenvec)
 //' # Update the eigen decomposition using SGA
 //' eigenret <- numeric(NCOL(retsp))
-//' HighFreq::push_sga(newdata=retsp[nrows], 
+//' HighFreq::push_sga(retsn=retsp[nrows], 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
 //'   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-void push_sga(const arma::rowvec& newdata, // Row of new asset returns
+void push_sga(const arma::rowvec& retsn, // Row of new asset returns
               arma::rowvec& eigenval, // Eigen values
               arma::mat& eigenvec, // Eigen vectors
               arma::rowvec& eigenret, // Row of eigen portfolio returns
               arma::rowvec& meanv, // Trailing means of the returns
               arma::rowvec& varv, // Trailing variances of the returns
-              const double& lambda, // Decay factor to multiply the past mean and variance
-              const double& gamma) { // Gain factor to multiply the past eigenelements
+              const double& lambda, // Decay factor which multiplies the past mean and variance
+              const double& gamma) { // Gain factor which multiplies the past eigenelements
   
   double lambda1 = 1-lambda;
   
   // Calculate the eigen portfolio returns - the products of the previous eigen vectors times the scaled returns
   arma::rowvec volv = arma::sqrt(varv);
-  eigenret = (newdata/volv)*eigenvec;
+  eigenret = (retsn/volv)*eigenvec;
   
   // Update the mean and variance of the returns
-  meanv = lambda*meanv + lambda1*newdata;
-  varv = lambda*varv + lambda1*arma::square(newdata-meanv);
+  meanv = lambda*meanv + lambda1*retsn;
+  varv = lambda*varv + lambda1*arma::square(retsn-meanv);
   // Calculate the standardized returns
   volv = arma::sqrt(varv);
-  arma::rowvec datav = (newdata-meanv)/volv;
-  // arma::rowvec datav = (newdata-meanv);
+  arma::rowvec datav = (retsn-meanv)/volv;
+  // arma::rowvec datav = (retsn-meanv);
   // std::cout << "datav: " << std::endl << datav << std::endl;
   // std::cout << "arma::trans(datav): " << std::endl << arma::trans(datav) << std::endl;
   
@@ -3575,7 +3669,7 @@ void push_sga(const arma::rowvec& newdata, // Row of new asset returns
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 //'   columns of returns data.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+//' @param \code{lambda} A decay factor which multiplies past
 //'   estimates.
 //'   
 //' @return A \emph{matrix} with three columns of data: the covariance and the
@@ -3702,7 +3796,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+//' @param \code{lambda} A decay factor which multiplies past
 //'   estimates.
 //'   
 //' @param \code{method} A \emph{character string} specifying the method for
@@ -3724,10 +3818,10 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
 //'   }
 //'   \deqn{
-//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t - \bar{p}_t)^T (p_t - \bar{p}_t)
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) p^T_t p_t
 //'   }
 //'   \deqn{
-//'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^T (p_t - \bar{p}_t)
+//'     cov_t = \lambda cov_{t-1} + (1-\lambda) r^T_t p_t
 //'   }
 //'   \deqn{
 //'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
@@ -3823,24 +3917,24 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 // [[Rcpp::export]]
 arma::mat run_reg(const arma::mat& respv, 
                   const arma::mat& predv,
-                  double lambda, 
+                  double lambda, // Decay factor which multiplies the past values 
                   std::string method = "none") {
   
   arma::uword nrows = predv.n_rows;
   arma::uword ncols = predv.n_cols;
   // Response means
-  arma::mat respmeans = arma::zeros<mat>(1, 1);
+  arma::mat respmeans = arma::zeros(1, 1);
   // Predictor means
-  arma::mat predmeans = arma::zeros<mat>(1, ncols);
-  arma::mat predz = arma::zeros<mat>(1, ncols);
+  arma::mat predmeans = arma::zeros(1, ncols);
+  // arma::mat predz = arma::zeros(1, ncols);
   // arma::mat vars = arma::square(predv);
-  arma::mat covarespred = arma::zeros<mat>(1, ncols);
-  arma::mat covarpred = arma::zeros<mat>(ncols, ncols);
-  arma::mat betas = arma::ones<mat>(nrows, ncols);
-  arma::mat alphas = arma::zeros<mat>(nrows, 1);
-  arma::mat resids = arma::zeros<mat>(nrows, 1);
-  arma::mat vars = arma::ones<mat>(nrows, 1);
-  arma::mat meanm = arma::zeros<mat>(nrows, 1);
+  arma::mat covarespred = arma::zeros(1, ncols);
+  arma::mat covarpred = arma::zeros(ncols, ncols);
+  arma::mat betas = arma::ones(nrows, ncols);
+  arma::mat alphas = arma::zeros(nrows, 1);
+  arma::mat resids = arma::zeros(nrows, 1);
+  arma::mat vars = arma::ones(nrows, 1);
+  arma::mat meanm = arma::zeros(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Initialize the variables
@@ -3853,9 +3947,9 @@ arma::mat run_reg(const arma::mat& respv,
     // Calculate the means using the decay factor
     respmeans = lambda*respmeans + lambda1*respv.row(it);
     predmeans = lambda*predmeans + lambda1*predv.row(it);
-    predz = predv.row(it) - predmeans;
-    covarespred = lambda*covarespred + lambda1*(respv.row(it)-respmeans)*predz;
-    covarpred = lambda*covarpred + lambda1*arma::trans(predz)*predz;
+    // predz = predv.row(it) - predmeans;
+    covarespred = lambda*covarespred + lambda1*respv.row(it)*predv.row(it);
+    covarpred = lambda*covarpred + lambda1*arma::trans(predv.row(it))*predv.row(it);
     // cout << "Calculating betas: " << it << endl;
     // Calculate the betas and alphas
     betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred*arma::inv(covarpred);
@@ -3898,7 +3992,7 @@ arma::mat run_reg(const arma::mat& respv,
 //' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+//' @param \code{lambda} A decay factor which multiplies past
 //'   estimates.
 //'   
 //' @param \code{demean} A \emph{Boolean} specifying whether the \emph{z-scores}
@@ -3998,17 +4092,17 @@ arma::mat run_reg(const arma::mat& respv,
 //' 
 arma::mat run_zscores(const arma::mat& respv, 
                       const arma::mat& predv,
-                      double lambda, 
+                      double lambda, // Decay factor which multiplies the past values 
                       bool demean = true) {
   
   arma::uword nrows = predv.n_rows;
   arma::uword ncols = predv.n_cols;
   // arma::mat var1 = arma::square(tseries.col(0));
   arma::mat varv = arma::square(predv);
-  arma::mat betas = arma::ones<mat>(nrows, ncols);
-  arma::mat zscores = arma::ones<mat>(nrows, 1);
-  arma::mat vars = arma::ones<mat>(nrows, 1);
-  arma::mat meanm = arma::zeros<mat>(nrows, 1);
+  arma::mat betas = arma::ones(nrows, ncols);
+  arma::mat zscores = arma::ones(nrows, 1);
+  arma::mat vars = arma::ones(nrows, 1);
+  arma::mat meanm = arma::zeros(nrows, 1);
   double lambda1 = 1-lambda;
   
   // Multiply each column of predictor by the response
@@ -5181,7 +5275,7 @@ arma::mat calc_hurst(const arma::mat& tseries,
   
   // If only single agg value then calculate the Hurst exponent from a single data point
   if (aggv.n_rows == 1) {
-    return 0.5*arma::log(calc_var_ag(tseries, aggv[0])/calc_var_ag(tseries, 1))/log(aggv[0]);
+    return 0.5*arma::log(calc_var_ag(tseries, aggv(0))/calc_var_ag(tseries, 1))/log(aggv(0));
   }  // end if
   
   // Allocate the objects
@@ -5189,8 +5283,8 @@ arma::mat calc_hurst(const arma::mat& tseries,
   arma::mat volv(nrows, tseries.n_cols, fill::zeros);
   
   // Calculate the log volatility at the agg points
-  for (arma::uword it=0; it < nrows; it++) {
-    volv.row(it) = 0.5*arma::log(calc_var_ag(tseries, aggv[it]));
+  for (arma::uword it = 0; it < nrows; it++) {
+    volv.row(it) = 0.5*arma::log(calc_var_ag(tseries, aggv(it)));
   }  // end for
   
   // Calculate the log of the agg points
@@ -5198,7 +5292,7 @@ arma::mat calc_hurst(const arma::mat& tseries,
   
   // Calculate the Hurst exponent from the regression slopes
   arma::mat varagg = arma::var(agglog);
-  return (arma::cov(volv, agglog).t())/varagg[0];
+  return (arma::cov(volv, agglog).t())/varagg(0);
   
 }  // end calc_hurst
 
@@ -5417,9 +5511,9 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
 //'   faster than \code{lm()}.
 //'
 //'   If \code{method = "regular"} then it performs shrinkage regression.  It
-//'   calculates the regularized inverse of the \code{predictor} matrix from its
+//'   calculates the \emph{regularized inverse} of the predictor matrix from its
 //'   singular value decomposition.  It performs regularization by selecting
-//'   only the largest singular values equal in number to \code{dimax}.
+//'   only the largest \emph{singular values} equal in number to \code{dimax}.
 //'   
 //'   If \code{method = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
@@ -5428,15 +5522,15 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
 //'   added to the predictor matrix (the default is \code{intercept = TRUE}).
 //'   
 //'   The length of the return vector depends on the number of columns of the
-//'   \code{predictor} matrix (including the intercept column, if it's added).
+//'   predictor matrix (including the intercept column, if it's added).
 //'   The length of the return vector is equal to the number of regression
 //'   coefficients, plus their t-values, plus the z-score.
 //'   The number of regression coefficients is equal to the number of columns of
-//'   the \code{predictor} matrix (including the intercept column, if it's
+//'   the predictor matrix (including the intercept column, if it's
 //'   added).
 //'   The number of t-values is equal to the number of coefficients.
 //' 
-//'   For example, if the number of columns of the \code{predictor} matrix is
+//'   For example, if the number of columns of the predictor matrix is
 //'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
 //'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
 //'   regression coefficients (including the intercept coefficient), \code{n+1}
@@ -5487,12 +5581,12 @@ arma::mat calc_reg(const arma::mat& respv,
   bool intercept = Rcpp::as<int>(controlv["intercept"]);
   // Threshold level for discarding small singular values
   double eigen_thresh = Rcpp::as<double>(controlv["eigen_thresh"]);
-  // Dimension reduction
+  // Apply dimension reduction
   arma::uword dimax = Rcpp::as<int>(controlv["dimax"]);
   // Confidence level for calculating the quantiles of returns
-  double confl = Rcpp::as<double>(controlv["confl"]);
+  // double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  double alpha = Rcpp::as<double>(controlv["alpha"]);
+  // double alpha = Rcpp::as<double>(controlv["alpha"]);
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predv.n_rows;
@@ -5504,7 +5598,7 @@ arma::mat calc_reg(const arma::mat& respv,
   arma::uword deg_free = (nrows - ncols);
   arma::vec coeff;
   arma::vec tvals;
-  arma::mat reg_data = arma::zeros<mat>(2*ncols+1, 1);
+  arma::mat reg_data = arma::zeros(2*ncols+1, 1);
   
   // Apply different calculation methods for the regression coefficients
   switch(calc_method(method)) {
@@ -5515,7 +5609,7 @@ arma::mat calc_reg(const arma::mat& respv,
   }  // end least_squares
   case methodenum::regular: {
     // Calculate shrinkage regression coefficients
-    coeff = calc_inv(predm, eigen_thresh, dimax)*respv;
+    coeff = calc_inv(predm, dimax, eigen_thresh)*respv;
     break;
   }  // end regular
   case methodenum::quantile: {
@@ -5691,7 +5785,7 @@ arma::mat roll_mean(const arma::mat& tseries,
   
   // Allocate mean matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat meanm = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat meanm = arma::zeros(numpts, tseries.n_cols);
   meanm.row(0) = tseries.row(0);
   
   // Perform loop over the end points
@@ -5759,7 +5853,7 @@ arma::mat roll_mean(const arma::mat& tseries,
 arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
   
   arma::uword length = tseries.n_elem;
-  arma::vec vars = arma::zeros<vec>(length);
+  arma::vec vars = arma::zeros(length);
   
   // Warmup period
   for (arma::uword it = 1; it < look_back; it++) {
@@ -5899,7 +5993,7 @@ arma::mat roll_var(const arma::mat& tseries,
   
   // Allocate variance matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat varm = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat varm = arma::zeros(numpts, tseries.n_cols);
   varm.row(0) = arma::square(tseries.row(0));
   
   // Perform loop over the end points
@@ -6094,7 +6188,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   
   // Allocate variance matrix
   arma::uword numpts = endpts.n_elem;
-  arma::vec varm = arma::zeros<vec>(numpts);
+  arma::vec varm = arma::zeros(numpts);
   
   // Extract OHLC close prices
   arma::colvec closep = ohlc.col(3);
@@ -6264,7 +6358,7 @@ arma::mat roll_skew(const arma::mat& tseries,
   
   // Allocate skewness matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat skewv = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat skewv = arma::zeros(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
@@ -6397,7 +6491,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   
   // Allocate kurtosis matrix
   arma::uword numpts = endpts.n_elem;
-  arma::mat kurtosisv = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat kurtosisv = arma::zeros(numpts, tseries.n_cols);
   
   // Perform loop over the end points
   for (arma::uword ep = 0; ep < numpts; ep++) {
@@ -6474,15 +6568,15 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   description of the model parameters.
 //'   
 //'   The number of columns of the return matrix depends on the number of
-//'   columns of the \code{predictor} matrix (including the intercept column, if
+//'   columns of the predictor matrix (including the intercept column, if
 //'   it's added).
 //'   The number of columns of the return matrix is equal to the number of
 //'   regression coefficients, plus their t-values, plus the z-score column.
 //'   The number of regression coefficients is equal to the number of columns of
-//'   the \code{predictor} matrix (including the intercept column, if it's
+//'   the predictor matrix (including the intercept column, if it's
 //'   added).
 //'   The number of t-values is equal to the number of coefficients.
-//'   For example, if the number of columns of the \code{predictor} matrix is
+//'   For example, if the number of columns of the predictor matrix is
 //'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
 //'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
 //'   regression coefficients (including the intercept coefficient), \code{n+1}
@@ -6691,7 +6785,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply past
+//' @param \code{lambda} A decay factor which multiplies past
 //'   estimates.
 //' 
 //' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
@@ -6798,7 +6892,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' @export
 // [[Rcpp::export]]
 void run_scale(arma::mat& tseries, 
-               double lambda,
+               double lambda, // Decay factor which multiplies the past values
                bool center = true, 
                bool scale = true) {
   
@@ -7167,7 +7261,7 @@ arma::mat roll_moment(const arma::mat& tseries,
   
   // Allocate matrix of statistics
   arma::uword numpts = endpts.n_elem;
-  arma::mat stats = arma::zeros<mat>(numpts, tseries.n_cols);
+  arma::mat stats = arma::zeros(numpts, tseries.n_cols);
   
   // Calculate a function pointer from the function name (string)
   momptr momfun = calc_momptr(funame);
@@ -7294,21 +7388,21 @@ arma::mat sim_garch(double omega,
   if (is_random) {
     // The innovations are random numbers
     arma::mat varm(nrows, 1);
-    varm[0] = omega/(1-alpha-beta);
+    varm(0) = omega/(1-alpha-beta);
     arma::mat returns(nrows, 1);
-    returns[0] = std::sqrt(varm[0])*innov[0];
+    returns(0) = std::sqrt(varm(0))*innov(0);
     
     for (arma::uword it = 1; it < nrows; it++) {
-      returns[it] = std::sqrt(varm[it-1])*innov[it];
-      varm[it] = omega + alpha*pow(returns[it], 2) + beta*varm[it-1];
+      returns(it) = std::sqrt(varm(it-1))*innov(it);
+      varm(it) = omega + alpha*pow(returns(it), 2) + beta*varm(it-1);
     }  // end for
     return arma::join_rows(returns, varm);
   } else {
     // The innovations are historical returns
     arma::mat varm = arma::square(innov);
-    varm[0] = omega/(1-alpha-beta);
+    varm(0) = omega/(1-alpha-beta);
     for (arma::uword it = 1; it < nrows; it++) {
-      varm[it] = omega + alpha*varm[it] + beta*varm[it-1];
+      varm(it) = omega + alpha*varm(it) + beta*varm(it-1);
     }  // end for
     return arma::join_rows(innov, varm);
   }  // end if
@@ -7380,8 +7474,8 @@ arma::mat sim_ou(double init_price,
                  arma::mat& innov) {
   
   arma::uword nrows = innov.n_rows;
-  arma::mat prices = arma::zeros<mat>(nrows, 1);
-  arma::mat returns = arma::zeros<mat>(nrows, 1);
+  arma::mat prices = arma::zeros(nrows, 1);
+  arma::mat returns = arma::zeros(nrows, 1);
   
   returns.row(0) = innov.row(0);
   prices.row(0) = init_price;
@@ -7449,8 +7543,8 @@ arma::mat sim_schwartz(double init_price,
                        arma::mat& innov) {
   
   arma::uword nrows = innov.n_rows;
-  arma::mat prices = arma::zeros<mat>(nrows, 1);
-  arma::mat returns = arma::zeros<mat>(nrows, 1);
+  arma::mat prices = arma::zeros(nrows, 1);
+  arma::mat returns = arma::zeros(nrows, 1);
   
   returns.row(0) = innov.row(0);
   prices.row(0) = init_price;
@@ -7528,7 +7622,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
   arma::uword nrows = innov.n_rows;
   arma::uword ncoeff = coeff.n_rows;
   arma::mat coeffr = arma::reverse(coeff);
-  arma::mat returns = arma::zeros<mat>(nrows, 1);
+  arma::mat returns = arma::zeros(nrows, 1);
 
   // Warmup period
   returns.row(0) = innov.row(0);
@@ -7619,8 +7713,8 @@ arma::mat sim_df(double init_price,
   arma::uword nrows = innov.n_rows;
   arma::uword ncoeff = coeff.n_rows;
   arma::mat coeffr = arma::reverse(coeff);
-  arma::mat prices = arma::zeros<mat>(nrows, 1);
-  arma::mat returns = arma::zeros<mat>(nrows, 1);
+  arma::mat prices = arma::zeros(nrows, 1);
+  arma::mat returns = arma::zeros(nrows, 1);
 
   // Warmup period
   returns.row(0) = innov.row(0);
@@ -7729,6 +7823,216 @@ double lik_garch(double omega,
 
 
 ////////////////////////////////////////////////////////////
+//' Simulate a portfolio optimization strategy using online (recursive) updating
+//' of the covariance matrix.
+//' 
+//' @param \code{rets} A \emph{time series} or \emph{matrix} of asset returns.
+//' 
+//' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
+//'   values} used for calculating the regularized inverse of the covariance
+//'   matrix (the default is \code{dimax = 0} - standard matrix inverse using
+//'   all the \emph{eigen values}).
+//'   
+//' @param \code{lambda} A decay factor which multiplies the past asset returns.
+//'   
+//' @param \code{lambdacov} A decay factor which multiplies the past covariance.
+//'   
+//' @param \code{lambdaw} A decay factor which multiplies the past portfolio
+//'   weights.
+//'   
+//' @return A \emph{matrix} of strategy returns and the portfolio weights, with
+//'   the same number of rows as the argument \code{rets}.
+//'   
+//' @details
+//'   The function \code{run_portf()} simulates a portfolio optimization
+//'   strategy. The strategy calculates the maximum Sharpe portfolio weights
+//'   \emph{in-sample} at every point in time, and applies them in the
+//'   \emph{out-of-sample} time interval.  It updates the trailing covariance
+//'   matrix recursively, instead of using past batches of data. The function
+//'   \code{run_portf()} uses three different decay factors for averaging past
+//'   values, to reduce the variance of its forecasts.
+//'   
+//'   The function \code{run_portf()} first scales the returns by their trailing
+//'   volatilities:
+//'   \deqn{
+//'     r^s_t = \frac{r_t}{\sigma_{t-1}}
+//'   }
+//'   Returns scaled by their volatility are more stationary so they're easier
+//'   to model.
+//'   
+//'   Then at every point in time, the function \code{run_portf()} calls the
+//'   function \code{HighFreq::push_covar()} to update the trailing covariance
+//'   matrix of the returns:
+//'   \deqn{
+//'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
+//'   }
+//'   \deqn{
+//'     \hat{r}_t = r^s_t - \bar{r}_t
+//'   }
+//'   \deqn{
+//'     cov_t = \lambda_c cov_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
+//'   }
+//'   Where \eqn{\lambda_c} is the decay factor which multiplies the past mean
+//'   and covariance.
+//'   
+//'   It then calls the function \code{HighFreq::calc_inv()} to calculate the
+//'   \emph{regularized inverse} of the covariance matrix using its eigen
+//'   decomposition:
+//'   \deqn{
+//'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
+//'   }
+//'   See the function \code{HighFreq::calc_inv()} for details.
+//'   
+//'   It then calculates the \emph{in-sample} weights of the maximum Sharpe
+//'   portfolio, by multiplying the inverse covariance matrix times the trailing
+//'   means of the asset returns:
+//'   \deqn{
+//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r^s_t
+//'   }
+//'   \deqn{
+//'     \strong{w}_t = \strong{C}^{-1} \bar{r}_t
+//'   }
+//'   Note that the decay factor \eqn{\lambda} is different from the decay
+//'   factor \eqn{\lambda_c} used for updating the trailing covariance
+//'   matrix.
+//'   
+//'   It then scales the weights so their sum of squares is equal to one:
+//'   \deqn{
+//'     \strong{w}_t = \frac{\strong{w}_t}{\sqrt{\sum{\strong{w}^2_t}}}
+//'   }
+//'   
+//'   It then calculates the trailing mean of the weights:
+//'   \deqn{
+//'     \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1-\lambda_w) \strong{w}_t
+//'   }
+//'   Note that the decay factor \eqn{\lambda_w} is different from the decay
+//'   factor \eqn{\lambda} used for updating the trailing means.
+//'   
+//'   It finally calculates the \emph{out-of-sample} portfolio returns by
+//'   multiplying the trailing mean weights times the scaled asset returns:
+//'   \deqn{
+//'     r^p_t = \bar{\strong{w}}_{t-1} r^s_t
+//'   }
+//'   Applying weights to scaled returns means trading stock amounts with unit
+//'   dollar volatility.  So if the weight is equal to \code{2} then we should
+//'   purchase an amount of stock with dollar volatility equal to \code{2}
+//'   dollars.  Trading stock amounts with unit dollar volatility improves
+//'   portfolio diversification.
+//'   
+//'   The function \code{run_portf()} uses three different decay factors for
+//'   averaging past values, to reduce the variance of its forecasts. The value
+//'   of the decay factor \eqn{\lambda} must be in the range between \code{0}
+//'   and \code{1}.
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, so the trailing values have a greater
+//'   dependence on past data.  This is equivalent to a long look-back
+//'   interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, so the trailing values have a weaker
+//'   dependence on past data.  This is equivalent to a short look-back
+//'   interval.
+//' 
+//'   The function \code{run_portf()} returns multiple columns of data, with the
+//'   same number of rows as the input argument \code{rets}. The first column
+//'   contains the strategy returns and the remaining columns contain the
+//'   portfolio weights.
+//'   
+//' @examples
+//' \dontrun{
+//' # Load ETF returns
+//' retsp <- rutils::etfenv$returns[, c("VTI", "TLT", "DBC", "USO", "XLF", "XLK")]
+//' retsp <- na.omit(retsp)
+//' datev <- zoo::index(retsp) # dates
+//' # Simulate a portfolio optimization strategy
+//' dimax <- 6
+//' lambda <- 0.978
+//' lambdacov <- 0.995
+//' lambdaw <- 0.9
+//' pnls <- HighFreq::run_portf(retsp, dimax, lambda, lambdacov, lambdaw)
+//' colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
+//' pnls <- xts::xts(pnls, order.by=datev)
+//' # Plot dygraph of strategy
+//' wealthv <- cbind(retsp$VTI, pnls$pnls*sd(retsp$VTI)/sd(pnls$pnls))
+//' colnames(wealthv) <- c("VTI", "Strategy")
+//' endd <- rutils::calc_endpoints(wealthv, interval="weeks")
+//' dygraphs::dygraph(cumsum(wealthv)[endd], main="Portfolio Optimization Strategy Returns") %>%
+//'  dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
+//'  dyLegend(width=300)
+//' # Plot dygraph of weights
+//' symbolv <- "VTI"
+//' stockweights <- cbind(cumsum(get(symbolv, retsp)), get(symbolv, pnls))
+//' colnames(stockweights)[2] <- "Weight"
+//' colnamev <- colnames(stockweights)
+//' endd <- rutils::calc_endpoints(pnls, interval="weeks")
+//' dygraphs::dygraph(stockweights[endd], main="Returns and Weight") %>%
+//'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+//'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+//'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
+//'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_portf(const arma::mat& rets, // Asset returns
+                    const arma::uword& dimax, // Number of eigen vectors for dimension reduction
+                    const double& lambda, // Returns decay factor
+                    const double& lambdacov, // Covariance decay factor
+                    const double& lambdaw) { // Weight decay factor
+  
+  arma::uword nrows = rets.n_rows;
+  arma::uword ncols = rets.n_cols;
+  arma::rowvec retsc; // Row of scaled asset returns
+  arma::rowvec retm(ncols, fill::zeros); // Trailing average of asset returns
+  arma::rowvec varv; // Variance of asset returns
+  arma::mat invmat(ncols, ncols, fill::ones); // Inverse covariance matrix
+  arma::mat weightv(nrows, ncols, fill::zeros); // Portfolio weights
+  arma::colvec stratret(nrows, fill::zeros); // Strategy returns
+  double weightd; // Sum of squared weights
+  double lambda1 = 1-lambda;
+  double lambdaw1 = 1-lambdaw;
+  
+  // Initialize the covariance matrix with first row of data
+  arma::rowvec meanv = rets.row(0);
+  arma::mat covmat = arma::trans(meanv)*meanv;
+
+  // Perform loop over the rows (time)
+  for (arma::uword it = 1; it < nrows; it++) {
+    // Scale the returns by the trailing volatility
+    // retsc = rets.row(it);
+    varv = arma::trans(covmat.diag());
+    varv.replace(0, 1);
+    retsc = rets.row(it)/arma::sqrt(varv);
+    // Calculate the strategy returns - the products of the lagged weights times the asset returns
+    stratret(it) = arma::dot(retsc, weightv.row(it-1));
+    // Update the covariance matrix with new row of asset returns
+    // if (scalit) {
+    push_covar(retsc, covmat, meanv, lambdacov);
+    // } else {
+    //   push_covar(rets.row(it), covmat, meanv, lambdacov);
+    // }  // end if
+    // Calculate the trailing mean of asset returns
+    retm = lambda*retm + lambda1*rets.row(it);
+    // Calculate weights using regularized inverse
+    invmat = calc_inv(covmat, dimax);
+    // Calculate weights using recursive inverse
+    // calc_invrec(covmat, invmat);
+    // weightv.row(it) = retm*invmat;
+    weightv.row(it) = lambdaw*weightv.row(it-1) + lambdaw1*retm*invmat;
+    // Scale the weights so their sum of squares is equal to one
+    weightd = std::sqrt(arma::sum(arma::square(weightv.row(it))));
+    if (weightd == 0) weightd = 1;
+    weightv.row(it) = weightv.row(it)/weightd;
+  }  // end for
+  
+  // Return the strategy returns and the portfolio weights
+  return arma::join_rows(stratret, weightv);
+  
+}  // end run_portf
+
+
+
+
+////////////////////////////////////////////////////////////
 //' Calculate the optimal portfolio weights using a variety of different
 //' objective functions.
 //' 
@@ -7754,10 +8058,10 @@ double lik_garch(double omega,
 //'
 //'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
 //'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-//'   regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
-//'   times the mean column returns \eqn{\mu}:
+//'   \emph{regularized inverse} of the \emph{covariance matrix}
+//'   \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
 //'   \deqn{
-//'     \strong{w} = \strong{C}^{-1} \mu
+//'     \strong{w} = \strong{C}^{-1} \bar{r}
 //'   }
 //'   
 //'   If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
@@ -7765,7 +8069,8 @@ double lik_garch(double omega,
 //'   
 //'   If \code{method = "minvarlin"} then it calculates the weights of the
 //'   minimum variance portfolio under linear constraint, by multiplying the
-//'   regularized inverse of the \emph{covariance matrix} times the unit vector:
+//'   \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+//'   vector:
 //'   \deqn{
 //'     \strong{w} = \strong{C}^{-1} \strong{1}
 //'   }
@@ -7778,32 +8083,32 @@ double lik_garch(double omega,
 //'   to the Sharpe ratios (the \code{returns} divided by their standard
 //'   deviations):
 //'   \deqn{
-//'     \strong{w} = \frac{\mu}{\sigma}
+//'     \strong{w} = \frac{\bar{r}}{\sigma}
 //'   }
 //'
 //'   If \code{method = "kellym"} then it calculates the momentum weights equal
 //'   to the Kelly ratios (the \code{returns} divided by their variance):
 //'   \deqn{
-//'     \strong{w} = \frac{\mu}{\sigma^2}
+//'     \strong{w} = \frac{\bar{r}}{\sigma^2}
 //'   }
 //'
 //'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-//'   the regularized inverse of the \emph{covariance matrix} of \code{returns}.
-//'   It performs regularization by selecting only the largest eigenvalues equal
-//'   in number to \code{dimax}.
+//'   the \emph{regularized inverse} of the \emph{covariance matrix} of
+//'   \code{returns}. It performs regularization by selecting only the largest
+//'   eigenvalues equal in number to \code{dimax}.
 //'   
 //'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 //'   \code{returns}, by shrinking their means to their common mean value:
 //'   \deqn{
-//'     r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+//'     r^{\prime}_i = (1 - \alpha) \, \bar{r}_i + \alpha \, \mu
 //'   }
-//'   Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
-//'   mean of all the columns.
+//'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
+//'   average of all the column means.
 //'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
 //'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
-//'   column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+//'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
 //'   complete shrinkage (with the column means all equal to the single mean of
-//'   all the columns: \eqn{r_i = \bar{r}}).
+//'   all the columns: \eqn{\bar{r}_i = \mu}).
 //'
 //'   After the weights are calculated, they are scaled, depending on several
 //'   arguments.
@@ -7899,7 +8204,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
     // Calculate weights using regularized inverse
-    weightv = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
+    weightv = calc_inv(covmat, dimax, eigen_thresh)*colmeans;
     break;
   }  // end maxsharpe
   case methodenum::maxsharpemed: {
@@ -7908,13 +8213,13 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Shrink colmeans to the median of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
     // Calculate weights using regularized inverse
-    weightv = calc_inv(covmat, eigen_thresh, dimax)*colmeans;
+    weightv = calc_inv(covmat, dimax, eigen_thresh)*colmeans;
     break;
   }  // end maxsharpemed
   case methodenum::minvarlin: {
     // Minimum variance weights under linear constraint
     // Multiply regularized inverse times unit vector
-    weightv = calc_inv(covmat, eigen_thresh, dimax)*arma::ones(ncols);
+    weightv = calc_inv(covmat, dimax, eigen_thresh)*arma::ones(ncols);
     break;
   }  // end minvarlin
   case methodenum::minvarquad: {
@@ -8032,8 +8337,8 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' 
 //' @param \code{endp} An \emph{integer vector} of end points.
 //' 
-//' @param \code{lambda} A \emph{numeric} decay factor to multiply the past
-//'   portfolio weights.  (The default is \code{lambda = 0} - no memory.)
+//' @param \code{lambda} A decay factor which multiplies the past portfolio
+//'   weights.  (The default is \code{lambda = 0} - no memory.)
 //'   
 //' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 //'   default is \code{1})
@@ -8135,8 +8440,8 @@ arma::mat back_test(const arma::mat& excess, // Asset excess returns
   double lambda1 = 1-lambda;
   arma::uword nweights = returns.n_cols;
   arma::vec weightv(nweights, fill::zeros);
-  arma::vec weights_past = ones(nweights)/std::sqrt(nweights);
-  arma::mat pnls = zeros(returns.n_rows, 1);
+  arma::vec weights_past = arma::ones(nweights)/std::sqrt(nweights);
+  arma::mat pnls = arma::zeros(returns.n_rows, 1);
 
   // Perform loop over the end points
   for (arma::uword it = 1; it < endp.size(); it++) {

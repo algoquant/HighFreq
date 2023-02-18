@@ -11,7 +11,7 @@ run_scale(tseries, lambda, center = TRUE, scale = TRUE)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply past
+\item{\code{lambda}}{A decay factor which multiplies past
 estimates.}
 
 \item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center

@@ -51,15 +51,17 @@ matrixv <- t(matrixv) \%*\% matrixv
 # Calculate the partial eigen decomposition
 neigen <- 5
 eigenp <- HighFreq::calc_eigenp(matrixv, neigen)
-# Calculate the full eigen decomposition
-eigend <- HighFreq::calc_eigen(matrixv)
+# Calculate the eigen decomposition using RcppArmadillo
+eigenval <- numeric(10) # Allocate eigen values
+eigenvec <- matrix(numeric(100), nc=10) # Allocate eigen vectors
+HighFreq::calc_eigen(matrixv, eigenval, eigenvec)
 # Compare the eigen decompositions
-all.equal(eigenp$values[1:neigen], eigend$values[1:neigen])
-all.equal(abs(eigenp$vectors), abs(eigend$vectors[, 1:neigen]))
+all.equal(eigenp$values[1:neigen], eigenval[1:neigen])
+all.equal(abs(eigenp$vectors), abs(eigenvec[, 1:neigen]))
 # Compare the speed of partial versus full decomposition
 summary(microbenchmark(
   partial=HighFreq::calc_eigenp(matrixv, neigen),
-  full=HighFreq::calc_eigen(matrixv),
+  full=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

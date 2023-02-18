@@ -34,10 +34,10 @@ The function \code{calc_weights()} calculates the optimal portfolio
 
   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-  regularized inverse of the \emph{covariance matrix} \eqn{\strong{C}^{-1}}
-  times the mean column returns \eqn{\mu}:
+  \emph{regularized inverse} of the \emph{covariance matrix}
+  \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
   \deqn{
-    \strong{w} = \strong{C}^{-1} \mu
+    \strong{w} = \strong{C}^{-1} \bar{r}
   }
   
   If \code{method = "maxsharpemed"} then \code{calc_weights()} uses the
@@ -45,7 +45,8 @@ The function \code{calc_weights()} calculates the optimal portfolio
   
   If \code{method = "minvarlin"} then it calculates the weights of the
   minimum variance portfolio under linear constraint, by multiplying the
-  regularized inverse of the \emph{covariance matrix} times the unit vector:
+  \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+  vector:
   \deqn{
     \strong{w} = \strong{C}^{-1} \strong{1}
   }
@@ -58,32 +59,32 @@ The function \code{calc_weights()} calculates the optimal portfolio
   to the Sharpe ratios (the \code{returns} divided by their standard
   deviations):
   \deqn{
-    \strong{w} = \frac{\mu}{\sigma}
+    \strong{w} = \frac{\bar{r}}{\sigma}
   }
 
   If \code{method = "kellym"} then it calculates the momentum weights equal
   to the Kelly ratios (the \code{returns} divided by their variance):
   \deqn{
-    \strong{w} = \frac{\mu}{\sigma^2}
+    \strong{w} = \frac{\bar{r}}{\sigma^2}
   }
 
   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-  the regularized inverse of the \emph{covariance matrix} of \code{returns}.
-  It performs regularization by selecting only the largest eigenvalues equal
-  in number to \code{dimax}.
+  the \emph{regularized inverse} of the \emph{covariance matrix} of
+  \code{returns}. It performs regularization by selecting only the largest
+  eigenvalues equal in number to \code{dimax}.
   
   In addition, \code{calc_weights()} applies shrinkage to the columns of
   \code{returns}, by shrinking their means to their common mean value:
   \deqn{
-    r^{\prime}_i = (1 - \alpha) \, r_i + \alpha \, \bar{r}
+    r^{\prime}_i = (1 - \alpha) \, \bar{r}_i + \alpha \, \mu
   }
-  Where \eqn{r_i} is the mean of column \eqn{i} and \eqn{\bar{r}} is the
-  mean of all the columns.
+  Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
+  average of all the column means.
   The shrinkage intensity \code{alpha} determines the amount of shrinkage
   that is applied, with \code{alpha = 0} representing no shrinkage (with the
-  column means \eqn{r_i} unchanged), and \code{alpha = 1} representing
+  column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
   complete shrinkage (with the column means all equal to the single mean of
-  all the columns: \eqn{r_i = \bar{r}}).
+  all the columns: \eqn{\bar{r}_i = \mu}).
 
   After the weights are calculated, they are scaled, depending on several
   arguments.

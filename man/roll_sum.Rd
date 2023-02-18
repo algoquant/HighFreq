@@ -5,7 +5,7 @@
 \title{Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 using \emph{Rcpp}.}
 \usage{
-roll_sum(tseries, look_back = 1L)
+roll_sum(tseries, look_back = 1L, weightv = 0L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -13,6 +13,9 @@ roll_sum(tseries, look_back = 1L)
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
 is \code{look_back = 1}).}
+
+\item{\code{weightv}}{A single-column \emph{matrix} of weights (the default
+is \code{weightv = 0}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
@@ -23,23 +26,49 @@ Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 using \emph{Rcpp}.
 }
 \details{
-The function \code{roll_sum()} calculates the rolling sums over the
-  columns of the data \code{tseries}.
+The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
+  over the columns of the data \code{tseries}.
+  
+  If the argument \code{weightv} is equal to zero (the default), then the
+  function \code{roll_sum()} calculates the simple rolling sums of the 
+  \emph{time series} data \eqn{p_t} over the look-back interval \eqn{\Delta}:
+  \deqn{
+    \bar{p}_t = \sum_{j=(t-\Delta+1)}^{t} p_j
+  }
+  
+  If the \code{weightv} argument has the same number of rows as the argument
+  \code{tseries}, then the function \code{roll_sum()} calculates rolling 
+  \emph{weighted} sums of the \emph{time series} data \eqn{p_t} in two steps.
+  
+  It first calculates the rolling sums of the products of the weights
+  \eqn{w_t} times the \emph{time series} data \eqn{p_t} over the look-back
+  interval \eqn{\Delta}:
+  \deqn{
+    \bar{w}_t = \sum_{j=(t-\Delta+1)}^{t} w_j
+  }
+  \deqn{
+    \bar{p}^w_t = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
+  }
+  
+  It then calculates the rolling \emph{weighted} sums \eqn{\bar{p}_t} as the
+  ratio of the sum products of the weights and the data, divided by the sums
+  of the weights:
+  \deqn{
+    \bar{p}_t = \frac{\bar{p}^w_t}{\bar{w}_t}
+  }
   
   The function \code{roll_sum()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
 
-  The function \code{roll_sum()} uses the fast \code{Armadillo} function
-  \code{arma::cumsum()}, without explicit loops.
-  The function \code{roll_sum()} is several times faster than
-  \code{rutils::roll_sum()} which uses vectorized \code{R} code.
+  The function \code{roll_sum()} is written in \code{C++} \code{Armadillo}
+  code, so it's much faster than equivalent \code{R} code.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
 retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
-look_back <- 22
+look_back <- 11
 # Calculate rolling sums and compare with rutils::roll_sum()
 sumc <- HighFreq::roll_sum(retsp, look_back)
 sumr <- rutils::roll_sum(retsp, look_back)
@@ -49,6 +78,18 @@ sumr <- apply(zoo::coredata(retsp), 2, cumsum)
 sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
+# Calculate weights equal to the trading volumes
+weightv <- quantmod::Vo(rutils::etfenv$VTI)
+weightv <- weightv[zoo::index(retsp)]
+# Calculate rolling weighted sums
+sumc <- HighFreq::roll_sum(retsp, look_back, 1/weightv)
+# Plot dygraph of the weighted sums
+datav <- cbind(retsp$VTI, sumc[, 1])
+colnames(datav) <- c("VTI", "Weighted")
+endp <- rutils::calc_endpoints(datav, interval="weeks")
+dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) \%>\% 
+  dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\% 
+  dyLegend(width=300)
 }
 
 }

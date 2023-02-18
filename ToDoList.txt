@@ -89,15 +89,37 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Create the function run_pca() to perform loop over push_eigen(), push_sga(), and push_cci() - clone run_covar()
-
-+ [ ] Create the function run_portf() to simulate a running portfolio optimization strategy - clone run_reg()
++ [ ] Create the function run_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
 Validate the principal components produced by push_eigen().
 The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So run_portf() needs logic that ensures that the weights change gradually.
 
-+ [ ] Modify calc_eigen() - pass the eigenvalues and eigenvectors by reference instead of returning list
++ [ ] Modify run_portf() - Perform matrix inverse only if covariance matrix changes significantly
+
++ [ ] Modify calc_eigen() - pass the eigenvalues and eigenvectors by reference instead of returning list - adapt push_eigen()
+Void (no return value - modifies the data in place).
+
++ [ ] Create the online functions run_sharpe() and run_kelly() - adapt run_mean()
+Apply volume weighting.
+Add minvol parameter - the floor of the volatility equal to 1, to prevent the ratios from blowing up when the volatility is very small or zero.
+  varv.replace(0, 1);
+
++ [ ] Create the online function run_skew()
+
++ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
+calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
+One robust method should be the Wilcoxon W statistic.
+Another robust method should be the Kruskal-Wallis H statistic as follows:
+Combine the given asset returns with the index returns into a single vector.
+Rank the vector of combined returns.
+Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
+The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
+
++ [ ] Create the function run_pca() to perform loop over push_eigen(), push_sga(), and push_cci() - clone run_covar()
 
 + [ ] In function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
+
++ [ ] Modify run_var() - add weights - adapt run_mean() ?
+Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
 
 + [ ] Modify push_sga() 
 Rename existing push_sga() to push_sgao(). 
@@ -111,31 +133,13 @@ Cardot Online Principal Component Analysis.pdf
 Weng Incremental IPCA.pdf
 Cardot Online Principal Component Analysis.pdf
 
-+ [ ] Create online functions run_sharpe() and run_kelly()
-Apply volume weighting.
-Add minvol parameter equal to the floor of the volatility, to prevent the ratios from blowing up when the volatility is very small or zero.
-
 + [ ] Create the function sgapca_exCn() - but don't export it
-
-+ [ ] Create function calc_alpha() to calculate the performance of an asset relative to an index. 
-calc_alpha() should implement several different methods, with the default being Jensen's alpha. 
-One robust method should be the Wilcoxon W statistic.
-Another robust method should be the Kruskal-Wallis H statistic as follows:
-Combine the given asset returns with the index returns into a single vector.
-Rank the vector of combined returns.
-Calculate the H statistic as the difference between the sum of the ranks of the asset returns minus the sum of the ranks of the S&P500 returns.
-The H statistic is reminiscent of the difference between the mean asset returns minus the mean S&P500 returns.
 
 + [ ] Create the function roll_eigen() - clone roll_reg()
 
-+ [ ] Rewrite the function run_reg() to perform loop over push_reg()
++ [ ] Rewrite the function run_reg() to perform loop over push_reg()?
 
 + [ ] Create the function push_reg()
-
-+ [ ] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns
-Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
-Adapt from run_covar()
-
 
 + [ ] Calculate update the largest principal components approximately using recursive Lanczos iteration and LOBPCG
 https://en.wikipedia.org/wiki/Power_iteration
@@ -152,12 +156,6 @@ https://stackoverflow.com/questions/19384376/using-multiple-source-files-with-rc
 https://stackoverflow.com/questions/13995266/using-3rd-party-header-files-with-rcpp
 https://stackoverflow.com/questions/14268245/using-header-h-files-with-cpp-files-in-an-r-package-with-rcpp
 https://stackoverflow.com/questions/50413660/linking-to-another-package-undefined-symbol
-
-+ [ ] Modify HighFreq::roll_sum() - add weights
-
-+ [ ] Modify HighFreq::run_var() - add weights - calculate the trailing weighted variance if the weight vector is passed as an argument - similar to HighFreq::run_mean()
-
-+ [ ] Create the function run_skew()
 
 + [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
 
@@ -555,6 +553,24 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] Create the function run_portf() to simulate a running portfolio optimization strategy
+Output the weights.  Average the weights.
+
++ [x] Modify calc_inv() - perform eigen decomposition instead of SVD
+Rename calc_inv() to calc_invsvd()
+
++ [x] Fix run_mean() - it doesn't handle multiple columns
+
++ [x] Deprecate roll_vec() and roll_vecw() - roll_sum() does the same
+
++ [x] Rename roll_wsum() to roll_sumw()
+
++ [x] Modify roll_sum() - add weights - adapt roll_vecw()
+
++ [x] Create function run_alpha() for calculating alpha, beta, and the idiosyncratic stock returns - run_reg() already does that
+Set the response argument to be the stock returns and the market factors argument be the returns of ETFs.
+Adapt from run_covar()
+
 + [x] Create the function push_sga() - finish examples documentation
 
 + [x] Create the function push_eigen() - clone push_covar() and push_sga()
@@ -575,6 +591,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 That may not always be correct, for example in the case of rolling calculations - actually it's OK.
 
 + [x] Modify weighted functions: pass weights as arma::colvec instead of arma::mat
+
++ [x] Fix run_reg() - don't subtract the means from the response and predictor when calculating the covariance
 
 + [x] Fix run_reg() - the betas are equal to the Kelly ratios only for a single predictor or when the predictors are orthogonal
 If the predictors are not orthogonal then the covariance matrix of the predictors must be inverted.
@@ -753,11 +771,11 @@ This is equivalent to extending the holding period beyond the rebalancing period
 
 + [x] Modify function sim_garch() so that it interprets the innovations as either standard random numbers or as historical returns
 
-+ [x] Change calls from HighFreq::roll_var(method="quantile") to HighFreq::roll_var(method="nonparametric")
++ [x] Change calls from roll_var(method="quantile") to roll_var(method="nonparametric")
 
-+ [x] Explain why TTR::runMAD() is much faster than HighFreq::roll_var(method="quantile")
-Answer: Because HighFreq::roll_var(method="quantile") is not MAD - use method="nonparametric" instead.
-HighFreq::roll_var(method="nonparametric") is slightly faster than TTR::runMAD().
++ [x] Explain why TTR::runMAD() is much faster than roll_var(method="quantile")
+Answer: Because roll_var(method="quantile") is not MAD - use method="nonparametric" instead.
+roll_var(method="nonparametric") is slightly faster than TTR::runMAD().
 
 + [x] Create function lik_garch() to calculate the GARCH log-likelihood
 

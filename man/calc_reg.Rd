@@ -42,9 +42,9 @@ The function \code{calc_reg()} performs multivariate regression using
   faster than \code{lm()}.
 
   If \code{method = "regular"} then it performs shrinkage regression.  It
-  calculates the regularized inverse of the \code{predictor} matrix from its
+  calculates the \emph{regularized inverse} of the predictor matrix from its
   singular value decomposition.  It performs regularization by selecting
-  only the largest singular values equal in number to \code{dimax}.
+  only the largest \emph{singular values} equal in number to \code{dimax}.
   
   If \code{method = "quantile"} then it performs quantile regression (not
   implemented yet).
@@ -53,15 +53,15 @@ The function \code{calc_reg()} performs multivariate regression using
   added to the predictor matrix (the default is \code{intercept = TRUE}).
   
   The length of the return vector depends on the number of columns of the
-  \code{predictor} matrix (including the intercept column, if it's added).
+  predictor matrix (including the intercept column, if it's added).
   The length of the return vector is equal to the number of regression
   coefficients, plus their t-values, plus the z-score.
   The number of regression coefficients is equal to the number of columns of
-  the \code{predictor} matrix (including the intercept column, if it's
+  the predictor matrix (including the intercept column, if it's
   added).
   The number of t-values is equal to the number of coefficients.
 
-  For example, if the number of columns of the \code{predictor} matrix is
+  For example, if the number of columns of the predictor matrix is
   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
   regression coefficients (including the intercept coefficient), \code{n+1}

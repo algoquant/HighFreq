@@ -5,10 +5,10 @@
 \title{Update the trailing eigen values and eigen vectors of streaming asset return
 data, with a row of new returns, using the \emph{SGA} algorithm.}
 \usage{
-push_sga(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
+push_sga(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
 }
 \arguments{
-\item{\code{newdata}}{A \emph{vector} of new asset returns.}
+\item{\code{retsn}}{A \emph{vector} of new asset returns.}
 
 \item{\code{eigenval}}{A \emph{vector} of eigen values.}
 
@@ -20,10 +20,10 @@ push_sga(newdata, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
 
 \item{\code{varv}}{A \emph{vector} of the trailing asset variances.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply the past
+\item{\code{lambda}}{A decay factor which multiplies the past
 mean and variance.}
 
-\item{\code{gamma}}{A \emph{numeric} gain factor to multiply the past
+\item{\code{gamma}}{A \emph{numeric} gain factor which multiplies the past
 eigenelements.}
 }
 \value{
@@ -41,8 +41,8 @@ The function \code{push_sga()} updates the trailing eigen values, eigen
   eigenelements in place, without copying the data in memory.
   
   The streaming asset returns \eqn{r_t} contain multiple columns and the
-  parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-  returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+  parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+  returns at time \eqn{t}.  The elements of the vectors \code{retsn},
   \code{meanv}, and \code{varv} represent single rows of data with multiple
   columns.
   
@@ -126,13 +126,14 @@ HighFreq::calc_scale(retss)
 meanv <- colMeans(retss)
 varv <- sapply(retss, var)
 covmat <- cov(retss)
+ncols <- NCOL(retss)
 # Calculate the eigen decomposition using RcppArmadillo
-eigend <- HighFreq::calc_eigen(covmat)
-eigenval <- eigend$values
-eigenvec <- eigend$vectors
+eigenval <- numeric(ncols) # Allocate eigen values
+eigenvec <- matrix(numeric(ncols^2), nc=ncols) # Allocate eigen vectors
+HighFreq::calc_eigen(covmat, eigenval, eigenvec)
 # Update the eigen decomposition using SGA
 eigenret <- numeric(NCOL(retsp))
-HighFreq::push_sga(newdata=retsp[nrows], 
+HighFreq::push_sga(retsn=retsp[nrows], 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 }

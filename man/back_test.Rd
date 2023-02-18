@@ -30,8 +30,8 @@ parameters (see Details).}
 
 \item{\code{endp}}{An \emph{integer vector} of end points.}
 
-\item{\code{lambda}}{A \emph{numeric} decay factor to multiply the past
-portfolio weights.  (The default is \code{lambda = 0} - no memory.)}
+\item{\code{lambda}}{A decay factor which multiplies the past portfolio
+weights.  (The default is \code{lambda = 0} - no memory.)}
 
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}

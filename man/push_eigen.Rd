@@ -5,10 +5,10 @@
 \title{Update the trailing eigen values and eigen vectors of streaming asset return
 data, with a row of new returns.}
 \usage{
-push_eigen(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov)
+push_eigen(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov)
 }
 \arguments{
-\item{\code{newdata}}{A \emph{vector} of new asset returns.}
+\item{\code{retsn}}{A \emph{vector} of new asset returns.}
 
 \item{\code{covmat}}{A trailing covariance \emph{matrix} of asset returns.}
 
@@ -20,8 +20,7 @@ push_eigen(newdata, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov)
 
 \item{\code{meanv}}{A \emph{vector} of trailing means of asset returns.}
 
-\item{\code{lambdacov}}{A \emph{numeric} decay factor to multiply the past
-mean and variance.}
+\item{\code{lambdacov}}{A decay factor which multiplies the past covariance.}
 }
 \value{
 Void (no return value - modifies the trailing eigen values, eigen
@@ -38,8 +37,8 @@ The function \code{push_eigen()} updates the trailing eigen values, eigen
   the data in memory.
   
   The streaming asset returns \eqn{r_t} contain multiple columns and the
-  parameter \code{newdata} represents a single row of \eqn{r_t} - the asset
-  returns at time \eqn{t}.  The elements of the vectors \code{newdata},
+  parameter \code{retsn} represents a single row of \eqn{r_t} - the asset
+  returns at time \eqn{t}.  The elements of the vectors \code{retsn},
   \code{eigenret}, and \code{meanv} represent single rows of data with
   multiple columns.
   
@@ -93,7 +92,7 @@ meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
 eigenret <- numeric(NCOL(retsp))
-HighFreq::push_eigen(newdata=retsp[nrows], covmat=covmat, 
+HighFreq::push_eigen(retsn=retsp[nrows], covmat=covmat, 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 }
