@@ -32,21 +32,21 @@ arma::mat calc_eigen(const arma::mat& covmat) {
 // Calculate the alpha and beta regression coefficients
 // without using the Moore-Penrose inverse arma::pinv().
 // [[Rcpp::export]]
-arma::mat calc_betas(const arma::mat& response, 
-                     const arma::mat& predictor) {
+arma::mat calc_betas(const arma::mat& respv, 
+                     const arma::mat& predv) {
   
-  // arma::uword nrows = predictor.n_rows;
-  // arma::uword ncols = predictor.n_cols;
+  // arma::uword nrows = predv.n_rows;
+  // arma::uword ncols = predv.n_cols;
   // Response and Predictor means
-  arma::mat respmeans = arma::mean(response, 0);
-  arma::mat predmeans = arma::mean(predictor, 0);
-  arma::mat predz = predictor.each_row() - predmeans;
+  arma::mat respm = arma::mean(respv, 0);
+  arma::mat predm = arma::mean(predv, 0);
+  arma::mat predz = predv.each_row() - predm;
   
   // Initialize the variables
-  arma::mat covarespred = arma::trans(response.each_row()-respmeans)*predz;
+  arma::mat covarespred = arma::trans(respv.each_row()-respm)*predz;
   arma::mat covarpred = arma::trans(predz)*predz;
   arma::mat betas = covarespred*arma::inv(covarpred);
-  arma::mat alphas = respmeans - arma::dot(betas, predmeans);
+  arma::mat alphas = respm - arma::dot(betas, predm);
   
   return arma::join_rows(alphas, betas);
   
@@ -327,75 +327,57 @@ void calc_invrec(const arma::mat& matrixv, arma::mat& invmat, arma::uword niter=
 
 
 
+// run_regn() - refactoring of run_reg() but using homogeneous notation for betas.
+// But the residuals are not the same.
 // [[Rcpp::export]]
-arma::mat run_portf(const arma::mat& returnm, // Asset returns
-                    const arma::uword& dimax, // Number of eigen vectors for dimension reduction
-                    const double& lambda, // Returns decay factor
-                    const double& lambdacov, // Covariance decay factor
-                    const double& lambdaw, // Weight decay factor
-                    bool scalit = true, // Scale the returns by the volatility?
-                    bool flipc = true) { // Flip the signs of the weights
+arma::mat run_regn(const arma::mat& respv, 
+                  const arma::mat& predv,
+                  double lambda, // Decay factor which multiplies the past values 
+                  std::string method = "none") {
   
-  arma::uword nrows = returnm.n_rows;
-  arma::uword ncols = returnm.n_cols;
-  arma::rowvec newdata; // Row of asset returns
-  arma::rowvec retm(ncols, fill::zeros); // Trailing average of asset returns
-  arma::rowvec varv; // Variance of asset returns
-  arma::mat invmat(ncols, ncols, fill::ones); // Inverse covariance matrix
-  arma::mat weightv(nrows, ncols, fill::zeros); // Portfolio weights
-  arma::colvec stratret(nrows, fill::zeros); // Strategy returns
-  double weightd; // Sum of squared weights
+  arma::uword nrows = predv.n_rows;
+  arma::uword ncols = predv.n_cols;
+  arma::mat predm = arma::join_rows(ones(nrows), predv); // Predictor matrix
+  arma::mat covarespred = arma::zeros(1, ncols); // Covariance between the response and predictor
+  arma::mat covarpred = arma::zeros(ncols, ncols); // Covariance between the predictors
+  arma::mat betas = arma::zeros(nrows, ncols+1); // Betas
+  arma::mat resids = arma::zeros(nrows, 1); // Residuals
+  arma::mat residv = arma::ones(nrows, 1); // Residual variance
+  arma::mat residm = arma::zeros(nrows, 1); // Residual mean
   double lambda1 = 1-lambda;
-  double lambdaw1 = 1-lambdaw;
-
-  // Initialize the covariance matrix with first row of data
-  arma::rowvec meanv = returnm.row(0);
-  arma::mat covmat = arma::trans(meanv)*meanv;
-  // invmat.diag() = 1/covmat.diag();
-  // invmat.diag() = ones(ncols);
-  // calc_invrec(covmat, invmat);
-  // invmat = calc_inv(covmat);
-  // Initialize the eigen decomposition
-
-  // Perform loop over the rows (time)
+  
+  // Initialize the variables
+  covarespred = respv.row(0)*predm.row(0);
+  covarpred = arma::trans(predm.row(0))*predm.row(0);
+  betas.row(0) = covarespred*arma::inv(covarpred);
+  // Perform loop over the rows
   for (arma::uword it = 1; it < nrows; it++) {
-    // Scale the returns by the trailing volatility
-    // newdata = returnm.row(it);
-    varv = arma::trans(covmat.diag());
-    varv.replace(0, 1);
-    newdata = returnm.row(it)/arma::sqrt(varv);
-    // Calculate the strategy returns - the products of the lagged weights times the asset returns
-    stratret(it) = arma::dot(newdata, weightv.row(it-1));
-    // Update the covariance matrix with new row of asset returns
-    if (scalit) {
-      push_covar(newdata, covmat, meanv, lambdacov);
-    } else {
-      push_covar(returnm.row(it), covmat, meanv, lambdacov);
-    }  // end if
-    // Calculate the trailing mean of asset returns
-    retm = lambda*retm + lambda1*returnm.row(it);
-    // Calculate weights using regularized inverse
-    invmat = calc_inv(covmat, dimax);
-    // Calculate weights using recursive inverse
-    // calc_invrec(covmat, invmat);
-    // weightv.row(it) = retm*invmat;
-    weightv.row(it) = lambdaw*weightv.row(it-1) + lambdaw1*retm*invmat;
-    // Scale the weights so their sum of squares is equal to one
-    weightd = std::sqrt(arma::sum(arma::square(weightv.row(it))));
-    if (weightd == 0) weightd = 1;
-    weightv.row(it) = weightv.row(it)/weightd;
-    // Copy the past weights into lagged weights
-    // weightl = weightp;
-    // weightp = weightv;
+    // Update the covariance between the response and predictor
+    covarespred = lambda*covarespred + lambda1*respv.row(it)*predm.row(it);
+    covarpred = lambda*covarpred + lambda1*arma::trans(predm.row(it))*predm.row(it);
+    // Update the betas
+    betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred*arma::inv(covarpred);
+    // betas.row(it) = lambda*betas.row(it-1) + lambda1*arma::solve(predm.row(it), respv.row(it), solve_opts::fast);
+    resids.row(it) = lambda*resids.row(it-1) + lambda1*(respv.row(it) - arma::dot(betas.row(it), predm.row(it)));
+    // Calculate the mean and variance of the residuals
+    residm.row(it) = lambda*residm.row(it-1) + lambda1*resids.row(it);
+    residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(resids.row(it) - residm.row(it));
+    // residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(resids.row(it));
   }  // end for
   
-  // Return the portfolio returns and the first two eigen vectors
-  // Return the portfolio returns and the first two eigen vectors
-  // return stratret;
-  return arma::join_rows(stratret, weightv);
+  if (method == "scale") {
+    // Divide the residuals by their volatility
+    resids = resids/arma::sqrt(residv);
+  } else if (method == "standardize") {
+    // De-mean the residuals and divide them by their volatility
+    resids = (resids - residm)/arma::sqrt(residv);
+  }  // end if
   
-}  // end run_portf
+  return arma::join_rows(resids, betas);
   
+}  // end run_regn
+
+
   
 // [[Rcpp::export]]
 void run_sgao(arma::colvec& eigenval, // eigen values

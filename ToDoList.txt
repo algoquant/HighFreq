@@ -89,6 +89,15 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Add t-values of the alpha and betas to run_reg()?
+
++ [ ] Compare the outputs of functions run_reg() versus roll_reg()
+Find the lambda parameter which produces similar values for a given look_back parameter.
+
++ [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
+Nadagouda Recursive Least Squares Regression Kalman Filter.pdf
+https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
+
 + [ ] Create the function run_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
 Validate the principal components produced by push_eigen().
 The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So run_portf() needs logic that ensures that the weights change gradually.
@@ -164,20 +173,6 @@ https://stackoverflow.com/questions/50413660/linking-to-another-package-undefine
 + [ ] Replace the word "running" with "online" or "streaming"
 
 + [ ] Update the documentation for all the online functions run_*() - switch terms in the online formulas
-
-+ [ ] Deprecate run_zscores() because run_reg() is the new version
-run_zscores() has errors in the code and in the documentation.
-For example, the means are not subtracted from the returns before squaring them.
-
-+ [ ] Add t-values of the alpha and betas to run_reg()
-
-+ [ ] Compare the outputs of functions run_reg() versus roll_reg()
-Find the lambda parameter which produces similar values for a given look_back parameter.
-
-
-+ [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
-Nadagouda Recursive Least Squares Regression Kalman Filter
-https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
 + [ ] Calculate the mean portfolio returns ignoring zero stock returns, because including zero returns biases the estimate away from the actual mean portfolio returns
 
@@ -553,6 +548,10 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] Deprecate run_zscores() because run_reg() is the new version
+run_zscores() has errors in the code and in the documentation.
+For example, the means are not subtracted from the returns before squaring them.
+
 + [x] Create the function run_portf() to simulate a running portfolio optimization strategy
 Output the weights.  Average the weights.
 
@@ -592,7 +591,9 @@ That may not always be correct, for example in the case of rolling calculations 
 
 + [x] Modify weighted functions: pass weights as arma::colvec instead of arma::mat
 
-+ [x] Fix run_reg() - don't subtract the means from the response and predictor when calculating the covariance
++ [x] Fix run_reg() - subtract alpha when calculating residuals
+
++ [x] Fix run_reg() - subtract the means from the response and predictor when calculating the covariance
 
 + [x] Fix run_reg() - the betas are equal to the Kelly ratios only for a single predictor or when the predictors are orthogonal
 If the predictors are not orthogonal then the covariance matrix of the predictors must be inverted.

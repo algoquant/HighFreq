@@ -3818,10 +3818,10 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
 //'   }
 //'   \deqn{
-//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) p^T_t p_t
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
 //'   }
 //'   \deqn{
-//'     cov_t = \lambda cov_{t-1} + (1-\lambda) r^T_t p_t
+//'     cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
 //'   }
 //'   \deqn{
 //'     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
@@ -3830,10 +3830,13 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
 //'   }
 //'   \deqn{
-//'     \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
+//'     \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \alpha_t - \beta_t p_t)
 //'   }
 //'   \deqn{
-//'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) \epsilon^2_t
+//'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
+//'   }
+//'   \deqn{
+//'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
 //'   }
 //'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
 //'   \eqn{cov_t} is the covariance matrix between the response and the
@@ -3906,7 +3909,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' datav <- cbind(cumsum(respv), regs[, 1])
 //' colnames(datav) <- c("XLF", "residuals")
 //' colnamev <- colnames(datav)
-//' dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") %>%
+//' dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") %>%
 //'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 //'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
 //'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
@@ -3915,222 +3918,70 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_reg(const arma::mat& respv, 
-                  const arma::mat& predv,
+arma::mat run_reg(const arma::mat& respv, // Response 
+                  const arma::mat& predv, // Predictor
                   double lambda, // Decay factor which multiplies the past values 
-                  std::string method = "none") {
+                  std::string method = "none") { // Method for scaling the residuals
   
   arma::uword nrows = predv.n_rows;
   arma::uword ncols = predv.n_cols;
-  // Response means
-  arma::mat respmeans = arma::zeros(1, 1);
-  // Predictor means
-  arma::mat predmeans = arma::zeros(1, ncols);
-  // arma::mat predz = arma::zeros(1, ncols);
-  // arma::mat vars = arma::square(predv);
-  arma::mat covarespred = arma::zeros(1, ncols);
-  arma::mat covarpred = arma::zeros(ncols, ncols);
-  arma::mat betas = arma::ones(nrows, ncols);
-  arma::mat alphas = arma::zeros(nrows, 1);
-  arma::mat resids = arma::zeros(nrows, 1);
-  arma::mat vars = arma::ones(nrows, 1);
-  arma::mat meanm = arma::zeros(nrows, 1);
+  arma::mat respm = respv.row(0); // Response means
+  arma::mat predm = predv.row(0); // Predictor means
+  arma::mat respz(1, ncols); // Response de-meaned
+  arma::mat predz(1, ncols); // Predictor de-meaned
+  arma::mat covarespred = arma::zeros(1, ncols); // Covariance between the response and predictor
+  arma::mat covarpred = arma::zeros(ncols, ncols); // Covariance between the predictors
+  arma::mat betas = arma::ones(nrows, ncols); // Betas
+  arma::mat alphas = arma::zeros(nrows, 1); // Alphas
+  arma::mat resids = arma::zeros(nrows, 1); // Residuals
+  arma::mat residv = arma::ones(nrows, 1); // Residual variance
+  arma::mat residm = arma::zeros(nrows, 1); // Residual mean
   double lambda1 = 1-lambda;
   
   // Initialize the variables
-  respmeans = respv.row(0);
-  predmeans = predv.row(0);
-  covarespred = respmeans*predmeans;
-  covarpred = arma::trans(predmeans)*predmeans;
+  // cout << "Initializing the variables" << endl;
+  covarespred = respm*predm;
+  covarpred = arma::trans(predm)*predm;
+  betas.row(0) = covarespred*arma::inv(covarpred);
+  alphas.row(0) = respm - arma::dot(betas.row(0), predm);
   // Perform loop over the rows
   for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the means using the decay factor
-    respmeans = lambda*respmeans + lambda1*respv.row(it);
-    predmeans = lambda*predmeans + lambda1*predv.row(it);
-    // predz = predv.row(it) - predmeans;
-    covarespred = lambda*covarespred + lambda1*respv.row(it)*predv.row(it);
-    covarpred = lambda*covarpred + lambda1*arma::trans(predv.row(it))*predv.row(it);
+    // Update the means using the decay factor
+    respz = respv.row(it) - respm;
+    predz = predv.row(it) - predm;
+    respm = lambda*respm + lambda1*respv.row(it);
+    predm = lambda*predm + lambda1*predv.row(it);
+    // Update the covariance between the response and predictor
+    // cout << "Updating the covariances: " << it << endl;
+    covarespred = lambda*covarespred + lambda1*respz*predz;
+    covarpred = lambda*covarpred + lambda1*arma::trans(predz)*predz;
     // cout << "Calculating betas: " << it << endl;
-    // Calculate the betas and alphas
+    // Update the betas and alphas
     betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred*arma::inv(covarpred);
-    alphas.row(it) = respmeans - arma::trans(predmeans)*betas.row(it);
+    alphas.row(it) = respm - arma::dot(betas.row(it), predm);
     // Calculate the betas and alphas assuming predictors are orthogonal - old method - only slightly faster
-    // vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(predz);
-    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred/vars.row(it);
+    // residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(predz);
+    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred/residv.row(it);
     // Calculate the residuals
-    // cout << "Calculating resids: " << it << endl;
-    // resids.row(it) = lambda*resids.row(it-1) + lambda1*(respv.row(it) - arma::dot(betas.row(it), predv.row(it)));
-    resids.row(it) = lambda*resids.row(it-1) + lambda1*(respv.row(it) - arma::trans(predv.row(it))*betas.row(it));
+    // cout << "Calculating residuals: " << it << endl;
+    resids.row(it) = lambda*resids.row(it-1) + lambda1*(respv.row(it) - alphas.row(it) - arma::dot(betas.row(it), predv.row(it)));
     // Calculate the mean and variance of the residuals
-    // meanm.row(it) = lambda*meanm.row(it-1) + lambda1*resids.row(it);
-    // vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(resids.row(it) - meanm.row(it));
-    vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(resids.row(it));
+    residm.row(it) = lambda*residm.row(it-1) + lambda1*resids.row(it);
+    residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(resids.row(it) - residm.row(it));
   }  // end for
   
+  // Scale the residuals
   if (method == "scale") {
     // Divide the residuals by their volatility
-    resids = resids/arma::sqrt(vars);
+    resids = resids/arma::sqrt(residv);
   } else if (method == "standardize") {
     // De-mean the residuals and divide them by their volatility
-    resids = (resids - meanm)/arma::sqrt(vars);
+    resids = (resids - residm)/arma::sqrt(residv);
   }  // end if
   
   return arma::join_rows(resids, alphas, betas);
   
 }  // end run_reg
-
-
-
-// run_zscores() is deprecated because run_reg() is the new version
-////////////////////////////////////////////////////////////
-//' Calculate the z-scores of trailing regressions of streaming \emph{time
-//' series} of returns.
-//' 
-//' @param \code{respv} A single-column \emph{time series} or a single-column
-//'   \emph{matrix} of response data.
-//' 
-//' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
-//'   data.
-//' 
-//' @param \code{lambda} A decay factor which multiplies past
-//'   estimates.
-//'   
-//' @param \code{demean} A \emph{Boolean} specifying whether the \emph{z-scores}
-//'   should be de-meaned (the default is \code{demean = TRUE}).
-//'
-//' @return A \emph{matrix} with the z-scores, betas, and the variances of the
-//'   predictor data.
-//'
-//' @details
-//'   The function \code{run_zscores()} calculates the vectors of \emph{betas}
-//'   \eqn{\beta_t} and the residuals \eqn{\epsilon_t} of trailing regressions
-//'   by recursively weighting the current estimates with past estimates, using
-//'   the decay factor \eqn{\lambda}:
-//'   \deqn{
-//'     \sigma^2_t = (1-\lambda) p^2_t + \lambda \sigma^2_{t-1}
-//'   }
-//'   \deqn{
-//'     cov_t = (1-\lambda) r_t p_t + \lambda cov_{t-1}
-//'   }
-//'   \deqn{
-//'     \beta_t = (1-\lambda) \frac{cov_t}{\sigma^2_t} + \lambda \beta_{t-1}
-//'   }
-//'   \deqn{
-//'     \epsilon_t = (1-\lambda) (r_t - \beta_t p_t) + \lambda \epsilon_{t-1}
-//'   }
-//'   Where \eqn{cov_t} is the vector of covariances between the
-//'   response and predictor returns, at time \eqn{t};
-//'   \eqn{\sigma^2_t} is the predictor variance,
-//'   and \eqn{r_t} and \eqn{p_t} are the streaming returns of the response
-//'   and predictor data.
-//' 
-//'   The above formulas for \eqn{\sigma^2} and \eqn{cov} are
-//'   approximate because they don't subtract the means before squaring the
-//'   returns.  But they're very good approximations for daily returns.
-//' 
-//'   The matrices \eqn{\sigma^2}, \eqn{cov}, and \eqn{\beta} have the
-//'   same number of rows as the input argument \code{predv}.
-//'
-//'   If the argument \code{demean = TRUE} (the default) then the
-//'   \emph{z-scores} \eqn{z_t} are calculated as equal to the residuals
-//'   \eqn{\epsilon_t} minus their means \eqn{\bar{\epsilon}}, divided by their
-//'   volatilities \eqn{\varsigma_t}:
-//'   \deqn{
-//'     z_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
-//'   }
-//'   If the argument \code{demean = FALSE} then the \emph{z-scores} are
-//'   only divided by their volatilities without subtracting their means:
-//'   \deqn{
-//'     z_t = \frac{\epsilon_t}{\varsigma_t}
-//'   }
-//' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
-//'   The formulas are equivalent to a convolution with exponentially decaying
-//'   weights, but they're much faster to calculate.
-//'   Using exponentially decaying weights is more natural than using a sliding
-//'   look-back interval, because it gradually "forgets" about the past data.
-//' 
-//'   The value of the decay factor \eqn{\lambda} must be in the range between
-//'   \code{0} and \code{1}.
-//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
-//'   values have a greater weight, and the trailing \emph{z-score} values have
-//'   a stronger dependence on past data.  This is equivalent to a long
-//'   look-back interval.
-//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
-//'   past values have a smaller weight, and the trailing \emph{z-score} values
-//'   have a weaker dependence on past data.  This is equivalent to a short
-//'   look-back interval.
-//' 
-//'   The function \code{run_zscores()} returns multiple columns of data. If the
-//'   matrix \code{predv} has \code{n} columns then \code{run_zscores()}
-//'   returns a matrix with \code{2n+1} columns.  The first column contains the
-//'   \emph{z-scores}, and the remaining columns contain the \emph{betas} and
-//'   the \emph{variances} of the predictor data.
-//' 
-//' @examples
-//' \dontrun{
-//' # Calculate historical returns
-//' retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
-//' # Response equals XLF returns
-//' respv <- retsp[, 1]
-//' # Predictor matrix equals VTI and IEF returns
-//' predv <- retsp[, -1]
-//' # Calculate the trailing z-scores
-//' lambda <- 0.9
-//' zscores <- HighFreq::run_zscores(respv=respv, predv=predv, lambda=lambda)
-//' # Plot the trailing z-scores
-//' datav <- cbind(cumsum(respv), zscores[, 1])
-//' colnames(datav) <- c("XLF", "zscores")
-//' colnamev <- colnames(datav)
-//' dygraphs::dygraph(datav, main="Z-Scores of XLF Versus VTI and IEF") %>%
-//'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
-//'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
-//'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
-//'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
-//' }
-//' 
-arma::mat run_zscores(const arma::mat& respv, 
-                      const arma::mat& predv,
-                      double lambda, // Decay factor which multiplies the past values 
-                      bool demean = true) {
-  
-  arma::uword nrows = predv.n_rows;
-  arma::uword ncols = predv.n_cols;
-  // arma::mat var1 = arma::square(tseries.col(0));
-  arma::mat varv = arma::square(predv);
-  arma::mat betas = arma::ones(nrows, ncols);
-  arma::mat zscores = arma::ones(nrows, 1);
-  arma::mat vars = arma::ones(nrows, 1);
-  arma::mat meanm = arma::zeros(nrows, 1);
-  double lambda1 = 1-lambda;
-  
-  // Multiply each column of predictor by the response
-  arma::mat covars = predv;
-  covars.each_col() %= respv;
-  
-  // Perform loop over the rows
-  for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the z-score as the weighted sum of products of returns.
-    // cout << "Calculating vars: " << it << endl;
-    varv.row(it) = lambda1*varv.row(it) + lambda*varv.row(it-1);  // this is wrong
-    // cout << "Calculating covars: " << it << endl;
-    covars.row(it) = lambda1*covars.row(it) + lambda*covars.row(it-1);
-    // cout << "Calculating betas: " << it << endl;
-    betas.row(it) = lambda1*covars.row(it)/vars.row(it) + lambda*betas.row(it-1);
-    // cout << "Calculating zscores: " << it << endl;
-    zscores.row(it) = lambda1*(respv.row(it) - arma::dot(betas.row(it), predv.row(it))) + lambda*zscores.row(it-1);
-    // Calculate the mean and variance of the z-scores.
-    meanm.row(it) = lambda1*zscores.row(it) + lambda*meanm.row(it-1);
-    vars.row(it) = lambda1*arma::square(zscores.row(it) - zscores.row(it-1)) + lambda*vars.row(it-1);
-  }  // end for
-  
-  if (demean)
-    return arma::join_rows((zscores - meanm)/arma::sqrt(vars), betas, vars);
-  else
-    return arma::join_rows(zscores/arma::sqrt(vars), betas, vars);
-
-}  // end run_zscores
 
 
 

@@ -43,10 +43,10 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) p^T_t p_t
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
   }
   \deqn{
-    cov_t = \lambda cov_{t-1} + (1-\lambda) r^T_t p_t
+    cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
   }
   \deqn{
     \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
@@ -55,10 +55,13 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
   }
   \deqn{
-    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \beta_t p_t)
+    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \alpha_t - \beta_t p_t)
   }
   \deqn{
-    \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) \epsilon^2_t
+    \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
+  }
+  \deqn{
+    \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
   }
   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
   \eqn{cov_t} is the covariance matrix between the response and the
@@ -131,7 +134,7 @@ regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
 datav <- cbind(cumsum(respv), regs[, 1])
 colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)
-dygraphs::dygraph(datav, main="Residuals of XLF Versus VTI and IEF") \%>\%
+dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") \%>\%
   dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%
   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") \%>\%
