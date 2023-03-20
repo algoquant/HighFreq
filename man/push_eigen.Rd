@@ -83,16 +83,16 @@ The function \code{push_eigen()} updates the trailing eigen values, eigen
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+retp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
 # Calculate the returns without the last row
-nrows <- NROW(retsp)
-retss <- retsp[-nrows]
+nrows <- NROW(retp)
+retss <- retp[-nrows]
 # Calculate the previous covariance of returns
 meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
-eigenret <- numeric(NCOL(retsp))
-HighFreq::push_eigen(retsn=retsp[nrows], covmat=covmat, 
+eigenret <- numeric(NCOL(retp))
+HighFreq::push_eigen(retsn=retp[nrows], covmat=covmat, 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
 }

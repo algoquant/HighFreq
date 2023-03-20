@@ -96,19 +96,19 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Define monthly end points and start points
-endp <- xts::endpoints(retsp, on="months")[-1]
+endp <- xts::endpoints(retp, on="months")[-1]
 look_back <- 12
 startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(respv=retsp[, 1], predv=retsp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
+reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
 betas <- reg_stats[, 2]
 # Calculate rolling betas in R
 betar <- sapply(1:NROW(endp), FUN=function(ep) {
-  datav <- retsp[startp[ep]:endp[ep], ]
+  datav <- retp[startp[ep]:endp[ep], ]
   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 })  # end sapply
 # Compare the outputs of both functions

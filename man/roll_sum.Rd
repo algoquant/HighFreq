@@ -66,25 +66,25 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 11
 # Calculate rolling sums and compare with rutils::roll_sum()
-sumc <- HighFreq::roll_sum(retsp, look_back)
-sumr <- rutils::roll_sum(retsp, look_back)
+sumc <- HighFreq::roll_sum(retp, look_back)
+sumr <- rutils::roll_sum(retp, look_back)
 all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
-sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumr <- apply(zoo::coredata(retp), 2, cumsum)
 sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 # Calculate weights equal to the trading volumes
 weightv <- quantmod::Vo(rutils::etfenv$VTI)
-weightv <- weightv[zoo::index(retsp)]
+weightv <- weightv[zoo::index(retp)]
 # Calculate rolling weighted sums
-sumc <- HighFreq::roll_sum(retsp, look_back, 1/weightv)
+sumc <- HighFreq::roll_sum(retp, look_back, 1/weightv)
 # Plot dygraph of the weighted sums
-datav <- cbind(retsp$VTI, sumc[, 1])
+datav <- cbind(retp$VTI, sumc[, 1])
 colnames(datav) <- c("VTI", "Weighted")
 endp <- rutils::calc_endpoints(datav, interval="weeks")
 dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) \%>\% 

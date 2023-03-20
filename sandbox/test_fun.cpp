@@ -378,7 +378,7 @@ arma::mat run_regn(const arma::mat& respv,
 }  // end run_regn
 
 
-  
+
 // [[Rcpp::export]]
 void run_sgao(arma::colvec& eigenval, // eigen values
              arma::mat& eigenvec, // eigen vectors

@@ -56,7 +56,7 @@ The function \code{push_covar()} updates the trailing covariance matrix of
   
   Finally, it updates the trailing covariance matrix of the returns:
   \deqn{
-    cov_t = \lambda cov_{t-1} + (1-\lambda) \hat{r}^T_t \hat{r}_t
+    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) \hat{r}^T_t \hat{r}_t
   }
   
   The decay factor \eqn{\lambda} determines the strength of the updates,
@@ -72,15 +72,15 @@ The function \code{push_covar()} updates the trailing covariance matrix of
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+retp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
 # Calculate the returns without last row
-nrows <- NROW(retsp)
-retss <- retsp[-nrows]
+nrows <- NROW(retp)
+retss <- retp[-nrows]
 # Calculate the covariance of returns
 meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
-HighFreq::push_covar(retsn=retsp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
+HighFreq::push_covar(retsn=retp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
 }
 
 }

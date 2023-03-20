@@ -81,24 +81,24 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-retsp <- na.omit(rutils::etfenv$returns$VTI)
+retp <- na.omit(rutils::etfenv$returns$VTI)
 # Define end points and start points
-endp <- 1 + HighFreq::calc_endpoints(NROW(retsp), step=25)
+endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
 startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-skewv <- HighFreq::roll_skew(retsp, step=25, look_back=3)
+skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
 # Calculate the rolling skewness using R code
 skewr <- sapply(1:NROW(endp), function(it) {
-  HighFreq::calc_skew(retsp[startp[it]:endp[it], ])
+  HighFreq::calc_skew(retp[startp[it]:endp[it], ])
 })  # end sapply
 # Compare the skewness estimates
 all.equal(drop(skewv), skewr, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_skew(retsp, step=25, look_back=3),
+  Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
   Rcode=sapply(1:NROW(endp), function(it) {
-    HighFreq::calc_skew(retsp[startp[it]:endp[it], ])
+    HighFreq::calc_skew(retp[startp[it]:endp[it], ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

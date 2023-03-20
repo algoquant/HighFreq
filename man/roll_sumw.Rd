@@ -39,7 +39,7 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
   convolutions of the columns of \code{tseries} with the \emph{column
   vector} of weights using the \code{Armadillo} function
   \code{arma::conv2()}.  It performs a similar calculation to the standard
-  \code{R} function \cr\code{stats::filter(x=retsp, filter=weightv,
+  \code{R} function \cr\code{stats::filter(x=retp, filter=weightv,
   method="convolution", sides=1)}, but it can be many times faster, and it
   doesn't produce any leading \code{NA} values.
   
@@ -75,53 +75,53 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
 \dontrun{
 # First example
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
 look_back <- 11
 # Calculate rolling sums and compare with rutils::roll_sum()
-sumc <- HighFreq::roll_sum(retsp, look_back)
-sumr <- rutils::roll_sum(retsp, look_back)
+sumc <- HighFreq::roll_sum(retp, look_back)
+sumr <- rutils::roll_sum(retp, look_back)
 all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
-sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumr <- apply(zoo::coredata(retp), 2, cumsum)
 sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Calculate rolling sums at end points
 stubv <- 21
-sumc <- HighFreq::roll_sumw(retsp, look_back, stub=stubv)
-endp <- (stubv + look_back*(0:(NROW(retsp) \%/\% look_back)))
-endp <- endp[endp < NROW(retsp)]
-sumr <- apply(zoo::coredata(retsp), 2, cumsum)
+sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
+endp <- (stubv + look_back*(0:(NROW(retp) \%/\% look_back)))
+endp <- endp[endp < NROW(retp)]
+sumr <- apply(zoo::coredata(retp), 2, cumsum)
 sumr <- sumr[endp+1, ]
 sumlag <- rbind(numeric(2), sumr[1:(NROW(sumr) - 1), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Calculate rolling sums at end points - pass in endp
-sumc <- HighFreq::roll_sumw(retsp, endp=endp)
+sumc <- HighFreq::roll_sumw(retp, endp=endp)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Create exponentially decaying weights
 weightv <- exp(-0.2*(1:11))
 weightv <- matrix(weightv/sum(weightv), nc=1)
 # Calculate rolling weighted sum
-sumc <- HighFreq::roll_sumw(retsp, weightv=weightv)
+sumc <- HighFreq::roll_sumw(retp, weightv=weightv)
 # Calculate rolling weighted sum using filter()
-filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
+filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-sumc <- HighFreq::roll_sumw(retsp, endp=endp, weightv=weightv)
+sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
 all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weightv <- matrix(c(1, rep(0, 10)), nc=1)
 # Calculate rolling weighted sum
-weighted <- HighFreq::roll_sumw(retsp, weightv=weightv)
+weighted <- HighFreq::roll_sumw(retp, weightv=weightv)
 # Compare with original
-all.equal(coredata(retsp), weighted, check.attributes=FALSE)
+all.equal(coredata(retp), weighted, check.attributes=FALSE)
 }
 
 }

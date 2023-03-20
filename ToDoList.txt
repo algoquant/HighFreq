@@ -548,6 +548,14 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] In run_covar() add means to the output
+
++ [x] Fix run_reg() - it should produce same betas as run_covar()
+This update formula was wrong:
+β_t = λβ_(t−1) + (1 − λ) cov_t/σ^2
+It should simply be:
+β_t = cov_t/σ^2
+
 + [x] Deprecate run_zscores() because run_reg() is the new version
 run_zscores() has errors in the code and in the documentation.
 For example, the means are not subtracted from the returns before squaring them.

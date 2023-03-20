@@ -28,12 +28,12 @@ The function \code{push_cov2cor()} calculates the correlation matrix from
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+retp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
 # Calculate the covariance matrix of returns
-covmat <- cov(retsp)
+covmat <- cov(retp)
 # Calculate the correlation matrix of returns
 push_cov2cor(covmat)
-all.equal(covmat, cor(retsp))
+all.equal(covmat, cor(retp))
 }
 
 }

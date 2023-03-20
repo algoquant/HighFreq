@@ -99,21 +99,21 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-retsp <- na.omit(rutils::etfenv$returns$VTI)
+retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-var_rollfun <- HighFreq::roll_moment(retsp, fun="calc_var", step=25, look_back=3)
+var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", step=25, look_back=3)
 # Calculate the rolling variance using roll_var()
-var_roll <- HighFreq::roll_var(retsp, step=25, look_back=3)
+var_roll <- HighFreq::roll_var(retp, step=25, look_back=3)
 # Compare the two methods
 all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 # Define end points and start points
-endp <- HighFreq::calc_endpoints(NROW(retsp), step=25)
+endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
 startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling variance using RcppArmadillo
-var_rollfun <- HighFreq::roll_moment(retsp, fun="calc_var", startp=startp, endp=endp)
+var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp)
 # Calculate the rolling variance using R code
 var_roll <- sapply(1:NROW(endp), function(it) {
-  var(retsp[startp[it]:endp[it]+1, ])
+  var(retp[startp[it]:endp[it]+1, ])
 })  # end sapply
 var_roll[1] <- 0
 # Compare the two methods
@@ -121,9 +121,9 @@ all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_moment(retsp, fun="calc_var", startp=startp, endp=endp),
+  Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp),
   Rcode=sapply(1:NROW(endp), function(it) {
-    var(retsp[startp[it]:endp[it]+1, ])
+    var(retp[startp[it]:endp[it]+1, ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

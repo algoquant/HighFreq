@@ -55,46 +55,46 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns
 \examples{
 \dontrun{
 # Define a single-column time series of returns
-retsp <- na.omit(rutils::etfenv$returns$VTI)
+retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the moment kurtosis
-HighFreq::calc_kurtosis(retsp)
+HighFreq::calc_kurtosis(retp)
 # Calculate the moment kurtosis in R
 calc_kurtr <- function(x) {
   x <- (x-mean(x))
   sum(x^4)/var(x)^2/NROW(x)
 }  # end calc_kurtr
-all.equal(HighFreq::calc_kurtosis(retsp), 
-  calc_kurtr(retsp), check.attributes=FALSE)
+all.equal(HighFreq::calc_kurtosis(retp), 
+  calc_kurtr(retp), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_kurtosis(retsp),
-  Rcode=calc_kurtr(retsp),
+  Rcpp=HighFreq::calc_kurtosis(retp),
+  Rcode=calc_kurtr(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile kurtosis
-HighFreq::calc_kurtosis(retsp, method="quantile", confl=0.9)
+HighFreq::calc_kurtosis(retp, method="quantile", confl=0.9)
 # Calculate the quantile kurtosis in R
 calc_kurtq <- function(x, a=0.9) {
   	quantiles <- quantile(x, c(1-a, 0.25, 0.75, a), type=5)
   	(quantiles[4] - quantiles[1])/(quantiles[3] - quantiles[2])
 }  # end calc_kurtq
-all.equal(drop(HighFreq::calc_kurtosis(retsp, method="quantile", confl=0.9)), 
-  calc_kurtq(retsp, a=0.9), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_kurtosis(retp, method="quantile", confl=0.9)), 
+  calc_kurtq(retp, a=0.9), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_kurtosis(retsp, method="quantile"),
-  Rcode=calc_kurtq(retsp),
+  Rcpp=HighFreq::calc_kurtosis(retp, method="quantile"),
+  Rcode=calc_kurtq(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the nonparametric kurtosis
-HighFreq::calc_kurtosis(retsp, method="nonparametric")
+HighFreq::calc_kurtosis(retp, method="nonparametric")
 # Compare HighFreq::calc_kurtosis() with R nonparametric kurtosis
-all.equal(drop(HighFreq::calc_kurtosis(retsp, method="nonparametric")), 
-  (mean(retsp)-median(retsp))/sd(retsp), 
+all.equal(drop(HighFreq::calc_kurtosis(retp, method="nonparametric")), 
+  (mean(retp)-median(retp))/sd(retp), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_kurtosis(retsp, method="nonparametric"),
-  Rcode=(mean(retsp)-median(retsp))/sd(retsp),
+  Rcpp=HighFreq::calc_kurtosis(retp, method="nonparametric"),
+  Rcode=(mean(retp)-median(retp))/sd(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

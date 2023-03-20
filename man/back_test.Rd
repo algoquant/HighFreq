@@ -98,12 +98,12 @@ The function \code{back_test()} performs a backtest simulation of a
 \examples{
 \dontrun{
 # Calculate the ETF daily excess returns
-retsp <- na.omit(rutils::etfenv$returns[, 1:16])
+retp <- na.omit(rutils::etfenv$returns[, 1:16])
 # riskf is the daily risk-free rate
 riskf <- 0.03/260
-retexcess <- retsp - riskf
+retexcess <- retp - riskf
 # Define monthly end points without initial warmup period
-endp <- rutils::calc_endpoints(retsp, interval="months")
+endp <- rutils::calc_endpoints(retp, interval="months")
 endp <- endp[endp > 0]
 nrows <- NROW(endp)
 # Define 12-month look-back interval and start points over sliding window
@@ -115,8 +115,8 @@ dimax <- 3
 # Create a list of portfolio optimization parameters
 controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
-pnls <- HighFreq::back_test(retexcess, retsp, controlv=controlv, startp=(startp-1), endp=(endp-1))
-pnls <- xts::xts(pnls, index(retsp))
+pnls <- HighFreq::back_test(retexcess, retp, controlv=controlv, startp=(startp-1), endp=(endp-1))
+pnls <- xts::xts(pnls, index(retp))
 colnames(pnls) <- "strategy"
 # Plot dygraph of strategy
 dygraphs::dygraph(cumsum(pnls), 

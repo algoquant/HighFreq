@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_covar}
 \alias{run_covar}
-\title{Calculate the trailing covariance of two streaming \emph{time series} of
+\title{Calculate the trailing covariances of two streaming \emph{time series} of
 returns.}
 \usage{
 run_covar(tseries, lambda)
@@ -15,30 +15,31 @@ columns of returns data.}
 estimates.}
 }
 \value{
-A \emph{matrix} with three columns of data: the covariance and the
-  variances of the two columns of the argument \code{tseries}.
+A \emph{matrix} with five columns of data: the trailing covariances,
+  the variances, and the mean values of the two columns of the argument
+  \code{tseries}.
 }
 \description{
-Calculate the trailing covariance of two streaming \emph{time series} of
+Calculate the trailing covariances of two streaming \emph{time series} of
 returns.
 }
 \details{
-The function \code{run_covar()} calculates the trailing covariance of two
+The function \code{run_covar()} calculates the trailing covariances of two
   streaming \emph{time series} of returns, by recursively weighting the past
-  covariance estimates \eqn{cov_{t-1}}, with the products of their
+  covariance estimates \eqn{{cov}_{t-1}}, with the products of their
   returns minus their means, using the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{r}^1_t = \lambda \bar{r}^1_{t-1} + (1-\lambda) r^1_t
+    \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
   }
   \deqn{
-    \bar{r}^2_t = \lambda \bar{r}^2_{t-1} + (1-\lambda) r^2_t
+    \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
   }
   \deqn{
-    cov_t = \lambda cov_{t-1} + (1-\lambda) (r^1_t - \bar{r}^1_t) (r^2_t - \bar{r}^2_t)
+    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
   }
-  Where \eqn{cov_t} is the covariance estimate at time \eqn{t},
-  \eqn{r^1_t} and \eqn{r^2_t} are the two streaming returns data, and
-  \eqn{\bar{r}^1_t} and \eqn{\bar{r}^2_t} are the means of the returns.
+  Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
+  \eqn{x_t} and \eqn{y_t} are the two streaming returns data, and
+  \eqn{\bar{x}_t} and \eqn{\bar{x}_t} are the trailing means of the returns.
 
   The above recursive formulas are convenient for processing live streaming
   data because they don't require maintaining a buffer of past data.
@@ -58,20 +59,21 @@ The function \code{run_covar()} calculates the trailing covariance of two
   a weaker dependence on past data.  This is equivalent to a short
   look-back interval.
 
-  The function \code{run_covar()} returns three columns of data: the
-  covariance and the variances of the two columns of the argument
-  \code{tseries}.  This allows calculating the trailing correlation.
+  The function \code{run_covar()} returns five columns of data: the trailing 
+  covariances, the variances, and the mean values of the two columns of the
+  argument \code{tseries}.  This allows calculating the trailing
+  correlations, betas, and alphas.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the trailing covariance
 lambda <- 0.9
-covars <- HighFreq::run_covar(retsp, lambda=lambda)
+covars <- HighFreq::run_covar(retp, lambda=lambda)
 # Calculate trailing covariance using R code
-filtered <- (1-lambda)*filter(retsp[, 1]*retsp[, 2], 
-  filter=lambda, init=as.numeric(retsp[1, 1]*retsp[1, 2])/(1-lambda), 
+filtered <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
+  filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
   method="recursive")
 all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
 # Calculate the trailing correlation

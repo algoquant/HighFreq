@@ -94,26 +94,26 @@ The function \code{run_scale()} performs a trailing standardization
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 # Calculate the trailing standardized returns using R code
 lambda <- 0.9
 lambda1 <- 1 - lambda
-scaled <- zoo::coredata(retsp)
+scaled <- zoo::coredata(retp)
 meanm <- scaled[1, ];
 vars <- scaled[1, ]^2;
-for (it in 2:NROW(retsp)) {
+for (it in 2:NROW(retp)) {
   meanm <- lambda*meanm + lambda1*scaled[it, ];
   vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 }  # end for
 # Calculate the trailing standardized returns using C++ code
-HighFreq::run_scale(retsp, lambda=lambda)
-all.equal(zoo::coredata(retsp), scaled, check.attributes=FALSE)
+HighFreq::run_scale(retp, lambda=lambda)
+all.equal(zoo::coredata(retp), scaled, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_scale(retsp, lambda=lambda),
-  Rcode={for (it in 2:NROW(retsp)) {
+  Rcpp=HighFreq::run_scale(retp, lambda=lambda),
+  Rcode={for (it in 2:NROW(retp)) {
    meanm <- lambda*meanm + lambda1*scaled[it, ];
    vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)

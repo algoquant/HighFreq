@@ -118,10 +118,10 @@ The function \code{push_sga()} updates the trailing eigen values, eigen
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
+retp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI", "DBC")])
 # Calculate the covariance of returns without the last row
-nrows <- NROW(retsp)
-retss <- retsp[-nrows]
+nrows <- NROW(retp)
+retss <- retp[-nrows]
 HighFreq::calc_scale(retss)
 meanv <- colMeans(retss)
 varv <- sapply(retss, var)
@@ -132,8 +132,8 @@ eigenval <- numeric(ncols) # Allocate eigen values
 eigenvec <- matrix(numeric(ncols^2), nc=ncols) # Allocate eigen vectors
 HighFreq::calc_eigen(covmat, eigenval, eigenvec)
 # Update the eigen decomposition using SGA
-eigenret <- numeric(NCOL(retsp))
-HighFreq::push_sga(retsn=retsp[nrows], 
+eigenret <- numeric(NCOL(retp))
+HighFreq::push_sga(retsn=retp[nrows], 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
 }

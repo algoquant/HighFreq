@@ -44,15 +44,15 @@ The function \code{roll_varvec()} calculates a \emph{vector} of variance
 \examples{
 \dontrun{
 # Create a vector of random returns
-retsp <- rnorm(1e6)
+retp <- rnorm(1e6)
 # Compare the variance estimates over 11-period look-back intervals
-all.equal(drop(HighFreq::roll_varvec(retsp, look_back=11))[-(1:10)], 
-  RcppRoll::roll_var(retsp, n=11))
+all.equal(drop(HighFreq::roll_varvec(retp, look_back=11))[-(1:10)], 
+  RcppRoll::roll_var(retp, n=11))
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_varvec(retsp, look_back=11),
-  RcppRoll=RcppRoll::roll_var(retsp, n=11),
+  Rcpp=HighFreq::roll_varvec(retp, look_back=11),
+  RcppRoll=RcppRoll::roll_var(retp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 }

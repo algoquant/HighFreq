@@ -66,10 +66,10 @@ The function \code{roll_scale()} performs a rolling standardization
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 look_back <- 11
-rolled_scaled <- roll::roll_scale(retsp, width=look_back, min_obs=1)
-rolled_scaled2 <- HighFreq::roll_scale(retsp, look_back=look_back)
+rolled_scaled <- roll::roll_scale(retp, width=look_back, min_obs=1)
+rolled_scaled2 <- HighFreq::roll_scale(retp, look_back=look_back)
 all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
   check.attributes=FALSE)
 }

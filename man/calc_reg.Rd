@@ -75,11 +75,11 @@ The function \code{calc_reg()} performs multivariate regression using
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-respv <- retsp[, 1]
+respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retsp[, -1]
+predv <- retp[, -1]
 # Perform multivariate regression using lm()
 lmod <- lm(respv ~ predv)
 lmodsum <- summary(lmod)

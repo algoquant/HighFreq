@@ -57,7 +57,7 @@ The function \code{run_portf()} simulates a portfolio optimization
     \hat{r}_t = r^s_t - \bar{r}_t
   }
   \deqn{
-    cov_t = \lambda_c cov_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
+    {cov}_t = \lambda_c {cov}_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
   }
   Where \eqn{\lambda_c} is the decay factor which multiplies the past mean
   and covariance.
@@ -127,19 +127,19 @@ The function \code{run_portf()} simulates a portfolio optimization
 \examples{
 \dontrun{
 # Load ETF returns
-retsp <- rutils::etfenv$returns[, c("VTI", "TLT", "DBC", "USO", "XLF", "XLK")]
-retsp <- na.omit(retsp)
-datev <- zoo::index(retsp) # dates
+retp <- rutils::etfenv$returns[, c("VTI", "TLT", "DBC", "USO", "XLF", "XLK")]
+retp <- na.omit(retp)
+datev <- zoo::index(retp) # dates
 # Simulate a portfolio optimization strategy
 dimax <- 6
 lambda <- 0.978
 lambdacov <- 0.995
 lambdaw <- 0.9
-pnls <- HighFreq::run_portf(retsp, dimax, lambda, lambdacov, lambdaw)
+pnls <- HighFreq::run_portf(retp, dimax, lambda, lambdacov, lambdaw)
 colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 pnls <- xts::xts(pnls, order.by=datev)
 # Plot dygraph of strategy
-wealthv <- cbind(retsp$VTI, pnls$pnls*sd(retsp$VTI)/sd(pnls$pnls))
+wealthv <- cbind(retp$VTI, pnls$pnls*sd(retp$VTI)/sd(pnls$pnls))
 colnames(wealthv) <- c("VTI", "Strategy")
 endd <- rutils::calc_endpoints(wealthv, interval="weeks")
 dygraphs::dygraph(cumsum(wealthv)[endd], main="Portfolio Optimization Strategy Returns") \%>\%
@@ -147,7 +147,7 @@ dygraphs::dygraph(cumsum(wealthv)[endd], main="Portfolio Optimization Strategy R
  dyLegend(width=300)
 # Plot dygraph of weights
 symbolv <- "VTI"
-stockweights <- cbind(cumsum(get(symbolv, retsp)), get(symbolv, pnls))
+stockweights <- cbind(cumsum(get(symbolv, retp)), get(symbolv, pnls))
 colnames(stockweights)[2] <- "Weight"
 colnamev <- colnames(stockweights)
 endd <- rutils::calc_endpoints(pnls, interval="weeks")

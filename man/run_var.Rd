@@ -61,12 +61,12 @@ The function \code{run_var()} calculates the trailing variance of
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing variance
 lambda <- 0.9
-vars <- HighFreq::run_var(retsp, lambda=lambda)
+vars <- HighFreq::run_var(retp, lambda=lambda)
 # Calculate centered returns
-retc <- (retsp - HighFreq::run_mean(retsp, lambda=lambda))
+retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
 # Calculate trailing variance using R code
 filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
   init=as.numeric(retc[1, 1])^2/(1-lambda), 
@@ -75,7 +75,7 @@ all.equal(vars, unclass(filtered), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_var(retsp, lambda=lambda),
+  Rcpp=HighFreq::run_var(retp, lambda=lambda),
   Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

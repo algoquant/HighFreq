@@ -50,44 +50,44 @@ The function \code{calc_mean()} calculates the mean (location) values of
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Calculate the column means in RcppArmadillo
-HighFreq::calc_mean(retsp)
+HighFreq::calc_mean(retp)
 # Calculate the column means in R
-sapply(retsp, mean)
+sapply(retp, mean)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(retsp)), 
-  sapply(retsp, mean), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(retp)), 
+  sapply(retp, mean), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(retsp),
-  Rcode=sapply(retsp, mean),
+  Rcpp=HighFreq::calc_mean(retp),
+  Rcode=sapply(retp, mean),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the quantile mean (location)
-HighFreq::calc_mean(retsp, method="quantile", confl=0.9)
+HighFreq::calc_mean(retp, method="quantile", confl=0.9)
 # Calculate the quantile mean (location) in R
-colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5))
+colSums(sapply(retp, quantile, c(0.9, 0.1), type=5))
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(retsp, method="quantile", confl=0.9)), 
-  colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5)), 
+all.equal(drop(HighFreq::calc_mean(retp, method="quantile", confl=0.9)), 
+  colSums(sapply(retp, quantile, c(0.9, 0.1), type=5)), 
   check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(retsp, method="quantile", confl=0.9),
-  Rcode=colSums(sapply(retsp, quantile, c(0.9, 0.1), type=5)),
+  Rcpp=HighFreq::calc_mean(retp, method="quantile", confl=0.9),
+  Rcode=colSums(sapply(retp, quantile, c(0.9, 0.1), type=5)),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Calculate the column medians in RcppArmadillo
-HighFreq::calc_mean(retsp, method="nonparametric")
+HighFreq::calc_mean(retp, method="nonparametric")
 # Calculate the column medians in R
-sapply(retsp, median)
+sapply(retp, median)
 # Compare the values
-all.equal(drop(HighFreq::calc_mean(retsp, method="nonparametric")), 
-  sapply(retsp, median), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_mean(retp, method="nonparametric")), 
+  sapply(retp, median), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_mean(retsp, method="nonparametric"),
-  Rcode=sapply(retsp, median),
+  Rcpp=HighFreq::calc_mean(retp, method="nonparametric"),
+  Rcode=sapply(retp, median),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

@@ -51,16 +51,16 @@ The function \code{roll_sumep()} calculates the rolling sums at the end
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define end points at 25 day intervals
-endp <- HighFreq::calc_endpoints(NROW(retsp), step=25)
+endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
 # Define start points as 75 day lag of end points
 startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate rolling sums using Rcpp
-sumc <- HighFreq::roll_sumep(retsp, startp=startp, endp=endp)
+sumc <- HighFreq::roll_sumep(retp, startp=startp, endp=endp)
 # Calculate rolling sums using R code
 sumr <- sapply(1:NROW(endp), function(ep) {
-colSums(retsp[(startp[ep]+1):(endp[ep]+1), ])
+colSums(retp[(startp[ep]+1):(endp[ep]+1), ])
   })  # end sapply
 sumr <- t(sumr)
 all.equal(sumc, sumr, check.attributes=FALSE)

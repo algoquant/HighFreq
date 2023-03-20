@@ -71,22 +71,22 @@ The function \code{calc_scale()} standardizes (centers and scales) the
 \examples{
 \dontrun{
 # Calculate a time series of returns
-retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Demean the returns
-demeaned <- apply(retsp, 2, function(x) (x-mean(x)))
-HighFreq::calc_scale(retsp, scale=FALSE)
-all.equal(demeaned, retsp, check.attributes=FALSE)
+demeaned <- apply(retp, 2, function(x) (x-mean(x)))
+HighFreq::calc_scale(retp, scale=FALSE)
+all.equal(demeaned, retp, check.attributes=FALSE)
 # Calculate a time series of returns
-retsp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Standardize the returns
-retss <- scale(retsp)
-HighFreq::calc_scale(retsp)
-all.equal(retss, retsp, check.attributes=FALSE)
+retss <- scale(retp)
+HighFreq::calc_scale(retp)
+all.equal(retss, retp, check.attributes=FALSE)
 # Compare the speed of Rcpp with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcode=scale(retsp),
-  Rcpp=HighFreq::calc_scale(retsp),
+  Rcode=scale(retp),
+  Rcpp=HighFreq::calc_scale(retp),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

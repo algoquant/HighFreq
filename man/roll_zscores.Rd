@@ -70,11 +70,11 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-respv <- retsp[, 1]
+respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retsp[, -1]
+predv <- retp[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
 zscores <- HighFreq::roll_zscores(respv=respv, predv=predv, look_back)

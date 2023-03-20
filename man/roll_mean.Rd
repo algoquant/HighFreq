@@ -8,16 +8,19 @@ look-back interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_mean(
   tseries,
+  look_back = 1L,
   startp = 0L,
   endp = 0L,
   step = 1L,
-  look_back = 1L,
   stub = 0L,
   method = "moment",
   confl = 0.75
 )
 }
 \arguments{
+\item{\code{look_back}}{The number of end points in the look-back interval
+(the default is \code{look_back = 1}).}
+
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
@@ -28,9 +31,6 @@ is \code{startp = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
-
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -88,29 +88,29 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
 \examples{
 \dontrun{
 # Define time series of returns using package rutils
-retsp <- na.omit(rutils::etfenv$returns$VTI)
+retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling means at 25 day end points, with a 75 day look-back
-meanv <- HighFreq::roll_mean(retsp, step=25, look_back=3)
+meanv <- HighFreq::roll_mean(retp, look_back=3, step=25)
 # Compare the mean estimates over 11-period look-back intervals
-all.equal(HighFreq::roll_mean(retsp, look_back=11)[-(1:10), ], 
-  drop(RcppRoll::roll_mean(retsp, n=11)), check.attributes=FALSE)
+all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
+  drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 # Define end points and start points
-endp <- HighFreq::calc_endpoints(NROW(retsp), step=25)
+endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
 startp <- HighFreq::calc_startpoints(endp, look_back=3)
 # Calculate the rolling means using RcppArmadillo
-meanv <- HighFreq::roll_mean(retsp, startp=startp, endp=endp)
+meanv <- HighFreq::roll_mean(retp, startp=startp, endp=endp)
 # Calculate the rolling medians using RcppArmadillo
-medianscpp <- HighFreq::roll_mean(retsp, startp=startp, endp=endp, method="nonparametric")
+medianscpp <- HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric")
 # Calculate the rolling medians using R
 medians = sapply(1:NROW(endp), function(i) {
-  median(retsp[startp[i]:endp[i] + 1])
+  median(retp[startp[i]:endp[i] + 1])
 })  # end sapply
 all.equal(medians, drop(medianscpp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_mean(retsp, startp=startp, endp=endp, method="nonparametric"),
-  Rcode=sapply(1:NROW(endp), function(i) {median(retsp[startp[i]:endp[i] + 1])}),
+  Rcpp=HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric"),
+  Rcode=sapply(1:NROW(endp), function(i) {median(retp[startp[i]:endp[i] + 1])}),
   times=10))[, c(1, 4, 5)]
 }
 }

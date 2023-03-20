@@ -64,27 +64,27 @@ The function \code{calc_var()} calculates the dispersion of the
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 # Compare HighFreq::calc_var() with standard var()
-all.equal(drop(HighFreq::calc_var(retsp)), 
-  apply(retsp, 2, var), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retp)), 
+  apply(retp, 2, var), check.attributes=FALSE)
 # Compare HighFreq::calc_var() with matrixStats
-all.equal(drop(HighFreq::calc_var(retsp)), 
-  matrixStats::colVars(retsp), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retp)), 
+  matrixStats::colVars(retp), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(retsp),
-  matrixStats=matrixStats::colVars(retsp),
-  Rcode=apply(retsp, 2, var),
+  Rcpp=HighFreq::calc_var(retp),
+  matrixStats=matrixStats::colVars(retp),
+  Rcode=apply(retp, 2, var),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_var() with stats::mad()
-all.equal(drop(HighFreq::calc_var(retsp, method="nonparametric")), 
-  sapply(retsp, mad), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_var(retp, method="nonparametric")), 
+  sapply(retp, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_var(retsp, method="nonparametric"),
-  Rcode=sapply(retsp, mad),
+  Rcpp=HighFreq::calc_var(retp, method="nonparametric"),
+  Rcode=sapply(retp, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

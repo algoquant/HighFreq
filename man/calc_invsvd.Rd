@@ -82,9 +82,9 @@ The function \code{calc_invsvd()} calculates the \emph{regularized
 \examples{
 \dontrun{
 # Calculate ETF returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "TLT", "DBC")])
 # Calculate covariance matrix
-covmat <- cov(retsp)
+covmat <- cov(retp)
 # Calculate matrix inverse using RcppArmadillo
 invmat <- HighFreq::calc_invsvd(covmat)
 # Calculate matrix inverse in R

@@ -37,21 +37,21 @@ The function \code{roll_conv()} calculates the convolutions of the
 \dontrun{
 # First example
 # Calculate a time series of returns
-retsp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
+retp <- na.omit(rutils::etfenv$returns[, c("IEF", "VTI")])
 # Create simple weights equal to a 1 value plus zeros
 weightv <- c(1, rep(0, 10))
 # Calculate rolling weighted sums
-weighted <- HighFreq::roll_conv(retsp, weightv)
+weighted <- HighFreq::roll_conv(retp, weightv)
 # Compare with original
-all.equal(coredata(retsp), weighted, check.attributes=FALSE)
+all.equal(coredata(retp), weighted, check.attributes=FALSE)
 # Second example
 # Calculate exponentially decaying weights
 weightv <- exp(-0.2*(1:11))
 weightv <- weightv/sum(weightv)
 # Calculate rolling weighted sums
-weighted <- HighFreq::roll_conv(retsp, weightv)
+weighted <- HighFreq::roll_conv(retp, weightv)
 # Calculate rolling weighted sums using filter()
-filtered <- filter(x=retsp, filter=weightv, method="convolution", sides=1)
+filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 # Compare both methods
 all.equal(filtered[-(1:11), ], weighted[-(1:11), ], check.attributes=FALSE)
 }

@@ -114,9 +114,9 @@ The function \code{calc_weights()} calculates the optimal portfolio
 \examples{
 \dontrun{
 # Calculate covariance matrix and eigen decomposition of ETF returns
-retsp <- na.omit(rutils::etfenv$returns[, 1:16])
-ncols <- NCOL(retsp)
-eigend <- eigen(cov(retsp))
+retp <- na.omit(rutils::etfenv$returns[, 1:16])
+ncols <- NCOL(retp)
+eigend <- eigen(cov(retp))
 # Calculate regularized inverse of covariance matrix
 dimax <- 3
 eigenvec <- eigend$vectors[, 1:dimax]
@@ -124,18 +124,18 @@ eigenval <- eigend$values[1:dimax]
 invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
 alpha <- 0.5
-colmeans <- colMeans(retsp)
+colmeans <- colMeans(retp)
 colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
 # Calculate weights using R
 weightr <- drop(invmat \%*\% colmeans)
 # Apply weights scaling
-weightr <- weightr*sd(rowMeans(retsp))/sd(retsp \%*\% weightr)
-weightr <- 0.01*weightr/sd(retsp \%*\% weightr)
+weightr <- weightr*sd(rowMeans(retp))/sd(retp \%*\% weightr)
+weightr <- 0.01*weightr/sd(retp \%*\% weightr)
 weightr <- weightr/sqrt(sum(weightr^2))
 # Create a list of portfolio optimization parameters
 controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Calculate weights using RcppArmadillo
-weightcpp <- drop(HighFreq::calc_weights(retsp, controlv=controlv))
+weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
 all.equal(weightcpp, weightr)
 }
 

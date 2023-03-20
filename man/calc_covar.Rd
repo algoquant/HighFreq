@@ -63,23 +63,23 @@ The function \code{calc_covar()} calculates the covariance matrix of the
 \examples{
 \dontrun{
 # Calculate VTI and XLF returns
-retsp <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
+retp <- na.omit(rutils::etfenv$returns[, c("VTI", "XLF")])
 # Compare HighFreq::calc_covar() with standard var()
-all.equal(drop(HighFreq::calc_covar(retsp)), 
-  cov(retsp), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_covar(retp)), 
+  cov(retp), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with matrixStats and with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_covar(retsp),
-  Rcode=cov(retsp),
+  Rcpp=HighFreq::calc_covar(retp),
+  Rcode=cov(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare HighFreq::calc_covar() with stats::mad()
-all.equal(drop(HighFreq::calc_covar(retsp, method="nonparametric")), 
-  sapply(retsp, mad), check.attributes=FALSE)
+all.equal(drop(HighFreq::calc_covar(retp, method="nonparametric")), 
+  sapply(retp, mad), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with stats::mad()
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_covar(retsp, method="nonparametric"),
-  Rcode=sapply(retsp, mad),
+  Rcpp=HighFreq::calc_covar(retp, method="nonparametric"),
+  Rcode=sapply(retp, mad),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

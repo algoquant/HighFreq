@@ -23,8 +23,9 @@ scaling the residuals (the default is \code{method = "none"} - no
 scaling).}
 }
 \value{
-A \emph{matrix} with the regression residuals, alphas, and betas,
-  with the same number of rows as the input argument \code{predv}.
+A \emph{matrix} with the regression betas, alphas, and the residuals
+  (in that order - see details), with the same number of rows as the predictor
+  argument \code{predv}.
 }
 \description{
 Calculate recursively the trailing regressions of streaming \emph{time
@@ -46,16 +47,16 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
   }
   \deqn{
-    cov_t = \lambda cov_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
+    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
   }
   \deqn{
-    \beta_t = \lambda \beta_{t-1} + (1-\lambda) \sigma^{-2}_t cov_t
+    \beta_t = \frac{{cov}_t}{\sigma^2_t}
   }
   \deqn{
     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
   }
   \deqn{
-    \epsilon_t = \lambda \epsilon_{t-1} + (1-\lambda) (r_t - \alpha_t - \beta_t p_t)
+    \epsilon_t = r_t - \alpha_t - \beta_t p_t
   }
   \deqn{
     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
@@ -64,15 +65,12 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
   }
   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
-  \eqn{cov_t} is the covariance matrix between the response and the
-  predictor data,
-  \eqn{\sigma^2_t} is the covariance matrix of the predictors (\eqn{\sigma^{-2}_t}
-  is the inverse of the covariance), and \eqn{\varsigma^2_t} is the
-  residual variance.
+  \eqn{{cov}_t} is the covariance matrix between the response and the
+  predictor data, \eqn{\sigma^2_t} is the covariance matrix of the
+  predictors, and \eqn{\varsigma^2_t} is the residual variance.
 
-  The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and
-  \eqn{\beta} have the same number of rows as the input argument
-  \code{predv}.
+  The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and \eqn{\beta} have
+  the same number of rows as the predictor argument \code{predv}.
 
   The function \code{run_reg()} calculates the regressions with an intercept
   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
@@ -113,25 +111,25 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   Which are equal to the \emph{z-scores}.
 
   The function \code{run_reg()} returns multiple columns of data, with the
-  same number of rows as the input argument \code{predv}. If the matrix
-  \code{predv} has \code{n} columns then \code{run_reg()} returns a
-  matrix with \code{n+2} columns.  The first column contains the
-  \emph{residuals}, the second the \emph{alphas}, and the remaining columns
-  contain the \emph{betas}.
+  same number of rows as the input argument \code{predv}. If the predictor
+  matrix \code{predv} has \code{n} columns then \code{run_reg()} returns a
+  matrix with \code{n+2} columns.  The first \code{n} columns contain the
+  \emph{betas}, the \code{n+1} column the \emph{alphas}, and the last column
+  contains the \emph{residuals}.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
-retsp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
+retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
-respv <- retsp[, 1]
+respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retsp[, -1]
+predv <- retp[, -1]
 # Calculate the trailing regressions
 lambda <- 0.9
 regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
 # Plot the trailing residuals
-datav <- cbind(cumsum(respv), regs[, 1])
+datav <- cbind(cumsum(respv), regs[, 5])
 colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") \%>\%

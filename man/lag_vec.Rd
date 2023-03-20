@@ -48,15 +48,15 @@ The function \code{lag_vec()} applies a lag to the input \emph{time
 \examples{
 \dontrun{
 # Create a vector of random returns
-retsp <- rnorm(1e6)
+retp <- rnorm(1e6)
 # Compare lag_vec() with rutils::lagit()
-all.equal(drop(HighFreq::lag_vec(retsp)), 
-  rutils::lagit(retsp))
+all.equal(drop(HighFreq::lag_vec(retp)), 
+  rutils::lagit(retp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::lag_vec(retsp),
-  Rcode=rutils::lagit(retsp),
+  Rcpp=HighFreq::lag_vec(retp),
+  Rcode=rutils::lagit(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 
