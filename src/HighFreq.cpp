@@ -1003,10 +1003,10 @@ std::vector<double> decode_it(Rcpp::List encodel) {
 //'   
 //'   The \code{Armadillo} function \code{arma::sort_index()} calculates the
 //'   permutation index which sorts a given vector into an ascending order.
-//'   Applying the function \code{arma::sort_index()} twice:
-//'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-//'   permutation index to sort the vector from ascending order back into its
-//'   original unsorted order.
+//'   Applying the function \code{arma::sort_index()} twice:\cr
+//'   \code{arma::sort_index(arma::sort_index())},\cr
+//'   calculates the \emph{reverse} permutation index to sort the vector from
+//'   ascending order back into its original unsorted order.
 //'   
 //'   The function \code{calc_ranks()} calls the \code{Armadillo} function
 //'   \code{arma::sort_index()} twice to calculate the \emph{reverse}
@@ -2224,19 +2224,19 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
 //' # Create simple weights equal to a 1 value plus zeros
 //' weightv <- c(1, rep(0, 10))
 //' # Calculate rolling weighted sums
-//' weighted <- HighFreq::roll_conv(retp, weightv)
+//' retf <- HighFreq::roll_conv(retp, weightv)
 //' # Compare with original
-//' all.equal(coredata(retp), weighted, check.attributes=FALSE)
+//' all.equal(coredata(retp), retf, check.attributes=FALSE)
 //' # Second example
 //' # Calculate exponentially decaying weights
 //' weightv <- exp(-0.2*(1:11))
 //' weightv <- weightv/sum(weightv)
 //' # Calculate rolling weighted sums
-//' weighted <- HighFreq::roll_conv(retp, weightv)
+//' retf <- HighFreq::roll_conv(retp, weightv)
 //' # Calculate rolling weighted sums using filter()
-//' filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
+//' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 //' # Compare both methods
-//' all.equal(filtered[-(1:11), ], weighted[-(1:11), ], check.attributes=FALSE)
+//' all.equal(retc[-(1:11), ], retf[-(1:11), ], check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -2337,7 +2337,7 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' datav <- cbind(retp$VTI, sumc[, 1])
 //' colnames(datav) <- c("VTI", "Weighted")
 //' endp <- rutils::calc_endpoints(datav, interval="weeks")
-//' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) %>% 
+//' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) %>% 
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 //'   dyLegend(width=300)
 //' }
@@ -2617,12 +2617,12 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Calculate rolling weighted sum
 //' sumc <- HighFreq::roll_sumw(retp, weightv=weightv)
 //' # Calculate rolling weighted sum using filter()
-//' filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
-//' all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
+//' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
+//' all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
 //' sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-//' all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
+//' all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
 //' weightv <- matrix(c(1, rep(0, 10)), nc=1)
@@ -2788,10 +2788,10 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' lambda <- 0.95
 //' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
 //' # Calculate trailing means using R code
-//' filtered <- (1-lambda)*filter(closep, 
+//' pricef <- (1-lambda)*filter(closep, 
 //'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
 //'   method="recursive")
-//' all.equal(drop(meanv), unclass(filtered), check.attributes=FALSE)
+//' all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 //' 
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
@@ -3085,10 +3085,10 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' # Calculate centered returns
 //' retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
 //' # Calculate trailing variance using R code
-//' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+//' retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
 //'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 //'   method="recursive")
-//' all.equal(vars, unclass(filtered), check.attributes=FALSE)
+//' all.equal(vars, unclass(retc2), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -3725,10 +3725,10 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //' lambda <- 0.9
 //' covars <- HighFreq::run_covar(retp, lambda=lambda)
 //' # Calculate trailing covariance using R code
-//' filtered <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
+//' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
 //'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
 //'   method="recursive")
-//' all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
+//' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
 //' # Calculate the trailing correlation
 //' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 //' }
@@ -5793,7 +5793,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' variance <- HighFreq::roll_var(retp, look_back=3, step=25)
+//' varv <- HighFreq::roll_var(retp, look_back=3, step=25)
 //' # Compare the variance estimates over 11-period look-back intervals
 //' all.equal(HighFreq::roll_var(retp, look_back=11)[-(1:10), ], 
 //'   drop(RcppRoll::roll_var(retp, n=11)), check.attributes=FALSE)
@@ -7454,11 +7454,11 @@ arma::mat sim_schwartz(double init_price,
 //' # Calculate matrix of innovations
 //' innov <- matrix(rnorm(1e4, sd=0.01))
 //' # Calculate recursive filter using filter()
-//' filtered <- filter(innov, filter=coeff, method="recursive")
+//' innof <- filter(innov, filter=coeff, method="recursive")
 //' # Calculate recursive filter using RcppArmadillo
 //' retp <- HighFreq::sim_ar(coeff, innov)
 //' # Compare the two methods
-//' all.equal(as.numeric(retp), as.numeric(filtered))
+//' all.equal(as.numeric(retp), as.numeric(innof))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -7696,25 +7696,25 @@ double lik_garch(double omega,
 //'   the same number of rows as the argument \code{rets}.
 //'   
 //' @details
-//'   The function \code{run_portf()} simulates a portfolio optimization
+//'   The function \code{sim_portfoptim()} simulates a portfolio optimization
 //'   strategy. The strategy calculates the maximum Sharpe portfolio weights
 //'   \emph{in-sample} at every point in time, and applies them in the
 //'   \emph{out-of-sample} time interval.  It updates the trailing covariance
 //'   matrix recursively, instead of using past batches of data. The function
-//'   \code{run_portf()} uses three different decay factors for averaging past
+//'   \code{sim_portfoptim()} uses three different decay factors for averaging past
 //'   values, to reduce the variance of its forecasts.
 //'   
-//'   The function \code{run_portf()} first scales the returns by their trailing
-//'   volatilities:
+//'   The function \code{sim_portfoptim()} first scales the returns by their
+//'   trailing volatilities:
 //'   \deqn{
 //'     r^s_t = \frac{r_t}{\sigma_{t-1}}
 //'   }
 //'   Returns scaled by their volatility are more stationary so they're easier
 //'   to model.
 //'   
-//'   Then at every point in time, the function \code{run_portf()} calls the
-//'   function \code{HighFreq::push_covar()} to update the trailing covariance
-//'   matrix of the returns:
+//'   Then at every point in time, the function \code{sim_portfoptim()} calls
+//'   the function \code{HighFreq::push_covar()} to update the trailing
+//'   covariance matrix of the returns:
 //'   \deqn{
 //'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
 //'   }
@@ -7771,10 +7771,10 @@ double lik_garch(double omega,
 //'   dollars.  Trading stock amounts with unit dollar volatility improves
 //'   portfolio diversification.
 //'   
-//'   The function \code{run_portf()} uses three different decay factors for
-//'   averaging past values, to reduce the variance of its forecasts. The value
-//'   of the decay factor \eqn{\lambda} must be in the range between \code{0}
-//'   and \code{1}.
+//'   The function \code{sim_portfoptim()} uses three different decay factors
+//'   for averaging past values, to reduce the variance of its forecasts. The
+//'   value of the decay factor \eqn{\lambda} must be in the range between
+//'   \code{0} and \code{1}.
 //'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 //'   values have a greater weight, so the trailing values have a greater
 //'   dependence on past data.  This is equivalent to a long look-back
@@ -7784,9 +7784,9 @@ double lik_garch(double omega,
 //'   dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
-//'   The function \code{run_portf()} returns multiple columns of data, with the
-//'   same number of rows as the input argument \code{rets}. The first column
-//'   contains the strategy returns and the remaining columns contain the
+//'   The function \code{sim_portfoptim()} returns multiple columns of data,
+//'   with the same number of rows as the input argument \code{rets}. The first
+//'   column contains the strategy returns and the remaining columns contain the
 //'   portfolio weights.
 //'   
 //' @examples
@@ -7800,7 +7800,7 @@ double lik_garch(double omega,
 //' lambda <- 0.978
 //' lambdacov <- 0.995
 //' lambdaw <- 0.9
-//' pnls <- HighFreq::run_portf(retp, dimax, lambda, lambdacov, lambdaw)
+//' pnls <- HighFreq::sim_portfoptim(retp, dimax, lambda, lambdacov, lambdaw)
 //' colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 //' pnls <- xts::xts(pnls, order.by=datev)
 //' # Plot dygraph of strategy
@@ -7825,11 +7825,11 @@ double lik_garch(double omega,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_portf(const arma::mat& rets, // Asset returns
-                    const arma::uword& dimax, // Number of eigen vectors for dimension reduction
-                    const double& lambda, // Returns decay factor
-                    const double& lambdacov, // Covariance decay factor
-                    const double& lambdaw) { // Weight decay factor
+arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
+                         const arma::uword& dimax, // Number of eigen vectors for dimension reduction
+                         const double& lambda, // Returns decay factor
+                         const double& lambdacov, // Covariance decay factor
+                         const double& lambdaw) { // Weight decay factor
   
   arma::uword nrows = rets.n_rows;
   arma::uword ncols = rets.n_cols;
@@ -7879,7 +7879,7 @@ arma::mat run_portf(const arma::mat& rets, // Asset returns
   // Return the strategy returns and the portfolio weights
   return arma::join_rows(stratret, weightv);
   
-}  // end run_portf
+}  // end sim_portfoptim
 
 
 

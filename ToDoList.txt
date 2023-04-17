@@ -89,6 +89,11 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
+
++ [ ] Modify run_min() and run_max() to calculate the trailing, volume weighted minimum and maximum of OHLC prices
+Follow the example of run_mean() and use OHLC prices and add an extra parameter weightv.
+
 + [ ] Add t-values of the alpha and betas to run_reg()?
 
 + [ ] Compare the outputs of functions run_reg() versus roll_reg()
@@ -98,11 +103,13 @@ Find the lambda parameter which produces similar values for a given look_back pa
 Nadagouda Recursive Least Squares Regression Kalman Filter.pdf
 https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
+
 + [ ] Create the function run_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
 Validate the principal components produced by push_eigen().
-The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So run_portf() needs logic that ensures that the weights change gradually.
+The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So sim_portfoptim() needs logic that ensures that the weights change gradually.
 
-+ [ ] Modify run_portf() - Perform matrix inverse only if covariance matrix changes significantly
++ [ ] Modify sim_portfoptim() - Perform matrix inverse only if covariance matrix changes significantly
 
 + [ ] Modify calc_eigen() - pass the eigenvalues and eigenvectors by reference instead of returning list - adapt push_eigen()
 Void (no return value - modifies the data in place).
@@ -166,8 +173,6 @@ https://stackoverflow.com/questions/13995266/using-3rd-party-header-files-with-r
 https://stackoverflow.com/questions/14268245/using-header-h-files-with-cpp-files-in-an-r-package-with-rcpp
 https://stackoverflow.com/questions/50413660/linking-to-another-package-undefined-symbol
 
-+ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
-
 + [ ] Modify all the calc_*() and run_*() functions to remove zero values from the data since these are missing values, so they skew the outputs
 
 + [ ] Replace the word "running" with "online" or "streaming"
@@ -180,7 +185,7 @@ https://stackoverflow.com/questions/50413660/linking-to-another-package-undefine
 
 + [ ] Enhance the function calc_var() to calculate the variance for overlapping aggregated returns: the variance of returns aggregated over k time periods - the prototype is in test_temp.cpp
 
-+ [ ] Modify roll_zscores() so it updates the previous regression, instead of performing a new regression at every point in time
++ [ ] Modify roll_reg() so it updates the previous regression, instead of performing a new regression at every point in time
 
 + [ ] Make function back_test() parallel using package RcppParallel
 
@@ -313,9 +318,9 @@ Worker agg_ohlc()
 
 + [ ] Fix scaling in calc_weights() ?
 
-+ [ ] Explain why roll_wsum() is slower than filter()
++ [ ] Explain why roll_sumw() is slower than filter()
 
-+ [ ] Explain why roll_wsum() output is different from roll_conv()
++ [ ] Explain why roll_sumw() output is different from roll_conv()
 
 + [ ] Create function calc_drawd() for calculating the drawdown in R code
 
@@ -376,8 +381,6 @@ https://cran.r-project.org/web/packages/roxygen2/vignettes/rd.html#inheriting-do
 https://stackoverflow.com/questions/65739109/r-r6-inheritance-with-roxygen2-class-parentclass-is-not-exported-by-namespa
 
 + [ ] Add unit testing using testthat and devtools: create /tests directory
-
-+ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum() ? 
 
 + [ ] Convert function calls to roll functions from package RcppRoll to native Rcpp functions: roll_max() and roll_var()
 
@@ -560,7 +563,7 @@ It should simply be:
 run_zscores() has errors in the code and in the documentation.
 For example, the means are not subtracted from the returns before squaring them.
 
-+ [x] Create the function run_portf() to simulate a running portfolio optimization strategy
++ [x] Create the function sim_portfoptim() to simulate a running portfolio optimization strategy
 Output the weights.  Average the weights.
 
 + [x] Modify calc_inv() - perform eigen decomposition instead of SVD
@@ -837,7 +840,7 @@ run_mean(), run_var(), run_covar(), run_zscore(), run_max(), run_min()
 + [x] Modify the functions which depend on calc_endpoints(): roll_reg(), roll_var(), roll_var_ohlc(), roll_skew(), roll_kurtosis(), roll_zscores()
 Add arguments end_p and start_p and keep arguments step, stu_b, and look_back.
 Add code to use end_p if it's non-zero, else to calculate end points from step, stu_b, and look_back.
-Follow example of roll_wsum().
+Follow example of roll_sumw().
 
 + [x] Remove underscores from function arguments: rename stu_b to stub, oh_lc, weight_s, re_turns, se_ries, end_p, start_p
 
@@ -866,7 +869,7 @@ It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 
 + [x] Merge function calc_mad() into calc_var() - add parameter "method" to calc_var()
 
-+ [x] In roll_wsum(), fix the naming conflict with the end_p argument, by declaring an internal Armadillo variable end_parma
++ [x] In roll_sumw(), fix the naming conflict with the end_p argument, by declaring an internal Armadillo variable end_parma
 
 + [x] Fill new vectors and matrices with zeros using fill::zeros
 
@@ -876,7 +879,7 @@ It's already implemented in C:/Develop/R/Rcpp/roll_skew.cpp
 
 + [x] Rename argument t_series to se_ries
 
-+ [x] Rename roll_sum() to roll_wsum()
++ [x] Rename roll_sum() to roll_sumw()
 
 + [x] Create function roll_sum() for calculating a simple rolling sum over the columns of a matrix, without weighting or end points
 
@@ -893,13 +896,13 @@ Calculate the nonparametric skewness estimator using the quantiles: skewness = (
 roll_count() is already in lm_arma.cpp.
 roll_count() should count the number of consecutive TRUE elements, and reset to zero after every FALSE element.
 
-+ [x] Rename roll_sum() to roll_vec(), and roll_wsum() to roll_vecw()
++ [x] Rename roll_sum() to roll_vec(), and roll_sumw() to roll_vecw()
 
 + [x] Modify the old function roll_sum() so that it accepts matrix argument and calculates the rolling sum over the columns of a matrix
 Modify function roll_sum() to use arma::cumsum() and diff_it(), instead of explicit loop.
 Function roll_sum() aggregates returns to a lower periodicity, similar to roll_ohlc().
 If weight_s argument is not NULL, then perform weighted sum using convolution and function arma::conv2().
-It would then replicate functions roll_wsum(), roll_conv(), and roll_conv_ref().
+It would then replicate functions roll_sumw(), roll_conv(), and roll_conv_ref().
 Pass in parameters end_points and weight_s with default NULL values, using the syntax:
 Rcpp::Nullable<Rcpp::IntegerVector> end_points = R_NilValue
 https://stackoverflow.com/questions/34205925/default-null-parameter-rcpp
@@ -950,8 +953,8 @@ Copying over the input argument mat_rix causes snooping data leak in backtest.
 
 + [x] Test the function roll_conv() to determine if it applies convolution only over past values.
 
-+ [x] Rename function roll_wsum() to roll_conv(), because it replicates convolution - no!
-The function roll_wsum() is for vectors and is not the same as roll_conv() which is for matrices.
++ [x] Rename function roll_sumw() to roll_conv(), because it replicates convolution - no!
+The function roll_sumw() is for vectors and is not the same as roll_conv() which is for matrices.
 
 + [x] Create RcppArmadillo function calc_ranks() for calculating the ranks of the elements of a vector.
 
@@ -1083,7 +1086,7 @@ Adapt code from /Users/jerzy/Develop/lecture_slides/scripts/sim_arima.cpp
 
 + [x] Add calc_* functions using RcppArmadillo: calc_eigen(), calc_inv(), calc_scale(), calc_lm(), calc_weights()
 
-+ [x] Add roll_* functions using RcppArmadillo: roll_wsum(), roll_zscores(), roll_scale(), roll_portf()
++ [x] Add roll_* functions using RcppArmadillo: roll_sumw(), roll_zscores(), roll_scale(), roll_portf()
 
 + [x] Create function remove_jumps() to remove overnight close-to-open jumps from OHLC (?)  
 
@@ -1245,6 +1248,8 @@ created function save_rets_OHLC()
 
 ### Tasks deprecated
 
++ [ ] Modify function roll_vwap() so that it calls RcppRoll::roll_sum()
+
 + [ ] Link HighFreq to ARPACK-Armadillo library - the ARPACK functions are already implemented in Armadillo as the eigen solver SymEigsSolver in the namespace arma::newarp
 Use ARPACK-Armadillo - but how to link it with Armadillo?
 I'd like to call your ARPACK-Armadillo functions in my RcppArmadillo package.
@@ -1284,7 +1289,7 @@ For example, rename function diff_it() as do_diff()
 + [ ] Remove unnecessary pointer "&" and "const" attributes from input arguments - No!
 Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.
 
-+ [ ] In function roll_wsum() add argument start_p - it's not needed because the length of weights determines the start points
++ [ ] In function roll_sumw() add argument start_p - it's not needed because the length of weights determines the start points
 
 + [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 
