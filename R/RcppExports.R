@@ -81,7 +81,7 @@ NULL
 #' 
 #' @export
 param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0) {
-    .Call('_HighFreq_param_reg', PACKAGE = 'HighFreq', method, intercept, eigen_thresh, dimax, confl, alpha)
+    .Call(`_HighFreq_param_reg`, method, intercept, eigen_thresh, dimax, confl, alpha)
 }
 
 #' Create a named list of model parameters that can be passed into portfolio
@@ -145,7 +145,7 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #' 
 #' @export
 param_portf <- function(method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.001) {
-    .Call('_HighFreq_param_portf', PACKAGE = 'HighFreq', method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
+    .Call(`_HighFreq_param_portf`, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
 }
 
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
@@ -200,7 +200,7 @@ param_portf <- function(method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, con
 #' 
 #' @export
 lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_lag_vec', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+    .Call(`_HighFreq_lag_vec`, tseries, lagg, pad_zeros)
 }
 
 #' Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
@@ -252,7 +252,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_lagit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+    .Call(`_HighFreq_lagit`, tseries, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
@@ -306,7 +306,7 @@ lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_diff_vec', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+    .Call(`_HighFreq_diff_vec`, tseries, lagg, pad_zeros)
 }
 
 #' Calculate the row differences of a \emph{time series} or a \emph{matrix}
@@ -375,7 +375,7 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #' @export
 diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call('_HighFreq_diffit', PACKAGE = 'HighFreq', tseries, lagg, pad_zeros)
+    .Call(`_HighFreq_diffit`, tseries, lagg, pad_zeros)
 }
 
 #' Calculate a vector of end points that divides an integer time sequence of
@@ -481,7 +481,7 @@ diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'
 #' @export
 calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
-    .Call('_HighFreq_calc_endpoints', PACKAGE = 'HighFreq', length, step, stub, stubs)
+    .Call(`_HighFreq_calc_endpoints`, length, step, stub, stubs)
 }
 
 #' Calculate a vector of start points by lagging (shifting) a vector of end
@@ -519,7 +519,7 @@ calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
 #'
 #' @export
 calc_startpoints <- function(endp, look_back) {
-    .Call('_HighFreq_calc_startpoints', PACKAGE = 'HighFreq', endp, look_back)
+    .Call(`_HighFreq_calc_startpoints`, endp, look_back)
 }
 
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
@@ -548,7 +548,7 @@ calc_startpoints <- function(endp, look_back) {
 #' }
 #' @export
 roll_count <- function(tseries) {
-    .Call('_HighFreq_roll_count', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_roll_count`, tseries)
 }
 
 #' Calculate the run length encoding of a single-column \emph{time series},
@@ -586,7 +586,7 @@ roll_count <- function(tseries) {
 #' 
 #' @export
 encode_it <- function(tseries) {
-    .Call('_HighFreq_encode_it', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_encode_it`, tseries)
 }
 
 #' Calculate the \emph{vector} of data from its run length encoding.
@@ -626,7 +626,7 @@ encode_it <- function(tseries) {
 #' 
 #' @export
 decode_it <- function(encodel) {
-    .Call('_HighFreq_decode_it', PACKAGE = 'HighFreq', encodel)
+    .Call(`_HighFreq_decode_it`, encodel)
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
@@ -656,10 +656,10 @@ decode_it <- function(encodel) {
 #'   
 #'   The \code{Armadillo} function \code{arma::sort_index()} calculates the
 #'   permutation index which sorts a given vector into an ascending order.
-#'   Applying the function \code{arma::sort_index()} twice:
-#'   \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-#'   permutation index to sort the vector from ascending order back into its
-#'   original unsorted order.
+#'   Applying the function \code{arma::sort_index()} twice:\cr
+#'   \code{arma::sort_index(arma::sort_index())},\cr
+#'   calculates the \emph{reverse} permutation index to sort the vector from
+#'   ascending order back into its original unsorted order.
 #'   
 #'   The function \code{calc_ranks()} calls the \code{Armadillo} function
 #'   \code{arma::sort_index()} twice to calculate the \emph{reverse}
@@ -682,7 +682,7 @@ decode_it <- function(encodel) {
 #' 
 #' @export
 calc_ranks <- function(tseries) {
-    .Call('_HighFreq_calc_ranks', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_calc_ranks`, tseries)
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
@@ -740,11 +740,11 @@ calc_ranks <- function(tseries) {
 #' 
 #' @export
 calc_ranks_stl <- function(tseries) {
-    .Call('_HighFreq_calc_ranks_stl', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_calc_ranks_stl`, tseries)
 }
 
 remove_dup <- function(stringv) {
-    .Call('_HighFreq_remove_dup', PACKAGE = 'HighFreq', stringv)
+    .Call(`_HighFreq_remove_dup`, stringv)
 }
 
 #' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
@@ -820,7 +820,7 @@ remove_dup <- function(stringv) {
 #' 
 #' @export
 mult_mat <- function(vectorv, matrixv, byrow = TRUE) {
-    .Call('_HighFreq_mult_mat', PACKAGE = 'HighFreq', vectorv, matrixv, byrow)
+    .Call(`_HighFreq_mult_mat`, vectorv, matrixv, byrow)
 }
 
 #' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
@@ -900,7 +900,7 @@ mult_mat <- function(vectorv, matrixv, byrow = TRUE) {
 #' 
 #' @export
 mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
-    invisible(.Call('_HighFreq_mult_mat_ref', PACKAGE = 'HighFreq', vectorv, matrixv, byrow))
+    invisible(.Call(`_HighFreq_mult_mat_ref`, vectorv, matrixv, byrow))
 }
 
 #' Calculate the eigen decomposition of a square, symmetric matrix using
@@ -949,7 +949,7 @@ mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
 #' 
 #' @export
 calc_eigen <- function(matrixv, eigenval, eigenvec) {
-    invisible(.Call('_HighFreq_calc_eigen', PACKAGE = 'HighFreq', matrixv, eigenval, eigenvec))
+    invisible(.Call(`_HighFreq_calc_eigen`, matrixv, eigenval, eigenvec))
 }
 
 #' Calculate the partial eigen decomposition of a dense symmetric matrix using
@@ -1009,7 +1009,7 @@ calc_eigen <- function(matrixv, eigenval, eigenvec) {
 #' 
 #' @export
 calc_eigenp <- function(matrixv, neigen) {
-    .Call('_HighFreq_calc_eigenp', PACKAGE = 'HighFreq', matrixv, neigen)
+    .Call(`_HighFreq_calc_eigenp`, matrixv, neigen)
 }
 
 #' Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
@@ -1100,7 +1100,7 @@ calc_eigenp <- function(matrixv, neigen) {
 #' 
 #' @examples
 calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
-    .Call('_HighFreq_calc_inv', PACKAGE = 'HighFreq', matrixv, dimax, eigen_thresh)
+    .Call(`_HighFreq_calc_inv`, matrixv, dimax, eigen_thresh)
 }
 
 #' Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
@@ -1195,7 +1195,7 @@ calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #' 
 #' @export
 calc_invsvd <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
-    .Call('_HighFreq_calc_invsvd', PACKAGE = 'HighFreq', matrixv, dimax, eigen_thresh)
+    .Call(`_HighFreq_calc_invsvd`, matrixv, dimax, eigen_thresh)
 }
 
 #' Calculate the approximate inverse of a square \emph{matrix} recursively
@@ -1261,7 +1261,7 @@ calc_invsvd <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #' 
 #' @export
 calc_invrec <- function(matrixv, invmat, niter = 1L) {
-    invisible(.Call('_HighFreq_calc_invrec', PACKAGE = 'HighFreq', matrixv, invmat, niter))
+    invisible(.Call(`_HighFreq_calc_invrec`, matrixv, invmat, niter))
 }
 
 #' Calculate the inverse of a square \emph{matrix} in place, without copying
@@ -1311,7 +1311,7 @@ calc_invrec <- function(matrixv, invmat, niter = 1L) {
 #' 
 #' @export
 calc_invref <- function(matrixv) {
-    invisible(.Call('_HighFreq_calc_invref', PACKAGE = 'HighFreq', matrixv))
+    invisible(.Call(`_HighFreq_calc_invref`, matrixv))
 }
 
 #' Standardize (center and scale) the columns of a \emph{time series} of data
@@ -1396,7 +1396,7 @@ calc_invref <- function(matrixv) {
 #' 
 #' @export
 calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE) {
-    invisible(.Call('_HighFreq_calc_scale', PACKAGE = 'HighFreq', tseries, center, scale, use_median))
+    invisible(.Call(`_HighFreq_calc_scale`, tseries, center, scale, use_median))
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -1443,7 +1443,7 @@ calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE)
 #' 
 #' @export
 agg_ohlc <- function(tseries) {
-    .Call('_HighFreq_agg_ohlc', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_agg_ohlc`, tseries)
 }
 
 #' Aggregate a time series to an \emph{OHLC} time series with lower
@@ -1491,7 +1491,7 @@ agg_ohlc <- function(tseries) {
 #' 
 #' @export
 roll_ohlc <- function(tseries, endp) {
-    .Call('_HighFreq_roll_ohlc', PACKAGE = 'HighFreq', tseries, endp)
+    .Call(`_HighFreq_roll_ohlc`, tseries, endp)
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -1525,24 +1525,24 @@ roll_ohlc <- function(tseries, endp) {
 #' # Create simple weights equal to a 1 value plus zeros
 #' weightv <- c(1, rep(0, 10))
 #' # Calculate rolling weighted sums
-#' weighted <- HighFreq::roll_conv(retp, weightv)
+#' retf <- HighFreq::roll_conv(retp, weightv)
 #' # Compare with original
-#' all.equal(coredata(retp), weighted, check.attributes=FALSE)
+#' all.equal(coredata(retp), retf, check.attributes=FALSE)
 #' # Second example
 #' # Calculate exponentially decaying weights
 #' weightv <- exp(-0.2*(1:11))
 #' weightv <- weightv/sum(weightv)
 #' # Calculate rolling weighted sums
-#' weighted <- HighFreq::roll_conv(retp, weightv)
+#' retf <- HighFreq::roll_conv(retp, weightv)
 #' # Calculate rolling weighted sums using filter()
-#' filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
+#' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 #' # Compare both methods
-#' all.equal(filtered[-(1:11), ], weighted[-(1:11), ], check.attributes=FALSE)
+#' all.equal(retc[-(1:11), ], retf[-(1:11), ], check.attributes=FALSE)
 #' }
 #' 
 #' @export
 roll_conv <- function(tseries, weightv) {
-    .Call('_HighFreq_roll_conv', PACKAGE = 'HighFreq', tseries, weightv)
+    .Call(`_HighFreq_roll_conv`, tseries, weightv)
 }
 
 #' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -1622,14 +1622,14 @@ roll_conv <- function(tseries, weightv) {
 #' datav <- cbind(retp$VTI, sumc[, 1])
 #' colnames(datav) <- c("VTI", "Weighted")
 #' endp <- rutils::calc_endpoints(datav, interval="weeks")
-#' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) %>% 
+#' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) %>% 
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 #'   dyLegend(width=300)
 #' }
 #' 
 #' @export
 roll_sum <- function(tseries, look_back = 1L, weightv = 0L) {
-    .Call('_HighFreq_roll_sum', PACKAGE = 'HighFreq', tseries, look_back, weightv)
+    .Call(`_HighFreq_roll_sum`, tseries, look_back, weightv)
 }
 
 #' Calculate the rolling sums at the end points of a \emph{time series} or a
@@ -1683,7 +1683,7 @@ roll_sum <- function(tseries, look_back = 1L, weightv = 0L) {
 #' 
 #' @export
 roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call('_HighFreq_roll_sumep', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub)
+    .Call(`_HighFreq_roll_sumep`, tseries, startp, endp, step, look_back, stub)
 }
 
 #' Calculate the rolling weighted sums over a \emph{time series} or a
@@ -1785,12 +1785,12 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' # Calculate rolling weighted sum
 #' sumc <- HighFreq::roll_sumw(retp, weightv=weightv)
 #' # Calculate rolling weighted sum using filter()
-#' filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
-#' all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
+#' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
+#' all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 #' 
 #' # Calculate rolling weighted sums at end points
 #' sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-#' all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
+#' all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
 #' 
 #' # Create simple weights equal to a 1 value plus zeros
 #' weightv <- matrix(c(1, rep(0, 10)), nc=1)
@@ -1802,10 +1802,11 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' 
 #' @export
 roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL) {
-    .Call('_HighFreq_roll_sumw', PACKAGE = 'HighFreq', tseries, endp, look_back, stub, weightv)
+    .Call(`_HighFreq_roll_sumw`, tseries, endp, look_back, stub, weightv)
 }
 
-#' Calculate the trailing weighted means of streaming \emph{time series} data.
+#' Calculate the trailing weighted means of streaming \emph{time series} data
+#' using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1855,8 +1856,9 @@ roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #'     \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
 #'   }
 #' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data.
 #'   The formulas are equivalent to a convolution with exponentially decaying
 #'   weights, but they're much faster to calculate.
 #'   Using exponentially decaying weights is more natural than using a sliding
@@ -1886,18 +1888,18 @@ roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' ohlc <- rutils::etfenv$VTI
 #' closep <- quantmod::Cl(ohlc)
 #' # Calculate the trailing means
-#' lambda <- 0.95
-#' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
+#' lambda <- 0.9
+#' meanv <- HighFreq::run_mean(closep, lambda=lambda)
 #' # Calculate trailing means using R code
-#' filtered <- (1-lambda)*filter(closep, 
+#' pricef <- (1-lambda)*filter(closep, 
 #'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
 #'   method="recursive")
-#' all.equal(drop(meanv), unclass(filtered), check.attributes=FALSE)
+#' all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 #' 
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv = 0),
+#'   Rcpp=HighFreq::run_mean(closep, lambda=lambda),
 #'   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #'   
@@ -1910,15 +1912,16 @@ roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' colnames(datav) <- c("means trailing", "means weighted")
 #' dygraphs::dygraph(datav, main="Trailing Means") %>%
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
-#'   dyLegend(show="always", width=500)
+#'   dyLegend(show="always", width=300)
 #' }
 #' 
 #' @export
 run_mean <- function(tseries, lambda, weightv = 0L) {
-    .Call('_HighFreq_run_mean', PACKAGE = 'HighFreq', tseries, lambda, weightv)
+    .Call(`_HighFreq_run_mean`, tseries, lambda, weightv)
 }
 
-#' Calculate the trailing maximum values of streaming \emph{time series} data.
+#' Calculate the trailing maximum values of streaming \emph{time series} data
+#' using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -1982,10 +1985,11 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' 
 #' @export
 run_max <- function(tseries, lambda) {
-    .Call('_HighFreq_run_max', PACKAGE = 'HighFreq', tseries, lambda)
+    .Call(`_HighFreq_run_max`, tseries, lambda)
 }
 
-#' Calculate the trailing minimum values of streaming \emph{time series} data.
+#' Calculate the trailing minimum values of streaming \emph{time series} data
+#' using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
@@ -2049,10 +2053,11 @@ run_max <- function(tseries, lambda) {
 #' 
 #' @export
 run_min <- function(tseries, lambda) {
-    .Call('_HighFreq_run_min', PACKAGE = 'HighFreq', tseries, lambda)
+    .Call(`_HighFreq_run_min`, tseries, lambda)
 }
 
-#' Calculate the trailing variance of streaming \emph{time series} of returns.
+#' Calculate the trailing variance of streaming \emph{time series} of returns
+#' using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 #' 
@@ -2076,8 +2081,9 @@ run_min <- function(tseries, lambda) {
 #'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 #'   \eqn{r_t} are the streaming returns data.
 #' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data.
 #'   The formulas are equivalent to a convolution with exponentially decaying
 #'   weights, but they're much faster to calculate.
 #'   Using exponentially decaying weights is more natural than using a sliding
@@ -2111,10 +2117,10 @@ run_min <- function(tseries, lambda) {
 #' # Calculate centered returns
 #' retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
 #' # Calculate trailing variance using R code
-#' filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+#' retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
 #'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 #'   method="recursive")
-#' all.equal(vars, unclass(filtered), check.attributes=FALSE)
+#' all.equal(vars, unclass(retc2), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -2125,10 +2131,11 @@ run_min <- function(tseries, lambda) {
 #' 
 #' @export
 run_var <- function(tseries, lambda) {
-    .Call('_HighFreq_run_var', PACKAGE = 'HighFreq', tseries, lambda)
+    .Call(`_HighFreq_run_var`, tseries, lambda)
 }
 
-#' Calculate the trailing variance of streaming \emph{OHLC} price data.
+#' Calculate the trailing variance of streaming \emph{OHLC} price data using an
+#' online recursive formula.
 #' 
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 #'   price data.
@@ -2186,7 +2193,7 @@ run_var <- function(tseries, lambda) {
 #' # dygraph plot of VTI trailing versus rolling volatility
 #' dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility of VTI") %>%
 #'   dyOptions(colors=c("red", "blue"), strokeWidth=2) %>%
-#'   dyLegend(show="always", width=500)
+#'   dyLegend(show="always", width=300)
 #' # Compare the speed of trailing versus rolling volatility
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -2196,7 +2203,7 @@ run_var <- function(tseries, lambda) {
 #' }
 #' @export
 run_var_ohlc <- function(ohlc, lambda) {
-    .Call('_HighFreq_run_var_ohlc', PACKAGE = 'HighFreq', ohlc, lambda)
+    .Call(`_HighFreq_run_var_ohlc`, ohlc, lambda)
 }
 
 #' Calculate the correlation matrix from the covariance matrix.
@@ -2228,11 +2235,11 @@ run_var_ohlc <- function(ohlc, lambda) {
 #' 
 #' @export
 push_cov2cor <- function(covmat) {
-    invisible(.Call('_HighFreq_push_cov2cor', PACKAGE = 'HighFreq', covmat))
+    invisible(.Call(`_HighFreq_push_cov2cor`, covmat))
 }
 
 #' Update the trailing covariance matrix of streaming asset returns,
-#' with a row of new returns.
+#' with a row of new returns using an online recursive formula.
 #' 
 #' @param \code{retsn} A \emph{vector} of new asset returns.
 #' 
@@ -2306,7 +2313,7 @@ push_cov2cor <- function(covmat) {
 #' 
 #' @export
 push_covar <- function(retsn, covmat, meanv, lambdacov) {
-    invisible(.Call('_HighFreq_push_covar', PACKAGE = 'HighFreq', retsn, covmat, meanv, lambdacov))
+    invisible(.Call(`_HighFreq_push_covar`, retsn, covmat, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
@@ -2398,7 +2405,7 @@ push_covar <- function(retsn, covmat, meanv, lambdacov) {
 #' 
 #' @export
 push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov) {
-    invisible(.Call('_HighFreq_push_eigen', PACKAGE = 'HighFreq', retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov))
+    invisible(.Call(`_HighFreq_push_eigen`, retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov))
 }
 
 #' Update the trailing eigen values and eigen vectors of streaming asset return
@@ -2531,11 +2538,11 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #' 
 #' @export
 push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma) {
-    invisible(.Call('_HighFreq_push_sga', PACKAGE = 'HighFreq', retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
+    invisible(.Call(`_HighFreq_push_sga`, retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
 }
 
 #' Calculate the trailing covariances of two streaming \emph{time series} of
-#' returns.
+#' returns using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 #'   columns of returns data.
@@ -2559,16 +2566,23 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
 #'   }
 #'   \deqn{
+#'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+#'   }
+#'   \deqn{
+#'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+#'   }
+#'   \deqn{
 #'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
 #'   }
 #'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
-#'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data, and
-#'   \eqn{\bar{x}_t} and \eqn{\bar{x}_t} are the trailing means of the returns.
+#'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
+#'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
+#'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
 #' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
-#'   The formulas are equivalent to a convolution with exponentially decaying
-#'   weights, but they're much faster to calculate.
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data. The formulas are equivalent to a convolution with exponentially
+#'   decaying weights, but they're much faster to calculate.
 #'   Using exponentially decaying weights is more natural than using a sliding
 #'   look-back interval, because it gradually "forgets" about the past data.
 #' 
@@ -2596,22 +2610,108 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' lambda <- 0.9
 #' covars <- HighFreq::run_covar(retp, lambda=lambda)
 #' # Calculate trailing covariance using R code
-#' filtered <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
+#' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
 #'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
 #'   method="recursive")
-#' all.equal(covars[, 1], unclass(filtered), check.attributes=FALSE)
+#' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
 #' # Calculate the trailing correlation
 #' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 #' }
 #' 
 #' @export
 run_covar <- function(tseries, lambda) {
-    .Call('_HighFreq_run_covar', PACKAGE = 'HighFreq', tseries, lambda)
+    .Call(`_HighFreq_run_covar`, tseries, lambda)
 }
 
-#' Calculate recursively the trailing regressions of streaming \emph{time
-#' series} of response and predictor data, and calculate the residuals, alphas,
-#' and betas.
+#' Calculate the trailing autocovariances of a \emph{time series} of returns
+#' using an online recursive formula.
+#' 
+#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with a single
+#'   column of returns data.
+#' 
+#' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
+#'   (The default is \code{lagg = 1}.)
+#'
+#' @param \code{lambda} A decay factor which multiplies past
+#'   estimates.
+#'   
+#' @return A \emph{matrix} with three columns of data: the trailing
+#'   autocovariances, the variances, and the mean values of the argument
+#'   \code{tseries}.
+#'
+#' @details
+#'   The function \code{run_autocovar()} calculates the trailing
+#'   autocovariances of a streaming \emph{time series} of returns, by
+#'   recursively weighting the past covariance estimates \eqn{{cov}_{t-1}},
+#'   with the products of their returns minus their means, using the decay
+#'   factor \eqn{\lambda}:
+#'   \deqn{
+#'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+#'   }
+#'   \deqn{
+#'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+#'   }
+#'   \deqn{
+#'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+#'   }
+#'   \deqn{
+#'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+#'   }
+#'   \deqn{
+#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
+#'   }
+#'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
+#'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
+#'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
+#'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
+#' 
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data. The formulas are equivalent to a convolution with exponentially
+#'   decaying weights, but they're much faster to calculate.
+#'   Using exponentially decaying weights is more natural than using a sliding
+#'   look-back interval, because it gradually "forgets" about the past data.
+#' 
+#'   The value of the decay factor \eqn{\lambda} must be in the range between
+#'   \code{0} and \code{1}.  
+#'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+#'   values have a greater weight, and the trailing covariance values have a
+#'   stronger dependence on past data.  This is equivalent to a long
+#'   look-back interval.
+#'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+#'   past values have a smaller weight, and the trailing covariance values have
+#'   a weaker dependence on past data.  This is equivalent to a short
+#'   look-back interval.
+#' 
+#'   The function \code{run_autocovar()} returns five columns of data: the trailing 
+#'   autocovariances, the variances, and the mean values of the two columns of the
+#'   argument \code{tseries}.  This allows calculating the trailing
+#'   correlations, betas, and alphas.
+#' 
+#' @examples
+#' \dontrun{
+#' # Calculate historical returns
+#' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+#' # Calculate the trailing covariance
+#' lambda <- 0.9
+#' covars <- HighFreq::run_autocovar(retp, lambda=lambda)
+#' # Calculate trailing covariance using R code
+#' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
+#'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
+#'   method="recursive")
+#' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
+#' # Calculate the trailing correlation
+#' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+#' }
+#' 
+#' @export
+run_autocovar <- function(tseries, lambda) {
+    .Call(`_HighFreq_run_autocovar`, tseries, lambda)
+}
+
+#' Calculate the trailing regressions of streaming \emph{time series} of
+#' response and predictor data, and calculate the residuals, alphas, and betas
+#' using an online recursive formula.
 #' 
 #' @param \code{respv} A single-column \emph{time series} or a single-column
 #'   \emph{matrix} of response data.
@@ -2674,10 +2774,11 @@ run_covar <- function(tseries, lambda) {
 #'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
 #'   intercept value.
 #'
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data.
 #'   The above recursive formulas are equivalent to a convolution with
 #'   exponentially decaying weights, but they're much faster to calculate.
-#'   The recursive formulas are convenient for processing live streaming data
-#'   because they don't require maintaining a buffer of past data.
 #'   Using exponentially decaying weights is more natural than using a sliding
 #'   look-back interval, because it gradually "forgets" about the past data.
 #'
@@ -2739,7 +2840,7 @@ run_covar <- function(tseries, lambda) {
 #' 
 #' @export
 run_reg <- function(respv, predv, lambda, method = "none") {
-    .Call('_HighFreq_run_reg', PACKAGE = 'HighFreq', respv, predv, lambda, method)
+    .Call(`_HighFreq_run_reg`, respv, predv, lambda, method)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -2825,7 +2926,7 @@ run_reg <- function(respv, predv, lambda, method = "none") {
 #' 
 #' @export
 calc_mean <- function(tseries, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_calc_mean', PACKAGE = 'HighFreq', tseries, method, confl)
+    .Call(`_HighFreq_calc_mean`, tseries, method, confl)
 }
 
 #' Calculate the variance of a single-column \emph{time series} or a
@@ -2856,7 +2957,7 @@ calc_mean <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_varvec <- function(tseries) {
-    .Call('_HighFreq_calc_varvec', PACKAGE = 'HighFreq', tseries)
+    .Call(`_HighFreq_calc_varvec`, tseries)
 }
 
 #' Calculate the dispersion (variance) of the columns of a \emph{time series}
@@ -2939,7 +3040,7 @@ calc_varvec <- function(tseries) {
 #' 
 #' @export
 calc_var <- function(tseries, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_calc_var', PACKAGE = 'HighFreq', tseries, method, confl)
+    .Call(`_HighFreq_calc_var`, tseries, method, confl)
 }
 
 #' Calculate the covariance matrix of the columns of a \emph{time series}
@@ -3017,7 +3118,7 @@ calc_var <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_covar <- function(tseries, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_calc_covar', PACKAGE = 'HighFreq', tseries, method, confl)
+    .Call(`_HighFreq_calc_covar`, tseries, method, confl)
 }
 
 #' Calculate the variance of returns aggregated over the end points. 
@@ -3073,7 +3174,7 @@ calc_covar <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_var_ag <- function(tseries, step = 1L) {
-    .Call('_HighFreq_calc_var_ag', PACKAGE = 'HighFreq', tseries, step)
+    .Call(`_HighFreq_calc_var_ag`, tseries, step)
 }
 
 #' Calculate the variance of returns from \emph{OHLC} prices using different
@@ -3182,7 +3283,7 @@ calc_var_ag <- function(tseries, step = 1L) {
 #' }
 #' @export
 calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call('_HighFreq_calc_var_ohlc', PACKAGE = 'HighFreq', ohlc, method, closel, scale, index)
+    .Call(`_HighFreq_calc_var_ohlc`, ohlc, method, closel, scale, index)
 }
 
 #' Calculate the variance of aggregated \emph{OHLC} prices using different
@@ -3259,7 +3360,7 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE
 #' 
 #' @export
 calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call('_HighFreq_calc_var_ohlc_ag', PACKAGE = 'HighFreq', ohlc, step, method, closel, scale, index)
+    .Call(`_HighFreq_calc_var_ohlc_ag`, ohlc, step, method, closel, scale, index)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
@@ -3350,7 +3451,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #' 
 #' @export
 calc_skew <- function(tseries, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_calc_skew', PACKAGE = 'HighFreq', tseries, method, confl)
+    .Call(`_HighFreq_calc_skew`, tseries, method, confl)
 }
 
 #' Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -3443,7 +3544,7 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_calc_kurtosis', PACKAGE = 'HighFreq', tseries, method, confl)
+    .Call(`_HighFreq_calc_kurtosis`, tseries, method, confl)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
@@ -3507,7 +3608,7 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' 
 #' @export
 calc_hurst <- function(tseries, aggv) {
-    .Call('_HighFreq_calc_hurst', PACKAGE = 'HighFreq', tseries, aggv)
+    .Call(`_HighFreq_calc_hurst`, tseries, aggv)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated
@@ -3579,7 +3680,7 @@ calc_hurst <- function(tseries, aggv) {
 #' 
 #' @export
 calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call('_HighFreq_calc_hurst_ohlc', PACKAGE = 'HighFreq', ohlc, step, method, closel, scale, index)
+    .Call(`_HighFreq_calc_hurst_ohlc`, ohlc, step, method, closel, scale, index)
 }
 
 #' Perform multivariate linear regression using least squares and return a
@@ -3632,7 +3733,7 @@ calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scal
 #' 
 #' @export
 calc_lm <- function(respv, predv) {
-    .Call('_HighFreq_calc_lm', PACKAGE = 'HighFreq', respv, predv)
+    .Call(`_HighFreq_calc_lm`, respv, predv)
 }
 
 #' Perform multivariate regression using different methods, and return a vector
@@ -3726,7 +3827,7 @@ calc_lm <- function(respv, predv) {
 #' 
 #' @export
 calc_reg <- function(respv, predv, controlv) {
-    .Call('_HighFreq_calc_reg', PACKAGE = 'HighFreq', respv, predv, controlv)
+    .Call(`_HighFreq_calc_reg`, respv, predv, controlv)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -3824,7 +3925,7 @@ calc_reg <- function(respv, predv, controlv) {
 #' }
 #' @export
 roll_mean <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_roll_mean', PACKAGE = 'HighFreq', tseries, look_back, startp, endp, step, stub, method, confl)
+    .Call(`_HighFreq_roll_mean`, tseries, look_back, startp, endp, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3873,7 +3974,7 @@ roll_mean <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L
 #' }
 #' @export
 roll_varvec <- function(tseries, look_back = 1L) {
-    .Call('_HighFreq_roll_varvec', PACKAGE = 'HighFreq', tseries, look_back)
+    .Call(`_HighFreq_roll_varvec`, tseries, look_back)
 }
 
 #' Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
@@ -3944,7 +4045,7 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #' # Define time series of returns using package rutils
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-#' variance <- HighFreq::roll_var(retp, look_back=3, step=25)
+#' varv <- HighFreq::roll_var(retp, look_back=3, step=25)
 #' # Compare the variance estimates over 11-period look-back intervals
 #' all.equal(HighFreq::roll_var(retp, look_back=11)[-(1:10), ], 
 #'   drop(RcppRoll::roll_var(retp, n=11)), check.attributes=FALSE)
@@ -3962,7 +4063,7 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #' }
 #' @export
 roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_roll_var', PACKAGE = 'HighFreq', tseries, look_back, startp, endp, step, stub, method, confl)
+    .Call(`_HighFreq_roll_var`, tseries, look_back, startp, endp, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -4106,7 +4207,7 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L,
 #' }
 #' @export
 roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
-    .Call('_HighFreq_roll_var_ohlc', PACKAGE = 'HighFreq', ohlc, startp, endp, step, look_back, stub, method, scale, index)
+    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endp, step, look_back, stub, method, scale, index)
 }
 
 #' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
@@ -4193,7 +4294,7 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' }
 #' @export
 roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_roll_skew', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call(`_HighFreq_roll_skew`, tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
@@ -4279,7 +4380,7 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' }
 #' @export
 roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call('_HighFreq_roll_kurtosis', PACKAGE = 'HighFreq', tseries, startp, endp, step, look_back, stub, method, confl)
+    .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endp, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -4380,7 +4481,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' 
 #' @export
 roll_reg <- function(respv, predv, controlv, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call('_HighFreq_roll_reg', PACKAGE = 'HighFreq', respv, predv, controlv, startp, endp, step, look_back, stub)
+    .Call(`_HighFreq_roll_reg`, respv, predv, controlv, startp, endp, step, look_back, stub)
 }
 
 #' Perform a rolling standardization (centering and scaling) of the columns of
@@ -4449,7 +4550,7 @@ roll_reg <- function(respv, predv, controlv, startp = 0L, endp = 0L, step = 1L, 
 #' 
 #' @export
 roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_median = FALSE) {
-    .Call('_HighFreq_roll_scale', PACKAGE = 'HighFreq', matrix, look_back, center, scale, use_median)
+    .Call(`_HighFreq_roll_scale`, matrix, look_back, center, scale, use_median)
 }
 
 #' Standardize (center and scale) the columns of a \emph{time series} of data
@@ -4521,8 +4622,9 @@ roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_media
 #'   weaker dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
-#'   The above recursive formulas are convenient for processing live streaming
-#'   data because they don't require maintaining a buffer of past data.
+#'   The above online recursive formulas are convenient for processing live
+#'   streaming data because they don't require maintaining a buffer of past
+#'   data.
 #'   The formulas are equivalent to a convolution with exponentially decaying
 #'   weights, but they're much faster to calculate.
 #'   Using exponentially decaying weights is more natural than using a sliding
@@ -4564,7 +4666,7 @@ roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_media
 #' 
 #' @export
 run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
-    invisible(.Call('_HighFreq_run_scale', PACKAGE = 'HighFreq', tseries, lambda, center, scale))
+    invisible(.Call(`_HighFreq_run_scale`, tseries, lambda, center, scale))
 }
 
 #' Calculate a \emph{vector} of z-scores of the residuals of rolling
@@ -4644,7 +4746,7 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' 
 #' @export
 roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call('_HighFreq_roll_zscores', PACKAGE = 'HighFreq', respv, predv, startp, endp, step, look_back, stub)
+    .Call(`_HighFreq_roll_zscores`, respv, predv, startp, endp, step, look_back, stub)
 }
 
 #' Calculate a \emph{matrix} of moment values over a rolling look-back
@@ -4755,7 +4857,7 @@ roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_b
 #' }
 #' @export
 roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call('_HighFreq_roll_moment', PACKAGE = 'HighFreq', tseries, funame, method, confl, startp, endp, step, look_back, stub)
+    .Call(`_HighFreq_roll_moment`, tseries, funame, method, confl, startp, endp, step, look_back, stub)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
@@ -4846,7 +4948,7 @@ roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl 
 #' 
 #' @export
 sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
-    .Call('_HighFreq_sim_garch', PACKAGE = 'HighFreq', omega, alpha, beta, innov, is_random)
+    .Call(`_HighFreq_sim_garch`, omega, alpha, beta, innov, is_random)
 }
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
@@ -4905,7 +5007,7 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' 
 #' @export
 sim_ou <- function(init_price, eq_price, theta, innov) {
-    .Call('_HighFreq_sim_ou', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
+    .Call(`_HighFreq_sim_ou`, init_price, eq_price, theta, innov)
 }
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
@@ -4954,7 +5056,7 @@ sim_ou <- function(init_price, eq_price, theta, innov) {
 #' 
 #' @export
 sim_schwartz <- function(init_price, eq_price, theta, innov) {
-    .Call('_HighFreq_sim_schwartz', PACKAGE = 'HighFreq', init_price, eq_price, theta, innov)
+    .Call(`_HighFreq_sim_schwartz`, init_price, eq_price, theta, innov)
 }
 
 #' Simulate \emph{autoregressive} returns by recursively filtering a
@@ -4999,11 +5101,11 @@ sim_schwartz <- function(init_price, eq_price, theta, innov) {
 #' # Calculate matrix of innovations
 #' innov <- matrix(rnorm(1e4, sd=0.01))
 #' # Calculate recursive filter using filter()
-#' filtered <- filter(innov, filter=coeff, method="recursive")
+#' innof <- filter(innov, filter=coeff, method="recursive")
 #' # Calculate recursive filter using RcppArmadillo
 #' retp <- HighFreq::sim_ar(coeff, innov)
 #' # Compare the two methods
-#' all.equal(as.numeric(retp), as.numeric(filtered))
+#' all.equal(as.numeric(retp), as.numeric(innof))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
@@ -5014,7 +5116,7 @@ sim_schwartz <- function(init_price, eq_price, theta, innov) {
 #' 
 #' @export
 sim_ar <- function(coeff, innov) {
-    .Call('_HighFreq_sim_ar', PACKAGE = 'HighFreq', coeff, innov)
+    .Call(`_HighFreq_sim_ar`, coeff, innov)
 }
 
 #' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
@@ -5078,7 +5180,7 @@ sim_ar <- function(coeff, innov) {
 #' 
 #' @export
 sim_df <- function(init_price, eq_price, theta, coeff, innov) {
-    .Call('_HighFreq_sim_df', PACKAGE = 'HighFreq', init_price, eq_price, theta, coeff, innov)
+    .Call(`_HighFreq_sim_df`, init_price, eq_price, theta, coeff, innov)
 }
 
 #' Calculate the log-likelihood of a time series of returns assuming a
@@ -5136,7 +5238,7 @@ sim_df <- function(init_price, eq_price, theta, coeff, innov) {
 #' 
 #' @export
 lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
-    .Call('_HighFreq_lik_garch', PACKAGE = 'HighFreq', omega, alpha, beta, returns, minval)
+    .Call(`_HighFreq_lik_garch`, omega, alpha, beta, returns, minval)
 }
 
 #' Simulate a portfolio optimization strategy using online (recursive) updating
@@ -5160,25 +5262,25 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   the same number of rows as the argument \code{rets}.
 #'   
 #' @details
-#'   The function \code{run_portf()} simulates a portfolio optimization
+#'   The function \code{sim_portfoptim()} simulates a portfolio optimization
 #'   strategy. The strategy calculates the maximum Sharpe portfolio weights
 #'   \emph{in-sample} at every point in time, and applies them in the
 #'   \emph{out-of-sample} time interval.  It updates the trailing covariance
 #'   matrix recursively, instead of using past batches of data. The function
-#'   \code{run_portf()} uses three different decay factors for averaging past
+#'   \code{sim_portfoptim()} uses three different decay factors for averaging past
 #'   values, to reduce the variance of its forecasts.
 #'   
-#'   The function \code{run_portf()} first scales the returns by their trailing
-#'   volatilities:
+#'   The function \code{sim_portfoptim()} first scales the returns by their
+#'   trailing volatilities:
 #'   \deqn{
 #'     r^s_t = \frac{r_t}{\sigma_{t-1}}
 #'   }
 #'   Returns scaled by their volatility are more stationary so they're easier
 #'   to model.
 #'   
-#'   Then at every point in time, the function \code{run_portf()} calls the
-#'   function \code{HighFreq::push_covar()} to update the trailing covariance
-#'   matrix of the returns:
+#'   Then at every point in time, the function \code{sim_portfoptim()} calls
+#'   the function \code{HighFreq::push_covar()} to update the trailing
+#'   covariance matrix of the returns:
 #'   \deqn{
 #'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
 #'   }
@@ -5235,10 +5337,10 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   dollars.  Trading stock amounts with unit dollar volatility improves
 #'   portfolio diversification.
 #'   
-#'   The function \code{run_portf()} uses three different decay factors for
-#'   averaging past values, to reduce the variance of its forecasts. The value
-#'   of the decay factor \eqn{\lambda} must be in the range between \code{0}
-#'   and \code{1}.
+#'   The function \code{sim_portfoptim()} uses three different decay factors
+#'   for averaging past values, to reduce the variance of its forecasts. The
+#'   value of the decay factor \eqn{\lambda} must be in the range between
+#'   \code{0} and \code{1}.
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
 #'   values have a greater weight, so the trailing values have a greater
 #'   dependence on past data.  This is equivalent to a long look-back
@@ -5248,9 +5350,9 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
-#'   The function \code{run_portf()} returns multiple columns of data, with the
-#'   same number of rows as the input argument \code{rets}. The first column
-#'   contains the strategy returns and the remaining columns contain the
+#'   The function \code{sim_portfoptim()} returns multiple columns of data,
+#'   with the same number of rows as the input argument \code{rets}. The first
+#'   column contains the strategy returns and the remaining columns contain the
 #'   portfolio weights.
 #'   
 #' @examples
@@ -5264,7 +5366,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' lambda <- 0.978
 #' lambdacov <- 0.995
 #' lambdaw <- 0.9
-#' pnls <- HighFreq::run_portf(retp, dimax, lambda, lambdacov, lambdaw)
+#' pnls <- HighFreq::sim_portfoptim(retp, dimax, lambda, lambdacov, lambdaw)
 #' colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 #' pnls <- xts::xts(pnls, order.by=datev)
 #' # Plot dygraph of strategy
@@ -5288,8 +5390,8 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' }
 #' 
 #' @export
-run_portf <- function(rets, dimax, lambda, lambdacov, lambdaw) {
-    .Call('_HighFreq_run_portf', PACKAGE = 'HighFreq', rets, dimax, lambda, lambdacov, lambdaw)
+sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
+    .Call(`_HighFreq_sim_portfoptim`, rets, dimax, lambda, lambdacov, lambdaw)
 }
 
 #' Calculate the optimal portfolio weights using a variety of different
@@ -5424,7 +5526,7 @@ run_portf <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' 
 #' @export
 calc_weights <- function(returns, controlv) {
-    .Call('_HighFreq_calc_weights', PACKAGE = 'HighFreq', returns, controlv)
+    .Call(`_HighFreq_calc_weights`, returns, controlv)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -5534,6 +5636,6 @@ calc_weights <- function(returns, controlv) {
 #' 
 #' @export
 back_test <- function(excess, returns, controlv, startp, endp, lambda = 0.0, coeff = 1.0, bid_offer = 0.0) {
-    .Call('_HighFreq_back_test', PACKAGE = 'HighFreq', excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
+    .Call(`_HighFreq_back_test`, excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
 }
 

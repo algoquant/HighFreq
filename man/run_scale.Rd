@@ -80,8 +80,9 @@ The function \code{run_scale()} performs a trailing standardization
   weaker dependence on past data.  This is equivalent to a short look-back
   interval.
 
-  The above recursive formulas are convenient for processing live streaming
-  data because they don't require maintaining a buffer of past data.
+  The above online recursive formulas are convenient for processing live
+  streaming data because they don't require maintaining a buffer of past
+  data.
   The formulas are equivalent to a convolution with exponentially decaying
   weights, but they're much faster to calculate.
   Using exponentially decaying weights is more natural than using a sliding

@@ -3,7 +3,7 @@
 \name{push_covar}
 \alias{push_covar}
 \title{Update the trailing covariance matrix of streaming asset returns,
-with a row of new returns.}
+with a row of new returns using an online recursive formula.}
 \usage{
 push_covar(retsn, covmat, meanv, lambdacov)
 }
@@ -22,7 +22,7 @@ Void (no return value - modifies the trailing covariance matrix
 }
 \description{
 Update the trailing covariance matrix of streaming asset returns,
-with a row of new returns.
+with a row of new returns using an online recursive formula.
 }
 \details{
 The function \code{push_covar()} updates the trailing covariance matrix of

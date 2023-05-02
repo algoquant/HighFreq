@@ -37,10 +37,10 @@ The function \code{calc_ranks()} calculates the ranks of the elements of a
   
   The \code{Armadillo} function \code{arma::sort_index()} calculates the
   permutation index which sorts a given vector into an ascending order.
-  Applying the function \code{arma::sort_index()} twice:
-  \code{arma::sort_index(arma::sort_index())}, calculates the \emph{reverse}
-  permutation index to sort the vector from ascending order back into its
-  original unsorted order.
+  Applying the function \code{arma::sort_index()} twice:\cr
+  \code{arma::sort_index(arma::sort_index())},\cr
+  calculates the \emph{reverse} permutation index to sort the vector from
+  ascending order back into its original unsorted order.
   
   The function \code{calc_ranks()} calls the \code{Armadillo} function
   \code{arma::sort_index()} twice to calculate the \emph{reverse}

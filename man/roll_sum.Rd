@@ -87,7 +87,7 @@ sumc <- HighFreq::roll_sum(retp, look_back, 1/weightv)
 datav <- cbind(retp$VTI, sumc[, 1])
 colnames(datav) <- c("VTI", "Weighted")
 endp <- rutils::calc_endpoints(datav, interval="weeks")
-dygraphs::dygraph(cumsum(datav)[endp], main=colnames(foo)) \%>\% 
+dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) \%>\% 
   dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\% 
   dyLegend(width=300)
 }

@@ -2,9 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_reg}
 \alias{run_reg}
-\title{Calculate recursively the trailing regressions of streaming \emph{time
-series} of response and predictor data, and calculate the residuals, alphas,
-and betas.}
+\title{Calculate the trailing regressions of streaming \emph{time series} of
+response and predictor data, and calculate the residuals, alphas, and betas
+using an online recursive formula.}
 \usage{
 run_reg(respv, predv, lambda, method = "none")
 }
@@ -28,9 +28,9 @@ A \emph{matrix} with the regression betas, alphas, and the residuals
   argument \code{predv}.
 }
 \description{
-Calculate recursively the trailing regressions of streaming \emph{time
-series} of response and predictor data, and calculate the residuals, alphas,
-and betas.
+Calculate the trailing regressions of streaming \emph{time series} of
+response and predictor data, and calculate the residuals, alphas, and betas
+using an online recursive formula.
 }
 \details{
 The function \code{run_reg()} calculates the vectors of \emph{alphas}
@@ -76,10 +76,11 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
   intercept value.
 
+  The above online recursive formulas are convenient for processing live
+  streaming data because they don't require maintaining a buffer of past
+  data.
   The above recursive formulas are equivalent to a convolution with
   exponentially decaying weights, but they're much faster to calculate.
-  The recursive formulas are convenient for processing live streaming data
-  because they don't require maintaining a buffer of past data.
   Using exponentially decaying weights is more natural than using a sliding
   look-back interval, because it gradually "forgets" about the past data.
 

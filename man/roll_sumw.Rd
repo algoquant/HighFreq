@@ -109,12 +109,12 @@ weightv <- matrix(weightv/sum(weightv), nc=1)
 # Calculate rolling weighted sum
 sumc <- HighFreq::roll_sumw(retp, weightv=weightv)
 # Calculate rolling weighted sum using filter()
-filtered <- filter(x=retp, filter=weightv, method="convolution", sides=1)
-all.equal(sumc[-(1:11), ], filtered[-(1:11), ], check.attributes=FALSE)
+retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
+all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
 sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-all.equal(sumc, filtered[endp+1, ], check.attributes=FALSE)
+all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weightv <- matrix(c(1, rep(0, 10)), nc=1)

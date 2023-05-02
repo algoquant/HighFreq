@@ -53,11 +53,11 @@ coeff <- matrix(c(0.1, 0.3, 0.5))
 # Calculate matrix of innovations
 innov <- matrix(rnorm(1e4, sd=0.01))
 # Calculate recursive filter using filter()
-filtered <- filter(innov, filter=coeff, method="recursive")
+innof <- filter(innov, filter=coeff, method="recursive")
 # Calculate recursive filter using RcppArmadillo
 retp <- HighFreq::sim_ar(coeff, innov)
 # Compare the two methods
-all.equal(as.numeric(retp), as.numeric(filtered))
+all.equal(as.numeric(retp), as.numeric(innof))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

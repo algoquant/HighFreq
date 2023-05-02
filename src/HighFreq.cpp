@@ -1,6 +1,10 @@
-// [[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
+// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
+
+#include "RcppArmadillo.h"
 #include <vector>
+// Create hooks for RcppArmadillo
+// [[Rcpp::depends(RcppArmadillo)]]
+
 using namespace arma;
 // Use STL
 using namespace std;
@@ -2704,7 +2708,8 @@ arma::mat roll_sumw(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing weighted means of streaming \emph{time series} data.
+//' Calculate the trailing weighted means of streaming \emph{time series} data
+//' using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -2754,8 +2759,9 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //'     \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
 //'   }
 //' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data.
 //'   The formulas are equivalent to a convolution with exponentially decaying
 //'   weights, but they're much faster to calculate.
 //'   Using exponentially decaying weights is more natural than using a sliding
@@ -2785,8 +2791,8 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' ohlc <- rutils::etfenv$VTI
 //' closep <- quantmod::Cl(ohlc)
 //' # Calculate the trailing means
-//' lambda <- 0.95
-//' meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
+//' lambda <- 0.9
+//' meanv <- HighFreq::run_mean(closep, lambda=lambda)
 //' # Calculate trailing means using R code
 //' pricef <- (1-lambda)*filter(closep, 
 //'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
@@ -2796,7 +2802,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv = 0),
+//'   Rcpp=HighFreq::run_mean(closep, lambda=lambda),
 //'   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //'   
@@ -2809,7 +2815,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' colnames(datav) <- c("means trailing", "means weighted")
 //' dygraphs::dygraph(datav, main="Trailing Means") %>%
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
-//'   dyLegend(show="always", width=500)
+//'   dyLegend(show="always", width=300)
 //' }
 //' 
 //' @export
@@ -2853,7 +2859,8 @@ arma::mat run_mean(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing maximum values of streaming \emph{time series} data.
+//' Calculate the trailing maximum values of streaming \emph{time series} data
+//' using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -2940,7 +2947,8 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing minimum values of streaming \emph{time series} data.
+//' Calculate the trailing minimum values of streaming \emph{time series} data
+//' using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -3026,7 +3034,8 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing variance of streaming \emph{time series} of returns.
+//' Calculate the trailing variance of streaming \emph{time series} of returns
+//' using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
 //' 
@@ -3050,8 +3059,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
 //'   \eqn{r_t} are the streaming returns data.
 //' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data.
 //'   The formulas are equivalent to a convolution with exponentially decaying
 //'   weights, but they're much faster to calculate.
 //'   Using exponentially decaying weights is more natural than using a sliding
@@ -3125,7 +3135,8 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing variance of streaming \emph{OHLC} price data.
+//' Calculate the trailing variance of streaming \emph{OHLC} price data using an
+//' online recursive formula.
 //' 
 //' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 //'   price data.
@@ -3183,7 +3194,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' # dygraph plot of VTI trailing versus rolling volatility
 //' dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility of VTI") %>%
 //'   dyOptions(colors=c("red", "blue"), strokeWidth=2) %>%
-//'   dyLegend(show="always", width=500)
+//'   dyLegend(show="always", width=300)
 //' # Compare the speed of trailing versus rolling volatility
 //' library(microbenchmark)
 //' summary(microbenchmark(
@@ -3228,6 +3239,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 }  // end run_var_ohlc
 
 
+
 ////////////////////////////////////////////////////////////
 //' Calculate the correlation matrix from the covariance matrix.
 //' 
@@ -3269,7 +3281,7 @@ void push_cov2cor(arma::mat& covmat) {
 
 ////////////////////////////////////////////////////////////
 //' Update the trailing covariance matrix of streaming asset returns,
-//' with a row of new returns.
+//' with a row of new returns using an online recursive formula.
 //' 
 //' @param \code{retsn} A \emph{vector} of new asset returns.
 //' 
@@ -3664,7 +3676,7 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 
 ////////////////////////////////////////////////////////////
 //' Calculate the trailing covariances of two streaming \emph{time series} of
-//' returns.
+//' returns using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 //'   columns of returns data.
@@ -3688,16 +3700,23 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
 //'   }
 //'   \deqn{
+//'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+//'   }
+//'   \deqn{
+//'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+//'   }
+//'   \deqn{
 //'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
 //'   }
 //'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
-//'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data, and
-//'   \eqn{\bar{x}_t} and \eqn{\bar{x}_t} are the trailing means of the returns.
+//'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
+//'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
+//'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
 //' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
-//'   The formulas are equivalent to a convolution with exponentially decaying
-//'   weights, but they're much faster to calculate.
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data. The formulas are equivalent to a convolution with exponentially
+//'   decaying weights, but they're much faster to calculate.
 //'   Using exponentially decaying weights is more natural than using a sliding
 //'   look-back interval, because it gradually "forgets" about the past data.
 //' 
@@ -3789,9 +3808,146 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate recursively the trailing regressions of streaming \emph{time
-//' series} of response and predictor data, and calculate the residuals, alphas,
-//' and betas.
+//' Calculate the trailing autocovariances of a \emph{time series} of returns
+//' using an online recursive formula.
+//' 
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} with a single
+//'   column of returns data.
+//' 
+//' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
+//'   (The default is \code{lagg = 1}.)
+//'
+//' @param \code{lambda} A decay factor which multiplies past
+//'   estimates.
+//'   
+//' @return A \emph{matrix} with three columns of data: the trailing
+//'   autocovariances, the variances, and the mean values of the argument
+//'   \code{tseries}.
+//'
+//' @details
+//'   The function \code{run_autocovar()} calculates the trailing
+//'   autocovariances of a streaming \emph{time series} of returns, by
+//'   recursively weighting the past covariance estimates \eqn{{cov}_{t-1}},
+//'   with the products of their returns minus their means, using the decay
+//'   factor \eqn{\lambda}:
+//'   \deqn{
+//'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+//'   }
+//'   \deqn{
+//'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+//'   }
+//'   \deqn{
+//'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+//'   }
+//'   \deqn{
+//'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+//'   }
+//'   \deqn{
+//'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
+//'   }
+//'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
+//'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
+//'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
+//'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
+//' 
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data. The formulas are equivalent to a convolution with exponentially
+//'   decaying weights, but they're much faster to calculate.
+//'   Using exponentially decaying weights is more natural than using a sliding
+//'   look-back interval, because it gradually "forgets" about the past data.
+//' 
+//'   The value of the decay factor \eqn{\lambda} must be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the trailing covariance values have a
+//'   stronger dependence on past data.  This is equivalent to a long
+//'   look-back interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the trailing covariance values have
+//'   a weaker dependence on past data.  This is equivalent to a short
+//'   look-back interval.
+//' 
+//'   The function \code{run_autocovar()} returns five columns of data: the trailing 
+//'   autocovariances, the variances, and the mean values of the two columns of the
+//'   argument \code{tseries}.  This allows calculating the trailing
+//'   correlations, betas, and alphas.
+//' 
+//' @examples
+//' \dontrun{
+//' # Calculate historical returns
+//' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
+//' # Calculate the trailing covariance
+//' lambda <- 0.9
+//' covars <- HighFreq::run_autocovar(retp, lambda=lambda)
+//' # Calculate trailing covariance using R code
+//' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
+//'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
+//'   method="recursive")
+//' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
+//' # Calculate the trailing correlation
+//' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_autocovar(const arma::mat& tseries, double lambda) {
+ 
+ arma::uword nrows = tseries.n_rows;
+ arma::uword ncols = tseries.n_cols;
+ arma::mat meanm(nrows, ncols);
+ arma::mat meand(1, ncols);
+ arma::mat vars(nrows, ncols);
+ arma::mat covar(nrows, 1);
+ double lambda1 = 1-lambda;
+ 
+ // Perform loop over the rows
+ meanm.row(0) = tseries.row(0);
+ vars.row(0) = arma::square(tseries.row(0));
+ covar.row(0) = tseries(0, 0)*tseries(0, 1);
+ for (arma::uword it = 1; it < nrows; it++) {
+   // Calculate the mean as the weighted sum
+   meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
+   meand = tseries.row(it) - meanm.row(it);
+   // Calculate the covariance as the weighted sum of products of returns
+   vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand);
+   covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand(0)*meand(1));
+ }  // end for
+ 
+ return arma::join_rows(covar, vars, meanm);
+ 
+ // Slower code below - because push_covar() calls arma::trans()
+ // 
+ // arma::uword nrows = tseries.n_rows;
+ // arma::uword ncols = tseries.n_cols;
+ // arma::mat vars(nrows, ncols);
+ // arma::mat covar(nrows, 1);
+ // arma::rowvec meanv = tseries.row(0);
+ // arma::mat covmat = arma::trans(tseries.row(0))*tseries.row(0);
+ // 
+ // // Copy the covariance data
+ // vars.row(0) = arma::trans(covmat.diag());
+ // covar.row(0) = covmat(0, 1);
+ // 
+ // // Perform loop over the rows
+ // for (arma::uword it = 1; it < nrows; it++) {
+ //   // Update the covariance matrix
+ //   push_covar(tseries.row(it), covmat, meanv, lambda);
+ //   // Copy the covariance data
+ //   vars.row(it) = arma::trans(covmat.diag());
+ //   covar.row(it) = covmat(0, 1);
+ // }  // end for
+ // 
+ // return arma::join_rows(covar, vars);
+ 
+}  // end run_autocovar
+
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the trailing regressions of streaming \emph{time series} of
+//' response and predictor data, and calculate the residuals, alphas, and betas
+//' using an online recursive formula.
 //' 
 //' @param \code{respv} A single-column \emph{time series} or a single-column
 //'   \emph{matrix} of response data.
@@ -3854,10 +4010,11 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
 //'   intercept value.
 //'
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data.
 //'   The above recursive formulas are equivalent to a convolution with
 //'   exponentially decaying weights, but they're much faster to calculate.
-//'   The recursive formulas are convenient for processing live streaming data
-//'   because they don't require maintaining a buffer of past data.
 //'   Using exponentially decaying weights is more natural than using a sliding
 //'   look-back interval, because it gradually "forgets" about the past data.
 //'
@@ -6700,8 +6857,9 @@ arma::mat roll_scale(const arma::mat& matrix,
 //'   weaker dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
-//'   The above recursive formulas are convenient for processing live streaming
-//'   data because they don't require maintaining a buffer of past data.
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data.
 //'   The formulas are equivalent to a convolution with exponentially decaying
 //'   weights, but they're much faster to calculate.
 //'   Using exponentially decaying weights is more natural than using a sliding

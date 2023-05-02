@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_max}
 \alias{run_max}
-\title{Calculate the trailing maximum values of streaming \emph{time series} data.}
+\title{Calculate the trailing maximum values of streaming \emph{time series} data
+using an online recursive formula.}
 \usage{
 run_max(tseries, lambda)
 }
@@ -16,7 +17,8 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing maximum values of streaming \emph{time series} data.
+Calculate the trailing maximum values of streaming \emph{time series} data
+using an online recursive formula.
 }
 \details{
 The function \code{run_max()} calculates the trailing maximum values of

@@ -88,7 +88,7 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-variance <- HighFreq::roll_var(retp, look_back=3, step=25)
+varv <- HighFreq::roll_var(retp, look_back=3, step=25)
 # Compare the variance estimates over 11-period look-back intervals
 all.equal(HighFreq::roll_var(retp, look_back=11)[-(1:10), ], 
   drop(RcppRoll::roll_var(retp, n=11)), check.attributes=FALSE)

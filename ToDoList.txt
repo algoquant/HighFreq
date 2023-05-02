@@ -89,10 +89,19 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Modify the online functions run_*() so that they perform calculations with NA data
+If a row is NA, they should return NA, not an error.
+If a row is not NA, but the previous row was NA, they start the recursion from scratch.
+
++ [ ] Create the function run_autocovar() for online autocorrelations
+Clone run_covar()
+
 + [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
 
 + [ ] Modify run_min() and run_max() to calculate the trailing, volume weighted minimum and maximum of OHLC prices
 Follow the example of run_mean() and use OHLC prices and add an extra parameter weightv.
+
++ [ ] Create the function sim_stratar() for simulating the autoregressive strategy
 
 + [ ] Add t-values of the alpha and betas to run_reg()?
 
@@ -105,7 +114,7 @@ https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filter
 
 + [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
 
-+ [ ] Create the function run_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
++ [ ] Create the function sim_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
 Validate the principal components produced by push_eigen().
 The principal component weights are indifferent to their sign.  The weights with signs flipped are also principal component weights.  Therefore push_eigen() can produce weights that oscillate in sign.  So sim_portfoptim() needs logic that ensures that the weights change gradually.
 

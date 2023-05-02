@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_mean}
 \alias{run_mean}
-\title{Calculate the trailing weighted means of streaming \emph{time series} data.}
+\title{Calculate the trailing weighted means of streaming \emph{time series} data
+using an online recursive formula.}
 \usage{
 run_mean(tseries, lambda, weightv = 0L)
 }
@@ -18,7 +19,8 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing weighted means of streaming \emph{time series} data.
+Calculate the trailing weighted means of streaming \emph{time series} data
+using an online recursive formula.
 }
 \details{
 The function \code{run_mean()} calculates the trailing weighted means of
@@ -59,8 +61,9 @@ The function \code{run_mean()} calculates the trailing weighted means of
     \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
   }
 
-  The above recursive formulas are convenient for processing live streaming
-  data because they don't require maintaining a buffer of past data.
+  The above online recursive formulas are convenient for processing live
+  streaming data because they don't require maintaining a buffer of past
+  data.
   The formulas are equivalent to a convolution with exponentially decaying
   weights, but they're much faster to calculate.
   Using exponentially decaying weights is more natural than using a sliding
@@ -90,18 +93,18 @@ The function \code{run_mean()} calculates the trailing weighted means of
 ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
-lambda <- 0.95
-meanv <- HighFreq::run_mean(closep, lambda=lambda, weightv = 0)
+lambda <- 0.9
+meanv <- HighFreq::run_mean(closep, lambda=lambda)
 # Calculate trailing means using R code
-filtered <- (1-lambda)*filter(closep, 
+pricef <- (1-lambda)*filter(closep, 
   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
   method="recursive")
-all.equal(drop(meanv), unclass(filtered), check.attributes=FALSE)
+all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(closep, lambda=lambda, weightv = 0),
+  Rcpp=HighFreq::run_mean(closep, lambda=lambda),
   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
@@ -114,7 +117,7 @@ datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means trailing", "means weighted")
 dygraphs::dygraph(datav, main="Trailing Means") \%>\%
   dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\%
-  dyLegend(show="always", width=500)
+  dyLegend(show="always", width=300)
 }
 
 }

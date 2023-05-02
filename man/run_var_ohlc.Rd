@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var_ohlc}
 \alias{run_var_ohlc}
-\title{Calculate the trailing variance of streaming \emph{OHLC} price data.}
+\title{Calculate the trailing variance of streaming \emph{OHLC} price data using an
+online recursive formula.}
 \usage{
 run_var_ohlc(ohlc, lambda)
 }
@@ -17,7 +18,8 @@ A single-column \emph{matrix} of variance estimates, with the same
   number of rows as the input \code{ohlc} price data.
 }
 \description{
-Calculate the trailing variance of streaming \emph{OHLC} price data.
+Calculate the trailing variance of streaming \emph{OHLC} price data using an
+online recursive formula.
 }
 \details{
 The function \code{run_var_ohlc()} calculates a single-column
@@ -67,7 +69,7 @@ datav <- xts::xts(datav, index(ohlc))
 # dygraph plot of VTI trailing versus rolling volatility
 dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility of VTI") \%>\%
   dyOptions(colors=c("red", "blue"), strokeWidth=2) \%>\%
-  dyLegend(show="always", width=500)
+  dyLegend(show="always", width=300)
 # Compare the speed of trailing versus rolling volatility
 library(microbenchmark)
 summary(microbenchmark(

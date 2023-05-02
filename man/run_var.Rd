@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var}
 \alias{run_var}
-\title{Calculate the trailing variance of streaming \emph{time series} of returns.}
+\title{Calculate the trailing variance of streaming \emph{time series} of returns
+using an online recursive formula.}
 \usage{
 run_var(tseries, lambda)
 }
@@ -16,7 +17,8 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing variance of streaming \emph{time series} of returns.
+Calculate the trailing variance of streaming \emph{time series} of returns
+using an online recursive formula.
 }
 \details{
 The function \code{run_var()} calculates the trailing variance of
@@ -33,8 +35,9 @@ The function \code{run_var()} calculates the trailing variance of
   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
   \eqn{r_t} are the streaming returns data.
 
-  The above recursive formulas are convenient for processing live streaming
-  data because they don't require maintaining a buffer of past data.
+  The above online recursive formulas are convenient for processing live
+  streaming data because they don't require maintaining a buffer of past
+  data.
   The formulas are equivalent to a convolution with exponentially decaying
   weights, but they're much faster to calculate.
   Using exponentially decaying weights is more natural than using a sliding
@@ -68,10 +71,10 @@ vars <- HighFreq::run_var(retp, lambda=lambda)
 # Calculate centered returns
 retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
 # Calculate trailing variance using R code
-filtered <- (1-lambda)*filter(retc^2, filter=lambda, 
+retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
   init=as.numeric(retc[1, 1])^2/(1-lambda), 
   method="recursive")
-all.equal(vars, unclass(filtered), check.attributes=FALSE)
+all.equal(vars, unclass(retc2), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(

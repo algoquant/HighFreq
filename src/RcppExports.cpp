@@ -508,6 +508,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// run_autocovar
+arma::mat run_autocovar(const arma::mat& tseries, double lambda);
+RcppExport SEXP _HighFreq_run_autocovar(SEXP tseriesSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(run_autocovar(tseries, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // run_reg
 arma::mat run_reg(const arma::mat& respv, const arma::mat& predv, double lambda, std::string method);
 RcppExport SEXP _HighFreq_run_reg(SEXP respvSEXP, SEXP predvSEXP, SEXP lambdaSEXP, SEXP methodSEXP) {
@@ -964,9 +976,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// run_portf
-arma::mat run_portf(const arma::mat& rets, const arma::uword& dimax, const double& lambda, const double& lambdacov, const double& lambdaw);
-RcppExport SEXP _HighFreq_run_portf(SEXP retsSEXP, SEXP dimaxSEXP, SEXP lambdaSEXP, SEXP lambdacovSEXP, SEXP lambdawSEXP) {
+// sim_portfoptim
+arma::mat sim_portfoptim(const arma::mat& rets, const arma::uword& dimax, const double& lambda, const double& lambdacov, const double& lambdaw);
+RcppExport SEXP _HighFreq_sim_portfoptim(SEXP retsSEXP, SEXP dimaxSEXP, SEXP lambdaSEXP, SEXP lambdacovSEXP, SEXP lambdawSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -975,7 +987,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< const double& >::type lambdacov(lambdacovSEXP);
     Rcpp::traits::input_parameter< const double& >::type lambdaw(lambdawSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_portf(rets, dimax, lambda, lambdacov, lambdaw));
+    rcpp_result_gen = Rcpp::wrap(sim_portfoptim(rets, dimax, lambda, lambdacov, lambdaw));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1050,6 +1062,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_push_eigen", (DL_FUNC) &_HighFreq_push_eigen, 7},
     {"_HighFreq_push_sga", (DL_FUNC) &_HighFreq_push_sga, 8},
     {"_HighFreq_run_covar", (DL_FUNC) &_HighFreq_run_covar, 2},
+    {"_HighFreq_run_autocovar", (DL_FUNC) &_HighFreq_run_autocovar, 2},
     {"_HighFreq_run_reg", (DL_FUNC) &_HighFreq_run_reg, 4},
     {"_HighFreq_calc_mean", (DL_FUNC) &_HighFreq_calc_mean, 3},
     {"_HighFreq_calc_varvec", (DL_FUNC) &_HighFreq_calc_varvec, 1},
@@ -1081,7 +1094,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_sim_ar", (DL_FUNC) &_HighFreq_sim_ar, 2},
     {"_HighFreq_sim_df", (DL_FUNC) &_HighFreq_sim_df, 5},
     {"_HighFreq_lik_garch", (DL_FUNC) &_HighFreq_lik_garch, 5},
-    {"_HighFreq_run_portf", (DL_FUNC) &_HighFreq_run_portf, 5},
+    {"_HighFreq_sim_portfoptim", (DL_FUNC) &_HighFreq_sim_portfoptim, 5},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 2},
     {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 8},
     {NULL, NULL, 0}

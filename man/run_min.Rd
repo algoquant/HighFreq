@@ -2,7 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_min}
 \alias{run_min}
-\title{Calculate the trailing minimum values of streaming \emph{time series} data.}
+\title{Calculate the trailing minimum values of streaming \emph{time series} data
+using an online recursive formula.}
 \usage{
 run_min(tseries, lambda)
 }
@@ -16,7 +17,8 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing minimum values of streaming \emph{time series} data.
+Calculate the trailing minimum values of streaming \emph{time series} data
+using an online recursive formula.
 }
 \details{
 The function \code{run_min()} calculates the trailing minimum values of
