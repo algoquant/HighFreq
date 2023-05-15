@@ -38,16 +38,16 @@ NULL
 #' @param \code{method} A \emph{character string} specifying the type of
 #'   regression model (the default is \code{method = "least_squares"}).
 #'   
-#' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
-#'   term should be added to the predictor (the default is \code{intercept =
+#' @param \code{addunit} A \emph{Boolean} specifying whether an intercept
+#'   term should be added to the predictor (the default is \code{addunit =
 #'   TRUE}).
 #'
-#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#' @param \code{singmin} A \emph{numeric} threshold level for discarding
 #'   small \emph{singular values} in order to regularize the inverse of the
 #'   predictor matrix (the default is \code{1e-5}).
 #'   
 #' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-#'   values} used for calculating the \emph{regularized inverse} of the
+#'   values} used for calculating the \emph{reduced inverse} of the
 #'   predictor matrix (the default is \code{dimax = 0} - standard matrix
 #'   inverse using all the \emph{singular values}).
 #'   
@@ -75,13 +75,13 @@ NULL
 #' controlv <- HighFreq::param_reg()
 #' unlist(controlv)
 #' # Create a custom list of regression parameters
-#' controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+#' controlv <- HighFreq::param_reg(addunit=FALSE, method="regular", dimax=4)
 #' unlist(controlv)
 #' }
 #' 
 #' @export
-param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0) {
-    .Call(`_HighFreq_param_reg`, method, intercept, eigen_thresh, dimax, confl, alpha)
+param_reg <- function(regmod = "least_squares", addunit = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alpha = 0.0) {
+    .Call(`_HighFreq_param_reg`, regmod, addunit, singmin, dimax, residscale, confl, alpha)
 }
 
 #' Create a named list of model parameters that can be passed into portfolio
@@ -91,12 +91,12 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #'   calculating the portfolio weights (the default is \code{method =
 #'   "sharpem"}).
 #'   
-#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#' @param \code{singmin} A \emph{numeric} threshold level for discarding
 #'   small \emph{singular values} in order to regularize the inverse of the
 #'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 #'   
 #' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-#'   values} used for calculating the \emph{regularized inverse} of the
+#'   values} used for calculating the \emph{reduced inverse} of the
 #'   \code{covariance matrix} of \code{returns} matrix (the default is
 #'   \code{dimax = 0} - standard matrix inverse using all the \emph{singular
 #'   values}).
@@ -116,8 +116,8 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #' @param \code{scalew} A \emph{character string} specifying the method for
 #'   scaling the weights (the default is \code{scalew = "voltarget"}).
 #'
-#' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-#'   weights (the default is \code{0.001})
+#' @param \code{voltarget} A \emph{numeric} volatility target for scaling the
+#'   weights (the default is \code{0.01})
 #' 
 #' 
 #' @return A named list of model parameters that can be passed into portfolio
@@ -144,8 +144,8 @@ param_reg <- function(method = "least_squares", intercept = TRUE, eigen_thresh =
 #' }
 #' 
 #' @export
-param_portf <- function(method = "sharpem", eigen_thresh = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", vol_target = 0.001) {
-    .Call(`_HighFreq_param_portf`, method, eigen_thresh, dimax, confl, alpha, rankw, centerw, scalew, vol_target)
+param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", voltarget = 0.01) {
+    .Call(`_HighFreq_param_portf`, method, singmin, dimax, confl, alpha, rankw, centerw, scalew, voltarget)
 }
 
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
@@ -487,20 +487,20 @@ calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
 #' Calculate a vector of start points by lagging (shifting) a vector of end
 #' points.
 #'
-#' @param \code{endp} An \emph{integer} vector of end points.
+#' @param \code{endd} An \emph{integer} vector of end points.
 #'   
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   lag (shift) applied to the end points.
 #'   
 #' @return An \emph{integer} vector with the same number of elements as the
-#'   vector \code{endp}.
+#'   vector \code{endd}.
 #'
 #' @details
-#'   The start points are equal to the values of the vector \code{endp} lagged
+#'   The start points are equal to the values of the vector \code{endd} lagged
 #'   (shifted) by an amount equal to \code{look_back}.  In addition, an extra
 #'   value of \code{1} is added to them, to avoid data overlaps.  The lag
 #'   operation requires appending a beginning warmup interval containing zeros,
-#'   so that the vector of start points has the same length as the \code{endp}.
+#'   so that the vector of start points has the same length as the \code{endd}.
 #'   
 #'   For example, consider the end points for a vector of length \code{25}
 #'   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
@@ -513,13 +513,13 @@ calc_endpoints <- function(length, step = 1L, stub = 0L, stubs = TRUE) {
 #'   
 #' @examples
 #' # Calculate end points
-#' endp <- HighFreq::calc_endpoints(length=55, step=5)
+#' endd <- HighFreq::calc_endpoints(length=55, step=5)
 #' # Calculate start points corresponding to the end points
-#' startp <- HighFreq::calc_startpoints(endp, look_back=5)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=5)
 #'
 #' @export
-calc_startpoints <- function(endp, look_back) {
-    .Call(`_HighFreq_calc_startpoints`, endp, look_back)
+calc_startpoints <- function(endd, look_back) {
+    .Call(`_HighFreq_calc_startpoints`, endd, look_back)
 }
 
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
@@ -747,8 +747,8 @@ remove_dup <- function(stringv) {
     .Call(`_HighFreq_remove_dup`, stringv)
 }
 
-#' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-#' element-wise.
+#' Multiply element-wise the rows or columns of a \emph{matrix} times a
+#' \emph{vector}.
 #' 
 #' @param \code{vector} A \emph{numeric} \emph{vector}.
 #' 
@@ -758,13 +758,13 @@ remove_dup <- function(stringv) {
 #'   the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
 #'   (the default is \code{byrow = TRUE}.)
 #' 
-#' @return A \emph{matrix} equal to the product of the arguments \code{matrix}
-#'   times \code{vector}, with the same dimensions as the argument
-#'   \code{matrix}.
+#' @return A \emph{matrix} equal to the product of the elements of
+#'   \code{matrix} times \code{vector}, with the same dimensions as the
+#'   argument \code{matrix}.
 #' 
 #' @details
-#'   The function \code{mult_mat()} multiplies the rows or columns of a
-#'   \emph{matrix} times a \emph{vector}, element-wise.
+#'   The function \code{mult_mat()} multiplies element-wise the rows or columns
+#'   of a \emph{matrix} times a \emph{vector}.
 #'
 #'   If \code{byrow = TRUE} (the default), then function \code{mult_mat()}
 #'   multiplies the rows of the argument \code{matrix} times the argument
@@ -1012,25 +1012,25 @@ calc_eigenp <- function(matrixv, neigen) {
     .Call(`_HighFreq_calc_eigenp`, matrixv, neigen)
 }
 
-#' Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+#' Calculate the \emph{reduced inverse} of a symmetric \emph{matrix} of
 #' data using eigen decomposition.
 #' 
 #' @param \code{matrixv} A symmetric \emph{matrix} of data.
 #'   
 #' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
-#'   values} used for calculating the \emph{regularized inverse} of the matrix
+#'   values} used for calculating the \emph{reduced inverse} of the matrix
 #'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 #'   using all the \emph{eigen values}).
 #' 
-#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#' @param \code{singmin} A \emph{numeric} threshold level for discarding
 #'   small \emph{eigen values} in order to regularize the inverse of the matrix
 #'   \code{matrixv} (the default is \code{0.0}).
 #'
-#' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+#' @return A \emph{matrix} equal to the \emph{reduced inverse} of the
 #'   matrix \code{matrixv}.
 #'
 #' @details
-#'   The function \code{calc_inv()} calculates the \emph{regularized inverse}
+#'   The function \code{calc_inv()} calculates the \emph{reduced inverse}
 #'   of the matrix \code{matrixv} using eigen decomposition.
 #'   
 #'   The function \code{calc_inv()} first performs eigen decomposition of the
@@ -1048,7 +1048,7 @@ calc_eigenp <- function(matrixv, neigen) {
 #'     \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
 #'   }
 #'   
-#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+#'   The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
 #'   by removing \emph{eigen vectors} with very small \emph{eigen values}:
 #'   \deqn{
 #'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
@@ -1057,16 +1057,16 @@ calc_eigenp <- function(matrixv, neigen) {
 #'   that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
 #'   
 #'   The function \code{calc_inv()} applies regularization to the matrix
-#'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+#'   inverse using the arguments \code{dimax} and \code{singmin}.
 #'   
 #'   The function \code{calc_inv()} applies regularization by discarding the
 #'   smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
-#'   threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+#'   threshold level \code{singmin} times the sum of all the \emph{eigen
 #'   values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
 #'   
 #'   It also discards additional \emph{eigen vectors} so that only the highest
 #'   order \emph{eigen vectors} remain, up to order \code{dimax}.
-#'   It calculates the \emph{regularized inverse} from the eigen decomposition
+#'   It calculates the \emph{reduced inverse} from the eigen decomposition
 #'   using only the largest \emph{eigen values} up to \code{dimax}.  For
 #'   example, if
 #'   \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
@@ -1088,9 +1088,9 @@ calc_eigenp <- function(matrixv, neigen) {
 #' # Calculate matrix inverse in R
 #' invr <- solve(covmat)
 #' all.equal(invmat, invr, check.attributes=FALSE)
-#' # Calculate regularized inverse using RcppArmadillo
+#' # Calculate reduced inverse using RcppArmadillo
 #' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-#' # Calculate regularized inverse using eigen decomposition in R
+#' # Calculate reduced inverse using eigen decomposition in R
 #' eigend <- eigen(covmat)
 #' dimax <- 1:3
 #' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
@@ -1099,29 +1099,29 @@ calc_eigenp <- function(matrixv, neigen) {
 #' }
 #' 
 #' @examples
-calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
-    .Call(`_HighFreq_calc_inv`, matrixv, dimax, eigen_thresh)
+calc_inv <- function(matrixv, dimax = 0L, singmin = 0.0) {
+    .Call(`_HighFreq_calc_inv`, matrixv, dimax, singmin)
 }
 
-#' Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+#' Calculate the \emph{reduced inverse} of a \emph{matrix} of data using
 #' Singular Value Decomposition (\emph{SVD}).
 #' 
 #' @param \code{matrixv} A \emph{matrix} of data.
 #'   
 #' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-#'   values} used for calculating the \emph{regularized inverse} of the matrix
+#'   values} used for calculating the \emph{reduced inverse} of the matrix
 #'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 #'   using all the \emph{singular values}).
 #' 
-#' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+#' @param \code{singmin} A \emph{numeric} threshold level for discarding
 #'   small \emph{singular values} in order to regularize the inverse of the
 #'   matrix \code{matrixv} (the default is \code{0.0}).
 #'
-#' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+#' @return A \emph{matrix} equal to the \emph{reduced inverse} of the
 #'   matrix \code{matrixv}.
 #'
 #' @details
-#'   The function \code{calc_invsvd()} calculates the \emph{regularized
+#'   The function \code{calc_invsvd()} calculates the \emph{reduced
 #'   inverse} of the matrix \code{matrixv} using Singular Value Decomposition
 #'   (\emph{SVD}).
 #'   
@@ -1142,7 +1142,7 @@ calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
 #'   }
 #'   
-#'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+#'   The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
 #'   by removing \emph{singular vectors} with very small \emph{singular values}:
 #'   \deqn{
 #'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
@@ -1152,17 +1152,17 @@ calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #'   \emph{singular values} removed.
 #'   
 #'   The function \code{calc_invsvd()} applies regularization to the matrix
-#'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+#'   inverse using the arguments \code{dimax} and \code{singmin}.
 #'   
 #'   The function \code{calc_invsvd()} applies regularization by discarding the
 #'   smallest \emph{singular values} \eqn{\sigma_i} that are less than the
-#'   threshold level \code{eigen_thresh} times the sum of all the
+#'   threshold level \code{singmin} times the sum of all the
 #'   \emph{singular values}: \deqn{\sigma_i < eigen\_thresh \cdot
 #'   (\sum{\sigma_i})}
 #'   
 #'   It also discards additional \emph{singular vectors} so that only the
 #'   highest order \emph{singular vectors} remain, up to order \code{dimax}. It
-#'   calculates the \emph{regularized inverse} from the \emph{SVD} matrices
+#'   calculates the \emph{reduced inverse} from the \emph{SVD} matrices
 #'   using only the largest \emph{singular values} up to order \code{dimax}.
 #'   For example, if \code{dimax = 3} then it only uses the \code{3} highest
 #'   order \emph{singular vectors}, with the largest \emph{singular values}.
@@ -1183,9 +1183,9 @@ calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #' # Calculate matrix inverse in R
 #' invr <- solve(covmat)
 #' all.equal(invmat, invr, check.attributes=FALSE)
-#' # Calculate regularized inverse using RcppArmadillo
+#' # Calculate reduced inverse using RcppArmadillo
 #' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
-#' # Calculate regularized inverse from SVD in R
+#' # Calculate reduced inverse from SVD in R
 #' svdec <- svd(covmat)
 #' dimax <- 1:3
 #' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
@@ -1194,8 +1194,8 @@ calc_inv <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
 #' }
 #' 
 #' @export
-calc_invsvd <- function(matrixv, dimax = 0L, eigen_thresh = 0.0) {
-    .Call(`_HighFreq_calc_invsvd`, matrixv, dimax, eigen_thresh)
+calc_invsvd <- function(matrixv, dimax = 0L, singmin = 0.0) {
+    .Call(`_HighFreq_calc_invsvd`, matrixv, dimax, singmin)
 }
 
 #' Calculate the approximate inverse of a square \emph{matrix} recursively
@@ -1455,14 +1455,14 @@ agg_ohlc <- function(tseries) {
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'   
-#' @param \emph{endp} An \emph{integer vector} of end points.
+#' @param \emph{endd} An \emph{integer vector} of end points.
 #'
 #' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
-#'   to the number of \emph{endp} minus one.
+#'   to the number of \emph{endd} minus one.
 #'   
 #' @details
 #'   The function \code{roll_ohlc()} performs a loop over the end points
-#'   \emph{endp}, along the rows of the data \code{tseries}. At each end point,
+#'   \emph{endd}, along the rows of the data \code{tseries}. At each end point,
 #'   it selects the past rows of the data \code{tseries}, starting at the first
 #'   bar after the previous end point, and then calls the function
 #'   \code{agg_ohlc()} on the selected data \code{tseries} to calculate the
@@ -1481,17 +1481,17 @@ agg_ohlc <- function(tseries) {
 #' # Define matrix of OHLC data
 #' ohlc <- rutils::etfenv$VTI[, 1:5]
 #' # Define end points at 25 day intervals
-#' endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
-#' # Aggregate over endp:
-#' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
+#' endd <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+#' # Aggregate over endd:
+#' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endd=endd)
 #' # Compare with xts::to.period()
-#' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+#' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 #' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_ohlc <- function(tseries, endp) {
-    .Call(`_HighFreq_roll_ohlc`, tseries, endp)
+roll_ohlc <- function(tseries, endd) {
+    .Call(`_HighFreq_roll_ohlc`, tseries, endd)
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -1621,8 +1621,8 @@ roll_conv <- function(tseries, weightv) {
 #' # Plot dygraph of the weighted sums
 #' datav <- cbind(retp$VTI, sumc[, 1])
 #' colnames(datav) <- c("VTI", "Weighted")
-#' endp <- rutils::calc_endpoints(datav, interval="weeks")
-#' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) %>% 
+#' endd <- rutils::calc_endpoints(datav, interval="weeks")
+#' dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) %>% 
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 #'   dyLegend(width=300)
 #' }
@@ -1640,8 +1640,8 @@ roll_sum <- function(tseries, look_back = 1L, weightv = 0L) {
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -1668,22 +1668,22 @@ roll_sum <- function(tseries, look_back = 1L, weightv = 0L) {
 #' # Calculate historical returns
 #' retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 #' # Define end points at 25 day intervals
-#' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
+#' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
 #' # Define start points as 75 day lag of end points
-#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 #' # Calculate rolling sums using Rcpp
-#' sumc <- HighFreq::roll_sumep(retp, startp=startp, endp=endp)
+#' sumc <- HighFreq::roll_sumep(retp, startp=startp, endd=endd)
 #' # Calculate rolling sums using R code
-#' sumr <- sapply(1:NROW(endp), function(ep) {
-#' colSums(retp[(startp[ep]+1):(endp[ep]+1), ])
+#' sumr <- sapply(1:NROW(endd), function(ep) {
+#' colSums(retp[(startp[ep]+1):(endd[ep]+1), ])
 #'   })  # end sapply
 #' sumr <- t(sumr)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_sumep`, tseries, startp, endp, step, look_back, stub)
+roll_sumep <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_sumep`, tseries, startp, endd, step, look_back, stub)
 }
 
 #' Calculate the rolling weighted sums over a \emph{time series} or a
@@ -1691,8 +1691,8 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = NULL}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = NULL}).
 #'   
 #' @param \code{look_back} The length of the look-back interval, equal to the
 #'   number of data points included in calculating the rolling sum (the default
@@ -1722,13 +1722,13 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   The function \code{roll_sumw()} returns a \emph{matrix} with the same
 #'   dimensions as the input argument \code{tseries}.
 #' 
-#'   The arguments \code{weightv}, \code{endp}, and \code{stub} are
+#'   The arguments \code{weightv}, \code{endd}, and \code{stub} are
 #'   optional.
 #'   
 #'   If the argument \code{weightv} is not supplied, then simple sums are
 #'   calculated, not weighted sums.
 #'   
-#'   If either the \code{stub} or \code{endp} arguments are supplied,
+#'   If either the \code{stub} or \code{endd} arguments are supplied,
 #'   then the rolling sums are calculated at the end points. 
 #'   
 #'   If only the argument \code{stub} is supplied, then the end points are
@@ -1736,7 +1736,7 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   end point is equal to \code{stub} and the end points are spaced
 #'   \code{look_back} periods apart.
 #'   
-#'   If the arguments \code{weightv}, \code{endp}, and \code{stub} are
+#'   If the arguments \code{weightv}, \code{endd}, and \code{stub} are
 #'   not supplied, then the sums are calculated over a number of data points
 #'   equal to \code{look_back}.
 #'   
@@ -1767,16 +1767,16 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' # Calculate rolling sums at end points
 #' stubv <- 21
 #' sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
-#' endp <- (stubv + look_back*(0:(NROW(retp) %/% look_back)))
-#' endp <- endp[endp < NROW(retp)]
+#' endd <- (stubv + look_back*(0:(NROW(retp) %/% look_back)))
+#' endd <- endd[endd < NROW(retp)]
 #' sumr <- apply(zoo::coredata(retp), 2, cumsum)
-#' sumr <- sumr[endp+1, ]
+#' sumr <- sumr[endd+1, ]
 #' sumlag <- rbind(numeric(2), sumr[1:(NROW(sumr) - 1), ])
 #' sumr <- (sumr - sumlag)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
 #' 
-#' # Calculate rolling sums at end points - pass in endp
-#' sumc <- HighFreq::roll_sumw(retp, endp=endp)
+#' # Calculate rolling sums at end points - pass in endd
+#' sumc <- HighFreq::roll_sumw(retp, endd=endd)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
 #' 
 #' # Create exponentially decaying weights
@@ -1789,8 +1789,8 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 #' 
 #' # Calculate rolling weighted sums at end points
-#' sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-#' all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
+#' sumc <- HighFreq::roll_sumw(retp, endd=endd, weightv=weightv)
+#' all.equal(sumc, retc[endd+1, ], check.attributes=FALSE)
 #' 
 #' # Create simple weights equal to a 1 value plus zeros
 #' weightv <- matrix(c(1, rep(0, 10)), nc=1)
@@ -1801,8 +1801,8 @@ roll_sumep <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' }
 #' 
 #' @export
-roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL) {
-    .Call(`_HighFreq_roll_sumw`, tseries, endp, look_back, stub, weightv)
+roll_sumw <- function(tseries, endd = NULL, look_back = 1L, stub = NULL, weightv = NULL) {
+    .Call(`_HighFreq_roll_sumw`, tseries, endd, look_back, stub, weightv)
 }
 
 #' Calculate the trailing weighted means of streaming \emph{time series} data
@@ -1890,7 +1890,7 @@ roll_sumw <- function(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv
 #' # Calculate the trailing means
 #' lambda <- 0.9
 #' meanv <- HighFreq::run_mean(closep, lambda=lambda)
-#' # Calculate trailing means using R code
+#' # Calculate the trailing means using R code
 #' pricef <- (1-lambda)*filter(closep, 
 #'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
 #'   method="recursive")
@@ -2116,7 +2116,7 @@ run_min <- function(tseries, lambda) {
 #' vars <- HighFreq::run_var(retp, lambda=lambda)
 #' # Calculate centered returns
 #' retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
-#' # Calculate trailing variance using R code
+#' # Calculate the trailing variance using R code
 #' retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
 #'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 #'   method="recursive")
@@ -2423,8 +2423,8 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #' 
 #' @param \code{varv} A \emph{vector} of the trailing asset variances.
 #' 
-#' @param \code{lambda} A decay factor which multiplies the past
-#'   mean and variance.
+#' @param \code{lambda} A decay factor which multiplies the past mean and
+#'   variance.
 #' 
 #' @param \code{gamma} A \emph{numeric} gain factor which multiplies the past
 #'   eigenelements.
@@ -2547,8 +2547,7 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 #'   columns of returns data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with five columns of data: the trailing covariances,
 #'   the variances, and the mean values of the two columns of the argument
@@ -2609,13 +2608,21 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' # Calculate the trailing covariance
 #' lambda <- 0.9
 #' covars <- HighFreq::run_covar(retp, lambda=lambda)
-#' # Calculate trailing covariance using R code
-#' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
-#'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
-#'   method="recursive")
-#' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
 #' # Calculate the trailing correlation
 #' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+#' # Calculate the trailing covariance using R code
+#' nrows <- NROW(retp)
+#' retm <- matrix(numeric(2*nrows), nc=2)
+#' retm[1, ] <- retp[1, ]
+#' retd <- matrix(numeric(2*nrows), nc=2)
+#' covarr <- numeric(nrows)
+#' covarr[1] <- retp[1, 1]*retp[1, 2]
+#' for (it in 2:nrows) {
+#'   retm[it, ] <- lambda*retm[it-1, ] + (1-lambda)*(retp[it, ])
+#'   retd[it, ] <- retp[it, ] - retm[it, ]
+#'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it, 1]*retd[it, 2]
+#' } # end for
+#' all.equal(covars[, 1], covarr, check.attributes=FALSE)
 #' }
 #' 
 #' @export
@@ -2623,47 +2630,40 @@ run_covar <- function(tseries, lambda) {
     .Call(`_HighFreq_run_covar`, tseries, lambda)
 }
 
-#' Calculate the trailing autocovariances of a \emph{time series} of returns
+#' Calculate the trailing autocovariance of a \emph{time series} of returns
 #' using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} with a single
 #'   column of returns data.
 #' 
+#' @param \code{lambda} A decay factor which multiplies past estimates.
+#'   
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
 #'   (The default is \code{lagg = 1}.)
 #'
-#' @param \code{lambda} A decay factor which multiplies past
-#'   estimates.
-#'   
 #' @return A \emph{matrix} with three columns of data: the trailing
 #'   autocovariances, the variances, and the mean values of the argument
 #'   \code{tseries}.
 #'
 #' @details
 #'   The function \code{run_autocovar()} calculates the trailing
-#'   autocovariances of a streaming \emph{time series} of returns, by
-#'   recursively weighting the past covariance estimates \eqn{{cov}_{t-1}},
+#'   autocovariance of a streaming \emph{time series} of returns, by
+#'   recursively weighting the past autocovariance estimates \eqn{{cov}_{t-1}},
 #'   with the products of their returns minus their means, using the decay
 #'   factor \eqn{\lambda}:
 #'   \deqn{
 #'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
 #'   }
 #'   \deqn{
-#'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+#'     \sigma^2_{t} = \lambda \sigma^2_{t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
 #'   }
 #'   \deqn{
-#'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
 #'   }
-#'   \deqn{
-#'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
-#'   }
-#'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
-#'   }
-#'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
-#'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
-#'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
-#'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
+#'   Where \eqn{{cov}_t} is the trailing autocovariance estimate at time
+#'   \eqn{t}, with \code{lagg=l}.
+#'   And \eqn{\sigma^2_{t}} and \eqn{\bar{x}_t} are the trailing variances and
+#'   means of the streaming data.
 #' 
 #'   The above online recursive formulas are convenient for processing live
 #'   streaming data because they don't require maintaining a buffer of past
@@ -2683,35 +2683,44 @@ run_covar <- function(tseries, lambda) {
 #'   a weaker dependence on past data.  This is equivalent to a short
 #'   look-back interval.
 #' 
-#'   The function \code{run_autocovar()} returns five columns of data: the trailing 
-#'   autocovariances, the variances, and the mean values of the two columns of the
+#'   The function \code{run_autocovar()} returns three columns of data: the
+#'   trailing autocovariances, the variances, and the mean values of the
 #'   argument \code{tseries}.  This allows calculating the trailing
-#'   correlations, betas, and alphas.
+#'   autocorrelations.
 #' 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-#' # Calculate the trailing covariance
+#' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
+#' # Calculate the trailing autocovariance
 #' lambda <- 0.9
-#' covars <- HighFreq::run_autocovar(retp, lambda=lambda)
-#' # Calculate trailing covariance using R code
-#' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
-#'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
-#'   method="recursive")
-#' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
-#' # Calculate the trailing correlation
-#' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+#' lagg <- 3
+#' covars <- HighFreq::run_autocovar(retp, lambda=lambda, lagg=lagg)
+#' # Calculate the trailing autocorrelation
+#' correl <- covars[, 1]/covars[, 2]
+#' # Calculate the trailing autocovariance using R code
+#' nrows <- NROW(retp)
+#' retm <- numeric(nrows)
+#' retm[1] <- retp[1, ]
+#' retd <- numeric(nrows)
+#' covarr <- numeric(nrows)
+#' covarr[1] <- retp[1, ]^2
+#' for (it in 2:nrows) {
+#'   retm[it] <- lambda*retm[it-1] + (1-lambda)*(retp[it])
+#'   retd[it] <- retp[it] - retm[it]
+#'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it]*retd[max(it-lagg, 1)]
+#' } # end for
+#' all.equal(covarr, covars[, 1])
 #' }
 #' 
 #' @export
-run_autocovar <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_autocovar`, tseries, lambda)
+run_autocovar <- function(tseries, lambda, lagg = 1L) {
+    .Call(`_HighFreq_run_autocovar`, tseries, lambda, lagg)
 }
 
-#' Calculate the trailing regressions of streaming \emph{time series} of
-#' response and predictor data, and calculate the residuals, alphas, and betas
-#' using an online recursive formula.
+#' Perform regressions on streaming \emph{time series} of response and
+#' predictor data, and calculate the regression coefficients and the residuals
+#' using online recursive formulas.
 #' 
 #' @param \code{respv} A single-column \emph{time series} or a single-column
 #'   \emph{matrix} of response data.
@@ -2719,61 +2728,83 @@ run_autocovar <- function(tseries, lambda) {
 #' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
-#' @param \code{method} A \emph{character string} specifying the method for
-#'   scaling the residuals (the default is \code{method = "none"} - no
-#'   scaling).
+#' @param \code{controlv} A \emph{list} of model parameters (see Details).
+#'
 #'   
-#' @return A \emph{matrix} with the regression betas, alphas, and the residuals
-#'   (in that order - see details), with the same number of rows as the predictor
-#'   argument \code{predv}.
+#' @return A \emph{matrix} with the regression coefficients and the residuals
+#'   (in that order - see details), with the same number of rows as the
+#'   predictor argument \code{predv}.
 #'
 #' @details
-#'   The function \code{run_reg()} calculates the vectors of \emph{alphas}
-#'   \eqn{\alpha_t}, \emph{betas} \eqn{\beta_t}, and the \emph{residuals}
-#'   \eqn{\epsilon_t} of trailing regressions, by recursively weighting the
-#'   current estimates with past estimates, using the decay factor \eqn{\lambda}:
+#'   The function \code{run_reg()} performs regressions on streaming \emph{time
+#'   series} of response and predictor data, and calculates the trailing
+#'   regression coefficients \eqn{\beta_t} and the residuals \eqn{\epsilon_t}.
+#'   It recursively weights the current estimates with past estimates, using
+#'   the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
 #'   }
 #'   \deqn{
-#'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
+#'     {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
+#'     \beta_t = {cov}^{-1}_{p t} {cov}_t
 #'   }
 #'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
-#'   }
-#'   \deqn{
-#'     \beta_t = \frac{{cov}_t}{\sigma^2_t}
-#'   }
-#'   \deqn{
-#'     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
-#'   }
-#'   \deqn{
-#'     \epsilon_t = r_t - \alpha_t - \beta_t p_t
+#'     \epsilon_t = r_t - \beta_t p_t
 #'   }
 #'   \deqn{
 #'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
 #'   }
 #'   \deqn{
-#'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
+#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
 #'   }
-#'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+#'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor time series,
 #'   \eqn{{cov}_t} is the covariance matrix between the response and the
-#'   predictor data, \eqn{\sigma^2_t} is the covariance matrix of the
-#'   predictors, and \eqn{\varsigma^2_t} is the residual variance.
+#'   predictor data, \eqn{{cov}_{p t}} is the covariance matrix of the
+#'   predictors, and \eqn{\sigma^2_t} is the residual variance.
 #' 
-#'   The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and \eqn{\beta} have
-#'   the same number of rows as the predictor argument \code{predv}.
+#'   The matrices \eqn{\beta} and \eqn{\epsilon} have the same number of rows
+#'   as the predictor argument \code{predv}.
 #'
-#'   The function \code{run_reg()} calculates the regressions with an intercept
-#'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
-#'   intercept value.
+#'   The function \code{run_reg()} accepts a list of regression model
+#'   parameters through the argument \code{controlv}.
+#'   The argument \code{controlv} contains the parameters \code{addunit},
+#'   \code{regmod}, and \code{residscale}.
+#'   Below is a description of how these parameters work.
+#'   The list of model parameters can be created using the function
+#'   \code{param_reg()}.  
 #'
+#'   If \code{addunit = TRUE} (the default), then \code{run_reg()} calculates
+#'   the regressions with an intercept (constant) term. If the predictor matrix
+#'   \code{predv} has \code{n} columns, then the number of regression
+#'   coefficients is equal to \code{n+1}, and the first regression coefficient
+#'   is the intercept value \eqn{\alpha}.
+#'   If \code{addunit = FALSE}, then \code{run_reg()} calculates the
+#'   regressions without an intercept (constant) term, and the number of
+#'   regression coefficients is equal to \code{n}.
+#'
+#'   If \code{regmod = "least_squares"} (the default) then it performs the
+#'   standard least squares regression.  This is currently the only option.
+#' 
+#'   The \emph{residuals} may be scaled by their volatilities to obtain the
+#'   \emph{z-scores}. The default is \code{residscale = "none"} - no scaling.
+#'   If the argument \code{residscale = "scale"} then the \emph{residuals}
+#'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma_t}
+#'   without subtracting their means:
+#'   \deqn{
+#'     \epsilon_t = \frac{\epsilon_t}{\sigma_t}
+#'   }
+#'   If the argument \code{residscale = "standardize"} then the residual means
+#'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+#'   they are divided by their volatilities \eqn{\sigma_t}:
+#'   \deqn{
+#'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\sigma_t}
+#'   }
+#'   Which are equal to the \emph{z-scores}.
+#' 
 #'   The above online recursive formulas are convenient for processing live
 #'   streaming data because they don't require maintaining a buffer of past
 #'   data.
@@ -2793,28 +2824,16 @@ run_autocovar <- function(tseries, lambda) {
 #'   dependence on past data.  This is equivalent to a short look-back
 #'   interval.
 #' 
-#'   The \emph{residuals} may be scaled by their volatilities to obtain the
-#'   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
-#'   If the argument \code{method = "scale"} then the \emph{residuals}
-#'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
-#'   without subtracting their means:
-#'   \deqn{
-#'     \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
-#'   }
-#'   If the argument \code{method = "standardize"} then the residual means
-#'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
-#'   they are divided by their volatilities \eqn{\varsigma_t}:
-#'   \deqn{
-#'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
-#'   }
-#'   Which are equal to the \emph{z-scores}.
-#' 
 #'   The function \code{run_reg()} returns multiple columns of data, with the
-#'   same number of rows as the input argument \code{predv}. If the predictor
-#'   matrix \code{predv} has \code{n} columns then \code{run_reg()} returns a
-#'   matrix with \code{n+2} columns.  The first \code{n} columns contain the
-#'   \emph{betas}, the \code{n+1} column the \emph{alphas}, and the last column
-#'   contains the \emph{residuals}.
+#'   same number of rows as the input argument \code{predv}. 
+#'   If the predictor matrix \code{predv} has \code{n} columns and if
+#'   \code{addunit = TRUE} (the default) then \code{run_reg()} returns a matrix
+#'   with \code{n+2} columns. The first \code{n+1} columns contain the
+#'   regression coefficients (with the first column equal to the intercept
+#'   value \eqn{\alpha}) and the last column contains the \emph{residuals}.
+#'   If \code{addunit = FALSE} then \code{run_reg()} returns a matrix with
+#'   \code{n+1} columns. The first \code{n} columns contain the regression
+#'   coefficients and the last column contains the \emph{residuals}.
 #' 
 #' @examples
 #' \dontrun{
@@ -2826,21 +2845,51 @@ run_autocovar <- function(tseries, lambda) {
 #' predv <- retp[, -1]
 #' # Calculate the trailing regressions
 #' lambda <- 0.9
-#' regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
+#' # Create a default list of regression parameters
+#' controlv <- HighFreq::param_reg(residscale="standardize")
+#' regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda, controlv=controlv)
 #' # Plot the trailing residuals
-#' datav <- cbind(cumsum(respv), regs[, 5])
+#' datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 #' colnames(datav) <- c("XLF", "residuals")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") %>%
 #'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 #'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
-#'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+#'   dySeries(name=colnamev[1], axis="y", strokeWidth=2, col="blue") %>%
+#'   dySeries(name=colnamev[2], axis="y2", strokeWidth=2, col="red") %>%
+#'   dyLegend(show="always", width=300)
+#' 
+#' # Calculate the trailing regressions using R code
+#' lambda1 <- (1-lambda)
+#' respv <- zoo::coredata(respv)
+#' predv <- zoo::coredata(predv)
+#' nrows <- NROW(predv)
+#' predm <- cbind(rep(1, nrows), predv)
+#' ncols <- NCOL(predm)
+#' covrespred <- respv[1, ]*predm[1, ]
+#' covpred <- outer(predm[1, ], predm[1, ])
+#' betas <- matrix(numeric(nrows*ncols), nc=ncols)
+#' betas[1, ] <- covrespred %*% MASS::ginv(covpred)
+#' resids <- numeric(nrows)
+#' residm <- 0
+#' residv <- 0
+#' for (it in 2:nrows) {
+#'  covrespred <- lambda*covrespred + lambda1*respv[it, ]*predm[it, ]
+#'  covpred <- lambda*covpred + lambda1*outer(predm[it, ], predm[it, ])
+#'  betas[it, ] <- covrespred %*% MASS::ginv(covpred)
+#'  resids[it] <- respv[it, ] - (betas[it, ] %*% predm[it, ])
+#'  residm <- lambda*residm + lambda1*resids[it]
+#'  residv <- lambda*residv + lambda1*(resids[it] - residm)^2
+#'  resids[it] <- (resids[it] - residm)/sqrt(residv)
+#' } # end for
+#' # Compare values, excluding warmup period
+#' all.equal(regs[-(1:1e3), ], unname(cbind(betas, resids))[-(1:1e3), ])
+#'  
 #' }
 #' 
 #' @export
-run_reg <- function(respv, predv, lambda, method = "none") {
-    .Call(`_HighFreq_run_reg`, respv, predv, lambda, method)
+run_reg <- function(respv, predv, lambda, controlv) {
+    .Call(`_HighFreq_run_reg`, respv, predv, lambda, controlv)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -3475,7 +3524,7 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #'
 #'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
 #'   calculates the fourth moment of the data.
-#'   But it doesn't de-mean the columns of \code{tseries} because that requires
+#'   But it doesn't center the columns of \code{tseries} because that requires
 #'   copying the matrix \code{tseries} in memory, so it's time-consuming.
 #'
 #'   If \code{method = "quantile"} then it calculates the skewness
@@ -3760,23 +3809,23 @@ calc_lm <- function(respv, predv) {
 #'   The list of model parameters can be created using the function
 #'   \code{param_reg()}.  Below is a description of the model parameters.
 #'
-#'   If \code{method = "least_squares"} (the default) then it performs the
+#'   If \code{regmod = "least_squares"} (the default) then it performs the
 #'   standard least squares regression, the same as the function
 #'   \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
 #'   \emph{stats}.
 #'   But it uses \code{RcppArmadillo} \code{C++} code so it's several times
 #'   faster than \code{lm()}.
 #'
-#'   If \code{method = "regular"} then it performs shrinkage regression.  It
-#'   calculates the \emph{regularized inverse} of the predictor matrix from its
+#'   If \code{regmod = "regular"} then it performs shrinkage regression.  It
+#'   calculates the \emph{reduced inverse} of the predictor matrix from its
 #'   singular value decomposition.  It performs regularization by selecting
 #'   only the largest \emph{singular values} equal in number to \code{dimax}.
 #'   
-#'   If \code{method = "quantile"} then it performs quantile regression (not
+#'   If \code{regmod = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
 #' 
-#'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
-#'   added to the predictor matrix (the default is \code{intercept = TRUE}).
+#'   If \code{addunit = TRUE} then an extra intercept column (unit column) is
+#'   added to the predictor matrix (the default is \code{addunit = TRUE}).
 #'   
 #'   The length of the return vector depends on the number of columns of the
 #'   predictor matrix (including the intercept column, if it's added).
@@ -3787,13 +3836,13 @@ calc_lm <- function(respv, predv) {
 #'   added).
 #'   The number of t-values is equal to the number of coefficients.
 #' 
-#'   For example, if the number of columns of the predictor matrix is
-#'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+#'   For example, if the number of columns of the predictor matrix is equal to
+#'   \code{n}, and if \code{addunit = TRUE} (the default), then
 #'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
 #'   regression coefficients (including the intercept coefficient), \code{n+1}
 #'   corresponding t-values, and \code{1} z-score value.
 #'
-#'   If \code{intercept = FALSE}, then \code{calc_reg()} returns a vector with
+#'   If \code{addunit = FALSE}, then \code{calc_reg()} returns a vector with
 #'   \code{2n+1} elements: \code{n} regression coefficients (without the
 #'   intercept coefficient), \code{n} corresponding t-values, and \code{1}
 #'   z-score value.
@@ -3842,8 +3891,8 @@ calc_reg <- function(respv, predv, controlv) {
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -3871,7 +3920,7 @@ calc_reg <- function(respv, predv, controlv) {
 #'   calculates the mean (location).
 #'   See the function \code{calc_mean()} for a description of the mean methods.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{tseries}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -3905,27 +3954,27 @@ calc_reg <- function(respv, predv, controlv) {
 #' all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
 #'   drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 #' # Define end points and start points
-#' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+#' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 #' # Calculate the rolling means using RcppArmadillo
-#' meanv <- HighFreq::roll_mean(retp, startp=startp, endp=endp)
+#' meanv <- HighFreq::roll_mean(retp, startp=startp, endd=endd)
 #' # Calculate the rolling medians using RcppArmadillo
-#' medianscpp <- HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric")
+#' medianscpp <- HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric")
 #' # Calculate the rolling medians using R
-#' medians = sapply(1:NROW(endp), function(i) {
-#'   median(retp[startp[i]:endp[i] + 1])
+#' medians = sapply(1:NROW(endd), function(i) {
+#'   median(retp[startp[i]:endd[i] + 1])
 #' })  # end sapply
 #' all.equal(medians, drop(medianscpp))
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric"),
-#'   Rcode=sapply(1:NROW(endp), function(i) {median(retp[startp[i]:endp[i] + 1])}),
+#'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
+#'   Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
-roll_mean <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_mean`, tseries, look_back, startp, endp, step, stub, method, confl)
+roll_mean <- function(tseries, look_back = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_mean`, tseries, look_back, startp, endd, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -3989,8 +4038,8 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4019,7 +4068,7 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #'   See the function \code{calc_var()} for a description of the dispersion
 #'   methods.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{tseries}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4062,8 +4111,8 @@ roll_varvec <- function(tseries, look_back = 1L) {
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_var`, tseries, look_back, startp, endp, step, stub, method, confl)
+roll_var <- function(tseries, look_back = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_var`, tseries, look_back, startp, endd, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -4076,8 +4125,8 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L,
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4126,7 +4175,7 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L,
 #'   In the initial warmup period, the variance is calculated over an expanding
 #'   look-back interval.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{ohlc}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4192,11 +4241,11 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L,
 #' # Same calculation in R
 #' nrows <- NROW(ohlc)
 #' closel = HighFreq::lagit(ohlc[, 4])
-#' endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
-#' startp <- drop(HighFreq::calc_startpoints(endp, 2))
-#' npts <- NROW(endp)
+#' endd <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+#' startp <- drop(HighFreq::calc_startpoints(endd, 2))
+#' npts <- NROW(endd)
 #' varollr <- sapply(2:npts, function(it) {
-#'   rangev <- startp[it]:endp[it]
+#'   rangev <- startp[it]:endd[it]
 #'   sub_ohlc = ohlc[rangev, ]
 #'   sub_close = closel[rangev]
 #'   sub_index = indeks[rangev]
@@ -4206,8 +4255,8 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endp = 0L, step = 1L,
 #' all.equal(drop(var_rolling), varollr)
 #' }
 #' @export
-roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endp, step, look_back, stub, method, scale, index)
+roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
+    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endd, step, look_back, stub, method, scale, index)
 }
 
 #' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
@@ -4219,8 +4268,8 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is 
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is 
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4255,7 +4304,7 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #'   See the function \code{calc_skew()} for a description of the skewness
 #'   methods.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{tseries}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4273,13 +4322,13 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' # Define time series of returns using package rutils
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Define end points and start points
-#' endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+#' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 #' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
 #' skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
 #' # Calculate the rolling skewness using R code
-#' skewr <- sapply(1:NROW(endp), function(it) {
-#'   HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+#' skewr <- sapply(1:NROW(endd), function(it) {
+#'   HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 #' })  # end sapply
 #' # Compare the skewness estimates
 #' all.equal(drop(skewv), skewr, check.attributes=FALSE)
@@ -4287,14 +4336,14 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endp = 0L, step = 1L, look_back = 1
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
-#'   Rcode=sapply(1:NROW(endp), function(it) {
-#'     HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+#'   Rcode=sapply(1:NROW(endd), function(it) {
+#'     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_skew`, tseries, startp, endp, step, look_back, stub, method, confl)
+roll_skew <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_skew`, tseries, startp, endd, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
@@ -4306,8 +4355,8 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is 
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is 
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4341,7 +4390,7 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #'   which calculates the kurtosis. See the function \code{calc_kurtosis()} for
 #'   a description of the kurtosis methods.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{tseries}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4359,13 +4408,13 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' # Define time series of returns using package rutils
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Define end points and start points
-#' endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+#' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 #' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
 #' kurtosisv <- HighFreq::roll_kurtosis(retp, step=25, look_back=3)
 #' # Calculate the rolling kurtosis using R code
-#' kurt_r <- sapply(1:NROW(endp), function(it) {
-#'   HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+#' kurt_r <- sapply(1:NROW(endd), function(it) {
+#'   HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 #' })  # end sapply
 #' # Compare the kurtosis estimates
 #' all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
@@ -4373,14 +4422,14 @@ roll_skew <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::roll_kurtosis(retp, step=25, look_back=3),
-#'   Rcode=sapply(1:NROW(endp), function(it) {
-#'     HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+#'   Rcode=sapply(1:NROW(endd), function(it) {
+#'     HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endp, step, look_back, stub, method, confl)
+roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endd, step, look_back, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -4397,8 +4446,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is 
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is 
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4423,7 +4472,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   each end point it subsets the time series \code{predv} over a look-back
 #'   interval equal to \code{look_back} number of end points.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{predv}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4452,7 +4501,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #'   added).
 #'   The number of t-values is equal to the number of coefficients.
 #'   For example, if the number of columns of the predictor matrix is
-#'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+#'   equal to \code{n}, and if \code{addunit = TRUE} (the default), then
 #'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
 #'   regression coefficients (including the intercept coefficient), \code{n+1}
 #'   corresponding t-values, and \code{1} z-score column.
@@ -4462,17 +4511,17 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' # Calculate historical returns
 #' retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 #' # Define monthly end points and start points
-#' endp <- xts::endpoints(retp, on="months")[-1]
+#' endd <- xts::endpoints(retp, on="months")[-1]
 #' look_back <- 12
-#' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
+#' startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
 #' # Create a default list of regression parameters
 #' controlv <- HighFreq::param_reg()
 #' # Calculate rolling betas using RcppArmadillo
-#' reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
+#' reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endd=(endd-1), startp=(startp-1), controlv=controlv)
 #' betas <- reg_stats[, 2]
 #' # Calculate rolling betas in R
-#' betar <- sapply(1:NROW(endp), FUN=function(ep) {
-#'   datav <- retp[startp[ep]:endp[ep], ]
+#' betar <- sapply(1:NROW(endd), FUN=function(ep) {
+#'   datav <- retp[startp[ep]:endd[ep], ]
 #'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
@@ -4480,8 +4529,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endp = 0L, step = 1L, look_back 
 #' }
 #' 
 #' @export
-roll_reg <- function(respv, predv, controlv, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_reg`, respv, predv, controlv, startp, endp, step, look_back, stub)
+roll_reg <- function(respv, predv, controlv, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_reg`, respv, predv, controlv, startp, endd, step, look_back, stub)
 }
 
 #' Perform a rolling standardization (centering and scaling) of the columns of
@@ -4559,8 +4608,7 @@ roll_scale <- function(matrix, look_back, center = TRUE, scale = TRUE, use_media
 #' 
 #' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past
-#'   estimates.
+#' @param \code{lambda} A decay factor which multiplies past estimates.
 #' 
 #' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
 #'   the columns so that they have zero mean or median (the default is
@@ -4681,8 +4729,8 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4708,7 +4756,7 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #'   It passes the subset time series to the function \code{calc_lm()}, which
 #'   calculates the regression data.
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{predv}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4745,8 +4793,8 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' }
 #' 
 #' @export
-roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_zscores`, respv, predv, startp, endp, step, look_back, stub)
+roll_zscores <- function(respv, predv, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_zscores`, respv, predv, startp, endd, step, look_back, stub)
 }
 
 #' Calculate a \emph{matrix} of moment values over a rolling look-back
@@ -4767,8 +4815,8 @@ roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_b
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
 #' 
-#' @param \code{endp} An \emph{integer} vector of end points (the default is 
-#'   \code{endp = 0}).
+#' @param \code{endd} An \emph{integer} vector of end points (the default is 
+#'   \code{endd = 0}).
 #' 
 #' @param \code{step} The number of time periods between the end points (the
 #'   default is \code{step = 1}).
@@ -4805,7 +4853,7 @@ roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_b
 #'    }
 #'    (The default is the \code{funame = "calc_mean"}).
 #'   
-#'   If the arguments \code{endp} and \code{startp} are not given then it
+#'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
 #'   periods. It calculates the end points along the rows of \code{tseries}
 #'   using the function \code{calc_endpoints()}, with the number of time
@@ -4835,13 +4883,13 @@ roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_b
 #' # Compare the two methods
 #' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 #' # Define end points and start points
-#' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-#' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+#' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+#' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 #' # Calculate the rolling variance using RcppArmadillo
-#' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp)
+#' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd)
 #' # Calculate the rolling variance using R code
-#' var_roll <- sapply(1:NROW(endp), function(it) {
-#'   var(retp[startp[it]:endp[it]+1, ])
+#' var_roll <- sapply(1:NROW(endd), function(it) {
+#'   var(retp[startp[it]:endd[it]+1, ])
 #' })  # end sapply
 #' var_roll[1] <- 0
 #' # Compare the two methods
@@ -4849,15 +4897,15 @@ roll_zscores <- function(respv, predv, startp = 0L, endp = 0L, step = 1L, look_b
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp),
-#'   Rcode=sapply(1:NROW(endp), function(it) {
-#'     var(retp[startp[it]:endp[it]+1, ])
+#'   Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd),
+#'   Rcode=sapply(1:NROW(endd), function(it) {
+#'     var(retp[startp[it]:endd[it]+1, ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endp = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_moment`, tseries, funame, method, confl, startp, endp, step, look_back, stub)
+roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_moment`, tseries, funame, method, confl, startp, endd, step, look_back, stub)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
@@ -5247,7 +5295,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' @param \code{rets} A \emph{time series} or \emph{matrix} of asset returns.
 #' 
 #' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
-#'   values} used for calculating the regularized inverse of the covariance
+#'   values} used for calculating the reduced inverse of the covariance
 #'   matrix (the default is \code{dimax = 0} - standard matrix inverse using
 #'   all the \emph{eigen values}).
 #'   
@@ -5294,7 +5342,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #'   and covariance.
 #'   
 #'   It then calls the function \code{HighFreq::calc_inv()} to calculate the
-#'   \emph{regularized inverse} of the covariance matrix using its eigen
+#'   \emph{reduced inverse} of the covariance matrix using its eigen
 #'   decomposition:
 #'   \deqn{
 #'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
@@ -5419,7 +5467,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'
 #'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
 #'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-#'   \emph{regularized inverse} of the \emph{covariance matrix}
+#'   \emph{reduced inverse} of the \emph{covariance matrix}
 #'   \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
 #'   \deqn{
 #'     \strong{w} = \strong{C}^{-1} \bar{r}
@@ -5430,7 +5478,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   
 #'   If \code{method = "minvarlin"} then it calculates the weights of the
 #'   minimum variance portfolio under linear constraint, by multiplying the
-#'   \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+#'   \emph{reduced inverse} of the \emph{covariance matrix} times the unit
 #'   vector:
 #'   \deqn{
 #'     \strong{w} = \strong{C}^{-1} \strong{1}
@@ -5454,7 +5502,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   }
 #'
 #'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-#'   the \emph{regularized inverse} of the \emph{covariance matrix} of
+#'   the \emph{reduced inverse} of the \emph{covariance matrix} of
 #'   \code{returns}. It performs regularization by selecting only the largest
 #'   eigenvalues equal in number to \code{dimax}.
 #'   
@@ -5482,7 +5530,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'
 #'   If \code{scalew = "voltarget"} (the default) then the weights are
 #'   scaled (multiplied by a factor) so that the weighted portfolio has an
-#'   in-sample volatility equal to \code{vol_target}.
+#'   in-sample volatility equal to \code{voltarget}.
 #'   
 #'   If \code{scalew = "voleqw"} then the weights are scaled so that the
 #'   weighted portfolio has the same volatility as the equal weight portfolio.
@@ -5502,7 +5550,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 #' ncols <- NCOL(retp)
 #' eigend <- eigen(cov(retp))
-#' # Calculate regularized inverse of covariance matrix
+#' # Calculate reduced inverse of covariance matrix
 #' dimax <- 3
 #' eigenvec <- eigend$vectors[, 1:dimax]
 #' eigenval <- eigend$values[1:dimax]
@@ -5532,10 +5580,10 @@ calc_weights <- function(returns, controlv) {
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
 #' \code{RcppArmadillo}.
 #' 
-#' @param \code{returns} A \emph{time series} or a \emph{matrix} of asset
+#' @param \code{retp} A \emph{time series} or a \emph{matrix} of asset
 #'   returns data.
 #'   
-#' @param \code{excess} A \emph{time series} or a \emph{matrix} of excess
+#' @param \code{retx} A \emph{time series} or a \emph{matrix} of excess
 #'   returns data (the returns in excess of the risk-free rate).
 #'   
 #' @param \code{controlv} A \emph{list} of portfolio optimization model
@@ -5543,7 +5591,7 @@ calc_weights <- function(returns, controlv) {
 #'
 #' @param \code{startp} An \emph{integer vector} of start points.
 #' 
-#' @param \code{endp} An \emph{integer vector} of end points.
+#' @param \code{endd} An \emph{integer vector} of end points.
 #' 
 #' @param \code{lambda} A decay factor which multiplies the past portfolio
 #'   weights.  (The default is \code{lambda = 0} - no memory.)
@@ -5556,15 +5604,15 @@ calc_weights <- function(returns, controlv) {
 #'   
 #'   
 #' @return A column \emph{vector} of strategy returns, with the same length as
-#'   the number of rows of \code{returns}.
+#'   the number of rows of \code{retp}.
 #'
 #' @details
 #'   The function \code{back_test()} performs a backtest simulation of a
 #'   rolling portfolio optimization strategy over a \emph{vector} of the end
-#'   points \code{endp}.
+#'   points \code{endd}.
 #'   
-#'   It performs a loop over the end points \code{endp}, and subsets the
-#'   \emph{matrix} of the excess asset returns \code{excess} along its rows,
+#'   It performs a loop over the end points \code{endd}, and subsets the
+#'   \emph{matrix} of the excess asset returns \code{retx} along its rows,
 #'   between the corresponding \emph{start point} and the \emph{end point}. 
 #'   
 #'   The function \code{back_test()} passes the subset matrix of excess returns
@@ -5604,7 +5652,7 @@ calc_weights <- function(returns, controlv) {
 #'   
 #'   The function \code{back_test()} returns a \emph{time series} (column
 #'   \emph{vector}) of strategy returns, of the same length as the number of
-#'   rows of \code{returns}.
+#'   rows of \code{retp}.
 #'
 #' @examples
 #' \dontrun{
@@ -5612,21 +5660,21 @@ calc_weights <- function(returns, controlv) {
 #' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 #' # riskf is the daily risk-free rate
 #' riskf <- 0.03/260
-#' retexcess <- retp - riskf
+#' retx <- retp - riskf
 #' # Define monthly end points without initial warmup period
-#' endp <- rutils::calc_endpoints(retp, interval="months")
-#' endp <- endp[endp > 0]
-#' nrows <- NROW(endp)
+#' endd <- rutils::calc_endpoints(retp, interval="months")
+#' endd <- endd[endd > 0]
+#' nrows <- NROW(endd)
 #' # Define 12-month look-back interval and start points over sliding window
 #' look_back <- 12
-#' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
+#' startp <- c(rep_len(1, look_back-1), endd[1:(nrows-look_back+1)])
 #' # Define return shrinkage and dimension reduction
 #' alpha <- 0.5
 #' dimax <- 3
 #' # Create a list of portfolio optimization parameters
 #' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 #' # Simulate a monthly rolling portfolio optimization strategy
-#' pnls <- HighFreq::back_test(retexcess, retp, controlv=controlv, startp=(startp-1), endp=(endp-1))
+#' pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 #' pnls <- xts::xts(pnls, index(retp))
 #' colnames(pnls) <- "strategy"
 #' # Plot dygraph of strategy
@@ -5635,7 +5683,7 @@ calc_weights <- function(returns, controlv) {
 #' }
 #' 
 #' @export
-back_test <- function(excess, returns, controlv, startp, endp, lambda = 0.0, coeff = 1.0, bid_offer = 0.0) {
-    .Call(`_HighFreq_back_test`, excess, returns, controlv, startp, endp, lambda, coeff, bid_offer)
+back_test <- function(retx, retp, controlv, startp, endd, lambda = 0.0, coeff = 1.0, bid_offer = 0.0) {
+    .Call(`_HighFreq_back_test`, retx, retp, controlv, startp, endd, lambda, coeff, bid_offer)
 }
 

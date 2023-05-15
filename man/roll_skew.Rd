@@ -9,7 +9,7 @@ interval attached at the end points of a \emph{time series} or a
 roll_skew(
   tseries,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L,
@@ -23,8 +23,8 @@ roll_skew(
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is 
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -65,7 +65,7 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
   See the function \code{calc_skew()} for a description of the skewness
   methods.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{tseries}
   using the function \code{calc_endpoints()}, with the number of time
@@ -83,13 +83,13 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Define end points and start points
-endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endp, look_back=3)
+endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+startp <- HighFreq::calc_startpoints(endd, look_back=3)
 # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
 skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
 # Calculate the rolling skewness using R code
-skewr <- sapply(1:NROW(endp), function(it) {
-  HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+skewr <- sapply(1:NROW(endd), function(it) {
+  HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 })  # end sapply
 # Compare the skewness estimates
 all.equal(drop(skewv), skewr, check.attributes=FALSE)
@@ -97,8 +97,8 @@ all.equal(drop(skewv), skewr, check.attributes=FALSE)
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
-  Rcode=sapply(1:NROW(endp), function(it) {
-    HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+  Rcode=sapply(1:NROW(endd), function(it) {
+    HighFreq::calc_skew(retp[startp[it]:endd[it], ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

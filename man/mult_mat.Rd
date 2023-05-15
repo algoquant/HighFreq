@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{mult_mat}
 \alias{mult_mat}
-\title{Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise.}
+\title{Multiply element-wise the rows or columns of a \emph{matrix} times a
+\emph{vector}.}
 \usage{
 mult_mat(vectorv, matrixv, byrow = TRUE)
 }
@@ -17,17 +17,17 @@ the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
 (the default is \code{byrow = TRUE}.)}
 }
 \value{
-A \emph{matrix} equal to the product of the arguments \code{matrix}
-  times \code{vector}, with the same dimensions as the argument
-  \code{matrix}.
+A \emph{matrix} equal to the product of the elements of
+  \code{matrix} times \code{vector}, with the same dimensions as the
+  argument \code{matrix}.
 }
 \description{
-Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-element-wise.
+Multiply element-wise the rows or columns of a \emph{matrix} times a
+\emph{vector}.
 }
 \details{
-The function \code{mult_mat()} multiplies the rows or columns of a
-  \emph{matrix} times a \emph{vector}, element-wise.
+The function \code{mult_mat()} multiplies element-wise the rows or columns
+  of a \emph{matrix} times a \emph{vector}.
 
   If \code{byrow = TRUE} (the default), then function \code{mult_mat()}
   multiplies the rows of the argument \code{matrix} times the argument

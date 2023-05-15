@@ -2,33 +2,33 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_inv}
 \alias{calc_inv}
-\title{Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+\title{Calculate the \emph{reduced inverse} of a symmetric \emph{matrix} of
 data using eigen decomposition.}
 \usage{
-calc_inv(matrixv, dimax = 0L, eigen_thresh = 0)
+calc_inv(matrixv, dimax = 0L, singmin = 0)
 }
 \arguments{
 \item{\code{matrixv}}{A symmetric \emph{matrix} of data.}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of \emph{eigen
-values} used for calculating the \emph{regularized inverse} of the matrix
+values} used for calculating the \emph{reduced inverse} of the matrix
 \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 using all the \emph{eigen values}).}
 
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+\item{\code{singmin}}{A \emph{numeric} threshold level for discarding
 small \emph{eigen values} in order to regularize the inverse of the matrix
 \code{matrixv} (the default is \code{0.0}).}
 }
 \value{
-A \emph{matrix} equal to the \emph{regularized inverse} of the
+A \emph{matrix} equal to the \emph{reduced inverse} of the
   matrix \code{matrixv}.
 }
 \description{
-Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+Calculate the \emph{reduced inverse} of a symmetric \emph{matrix} of
 data using eigen decomposition.
 }
 \details{
-The function \code{calc_inv()} calculates the \emph{regularized inverse}
+The function \code{calc_inv()} calculates the \emph{reduced inverse}
   of the matrix \code{matrixv} using eigen decomposition.
   
   The function \code{calc_inv()} first performs eigen decomposition of the
@@ -46,7 +46,7 @@ The function \code{calc_inv()} calculates the \emph{regularized inverse}
     \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
   }
   
-  The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+  The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
   by removing \emph{eigen vectors} with very small \emph{eigen values}:
   \deqn{
     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
@@ -55,16 +55,16 @@ The function \code{calc_inv()} calculates the \emph{regularized inverse}
   that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
   
   The function \code{calc_inv()} applies regularization to the matrix
-  inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+  inverse using the arguments \code{dimax} and \code{singmin}.
   
   The function \code{calc_inv()} applies regularization by discarding the
   smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
-  threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+  threshold level \code{singmin} times the sum of all the \emph{eigen
   values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
   
   It also discards additional \emph{eigen vectors} so that only the highest
   order \emph{eigen vectors} remain, up to order \code{dimax}.
-  It calculates the \emph{regularized inverse} from the eigen decomposition
+  It calculates the \emph{reduced inverse} from the eigen decomposition
   using only the largest \emph{eigen values} up to \code{dimax}.  For
   example, if
   \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
@@ -86,9 +86,9 @@ invmat <- HighFreq::calc_inv(covmat)
 # Calculate matrix inverse in R
 invr <- solve(covmat)
 all.equal(invmat, invr, check.attributes=FALSE)
-# Calculate regularized inverse using RcppArmadillo
+# Calculate reduced inverse using RcppArmadillo
 invmat <- HighFreq::calc_inv(covmat, dimax=3)
-# Calculate regularized inverse using eigen decomposition in R
+# Calculate reduced inverse using eigen decomposition in R
 eigend <- eigen(covmat)
 dimax <- 1:3
 invr <- eigend$vectors[, dimax] \%*\% (t(eigend$vectors[, dimax])/eigend$values[dimax])

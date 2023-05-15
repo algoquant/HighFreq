@@ -2,11 +2,11 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_reg}
 \alias{run_reg}
-\title{Calculate the trailing regressions of streaming \emph{time series} of
-response and predictor data, and calculate the residuals, alphas, and betas
-using an online recursive formula.}
+\title{Perform regressions on streaming \emph{time series} of response and
+predictor data, and calculate the regression coefficients and the residuals
+using online recursive formulas.}
 \usage{
-run_reg(respv, predv, lambda, method = "none")
+run_reg(respv, predv, lambda, controlv)
 }
 \arguments{
 \item{\code{respv}}{A single-column \emph{time series} or a single-column
@@ -15,66 +15,87 @@ run_reg(respv, predv, lambda, method = "none")
 \item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past
-estimates.}
+\item{\code{lambda}}{A decay factor which multiplies past estimates.}
 
-\item{\code{method}}{A \emph{character string} specifying the method for
-scaling the residuals (the default is \code{method = "none"} - no
-scaling).}
+\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
 }
 \value{
-A \emph{matrix} with the regression betas, alphas, and the residuals
-  (in that order - see details), with the same number of rows as the predictor
-  argument \code{predv}.
+A \emph{matrix} with the regression coefficients and the residuals
+  (in that order - see details), with the same number of rows as the
+  predictor argument \code{predv}.
 }
 \description{
-Calculate the trailing regressions of streaming \emph{time series} of
-response and predictor data, and calculate the residuals, alphas, and betas
-using an online recursive formula.
+Perform regressions on streaming \emph{time series} of response and
+predictor data, and calculate the regression coefficients and the residuals
+using online recursive formulas.
 }
 \details{
-The function \code{run_reg()} calculates the vectors of \emph{alphas}
-  \eqn{\alpha_t}, \emph{betas} \eqn{\beta_t}, and the \emph{residuals}
-  \eqn{\epsilon_t} of trailing regressions, by recursively weighting the
-  current estimates with past estimates, using the decay factor \eqn{\lambda}:
+The function \code{run_reg()} performs regressions on streaming \emph{time
+  series} of response and predictor data, and calculates the trailing
+  regression coefficients \eqn{\beta_t} and the residuals \eqn{\epsilon_t}.
+  It recursively weights the current estimates with past estimates, using
+  the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
   }
   \deqn{
-    \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
+    {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
+    \beta_t = {cov}^{-1}_{p t} {cov}_t
   }
   \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
-  }
-  \deqn{
-    \beta_t = \frac{{cov}_t}{\sigma^2_t}
-  }
-  \deqn{
-    \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
-  }
-  \deqn{
-    \epsilon_t = r_t - \alpha_t - \beta_t p_t
+    \epsilon_t = r_t - \beta_t p_t
   }
   \deqn{
     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
   }
   \deqn{
-    \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
+    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
   }
-  Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+  Where \eqn{r_t} and \eqn{p_t} are the response and predictor time series,
   \eqn{{cov}_t} is the covariance matrix between the response and the
-  predictor data, \eqn{\sigma^2_t} is the covariance matrix of the
-  predictors, and \eqn{\varsigma^2_t} is the residual variance.
+  predictor data, \eqn{{cov}_{p t}} is the covariance matrix of the
+  predictors, and \eqn{\sigma^2_t} is the residual variance.
 
-  The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and \eqn{\beta} have
-  the same number of rows as the predictor argument \code{predv}.
+  The matrices \eqn{\beta} and \eqn{\epsilon} have the same number of rows
+  as the predictor argument \code{predv}.
 
-  The function \code{run_reg()} calculates the regressions with an intercept
-  (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
-  intercept value.
+  The function \code{run_reg()} accepts a list of regression model
+  parameters through the argument \code{controlv}.
+  The argument \code{controlv} contains the parameters \code{addunit},
+  \code{regmod}, and \code{residscale}.
+  Below is a description of how these parameters work.
+  The list of model parameters can be created using the function
+  \code{param_reg()}.  
+
+  If \code{addunit = TRUE} (the default), then \code{run_reg()} calculates
+  the regressions with an intercept (constant) term. If the predictor matrix
+  \code{predv} has \code{n} columns, then the number of regression
+  coefficients is equal to \code{n+1}, and the first regression coefficient
+  is the intercept value \eqn{\alpha}.
+  If \code{addunit = FALSE}, then \code{run_reg()} calculates the
+  regressions without an intercept (constant) term, and the number of
+  regression coefficients is equal to \code{n}.
+
+  If \code{regmod = "least_squares"} (the default) then it performs the
+  standard least squares regression.  This is currently the only option.
+
+  The \emph{residuals} may be scaled by their volatilities to obtain the
+  \emph{z-scores}. The default is \code{residscale = "none"} - no scaling.
+  If the argument \code{residscale = "scale"} then the \emph{residuals}
+  \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma_t}
+  without subtracting their means:
+  \deqn{
+    \epsilon_t = \frac{\epsilon_t}{\sigma_t}
+  }
+  If the argument \code{residscale = "standardize"} then the residual means
+  \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+  they are divided by their volatilities \eqn{\sigma_t}:
+  \deqn{
+    \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\sigma_t}
+  }
+  Which are equal to the \emph{z-scores}.
 
   The above online recursive formulas are convenient for processing live
   streaming data because they don't require maintaining a buffer of past
@@ -95,28 +116,16 @@ The function \code{run_reg()} calculates the vectors of \emph{alphas}
   dependence on past data.  This is equivalent to a short look-back
   interval.
 
-  The \emph{residuals} may be scaled by their volatilities to obtain the
-  \emph{z-scores}. The default is \code{method = "none"} - no scaling.
-  If the argument \code{method = "scale"} then the \emph{residuals}
-  \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
-  without subtracting their means:
-  \deqn{
-    \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
-  }
-  If the argument \code{method = "standardize"} then the residual means
-  \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
-  they are divided by their volatilities \eqn{\varsigma_t}:
-  \deqn{
-    \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
-  }
-  Which are equal to the \emph{z-scores}.
-
   The function \code{run_reg()} returns multiple columns of data, with the
-  same number of rows as the input argument \code{predv}. If the predictor
-  matrix \code{predv} has \code{n} columns then \code{run_reg()} returns a
-  matrix with \code{n+2} columns.  The first \code{n} columns contain the
-  \emph{betas}, the \code{n+1} column the \emph{alphas}, and the last column
-  contains the \emph{residuals}.
+  same number of rows as the input argument \code{predv}. 
+  If the predictor matrix \code{predv} has \code{n} columns and if
+  \code{addunit = TRUE} (the default) then \code{run_reg()} returns a matrix
+  with \code{n+2} columns. The first \code{n+1} columns contain the
+  regression coefficients (with the first column equal to the intercept
+  value \eqn{\alpha}) and the last column contains the \emph{residuals}.
+  If \code{addunit = FALSE} then \code{run_reg()} returns a matrix with
+  \code{n+1} columns. The first \code{n} columns contain the regression
+  coefficients and the last column contains the \emph{residuals}.
 }
 \examples{
 \dontrun{
@@ -128,16 +137,46 @@ respv <- retp[, 1]
 predv <- retp[, -1]
 # Calculate the trailing regressions
 lambda <- 0.9
-regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
+# Create a default list of regression parameters
+controlv <- HighFreq::param_reg(residscale="standardize")
+regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda, controlv=controlv)
 # Plot the trailing residuals
-datav <- cbind(cumsum(respv), regs[, 5])
+datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 colnames(datav) <- c("XLF", "residuals")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") \%>\%
   dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%
   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
-  dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") \%>\%
-  dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+  dySeries(name=colnamev[1], axis="y", strokeWidth=2, col="blue") \%>\%
+  dySeries(name=colnamev[2], axis="y2", strokeWidth=2, col="red") \%>\%
+  dyLegend(show="always", width=300)
+
+# Calculate the trailing regressions using R code
+lambda1 <- (1-lambda)
+respv <- zoo::coredata(respv)
+predv <- zoo::coredata(predv)
+nrows <- NROW(predv)
+predm <- cbind(rep(1, nrows), predv)
+ncols <- NCOL(predm)
+covrespred <- respv[1, ]*predm[1, ]
+covpred <- outer(predm[1, ], predm[1, ])
+betas <- matrix(numeric(nrows*ncols), nc=ncols)
+betas[1, ] <- covrespred \%*\% MASS::ginv(covpred)
+resids <- numeric(nrows)
+residm <- 0
+residv <- 0
+for (it in 2:nrows) {
+ covrespred <- lambda*covrespred + lambda1*respv[it, ]*predm[it, ]
+ covpred <- lambda*covpred + lambda1*outer(predm[it, ], predm[it, ])
+ betas[it, ] <- covrespred \%*\% MASS::ginv(covpred)
+ resids[it] <- respv[it, ] - (betas[it, ] \%*\% predm[it, ])
+ residm <- lambda*residm + lambda1*resids[it]
+ residv <- lambda*residv + lambda1*(resids[it] - residm)^2
+ resids[it] <- (resids[it] - residm)/sqrt(residv)
+} # end for
+# Compare values, excluding warmup period
+all.equal(regs[-(1:1e3), ], unname(cbind(betas, resids))[-(1:1e3), ])
+ 
 }
 
 }

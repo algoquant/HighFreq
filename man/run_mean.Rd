@@ -95,7 +95,7 @@ closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
 lambda <- 0.9
 meanv <- HighFreq::run_mean(closep, lambda=lambda)
-# Calculate trailing means using R code
+# Calculate the trailing means using R code
 pricef <- (1-lambda)*filter(closep, 
   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
   method="recursive")

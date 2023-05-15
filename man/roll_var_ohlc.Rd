@@ -9,7 +9,7 @@ interval attached at the end points of a \emph{time series} or a
 roll_var_ohlc(
   ohlc,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L,
@@ -25,8 +25,8 @@ price data.}
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -81,7 +81,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   In the initial warmup period, the variance is calculated over an expanding
   look-back interval.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{ohlc}
   using the function \code{calc_endpoints()}, with the number of time
@@ -147,11 +147,11 @@ varoll <- HighFreq::roll_var_ohlc(ohlc,
 # Same calculation in R
 nrows <- NROW(ohlc)
 closel = HighFreq::lagit(ohlc[, 4])
-endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
-startp <- drop(HighFreq::calc_startpoints(endp, 2))
-npts <- NROW(endp)
+endd <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+startp <- drop(HighFreq::calc_startpoints(endd, 2))
+npts <- NROW(endd)
 varollr <- sapply(2:npts, function(it) {
-  rangev <- startp[it]:endp[it]
+  rangev <- startp[it]:endd[it]
   sub_ohlc = ohlc[rangev, ]
   sub_close = closel[rangev]
   sub_index = indeks[rangev]

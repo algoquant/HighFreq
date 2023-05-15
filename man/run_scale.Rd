@@ -11,8 +11,7 @@ run_scale(tseries, lambda, center = TRUE, scale = TRUE)
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past
-estimates.}
+\item{\code{lambda}}{A decay factor which multiplies past estimates.}
 
 \item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center
 the columns so that they have zero mean or median (the default is

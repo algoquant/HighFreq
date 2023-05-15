@@ -9,7 +9,7 @@ interval attached at the end points of a \emph{time series} or a
 roll_kurtosis(
   tseries,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L,
@@ -23,8 +23,8 @@ roll_kurtosis(
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is 
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -64,7 +64,7 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
   which calculates the kurtosis. See the function \code{calc_kurtosis()} for
   a description of the kurtosis methods.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{tseries}
   using the function \code{calc_endpoints()}, with the number of time
@@ -82,13 +82,13 @@ The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Define end points and start points
-endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endp, look_back=3)
+endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+startp <- HighFreq::calc_startpoints(endd, look_back=3)
 # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
 kurtosisv <- HighFreq::roll_kurtosis(retp, step=25, look_back=3)
 # Calculate the rolling kurtosis using R code
-kurt_r <- sapply(1:NROW(endp), function(it) {
-  HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+kurt_r <- sapply(1:NROW(endd), function(it) {
+  HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 })  # end sapply
 # Compare the kurtosis estimates
 all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
@@ -96,8 +96,8 @@ all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
 library(microbenchmark)
 summary(microbenchmark(
   Rcpp=HighFreq::roll_kurtosis(retp, step=25, look_back=3),
-  Rcode=sapply(1:NROW(endp), function(it) {
-    HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+  Rcode=sapply(1:NROW(endd), function(it) {
+    HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

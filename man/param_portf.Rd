@@ -7,14 +7,14 @@ optimization functions.}
 \usage{
 param_portf(
   method = "sharpem",
-  eigen_thresh = 1e-05,
+  singmin = 1e-05,
   dimax = 0L,
   confl = 0.1,
   alpha = 0,
   rankw = FALSE,
   centerw = FALSE,
   scalew = "voltarget",
-  vol_target = 0.001
+  voltarget = 0.01
 )
 }
 \arguments{
@@ -22,12 +22,12 @@ param_portf(
 calculating the portfolio weights (the default is \code{method =
 "sharpem"}).}
 
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+\item{\code{singmin}}{A \emph{numeric} threshold level for discarding
 small \emph{singular values} in order to regularize the inverse of the
 \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of \emph{singular
-values} used for calculating the \emph{regularized inverse} of the
+values} used for calculating the \emph{reduced inverse} of the
 \code{covariance matrix} of \code{returns} matrix (the default is
 \code{dimax = 0} - standard matrix inverse using all the \emph{singular
 values}).}
@@ -47,8 +47,8 @@ be centered (the default is \code{centerw = FALSE}).}
 \item{\code{scalew}}{A \emph{character string} specifying the method for
 scaling the weights (the default is \code{scalew = "voltarget"}).}
 
-\item{\code{vol_target}}{A \emph{numeric} volatility target for scaling the
-weights (the default is \code{0.001})}
+\item{\code{voltarget}}{A \emph{numeric} volatility target for scaling the
+weights (the default is \code{0.01})}
 }
 \value{
 A named list of model parameters that can be passed into portfolio

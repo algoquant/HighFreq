@@ -70,7 +70,7 @@ lambda <- 0.9
 vars <- HighFreq::run_var(retp, lambda=lambda)
 # Calculate centered returns
 retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
-# Calculate trailing variance using R code
+# Calculate the trailing variance using R code
 retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
   init=as.numeric(retc[1, 1])^2/(1-lambda), 
   method="recursive")

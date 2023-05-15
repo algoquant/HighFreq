@@ -10,7 +10,7 @@ roll_reg(
   predv,
   controlv,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L
@@ -28,8 +28,8 @@ data.}
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is 
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -59,7 +59,7 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   each end point it subsets the time series \code{predv} over a look-back
   interval equal to \code{look_back} number of end points.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{predv}
   using the function \code{calc_endpoints()}, with the number of time
@@ -88,7 +88,7 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   added).
   The number of t-values is equal to the number of coefficients.
   For example, if the number of columns of the predictor matrix is
-  equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+  equal to \code{n}, and if \code{addunit = TRUE} (the default), then
   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
   regression coefficients (including the intercept coefficient), \code{n+1}
   corresponding t-values, and \code{1} z-score column.
@@ -98,17 +98,17 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 # Define monthly end points and start points
-endp <- xts::endpoints(retp, on="months")[-1]
+endd <- xts::endpoints(retp, on="months")[-1]
 look_back <- 12
-startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
+startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
+reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endd=(endd-1), startp=(startp-1), controlv=controlv)
 betas <- reg_stats[, 2]
 # Calculate rolling betas in R
-betar <- sapply(1:NROW(endp), FUN=function(ep) {
-  datav <- retp[startp[ep]:endp[ep], ]
+betar <- sapply(1:NROW(endd), FUN=function(ep) {
+  datav <- retp[startp[ep]:endd[ep], ]
   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 })  # end sapply
 # Compare the outputs of both functions

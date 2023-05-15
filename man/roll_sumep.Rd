@@ -8,7 +8,7 @@
 roll_sumep(
   tseries,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L
@@ -20,8 +20,8 @@ roll_sumep(
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -53,14 +53,14 @@ The function \code{roll_sumep()} calculates the rolling sums at the end
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define end points at 25 day intervals
-endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
+endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
 # Define start points as 75 day lag of end points
-startp <- HighFreq::calc_startpoints(endp, look_back=3)
+startp <- HighFreq::calc_startpoints(endd, look_back=3)
 # Calculate rolling sums using Rcpp
-sumc <- HighFreq::roll_sumep(retp, startp=startp, endp=endp)
+sumc <- HighFreq::roll_sumep(retp, startp=startp, endd=endd)
 # Calculate rolling sums using R code
-sumr <- sapply(1:NROW(endp), function(ep) {
-colSums(retp[(startp[ep]+1):(endp[ep]+1), ])
+sumr <- sapply(1:NROW(endd), function(ep) {
+colSums(retp[(startp[ep]+1):(endd[ep]+1), ])
   })  # end sapply
 sumr <- t(sumr)
 all.equal(sumc, sumr, check.attributes=FALSE)

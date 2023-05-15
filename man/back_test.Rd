@@ -6,21 +6,21 @@
 \code{RcppArmadillo}.}
 \usage{
 back_test(
-  excess,
-  returns,
+  retx,
+  retp,
   controlv,
   startp,
-  endp,
+  endd,
   lambda = 0,
   coeff = 1,
   bid_offer = 0
 )
 }
 \arguments{
-\item{\code{returns}}{A \emph{time series} or a \emph{matrix} of asset
+\item{\code{retp}}{A \emph{time series} or a \emph{matrix} of asset
 returns data.}
 
-\item{\code{excess}}{A \emph{time series} or a \emph{matrix} of excess
+\item{\code{retx}}{A \emph{time series} or a \emph{matrix} of excess
 returns data (the returns in excess of the risk-free rate).}
 
 \item{\code{controlv}}{A \emph{list} of portfolio optimization model
@@ -28,7 +28,7 @@ parameters (see Details).}
 
 \item{\code{startp}}{An \emph{integer vector} of start points.}
 
-\item{\code{endp}}{An \emph{integer vector} of end points.}
+\item{\code{endd}}{An \emph{integer vector} of end points.}
 
 \item{\code{lambda}}{A decay factor which multiplies the past portfolio
 weights.  (The default is \code{lambda = 0} - no memory.)}
@@ -41,7 +41,7 @@ default is \code{1})}
 }
 \value{
 A column \emph{vector} of strategy returns, with the same length as
-  the number of rows of \code{returns}.
+  the number of rows of \code{retp}.
 }
 \description{
 Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -50,10 +50,10 @@ Simulate (backtest) a rolling portfolio optimization strategy, using
 \details{
 The function \code{back_test()} performs a backtest simulation of a
   rolling portfolio optimization strategy over a \emph{vector} of the end
-  points \code{endp}.
+  points \code{endd}.
   
-  It performs a loop over the end points \code{endp}, and subsets the
-  \emph{matrix} of the excess asset returns \code{excess} along its rows,
+  It performs a loop over the end points \code{endd}, and subsets the
+  \emph{matrix} of the excess asset returns \code{retx} along its rows,
   between the corresponding \emph{start point} and the \emph{end point}. 
   
   The function \code{back_test()} passes the subset matrix of excess returns
@@ -93,7 +93,7 @@ The function \code{back_test()} performs a backtest simulation of a
   
   The function \code{back_test()} returns a \emph{time series} (column
   \emph{vector}) of strategy returns, of the same length as the number of
-  rows of \code{returns}.
+  rows of \code{retp}.
 }
 \examples{
 \dontrun{
@@ -101,21 +101,21 @@ The function \code{back_test()} performs a backtest simulation of a
 retp <- na.omit(rutils::etfenv$returns[, 1:16])
 # riskf is the daily risk-free rate
 riskf <- 0.03/260
-retexcess <- retp - riskf
+retx <- retp - riskf
 # Define monthly end points without initial warmup period
-endp <- rutils::calc_endpoints(retp, interval="months")
-endp <- endp[endp > 0]
-nrows <- NROW(endp)
+endd <- rutils::calc_endpoints(retp, interval="months")
+endd <- endd[endd > 0]
+nrows <- NROW(endd)
 # Define 12-month look-back interval and start points over sliding window
 look_back <- 12
-startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
+startp <- c(rep_len(1, look_back-1), endd[1:(nrows-look_back+1)])
 # Define return shrinkage and dimension reduction
 alpha <- 0.5
 dimax <- 3
 # Create a list of portfolio optimization parameters
 controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
-pnls <- HighFreq::back_test(retexcess, retp, controlv=controlv, startp=(startp-1), endp=(endp-1))
+pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 pnls <- xts::xts(pnls, index(retp))
 colnames(pnls) <- "strategy"
 # Plot dygraph of strategy

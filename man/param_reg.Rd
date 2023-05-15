@@ -6,10 +6,11 @@
 and machine learning functions.}
 \usage{
 param_reg(
-  method = "least_squares",
-  intercept = TRUE,
-  eigen_thresh = 1e-05,
+  regmod = "least_squares",
+  addunit = TRUE,
+  singmin = 1e-05,
   dimax = 0L,
+  residscale = "none",
   confl = 0.1,
   alpha = 0
 )
@@ -18,16 +19,16 @@ param_reg(
 \item{\code{method}}{A \emph{character string} specifying the type of
 regression model (the default is \code{method = "least_squares"}).}
 
-\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
-term should be added to the predictor (the default is \code{intercept =
+\item{\code{addunit}}{A \emph{Boolean} specifying whether an intercept
+term should be added to the predictor (the default is \code{addunit =
 TRUE}).}
 
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+\item{\code{singmin}}{A \emph{numeric} threshold level for discarding
 small \emph{singular values} in order to regularize the inverse of the
 predictor matrix (the default is \code{1e-5}).}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of \emph{singular
-values} used for calculating the \emph{regularized inverse} of the
+values} used for calculating the \emph{reduced inverse} of the
 predictor matrix (the default is \code{dimax = 0} - standard matrix
 inverse using all the \emph{singular values}).}
 
@@ -60,7 +61,7 @@ The function \code{param_reg()} creates a named list of model parameters
 controlv <- HighFreq::param_reg()
 unlist(controlv)
 # Create a custom list of regression parameters
-controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+controlv <- HighFreq::param_reg(addunit=FALSE, method="regular", dimax=4)
 unlist(controlv)
 }
 

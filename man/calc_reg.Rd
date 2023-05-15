@@ -34,23 +34,23 @@ The function \code{calc_reg()} performs multivariate regression using
   The list of model parameters can be created using the function
   \code{param_reg()}.  Below is a description of the model parameters.
 
-  If \code{method = "least_squares"} (the default) then it performs the
+  If \code{regmod = "least_squares"} (the default) then it performs the
   standard least squares regression, the same as the function
   \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
   \emph{stats}.
   But it uses \code{RcppArmadillo} \code{C++} code so it's several times
   faster than \code{lm()}.
 
-  If \code{method = "regular"} then it performs shrinkage regression.  It
-  calculates the \emph{regularized inverse} of the predictor matrix from its
+  If \code{regmod = "regular"} then it performs shrinkage regression.  It
+  calculates the \emph{reduced inverse} of the predictor matrix from its
   singular value decomposition.  It performs regularization by selecting
   only the largest \emph{singular values} equal in number to \code{dimax}.
   
-  If \code{method = "quantile"} then it performs quantile regression (not
+  If \code{regmod = "quantile"} then it performs quantile regression (not
   implemented yet).
 
-  If \code{intercept = TRUE} then an extra intercept column (unit column) is
-  added to the predictor matrix (the default is \code{intercept = TRUE}).
+  If \code{addunit = TRUE} then an extra intercept column (unit column) is
+  added to the predictor matrix (the default is \code{addunit = TRUE}).
   
   The length of the return vector depends on the number of columns of the
   predictor matrix (including the intercept column, if it's added).
@@ -61,13 +61,13 @@ The function \code{calc_reg()} performs multivariate regression using
   added).
   The number of t-values is equal to the number of coefficients.
 
-  For example, if the number of columns of the predictor matrix is
-  equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+  For example, if the number of columns of the predictor matrix is equal to
+  \code{n}, and if \code{addunit = TRUE} (the default), then
   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
   regression coefficients (including the intercept coefficient), \code{n+1}
   corresponding t-values, and \code{1} z-score value.
 
-  If \code{intercept = FALSE}, then \code{calc_reg()} returns a vector with
+  If \code{addunit = FALSE}, then \code{calc_reg()} returns a vector with
   \code{2n+1} elements: \code{n} regression coefficients (without the
   intercept coefficient), \code{n} corresponding t-values, and \code{1}
   z-score value.

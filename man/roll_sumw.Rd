@@ -5,13 +5,13 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_sumw(tseries, endp = NULL, look_back = 1L, stub = NULL, weightv = NULL)
+roll_sumw(tseries, endd = NULL, look_back = 1L, stub = NULL, weightv = NULL)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is
-\code{endp = NULL}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is
+\code{endd = NULL}).}
 
 \item{\code{look_back}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
@@ -46,13 +46,13 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
   The function \code{roll_sumw()} returns a \emph{matrix} with the same
   dimensions as the input argument \code{tseries}.
 
-  The arguments \code{weightv}, \code{endp}, and \code{stub} are
+  The arguments \code{weightv}, \code{endd}, and \code{stub} are
   optional.
   
   If the argument \code{weightv} is not supplied, then simple sums are
   calculated, not weighted sums.
   
-  If either the \code{stub} or \code{endp} arguments are supplied,
+  If either the \code{stub} or \code{endd} arguments are supplied,
   then the rolling sums are calculated at the end points. 
   
   If only the argument \code{stub} is supplied, then the end points are
@@ -60,7 +60,7 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
   end point is equal to \code{stub} and the end points are spaced
   \code{look_back} periods apart.
   
-  If the arguments \code{weightv}, \code{endp}, and \code{stub} are
+  If the arguments \code{weightv}, \code{endd}, and \code{stub} are
   not supplied, then the sums are calculated over a number of data points
   equal to \code{look_back}.
   
@@ -91,16 +91,16 @@ all.equal(sumc, sumr, check.attributes=FALSE)
 # Calculate rolling sums at end points
 stubv <- 21
 sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
-endp <- (stubv + look_back*(0:(NROW(retp) \%/\% look_back)))
-endp <- endp[endp < NROW(retp)]
+endd <- (stubv + look_back*(0:(NROW(retp) \%/\% look_back)))
+endd <- endd[endd < NROW(retp)]
 sumr <- apply(zoo::coredata(retp), 2, cumsum)
-sumr <- sumr[endp+1, ]
+sumr <- sumr[endd+1, ]
 sumlag <- rbind(numeric(2), sumr[1:(NROW(sumr) - 1), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
-# Calculate rolling sums at end points - pass in endp
-sumc <- HighFreq::roll_sumw(retp, endp=endp)
+# Calculate rolling sums at end points - pass in endd
+sumc <- HighFreq::roll_sumw(retp, endd=endd)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Create exponentially decaying weights
@@ -113,8 +113,8 @@ retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 
 # Calculate rolling weighted sums at end points
-sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
+sumc <- HighFreq::roll_sumw(retp, endd=endd, weightv=weightv)
+all.equal(sumc, retc[endd+1, ], check.attributes=FALSE)
 
 # Create simple weights equal to a 1 value plus zeros
 weightv <- matrix(c(1, rep(0, 10)), nc=1)

@@ -20,8 +20,8 @@ push_sga(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
 
 \item{\code{varv}}{A \emph{vector} of the trailing asset variances.}
 
-\item{\code{lambda}}{A decay factor which multiplies the past
-mean and variance.}
+\item{\code{lambda}}{A decay factor which multiplies the past mean and
+variance.}
 
 \item{\code{gamma}}{A \emph{numeric} gain factor which multiplies the past
 eigenelements.}

@@ -5,17 +5,17 @@
 \title{Aggregate a time series to an \emph{OHLC} time series with lower
 periodicity.}
 \usage{
-roll_ohlc(tseries, endp)
+roll_ohlc(tseries, endd)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 
-\item{\emph{endp}}{An \emph{integer vector} of end points.}
+\item{\emph{endd}}{An \emph{integer vector} of end points.}
 }
 \value{
 A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
-  to the number of \emph{endp} minus one.
+  to the number of \emph{endd} minus one.
 }
 \description{
 Given a time series of prices at a higher periodicity (say seconds), it
@@ -23,7 +23,7 @@ calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 }
 \details{
 The function \code{roll_ohlc()} performs a loop over the end points
-  \emph{endp}, along the rows of the data \code{tseries}. At each end point,
+  \emph{endd}, along the rows of the data \code{tseries}. At each end point,
   it selects the past rows of the data \code{tseries}, starting at the first
   bar after the previous end point, and then calls the function
   \code{agg_ohlc()} on the selected data \code{tseries} to calculate the
@@ -42,11 +42,11 @@ The function \code{roll_ohlc()} performs a loop over the end points
 # Define matrix of OHLC data
 ohlc <- rutils::etfenv$VTI[, 1:5]
 # Define end points at 25 day intervals
-endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
-# Aggregate over endp:
-ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
+endd <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+# Aggregate over endd:
+ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endd=endd)
 # Compare with xts::to.period()
-ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 }
 

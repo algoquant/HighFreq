@@ -10,7 +10,7 @@ roll_mean(
   tseries,
   look_back = 1L,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   stub = 0L,
   method = "moment",
@@ -26,8 +26,8 @@ roll_mean(
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -61,7 +61,7 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
   calculates the mean (location).
   See the function \code{calc_mean()} for a description of the mean methods.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{tseries}
   using the function \code{calc_endpoints()}, with the number of time
@@ -95,22 +95,22 @@ meanv <- HighFreq::roll_mean(retp, look_back=3, step=25)
 all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
   drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 # Define end points and start points
-endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endp, look_back=3)
+endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+startp <- HighFreq::calc_startpoints(endd, look_back=3)
 # Calculate the rolling means using RcppArmadillo
-meanv <- HighFreq::roll_mean(retp, startp=startp, endp=endp)
+meanv <- HighFreq::roll_mean(retp, startp=startp, endd=endd)
 # Calculate the rolling medians using RcppArmadillo
-medianscpp <- HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric")
+medianscpp <- HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric")
 # Calculate the rolling medians using R
-medians = sapply(1:NROW(endp), function(i) {
-  median(retp[startp[i]:endp[i] + 1])
+medians = sapply(1:NROW(endd), function(i) {
+  median(retp[startp[i]:endd[i] + 1])
 })  # end sapply
 all.equal(medians, drop(medianscpp))
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric"),
-  Rcode=sapply(1:NROW(endp), function(i) {median(retp[startp[i]:endp[i] + 1])}),
+  Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
+  Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
   times=10))[, c(1, 4, 5)]
 }
 }

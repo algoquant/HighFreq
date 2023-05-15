@@ -14,17 +14,17 @@ Add your R functions below the header.
 3. Finally, from the Build menu run Clean and rebuild.
 
 
-## How to update the NAMESPACE file after adding a new function
-Edit the NAMESPACE file and add a line to export the new function new_func(): 
-export(new_func)
-
-
-## Steps to fix the NAMESPACE file after adding a new function - sometimes produces a bad NAMESPACE file
+## How to fix the NAMESPACE file after adding a new function - sometimes produces a bad NAMESPACE file
+1. Best solution: copy over the NAMESPACE file with these lines (never needs updating after running Document):
+  useDynLib(HighFreq, .registration=TRUE)
+  importFrom(Rcpp, evalCpp)
+  exportPattern("^[[:alpha:]]+")
+Old below:
 1. In RStudio from Build menu run Document - usually produces a bad NAMESPACE file
 2. Edit the NAMESPACE file again and remove all lines that don't contain export() - no longer necessary
 3. Add at the top of NAMESPACE file the lines:
-useDynLib(HighFreq)
-importFrom(Rcpp, evalCpp)
+  useDynLib(HighFreq)
+  importFrom(Rcpp, evalCpp)
 
 
 ## Build scripts:
@@ -49,30 +49,34 @@ R CMD Rd2pdf /Users/jerzy/Develop/HighFreq/
 
 ### Comments
 
-# Applying different models in a loop can be achieved using function pointers
++ Coerce 1x1 matrices to double using arma::as_scalar, not Rcpp::as<double>()
+
++ Since arma::mat can't be initialized to a scalar, use arma::colvec, for example arma::colvec closel = 0
+
++ Pass scalar numbers as double instead of arma::mat
+
++ Applying different models in a loop can be achieved using function pointers
 First create a function pointer from its string name via an if-else statement.  Then reference (apply) the function pointer inside the loop.
 Standard function pointers are good enough - there's no need for Rcpp::XPtr function pointers.  There's also no need for functionals (functions of functions). 
 
-# The advantage of functors compared to functions, is that they can have state variables that are persistent between function calls
++ The advantage of functors compared to functions, is that they can have state variables that are persistent between function calls
 Functors are C++ class objects that act like functions.
 
-# When performing a rolling calculation, it's better to apply a single lag to a time series outside the loop instead of lagging it inside at each end point
++ When performing a rolling calculation, it's better to apply a single lag to a time series outside the loop instead of lagging it inside at each end point
 
-# Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.  But it can make it harder to pass in arguments when calling them from inside other functions.  The solution is to avoid nesting function calls, and instead create intermediate variables, and pass them into functions.  Passing in pointers also allows using const arguments so that they can't be modified inside the function.
++ Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.  But it can make it harder to pass in arguments when calling them from inside other functions.  The solution is to avoid nesting function calls, and instead create intermediate variables, and pass them into functions.  Passing in pointers also allows using const arguments so that they can't be modified inside the function.
 
-# You can pass scalar numbers as double instead of arma::mat
++ Volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
 
-# Volume weighted volatility is higher than simple average volatility because volumes are higher when volatility is higher. 
-
-# The yang_zhang method has the lowest standard error assuming normal distribution, but not necessarily for fat-tailed distributions.
++ The yang_zhang method has the lowest standard error assuming normal distribution, but not necessarily for fat-tailed distributions.
 In addition, the yang_zhang method has lower bias caused by finite sampling.
 The rogers_satchell method has the biggest bias caused by finite sampling and opening price jumps, and seriously underestimates the variance.
 
-# Theoretically, the Yang-Zhang (YZ) and Garman-Klass-Yang-Zhang (GKYZ) range variance estimators are unbiased and have up to seven times smaller standard errors than the standard close-to-close estimator.  But in practice, prices are not observed continuously, so the price range is underestimated, and so is the variance when using the YZ and GKYZ range estimators.  Therefore in practice the YZ and GKYZ range estimators are biased (underestimate volatility).  In addition, the standard errors are reduced less than by the theoretical amount, for the same reason. 
++ Theoretically, the Yang-Zhang (YZ) and Garman-Klass-Yang-Zhang (GKYZ) range variance estimators are unbiased and have up to seven times smaller standard errors than the standard close-to-close estimator.  But in practice, prices are not observed continuously, so the price range is underestimated, and so is the variance when using the YZ and GKYZ range estimators.  Therefore in practice the YZ and GKYZ range estimators are biased (underestimate volatility).  In addition, the standard errors are reduced less than by the theoretical amount, for the same reason. 
 
-# Using the average of open and close prices in the standard variance estimator (instead of just the close prices) doesn't reduce the standard error.
++ Using the average of open and close prices in the standard variance estimator (instead of just the close prices) doesn't reduce the standard error.
 
-# High frequency data has three tenor horizons: daily (daily or lower frequency of data), intraday (secondly to daily frequency of data), and sub-second tenor horizons (sub-secondly or higher frequency of data).
++ High frequency data has three tenor horizons: daily (daily or lower frequency of data), intraday (medium frequency - secondly to daily frequency of data), and sub-second tenor horizons (sub-secondly or higher frequency of data).
 At the sub-second tenor horizon, returns are dominated by noise and the bid-ask bounce.
 Returns are dominated in their scale by the volatility, and they have no discernable trend.
 At the sub-second horizon technical indicators are meaningless, and instead traders analyze the order book for clues about future returns.
@@ -80,28 +84,54 @@ At the intraday tenor horizon volatility, skew, and kurtosis are high, and mean-
 Technical indicators based on past returns and trading volumes can offer clues about future returns.
 At the daily tenor horizon skew and kurtosis are small, and trending dominates mean-reversion.
 
-# Calculating returns on 1-second bars doesn't make sense for two reasons: 
++ Calculating returns on 1-second bars doesn't make sense for two reasons: 
 First, because the changes in price are very small, comparable to the precision of prices (number of significant digits).
 As a result, price changes on 1-second bars are either zero or low multiples of the precision. 
 Second, the 1-second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
 Therefore 1-second bar returns carry almost no information.
 
 
+
 ### Tasks to-do
 
-+ [ ] Modify the online functions run_*() so that they perform calculations with NA data
-If a row is NA, they should return NA, not an error.
-If a row is not NA, but the previous row was NA, they start the recursion from scratch.
++ [x] Create the function run_autocovar() for online autocorrelations - Clone run_covar()
 
-+ [ ] Create the function run_autocovar() for online autocorrelations
-Clone run_covar()
++ [x] Rename variables
+method to regmod
+eigen_thresh to singmin
+intercept to addunit
+deg_free to degf
+
++ [x] Coerce 1x1 matrices to double using arma::as_scalar, not Rcpp::as<double>()
+
++ [ ] Modify roll_reg() so it calls calc_reg()
+
++ [ ] Create the function sim_stratar() for simulating the autoregressive strategy
 
 + [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
+
++ [ ] Modify the function calc_covar() to calculate a nonparametric (robust) covariance matrix
+Adapt function calc_var()
+The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
+cov = (var(r1+r2) - var(r1-r2))/4
+Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
+Several possible methods are: 
+Gerber covariance estimator.
+Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
+Hodges-Lehmann estimator: 
 
 + [ ] Modify run_min() and run_max() to calculate the trailing, volume weighted minimum and maximum of OHLC prices
 Follow the example of run_mean() and use OHLC prices and add an extra parameter weightv.
 
-+ [ ] Create the function sim_stratar() for simulating the autoregressive strategy
++ [ ] In function back_test() calculate the mean of returns using function calc_mean() and the covariance of returns using function calc_covar()?
+Add weight scaling instead of in calc_weights()?
+
++ [ ] Create the functions rowsums(), colsums(), and calc_covar() so that they ignore NA values
+Similar to colMeans(retis, na.rm=TRUE) and cov(retis, use="pairwise.complete.obs")
+
++ [ ] Modify the online functions run_*() so that they perform calculations with NA data
+If a row is NA, they should return NA, not an error.
+If a row is not NA, but the previous row was NA, they start the recursion from scratch.
 
 + [ ] Add t-values of the alpha and betas to run_reg()?
 
@@ -235,16 +265,6 @@ Function calc_table() is in /Users/jerzy/Develop/Rcpp/fun_stl.cpp
 
 + [ ] Calculate the covariance matrix in two steps: first perform clustering and then calculate the covariance matrix of the clusters
 
-+ [ ] Create function calc_covar() to calculate a nonparametric (robust) covariance matrix
-Adapt function calc_var()
-Calculate the MAD covariance - the covariance based on the median, analogous to the MAD Median Absolute Deviation.
-Several possible methods are: 
-The covariance is equal to the difference between the variance of the sum minus the variance of the difference: 
-cov = (var(r1+r2) - var(r1-r2))/4
-Gerber covariance estimator.
-Quantile estimator: weighted sums of the median and higher quantiles of asset returns.
-Hodges-Lehmann estimator: 
-
 + [ ] Add Portfolio Optimization using the Gerber Statistic
 http://nextlevelanalytics.github.io/2016/05/26/Gerber/
 Gerber Statistic Portfolio Optimization.pdf
@@ -356,9 +376,6 @@ Worker agg_ohlc()
 + [ ] Create online function for scrubbing jumps from streaming prices
 
 + [ ] Create online function for Hampel filter
-
-+ [ ] In function back_test() calculate the mean of returns using function calc_mean() and the covariance of returns using function calc_covar()?
-Add weight scaling instead of in calc_weights()?
 
 + [ ] In function calc_weights() fix scaling method voleqw - the below code should produce TRUE
 weightsr <- drop(invmat %*% colmeans)
@@ -562,6 +579,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 + [x] In run_covar() add means to the output
 
++ [x] Fix run_reg() - don't center the response and predictors
+
 + [x] Fix run_reg() - it should produce same betas as run_covar()
 This update formula was wrong:
 β_t = λβ_(t−1) + (1 − λ) cov_t/σ^2
@@ -600,7 +619,7 @@ Adapt from run_covar()
 
 + [x] Create the function push_covar(), for recursively updating the covariance matrix by reference using lambda and today's returns - using recursive technique from run_covar() - clone run_covar() and push_sga()
 
-+ [x] Create calc_eigenp() to calculate the partial eigen decomposition - only the lowest order principal components with the largest eigenvalues)
++ [x] Create calc_eigenp() to calculate the partial eigen decomposition - only the lowest order principal components with the largest eigenvalues
 
 + [x] Modify calc_eigen(): it shouldn't calculate the covariance
 

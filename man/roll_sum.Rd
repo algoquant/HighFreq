@@ -86,8 +86,8 @@ sumc <- HighFreq::roll_sum(retp, look_back, 1/weightv)
 # Plot dygraph of the weighted sums
 datav <- cbind(retp$VTI, sumc[, 1])
 colnames(datav) <- c("VTI", "Weighted")
-endp <- rutils::calc_endpoints(datav, interval="weeks")
-dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) \%>\% 
+endd <- rutils::calc_endpoints(datav, interval="weeks")
+dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) \%>\% 
   dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\% 
   dyLegend(width=300)
 }

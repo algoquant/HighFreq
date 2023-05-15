@@ -2,33 +2,33 @@
 % Please edit documentation in R/RcppExports.R
 \name{calc_invsvd}
 \alias{calc_invsvd}
-\title{Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+\title{Calculate the \emph{reduced inverse} of a \emph{matrix} of data using
 Singular Value Decomposition (\emph{SVD}).}
 \usage{
-calc_invsvd(matrixv, dimax = 0L, eigen_thresh = 0)
+calc_invsvd(matrixv, dimax = 0L, singmin = 0)
 }
 \arguments{
 \item{\code{matrixv}}{A \emph{matrix} of data.}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of \emph{singular
-values} used for calculating the \emph{regularized inverse} of the matrix
+values} used for calculating the \emph{reduced inverse} of the matrix
 \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 using all the \emph{singular values}).}
 
-\item{\code{eigen_thresh}}{A \emph{numeric} threshold level for discarding
+\item{\code{singmin}}{A \emph{numeric} threshold level for discarding
 small \emph{singular values} in order to regularize the inverse of the
 matrix \code{matrixv} (the default is \code{0.0}).}
 }
 \value{
-A \emph{matrix} equal to the \emph{regularized inverse} of the
+A \emph{matrix} equal to the \emph{reduced inverse} of the
   matrix \code{matrixv}.
 }
 \description{
-Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+Calculate the \emph{reduced inverse} of a \emph{matrix} of data using
 Singular Value Decomposition (\emph{SVD}).
 }
 \details{
-The function \code{calc_invsvd()} calculates the \emph{regularized
+The function \code{calc_invsvd()} calculates the \emph{reduced
   inverse} of the matrix \code{matrixv} using Singular Value Decomposition
   (\emph{SVD}).
   
@@ -49,7 +49,7 @@ The function \code{calc_invsvd()} calculates the \emph{regularized
     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
   }
   
-  The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+  The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
   by removing \emph{singular vectors} with very small \emph{singular values}:
   \deqn{
     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
@@ -59,17 +59,17 @@ The function \code{calc_invsvd()} calculates the \emph{regularized
   \emph{singular values} removed.
   
   The function \code{calc_invsvd()} applies regularization to the matrix
-  inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+  inverse using the arguments \code{dimax} and \code{singmin}.
   
   The function \code{calc_invsvd()} applies regularization by discarding the
   smallest \emph{singular values} \eqn{\sigma_i} that are less than the
-  threshold level \code{eigen_thresh} times the sum of all the
+  threshold level \code{singmin} times the sum of all the
   \emph{singular values}: \deqn{\sigma_i < eigen\_thresh \cdot
   (\sum{\sigma_i})}
   
   It also discards additional \emph{singular vectors} so that only the
   highest order \emph{singular vectors} remain, up to order \code{dimax}. It
-  calculates the \emph{regularized inverse} from the \emph{SVD} matrices
+  calculates the \emph{reduced inverse} from the \emph{SVD} matrices
   using only the largest \emph{singular values} up to order \code{dimax}.
   For example, if \code{dimax = 3} then it only uses the \code{3} highest
   order \emph{singular vectors}, with the largest \emph{singular values}.
@@ -90,9 +90,9 @@ invmat <- HighFreq::calc_invsvd(covmat)
 # Calculate matrix inverse in R
 invr <- solve(covmat)
 all.equal(invmat, invr, check.attributes=FALSE)
-# Calculate regularized inverse using RcppArmadillo
+# Calculate reduced inverse using RcppArmadillo
 invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
-# Calculate regularized inverse from SVD in R
+# Calculate reduced inverse from SVD in R
 svdec <- svd(covmat)
 dimax <- 1:3
 invr <- svdec$v[, dimax] \%*\% (t(svdec$u[, dimax])/svdec$d[dimax])

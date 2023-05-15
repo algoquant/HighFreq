@@ -12,7 +12,7 @@ roll_moment(
   method = "moment",
   confl = 0.75,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L
@@ -33,8 +33,8 @@ returns (the default is \code{confl = 0.75}).}
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is 
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is 
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -77,7 +77,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
    }
    (The default is the \code{funame = "calc_mean"}).
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{tseries}
   using the function \code{calc_endpoints()}, with the number of time
@@ -107,13 +107,13 @@ var_roll <- HighFreq::roll_var(retp, step=25, look_back=3)
 # Compare the two methods
 all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 # Define end points and start points
-endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endp, look_back=3)
+endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+startp <- HighFreq::calc_startpoints(endd, look_back=3)
 # Calculate the rolling variance using RcppArmadillo
-var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp)
+var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd)
 # Calculate the rolling variance using R code
-var_roll <- sapply(1:NROW(endp), function(it) {
-  var(retp[startp[it]:endp[it]+1, ])
+var_roll <- sapply(1:NROW(endd), function(it) {
+  var(retp[startp[it]:endd[it]+1, ])
 })  # end sapply
 var_roll[1] <- 0
 # Compare the two methods
@@ -121,9 +121,9 @@ all.equal(drop(var_rollfun), var_roll, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp),
-  Rcode=sapply(1:NROW(endp), function(it) {
-    var(retp[startp[it]:endp[it]+1, ])
+  Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd),
+  Rcode=sapply(1:NROW(endd), function(it) {
+    var(retp[startp[it]:endd[it]+1, ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

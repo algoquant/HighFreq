@@ -2,20 +2,19 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_autocovar}
 \alias{run_autocovar}
-\title{Calculate the trailing autocovariances of a \emph{time series} of returns
+\title{Calculate the trailing autocovariance of a \emph{time series} of returns
 using an online recursive formula.}
 \usage{
-run_autocovar(tseries, lambda)
+run_autocovar(tseries, lambda, lagg = 1L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with a single
 column of returns data.}
 
+\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag.
 (The default is \code{lagg = 1}.)}
-
-\item{\code{lambda}}{A decay factor which multiplies past
-estimates.}
 }
 \value{
 A \emph{matrix} with three columns of data: the trailing
@@ -23,34 +22,28 @@ A \emph{matrix} with three columns of data: the trailing
   \code{tseries}.
 }
 \description{
-Calculate the trailing autocovariances of a \emph{time series} of returns
+Calculate the trailing autocovariance of a \emph{time series} of returns
 using an online recursive formula.
 }
 \details{
 The function \code{run_autocovar()} calculates the trailing
-  autocovariances of a streaming \emph{time series} of returns, by
-  recursively weighting the past covariance estimates \eqn{{cov}_{t-1}},
+  autocovariance of a streaming \emph{time series} of returns, by
+  recursively weighting the past autocovariance estimates \eqn{{cov}_{t-1}},
   with the products of their returns minus their means, using the decay
   factor \eqn{\lambda}:
   \deqn{
     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
   }
   \deqn{
-    \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+    \sigma^2_{t} = \lambda \sigma^2_{t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
   }
   \deqn{
-    \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
   }
-  \deqn{
-    \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
-  }
-  \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
-  }
-  Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
-  \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
-  \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
-  \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
+  Where \eqn{{cov}_t} is the trailing autocovariance estimate at time
+  \eqn{t}, with \code{lagg=l}.
+  And \eqn{\sigma^2_{t}} and \eqn{\bar{x}_t} are the trailing variances and
+  means of the streaming data.
 
   The above online recursive formulas are convenient for processing live
   streaming data because they don't require maintaining a buffer of past
@@ -70,25 +63,34 @@ The function \code{run_autocovar()} calculates the trailing
   a weaker dependence on past data.  This is equivalent to a short
   look-back interval.
 
-  The function \code{run_autocovar()} returns five columns of data: the trailing 
-  autocovariances, the variances, and the mean values of the two columns of the
+  The function \code{run_autocovar()} returns three columns of data: the
+  trailing autocovariances, the variances, and the mean values of the
   argument \code{tseries}.  This allows calculating the trailing
-  correlations, betas, and alphas.
+  autocorrelations.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
-retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-# Calculate the trailing covariance
+retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
+# Calculate the trailing autocovariance
 lambda <- 0.9
-covars <- HighFreq::run_autocovar(retp, lambda=lambda)
-# Calculate trailing covariance using R code
-covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
-  filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
-  method="recursive")
-all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
-# Calculate the trailing correlation
-correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+lagg <- 3
+covars <- HighFreq::run_autocovar(retp, lambda=lambda, lagg=lagg)
+# Calculate the trailing autocorrelation
+correl <- covars[, 1]/covars[, 2]
+# Calculate the trailing autocovariance using R code
+nrows <- NROW(retp)
+retm <- numeric(nrows)
+retm[1] <- retp[1, ]
+retd <- numeric(nrows)
+covarr <- numeric(nrows)
+covarr[1] <- retp[1, ]^2
+for (it in 2:nrows) {
+  retm[it] <- lambda*retm[it-1] + (1-lambda)*(retp[it])
+  retd[it] <- retp[it] - retm[it]
+  covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it]*retd[max(it-lagg, 1)]
+} # end for
+all.equal(covarr, covars[, 1])
 }
 
 }

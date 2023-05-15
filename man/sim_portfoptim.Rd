@@ -11,7 +11,7 @@ sim_portfoptim(rets, dimax, lambda, lambdacov, lambdaw)
 \item{\code{rets}}{A \emph{time series} or \emph{matrix} of asset returns.}
 
 \item{\code{dimax}}{An \emph{integer} equal to the number of \emph{eigen
-values} used for calculating the regularized inverse of the covariance
+values} used for calculating the reduced inverse of the covariance
 matrix (the default is \code{dimax = 0} - standard matrix inverse using
 all the \emph{eigen values}).}
 
@@ -63,7 +63,7 @@ The function \code{sim_portfoptim()} simulates a portfolio optimization
   and covariance.
   
   It then calls the function \code{HighFreq::calc_inv()} to calculate the
-  \emph{regularized inverse} of the covariance matrix using its eigen
+  \emph{reduced inverse} of the covariance matrix using its eigen
   decomposition:
   \deqn{
     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}

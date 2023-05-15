@@ -29,16 +29,16 @@ using namespace arma::newarp;
 //' @param \code{method} A \emph{character string} specifying the type of
 //'   regression model (the default is \code{method = "least_squares"}).
 //'   
-//' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
-//'   term should be added to the predictor (the default is \code{intercept =
+//' @param \code{addunit} A \emph{Boolean} specifying whether an intercept
+//'   term should be added to the predictor (the default is \code{addunit =
 //'   TRUE}).
 //'
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//' @param \code{singmin} A \emph{numeric} threshold level for discarding
 //'   small \emph{singular values} in order to regularize the inverse of the
 //'   predictor matrix (the default is \code{1e-5}).
 //'   
 //' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-//'   values} used for calculating the \emph{regularized inverse} of the
+//'   values} used for calculating the \emph{reduced inverse} of the
 //'   predictor matrix (the default is \code{dimax = 0} - standard matrix
 //'   inverse using all the \emph{singular values}).
 //'   
@@ -66,23 +66,25 @@ using namespace arma::newarp;
 //' controlv <- HighFreq::param_reg()
 //' unlist(controlv)
 //' # Create a custom list of regression parameters
-//' controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+//' controlv <- HighFreq::param_reg(addunit=FALSE, method="regular", dimax=4)
 //' unlist(controlv)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List param_reg(std::string method = "least_squares",  // Type of regression model
-                     bool intercept = true,  // Add intercept column to the predictor matrix?
-                     double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regression model
+                     bool addunit = true,  // Add unit (intercept) column to the predictor matrix?
+                     double singmin = 1e-5, // Threshold level for discarding small singular values
                      arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
+                     std::string residscale = "none",  // Method for scaling the residuals
                      double confl = 0.1, // Confidence level for calculating the quantiles of returns
                      double alpha = 0.0) {  // Shrinkage intensity of returns
   
-  Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("method") = method,
-                                           Rcpp::Named("intercept") = intercept,
-                                           Rcpp::Named("eigen_thresh") = eigen_thresh,
+  Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("regmod") = regmod,
+                                           Rcpp::Named("addunit") = addunit,
+                                           Rcpp::Named("singmin") = singmin,
                                            Rcpp::Named("dimax") = dimax,
+                                           Rcpp::Named("residscale") = residscale,
                                            Rcpp::Named("confl") = confl,
                                            Rcpp::Named("alpha") = alpha);
   
@@ -99,12 +101,12 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
 //'   calculating the portfolio weights (the default is \code{method =
 //'   "sharpem"}).
 //'   
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//' @param \code{singmin} A \emph{numeric} threshold level for discarding
 //'   small \emph{singular values} in order to regularize the inverse of the
 //'   \code{covariance matrix} of \code{returns} (the default is \code{1e-5}).
 //'   
 //' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-//'   values} used for calculating the \emph{regularized inverse} of the
+//'   values} used for calculating the \emph{reduced inverse} of the
 //'   \code{covariance matrix} of \code{returns} matrix (the default is
 //'   \code{dimax = 0} - standard matrix inverse using all the \emph{singular
 //'   values}).
@@ -124,8 +126,8 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
 //' @param \code{scalew} A \emph{character string} specifying the method for
 //'   scaling the weights (the default is \code{scalew = "voltarget"}).
 //'
-//' @param \code{vol_target} A \emph{numeric} volatility target for scaling the
-//'   weights (the default is \code{0.001})
+//' @param \code{voltarget} A \emph{numeric} volatility target for scaling the
+//'   weights (the default is \code{0.01})
 //' 
 //' 
 //' @return A named list of model parameters that can be passed into portfolio
@@ -154,24 +156,24 @@ Rcpp::List param_reg(std::string method = "least_squares",  // Type of regressio
 //' @export
 // [[Rcpp::export]]
 Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio optimization model
-                       double eigen_thresh = 1e-5, // Threshold level for discarding small singular values
+                       double singmin = 1e-5, // Threshold level for discarding small singular values
                        arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
                        double confl = 0.1, // Confidence level for calculating the quantiles of returns
                        double alpha = 0.0, // Shrinkage intensity of returns
                        bool rankw = false, // Should the weights be ranked?
                        bool centerw = false, // Should the weights be centered?
                        std::string scalew = "voltarget", // Method for scaling the weights
-                       double vol_target = 0.001) { // Volatility target for scaling the weights
+                       double voltarget = 0.01) { // Volatility target for scaling the weights
 
   Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("method") = method,
-                                           Rcpp::Named("eigen_thresh") = eigen_thresh,
+                                           Rcpp::Named("singmin") = singmin,
                                            Rcpp::Named("dimax") = dimax,
                                            Rcpp::Named("confl") = confl,
                                            Rcpp::Named("alpha") = alpha,
                                            Rcpp::Named("rankw") = rankw,
                                            Rcpp::Named("centerw") = centerw,
                                            Rcpp::Named("scalew") = scalew,
-                                           Rcpp::Named("vol_target") = vol_target);
+                                           Rcpp::Named("voltarget") = voltarget);
   
   return controlv;
   
@@ -643,83 +645,83 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
   // Number of initial end points
   arma::uword numpts = length / step + 3;
   // Define the end points
-  arma::uvec endp;
-  endp.zeros(numpts);
+  arma::uvec endd;
+  endd.zeros(numpts);
   // Define the last end point
   arma::uword lastp = length - 1;
 
   // Calculate the initial end points - including extra end points at the end
   if (stub == 0) {
     for (arma::uword it = 0; it < numpts; ++it) {
-      endp(it) = it*step;
+      endd(it) = it*step;
     }  // end for
   } else if ((stub > 0) & (stubs)) {
     for (arma::uword it = 1; it < numpts; ++it) {
-      endp(it) = stub + (it-1)*step;
+      endd(it) = stub + (it-1)*step;
     }  // end for
   } else {
     for (arma::uword it = 0; it < numpts; ++it) {
-      endp(it) = stub + it*step;
+      endd(it) = stub + it*step;
     }  // end for
   }  // end if
-  // std::cout << "endp = " << arma::conv_to<rowvec>::from(endp) << std::endl;
+  // std::cout << "endd = " << arma::conv_to<rowvec>::from(endd) << std::endl;
   
-  // arma::uvec endp = arma::regspace<uvec>(stub, step, lastp + step);
-  // Find the index of the largest element of endp which is less than lastp
+  // arma::uvec endd = arma::regspace<uvec>(stub, step, lastp + step);
+  // Find the index of the largest element of endd which is less than lastp
   arma::uword endpp = 0;
-  for (arma::uword it = 0; endp(it) < lastp; ++it) {
+  for (arma::uword it = 0; endd(it) < lastp; ++it) {
     endpp++;
   }  // end for
   // std::cout << "endpp = " << endpp << std::endl;
   
   // Trim the initial end points at the end - remove extra end points at the end
-  // Subset endp to include the smallest element of endp which is equal to or greater than lastp
-  endp = endp.subvec(0, endpp);
+  // Subset endd to include the smallest element of endd which is equal to or greater than lastp
+  endd = endd.subvec(0, endpp);
 
   // Set the stub intervals at the end
   if (stubs) {
     // Include stub intervals
-    // Set the last end point to lastp - last element of endp
-    endp[endpp] = lastp;
+    // Set the last end point to lastp - last element of endd
+    endd[endpp] = lastp;
   } else {
     // Do not include the last end point - no stub interval at the end
     // Exclude the last element greater than lastp
-    if (endp[endpp] > lastp) {
-      endp = endp.subvec(0, endpp-1);
+    if (endd[endpp] > lastp) {
+      endd = endd.subvec(0, endpp-1);
     }  // end if
   }  // end if
   
-  return endp;
+  return endd;
   
   // Old code below
   // if ((stub == 0) & (remainp == 0)) {
   //   std::cout << "(stub == 0) & (remainp == 0)" << std::endl;
   //   // No stub interval
-  //   endp = arma::regspace<uvec>(0, step, length);
-  //   endp.back() = lastp;
-  //   // endp.transform([](arma::uword val) {return (val - 1);});
-  //   // endp.front() = 0;
+  //   endd = arma::regspace<uvec>(0, step, length);
+  //   endd.back() = lastp;
+  //   // endd.transform([](arma::uword val) {return (val - 1);});
+  //   // endd.front() = 0;
   // } else if ((stub == 0) & (remainp > 0)) {
   //   std::cout << "(stub == 0) & (remainp > 0)" << std::endl;
   //   // Add stub interval at end
-  //   endp = arma::regspace<uvec>(0, step, length + step);
-  //   // endp.transform([](arma::uword val) {return (val - 1);});
-  //   // endp.front() = 0;
-  //   endp.back() = lastp;
+  //   endd = arma::regspace<uvec>(0, step, length + step);
+  //   // endd.transform([](arma::uword val) {return (val - 1);});
+  //   // endd.front() = 0;
+  //   endd.back() = lastp;
   // } else if ((stub > 0) & (remainp == 0)) {
   //   std::cout << "(stub > 0) & (remainp == 0)" << std::endl;
   //   // Add initial stub interval equal to stub
   //   arma::uvec endm = arma::regspace<uvec>(stub, step, length);
   //   endm.back() = lastp;
-  //   endp.zeros(numpts+1);
-  //   endp.subvec(1, numpts) = endm;
+  //   endd.zeros(numpts+1);
+  //   endd.subvec(1, numpts) = endm;
   // } else if ((stub > 0) & (remainp > 0)) {
   //   std::cout << "(stub > 0) & (remainp > 0)" << std::endl;
   //   // Add initial stub interval equal to stub
   //   arma::uvec endm = arma::regspace<uvec>(stub, step, lastp + step);
   //   endm.back() = lastp;
-  //   endp.zeros(numpts+1);
-  //   endp.subvec(1, numpts) = endm;
+  //   endd.zeros(numpts+1);
+  //   endd.subvec(1, numpts) = endm;
   // }  // end if
   
 }  // end calc_endpoints
@@ -731,20 +733,20 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //' Calculate a vector of start points by lagging (shifting) a vector of end
 //' points.
 //'
-//' @param \code{endp} An \emph{integer} vector of end points.
+//' @param \code{endd} An \emph{integer} vector of end points.
 //'   
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   lag (shift) applied to the end points.
 //'   
 //' @return An \emph{integer} vector with the same number of elements as the
-//'   vector \code{endp}.
+//'   vector \code{endd}.
 //'
 //' @details
-//'   The start points are equal to the values of the vector \code{endp} lagged
+//'   The start points are equal to the values of the vector \code{endd} lagged
 //'   (shifted) by an amount equal to \code{look_back}.  In addition, an extra
 //'   value of \code{1} is added to them, to avoid data overlaps.  The lag
 //'   operation requires appending a beginning warmup interval containing zeros,
-//'   so that the vector of start points has the same length as the \code{endp}.
+//'   so that the vector of start points has the same length as the \code{endd}.
 //'   
 //'   For example, consider the end points for a vector of length \code{25}
 //'   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
@@ -757,17 +759,17 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //'   
 //' @examples
 //' # Calculate end points
-//' endp <- HighFreq::calc_endpoints(length=55, step=5)
+//' endd <- HighFreq::calc_endpoints(length=55, step=5)
 //' # Calculate start points corresponding to the end points
-//' startp <- HighFreq::calc_startpoints(endp, look_back=5)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=5)
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_startpoints(arma::uvec endp, arma::uword look_back) {
+arma::uvec calc_startpoints(arma::uvec endd, arma::uword look_back) {
   
-  arma::uword numpts = endp.n_elem;
+  arma::uword numpts = endd.n_elem;
   arma::uvec startp = arma::join_cols(arma::zeros<uvec>(look_back), 
-                                      endp.subvec(0, numpts - look_back - 1) + 1);
+                                      endd.subvec(0, numpts - look_back - 1) + 1);
   
   return startp;
   
@@ -1166,8 +1168,8 @@ std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
 
 
 ////////////////////////////////////////////////////////////
-//' Multiply the rows or columns of a \emph{matrix} times a \emph{vector},
-//' element-wise.
+//' Multiply element-wise the rows or columns of a \emph{matrix} times a
+//' \emph{vector}.
 //' 
 //' @param \code{vector} A \emph{numeric} \emph{vector}.
 //' 
@@ -1177,13 +1179,13 @@ std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
 //'   the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
 //'   (the default is \code{byrow = TRUE}.)
 //' 
-//' @return A \emph{matrix} equal to the product of the arguments \code{matrix}
-//'   times \code{vector}, with the same dimensions as the argument
-//'   \code{matrix}.
+//' @return A \emph{matrix} equal to the product of the elements of
+//'   \code{matrix} times \code{vector}, with the same dimensions as the
+//'   argument \code{matrix}.
 //' 
 //' @details
-//'   The function \code{mult_mat()} multiplies the rows or columns of a
-//'   \emph{matrix} times a \emph{vector}, element-wise.
+//'   The function \code{mult_mat()} multiplies element-wise the rows or columns
+//'   of a \emph{matrix} times a \emph{vector}.
 //'
 //'   If \code{byrow = TRUE} (the default), then function \code{mult_mat()}
 //'   multiplies the rows of the argument \code{matrix} times the argument
@@ -1524,25 +1526,25 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the \emph{regularized inverse} of a symmetric \emph{matrix} of
+//' Calculate the \emph{reduced inverse} of a symmetric \emph{matrix} of
 //' data using eigen decomposition.
 //' 
 //' @param \code{matrixv} A symmetric \emph{matrix} of data.
 //'   
 //' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
-//'   values} used for calculating the \emph{regularized inverse} of the matrix
+//'   values} used for calculating the \emph{reduced inverse} of the matrix
 //'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 //'   using all the \emph{eigen values}).
 //' 
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//' @param \code{singmin} A \emph{numeric} threshold level for discarding
 //'   small \emph{eigen values} in order to regularize the inverse of the matrix
 //'   \code{matrixv} (the default is \code{0.0}).
 //'
-//' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+//' @return A \emph{matrix} equal to the \emph{reduced inverse} of the
 //'   matrix \code{matrixv}.
 //'
 //' @details
-//'   The function \code{calc_inv()} calculates the \emph{regularized inverse}
+//'   The function \code{calc_inv()} calculates the \emph{reduced inverse}
 //'   of the matrix \code{matrixv} using eigen decomposition.
 //'   
 //'   The function \code{calc_inv()} first performs eigen decomposition of the
@@ -1560,7 +1562,7 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 //'     \strong{C}^{-1} = \strong{O} \, \Sigma^{-1} \, \strong{O}^T
 //'   }
 //'   
-//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+//'   The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
 //'   by removing \emph{eigen vectors} with very small \emph{eigen values}:
 //'   \deqn{
 //'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
@@ -1569,16 +1571,16 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 //'   that correspond to the largest \emph{eigen values} \eqn{\Sigma_{dimax}}. 
 //'   
 //'   The function \code{calc_inv()} applies regularization to the matrix
-//'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+//'   inverse using the arguments \code{dimax} and \code{singmin}.
 //'   
 //'   The function \code{calc_inv()} applies regularization by discarding the
 //'   smallest \emph{eigen values} \eqn{\Sigma_i} that are less than the
-//'   threshold level \code{eigen_thresh} times the sum of all the \emph{eigen
+//'   threshold level \code{singmin} times the sum of all the \emph{eigen
 //'   values}: \deqn{\Sigma_i < eigen\_thresh \cdot (\sum{\Sigma_i})}
 //'   
 //'   It also discards additional \emph{eigen vectors} so that only the highest
 //'   order \emph{eigen vectors} remain, up to order \code{dimax}.
-//'   It calculates the \emph{regularized inverse} from the eigen decomposition
+//'   It calculates the \emph{reduced inverse} from the eigen decomposition
 //'   using only the largest \emph{eigen values} up to \code{dimax}.  For
 //'   example, if
 //'   \code{dimax = 3} then it only uses the \code{3} highest order \emph{eigen
@@ -1600,9 +1602,9 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 //' # Calculate matrix inverse in R
 //' invr <- solve(covmat)
 //' all.equal(invmat, invr, check.attributes=FALSE)
-//' # Calculate regularized inverse using RcppArmadillo
+//' # Calculate reduced inverse using RcppArmadillo
 //' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-//' # Calculate regularized inverse using eigen decomposition in R
+//' # Calculate reduced inverse using eigen decomposition in R
 //' eigend <- eigen(covmat)
 //' dimax <- 1:3
 //' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
@@ -1614,7 +1616,7 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 // [[Rcpp::export]]
 arma::mat calc_inv(const arma::mat& matrixv, 
                    arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
-                   double eigen_thresh = 0.0) { // Threshold for discarding small eigen values
+                   double singmin = 0.0) { // Threshold for discarding small eigen values
   
   // Allocate Eigen variables
   arma::uword ncols = matrixv.n_cols;
@@ -1623,7 +1625,7 @@ arma::mat calc_inv(const arma::mat& matrixv,
   // Calculate the eigen decomposition - the eigenvalues are in ascending order
   arma::eig_sym(eigenval, eigenvec, matrixv);
   // Calculate the number of non-small singular values
-  arma::uword neigen = arma::sum(eigenval > eigen_thresh*arma::sum(eigenval));
+  arma::uword neigen = arma::sum(eigenval > singmin*arma::sum(eigenval));
   
   // If no regularization then set dimax to neigen
   if (dimax == 0) {
@@ -1638,7 +1640,7 @@ arma::mat calc_inv(const arma::mat& matrixv,
   eigenval = eigenval.subvec(ncols-dimax, ncols-1);
   eigenvec = eigenvec.cols(ncols-dimax, ncols-1);
   
-  // Calculate the regularized inverse from the eigen decomposition
+  // Calculate the reduced inverse from the eigen decomposition
   return eigenvec*arma::diagmat(1/eigenval)*eigenvec.t();
   
 }  // end calc_inv
@@ -1646,25 +1648,25 @@ arma::mat calc_inv(const arma::mat& matrixv,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the \emph{regularized inverse} of a \emph{matrix} of data using
+//' Calculate the \emph{reduced inverse} of a \emph{matrix} of data using
 //' Singular Value Decomposition (\emph{SVD}).
 //' 
 //' @param \code{matrixv} A \emph{matrix} of data.
 //'   
 //' @param \code{dimax} An \emph{integer} equal to the number of \emph{singular
-//'   values} used for calculating the \emph{regularized inverse} of the matrix
+//'   values} used for calculating the \emph{reduced inverse} of the matrix
 //'   \code{matrixv} (the default is \code{dimax = 0} - standard matrix inverse
 //'   using all the \emph{singular values}).
 //' 
-//' @param \code{eigen_thresh} A \emph{numeric} threshold level for discarding
+//' @param \code{singmin} A \emph{numeric} threshold level for discarding
 //'   small \emph{singular values} in order to regularize the inverse of the
 //'   matrix \code{matrixv} (the default is \code{0.0}).
 //'
-//' @return A \emph{matrix} equal to the \emph{regularized inverse} of the
+//' @return A \emph{matrix} equal to the \emph{reduced inverse} of the
 //'   matrix \code{matrixv}.
 //'
 //' @details
-//'   The function \code{calc_invsvd()} calculates the \emph{regularized
+//'   The function \code{calc_invsvd()} calculates the \emph{reduced
 //'   inverse} of the matrix \code{matrixv} using Singular Value Decomposition
 //'   (\emph{SVD}).
 //'   
@@ -1685,7 +1687,7 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //'     \strong{C}^{-1} = \strong{V} \, \Sigma^{-1} \, \strong{U}^T
 //'   }
 //'   
-//'   The \emph{regularized inverse} of the matrix \eqn{\strong{C}} is obtained
+//'   The \emph{reduced inverse} of the matrix \eqn{\strong{C}} is obtained
 //'   by removing \emph{singular vectors} with very small \emph{singular values}:
 //'   \deqn{
 //'     \strong{C}^{-1} = \strong{V}_n \, \Sigma_n^{-1} \, \strong{U}_n^T
@@ -1695,17 +1697,17 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //'   \emph{singular values} removed.
 //'   
 //'   The function \code{calc_invsvd()} applies regularization to the matrix
-//'   inverse using the arguments \code{dimax} and \code{eigen_thresh}.
+//'   inverse using the arguments \code{dimax} and \code{singmin}.
 //'   
 //'   The function \code{calc_invsvd()} applies regularization by discarding the
 //'   smallest \emph{singular values} \eqn{\sigma_i} that are less than the
-//'   threshold level \code{eigen_thresh} times the sum of all the
+//'   threshold level \code{singmin} times the sum of all the
 //'   \emph{singular values}: \deqn{\sigma_i < eigen\_thresh \cdot
 //'   (\sum{\sigma_i})}
 //'   
 //'   It also discards additional \emph{singular vectors} so that only the
 //'   highest order \emph{singular vectors} remain, up to order \code{dimax}. It
-//'   calculates the \emph{regularized inverse} from the \emph{SVD} matrices
+//'   calculates the \emph{reduced inverse} from the \emph{SVD} matrices
 //'   using only the largest \emph{singular values} up to order \code{dimax}.
 //'   For example, if \code{dimax = 3} then it only uses the \code{3} highest
 //'   order \emph{singular vectors}, with the largest \emph{singular values}.
@@ -1726,9 +1728,9 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //' # Calculate matrix inverse in R
 //' invr <- solve(covmat)
 //' all.equal(invmat, invr, check.attributes=FALSE)
-//' # Calculate regularized inverse using RcppArmadillo
+//' # Calculate reduced inverse using RcppArmadillo
 //' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
-//' # Calculate regularized inverse from SVD in R
+//' # Calculate reduced inverse from SVD in R
 //' svdec <- svd(covmat)
 //' dimax <- 1:3
 //' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
@@ -1740,7 +1742,7 @@ arma::mat calc_inv(const arma::mat& matrixv,
 // [[Rcpp::export]]
 arma::mat calc_invsvd(const arma::mat& matrixv, 
                       arma::uword dimax = 0, // The number of singular vectors for dimension reduction
-                      double eigen_thresh = 0.0) { // Threshold for discarding small singular values
+                      double singmin = 0.0) { // Threshold for discarding small singular values
   
   // Allocate SVD variables
   arma::vec svdval;  // Singular values
@@ -1748,7 +1750,7 @@ arma::mat calc_invsvd(const arma::mat& matrixv,
   // Calculate the SVD - the singular values are in ascending order
   arma::svd(svdu, svdval, svdv, matrixv);
   // Calculate the number of non-small singular values
-  arma::uword svdnum = arma::sum(svdval > eigen_thresh*arma::sum(svdval));
+  arma::uword svdnum = arma::sum(svdval > singmin*arma::sum(svdval));
   
   // If no regularization then set dimax to (svdnum - 1)
   if (dimax == 0) {
@@ -1764,7 +1766,7 @@ arma::mat calc_invsvd(const arma::mat& matrixv,
   svdu = svdu.cols(0, dimax);
   svdv = svdv.cols(0, dimax);
   
-  // Calculate the regularized inverse from the SVD decomposition
+  // Calculate the reduced inverse from the SVD decomposition
   return svdv*arma::diagmat(1/svdval)*svdu.t();
   
 }  // end calc_invsvd
@@ -2139,14 +2141,14 @@ arma::mat agg_ohlc(const arma::mat& tseries) {
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
 //'   columns of data.
 //'   
-//' @param \emph{endp} An \emph{integer vector} of end points.
+//' @param \emph{endd} An \emph{integer vector} of end points.
 //'
 //' @return A \emph{matrix} with \emph{OHLC} data, with the number of rows equal
-//'   to the number of \emph{endp} minus one.
+//'   to the number of \emph{endd} minus one.
 //'   
 //' @details
 //'   The function \code{roll_ohlc()} performs a loop over the end points
-//'   \emph{endp}, along the rows of the data \code{tseries}. At each end point,
+//'   \emph{endd}, along the rows of the data \code{tseries}. At each end point,
 //'   it selects the past rows of the data \code{tseries}, starting at the first
 //'   bar after the previous end point, and then calls the function
 //'   \code{agg_ohlc()} on the selected data \code{tseries} to calculate the
@@ -2165,28 +2167,28 @@ arma::mat agg_ohlc(const arma::mat& tseries) {
 //' # Define matrix of OHLC data
 //' ohlc <- rutils::etfenv$VTI[, 1:5]
 //' # Define end points at 25 day intervals
-//' endp <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
-//' # Aggregate over endp:
-//' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endp=endp)
+//' endd <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
+//' # Aggregate over endd:
+//' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endd=endd)
 //' # Compare with xts::to.period()
-//' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endp+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
+//' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 //' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endp) {
+arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endd) {
   
   // arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::uword numpts = endp.size();
+  arma::uword numpts = endd.size();
   arma::mat ohlcagg(numpts-1, ncols, fill::zeros);
   
   // Perform loop over the end points
   for (arma::uword it = 1; it < numpts; it++) {
     // cout << "it: " << it << endl;
     // Aggregate the OHLC
-    ohlcagg.row(it-1) = agg_ohlc(tseries.rows(endp(it-1)+1, endp(it)));
+    ohlcagg.row(it-1) = agg_ohlc(tseries.rows(endd(it-1)+1, endd(it)));
   }  // end for
   
   // Return the aggregations
@@ -2340,8 +2342,8 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' # Plot dygraph of the weighted sums
 //' datav <- cbind(retp$VTI, sumc[, 1])
 //' colnames(datav) <- c("VTI", "Weighted")
-//' endp <- rutils::calc_endpoints(datav, interval="weeks")
-//' dygraphs::dygraph(cumsum(datav)[endp], main=colnames(datav)) %>% 
+//' endd <- rutils::calc_endpoints(datav, interval="weeks")
+//' dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) %>% 
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 //'   dyLegend(width=300)
 //' }
@@ -2363,7 +2365,7 @@ arma::mat roll_sum(const arma::mat& tseries,
     for (arma::uword it = 1; it < look_back; it++) {
       sumr.row(it) = sumr.row(it-1) + tseries.row(it);
     }  // end for
-    // Remaining periods
+    // Perform loop over the remaining rows
     for (arma::uword it = look_back; it < nrows; it++) {
       startp = it - look_back;
       sumr.row(it) = sumr.row(it-1) + tseries.row(it) - tseries.row(startp);
@@ -2386,7 +2388,7 @@ arma::mat roll_sum(const arma::mat& tseries,
       // Divide by the mean weight
       sumr.row(it-1) = sumr.row(it-1)/weightrr;
     }  // end for
-    // Remaining periods
+    // Perform loop over the remaining rows
     for (arma::uword it = look_back; it < nrows; it++) {
       startp = it - look_back;
       weightrr = weightr;
@@ -2415,8 +2417,8 @@ arma::mat roll_sum(const arma::mat& tseries,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -2443,14 +2445,14 @@ arma::mat roll_sum(const arma::mat& tseries,
 //' # Calculate historical returns
 //' retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define end points at 25 day intervals
-//' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
+//' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
 //' # Define start points as 75 day lag of end points
-//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 //' # Calculate rolling sums using Rcpp
-//' sumc <- HighFreq::roll_sumep(retp, startp=startp, endp=endp)
+//' sumc <- HighFreq::roll_sumep(retp, startp=startp, endd=endd)
 //' # Calculate rolling sums using R code
-//' sumr <- sapply(1:NROW(endp), function(ep) {
-//' colSums(retp[(startp[ep]+1):(endp[ep]+1), ])
+//' sumr <- sapply(1:NROW(endd), function(ep) {
+//' colSums(retp[(startp[ep]+1):(endd[ep]+1), ])
 //'   })  # end sapply
 //' sumr <- t(sumr)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
@@ -2460,7 +2462,7 @@ arma::mat roll_sum(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat roll_sumep(const arma::mat& tseries, 
                      arma::uvec startp = 0, 
-                     arma::uvec endp = 0, 
+                     arma::uvec endd = 0, 
                      arma::uword step = 1, 
                      arma::uword look_back = 1, 
                      arma::uword stub = 0) {
@@ -2471,11 +2473,11 @@ arma::mat roll_sumep(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -2527,8 +2529,8 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = NULL}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = NULL}).
 //'   
 //' @param \code{look_back} The length of the look-back interval, equal to the
 //'   number of data points included in calculating the rolling sum (the default
@@ -2558,13 +2560,13 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   The function \code{roll_sumw()} returns a \emph{matrix} with the same
 //'   dimensions as the input argument \code{tseries}.
 //' 
-//'   The arguments \code{weightv}, \code{endp}, and \code{stub} are
+//'   The arguments \code{weightv}, \code{endd}, and \code{stub} are
 //'   optional.
 //'   
 //'   If the argument \code{weightv} is not supplied, then simple sums are
 //'   calculated, not weighted sums.
 //'   
-//'   If either the \code{stub} or \code{endp} arguments are supplied,
+//'   If either the \code{stub} or \code{endd} arguments are supplied,
 //'   then the rolling sums are calculated at the end points. 
 //'   
 //'   If only the argument \code{stub} is supplied, then the end points are
@@ -2572,7 +2574,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   end point is equal to \code{stub} and the end points are spaced
 //'   \code{look_back} periods apart.
 //'   
-//'   If the arguments \code{weightv}, \code{endp}, and \code{stub} are
+//'   If the arguments \code{weightv}, \code{endd}, and \code{stub} are
 //'   not supplied, then the sums are calculated over a number of data points
 //'   equal to \code{look_back}.
 //'   
@@ -2603,16 +2605,16 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Calculate rolling sums at end points
 //' stubv <- 21
 //' sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
-//' endp <- (stubv + look_back*(0:(NROW(retp) %/% look_back)))
-//' endp <- endp[endp < NROW(retp)]
+//' endd <- (stubv + look_back*(0:(NROW(retp) %/% look_back)))
+//' endd <- endd[endd < NROW(retp)]
 //' sumr <- apply(zoo::coredata(retp), 2, cumsum)
-//' sumr <- sumr[endp+1, ]
+//' sumr <- sumr[endd+1, ]
 //' sumlag <- rbind(numeric(2), sumr[1:(NROW(sumr) - 1), ])
 //' sumr <- (sumr - sumlag)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' 
-//' # Calculate rolling sums at end points - pass in endp
-//' sumc <- HighFreq::roll_sumw(retp, endp=endp)
+//' # Calculate rolling sums at end points - pass in endd
+//' sumc <- HighFreq::roll_sumw(retp, endd=endd)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' 
 //' # Create exponentially decaying weights
@@ -2625,8 +2627,8 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' all.equal(sumc[-(1:11), ], retc[-(1:11), ], check.attributes=FALSE)
 //' 
 //' # Calculate rolling weighted sums at end points
-//' sumc <- HighFreq::roll_sumw(retp, endp=endp, weightv=weightv)
-//' all.equal(sumc, retc[endp+1, ], check.attributes=FALSE)
+//' sumc <- HighFreq::roll_sumw(retp, endd=endd, weightv=weightv)
+//' all.equal(sumc, retc[endd+1, ], check.attributes=FALSE)
 //' 
 //' # Create simple weights equal to a 1 value plus zeros
 //' weightv <- matrix(c(1, rep(0, 10)), nc=1)
@@ -2639,7 +2641,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_sumw(const arma::mat& tseries,
-                    Rcpp::Nullable<Rcpp::IntegerVector> endp = R_NilValue, 
+                    Rcpp::Nullable<Rcpp::IntegerVector> endd = R_NilValue, 
                     arma::uword look_back = 1,
                     Rcpp::Nullable<int> stub = R_NilValue, 
                     Rcpp::Nullable<Rcpp::NumericVector> weightv = R_NilValue) {
@@ -2668,9 +2670,9 @@ arma::mat roll_sumw(const arma::mat& tseries,
   // Declare empty end points
   arma::uvec endpts;
   // Update end points
-  if (endp.isNotNull()) {
-    // Copy endp
-    endpts = Rcpp::as<uvec>(endp);
+  if (endd.isNotNull()) {
+    // Copy endd
+    endpts = Rcpp::as<uvec>(endd);
   } else if (stub.isNotNull()) {
     // Calculate end points with stub
     endpts = arma::regspace<uvec>(Rcpp::as<uword>(stub), look_back, nrows + look_back);
@@ -2793,7 +2795,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' # Calculate the trailing means
 //' lambda <- 0.9
 //' meanv <- HighFreq::run_mean(closep, lambda=lambda)
-//' # Calculate trailing means using R code
+//' # Calculate the trailing means using R code
 //' pricef <- (1-lambda)*filter(closep, 
 //'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
 //'   method="recursive")
@@ -3094,7 +3096,7 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' vars <- HighFreq::run_var(retp, lambda=lambda)
 //' # Calculate centered returns
 //' retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
-//' # Calculate trailing variance using R code
+//' # Calculate the trailing variance using R code
 //' retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
 //'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
 //'   method="recursive")
@@ -3215,23 +3217,26 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 
   // Calculate all the different intra-day and day-over-day returns 
   // (differences of OHLC prices)
+  arma::mat openp = ohlc.col(0);
+  arma::mat highp = ohlc.col(1);
+  arma::mat lowp = ohlc.col(2);
   arma::mat closep = ohlc.col(3);
-  arma::mat open_close(closep.n_rows, 1);
-  open_close = (ohlc.col(0) - lagit(closep, 1, false));
-  arma::mat close_open = (closep - ohlc.col(0));
-  arma::mat close_high = (closep - ohlc.col(1));
-  arma::mat close_low = (closep - ohlc.col(2));
-  arma::mat high_low = (ohlc.col(1) - ohlc.col(2));
-  arma::mat high_open = (ohlc.col(1) - ohlc.col(0));
-  arma::mat low_open = (ohlc.col(2) - ohlc.col(0));
+  arma::mat opcl(closep.n_rows, 1);
+  opcl = (openp - lagit(closep, 1, false));
+  arma::mat clop = (closep - openp);
+  arma::mat clhi = (closep - highp);
+  arma::mat cllow = (closep - lowp);
+  arma::mat hilow = (highp - lowp);
+  arma::mat hiop = (highp - openp);
+  arma::mat lowop = (lowp - openp);
   
   // Perform loop over the rows
-  vars.row(0) = arma::square(open_close.row(0)) + coeff*arma::square(close_open.row(0)) +
-    (coeff-1)*(close_high.row(0)*high_open.row(0) + close_low.row(0)*low_open.row(0));
+  vars.row(0) = arma::square(opcl.row(0)) + coeff*arma::square(clop.row(0)) +
+    (coeff-1)*(clhi.row(0)*hiop.row(0) + cllow.row(0)*lowop.row(0));
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the variance as the weighted sum of squared returns minus the squared means
-    vars.row(it) = lambda1*(arma::square(open_close.row(it)) + coeff*arma::square(close_open.row(it)) +
-      (coeff-1)*(close_high.row(it)*high_open.row(it) + close_low.row(it)*low_open.row(it))) + lambda*vars.row(it-1);
+    vars.row(it) = lambda1*(arma::square(opcl.row(it)) + coeff*arma::square(clop.row(it)) +
+      (coeff-1)*(clhi.row(it)*hiop.row(it) + cllow.row(it)*lowop.row(it))) + lambda*vars.row(it-1);
   }  // end for
   
   return vars;
@@ -3364,7 +3369,7 @@ void push_covar(const arma::rowvec& retsn, // Row of new asset returns
   
   // Update the means of the returns
   meanv = lambdacov*meanv + lambda1*retsn;
-  // Calculate the de-meaned returns
+  // Calculate the centered returns
   arma::rowvec datav = (retsn - meanv);
   
   // Update the covariance of the returns
@@ -3503,8 +3508,8 @@ void push_eigen(const arma::rowvec& retsn, // Row of new asset returns
 //' 
 //' @param \code{varv} A \emph{vector} of the trailing asset variances.
 //' 
-//' @param \code{lambda} A decay factor which multiplies the past
-//'   mean and variance.
+//' @param \code{lambda} A decay factor which multiplies the past mean and
+//'   variance.
 //' 
 //' @param \code{gamma} A \emph{numeric} gain factor which multiplies the past
 //'   eigenelements.
@@ -3681,8 +3686,7 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
 //'   columns of returns data.
 //' 
-//' @param \code{lambda} A decay factor which multiplies past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
 //' @return A \emph{matrix} with five columns of data: the trailing covariances,
 //'   the variances, and the mean values of the two columns of the argument
@@ -3743,13 +3747,21 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //' # Calculate the trailing covariance
 //' lambda <- 0.9
 //' covars <- HighFreq::run_covar(retp, lambda=lambda)
-//' # Calculate trailing covariance using R code
-//' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
-//'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
-//'   method="recursive")
-//' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
 //' # Calculate the trailing correlation
 //' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+//' # Calculate the trailing covariance using R code
+//' nrows <- NROW(retp)
+//' retm <- matrix(numeric(2*nrows), nc=2)
+//' retm[1, ] <- retp[1, ]
+//' retd <- matrix(numeric(2*nrows), nc=2)
+//' covarr <- numeric(nrows)
+//' covarr[1] <- retp[1, 1]*retp[1, 2]
+//' for (it in 2:nrows) {
+//'   retm[it, ] <- lambda*retm[it-1, ] + (1-lambda)*(retp[it, ])
+//'   retd[it, ] <- retp[it, ] - retm[it, ]
+//'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it, 1]*retd[it, 2]
+//' } # end for
+//' all.equal(covars[, 1], covarr, check.attributes=FALSE)
 //' }
 //' 
 //' @export
@@ -3759,7 +3771,7 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
   arma::mat meanm(nrows, ncols);
-  arma::mat meand(1, ncols);
+  arma::mat meand(1, ncols); // Centered row
   arma::mat vars(nrows, ncols);
   arma::mat covar(nrows, 1);
   double lambda1 = 1-lambda;
@@ -3808,47 +3820,40 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing autocovariances of a \emph{time series} of returns
+//' Calculate the trailing autocovariance of a \emph{time series} of returns
 //' using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} with a single
 //'   column of returns data.
 //' 
+//' @param \code{lambda} A decay factor which multiplies past estimates.
+//'   
 //' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
 //'   (The default is \code{lagg = 1}.)
 //'
-//' @param \code{lambda} A decay factor which multiplies past
-//'   estimates.
-//'   
 //' @return A \emph{matrix} with three columns of data: the trailing
 //'   autocovariances, the variances, and the mean values of the argument
 //'   \code{tseries}.
 //'
 //' @details
 //'   The function \code{run_autocovar()} calculates the trailing
-//'   autocovariances of a streaming \emph{time series} of returns, by
-//'   recursively weighting the past covariance estimates \eqn{{cov}_{t-1}},
+//'   autocovariance of a streaming \emph{time series} of returns, by
+//'   recursively weighting the past autocovariance estimates \eqn{{cov}_{t-1}},
 //'   with the products of their returns minus their means, using the decay
 //'   factor \eqn{\lambda}:
 //'   \deqn{
 //'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
 //'   }
 //'   \deqn{
-//'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+//'     \sigma^2_{t} = \lambda \sigma^2_{t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
 //'   }
 //'   \deqn{
-//'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+//'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
 //'   }
-//'   \deqn{
-//'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
-//'   }
-//'   \deqn{
-//'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
-//'   }
-//'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
-//'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
-//'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
-//'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
+//'   Where \eqn{{cov}_t} is the trailing autocovariance estimate at time
+//'   \eqn{t}, with \code{lagg=l}.
+//'   And \eqn{\sigma^2_{t}} and \eqn{\bar{x}_t} are the trailing variances and
+//'   means of the streaming data.
 //' 
 //'   The above online recursive formulas are convenient for processing live
 //'   streaming data because they don't require maintaining a buffer of past
@@ -3868,86 +3873,87 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //'   a weaker dependence on past data.  This is equivalent to a short
 //'   look-back interval.
 //' 
-//'   The function \code{run_autocovar()} returns five columns of data: the trailing 
-//'   autocovariances, the variances, and the mean values of the two columns of the
+//'   The function \code{run_autocovar()} returns three columns of data: the
+//'   trailing autocovariances, the variances, and the mean values of the
 //'   argument \code{tseries}.  This allows calculating the trailing
-//'   correlations, betas, and alphas.
+//'   autocorrelations.
 //' 
 //' @examples
 //' \dontrun{
 //' # Calculate historical returns
-//' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-//' # Calculate the trailing covariance
+//' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
+//' # Calculate the trailing autocovariance
 //' lambda <- 0.9
-//' covars <- HighFreq::run_autocovar(retp, lambda=lambda)
-//' # Calculate trailing covariance using R code
-//' covarr <- (1-lambda)*filter(retp[, 1]*retp[, 2], 
-//'   filter=lambda, init=as.numeric(retp[1, 1]*retp[1, 2])/(1-lambda), 
-//'   method="recursive")
-//' all.equal(covars[, 1], unclass(covarr), check.attributes=FALSE)
-//' # Calculate the trailing correlation
-//' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
+//' lagg <- 3
+//' covars <- HighFreq::run_autocovar(retp, lambda=lambda, lagg=lagg)
+//' # Calculate the trailing autocorrelation
+//' correl <- covars[, 1]/covars[, 2]
+//' # Calculate the trailing autocovariance using R code
+//' nrows <- NROW(retp)
+//' retm <- numeric(nrows)
+//' retm[1] <- retp[1, ]
+//' retd <- numeric(nrows)
+//' covarr <- numeric(nrows)
+//' covarr[1] <- retp[1, ]^2
+//' for (it in 2:nrows) {
+//'   retm[it] <- lambda*retm[it-1] + (1-lambda)*(retp[it])
+//'   retd[it] <- retp[it] - retm[it]
+//'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it]*retd[max(it-lagg, 1)]
+//' } # end for
+//' all.equal(covarr, covars[, 1])
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_autocovar(const arma::mat& tseries, double lambda) {
+arma::mat run_autocovar(const arma::mat& tseries, 
+                        double lambda, 
+                        arma::uword lagg = 1) {
  
  arma::uword nrows = tseries.n_rows;
  arma::uword ncols = tseries.n_cols;
  arma::mat meanm(nrows, ncols);
- arma::mat meand(1, ncols);
+ arma::mat meand(nrows, ncols); // Centered series
  arma::mat vars(nrows, ncols);
  arma::mat covar(nrows, 1);
  double lambda1 = 1-lambda;
  
- // Perform loop over the rows
+ // Initialize the first rows
  meanm.row(0) = tseries.row(0);
  vars.row(0) = arma::square(tseries.row(0));
- covar.row(0) = tseries(0, 0)*tseries(0, 1);
- for (arma::uword it = 1; it < nrows; it++) {
+ covar.row(0) = arma::square(tseries.row(0));
+ 
+ // Warmup period
+ if (lagg > 1) {
+   for (arma::uword it = 1; it < lagg; it++) {
+     // Calculate the mean as the weighted sum
+     meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
+     meand.row(it) = tseries.row(it) - meanm.row(it);
+     // Calculate the covariance as the weighted sum of products of returns
+     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand.row(it));
+     covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand.row(it)*meand.row(0));
+   }  // end for
+ }  // end if
+ 
+ // Perform loop over the remaining rows
+ for (arma::uword it = lagg; it < nrows; it++) {
    // Calculate the mean as the weighted sum
    meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
-   meand = tseries.row(it) - meanm.row(it);
+   meand.row(it) = tseries.row(it) - meanm.row(it);
    // Calculate the covariance as the weighted sum of products of returns
-   vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand);
-   covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand(0)*meand(1));
+   vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(meand.row(it));
+   covar.row(it) = lambda*covar.row(it-1) + lambda1*(meand.row(it)*meand.row(it - lagg));
  }  // end for
  
  return arma::join_rows(covar, vars, meanm);
- 
- // Slower code below - because push_covar() calls arma::trans()
- // 
- // arma::uword nrows = tseries.n_rows;
- // arma::uword ncols = tseries.n_cols;
- // arma::mat vars(nrows, ncols);
- // arma::mat covar(nrows, 1);
- // arma::rowvec meanv = tseries.row(0);
- // arma::mat covmat = arma::trans(tseries.row(0))*tseries.row(0);
- // 
- // // Copy the covariance data
- // vars.row(0) = arma::trans(covmat.diag());
- // covar.row(0) = covmat(0, 1);
- // 
- // // Perform loop over the rows
- // for (arma::uword it = 1; it < nrows; it++) {
- //   // Update the covariance matrix
- //   push_covar(tseries.row(it), covmat, meanv, lambda);
- //   // Copy the covariance data
- //   vars.row(it) = arma::trans(covmat.diag());
- //   covar.row(it) = covmat(0, 1);
- // }  // end for
- // 
- // return arma::join_rows(covar, vars);
  
 }  // end run_autocovar
 
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing regressions of streaming \emph{time series} of
-//' response and predictor data, and calculate the residuals, alphas, and betas
-//' using an online recursive formula.
+//' Perform regressions on streaming \emph{time series} of response and
+//' predictor data, and calculate the regression coefficients and the residuals
+//' using online recursive formulas.
 //' 
 //' @param \code{respv} A single-column \emph{time series} or a single-column
 //'   \emph{matrix} of response data.
@@ -3955,61 +3961,83 @@ arma::mat run_autocovar(const arma::mat& tseries, double lambda) {
 //' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
 //'   data.
 //' 
-//' @param \code{lambda} A decay factor which multiplies past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
-//' @param \code{method} A \emph{character string} specifying the method for
-//'   scaling the residuals (the default is \code{method = "none"} - no
-//'   scaling).
+//' @param \code{controlv} A \emph{list} of model parameters (see Details).
+//'
 //'   
-//' @return A \emph{matrix} with the regression betas, alphas, and the residuals
-//'   (in that order - see details), with the same number of rows as the predictor
-//'   argument \code{predv}.
+//' @return A \emph{matrix} with the regression coefficients and the residuals
+//'   (in that order - see details), with the same number of rows as the
+//'   predictor argument \code{predv}.
 //'
 //' @details
-//'   The function \code{run_reg()} calculates the vectors of \emph{alphas}
-//'   \eqn{\alpha_t}, \emph{betas} \eqn{\beta_t}, and the \emph{residuals}
-//'   \eqn{\epsilon_t} of trailing regressions, by recursively weighting the
-//'   current estimates with past estimates, using the decay factor \eqn{\lambda}:
+//'   The function \code{run_reg()} performs regressions on streaming \emph{time
+//'   series} of response and predictor data, and calculates the trailing
+//'   regression coefficients \eqn{\beta_t} and the residuals \eqn{\epsilon_t}.
+//'   It recursively weights the current estimates with past estimates, using
+//'   the decay factor \eqn{\lambda}:
 //'   \deqn{
-//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+//'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
 //'   }
 //'   \deqn{
-//'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t
+//'     {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
 //'   }
 //'   \deqn{
-//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (p_t-\bar{p}_t)^T (p_t-\bar{p}_t)
+//'     \beta_t = {cov}^{-1}_{p t} {cov}_t
 //'   }
 //'   \deqn{
-//'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (r_t-\bar{r}_t)^T (p_t-\bar{p}_t)
-//'   }
-//'   \deqn{
-//'     \beta_t = \frac{{cov}_t}{\sigma^2_t}
-//'   }
-//'   \deqn{
-//'     \alpha_t = \bar{r}_t - \beta_t \bar{p}_t
-//'   }
-//'   \deqn{
-//'     \epsilon_t = r_t - \alpha_t - \beta_t p_t
+//'     \epsilon_t = r_t - \beta_t p_t
 //'   }
 //'   \deqn{
 //'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
 //'   }
 //'   \deqn{
-//'     \varsigma^2_t = \lambda \varsigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
 //'   }
-//'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor data,
+//'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor time series,
 //'   \eqn{{cov}_t} is the covariance matrix between the response and the
-//'   predictor data, \eqn{\sigma^2_t} is the covariance matrix of the
-//'   predictors, and \eqn{\varsigma^2_t} is the residual variance.
+//'   predictor data, \eqn{{cov}_{p t}} is the covariance matrix of the
+//'   predictors, and \eqn{\sigma^2_t} is the residual variance.
 //' 
-//'   The matrices \eqn{\sigma^2}, \eqn{cov}, \eqn{\alpha}, and \eqn{\beta} have
-//'   the same number of rows as the predictor argument \code{predv}.
+//'   The matrices \eqn{\beta} and \eqn{\epsilon} have the same number of rows
+//'   as the predictor argument \code{predv}.
 //'
-//'   The function \code{run_reg()} calculates the regressions with an intercept
-//'   (constant) term. The vector of \emph{alphas} \eqn{\alpha_t} is the
-//'   intercept value.
+//'   The function \code{run_reg()} accepts a list of regression model
+//'   parameters through the argument \code{controlv}.
+//'   The argument \code{controlv} contains the parameters \code{addunit},
+//'   \code{regmod}, and \code{residscale}.
+//'   Below is a description of how these parameters work.
+//'   The list of model parameters can be created using the function
+//'   \code{param_reg()}.  
 //'
+//'   If \code{addunit = TRUE} (the default), then \code{run_reg()} calculates
+//'   the regressions with an intercept (constant) term. If the predictor matrix
+//'   \code{predv} has \code{n} columns, then the number of regression
+//'   coefficients is equal to \code{n+1}, and the first regression coefficient
+//'   is the intercept value \eqn{\alpha}.
+//'   If \code{addunit = FALSE}, then \code{run_reg()} calculates the
+//'   regressions without an intercept (constant) term, and the number of
+//'   regression coefficients is equal to \code{n}.
+//'
+//'   If \code{regmod = "least_squares"} (the default) then it performs the
+//'   standard least squares regression.  This is currently the only option.
+//' 
+//'   The \emph{residuals} may be scaled by their volatilities to obtain the
+//'   \emph{z-scores}. The default is \code{residscale = "none"} - no scaling.
+//'   If the argument \code{residscale = "scale"} then the \emph{residuals}
+//'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma_t}
+//'   without subtracting their means:
+//'   \deqn{
+//'     \epsilon_t = \frac{\epsilon_t}{\sigma_t}
+//'   }
+//'   If the argument \code{residscale = "standardize"} then the residual means
+//'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
+//'   they are divided by their volatilities \eqn{\sigma_t}:
+//'   \deqn{
+//'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\sigma_t}
+//'   }
+//'   Which are equal to the \emph{z-scores}.
+//' 
 //'   The above online recursive formulas are convenient for processing live
 //'   streaming data because they don't require maintaining a buffer of past
 //'   data.
@@ -4029,28 +4057,16 @@ arma::mat run_autocovar(const arma::mat& tseries, double lambda) {
 //'   dependence on past data.  This is equivalent to a short look-back
 //'   interval.
 //' 
-//'   The \emph{residuals} may be scaled by their volatilities to obtain the
-//'   \emph{z-scores}. The default is \code{method = "none"} - no scaling.
-//'   If the argument \code{method = "scale"} then the \emph{residuals}
-//'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\varsigma_t}
-//'   without subtracting their means:
-//'   \deqn{
-//'     \epsilon_t = \frac{\epsilon_t}{\varsigma_t}
-//'   }
-//'   If the argument \code{method = "standardize"} then the residual means
-//'   \eqn{\bar{\epsilon}} are subtracted from the \emph{residuals}, and then
-//'   they are divided by their volatilities \eqn{\varsigma_t}:
-//'   \deqn{
-//'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\varsigma_t}
-//'   }
-//'   Which are equal to the \emph{z-scores}.
-//' 
 //'   The function \code{run_reg()} returns multiple columns of data, with the
-//'   same number of rows as the input argument \code{predv}. If the predictor
-//'   matrix \code{predv} has \code{n} columns then \code{run_reg()} returns a
-//'   matrix with \code{n+2} columns.  The first \code{n} columns contain the
-//'   \emph{betas}, the \code{n+1} column the \emph{alphas}, and the last column
-//'   contains the \emph{residuals}.
+//'   same number of rows as the input argument \code{predv}. 
+//'   If the predictor matrix \code{predv} has \code{n} columns and if
+//'   \code{addunit = TRUE} (the default) then \code{run_reg()} returns a matrix
+//'   with \code{n+2} columns. The first \code{n+1} columns contain the
+//'   regression coefficients (with the first column equal to the intercept
+//'   value \eqn{\alpha}) and the last column contains the \emph{residuals}.
+//'   If \code{addunit = FALSE} then \code{run_reg()} returns a matrix with
+//'   \code{n+1} columns. The first \code{n} columns contain the regression
+//'   coefficients and the last column contains the \emph{residuals}.
 //' 
 //' @examples
 //' \dontrun{
@@ -4062,35 +4078,66 @@ arma::mat run_autocovar(const arma::mat& tseries, double lambda) {
 //' predv <- retp[, -1]
 //' # Calculate the trailing regressions
 //' lambda <- 0.9
-//' regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda)
+//' # Create a list of regression parameters
+//' controlv <- HighFreq::param_reg(residscale="standardize")
+//' regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda, controlv=controlv)
 //' # Plot the trailing residuals
-//' datav <- cbind(cumsum(respv), regs[, 5])
+//' datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 //' colnames(datav) <- c("XLF", "residuals")
 //' colnamev <- colnames(datav)
 //' dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") %>%
 //'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 //'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
-//'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
-//'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+//'   dySeries(name=colnamev[1], axis="y", strokeWidth=2, col="blue") %>%
+//'   dySeries(name=colnamev[2], axis="y2", strokeWidth=2, col="red") %>%
+//'   dyLegend(show="always", width=300)
+//' 
+//' # Calculate the trailing regressions using R code
+//' lambda1 <- (1-lambda)
+//' respv <- zoo::coredata(respv)
+//' predv <- zoo::coredata(predv)
+//' nrows <- NROW(predv)
+//' predm <- cbind(rep(1, nrows), predv)
+//' ncols <- NCOL(predm)
+//' covrespred <- respv[1, ]*predm[1, ]
+//' covpred <- outer(predm[1, ], predm[1, ])
+//' betas <- matrix(numeric(nrows*ncols), nc=ncols)
+//' betas[1, ] <- covrespred %*% MASS::ginv(covpred)
+//' resids <- numeric(nrows)
+//' residm <- 0
+//' residv <- 0
+//' for (it in 2:nrows) {
+//'  covrespred <- lambda*covrespred + lambda1*respv[it, ]*predm[it, ]
+//'  covpred <- lambda*covpred + lambda1*outer(predm[it, ], predm[it, ])
+//'  betas[it, ] <- covrespred %*% MASS::ginv(covpred)
+//'  resids[it] <- respv[it, ] - (betas[it, ] %*% predm[it, ])
+//'  residm <- lambda*residm + lambda1*resids[it]
+//'  residv <- lambda*residv + lambda1*(resids[it] - residm)^2
+//'  resids[it] <- (resids[it] - residm)/sqrt(residv)
+//' } # end for
+//' # Compare values, excluding warmup period
+//' all.equal(regs[-(1:1e3), ], cbind(betas, resids)[-(1:1e3), ], check.attributes=FALSE)
+//'  
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat run_reg(const arma::mat& respv, // Response 
-                  const arma::mat& predv, // Predictor
-                  double lambda, // Decay factor which multiplies the past values 
-                  std::string method = "none") { // Method for scaling the residuals
-  
+arma::mat run_reg(const arma::mat& respv, // Response vector
+                  const arma::mat& predv, // Predictor matrix
+                  double lambda, // Decay factor which multiplies the past values
+                  Rcpp::List controlv) { // List of regression model parameters
+
+  // Add unit (intercept) column to the predictor matrix
+  bool addunit = Rcpp::as<int>(controlv["addunit"]);
   arma::uword nrows = predv.n_rows;
-  arma::uword ncols = predv.n_cols;
-  arma::mat respm = respv.row(0); // Response means
-  arma::mat predm = predv.row(0); // Predictor means
-  arma::mat respd(1, ncols); // Response de-meaned
-  arma::mat predd(1, ncols); // Predictor de-meaned
-  arma::mat covarespred = arma::zeros(1, ncols); // Covariance between the response and predictor
-  arma::mat covarpred = arma::zeros(ncols, ncols); // Covariance between the predictors
+  arma::mat predm = predv; // Predictor matrix with unit (intercept) column
+  if (addunit)
+    predm = arma::join_rows(ones(nrows), predm);
+  
+  arma::uword ncols = predm.n_cols;
+  arma::mat covrespred = arma::zeros(1, ncols); // Covariance between the response and predictor
+  arma::mat covpred = arma::zeros(ncols, ncols); // Covariance between the predictors
   arma::mat betas = arma::ones(nrows, ncols); // Betas
-  arma::mat alphas = arma::zeros(nrows, 1); // Alphas
   arma::mat resids = arma::zeros(nrows, 1); // Residuals
   arma::mat residv = arma::ones(nrows, 1); // Residual variance
   arma::mat residm = arma::zeros(nrows, 1); // Residual mean
@@ -4098,46 +4145,42 @@ arma::mat run_reg(const arma::mat& respv, // Response
   
   // Initialize the variables
   // cout << "Initializing the variables" << endl;
-  covarespred = respm*predm;
-  covarpred = arma::trans(predm)*predm;
-  betas.row(0) = covarespred*arma::inv(covarpred);
-  alphas.row(0) = respm - arma::dot(betas.row(0), predm);
+  covrespred = respv.row(0)*predm.row(0);
+  covpred = arma::trans(predm.row(0))*predm.row(0);
+  betas.row(0) = covrespred*arma::inv(covpred);
   // Perform loop over the rows
   for (arma::uword it = 1; it < nrows; it++) {
-    // Update the means using the decay factor
-    respm = lambda*respm + lambda1*respv.row(it);
-    predm = lambda*predm + lambda1*predv.row(it);
-    respd = respv.row(it) - respm;
-    predd = predv.row(it) - predm;
     // Update the covariance between the response and predictor
     // cout << "Updating the covariances: " << it << endl;
-    covarespred = lambda*covarespred + lambda1*respd*predd;
-    covarpred = lambda*covarpred + lambda1*arma::trans(predd)*predd;
+    covrespred = lambda*covrespred + lambda1*respv.row(it)*predm.row(it);
+    covpred = lambda*covpred + lambda1*arma::trans(predm.row(it))*predm.row(it);
     // cout << "Calculating betas: " << it << endl;
     // Update the betas and alphas
-    betas.row(it) = covarespred*arma::inv(covarpred);
-    alphas.row(it) = respm - arma::dot(betas.row(it), predm);
+    betas.row(it) = covrespred*arma::inv(covpred);
     // Calculate the betas and alphas approximately assuming predictors are orthogonal - old method - only slightly faster
     // residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(predd);
-    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covarespred/residv.row(it);
+    // betas.row(it) = lambda*betas.row(it-1) + lambda1*covrespred/residv.row(it);
     // Calculate the residuals
     // cout << "Calculating residuals: " << it << endl;
-    resids.row(it) = respv.row(it) - alphas.row(it) - arma::dot(betas.row(it), predv.row(it));
+    resids.row(it) = respv.row(it) - arma::dot(betas.row(it), predm.row(it));
     // Calculate the mean and variance of the residuals
     residm.row(it) = lambda*residm.row(it-1) + lambda1*resids.row(it);
     residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(resids.row(it) - residm.row(it));
   }  // end for
   
+  // Type of residual scaling - the default is "none"
+  std::string residscale = Rcpp::as<std::string>(controlv["residscale"]);
+
   // Scale the residuals
-  if (method == "scale") {
+  if (residscale == "scale") {
     // Divide the residuals by their volatility
     resids = resids/arma::sqrt(residv);
-  } else if (method == "standardize") {
-    // De-mean the residuals and divide them by their volatility
+  } else if (residscale == "standardize") {
+    // Center the residuals and divide them by their volatility
     resids = (resids - residm)/arma::sqrt(residv);
   }  // end if
   
-  return arma::join_rows(betas, alphas, resids);
+  return arma::join_rows(betas, resids);
   
 }  // end run_reg
 
@@ -4648,15 +4691,15 @@ arma::mat calc_var_ag(const arma::mat& tseries,
     // Allocate aggregations, end points, and variance.
     arma::uword nrows = tseries.n_rows;
     arma::mat aggs;
-    arma::uvec endp;
+    arma::uvec endd;
     // The number of rows is equal to step so that loop works for stub=0
     arma::mat vars(step, tseries.n_cols);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < step; stub++) {
-      endp = calc_endpoints(nrows, step, stub, false);
-      // endp = arma::regspace<uvec>(stub, step, nrows + step);
-      // endp = endp.elem(find(endp < nrows));
-      aggs = tseries.rows(endp);
+      endd = calc_endpoints(nrows, step, stub, false);
+      // endd = arma::regspace<uvec>(stub, step, nrows + step);
+      // endd = endd.elem(find(endd < nrows));
+      aggs = tseries.rows(endd);
       vars.row(stub) = arma::var(diffit(aggs, 1, false));
     }  // end for
     return mean(vars);
@@ -4796,42 +4839,45 @@ double calc_var_ohlc(const arma::mat& ohlc,
   
   // Calculate all the different intra-day and day-over-day returns 
   // (differences of OHLC prices)
-  arma::colvec closep = ohlc.col(3);
-  arma::colvec open_close(closep.n_rows);
+  arma::mat openp = ohlc.col(0);
+  arma::mat highp = ohlc.col(1);
+  arma::mat lowp = ohlc.col(2);
+  arma::mat closep = ohlc.col(3);
+  arma::mat opcl = arma::zeros(nrows, 1);
   if (closel.n_rows == 1) {
-    open_close = arma::join_cols(closep.subvec(0, 0), closep.subvec(0, closep.n_elem-2));
-    open_close = (ohlc.col(0) - open_close)/index;
+    closel = arma::join_cols(closep.row(0), closep.rows(0, nrows-2));
+    opcl = (openp - closel)/index;
   } else {
-    open_close = (ohlc.col(0) - closel)/index;
+    opcl = (openp - closel)/index;
   }  // end if
-  arma::colvec close_open = (closep - ohlc.col(0))/index;
-  arma::colvec close_high = (closep - ohlc.col(1))/index;
-  arma::colvec close_low = (closep - ohlc.col(2))/index;
-  arma::colvec high_low = (ohlc.col(1) - ohlc.col(2))/index;
-  arma::colvec high_open = (ohlc.col(1) - ohlc.col(0))/index;
-  arma::colvec low_open = (ohlc.col(2) - ohlc.col(0))/index;
+  arma::mat clop = (closep - openp)/index;
+  arma::mat clhi = (closep - highp)/index;
+  arma::mat clow = (closep - lowp)/index;
+  arma::mat hilow = (highp - lowp)/index;
+  arma::mat hiop = (highp - openp)/index;
+  arma::mat lowop = (lowp - openp)/index;
   
   if (method == "close") {
     // cout << "Calc method is Close" << endl;
-    return arma::var(arma::diff(closep));
+    return arma::as_scalar(arma::var(arma::diff(closep)));
   } else if (method == "rogers_satchell") {
     // cout << "Calc method is Rogers-Satchell" << endl;
-    return -(arma::dot(close_high, high_open) +
-             arma::dot(close_low, low_open))/nrows;
+    return -(arma::dot(clhi, hiop) +
+             arma::dot(clow, lowop))/nrows;
   } else if (method == "garman_klass") {
     // cout << "Calc method is Garman-Klass" << endl;
-    return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/nrows;
+    return (0.5*arma::dot(hilow, hilow) -
+            (2*log(2)-1)*arma::dot(clop, clop))/nrows;
   } else if (method == "garman_klass_yz") {
     // cout << "Calc method is Garman-Klass-YZ" << endl;
-    return (0.5*arma::dot(high_low, high_low) -
-            (2*log(2)-1)*arma::dot(close_open, close_open))/nrows + 
-            arma::var(open_close);
+    return arma::as_scalar((0.5*arma::dot(hilow, hilow) -
+                           (2*log(2)-1)*arma::dot(clop, clop))/nrows + 
+                           arma::var(opcl));
   } else if (method == "yang_zhang") {
     // cout << "Calc method is Yang-Zhang" << endl;
-    return arma::var(open_close) + coeff*arma::var(close_open) +
-      (coeff-1)*(arma::dot(close_high, high_open) + 
-      arma::dot(close_low, low_open))/nrows;
+    return arma::as_scalar(arma::var(opcl) + coeff*arma::var(clop) +
+                           (coeff-1)*(arma::dot(clhi, hiop) + 
+                           arma::dot(clow, lowop))/nrows);
   } else {
     cout << "Wrong calc method!" << endl;
     return 1;
@@ -4933,19 +4979,18 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     // Allocate aggregations, end points, and variance.
     arma::uword nrows = ohlc.n_rows;
     arma::mat aggs;
-    arma::uvec endp;
+    arma::uvec endd;
     arma::mat vars(step, 1);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < step; stub++) {
-      endp = calc_endpoints(nrows, step, stub, false);
-      aggs = roll_ohlc(ohlc, endp);
+      endd = calc_endpoints(nrows, step, stub, false);
+      aggs = roll_ohlc(ohlc, endd);
       vars.row(stub) = calc_var_ohlc(aggs, method, closel, scale, index);
     }  // end for
     return arma::as_scalar(mean(vars));
   }  // end if
   
 }  // end calc_var_ohlc_ag
-
 
 
 
@@ -5055,7 +5100,7 @@ arma::mat calc_skew(const arma::mat& tseries,
     arma::mat meanm = arma::mean(tseries);
     arma::mat vars = arma::var(tseries);
     arma::mat skewness(1, ncols);
-    // De-mean the columns of tseries
+    // Center the columns of tseries
     // tseries.each_row() -= meanm;
     // return arma::sum(arma::pow(tseries, 3))/arma::pow(vars, 1.5)/nrows;
     for (arma::uword it = 0; it < ncols; it++) {
@@ -5103,7 +5148,7 @@ arma::mat calc_skew(const arma::mat& tseries,
 //'
 //'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
 //'   calculates the fourth moment of the data.
-//'   But it doesn't de-mean the columns of \code{tseries} because that requires
+//'   But it doesn't center the columns of \code{tseries} because that requires
 //'   copying the matrix \code{tseries} in memory, so it's time-consuming.
 //'
 //'   If \code{method = "quantile"} then it calculates the skewness
@@ -5189,7 +5234,7 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
     arma::mat meanm = arma::mean(tseries);
     arma::mat vars = arma::var(tseries);
     arma::mat kurtosis(1, ncols);
-    // Don't de-mean the columns of tseries because that requires copying the matrix of data, so it's time-consuming
+    // Don't center the columns of tseries because that requires copying the matrix of data, so it's time-consuming
     // Loop over columns of tseries
     for (arma::uword it = 0; it < ncols; it++) {
       kurtosis.col(it) = arma::sum(arma::pow(tseries.col(it) - arma::as_scalar(meanm.col(it)), 4))/arma::pow(vars.col(it), 2)/nrows;
@@ -5443,13 +5488,14 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //' 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
+Rcpp::List calc_lm(const arma::vec& respv,  // Response vector
+                   const arma::mat& predv) { // Predictor matrix
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predv.n_rows;
   arma::mat predm = arma::join_rows(ones(nrows), predv);
   arma::uword ncols = predm.n_cols;
-  arma::uword deg_free = (nrows - ncols);
+  arma::uword degf = (nrows - ncols);
   
   // Calculate alpha and beta coefficients for the model response ~ predictor
   arma::colvec coeff = arma::solve(predm, respv);
@@ -5463,7 +5509,7 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
   
   // Calculate R-squared and F-statistic
   double rsquared = exp_sumsq/tot_sumsq;
-  double fstat = (exp_sumsq*deg_free)/(res_sumsq*(ncols-1));
+  double fstat = (exp_sumsq*degf)/(res_sumsq*(ncols-1));
   // arma::rowvec stats=join_horiz(rsquared, fstat);
   Rcpp::NumericVector stats(2);
   stats(0) = rsquared;
@@ -5471,10 +5517,10 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
   stats.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
   
   // Calculate standard errors of beta coefficients
-  arma::colvec stderrv = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
+  arma::colvec stderrv = arma::sqrt(res_sumsq/degf*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
   // Calculate t-values and p-values of beta coefficients
   arma::colvec tvals = coeff/stderrv;
-  arma::colvec pvals = 2*Rcpp::pt(-Rcpp::abs(Rcpp::wrap(tvals)), deg_free);
+  arma::colvec pvals = 2*Rcpp::pt(-Rcpp::abs(Rcpp::wrap(tvals)), degf);
   Rcpp::NumericMatrix coeffmat = Rcpp::wrap(arma::join_rows(arma::join_rows(arma::join_rows(coeff, stderrv), tvals), pvals));
   Rcpp::colnames(coeffmat) = Rcpp::CharacterVector::create("coeff", "stderr", "tvals", "pvals");
   
@@ -5512,23 +5558,23 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
 //'   The list of model parameters can be created using the function
 //'   \code{param_reg()}.  Below is a description of the model parameters.
 //'
-//'   If \code{method = "least_squares"} (the default) then it performs the
+//'   If \code{regmod = "least_squares"} (the default) then it performs the
 //'   standard least squares regression, the same as the function
 //'   \code{calc_lm()}, and the function \code{lm()} from the \code{R} package
 //'   \emph{stats}.
 //'   But it uses \code{RcppArmadillo} \code{C++} code so it's several times
 //'   faster than \code{lm()}.
 //'
-//'   If \code{method = "regular"} then it performs shrinkage regression.  It
-//'   calculates the \emph{regularized inverse} of the predictor matrix from its
+//'   If \code{regmod = "regular"} then it performs shrinkage regression.  It
+//'   calculates the \emph{reduced inverse} of the predictor matrix from its
 //'   singular value decomposition.  It performs regularization by selecting
 //'   only the largest \emph{singular values} equal in number to \code{dimax}.
 //'   
-//'   If \code{method = "quantile"} then it performs quantile regression (not
+//'   If \code{regmod = "quantile"} then it performs quantile regression (not
 //'   implemented yet).
 //' 
-//'   If \code{intercept = TRUE} then an extra intercept column (unit column) is
-//'   added to the predictor matrix (the default is \code{intercept = TRUE}).
+//'   If \code{addunit = TRUE} then an extra intercept column (unit column) is
+//'   added to the predictor matrix (the default is \code{addunit = TRUE}).
 //'   
 //'   The length of the return vector depends on the number of columns of the
 //'   predictor matrix (including the intercept column, if it's added).
@@ -5539,13 +5585,13 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
 //'   added).
 //'   The number of t-values is equal to the number of coefficients.
 //' 
-//'   For example, if the number of columns of the predictor matrix is
-//'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+//'   For example, if the number of columns of the predictor matrix is equal to
+//'   \code{n}, and if \code{addunit = TRUE} (the default), then
 //'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
 //'   regression coefficients (including the intercept coefficient), \code{n+1}
 //'   corresponding t-values, and \code{1} z-score value.
 //'
-//'   If \code{intercept = FALSE}, then \code{calc_reg()} returns a vector with
+//'   If \code{addunit = FALSE}, then \code{calc_reg()} returns a vector with
 //'   \code{2n+1} elements: \code{n} regression coefficients (without the
 //'   intercept coefficient), \code{n} corresponding t-values, and \code{1}
 //'   z-score value.
@@ -5579,17 +5625,17 @@ Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv) {
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_reg(const arma::mat& respv, 
-                   const arma::mat& predv,
+arma::mat calc_reg(const arma::mat& respv,  // Response vector
+                   const arma::mat& predv, // Predictor matrix
                    Rcpp::List controlv) { // List of regression model parameters
   
   // Unpack the control list
   // Type of regression model
-  std::string method = Rcpp::as<std::string>(controlv["method"]);
-  // Add intercept column to the predictor matrix?
-  bool intercept = Rcpp::as<int>(controlv["intercept"]);
+  std::string regmod = Rcpp::as<std::string>(controlv["regmod"]);
+  // Add unit (intercept) column to the predictor matrix?
+  bool addunit = Rcpp::as<int>(controlv["addunit"]);
   // Threshold level for discarding small singular values
-  double eigen_thresh = Rcpp::as<double>(controlv["eigen_thresh"]);
+  double singmin = Rcpp::as<double>(controlv["singmin"]);
   // Apply dimension reduction
   arma::uword dimax = Rcpp::as<int>(controlv["dimax"]);
   // Confidence level for calculating the quantiles of returns
@@ -5599,18 +5645,18 @@ arma::mat calc_reg(const arma::mat& respv,
   
   // Add column for intercept to predictor matrix
   arma::uword nrows = predv.n_rows;
-  arma::mat predm = predv;
-  if (intercept)
-    predm = arma::join_rows(ones(nrows), predv);
+  arma::mat predm = predv; // Predictor matrix with unit (intercept) column
+  if (addunit)
+    predm = arma::join_rows(ones(nrows), predm);
   
   arma::uword ncols = predm.n_cols;
-  arma::uword deg_free = (nrows - ncols);
+  arma::uword degf = (nrows - ncols);
   arma::vec coeff;
   arma::vec tvals;
   arma::mat reg_data = arma::zeros(2*ncols+1, 1);
   
-  // Apply different calculation methods for the regression coefficients
-  switch(calc_method(method)) {
+  // Apply different calculation regmods for the regression coefficients
+  switch(calc_method(regmod)) {
   case methodenum::least_squares: {
     // Calculate regression coefficients for the model response ~ predictor
     coeff = arma::solve(predm, respv);
@@ -5618,7 +5664,7 @@ arma::mat calc_reg(const arma::mat& respv,
   }  // end least_squares
   case methodenum::regular: {
     // Calculate shrinkage regression coefficients
-    coeff = calc_inv(predm, dimax, eigen_thresh)*respv;
+    coeff = calc_inv(predm, dimax, singmin)*respv;
     break;
   }  // end regular
   case methodenum::quantile: {
@@ -5626,7 +5672,7 @@ arma::mat calc_reg(const arma::mat& respv,
     break;
   }  // end quantile
   default : {
-    cout << "Warning: Invalid method parameter: " << method << endl;
+    cout << "Warning: Invalid regmod parameter: " << regmod << endl;
     return reg_data;
   }  // end default
   }  // end switch
@@ -5640,7 +5686,7 @@ arma::mat calc_reg(const arma::mat& respv,
   // double exp_sumsq = tot_sumsq - res_sumsq;
   
   // Calculate standard errors of the beta coefficients
-  arma::mat stderrv = arma::sqrt(res_sumsq/deg_free*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
+  arma::mat stderrv = arma::sqrt(res_sumsq/degf*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
   // Calculate t-values of the beta coefficients
   tvals = coeff/stderrv;
   
@@ -5677,8 +5723,8 @@ arma::mat calc_reg(const arma::mat& respv,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -5706,7 +5752,7 @@ arma::mat calc_reg(const arma::mat& respv,
 //'   calculates the mean (location).
 //'   See the function \code{calc_mean()} for a description of the mean methods.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{tseries}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -5740,22 +5786,22 @@ arma::mat calc_reg(const arma::mat& respv,
 //' all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
 //'   drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 //' # Define end points and start points
-//' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+//' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 //' # Calculate the rolling means using RcppArmadillo
-//' meanv <- HighFreq::roll_mean(retp, startp=startp, endp=endp)
+//' meanv <- HighFreq::roll_mean(retp, startp=startp, endd=endd)
 //' # Calculate the rolling medians using RcppArmadillo
-//' medianscpp <- HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric")
+//' medianscpp <- HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric")
 //' # Calculate the rolling medians using R
-//' medians = sapply(1:NROW(endp), function(i) {
-//'   median(retp[startp[i]:endp[i] + 1])
+//' medians = sapply(1:NROW(endd), function(i) {
+//'   median(retp[startp[i]:endd[i] + 1])
 //' })  # end sapply
 //' all.equal(medians, drop(medianscpp))
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endp=endp, method="nonparametric"),
-//'   Rcode=sapply(1:NROW(endp), function(i) {median(retp[startp[i]:endp[i] + 1])}),
+//'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
+//'   Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
 //'   times=10))[, c(1, 4, 5)]
 //' }
 //' @export
@@ -5763,7 +5809,7 @@ arma::mat calc_reg(const arma::mat& respv,
 arma::mat roll_mean(const arma::mat& tseries, 
                     arma::uword look_back = 1, 
                     arma::uvec startp = 0, 
-                    arma::uvec endp = 0, 
+                    arma::uvec endd = 0, 
                     arma::uword step = 1, 
                     arma::uword stub = 0,
                     std::string method = "moment", 
@@ -5775,11 +5821,11 @@ arma::mat roll_mean(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -5894,8 +5940,8 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -5924,7 +5970,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //'   See the function \code{calc_var()} for a description of the dispersion
 //'   methods.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{tseries}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -5971,7 +6017,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 arma::mat roll_var(const arma::mat& tseries, 
                    arma::uword look_back = 1, 
                    arma::uvec startp = 0, 
-                   arma::uvec endp = 0, 
+                   arma::uvec endd = 0, 
                    arma::uword step = 1, 
                    arma::uword stub = 0,
                    std::string method = "moment", 
@@ -5983,11 +6029,11 @@ arma::mat roll_var(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -6032,8 +6078,8 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -6082,7 +6128,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //'   In the initial warmup period, the variance is calculated over an expanding
 //'   look-back interval.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{ohlc}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -6148,11 +6194,11 @@ arma::mat roll_var(const arma::mat& tseries,
 //' # Same calculation in R
 //' nrows <- NROW(ohlc)
 //' closel = HighFreq::lagit(ohlc[, 4])
-//' endp <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
-//' startp <- drop(HighFreq::calc_startpoints(endp, 2))
-//' npts <- NROW(endp)
+//' endd <- drop(HighFreq::calc_endpoints(nrows, 3)) + 1
+//' startp <- drop(HighFreq::calc_startpoints(endd, 2))
+//' npts <- NROW(endd)
 //' varollr <- sapply(2:npts, function(it) {
-//'   rangev <- startp[it]:endp[it]
+//'   rangev <- startp[it]:endd[it]
 //'   sub_ohlc = ohlc[rangev, ]
 //'   sub_close = closel[rangev]
 //'   sub_index = indeks[rangev]
@@ -6165,7 +6211,7 @@ arma::mat roll_var(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::vec roll_var_ohlc(const arma::mat& ohlc, 
                         arma::uvec startp = 0, 
-                        arma::uvec endp = 0, 
+                        arma::uvec endd = 0, 
                         arma::uword step = 1, 
                         arma::uword look_back = 1, 
                         arma::uword stub = 0,
@@ -6179,11 +6225,11 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -6259,8 +6305,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is 
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is 
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -6295,7 +6341,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //'   See the function \code{calc_skew()} for a description of the skewness
 //'   methods.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{tseries}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -6313,13 +6359,13 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
-//' endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+//' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 //' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
 //' skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
 //' # Calculate the rolling skewness using R code
-//' skewr <- sapply(1:NROW(endp), function(it) {
-//'   HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+//' skewr <- sapply(1:NROW(endd), function(it) {
+//'   HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 //' })  # end sapply
 //' # Compare the skewness estimates
 //' all.equal(drop(skewv), skewr, check.attributes=FALSE)
@@ -6327,8 +6373,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
-//'   Rcode=sapply(1:NROW(endp), function(it) {
-//'     HighFreq::calc_skew(retp[startp[it]:endp[it], ])
+//'   Rcode=sapply(1:NROW(endd), function(it) {
+//'     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -6336,7 +6382,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 // [[Rcpp::export]]
 arma::mat roll_skew(const arma::mat& tseries, 
                     arma::uvec startp = 0, 
-                    arma::uvec endp = 0, 
+                    arma::uvec endd = 0, 
                     arma::uword step = 1, 
                     arma::uword look_back = 1, 
                     arma::uword stub = 0,
@@ -6349,11 +6395,11 @@ arma::mat roll_skew(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -6393,8 +6439,8 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is 
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is 
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -6428,7 +6474,7 @@ arma::mat roll_skew(const arma::mat& tseries,
 //'   which calculates the kurtosis. See the function \code{calc_kurtosis()} for
 //'   a description of the kurtosis methods.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{tseries}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -6446,13 +6492,13 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
-//' endp <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+//' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 //' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
 //' kurtosisv <- HighFreq::roll_kurtosis(retp, step=25, look_back=3)
 //' # Calculate the rolling kurtosis using R code
-//' kurt_r <- sapply(1:NROW(endp), function(it) {
-//'   HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+//' kurt_r <- sapply(1:NROW(endd), function(it) {
+//'   HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 //' })  # end sapply
 //' # Compare the kurtosis estimates
 //' all.equal(drop(kurtosisv), kurt_r, check.attributes=FALSE)
@@ -6460,8 +6506,8 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::roll_kurtosis(retp, step=25, look_back=3),
-//'   Rcode=sapply(1:NROW(endp), function(it) {
-//'     HighFreq::calc_kurtosis(retp[startp[it]:endp[it], ])
+//'   Rcode=sapply(1:NROW(endd), function(it) {
+//'     HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -6469,7 +6515,7 @@ arma::mat roll_skew(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat roll_kurtosis(const arma::mat& tseries, 
                         arma::uvec startp = 0, 
-                        arma::uvec endp = 0, 
+                        arma::uvec endd = 0, 
                         arma::uword step = 1, 
                         arma::uword look_back = 1, 
                         arma::uword stub = 0,
@@ -6482,11 +6528,11 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -6531,8 +6577,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is 
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is 
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -6557,7 +6603,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   each end point it subsets the time series \code{predv} over a look-back
 //'   interval equal to \code{look_back} number of end points.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{predv}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -6586,7 +6632,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   added).
 //'   The number of t-values is equal to the number of coefficients.
 //'   For example, if the number of columns of the predictor matrix is
-//'   equal to \code{n}, and if \code{intercept = TRUE} (the default), then
+//'   equal to \code{n}, and if \code{addunit = TRUE} (the default), then
 //'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
 //'   regression coefficients (including the intercept coefficient), \code{n+1}
 //'   corresponding t-values, and \code{1} z-score column.
@@ -6596,17 +6642,17 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' # Calculate historical returns
 //' retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 //' # Define monthly end points and start points
-//' endp <- xts::endpoints(retp, on="months")[-1]
+//' endd <- xts::endpoints(retp, on="months")[-1]
 //' look_back <- 12
-//' startp <- c(rep(1, look_back), endp[1:(NROW(endp)-look_back)])
+//' startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
 //' # Create a default list of regression parameters
 //' controlv <- HighFreq::param_reg()
 //' # Calculate rolling betas using RcppArmadillo
-//' reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endp=(endp-1), startp=(startp-1), controlv=controlv)
+//' reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endd=(endd-1), startp=(startp-1), controlv=controlv)
 //' betas <- reg_stats[, 2]
 //' # Calculate rolling betas in R
-//' betar <- sapply(1:NROW(endp), FUN=function(ep) {
-//'   datav <- retp[startp[ep]:endp[ep], ]
+//' betar <- sapply(1:NROW(endd), FUN=function(ep) {
+//'   datav <- retp[startp[ep]:endd[ep], ]
 //'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
 //' })  # end sapply
 //' # Compare the outputs of both functions
@@ -6615,11 +6661,11 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat roll_reg(const arma::mat& respv, 
-                   const arma::mat& predv,
+arma::mat roll_reg(const arma::mat& respv, // Response vector
+                   const arma::mat& predv, // Predictor matrix
                    Rcpp::List controlv, 
                    arma::uvec startp = 0, 
-                   arma::uvec endp = 0, 
+                   arma::uvec endd = 0, 
                    arma::uword step = 1, 
                    arma::uword look_back = 1, 
                    arma::uword stub = 0) {
@@ -6630,11 +6676,11 @@ arma::mat roll_reg(const arma::mat& respv,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -6652,9 +6698,9 @@ arma::mat roll_reg(const arma::mat& respv,
   arma::mat predicti;
   arma::uword numpts = endpts.n_elem;
   arma::uword ncols = predv.n_cols;
-  // Add intercept column to the predictor matrix?
-  bool intercept = Rcpp::as<int>(controlv["intercept"]);
-  if (intercept) ncols += 1;
+  // Add unit (intercept) column to the predictor matrix?
+  bool addunit = Rcpp::as<int>(controlv["addunit"]);
+  if (addunit) ncols += 1;
   arma::mat reg_stats(numpts, (2*ncols + 1), fill::zeros);
   
   // Perform loop over the endpts
@@ -6680,7 +6726,7 @@ arma::mat roll_reg(const arma::mat& respv,
   // for (arma::uword it = look_back; it < nrows; it++) {
   //   responsi = respv.rows(it-look_back+1, it);
   //   predicti = predv.rows(it-look_back+1, it);
-  //   reg_data = calc_reg(responsi, predicti, method, eigen_thresh, dimax, confl, alpha);
+  //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alpha);
   //   reg_stats.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -6775,7 +6821,7 @@ arma::mat roll_scale(const arma::mat& matrix,
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
-  // Remaining periods
+  // Perform loop over the remaining rows
   for (arma::uword it = look_back; it < nrows; it++) {
     sub_mat = matrix.rows(it-look_back+1, it);
     calc_scale(sub_mat, center, scale, use_median);
@@ -6794,8 +6840,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 //' 
-//' @param \code{lambda} A decay factor which multiplies past
-//'   estimates.
+//' @param \code{lambda} A decay factor which multiplies past estimates.
 //' 
 //' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
 //'   the columns so that they have zero mean or median (the default is
@@ -6947,8 +6992,8 @@ void run_scale(arma::mat& tseries,
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -6974,7 +7019,7 @@ void run_scale(arma::mat& tseries,
 //'   It passes the subset time series to the function \code{calc_lm()}, which
 //'   calculates the regression data.
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{predv}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -7012,10 +7057,10 @@ void run_scale(arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_zscores(const arma::mat& respv, 
-                       const arma::mat& predv, 
+arma::vec roll_zscores(const arma::mat& respv, // Response vector
+                       const arma::mat& predv, // Predictor matrix
                        arma::uvec startp = 0, 
-                       arma::uvec endp = 0, 
+                       arma::uvec endd = 0, 
                        arma::uword step = 1, 
                        arma::uword look_back = 1,
                        arma::uword stub = 0) {
@@ -7026,11 +7071,11 @@ arma::vec roll_zscores(const arma::mat& respv,
   arma::uvec startpts;
   
   // Calculate end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate start points if missing
@@ -7147,8 +7192,8 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
 //' 
-//' @param \code{endp} An \emph{integer} vector of end points (the default is 
-//'   \code{endp = 0}).
+//' @param \code{endd} An \emph{integer} vector of end points (the default is 
+//'   \code{endd = 0}).
 //' 
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
@@ -7185,7 +7230,7 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //'    }
 //'    (The default is the \code{funame = "calc_mean"}).
 //'   
-//'   If the arguments \code{endp} and \code{startp} are not given then it
+//'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
 //'   periods. It calculates the end points along the rows of \code{tseries}
 //'   using the function \code{calc_endpoints()}, with the number of time
@@ -7215,13 +7260,13 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' # Compare the two methods
 //' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 //' # Define end points and start points
-//' endp <- HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endp, look_back=3)
+//' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
+//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
 //' # Calculate the rolling variance using RcppArmadillo
-//' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp)
+//' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd)
 //' # Calculate the rolling variance using R code
-//' var_roll <- sapply(1:NROW(endp), function(it) {
-//'   var(retp[startp[it]:endp[it]+1, ])
+//' var_roll <- sapply(1:NROW(endd), function(it) {
+//'   var(retp[startp[it]:endd[it]+1, ])
 //' })  # end sapply
 //' var_roll[1] <- 0
 //' # Compare the two methods
@@ -7229,9 +7274,9 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endp=endp),
-//'   Rcode=sapply(1:NROW(endp), function(it) {
-//'     var(retp[startp[it]:endp[it]+1, ])
+//'   Rcpp=HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd),
+//'   Rcode=sapply(1:NROW(endd), function(it) {
+//'     var(retp[startp[it]:endd[it]+1, ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
@@ -7242,7 +7287,7 @@ arma::mat roll_moment(const arma::mat& tseries,
                       std::string method = "moment", 
                       double confl = 0.75, 
                       arma::uvec startp = 0, 
-                      arma::uvec endp = 0, 
+                      arma::uvec endd = 0, 
                       arma::uword step = 1, 
                       arma::uword look_back = 1, 
                       arma::uword stub = 0) {
@@ -7253,11 +7298,11 @@ arma::mat roll_moment(const arma::mat& tseries,
   arma::uvec startpts;
   
   // Calculate the end points if missing
-  if (sum(endp) == 0) {
+  if (sum(endd) == 0) {
     endpts = calc_endpoints(nrows, step, stub);
   } else {
     // Copy end points
-    endpts = endp;
+    endpts = endd;
   }  // end if
   
   // Calculate the start points if missing
@@ -7484,17 +7529,17 @@ arma::mat sim_ou(double init_price,
                  arma::mat& innov) {
   
   arma::uword nrows = innov.n_rows;
-  arma::mat prices = arma::zeros(nrows, 1);
-  arma::mat returns = arma::zeros(nrows, 1);
+  arma::mat pricev = arma::zeros(nrows, 1);
+  arma::mat retv = arma::zeros(nrows, 1);
   
-  returns.row(0) = innov.row(0);
-  prices.row(0) = init_price;
+  retv.row(0) = innov.row(0);
+  pricev.row(0) = init_price;
   for (arma::uword it = 1; it < nrows; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + innov.row(it);
-    prices.row(it) = prices.row(it-1) + returns.row(it);
+    retv.row(it) = theta*(eq_price - pricev.row(it-1)) + innov.row(it);
+    pricev.row(it) = pricev.row(it-1) + retv.row(it);
   }  // end for
   
-  return prices;
+  return pricev;
   
 }  // end sim_ou
 
@@ -7641,7 +7686,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
     returns.row(it) = innov.row(it) + arma::dot(coeffr.rows(ncoeff-it, ncoeff-1), returns.rows(0, it-1));
   }  // end for
   
-  // Remaining periods
+  // Perform loop over the remaining rows
   for (arma::uword it = ncoeff; it < nrows; it++) {
     returns.row(it) = innov.row(it) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1));
   }  // end for
@@ -7736,7 +7781,7 @@ arma::mat sim_df(double init_price,
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
-  // Remaining periods
+  // Perform loop over the remaining rows
   for (arma::uword it = ncoeff; it < nrows; it++) {
     returns.row(it) = theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
@@ -7839,7 +7884,7 @@ double lik_garch(double omega,
 //' @param \code{rets} A \emph{time series} or \emph{matrix} of asset returns.
 //' 
 //' @param \code{dimax} An \emph{integer} equal to the number of \emph{eigen
-//'   values} used for calculating the regularized inverse of the covariance
+//'   values} used for calculating the reduced inverse of the covariance
 //'   matrix (the default is \code{dimax = 0} - standard matrix inverse using
 //'   all the \emph{eigen values}).
 //'   
@@ -7886,7 +7931,7 @@ double lik_garch(double omega,
 //'   and covariance.
 //'   
 //'   It then calls the function \code{HighFreq::calc_inv()} to calculate the
-//'   \emph{regularized inverse} of the covariance matrix using its eigen
+//'   \emph{reduced inverse} of the covariance matrix using its eigen
 //'   decomposition:
 //'   \deqn{
 //'     \strong{C}^{-1} = \strong{O}_{dimax} \, \Sigma^{-1}_{dimax} \, \strong{O}^T_{dimax}
@@ -8022,7 +8067,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
     // }  // end if
     // Calculate the trailing mean of asset returns
     retm = lambda*retm + lambda1*rets.row(it);
-    // Calculate weights using regularized inverse
+    // Calculate weights using reduced inverse
     invmat = calc_inv(covmat, dimax);
     // Calculate weights using recursive inverse
     // calc_invrec(covmat, invmat);
@@ -8068,7 +8113,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'
 //'   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
 //'   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-//'   \emph{regularized inverse} of the \emph{covariance matrix}
+//'   \emph{reduced inverse} of the \emph{covariance matrix}
 //'   \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
 //'   \deqn{
 //'     \strong{w} = \strong{C}^{-1} \bar{r}
@@ -8079,7 +8124,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   
 //'   If \code{method = "minvarlin"} then it calculates the weights of the
 //'   minimum variance portfolio under linear constraint, by multiplying the
-//'   \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+//'   \emph{reduced inverse} of the \emph{covariance matrix} times the unit
 //'   vector:
 //'   \deqn{
 //'     \strong{w} = \strong{C}^{-1} \strong{1}
@@ -8103,7 +8148,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   }
 //'
 //'   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-//'   the \emph{regularized inverse} of the \emph{covariance matrix} of
+//'   the \emph{reduced inverse} of the \emph{covariance matrix} of
 //'   \code{returns}. It performs regularization by selecting only the largest
 //'   eigenvalues equal in number to \code{dimax}.
 //'   
@@ -8131,7 +8176,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'
 //'   If \code{scalew = "voltarget"} (the default) then the weights are
 //'   scaled (multiplied by a factor) so that the weighted portfolio has an
-//'   in-sample volatility equal to \code{vol_target}.
+//'   in-sample volatility equal to \code{voltarget}.
 //'   
 //'   If \code{scalew = "voleqw"} then the weights are scaled so that the
 //'   weighted portfolio has the same volatility as the equal weight portfolio.
@@ -8151,7 +8196,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 //' ncols <- NCOL(retp)
 //' eigend <- eigen(cov(retp))
-//' # Calculate regularized inverse of covariance matrix
+//' # Calculate reduced inverse of covariance matrix
 //' dimax <- 3
 //' eigenvec <- eigend$vectors[, 1:dimax]
 //' eigenval <- eigend$values[1:dimax]
@@ -8182,7 +8227,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   // Type of portfolio optimization model
   std::string method = Rcpp::as<std::string>(controlv["method"]);
   // Threshold level for discarding small singular values
-  double eigen_thresh = Rcpp::as<double>(controlv["eigen_thresh"]);
+  double singmin = Rcpp::as<double>(controlv["singmin"]);
   // Dimension reduction
   arma::uword dimax = Rcpp::as<int>(controlv["dimax"]);
   // Confidence level for calculating the quantiles of returns
@@ -8196,7 +8241,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   // Method for scaling the weights
   std::string scalew = Rcpp::as<std::string>(controlv["scalew"]);
   // Volatility target for scaling the weights
-  double vol_target = Rcpp::as<double>(controlv["vol_target"]);
+  double voltarget = Rcpp::as<double>(controlv["voltarget"]);
 
   // Initialize the variables
   arma::uword ncols = returns.n_cols;
@@ -8213,8 +8258,8 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colmeans = arma::trans(arma::mean(returns, 0));
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
-    // Calculate weights using regularized inverse
-    weightv = calc_inv(covmat, dimax, eigen_thresh)*colmeans;
+    // Calculate weights using reduced inverse
+    weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
   }  // end maxsharpe
   case methodenum::maxsharpemed: {
@@ -8222,14 +8267,14 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colmeans = arma::trans(arma::median(returns, 0));
     // Shrink colmeans to the median of returns
     colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
-    // Calculate weights using regularized inverse
-    weightv = calc_inv(covmat, dimax, eigen_thresh)*colmeans;
+    // Calculate weights using reduced inverse
+    weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
   }  // end maxsharpemed
   case methodenum::minvarlin: {
     // Minimum variance weights under linear constraint
-    // Multiply regularized inverse times unit vector
-    weightv = calc_inv(covmat, dimax, eigen_thresh)*arma::ones(ncols);
+    // Multiply reduced inverse times unit vector
+    weightv = calc_inv(covmat, dimax, singmin)*arma::ones(ncols);
     break;
   }  // end minvarlin
   case methodenum::minvarquad: {
@@ -8299,8 +8344,8 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   // Apply different scaling methods for the weights
   switch(calc_method(scalew)) {
   case methodenum::voltarget: {
-    // Scale the weights so the portfolio has the volatility equal to vol_target
-    weightv = weightv*vol_target/arma::stddev(returns*weightv);
+    // Scale the weights so the portfolio has the volatility equal to voltarget
+    weightv = weightv*voltarget/arma::stddev(returns*weightv);
     break;
   }  // end voltarget
   case methodenum::voleqw: {
@@ -8334,10 +8379,10 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' Simulate (backtest) a rolling portfolio optimization strategy, using
 //' \code{RcppArmadillo}.
 //' 
-//' @param \code{returns} A \emph{time series} or a \emph{matrix} of asset
+//' @param \code{retp} A \emph{time series} or a \emph{matrix} of asset
 //'   returns data.
 //'   
-//' @param \code{excess} A \emph{time series} or a \emph{matrix} of excess
+//' @param \code{retx} A \emph{time series} or a \emph{matrix} of excess
 //'   returns data (the returns in excess of the risk-free rate).
 //'   
 //' @param \code{controlv} A \emph{list} of portfolio optimization model
@@ -8345,7 +8390,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'
 //' @param \code{startp} An \emph{integer vector} of start points.
 //' 
-//' @param \code{endp} An \emph{integer vector} of end points.
+//' @param \code{endd} An \emph{integer vector} of end points.
 //' 
 //' @param \code{lambda} A decay factor which multiplies the past portfolio
 //'   weights.  (The default is \code{lambda = 0} - no memory.)
@@ -8358,15 +8403,15 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   
 //'   
 //' @return A column \emph{vector} of strategy returns, with the same length as
-//'   the number of rows of \code{returns}.
+//'   the number of rows of \code{retp}.
 //'
 //' @details
 //'   The function \code{back_test()} performs a backtest simulation of a
 //'   rolling portfolio optimization strategy over a \emph{vector} of the end
-//'   points \code{endp}.
+//'   points \code{endd}.
 //'   
-//'   It performs a loop over the end points \code{endp}, and subsets the
-//'   \emph{matrix} of the excess asset returns \code{excess} along its rows,
+//'   It performs a loop over the end points \code{endd}, and subsets the
+//'   \emph{matrix} of the excess asset returns \code{retx} along its rows,
 //'   between the corresponding \emph{start point} and the \emph{end point}. 
 //'   
 //'   The function \code{back_test()} passes the subset matrix of excess returns
@@ -8406,7 +8451,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   
 //'   The function \code{back_test()} returns a \emph{time series} (column
 //'   \emph{vector}) of strategy returns, of the same length as the number of
-//'   rows of \code{returns}.
+//'   rows of \code{retp}.
 //'
 //' @examples
 //' \dontrun{
@@ -8414,21 +8459,21 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 //' # riskf is the daily risk-free rate
 //' riskf <- 0.03/260
-//' retexcess <- retp - riskf
+//' retx <- retp - riskf
 //' # Define monthly end points without initial warmup period
-//' endp <- rutils::calc_endpoints(retp, interval="months")
-//' endp <- endp[endp > 0]
-//' nrows <- NROW(endp)
+//' endd <- rutils::calc_endpoints(retp, interval="months")
+//' endd <- endd[endd > 0]
+//' nrows <- NROW(endd)
 //' # Define 12-month look-back interval and start points over sliding window
 //' look_back <- 12
-//' startp <- c(rep_len(1, look_back-1), endp[1:(nrows-look_back+1)])
+//' startp <- c(rep_len(1, look_back-1), endd[1:(nrows-look_back+1)])
 //' # Define return shrinkage and dimension reduction
 //' alpha <- 0.5
 //' dimax <- 3
 //' # Create a list of portfolio optimization parameters
 //' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
 //' # Simulate a monthly rolling portfolio optimization strategy
-//' pnls <- HighFreq::back_test(retexcess, retp, controlv=controlv, startp=(startp-1), endp=(endp-1))
+//' pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 //' pnls <- xts::xts(pnls, index(retp))
 //' colnames(pnls) <- "strategy"
 //' # Plot dygraph of strategy
@@ -8438,32 +8483,32 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat back_test(const arma::mat& excess, // Asset excess returns
-                    const arma::mat& returns, // Asset returns
+arma::mat back_test(const arma::mat& retx, // Asset excess returns
+                    const arma::mat& retp, // Asset returns
                     Rcpp::List controlv, // List of portfolio optimization model parameters
                     arma::uvec startp, // Start points
-                    arma::uvec endp, // End points
+                    arma::uvec endd, // End points
                     double lambda = 0.0, // Decay factor for averaging the portfolio weights
                     double coeff = 1.0, // Multiplier of strategy returns
                     double bid_offer = 0.0) { // The bid-offer spread
   
   double lambda1 = 1-lambda;
-  arma::uword nweights = returns.n_cols;
+  arma::uword nweights = retp.n_cols;
   arma::vec weightv(nweights, fill::zeros);
   arma::vec weights_past = arma::ones(nweights)/std::sqrt(nweights);
-  arma::mat pnls = arma::zeros(returns.n_rows, 1);
+  arma::mat pnls = arma::zeros(retp.n_rows, 1);
 
   // Perform loop over the end points
-  for (arma::uword it = 1; it < endp.size(); it++) {
+  for (arma::uword it = 1; it < endd.size(); it++) {
     // cout << "it: " << it << endl;
     // Calculate the portfolio weights
-    weightv = coeff*calc_weights(excess.rows(startp(it-1), endp(it-1)), controlv);
+    weightv = coeff*calc_weights(retx.rows(startp(it-1), endd(it-1)), controlv);
     // Calculate the weights as the weighted sum with past weights
     weightv = lambda1*weightv + lambda*weights_past;
     // Calculate out-of-sample returns
-    pnls.rows(endp(it-1)+1, endp(it)) = returns.rows(endp(it-1)+1, endp(it))*weightv;
+    pnls.rows(endd(it-1)+1, endd(it)) = retp.rows(endd(it-1)+1, endd(it))*weightv;
     // Add transaction costs
-    pnls.row(endp(it-1)+1) -= bid_offer*sum(abs(weightv - weights_past))/2;
+    pnls.row(endd(it-1)+1) -= bid_offer*sum(abs(weightv - weights_past))/2;
     // Copy the weights
     weights_past = weightv;
   }  // end for

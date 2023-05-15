@@ -34,7 +34,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
 
   If \code{method = "maxsharpe"} (the default) then \code{calc_weights()}
   calculates the weights of the maximum Sharpe portfolio, by multiplying the
-  \emph{regularized inverse} of the \emph{covariance matrix}
+  \emph{reduced inverse} of the \emph{covariance matrix}
   \eqn{\strong{C}^{-1}} times the mean column returns \eqn{\bar{r}}:
   \deqn{
     \strong{w} = \strong{C}^{-1} \bar{r}
@@ -45,7 +45,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   
   If \code{method = "minvarlin"} then it calculates the weights of the
   minimum variance portfolio under linear constraint, by multiplying the
-  \emph{regularized inverse} of the \emph{covariance matrix} times the unit
+  \emph{reduced inverse} of the \emph{covariance matrix} times the unit
   vector:
   \deqn{
     \strong{w} = \strong{C}^{-1} \strong{1}
@@ -69,7 +69,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   }
 
   \code{calc_weights()} calls the function \code{calc_inv()} to calculate
-  the \emph{regularized inverse} of the \emph{covariance matrix} of
+  the \emph{reduced inverse} of the \emph{covariance matrix} of
   \code{returns}. It performs regularization by selecting only the largest
   eigenvalues equal in number to \code{dimax}.
   
@@ -97,7 +97,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
 
   If \code{scalew = "voltarget"} (the default) then the weights are
   scaled (multiplied by a factor) so that the weighted portfolio has an
-  in-sample volatility equal to \code{vol_target}.
+  in-sample volatility equal to \code{voltarget}.
   
   If \code{scalew = "voleqw"} then the weights are scaled so that the
   weighted portfolio has the same volatility as the equal weight portfolio.
@@ -117,7 +117,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
 retp <- na.omit(rutils::etfenv$returns[, 1:16])
 ncols <- NCOL(retp)
 eigend <- eigen(cov(retp))
-# Calculate regularized inverse of covariance matrix
+# Calculate reduced inverse of covariance matrix
 dimax <- 3
 eigenvec <- eigend$vectors[, 1:dimax]
 eigenval <- eigend$values[1:dimax]

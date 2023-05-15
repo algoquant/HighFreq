@@ -9,7 +9,7 @@ roll_zscores(
   respv,
   predv,
   startp = 0L,
-  endp = 0L,
+  endd = 0L,
   step = 1L,
   look_back = 1L,
   stub = 0L
@@ -25,8 +25,8 @@ data.}
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
 
-\item{\code{endp}}{An \emph{integer} vector of end points (the default is
-\code{endp = 0}).}
+\item{\code{endd}}{An \emph{integer} vector of end points (the default is
+\code{endd = 0}).}
 
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
@@ -57,7 +57,7 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   It passes the subset time series to the function \code{calc_lm()}, which
   calculates the regression data.
   
-  If the arguments \code{endp} and \code{startp} are not given then it
+  If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
   periods. It calculates the end points along the rows of \code{predv}
   using the function \code{calc_endpoints()}, with the number of time
