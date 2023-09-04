@@ -5,45 +5,45 @@
 #' Calculate a \emph{TAQ} time series of random prices following geometric
 #' Brownian motion, combined with random trading volumes.
 #'
-#' @param \code{volat} The volatility per period of the \code{indeks} time index
+#' @param \code{volat} The volatility per period of the \code{datev} time index
 #'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
-#' @param \code{drift} The drift per period of the \code{indeks} time index (default
+#' @param \code{drift} The drift per period of the \code{datev} time index (default
 #'   is 0.0).
-#' @param \code{indeks} The time index for the \emph{TAQ} time series.
-#' @param bid_offer The bid-offer spread expressed as a fraction of the prices
+#' @param \code{datev} The time index for the \emph{TAQ} time series.
+#' @param bidask The bid-ask spread expressed as a fraction of the prices
 #'   (default is 0.001=10bps).
 #'
 #' @return An \emph{xts} time series, with time index equal to the input
-#'   \code{indeks} time index, and with four columns containing the bid, ask,
+#'   \code{datev} time index, and with four columns containing the bid, ask,
 #'   and trade prices, and the trade volume.
 #'
 #' @details The function \code{random_taq()} calculates an \emph{xts} time
 #'   series with four columns containing random prices following geometric
 #'   Brownian motion: the bid, ask, and trade prices, combined with random trade
 #'   volume data.
-#'   If \code{indeks} isn't supplied as an argument, then by default it's
+#'   If \code{datev} isn't supplied as an argument, then by default it's
 #'   equal to the secondly index over the two previous calendar days.
 #'
 #' @examples
 #' # Create secondly TAQ time series of random prices
 #' taq <- HighFreq::random_taq()
 #' # Create random TAQ time series from SPY index
-#' taq <- HighFreq::random_taq(indeks=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
+#' taq <- HighFreq::random_taq(datev=index(HighFreq::SPY["2012-02-13/2012-02-15"]))
 #'
 #' @export
 
 random_taq <- function(volat=6.5e-5, drift=0.0,
-  indeks=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
+  datev=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
              to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"),
-  bid_offer=0.001, ...) {
-  nrows <- NROW(indeks)
+  bidask=0.001, ...) {
+  nrows <- NROW(datev)
   # Create xts of random prices following geometric Brownian motion
   taq <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)),
-              order.by=indeks)
-  # Create vector of random bid-offer spreads
-  bid_offer <- bid_offer*(1 + runif(nrows))/2
+              order.by=datev)
+  # Create vector of random bid-ask spreads
+  bidask <- bidask*(1 + runif(nrows))/2
   # Create TAQ data from bid and offer prices
-  taq <- merge(taq*(1-bid_offer), taq*(1+bid_offer))
+  taq <- merge(taq*(1-bidask), taq*(1+bidask))
   # Add traded price to TAQ data
   r_unif <- runif(nrows)
   taq <- merge(taq, r_unif*taq[, 1] + (1-r_unif)*taq[, 2])
@@ -66,11 +66,11 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
 #'
 #' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes, in
 #'   \emph{xts} format (default is \emph{NULL}).
-#' @param \code{volat} The volatility per period of the \code{indeks} time index
+#' @param \code{volat} The volatility per period of the \code{datev} time index
 #'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
-#' @param \code{drift} The drift per period of the \code{indeks} time index (default
+#' @param \code{drift} The drift per period of the \code{datev} time index (default
 #'   is 0.0).
-#' @param \code{indeks} The time index for the \emph{OHLC} time series.
+#' @param \code{datev} The time index for the \emph{OHLC} time series.
 #' @param \code{reducit} \emph{Boolean} argument: should \code{ohlc} time series be
 #'   transformed to reduced form? (default is \code{TRUE})
 #'
@@ -103,12 +103,12 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
 #' @export
 
 random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
-    indeks=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
+    datev=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
       to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), ...) {
   if (is.null(ohlc)) {
-    nrows <- NROW(indeks)
+    nrows <- NROW(datev)
     # Create xts of random prices following geometric Brownian motion
-    xtsv <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)), order.by=indeks)
+    xtsv <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)), order.by=datev)
     # Add trade volume column
     xtsv <- merge(xtsv, volume=sample(x=10*(2:18), size=nrows, replace=TRUE))
     # Aggregate to minutes OHLC data
@@ -281,9 +281,9 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' @examples
 #' # Create local copy of SPY TAQ data
 #' taq <- HighFreq::SPY_TAQ
-#' # scrub quotes with suspect bid-offer spreads
-#' bid_offer <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-#' sus_pect <- which_extreme(bid_offer, look_back=51, vol_mult=3)
+#' # scrub quotes with suspect bid-ask spreads
+#' bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
+#' sus_pect <- which_extreme(bidask, look_back=51, vol_mult=3)
 #' # Remove suspect values
 #' taq <- taq[!sus_pect]
 #' 
@@ -432,10 +432,10 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 # Remove duplicate time stamps using duplicated()
   taq <- taq[!duplicated(index(taq)), ]
 
-# scrub quotes with suspect bid-offer spreads
-  bid_offer <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-#  bid_offer <- na.omit(bid_offer)
-  sus_pect <- which_extreme(bid_offer, look_back=look_back, vol_mult=vol_mult)
+# scrub quotes with suspect bid-ask spreads
+  bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
+#  bidask <- na.omit(bidask)
+  sus_pect <- which_extreme(bidask, look_back=look_back, vol_mult=vol_mult)
 # Remove suspect values
   taq <- taq[!sus_pect]
 # Replace suspect values
@@ -471,7 +471,7 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 #'   \item index timezone conversion,
 #'   \item data subset to trading hours,
 #'   \item removal of duplicate time stamps,
-#'   \item scrubbing of quotes with suspect bid-offer spreads,
+#'   \item scrubbing of quotes with suspect bid-ask spreads,
 #'   \item scrubbing of quotes with suspect price jumps,
 #'   \item cbinding of mid prices with volume data,
 #'   \item aggregation to OHLC using function \code{to.period()} from package \emph{xts},
@@ -505,10 +505,10 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 # Remove duplicate time stamps using duplicated()
   taq <- taq[!duplicated(index(taq)), ]
 
-# scrub quotes with suspect bid-offer spreads
-  bid_offer <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-#  bid_offer <- na.omit(bid_offer)
-  sus_pect <- which_extreme(bid_offer, look_back=look_back, vol_mult=vol_mult)
+# scrub quotes with suspect bid-ask spreads
+  bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
+#  bidask <- na.omit(bidask)
+  sus_pect <- which_extreme(bidask, look_back=look_back, vol_mult=vol_mult)
 # Remove suspect values
   taq <- taq[!sus_pect]
 # Replace suspect values
@@ -1346,9 +1346,9 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
   
   # Define the time index for scaling the returns
   if (scalit)
-    indeks <- c(1, diff(xts::.index(ohlc)))
+    timed <- c(1, diff(xts::.index(ohlc)))
   else
-    indeks <- rep(1, nrows)
+    timed <- rep(1, nrows)
   
   # Coerce ohlc to matrix
   if (is.xts(ohlc))
@@ -1356,14 +1356,14 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
   
   # Calculate all the different intra-day and day-over-day returns 
   # (differences of OHLC prices)
-  close_close <- rutils::diffit(ohlc[, 4])/indeks
-  open_close <- (ohlc[, 1]-rutils::lagit(ohlc[, 4]))/indeks
-  close_open <- (ohlc[, 4]-ohlc[, 1])/indeks
-  close_high <- (ohlc[, 4]-ohlc[, 2])/indeks
-  close_low <- (ohlc[, 4]-ohlc[, 3])/indeks
-  high_low <- (ohlc[, 2]-ohlc[, 3])/indeks
-  high_open <- (ohlc[, 2]-ohlc[, 1])/indeks
-  low_open <- (ohlc[, 3]-ohlc[, 1])/indeks
+  close_close <- rutils::diffit(ohlc[, 4])/timed
+  open_close <- (ohlc[, 1]-rutils::lagit(ohlc[, 4]))/timed
+  close_open <- (ohlc[, 4]-ohlc[, 1])/timed
+  close_high <- (ohlc[, 4]-ohlc[, 2])/timed
+  close_low <- (ohlc[, 4]-ohlc[, 3])/timed
+  high_low <- (ohlc[, 2]-ohlc[, 3])/timed
+  high_open <- (ohlc[, 2]-ohlc[, 1])/timed
+  low_open <- (ohlc[, 3]-ohlc[, 1])/timed
   
   switch(method,
          "close"={var(close_close)},
@@ -1572,8 +1572,8 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
   startpoints <- c(rep_len(1, look_back-1), endpoints[1:(nrows-look_back+1)])
   # Define list of look-back intervals for aggregations over past
   look_backs <- lapply(seq_along(endpoints), 
-                       function(indeks) {
-                         startpoints[indeks]:endpoints[indeks]
+                       function(endp) {
+                         startpoints[endp]:endpoints[endp]
                        })  # end lapply
   # Perform aggregations over length of endpoints
   if (by_columns) {
@@ -1699,10 +1699,10 @@ roll_backtest <- function(xtsv,
 
   # Perform backtest over length of endpoints
   backtest_range <- 2:(NROW(endpoints)-1)
-  back_test <- lapply(backtest_range, function(indeks) {
+  back_test <- lapply(backtest_range, function(endp) {
     trained_model <- 
-      train_func(xtsv[back_points[indeks]:endpoints[indeks]], ...)
-    trade_func(xtsv[(endpoints[indeks]+1):fwd_points[indeks]],
+      train_func(xtsv[back_points[endp]:endpoints[endp]], ...)
+    trade_func(xtsv[(endpoints[endp]+1):fwd_points[endp]],
                trained_model, ...)
   })  # end lapply
 
@@ -1724,7 +1724,7 @@ roll_backtest <- function(xtsv,
 #'
 #' @param \code{xtsv} A single-column \emph{xts} time series.
 #' 
-#' @param \code{indeks} A vector of \emph{character} strings representing points in
+#' @param \code{endp} A vector of \emph{character} strings representing points in
 #'   time, of the same length as the argument \code{xtsv}.
 #'
 #' @return An \emph{xts} time series with mean aggregations over the seasonality
@@ -1732,17 +1732,17 @@ roll_backtest <- function(xtsv,
 #'
 #' @details The function \code{season_ality()} calculates the mean of values
 #'   observed at the same points in time specified by the argument
-#'   \code{indeks}. An example of a daily seasonality aggregation is the average
+#'   \code{endp}. An example of a daily seasonality aggregation is the average
 #'   price of a stock between 9:30AM and 10:00AM every day, over many days. The
-#'   argument \code{indeks} is passed into function \code{tapply()}, and must be
+#'   argument \code{endp} is passed into function \code{tapply()}, and must be
 #'   the same length as the argument \code{xtsv}.
 #'
 #' @examples
 #' # Calculate running variance of each minutely OHLC bar of data
 #' xtsv <- ohlc_variance(HighFreq::SPY)
 #' # Remove overnight variance spikes at "09:31"
-#' indeks <- format(index(xtsv), "%H:%M")
-#' xtsv <- xtsv[!indeks=="09:31", ]
+#' endp <- format(index(xtsv), "%H:%M")
+#' xtsv <- xtsv[!endp=="09:31", ]
 #' # Calculate daily seasonality of variance
 #' var_seasonal <- season_ality(xtsv=xtsv)
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
@@ -1750,9 +1750,9 @@ roll_backtest <- function(xtsv,
 #'   
 #' @export
 
-season_ality <- function(xtsv, indeks=format(zoo::index(xtsv), "%H:%M")) {
+season_ality <- function(xtsv, endp=format(zoo::index(xtsv), "%H:%M")) {
 # Aggregate the mean
-  agg_regation <- tapply(X=xtsv, INDEX=indeks, FUN=mean)
+  agg_regation <- tapply(X=xtsv, INDEX=endp, FUN=mean)
 # Coerce from array to named vector
   agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
 # Coerce to xts

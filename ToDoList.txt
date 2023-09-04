@@ -94,21 +94,13 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [x] Create the function run_autocovar() for online autocorrelations - Clone run_covar()
++ [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
 
-+ [x] Rename variables
-method to regmod
-eigen_thresh to singmin
-intercept to addunit
-deg_free to degf
++ [ ] Add forecasts to the functions roll_reg() and run_reg()
 
-+ [x] Coerce 1x1 matrices to double using arma::as_scalar, not Rcpp::as<double>()
-
-+ [ ] Modify roll_reg() so it calls calc_reg()
++ [ ] Introduce a control argument in the functions calc_mean(), calc_var(), calc_skew() and calc_kurtosis()?
 
 + [ ] Create the function sim_stratar() for simulating the autoregressive strategy
-
-+ [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
 
 + [ ] Modify the function calc_covar() to calculate a nonparametric (robust) covariance matrix
 Adapt function calc_var()
@@ -123,7 +115,7 @@ Hodges-Lehmann estimator:
 + [ ] Modify run_min() and run_max() to calculate the trailing, volume weighted minimum and maximum of OHLC prices
 Follow the example of run_mean() and use OHLC prices and add an extra parameter weightv.
 
-+ [ ] In function back_test() calculate the mean of returns using function calc_mean() and the covariance of returns using function calc_covar()?
++ [ ] In the function back_test() calculate the mean of returns using function calc_mean() and the covariance of returns using function calc_covar()?
 Add weight scaling instead of in calc_weights()?
 
 + [ ] Create the functions rowsums(), colsums(), and calc_covar() so that they ignore NA values
@@ -171,7 +163,7 @@ The H statistic is reminiscent of the difference between the mean asset returns 
 
 + [ ] Create the function run_pca() to perform loop over push_eigen(), push_sga(), and push_cci() - clone run_covar()
 
-+ [ ] In function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
++ [ ] In the function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
 
 + [ ] Modify run_var() - add weights - adapt run_mean() ?
 Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
@@ -277,8 +269,6 @@ https://github.com/jjf234/roll
 + [ ] Add rolling rank regression from package roll:
 https://github.com/jjf234/roll
 
-+ [ ] Introduce a control argument in functions calc_mean(), calc_var(), calc_skew() and calc_kurtosis()?
-
 + [ ] Introduce shrinkage of returns to the PCAs - is it equivalent to parameter shrinkage (dimension reduction)? Maybe, even if it's not equivalent it's good anyway
 
 + [ ] Remove Rcpp features like Rcpp::Nullable to make the code closer to pure C++
@@ -297,17 +287,15 @@ For example, if you replace NumericVector with std::vector<double> then you lose
 cpp::NumericVector over std::vector<double>
 https://stackoverflow.com/questions/41602024/should-i-prefer-rcppnumericvector-over-stdvector
 
-+ [ ] In function calc_var() add robust dispersion estimators
++ [ ] In the function calc_var() add robust dispersion estimators
 
-+ [ ] In function calc_kurtosis() update the method nonparametric
++ [ ] In the function calc_kurtosis() update the method nonparametric
 
-+ [ ] In function roll_reg() add option to perform rolling predictions using the regressions
++ [ ] In the function roll_reg() add option to perform rolling predictions using the regressions
 
-+ [ ] In function calc_reg() add additional types of regressions: robust Theil-Sen regression, rank regression, quantile regression, PCA regression with shrinkage, etc.
++ [ ] In the function calc_reg() add additional types of regressions: robust Theil-Sen regression, rank regression, quantile regression, PCA regression with shrinkage, etc.
 It should calculate Pearson, Spearman, and Kendall correlations.
 It should return a named vector of coefficients, tvals, and zscore - works only for Rcpp.
-
-+ [ ] In function calc_lm() add Boolean parameter to add intercept column to explanatory matrix
 
 + [ ] Modify rolling Theil-Sen function to return a column of the MAD of pair slope estimates
 
@@ -333,7 +321,7 @@ Examples of statistics are the mean, median, Sharpe ratio (t-value), Wilcoxon st
 + [ ] Create a function called calc_quantile() for calculating the quantiles of the columns of a matrix
 It should accept a vector of probabilities and return a matrix.
 
-+ [ ] In function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
++ [ ] In the function roll_var() use moment update formulas from package fromo: Pebay Fast Moments.pdf
 Calculate rolling variance efficiently (used by package fromo):
 https://www.johndcook.com/blog/standard_deviation/
 
@@ -377,17 +365,17 @@ Worker agg_ohlc()
 
 + [ ] Create online function for Hampel filter
 
-+ [ ] In function calc_weights() fix scaling method voleqw - the below code should produce TRUE
++ [ ] In the function calc_weights() fix scaling method voleqw - the below code should produce TRUE
 weightsr <- drop(invmat %*% colmeans)
 weightsr <- weightsr*sd(rowMeans(returns))/sd(returns %*% weightsr)
 weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alpha, scalew="voleqw"))
 all.equal(weightcpp, weightsr)
 
-+ [ ] In function calc_mean() add shrinkage of returns?
++ [ ] In the function calc_mean() add shrinkage of returns?
 
-+ [ ] In function back_test(), scale the weights to match the volatility of the equally weighted portfolio?  No - that belongs to calc_weights()
++ [ ] In the function back_test(), scale the weights to match the volatility of the equally weighted portfolio?  No - that belongs to calc_weights()
 
-+ [ ] In function calc_weights(), make the weights scaling separate from the weight calculations.
++ [ ] In the function calc_weights(), make the weights scaling separate from the weight calculations.
 
 + [ ] Modify calc_weights() shrink the returns to a portfolio with weights proportional to the asset betas
 
@@ -516,7 +504,7 @@ https://stackoverflow.com/questions/27466319/templated-matrix-in-rcpp
 https://stackoverflow.com/questions/22513529/templated-function-for-sparse-and-dense-matrices-in-rcpparmadillo
 https://stackoverflow.com/questions/45163887/how-can-i-use-a-c-function-template-in-r-via-rcpp
 
-+ [ ] Fix bug in function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
++ [ ] Fix bug In the function random_ohlc() when sampling from rows of an input OHLC series (oh_lc not NULL): overnight returns are resampled into intraday periods, causing overestimation of variance.  
 As a result, bootstrapped standard errors for Garman-Klass-Yang-Zhang and Yang-Zhang methods are too big.  
 Possible fixes:
 modify random_ohlc() so that it samples from secondly return data and aggregates to minutely OHLC data (does this solve the problem?) - save random minutely OHLC prices to file for future use  
@@ -528,7 +516,7 @@ https://cran.r-project.org/web/packages/meboot/index.html
 
 + [ ] Create a function for calculating microprice  
 
-+ [ ] Tell Joshua Ulrich that there's a bug in function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
++ [ ] Tell Joshua Ulrich that there's a bug In the function TTR::volatility(), in the formula for the k coefficient in the Yang-Zhang estimator p.49
 The correct formula is on p.7 of Yang OHLC Range Volatility Estimators.pdf
 
 + [ ] Create function sea_son() for calculating time of day (year) as fraction
@@ -577,6 +565,22 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 ### Tasks finished
 
++ [x] Remove the Boolean parameter intercept in the functions calc_lm(), calc_reg(), roll_reg(), and run_reg() - add the intercept column in R
+
++ [x] In the function calc_lm() add Boolean parameter to add intercept column to explanatory matrix - no, add the intercept column in R
+
++ [x] Modify roll_reg() so it calls calc_reg()
+
++ [x] Create the function run_autocovar() for online autocorrelations - Clone run_covar()
+
++ [x] Rename variables
+method to regmod
+eigen_thresh to singmin
+intercept to addunit - no
+deg_free to degf
+
++ [x] Coerce 1x1 matrices to double using arma::as_scalar, not Rcpp::as<double>()
+
 + [x] In run_covar() add means to the output
 
 + [x] Fix run_reg() - don't center the response and predictors
@@ -593,6 +597,7 @@ For example, the means are not subtracted from the returns before squaring them.
 
 + [x] Create the function sim_portfoptim() to simulate a running portfolio optimization strategy
 Output the weights.  Average the weights.
+Old version was called run_portf()
 
 + [x] Modify calc_inv() - perform eigen decomposition instead of SVD
 Rename calc_inv() to calc_invsvd()
@@ -668,11 +673,11 @@ To: μt = λμt−1 + (1 − λ)pt
 
 + [x] Create a function called param_portf() for creating a named control list of portfolio optimization parameters that can be passed as an argument to the functions calc_weights() and back_test()
 
-+ [x] Introduce control arguments in functions calc_reg() and roll_reg()
++ [x] Introduce control arguments In the functions calc_reg() and roll_reg()
 
 + [x] Add control list argument to function back_test() and pass it to calc_weights(), instead of passing many arguments
 
-+ [x] Introduce control arguments in functions calc_weights() and back_test()
++ [x] Introduce control arguments In the functions calc_weights() and back_test()
 
 + [x] Modify the function roll_fun() for rolling aggregations of functions 
 Rename roll_fun() to roll_moment().
@@ -724,7 +729,7 @@ https://stackoverflow.com/questions/56204031/rcpp-function-default-values-in-hea
 Rename run_var() to roll_var_garch() ? No
 Instead, subtract the means from returns before squaring - otherwise it produces negative variance.
 
-+ [x] In function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
++ [x] In the function roll_var() calculate the rolling variance from the rolling sums of returns and the rolling sums of squared returns
 This avoids calling calc_var() in loop.
 Not necessary since calc_var() calls arma::var() so it's pretty fast.
 
@@ -732,12 +737,12 @@ Not necessary since calc_var() calls arma::var() so it's pretty fast.
 
 + [x] Rename "eigen shrinkage" to "dimension reduction" or "parameter shrinkage"
 
-+ [x] In function calc_weights() introduce independent ranking, centering and scaling of weights: rankw, centerw, rankcenterw, scalew, centerscalew
++ [x] In the function calc_weights() introduce independent ranking, centering and scaling of weights: rankw, centerw, rankcenterw, scalew, centerscalew
 Modify the argument scale from type Boolean to type methodenum.
 Rename the argument scale to scalew.
 Rename methods rank_sharpe/sharpem, rankrob/robustm, min_var/minvarlin, min_varpca/minvarquad, max_sharpe/maxsharpe, max_sharpe_median/maxsharpemed
 
-+ [x] In function calc_weights() modify the method rank because it's identical to ranksharpe
++ [x] In the function calc_weights() modify the method rank because it's identical to ranksharpe
 Rename methodenum::rank to methodenum::kellym.
 Calculate the momentum weights equal to the Kelly ratios: the returns divided by their variance.
 
@@ -756,7 +761,7 @@ Equivalent to this in R:
 prices <- lapply(1:NCOL(prices), function(i) weights[i]*prices[, i])
 prices <- rutils::do_call(cbind, prices)
 
-+ [x] In functions calc_reg() and roll_reg() change the default to intercept=TRUE
++ [x] In the functions calc_reg() and roll_reg() change the default to intercept=TRUE
 
 + [x] Simplify variable names by removing underscores: sym_bols -> symbolv, x_ts -> xtes
 Use last letter "d" for dates, "t" for times, "v" for variables, vectors and lists, "s" for series, etc.
@@ -777,7 +782,7 @@ varz.row(it) = lambda1*arma::square(resids.row(it) - resids.row(it-1)) + lambda*
 With
 varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*varz.row(it-1);
 
-+ [x] In functions calc_reg() and roll_reg() make the intercept term optional
++ [x] In the functions calc_reg() and roll_reg() make the intercept term optional
 
 + [x] Rename functions run_skew() to ohlc_skew(), run_returns() to ohlc_returns(), run_sharpe() to ohlc_sharpe() and run_variance() to ohlc_variance()
 
@@ -787,21 +792,21 @@ varz.row(it) = lambda1*arma::square(resids.row(it) - meanz.row(it)) + lambda*var
 
 + [x] Create function run_reg() - adapt from run_zscores()
 
-+ [x] Remove volat argument in functions sim_ou(), sim_schwartz(), and sim_df() 
++ [x] Remove volat argument In the functions sim_ou(), sim_schwartz(), and sim_df() 
 
-+ [x] In functions sim_df() and sim_schwartz() add argument init_price
++ [x] In the functions sim_df() and sim_schwartz() add argument init_price
 
 + [x] Create function sim_df() to simulate a Dickey-Fuller process
 
 + [x] Fix the regularization in calc_inv(): Check for zeros in the singular values svd_val to remove the zero singular values
 Use the tolerance argument eigen_thresh.  If svd_val is less than eigen_thresh then remove it by adjusting eigen_max.
 
-+ [x] In function back_test(), add the decay factor lambda for averaging the portfolio weights
++ [x] In the function back_test(), add the decay factor lambda for averaging the portfolio weights
 This is equivalent to extending the holding period beyond the rebalancing period.
 
 + [x] Rename the argument "design" to "predictor"
 
-+ [x] In function run_zscores() - de-mean the zscores when scaling them - introduce Boolean argument
++ [x] In the function run_zscores() - de-mean the zscores when scaling them - introduce Boolean argument
 
 + [x] Fix function calc_var_ag() so that it works for remainder=0
 
@@ -849,13 +854,13 @@ run_mean(), run_var(), run_covar(), run_zscore(), run_max(), run_min()
 
 + [x] Create function roll_mean() for the rolling calc_mean() the centrality (location) estimator (first moment) using RcppArmadillo
 
-+ [x] In functions roll_vec() and roll_vecw() convert arguments from arma::vec to arma::mat
++ [x] In the functions roll_vec() and roll_vecw() convert arguments from arma::vec to arma::mat
 
 + [x] Modify function diff_it() to handle negative lags
 
 + [x] Modify function diff_it() to pad with zeros as in rutils::diff_it()
 
-+ [x] In functions diff_vec() and diff_it(), rename argument padd to pad_zeros, as in lag_it()
++ [x] In the functions diff_vec() and diff_it(), rename argument padd to pad_zeros, as in lag_it()
 
 + [x] Modify function calc_inv() so it calculates the regularized inverse of a matrix, not the inverse of its covariance matrix
 
@@ -872,7 +877,7 @@ Follow example of roll_sumw().
 
 + [x] Remove underscores from function arguments: rename stu_b to stub, oh_lc, weight_s, re_turns, se_ries, end_p, start_p
 
-+ [x] In function calc_endpoints() add stub argument and remove argument front
++ [x] In the function calc_endpoints() add stub argument and remove argument front
 The prototype is in test_temp.cpp
 
 + [x] Create function calc_reg() for performing different types of regressions
@@ -967,12 +972,12 @@ The functions roll_* perform loops over the rows of columnar data, and they appl
 
 + [x] Modify the functions diff_it() and diff_vec() so they don't use arma::diff(), because it doesn't apply lags greater than one
 
-+ [x] In function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
++ [x] In the function calc_weights() scale the weights so that the resulting portfolio has a volatility of 1% - make this a parameter
 
-+ [x] In function calc_inv() add option to regularize the inverse by discarding small eigenvalues less than a tolerance level: use arma::pinv()
++ [x] In the function calc_inv() add option to regularize the inverse by discarding small eigenvalues less than a tolerance level: use arma::pinv()
 This is because the best choice for max_eigen can change in a rolling calculation, so it's better to introduce a tolerance cutoff.
 
-+ [x] In function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
++ [x] In the function calc_weights() add option for quantile weights, with argument "typ_e == quantile" and add argument "quan_tile == 0.1": with weights equal to 1 for top quantile, -1 for bottom quantile, and otherwise 0.
 
 + [x] Change license from GPL to MPL, similar to package data.table.
 
@@ -1014,11 +1019,11 @@ The function roll_sumw() is for vectors and is not the same as roll_conv() which
 
 + [x] In back_test() fix bid_offer bug: should be subtracted from PnL not added  
 
-+ [x] In function calc_weights() add additional option for rank momentum, with argument "typ_e == rank": rank weights using trailing Sharpe
++ [x] In the function calc_weights() add additional option for rank momentum, with argument "typ_e == rank": rank weights using trailing Sharpe
 
-+ [x] In function back_test() add argument co_eff to multiply the weights.
++ [x] In the function back_test() add argument co_eff to multiply the weights.
 
-+ [x] In function back_test() add transaction costs: remember previous weights and subtract current weights from previous weights
++ [x] In the function back_test() add transaction costs: remember previous weights and subtract current weights from previous weights
 Add argument bid_offer the bid-offer spread.
 
 + [x] Rename function roll_portf() to back_test()
@@ -1030,11 +1035,11 @@ Add argument bid_offer the bid-offer spread.
 
 + [x] Create a function called roll_conv() for calculating the convolutions of the matrix columns
 
-+ [x] In function calc_weights() add additional options for the typ_e argument: quadratic weights constraint (highest principal component)
++ [x] In the function calc_weights() add additional options for the typ_e argument: quadratic weights constraint (highest principal component)
 
-+ [x] In function calc_weights() modify weight_s scaling: scale the weights to match the volatility of mean returns
++ [x] In the function calc_weights() modify weight_s scaling: scale the weights to match the volatility of mean returns
 
-+ [x] In function calc_weights() add argument called typ_e (with default value "max_sharpe"), which specifies the objective function of portfolio optimization used for calculating the weights
++ [x] In the function calc_weights() add argument called typ_e (with default value "max_sharpe"), which specifies the objective function of portfolio optimization used for calculating the weights
 
 + [x] Replace zoo::na.locf() with xts:::na.locf.xts()
 
@@ -1064,7 +1069,7 @@ Add option to coerce output into xts series.
 
 + [x] Replace "win_dow" with "look_back"
 
-+ [x] Fix bug in function run_variance() for calc_method="yang_zhang": remove win_dow from formula for co_eff.
++ [x] Fix bug In the function run_variance() for calc_method="yang_zhang": remove win_dow from formula for co_eff.
 
 + [x] Replace xts::.subset_xts() with brackets operator []
 
@@ -1126,7 +1131,7 @@ Adapt code from /Users/jerzy/Develop/lecture_slides/scripts/sim_arima.cpp
 
 + [x] Add arguments lag and sca_le to function run_returns()
 
-+ [x] In functions calc_variance(), run_variance(), roll_variance(), and run_skew() don't perform log(oh_lc) - that can be done externally
++ [x] In the functions calc_variance(), run_variance(), roll_variance(), and run_skew() don't perform log(oh_lc) - that can be done externally
 
 + [x] Replace calls to lag_xts() with lag_it()
 
@@ -1203,7 +1208,7 @@ http://quant.stackexchange.com/questions/7666/using-variance-ratios-to-test-for-
 
 + [x] Add to function season_ality() in_dex argument
 
-+ [x] Perform bootstrap estimation of standard errors for all the methods in function vari_ance()  
++ [x] Perform bootstrap estimation of standard errors for all the methods In the function vari_ance()  
 benchmark to random OHLC
 
 + [x] Add to function vari_ance() the methods "garman.klass_yz" and "yang.zhang"  
@@ -1214,7 +1219,7 @@ benchmark to random OHLC
 
 + [x] Create function to_period()  
 
-+ [x] Rename argument agg_fun to esti_mator, in functions agg_regate() and roll_agg()  
++ [x] Rename argument agg_fun to esti_mator, In the functions agg_regate() and roll_agg()  
 
 + [x] Remove calc_method argument from agg_regate() and roll_agg() - instead use "..." argument
 
@@ -1304,7 +1309,7 @@ Update the description documentation of roll_moment()
 
 + [ ] Rewrite all weighted averages using convolution and function arma::conv2() - it's actually quite slow
 
-+ [ ] In function calc_weights() don't calculate the mean of returns and the covariance of returns, but instead pass them in as arguments?
++ [ ] In the function calc_weights() don't calculate the mean of returns and the covariance of returns, but instead pass them in as arguments?
 But then weight scaling has to be performed outside calc_weights().
 
 + [ ] Rename miscellaneous functions as do*() - No
@@ -1317,7 +1322,7 @@ For example, rename function diff_it() as do_diff()
 + [ ] Remove unnecessary pointer "&" and "const" attributes from input arguments - No!
 Passing pointers as arguments into functions increases their speed by 30% or more for very large vectors with a million or more elements.
 
-+ [ ] In function roll_sumw() add argument start_p - it's not needed because the length of weights determines the start points
++ [ ] In the function roll_sumw() add argument start_p - it's not needed because the length of weights determines the start points
 
 + [ ] Rewrite the function roll_zscores() to make it similar to roll_var(): create function calc_zscores() and loop over end points using calc_endpoints() and calc_startpoints()
 
@@ -1334,7 +1339,7 @@ start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))]
 instead of:
 start_points <-  end_points[c(rep_len(1, win_dow-1), 1:(len_gth-win_dow+1))] + (NROW(oh_lc) > (len_gth+1))
 
-+ [ ] Modify "close" method in function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
++ [ ] Modify "close" method In the function run_variance() by averaging open and close prices - no creates a bias underestimates variance  
 
 + [ ] Convert function season_ality() to use split.xts() (?)  
 

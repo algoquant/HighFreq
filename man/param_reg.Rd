@@ -7,7 +7,7 @@ and machine learning functions.}
 \usage{
 param_reg(
   regmod = "least_squares",
-  addunit = TRUE,
+  intercept = TRUE,
   singmin = 1e-05,
   dimax = 0L,
   residscale = "none",
@@ -19,8 +19,8 @@ param_reg(
 \item{\code{method}}{A \emph{character string} specifying the type of
 regression model (the default is \code{method = "least_squares"}).}
 
-\item{\code{addunit}}{A \emph{Boolean} specifying whether an intercept
-term should be added to the predictor (the default is \code{addunit =
+\item{\code{intercept}}{A \emph{Boolean} specifying whether an intercept
+term should be added to the predictor (the default is \code{intercept =
 TRUE}).}
 
 \item{\code{singmin}}{A \emph{numeric} threshold level for discarding
@@ -61,7 +61,7 @@ The function \code{param_reg()} creates a named list of model parameters
 controlv <- HighFreq::param_reg()
 unlist(controlv)
 # Create a custom list of regression parameters
-controlv <- HighFreq::param_reg(addunit=FALSE, method="regular", dimax=4)
+controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
 unlist(controlv)
 }
 

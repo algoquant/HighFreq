@@ -5,13 +5,13 @@
 \title{Perform multivariate regression using different methods, and return a vector
 of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
-calc_reg(respv, predv, controlv)
+calc_reg(respv, predm, controlv)
 }
 \arguments{
 \item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
@@ -49,28 +49,19 @@ The function \code{calc_reg()} performs multivariate regression using
   If \code{regmod = "quantile"} then it performs quantile regression (not
   implemented yet).
 
-  If \code{addunit = TRUE} then an extra intercept column (unit column) is
-  added to the predictor matrix (the default is \code{addunit = TRUE}).
-  
   The length of the return vector depends on the number of columns of the
-  predictor matrix (including the intercept column, if it's added).
+  predictor matrix (including the intercept column, if it's been added in
+  \code{R}).
+  The number of regression coefficients is equal to the number of columns of
+  the predictor matrix.
   The length of the return vector is equal to the number of regression
   coefficients, plus their t-values, plus the z-score.
-  The number of regression coefficients is equal to the number of columns of
-  the predictor matrix (including the intercept column, if it's
-  added).
   The number of t-values is equal to the number of coefficients.
 
   For example, if the number of columns of the predictor matrix is equal to
-  \code{n}, and if \code{addunit = TRUE} (the default), then
-  \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
-  regression coefficients (including the intercept coefficient), \code{n+1}
-  corresponding t-values, and \code{1} z-score value.
-
-  If \code{addunit = FALSE}, then \code{calc_reg()} returns a vector with
-  \code{2n+1} elements: \code{n} regression coefficients (without the
-  intercept coefficient), \code{n} corresponding t-values, and \code{1}
-  z-score value.
+  \code{n}, then \code{calc_reg()} returns a vector with \code{2n+1}
+  elements: \code{n} regression coefficients, \code{n} corresponding
+  t-values, and \code{1} z-score value.
 }
 \examples{
 \dontrun{
@@ -79,23 +70,25 @@ retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retp[, -1]
+predm <- retp[, -1]
 # Perform multivariate regression using lm()
-lmod <- lm(respv ~ predv)
-lmodsum <- summary(lmod)
-coeff <- lmodsum$coefficients
+regmod <- lm(respv ~ predm)
+regsum <- summary(regmod)
+coeff <- regsum$coefficients
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
+# Add unit intercept column to the predictor matrix
+predm <- cbind(rep(1, NROW(predm)), predm)
 # Perform multivariate regression using calc_reg()
-regarma <- drop(HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv))
+regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv))
 # Compare the outputs of both functions
-all.equal(regarma[1:(2*(1+NCOL(predv)))], 
+all.equal(regarma[1:(2*NCOL(predm))], 
   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv),
-  Rcode=lm(respv ~ predv),
+  Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv),
+  Rcode=lm(respv ~ predm),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

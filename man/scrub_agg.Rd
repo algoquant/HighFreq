@@ -29,7 +29,7 @@ The function \code{scrub_agg()} performs:
   \item index timezone conversion,
   \item data subset to trading hours,
   \item removal of duplicate time stamps,
-  \item scrubbing of quotes with suspect bid-offer spreads,
+  \item scrubbing of quotes with suspect bid-ask spreads,
   \item scrubbing of quotes with suspect price jumps,
   \item cbinding of mid prices with volume data,
   \item aggregation to OHLC using function \code{to.period()} from package \emph{xts},

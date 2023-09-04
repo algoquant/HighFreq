@@ -13,7 +13,7 @@ back_test(
   endd,
   lambda = 0,
   coeff = 1,
-  bid_offer = 0
+  spreadbo = 0
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ weights.  (The default is \code{lambda = 0} - no memory.)}
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
 
-\item{\code{bid_offer}}{A \emph{numeric} bid-offer spread (the default is
+\item{\code{spreadbo}}{A \emph{numeric} bid-ask spread (the default is
 \code{0})}
 }
 \value{
@@ -86,7 +86,7 @@ The function \code{back_test()} performs a backtest simulation of a
   or a reverting strategy (if \code{coeff = -1}).
   
   The function \code{back_test()} calculates the transaction costs by
-  multiplying the bid-offer spread \code{bid_offer} times the absolute
+  multiplying the bid-ask spread \code{spreadbo} times the absolute
   difference between the current weights minus the weights from the previous
   period. Then it subtracts the transaction costs from the out-of-sample
   strategy returns.

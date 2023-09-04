@@ -63,14 +63,14 @@ The function \code{run_min()} calculates the trailing minimum values of
 closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing minimums
 lambda <- 0.9
-minv <- HighFreq::run_min(closep, lambda=lambda)
+pricmin <- HighFreq::run_min(closep, lambda=lambda)
 # Plot dygraph of VTI prices and trailing minimums
-datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
+datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
 colnames(datav) <- c("prices", "min")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="VTI Prices and Trailing Minimums") \%>\%
-  dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
-  dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
+  dySeries(label=colnamev[1], strokeWidth=1, col="blue") \%>\%
+  dySeries(label=colnamev[2], strokeWidth=1, col="red")
 }
 
 }

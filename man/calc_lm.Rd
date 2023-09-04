@@ -5,13 +5,13 @@
 \title{Perform multivariate linear regression using least squares and return a
 named list of regression coefficients, their t-values, and p-values.}
 \usage{
-calc_lm(respv, predv)
+calc_lm(respv, predm)
 }
 \arguments{
 \item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 }
 \value{
@@ -41,20 +41,22 @@ retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retp[, -1]
+predm <- retp[, -1]
 # Perform multivariate regression using lm()
-lmod <- lm(respv ~ predv)
-lmodsum <- summary(lmod)
+regmod <- lm(respv ~ predm)
+regsum <- summary(regmod)
+# Add unit intercept column to the predictor matrix
+predm <- cbind(rep(1, NROW(predm)), predm)
 # Perform multivariate regression using calc_lm()
-regarma <- HighFreq::calc_lm(respv=respv, predv=predv)
+regarma <- HighFreq::calc_lm(respv=respv, predm=predm)
 # Compare the outputs of both functions
-all.equal(regarma$coefficients[, "coeff"], unname(coef(lmod)))
-all.equal(unname(regarma$coefficients), unname(lmodsum$coefficients))
-all.equal(unname(regarma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
+all.equal(regarma$coefficients[, "coeff"], unname(coef(regmod)))
+all.equal(unname(regarma$coefficients), unname(regsum$coefficients))
+all.equal(unname(regarma$stats), c(regsum$r.squared, unname(regsum$fstatistic[1])))
 # Compare the speed of RcppArmadillo with R code
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_lm(respv=respv, predv=predv),
-  Rcode=lm(respv ~ predv),
+  Rcpp=HighFreq::calc_lm(respv=respv, predm=predm),
+  Rcode=lm(respv ~ predm),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

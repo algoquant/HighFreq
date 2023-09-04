@@ -12,19 +12,19 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // param_reg
-Rcpp::List param_reg(std::string regmod, bool addunit, double singmin, arma::uword dimax, std::string residscale, double confl, double alpha);
-RcppExport SEXP _HighFreq_param_reg(SEXP regmodSEXP, SEXP addunitSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP residscaleSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
+Rcpp::List param_reg(std::string regmod, bool intercept, double singmin, arma::uword dimax, std::string residscale, double confl, double alpha);
+RcppExport SEXP _HighFreq_param_reg(SEXP regmodSEXP, SEXP interceptSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP residscaleSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type regmod(regmodSEXP);
-    Rcpp::traits::input_parameter< bool >::type addunit(addunitSEXP);
+    Rcpp::traits::input_parameter< bool >::type intercept(interceptSEXP);
     Rcpp::traits::input_parameter< double >::type singmin(singminSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< std::string >::type residscale(residscaleSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(param_reg(regmod, addunit, singmin, dimax, residscale, confl, alpha));
+    rcpp_result_gen = Rcpp::wrap(param_reg(regmod, intercept, singmin, dimax, residscale, confl, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -523,16 +523,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // run_reg
-arma::mat run_reg(const arma::mat& respv, const arma::mat& predv, double lambda, Rcpp::List controlv);
-RcppExport SEXP _HighFreq_run_reg(SEXP respvSEXP, SEXP predvSEXP, SEXP lambdaSEXP, SEXP controlvSEXP) {
+arma::mat run_reg(const arma::mat& respv, const arma::mat& predm, double lambda, Rcpp::List controlv);
+RcppExport SEXP _HighFreq_run_reg(SEXP respvSEXP, SEXP predmSEXP, SEXP lambdaSEXP, SEXP controlvSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type respv(respvSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type predv(predvSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type predm(predmSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type controlv(controlvSEXP);
-    rcpp_result_gen = Rcpp::wrap(run_reg(respv, predv, lambda, controlv));
+    rcpp_result_gen = Rcpp::wrap(run_reg(respv, predm, lambda, controlv));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -684,27 +684,27 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_lm
-Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predv);
-RcppExport SEXP _HighFreq_calc_lm(SEXP respvSEXP, SEXP predvSEXP) {
+Rcpp::List calc_lm(const arma::vec& respv, const arma::mat& predm);
+RcppExport SEXP _HighFreq_calc_lm(SEXP respvSEXP, SEXP predmSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type respv(respvSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type predv(predvSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_lm(respv, predv));
+    Rcpp::traits::input_parameter< const arma::mat& >::type predm(predmSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_lm(respv, predm));
     return rcpp_result_gen;
 END_RCPP
 }
 // calc_reg
-arma::mat calc_reg(const arma::mat& respv, const arma::mat& predv, Rcpp::List controlv);
-RcppExport SEXP _HighFreq_calc_reg(SEXP respvSEXP, SEXP predvSEXP, SEXP controlvSEXP) {
+arma::mat calc_reg(const arma::mat& respv, const arma::mat& predm, Rcpp::List controlv);
+RcppExport SEXP _HighFreq_calc_reg(SEXP respvSEXP, SEXP predmSEXP, SEXP controlvSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type respv(respvSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type predv(predvSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type predm(predmSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type controlv(controlvSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_reg(respv, predv, controlv));
+    rcpp_result_gen = Rcpp::wrap(calc_reg(respv, predm, controlv));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -812,20 +812,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_reg
-arma::mat roll_reg(const arma::mat& respv, const arma::mat& predv, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, arma::uword step, arma::uword look_back, arma::uword stub);
-RcppExport SEXP _HighFreq_roll_reg(SEXP respvSEXP, SEXP predvSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
+arma::mat roll_reg(const arma::mat& respv, const arma::mat& predm, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, arma::uword step, arma::uword look_back, arma::uword stub);
+RcppExport SEXP _HighFreq_roll_reg(SEXP respvSEXP, SEXP predmSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type respv(respvSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type predv(predvSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type predm(predmSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type controlv(controlvSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type startp(startpSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type endd(enddSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_reg(respv, predv, controlv, startp, endd, step, look_back, stub));
+    rcpp_result_gen = Rcpp::wrap(roll_reg(respv, predm, controlv, startp, endd, step, look_back, stub));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -858,19 +858,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // roll_zscores
-arma::vec roll_zscores(const arma::mat& respv, const arma::mat& predv, arma::uvec startp, arma::uvec endd, arma::uword step, arma::uword look_back, arma::uword stub);
-RcppExport SEXP _HighFreq_roll_zscores(SEXP respvSEXP, SEXP predvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
+arma::vec roll_zscores(const arma::mat& respv, const arma::mat& predm, arma::uvec startp, arma::uvec endd, arma::uword step, arma::uword look_back, arma::uword stub);
+RcppExport SEXP _HighFreq_roll_zscores(SEXP respvSEXP, SEXP predmSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP stepSEXP, SEXP look_backSEXP, SEXP stubSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type respv(respvSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type predv(predvSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type predm(predmSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type startp(startpSEXP);
     Rcpp::traits::input_parameter< arma::uvec >::type endd(enddSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type look_back(look_backSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type stub(stubSEXP);
-    rcpp_result_gen = Rcpp::wrap(roll_zscores(respv, predv, startp, endd, step, look_back, stub));
+    rcpp_result_gen = Rcpp::wrap(roll_zscores(respv, predm, startp, endd, step, look_back, stub));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1006,8 +1006,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // back_test
-arma::mat back_test(const arma::mat& retx, const arma::mat& retp, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, double lambda, double coeff, double bid_offer);
-RcppExport SEXP _HighFreq_back_test(SEXP retxSEXP, SEXP retpSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdaSEXP, SEXP coeffSEXP, SEXP bid_offerSEXP) {
+arma::mat back_test(const arma::mat& retx, const arma::mat& retp, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, double lambda, double coeff, double spreadbo);
+RcppExport SEXP _HighFreq_back_test(SEXP retxSEXP, SEXP retpSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdaSEXP, SEXP coeffSEXP, SEXP spreadboSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1018,8 +1018,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec >::type endd(enddSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type coeff(coeffSEXP);
-    Rcpp::traits::input_parameter< double >::type bid_offer(bid_offerSEXP);
-    rcpp_result_gen = Rcpp::wrap(back_test(retx, retp, controlv, startp, endd, lambda, coeff, bid_offer));
+    Rcpp::traits::input_parameter< double >::type spreadbo(spreadboSEXP);
+    rcpp_result_gen = Rcpp::wrap(back_test(retx, retp, controlv, startp, endd, lambda, coeff, spreadbo));
     return rcpp_result_gen;
 END_RCPP
 }

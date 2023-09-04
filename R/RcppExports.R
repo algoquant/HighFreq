@@ -38,8 +38,8 @@ NULL
 #' @param \code{method} A \emph{character string} specifying the type of
 #'   regression model (the default is \code{method = "least_squares"}).
 #'   
-#' @param \code{addunit} A \emph{Boolean} specifying whether an intercept
-#'   term should be added to the predictor (the default is \code{addunit =
+#' @param \code{intercept} A \emph{Boolean} specifying whether an intercept
+#'   term should be added to the predictor (the default is \code{intercept =
 #'   TRUE}).
 #'
 #' @param \code{singmin} A \emph{numeric} threshold level for discarding
@@ -75,13 +75,13 @@ NULL
 #' controlv <- HighFreq::param_reg()
 #' unlist(controlv)
 #' # Create a custom list of regression parameters
-#' controlv <- HighFreq::param_reg(addunit=FALSE, method="regular", dimax=4)
+#' controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
 #' unlist(controlv)
 #' }
 #' 
 #' @export
-param_reg <- function(regmod = "least_squares", addunit = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alpha = 0.0) {
-    .Call(`_HighFreq_param_reg`, regmod, addunit, singmin, dimax, residscale, confl, alpha)
+param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alpha = 0.0) {
+    .Call(`_HighFreq_param_reg`, regmod, intercept, singmin, dimax, residscale, confl, alpha)
 }
 
 #' Create a named list of model parameters that can be passed into portfolio
@@ -1038,7 +1038,7 @@ calc_eigenp <- function(matrixv, neigen) {
 #'   The eigen decomposition of a matrix \eqn{\strong{C}} is defined as the
 #'   factorization:
 #'   \deqn{
-#'     \strong{C} = \strong{O}  \, \Sigma  \, \strong{O}^T
+#'     \strong{C} = \strong{O} \, \Sigma \, \strong{O}^T
 #'   } Where \eqn{\strong{O}} is the matrix of \emph{eigen vectors} and
 #'   \eqn{\Sigma} is a diagonal matrix of \emph{eigen values}.
 #'   
@@ -1130,7 +1130,7 @@ calc_inv <- function(matrixv, dimax = 0L, singmin = 0.0) {
 #'   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
 #'   factorization:
 #'   \deqn{
-#'     \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
+#'     \strong{C} = \strong{U} \, \Sigma \, \strong{V}^T
 #'   }
 #'   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
 #'   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of
@@ -1973,14 +1973,14 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing maximums
 #' lambda <- 0.9
-#' maxv <- HighFreq::run_max(closep, lambda=lambda)
+#' pricmax <- HighFreq::run_max(closep, lambda=lambda)
 #' # Plot dygraph of VTI prices and trailing maximums
-#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 #' colnames(datav) <- c("prices", "max")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") %>%
-#'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
+#'   dySeries(label=colnamev[1], strokeWidth=2, col="blue") %>%
+#'   dySeries(label=colnamev[2], strokeWidth=2, col="red")
 #' }
 #' 
 #' @export
@@ -2041,14 +2041,14 @@ run_max <- function(tseries, lambda) {
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing minimums
 #' lambda <- 0.9
-#' minv <- HighFreq::run_min(closep, lambda=lambda)
+#' pricmin <- HighFreq::run_min(closep, lambda=lambda)
 #' # Plot dygraph of VTI prices and trailing minimums
-#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), minv)
+#' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
 #' colnames(datav) <- c("prices", "min")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav, main="VTI Prices and Trailing Minimums") %>%
-#'   dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
+#'   dySeries(label=colnamev[1], strokeWidth=1, col="blue") %>%
+#'   dySeries(label=colnamev[2], strokeWidth=1, col="red")
 #' }
 #' 
 #' @export
@@ -2719,13 +2719,13 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 }
 
 #' Perform regressions on streaming \emph{time series} of response and
-#' predictor data, and calculate the regression coefficients and the residuals
-#' using online recursive formulas.
+#' predictor data, and calculate the regression coefficients, the residuals,
+#' and the forecasts, using online recursive formulas.
 #' 
 #' @param \code{respv} A single-column \emph{time series} or a single-column
 #'   \emph{matrix} of response data.
 #' 
-#' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
+#' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
 #' @param \code{lambda} A decay factor which multiplies past estimates.
@@ -2733,58 +2733,74 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' @param \code{controlv} A \emph{list} of model parameters (see Details).
 #'
 #'   
-#' @return A \emph{matrix} with the regression coefficients and the residuals
-#'   (in that order - see details), with the same number of rows as the
-#'   predictor argument \code{predv}.
+#' @return A \emph{matrix} with the regression coefficients, the residuals, and
+#'   the forecasts (in that order - see details), with the same number of rows
+#'   as the predictor argument \code{predm}.
 #'
 #' @details
 #'   The function \code{run_reg()} performs regressions on streaming \emph{time
-#'   series} of response and predictor data, and calculates the trailing
-#'   regression coefficients \eqn{\beta_t} and the residuals \eqn{\epsilon_t}.
-#'   It recursively weights the current estimates with past estimates, using
-#'   the decay factor \eqn{\lambda}:
+#'   series} of response \eqn{r_t} and predictor \eqn{p_t} data:
+#'   \deqn{
+#'     r_t = \beta_t p_t + \epsilon_t
+#'   }
+#'   Where \eqn{\beta_t} are the trailing regression coefficients and
+#'   \eqn{\epsilon_t} are the residuals.
+#'   
+#'   It recursively updates the covariance matrix \eqn{{cov}_t} between the
+#'   response and the predictor data, and the covariance matrix
+#'   \eqn{{cov}_{pt}} between the predictors, using the decay factor
+#'   \eqn{\lambda}:
 #'   \deqn{
 #'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
 #'   }
 #'   \deqn{
 #'     {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
 #'   }
+#'   
+#'   It calculates the regression coefficients \eqn{\beta_t} as equal to the
+#'   covariance matrix between the response and the predictor data
+#'   \eqn{{cov}_t}, divided by the covariance matrix between the predictors
+#'   \eqn{{cov}_{pt}}:
 #'   \deqn{
-#'     \beta_t = {cov}^{-1}_{p t} {cov}_t
+#'     \beta_t = {cov}_t \, {cov}^{-1}_{p t}
 #'   }
+#'   
+#'   It calculates the residuals \eqn{\epsilon_t} as the difference between the
+#'   response \eqn{r_t} minus the fitted values \eqn{\beta_t p_t}:
 #'   \deqn{
 #'     \epsilon_t = r_t - \beta_t p_t
 #'   }
+#'   
+#'   And the residual variance \eqn{\sigma^2_t} as:
 #'   \deqn{
 #'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
 #'   }
 #'   \deqn{
 #'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
 #'   }
-#'   Where \eqn{r_t} and \eqn{p_t} are the response and predictor time series,
-#'   \eqn{{cov}_t} is the covariance matrix between the response and the
-#'   predictor data, \eqn{{cov}_{p t}} is the covariance matrix of the
-#'   predictors, and \eqn{\sigma^2_t} is the residual variance.
 #' 
-#'   The matrices \eqn{\beta} and \eqn{\epsilon} have the same number of rows
-#'   as the predictor argument \code{predv}.
+#'   It finally calculates the regression forecasts \eqn{f_t}, as equal to the
+#'   past regression coefficients \eqn{\beta_{t-1}} times the current predictor
+#'   data \eqn{p_t}:
+#'   \deqn{
+#'     f_t = \beta_{t-1} p_t
+#'   }
+#' 
+#'   The coefficient matrix \eqn{\beta} and the residuals \eqn{\epsilon} have
+#'   the same number of rows as the predictor argument \code{predm}.
 #'
 #'   The function \code{run_reg()} accepts a list of regression model
 #'   parameters through the argument \code{controlv}.
-#'   The argument \code{controlv} contains the parameters \code{addunit},
-#'   \code{regmod}, and \code{residscale}.
+#'   The argument \code{controlv} contains the parameters \code{regmod} and
+#'   \code{residscale}.
 #'   Below is a description of how these parameters work.
 #'   The list of model parameters can be created using the function
 #'   \code{param_reg()}.  
 #'
-#'   If \code{addunit = TRUE} (the default), then \code{run_reg()} calculates
-#'   the regressions with an intercept (constant) term. If the predictor matrix
-#'   \code{predv} has \code{n} columns, then the number of regression
-#'   coefficients is equal to \code{n+1}, and the first regression coefficient
-#'   is the intercept value \eqn{\alpha}.
-#'   If \code{addunit = FALSE}, then \code{run_reg()} calculates the
-#'   regressions without an intercept (constant) term, and the number of
-#'   regression coefficients is equal to \code{n}.
+#'   The number of regression coefficients is equal to the number of columns of
+#'   the predictor matrix \code{n}.
+#'   If the predictor matrix contains a unit intercept column then the first
+#'   regression coefficient is equal to the alpha value \eqn{\alpha}.
 #'
 #'   If \code{regmod = "least_squares"} (the default) then it performs the
 #'   standard least squares regression.  This is currently the only option.
@@ -2825,15 +2841,12 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #'   interval.
 #' 
 #'   The function \code{run_reg()} returns multiple columns of data, with the
-#'   same number of rows as the input argument \code{predv}. 
-#'   If the predictor matrix \code{predv} has \code{n} columns and if
-#'   \code{addunit = TRUE} (the default) then \code{run_reg()} returns a matrix
-#'   with \code{n+2} columns. The first \code{n+1} columns contain the
-#'   regression coefficients (with the first column equal to the intercept
-#'   value \eqn{\alpha}) and the last column contains the \emph{residuals}.
-#'   If \code{addunit = FALSE} then \code{run_reg()} returns a matrix with
-#'   \code{n+1} columns. The first \code{n} columns contain the regression
-#'   coefficients and the last column contains the \emph{residuals}.
+#'   same number of rows as the predictor matrix \code{predm}. If the predictor
+#'   matrix \code{predm} has \code{n} columns then \code{run_reg()} returns a
+#'   matrix with \code{n+2} columns.
+#'   The first \code{n} columns contain the regression coefficients (with the
+#'   first column equal to the alpha value \eqn{\alpha}).
+#'   The last \code{2} columns are the regression residuals and the forecasts.
 #' 
 #' @examples
 #' \dontrun{
@@ -2842,12 +2855,14 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' # Response equals XLF returns
 #' respv <- retp[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predv <- retp[, -1]
+#' predm <- retp[, -1]
+#' # Add unit intercept column to the predictor matrix
+#' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Calculate the trailing regressions
 #' lambda <- 0.9
-#' # Create a default list of regression parameters
+#' # Create a list of regression parameters
 #' controlv <- HighFreq::param_reg(residscale="standardize")
-#' regs <- HighFreq::run_reg(respv=respv, predv=predv, lambda=lambda, controlv=controlv)
+#' regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
 #' # Plot the trailing residuals
 #' datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 #' colnames(datav) <- c("XLF", "residuals")
@@ -2855,16 +2870,15 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF") %>%
 #'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 #'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
-#'   dySeries(name=colnamev[1], axis="y", strokeWidth=2, col="blue") %>%
-#'   dySeries(name=colnamev[2], axis="y2", strokeWidth=2, col="red") %>%
+#'   dySeries(axis="y", strokeWidth=2, col="blue") %>%
+#'   dySeries(axis="y2", strokeWidth=2, col="red") %>%
 #'   dyLegend(show="always", width=300)
 #' 
 #' # Calculate the trailing regressions using R code
 #' lambda1 <- (1-lambda)
 #' respv <- zoo::coredata(respv)
-#' predv <- zoo::coredata(predv)
-#' nrows <- NROW(predv)
-#' predm <- cbind(rep(1, nrows), predv)
+#' predm <- zoo::coredata(predm)
+#' nrows <- NROW(predm)
 #' ncols <- NCOL(predm)
 #' covrespred <- respv[1, ]*predm[1, ]
 #' covpred <- outer(predm[1, ], predm[1, ])
@@ -2883,13 +2897,13 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #'  resids[it] <- (resids[it] - residm)/sqrt(residv)
 #' } # end for
 #' # Compare values, excluding warmup period
-#' all.equal(regs[-(1:1e3), ], unname(cbind(betas, resids))[-(1:1e3), ])
+#' all.equal(regs[-(1:1e3), ], cbind(betas, resids)[-(1:1e3), ], check.attributes=FALSE)
 #'  
 #' }
 #' 
 #' @export
-run_reg <- function(respv, predv, lambda, controlv) {
-    .Call(`_HighFreq_run_reg`, respv, predv, lambda, controlv)
+run_reg <- function(respv, predm, lambda, controlv) {
+    .Call(`_HighFreq_run_reg`, respv, predm, lambda, controlv)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -3280,7 +3294,7 @@ calc_var_ag <- function(tseries, step = 1L) {
 #'   If \code{scale} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
 #'   the units of variance per second squared). This is useful when calculating
-#'   the variance from minutely bar data, because dividing returns by the
+#'   the variance from minutes bar data, because dividing returns by the
 #'   number of seconds decreases the effect of overnight price jumps. If the
 #'   time index is in days, then the variance is equal to the variance per day
 #'   squared.
@@ -3738,7 +3752,7 @@ calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scal
 #' @param \code{respv} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
 #' 
-#' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
+#' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
 #' @return A named list with three elements: a \emph{matrix} of coefficients
@@ -3763,26 +3777,28 @@ calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scal
 #' # Response equals XLF returns
 #' respv <- retp[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predv <- retp[, -1]
+#' predm <- retp[, -1]
 #' # Perform multivariate regression using lm()
-#' lmod <- lm(respv ~ predv)
-#' lmodsum <- summary(lmod)
+#' regmod <- lm(respv ~ predm)
+#' regsum <- summary(regmod)
+#' # Add unit intercept column to the predictor matrix
+#' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Perform multivariate regression using calc_lm()
-#' regarma <- HighFreq::calc_lm(respv=respv, predv=predv)
+#' regarma <- HighFreq::calc_lm(respv=respv, predm=predm)
 #' # Compare the outputs of both functions
-#' all.equal(regarma$coefficients[, "coeff"], unname(coef(lmod)))
-#' all.equal(unname(regarma$coefficients), unname(lmodsum$coefficients))
-#' all.equal(unname(regarma$stats), c(lmodsum$r.squared, unname(lmodsum$fstatistic[1])))
+#' all.equal(regarma$coefficients[, "coeff"], unname(coef(regmod)))
+#' all.equal(unname(regarma$coefficients), unname(regsum$coefficients))
+#' all.equal(unname(regarma$stats), c(regsum$r.squared, unname(regsum$fstatistic[1])))
 #' # Compare the speed of RcppArmadillo with R code
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_lm(respv=respv, predv=predv),
-#'   Rcode=lm(respv ~ predv),
+#'   Rcpp=HighFreq::calc_lm(respv=respv, predm=predm),
+#'   Rcode=lm(respv ~ predm),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_lm <- function(respv, predv) {
-    .Call(`_HighFreq_calc_lm`, respv, predv)
+calc_lm <- function(respv, predm) {
+    .Call(`_HighFreq_calc_lm`, respv, predm)
 }
 
 #' Perform multivariate regression using different methods, and return a vector
@@ -3791,7 +3807,7 @@ calc_lm <- function(respv, predv) {
 #' @param \code{respv} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
 #' 
-#' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
+#' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
 #' @param \code{controlv} A \emph{list} of model parameters (see Details).
@@ -3824,29 +3840,20 @@ calc_lm <- function(respv, predv) {
 #'   If \code{regmod = "quantile"} then it performs quantile regression (not
 #'   implemented yet).
 #' 
-#'   If \code{addunit = TRUE} then an extra intercept column (unit column) is
-#'   added to the predictor matrix (the default is \code{addunit = TRUE}).
-#'   
 #'   The length of the return vector depends on the number of columns of the
-#'   predictor matrix (including the intercept column, if it's added).
+#'   predictor matrix (including the intercept column, if it's been added in
+#'   \code{R}).
+#'   The number of regression coefficients is equal to the number of columns of
+#'   the predictor matrix.
 #'   The length of the return vector is equal to the number of regression
 #'   coefficients, plus their t-values, plus the z-score.
-#'   The number of regression coefficients is equal to the number of columns of
-#'   the predictor matrix (including the intercept column, if it's
-#'   added).
 #'   The number of t-values is equal to the number of coefficients.
 #' 
 #'   For example, if the number of columns of the predictor matrix is equal to
-#'   \code{n}, and if \code{addunit = TRUE} (the default), then
-#'   \code{calc_reg()} returns a vector with \code{2n+3} elements: \code{n+1}
-#'   regression coefficients (including the intercept coefficient), \code{n+1}
-#'   corresponding t-values, and \code{1} z-score value.
+#'   \code{n}, then \code{calc_reg()} returns a vector with \code{2n+1}
+#'   elements: \code{n} regression coefficients, \code{n} corresponding
+#'   t-values, and \code{1} z-score value.
 #'
-#'   If \code{addunit = FALSE}, then \code{calc_reg()} returns a vector with
-#'   \code{2n+1} elements: \code{n} regression coefficients (without the
-#'   intercept coefficient), \code{n} corresponding t-values, and \code{1}
-#'   z-score value.
-#'   
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
@@ -3854,29 +3861,31 @@ calc_lm <- function(respv, predv) {
 #' # Response equals XLF returns
 #' respv <- retp[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predv <- retp[, -1]
+#' predm <- retp[, -1]
 #' # Perform multivariate regression using lm()
-#' lmod <- lm(respv ~ predv)
-#' lmodsum <- summary(lmod)
-#' coeff <- lmodsum$coefficients
+#' regmod <- lm(respv ~ predm)
+#' regsum <- summary(regmod)
+#' coeff <- regsum$coefficients
 #' # Create a default list of regression parameters
 #' controlv <- HighFreq::param_reg()
+#' # Add unit intercept column to the predictor matrix
+#' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Perform multivariate regression using calc_reg()
-#' regarma <- drop(HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv))
+#' regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv))
 #' # Compare the outputs of both functions
-#' all.equal(regarma[1:(2*(1+NCOL(predv)))], 
+#' all.equal(regarma[1:(2*NCOL(predm))], 
 #'   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_reg(respv=respv, predv=predv, controlv=controlv),
-#'   Rcode=lm(respv ~ predv),
+#'   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv),
+#'   Rcode=lm(respv ~ predm),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_reg <- function(respv, predv, controlv) {
-    .Call(`_HighFreq_calc_reg`, respv, predv, controlv)
+calc_reg <- function(respv, predm, controlv) {
+    .Call(`_HighFreq_calc_reg`, respv, predm, controlv)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -4205,7 +4214,7 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endd = 0L, step = 1L,
 #'   If \code{scale} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
 #'   the units of variance per second squared.) This is useful when calculating
-#'   the variance from minutely bar data, because dividing returns by the
+#'   the variance from minutes bar data, because dividing returns by the
 #'   number of seconds decreases the effect of overnight price jumps. If the
 #'   time index is in days, then the variance is equal to the variance per day
 #'   squared.
@@ -4225,7 +4234,7 @@ roll_var <- function(tseries, look_back = 1L, startp = 0L, endd = 0L, step = 1L,
 #' ohlc <- log(HighFreq::SPY)
 #' # Extract the time index of SPY prices
 #' indeks <- c(1, diff(xts::.index(ohlc)))
-#' # Rolling variance at minutely end points, with a 21 minute look-back
+#' # Rolling variance at minutes end points, with a 21 minute look-back
 #' varoll <- HighFreq::roll_var_ohlc(ohlc, 
 #'                               step=1, look_back=21, 
 #'                               method="yang_zhang", 
@@ -4438,7 +4447,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
 #' @param \code{respv} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
 #' 
-#' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
+#' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #'   
 #' @param \code{controlv} A \emph{list} of model parameters (see Details).
@@ -4459,9 +4468,9 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
 #'   calculating the end points (the default is \code{stub = 0}).
 #' 
 #' @return A \emph{matrix} with the regression coefficients, their t-values,
-#'   and z-scores, and with the same number of rows as \code{predv} a
-#'   number of columns equal to \code{2n+3}, where \code{n} is the number of
-#'   columns of \code{predv}.
+#'   and z-scores, and with the same number of rows as \code{predm} a
+#'   number of columns equal to \code{2n+1}, where \code{n} is the number of
+#'   columns of \code{predm}.
 #'
 #' @details
 #'   The function \code{roll_reg()} calculates a \emph{matrix} of regression
@@ -4469,12 +4478,12 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
 #'   predictor matrix.
 #'   
 #'   The function \code{roll_reg()} performs a loop over the end points, and at
-#'   each end point it subsets the time series \code{predv} over a look-back
+#'   each end point it subsets the time series \code{predm} over a look-back
 #'   interval equal to \code{look_back} number of end points.
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{predv}
+#'   periods. It calculates the end points along the rows of \code{predm}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #'   
@@ -4492,45 +4501,48 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
 #'   description of the model parameters.
 #'   
 #'   The number of columns of the return matrix depends on the number of
-#'   columns of the predictor matrix (including the intercept column, if
-#'   it's added).
+#'   columns of the predictor matrix (including the intercept column, if it's
+#'   been added in \code{R}).
+#'   The number of regression coefficients is equal to the number of columns of
+#'   the predictor matrix.
+#'   If the predictor matrix contains an intercept column then the first
+#'   regression coefficient is equal to the intercept value \eqn{\alpha}.
 #'   The number of columns of the return matrix is equal to the number of
 #'   regression coefficients, plus their t-values, plus the z-score column.
-#'   The number of regression coefficients is equal to the number of columns of
-#'   the predictor matrix (including the intercept column, if it's
-#'   added).
 #'   The number of t-values is equal to the number of coefficients.
-#'   For example, if the number of columns of the predictor matrix is
-#'   equal to \code{n}, and if \code{addunit = TRUE} (the default), then
-#'   \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
-#'   regression coefficients (including the intercept coefficient), \code{n+1}
-#'   corresponding t-values, and \code{1} z-score column.
+#'   For example, if the number of columns of the predictor matrix is equal to
+#'   \code{n}, then \code{roll_reg()} returns a matrix with \code{2n+1}
+#'   columns: \code{n} regression coefficients, \code{n} corresponding
+#'   t-values, and \code{1} z-score column.
 #' 
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
-#' retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+#' predm <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+#' # Add unit intercept column to the predictor matrix
+#' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Define monthly end points and start points
-#' endd <- xts::endpoints(retp, on="months")[-1]
+#' endd <- xts::endpoints(predm, on="months")[-1]
 #' look_back <- 12
 #' startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
 #' # Create a default list of regression parameters
 #' controlv <- HighFreq::param_reg()
 #' # Calculate rolling betas using RcppArmadillo
-#' reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endd=(endd-1), startp=(startp-1), controlv=controlv)
-#' betas <- reg_stats[, 2]
+#' regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controlv=controlv)
+#' betas <- regroll[, 2]
 #' # Calculate rolling betas in R
 #' betar <- sapply(1:NROW(endd), FUN=function(ep) {
-#'   datav <- retp[startp[ep]:endd[ep], ]
-#'   drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
+#'   datav <- predm[startp[ep]:endd[ep], ]
+#'   # HighFreq::calc_reg(datav[, 2], datav[, -2], controlv)
+#'   drop(cov(datav[, 2], datav[, 3])/var(datav[, 3]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
 #' all.equal(betas, betar, check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_reg <- function(respv, predv, controlv, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_reg`, respv, predv, controlv, startp, endd, step, look_back, stub)
+roll_reg <- function(respv, predm, controlv, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_reg`, respv, predm, controlv, startp, endd, step, look_back, stub)
 }
 
 #' Perform a rolling standardization (centering and scaling) of the columns of
@@ -4723,7 +4735,7 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' @param \code{respv} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
 #' 
-#' @param \code{predv} A \emph{time series} or a \emph{matrix} of predictor
+#' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #'   
 #' @param \code{startp} An \emph{integer} vector of start points (the default
@@ -4742,15 +4754,15 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #'   calculating the end points (the default is \code{stub = 0}).
 #' 
 #' @return A column \emph{vector} of the same length as the number of rows of
-#'   \code{predv}.
+#'   \code{predm}.
 #'
 #' @details
 #'   The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
 #'   of the residuals of rolling regressions at the end points of the
-#'   \emph{time series} \code{predv}.
+#'   \emph{time series} \code{predm}.
 #'   
 #'   The function \code{roll_zscores()} performs a loop over the end points,
-#'   and at each end point it subsets the time series \code{predv} over a
+#'   and at each end point it subsets the time series \code{predm} over a
 #'   look-back interval equal to \code{look_back} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_lm()}, which
@@ -4758,7 +4770,7 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{predv}
+#'   periods. It calculates the end points along the rows of \code{predm}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #'   
@@ -4773,18 +4785,18 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' # Response equals XLF returns
 #' respv <- retp[, 1]
 #' # Predictor matrix equals VTI and IEF returns
-#' predv <- retp[, -1]
+#' predm <- retp[, -1]
 #' # Calculate Z-scores from rolling time series regression using RcppArmadillo
 #' look_back <- 11
-#' zscores <- HighFreq::roll_zscores(respv=respv, predv=predv, look_back)
+#' zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, look_back)
 #' # Calculate z-scores in R from rolling multivariate regression using lm()
-#' zscoresr <- sapply(1:NROW(predv), function(ro_w) {
+#' zscoresr <- sapply(1:NROW(predm), function(ro_w) {
 #'   if (ro_w == 1) return(0)
 #'   startpoint <- max(1, ro_w-look_back+1)
 #'   responsi <- response[startpoint:ro_w]
 #'   predicti <- predictor[startpoint:ro_w, ]
-#'   lmod <- lm(responsi ~ predicti)
-#'   residuals <- lmod$residuals
+#'   regmod <- lm(responsi ~ predicti)
+#'   residuals <- regmod$residuals
 #'   residuals[NROW(residuals)]/sd(residuals)
 #' })  # end sapply
 #' # Compare the outputs of both functions
@@ -4793,8 +4805,8 @@ run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
 #' }
 #' 
 #' @export
-roll_zscores <- function(respv, predv, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_zscores`, respv, predv, startp, endd, step, look_back, stub)
+roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, look_back = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_zscores`, respv, predm, startp, endd, step, look_back, stub)
 }
 
 #' Calculate a \emph{matrix} of moment values over a rolling look-back
@@ -5433,8 +5445,8 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' dygraphs::dygraph(stockweights[endd], main="Returns and Weight") %>%
 #'   dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
 #'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
-#'   dySeries(name=colnamev[1], axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
-#'   dySeries(name=colnamev[2], axis="y2", label=colnamev[2], strokeWidth=2, col="red")
+#'   dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
+#'   dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red")
 #' }
 #' 
 #' @export
@@ -5599,7 +5611,7 @@ calc_weights <- function(returns, controlv) {
 #' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 #'   default is \code{1})
 #'   
-#' @param \code{bid_offer} A \emph{numeric} bid-offer spread (the default is
+#' @param \code{spreadbo} A \emph{numeric} bid-ask spread (the default is
 #'   \code{0})
 #'   
 #'   
@@ -5645,7 +5657,7 @@ calc_weights <- function(returns, controlv) {
 #'   or a reverting strategy (if \code{coeff = -1}).
 #'   
 #'   The function \code{back_test()} calculates the transaction costs by
-#'   multiplying the bid-offer spread \code{bid_offer} times the absolute
+#'   multiplying the bid-ask spread \code{spreadbo} times the absolute
 #'   difference between the current weights minus the weights from the previous
 #'   period. Then it subtracts the transaction costs from the out-of-sample
 #'   strategy returns.
@@ -5683,7 +5695,7 @@ calc_weights <- function(returns, controlv) {
 #' }
 #' 
 #' @export
-back_test <- function(retx, retp, controlv, startp, endd, lambda = 0.0, coeff = 1.0, bid_offer = 0.0) {
-    .Call(`_HighFreq_back_test`, retx, retp, controlv, startp, endd, lambda, coeff, bid_offer)
+back_test <- function(retx, retp, controlv, startp, endd, lambda = 0.0, coeff = 1.0, spreadbo = 0.0) {
+    .Call(`_HighFreq_back_test`, retx, retp, controlv, startp, endd, lambda, coeff, spreadbo)
 }
 

@@ -10,12 +10,12 @@ random_taq(
   drift = 0,
   indeks = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
     as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
-  bid_offer = 0.001,
+  spreadbo = 0.001,
   ...
 )
 }
 \arguments{
-\item{bid_offer}{The bid-offer spread expressed as a fraction of the prices
+\item{spreadbo}{The bid-ask spread expressed as a fraction of the prices
 (default is 0.001=10bps).}
 
 \item{\code{volat}}{The volatility per period of the \code{indeks} time index

@@ -70,7 +70,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   If \code{scale} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared). This is useful when calculating
-  the variance from minutely bar data, because dividing returns by the
+  the variance from minutes bar data, because dividing returns by the
   number of seconds decreases the effect of overnight price jumps. If the
   time index is in days, then the variance is equal to the variance per day
   squared.

@@ -7,7 +7,7 @@ z-scores, at the end points of the predictor matrix.}
 \usage{
 roll_reg(
   respv,
-  predv,
+  predm,
   controlv,
   startp = 0L,
   endd = 0L,
@@ -20,7 +20,7 @@ roll_reg(
 \item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
@@ -42,9 +42,9 @@ calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A \emph{matrix} with the regression coefficients, their t-values,
-  and z-scores, and with the same number of rows as \code{predv} a
-  number of columns equal to \code{2n+3}, where \code{n} is the number of
-  columns of \code{predv}.
+  and z-scores, and with the same number of rows as \code{predm} a
+  number of columns equal to \code{2n+1}, where \code{n} is the number of
+  columns of \code{predm}.
 }
 \description{
 Calculate a \emph{matrix} of regression coefficients, their t-values, and
@@ -56,12 +56,12 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   predictor matrix.
   
   The function \code{roll_reg()} performs a loop over the end points, and at
-  each end point it subsets the time series \code{predv} over a look-back
+  each end point it subsets the time series \code{predm} over a look-back
   interval equal to \code{look_back} number of end points.
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{predv}
+  periods. It calculates the end points along the rows of \code{predm}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
   
@@ -79,37 +79,40 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   description of the model parameters.
   
   The number of columns of the return matrix depends on the number of
-  columns of the predictor matrix (including the intercept column, if
-  it's added).
+  columns of the predictor matrix (including the intercept column, if it's
+  been added in \code{R}).
+  The number of regression coefficients is equal to the number of columns of
+  the predictor matrix.
+  If the predictor matrix contains an intercept column then the first
+  regression coefficient is equal to the intercept value \eqn{\alpha}.
   The number of columns of the return matrix is equal to the number of
   regression coefficients, plus their t-values, plus the z-score column.
-  The number of regression coefficients is equal to the number of columns of
-  the predictor matrix (including the intercept column, if it's
-  added).
   The number of t-values is equal to the number of coefficients.
-  For example, if the number of columns of the predictor matrix is
-  equal to \code{n}, and if \code{addunit = TRUE} (the default), then
-  \code{roll_reg()} returns a matrix with \code{2n+3} columns: \code{n+1}
-  regression coefficients (including the intercept coefficient), \code{n+1}
-  corresponding t-values, and \code{1} z-score column.
+  For example, if the number of columns of the predictor matrix is equal to
+  \code{n}, then \code{roll_reg()} returns a matrix with \code{2n+1}
+  columns: \code{n} regression coefficients, \code{n} corresponding
+  t-values, and \code{1} z-score column.
 }
 \examples{
 \dontrun{
 # Calculate historical returns
-retp <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+predm <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
+# Add unit intercept column to the predictor matrix
+predm <- cbind(rep(1, NROW(predm)), predm)
 # Define monthly end points and start points
-endd <- xts::endpoints(retp, on="months")[-1]
+endd <- xts::endpoints(predm, on="months")[-1]
 look_back <- 12
 startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-reg_stats <- HighFreq::roll_reg(respv=retp[, 1], predv=retp[, 2], endd=(endd-1), startp=(startp-1), controlv=controlv)
-betas <- reg_stats[, 2]
+regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controlv=controlv)
+betas <- regroll[, 2]
 # Calculate rolling betas in R
 betar <- sapply(1:NROW(endd), FUN=function(ep) {
-  datav <- retp[startp[ep]:endd[ep], ]
-  drop(cov(datav[, 1], datav[, 2])/var(datav[, 2]))
+  datav <- predm[startp[ep]:endd[ep], ]
+  # HighFreq::calc_reg(datav[, 2], datav[, -2], controlv)
+  drop(cov(datav[, 2], datav[, 3])/var(datav[, 3]))
 })  # end sapply
 # Compare the outputs of both functions
 all.equal(betas, betar, check.attributes=FALSE)

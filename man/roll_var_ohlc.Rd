@@ -111,7 +111,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   If \code{scale} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
-  the variance from minutely bar data, because dividing returns by the
+  the variance from minutes bar data, because dividing returns by the
   number of seconds decreases the effect of overnight price jumps. If the
   time index is in days, then the variance is equal to the variance per day
   squared.
@@ -131,7 +131,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
 ohlc <- log(HighFreq::SPY)
 # Extract the time index of SPY prices
 indeks <- c(1, diff(xts::.index(ohlc)))
-# Rolling variance at minutely end points, with a 21 minute look-back
+# Rolling variance at minutes end points, with a 21 minute look-back
 varoll <- HighFreq::roll_var_ohlc(ohlc, 
                               step=1, look_back=21, 
                               method="yang_zhang", 

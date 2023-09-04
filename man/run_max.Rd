@@ -63,14 +63,14 @@ The function \code{run_max()} calculates the trailing maximum values of
 closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing maximums
 lambda <- 0.9
-maxv <- HighFreq::run_max(closep, lambda=lambda)
+pricmax <- HighFreq::run_max(closep, lambda=lambda)
 # Plot dygraph of VTI prices and trailing maximums
-datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), maxv)
+datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 colnames(datav) <- c("prices", "max")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") \%>\%
-  dySeries(name=colnamev[1], label=colnamev[1], strokeWidth=2, col="blue") \%>\%
-  dySeries(name=colnamev[2], label=colnamev[2], strokeWidth=2, col="red")
+  dySeries(label=colnamev[1], strokeWidth=2, col="blue") \%>\%
+  dySeries(label=colnamev[2], strokeWidth=2, col="red")
 }
 
 }

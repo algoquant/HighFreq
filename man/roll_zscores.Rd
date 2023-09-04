@@ -7,7 +7,7 @@ regressions at the end points of the predictor matrix.}
 \usage{
 roll_zscores(
   respv,
-  predv,
+  predm,
   startp = 0L,
   endd = 0L,
   step = 1L,
@@ -19,7 +19,7 @@ roll_zscores(
 \item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
 of response data.}
 
-\item{\code{predv}}{A \emph{time series} or a \emph{matrix} of predictor
+\item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
@@ -39,7 +39,7 @@ calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A column \emph{vector} of the same length as the number of rows of
-  \code{predv}.
+  \code{predm}.
 }
 \description{
 Calculate a \emph{vector} of z-scores of the residuals of rolling
@@ -48,10 +48,10 @@ regressions at the end points of the predictor matrix.
 \details{
 The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   of the residuals of rolling regressions at the end points of the
-  \emph{time series} \code{predv}.
+  \emph{time series} \code{predm}.
   
   The function \code{roll_zscores()} performs a loop over the end points,
-  and at each end point it subsets the time series \code{predv} over a
+  and at each end point it subsets the time series \code{predm} over a
   look-back interval equal to \code{look_back} number of end points.
   
   It passes the subset time series to the function \code{calc_lm()}, which
@@ -59,7 +59,7 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{predv}
+  periods. It calculates the end points along the rows of \code{predm}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
   
@@ -74,18 +74,18 @@ retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI", "IEF")])
 # Response equals XLF returns
 respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
-predv <- retp[, -1]
+predm <- retp[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
 look_back <- 11
-zscores <- HighFreq::roll_zscores(respv=respv, predv=predv, look_back)
+zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, look_back)
 # Calculate z-scores in R from rolling multivariate regression using lm()
-zscoresr <- sapply(1:NROW(predv), function(ro_w) {
+zscoresr <- sapply(1:NROW(predm), function(ro_w) {
   if (ro_w == 1) return(0)
   startpoint <- max(1, ro_w-look_back+1)
   responsi <- response[startpoint:ro_w]
   predicti <- predictor[startpoint:ro_w, ]
-  lmod <- lm(responsi ~ predicti)
-  residuals <- lmod$residuals
+  regmod <- lm(responsi ~ predicti)
+  residuals <- regmod$residuals
   residuals[NROW(residuals)]/sd(residuals)
 })  # end sapply
 # Compare the outputs of both functions
