@@ -3121,8 +3121,8 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   // Perform loop over the rows
   meanm.row(0) = tseries.row(0);
-  // vars.row(0) = arma::square(tseries.row(0));
-  vars.row(0) = 0;
+  vars.row(0) = arma::square(tseries.row(0));
+  // vars.row(0) = 0;
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the means using the decay factor
     meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);

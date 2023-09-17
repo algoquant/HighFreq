@@ -4441,8 +4441,8 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
     .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endd, step, look_back, stub, method, confl)
 }
 
-#' Calculate a \emph{matrix} of regression coefficients, their t-values, and
-#' z-scores, at the end points of the predictor matrix.
+#' Perform a rolling regression and calculate a matrix of regression
+#' coefficients, their t-values, and z-scores.
 #' 
 #' @param \code{respv} A single-column \emph{time series} or a \emph{vector}
 #'   of response data.
@@ -4473,9 +4473,9 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, look_back 
 #'   columns of \code{predm}.
 #'
 #' @details
-#'   The function \code{roll_reg()} calculates a \emph{matrix} of regression
-#'   coefficients, their t-values, and z-scores at the end points of the
-#'   predictor matrix.
+#'   The function \code{roll_reg()} performs a rolling regression over the end
+#'   points of the predictor matrix, and calculates a \emph{matrix} of
+#'   regression coefficients, their t-values, and z-scores.
 #'   
 #'   The function \code{roll_reg()} performs a loop over the end points, and at
 #'   each end point it subsets the time series \code{predm} over a look-back
