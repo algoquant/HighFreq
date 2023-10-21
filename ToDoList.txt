@@ -94,6 +94,8 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Merge the functions calc_inv() with calc_invsvd()
+
 + [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
 
 + [ ] Add forecasts to the functions roll_reg() and run_reg()
@@ -129,6 +131,9 @@ If a row is not NA, but the previous row was NA, they start the recursion from s
 
 + [ ] Compare the outputs of functions run_reg() versus roll_reg()
 Find the lambda parameter which produces similar values for a given look_back parameter.
+
++ [ ] Introduce partial least squares regression
+https://en.wikipedia.org/wiki/Partial_least_squares_regression
 
 + [ ] Implement recursive least squares regression - recursive formula is analogous to Kalman filter
 Nadagouda Recursive Least Squares Regression Kalman Filter.pdf
