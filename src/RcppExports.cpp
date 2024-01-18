@@ -587,14 +587,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_var_ag
-arma::mat calc_var_ag(const arma::mat& tseries, arma::uword step);
-RcppExport SEXP _HighFreq_calc_var_ag(SEXP tseriesSEXP, SEXP stepSEXP) {
+arma::mat calc_var_ag(const arma::mat& pricev, arma::uword step);
+RcppExport SEXP _HighFreq_calc_var_ag(SEXP pricevSEXP, SEXP stepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type tseries(tseriesSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type pricev(pricevSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type step(stepSEXP);
-    rcpp_result_gen = Rcpp::wrap(calc_var_ag(tseries, step));
+    rcpp_result_gen = Rcpp::wrap(calc_var_ag(pricev, step));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1006,8 +1006,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // back_test
-arma::mat back_test(const arma::mat& retx, const arma::mat& retp, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, double lambda, double coeff, double spreadbo);
-RcppExport SEXP _HighFreq_back_test(SEXP retxSEXP, SEXP retpSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdaSEXP, SEXP coeffSEXP, SEXP spreadboSEXP) {
+arma::mat back_test(const arma::mat& retx, const arma::mat& retp, Rcpp::List controlv, arma::uvec startp, arma::uvec endd, double lambda, double coeff, double bidask);
+RcppExport SEXP _HighFreq_back_test(SEXP retxSEXP, SEXP retpSEXP, SEXP controlvSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdaSEXP, SEXP coeffSEXP, SEXP bidaskSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1018,8 +1018,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uvec >::type endd(enddSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type coeff(coeffSEXP);
-    Rcpp::traits::input_parameter< double >::type spreadbo(spreadboSEXP);
-    rcpp_result_gen = Rcpp::wrap(back_test(retx, retp, controlv, startp, endd, lambda, coeff, spreadbo));
+    Rcpp::traits::input_parameter< double >::type bidask(bidaskSEXP);
+    rcpp_result_gen = Rcpp::wrap(back_test(retx, retp, controlv, startp, endd, lambda, coeff, bidask));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -238,7 +238,7 @@ arma::vec lag_vec(const arma::vec& tseries,
                   arma::sword lagg = 1, 
                   bool pad_zeros = true) {
   
-  arma::uword nrows = (tseries.n_elem-1);
+  arma::uword nrows = (tseries.n_elem - 1);
   
   if (lagg > 0) {
     if (pad_zeros) {
@@ -321,7 +321,7 @@ arma::mat lagit(const arma::mat& tseries,
                 arma::sword lagg = 1, 
                 bool pad_zeros = true) {
   
-  arma::uword nrows = (tseries.n_rows-1);
+  arma::uword nrows = (tseries.n_rows - 1);
   arma::uword ncols = tseries.n_cols;
   
   if (lagg > 0) {
@@ -417,7 +417,7 @@ arma::mat lagit(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::vec diff_vec(const arma::vec& tseries, arma::uword lagg = 1, bool pad_zeros = true) {
   
-  arma::uword length = (tseries.n_elem-1);
+  arma::uword length = (tseries.n_elem - 1);
   
   if (pad_zeros)
     // Pad the output with zeros at the front
@@ -2181,8 +2181,14 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endd) {
   
   // arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
+  // Number of output rows
   arma::uword numpts = endd.size();
-  arma::mat ohlcagg(numpts-1, ncols, fill::zeros);
+  // Number of output columns
+  arma::uword numohlc = 5; // With volume column
+  if ((ncols == 1) || (ncols == 4))
+    numohlc = 4; // No volume column
+  // Allocate output matrix
+  arma::mat ohlcagg(numpts-1, numohlc, fill::zeros);
   
   // Perform loop over the end points
   for (arma::uword it = 1; it < numpts; it++) {
@@ -2710,8 +2716,8 @@ arma::mat roll_sumw(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing weighted means of streaming \emph{time series} data
-//' using an online recursive formula.
+//' Calculate the exponential moving average (EMA) of streaming \emph{time
+//' series} data using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
@@ -2723,10 +2729,10 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //'   \code{tseries}.
 //'
 //' @details
-//'   The function \code{run_mean()} calculates the trailing weighted means of
-//'   the streaming \emph{time series} data \eqn{p_t} by recursively weighting
-//'   present and past values using the decay factor \eqn{\lambda}. If the
-//'   \code{weightv} argument is equal to zero, then the function
+//'   The function \code{run_mean()} calculates the exponential moving average
+//'   (EMA) of the streaming \emph{time series} data \eqn{p_t} by recursively
+//'   weighting present and past values using the decay factor \eqn{\lambda}. If
+//'   the \code{weightv} argument is equal to zero, then the function
 //'   \code{run_mean()} simply calculates the exponentially weighted moving
 //'   average value of the streaming \emph{time series} data \eqn{p_t}:
 //'   \deqn{
@@ -2739,7 +2745,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //'   
 //'   If the argument \code{weightv} has the same number of rows as the argument
 //'   \code{tseries}, then the function \code{run_mean()} calculates the
-//'   trailing weighted means in two steps.
+//'   exponential moving average (EMA) in two steps.
 //'   
 //'   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
 //'   \deqn{
@@ -2810,9 +2816,9 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //'   
 //' # Calculate weights equal to the trading volumes
 //' weightv <- quantmod::Vo(ohlc)
-//' # Calculate the trailing weighted means
+//' # Calculate the exponential moving average (EMA)
 //' meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
-//' # Plot dygraph of the trailing weighted means
+//' # Plot dygraph of the EMA
 //' datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 //' colnames(datav) <- c("means trailing", "means weighted")
 //' dygraphs::dygraph(datav, main="Trailing Means") %>%
@@ -3036,10 +3042,10 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing variance of streaming \emph{time series} of returns
+//' Calculate the trailing variance of streaming \emph{time series} of data
 //' using an online recursive formula.
 //' 
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of returns.
+//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //' 
 //' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
@@ -3048,9 +3054,9 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'
 //' @details
 //'   The function \code{run_var()} calculates the trailing variance of
-//'   streaming \emph{time series} of returns, by recursively weighting the past
+//'   streaming \emph{time series} of data, by recursively weighting the past
 //'   variance estimates \eqn{\sigma^2_{t-1}}, with the squared differences of
-//'   the returns minus the trailing means \eqn{(r_t - \bar{r}_t)^2}, using the
+//'   the data minus its trailing means \eqn{(r_t - \bar{r}_t)^2}, using the
 //'   decay factor \eqn{\lambda}:
 //'   \deqn{
 //'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
@@ -3059,7 +3065,7 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
 //'   }
 //'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
-//'   \eqn{r_t} are the streaming returns data.
+//'   \eqn{r_t} are the streaming data.
 //' 
 //'   The above online recursive formulas are convenient for processing live
 //'   streaming data because they don't require maintaining a buffer of past
@@ -3126,7 +3132,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the means using the decay factor
     meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
-    // Variance is the weighted sum of the past variance and the square of returns minus the means
+    // Variance is the weighted sum of the past variance and the square of the data minus its mean
     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(tseries.row(it) - meanm.row(it));
   }  // end for
   
@@ -4664,7 +4670,7 @@ arma::mat calc_covar(const arma::mat& tseries,
 ////////////////////////////////////////////////////////////
 //' Calculate the variance of returns aggregated over the end points. 
 //'
-//' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
+//' @param \code{pricev} A \emph{time series} or a \emph{matrix} of prices.
 //'
 //' @param \code{step} The number of time periods in each interval between
 //'   neighboring end points (the default is \code{step = 1}).
@@ -4677,7 +4683,7 @@ arma::mat calc_covar(const arma::mat& tseries,
 //'
 //'   It first calculates the end points spaced apart by the number of periods
 //'   equal to the argument \code{step}.  Then it calculates the aggregated
-//'   returns by differencing the prices \code{tseries} calculated at the end
+//'   returns by differencing the prices \code{pricev} calculated at the end
 //'   points. Finally it calculates the variance of the returns.
 //'
 //'   The choice of the first end point is arbitrary, so \code{calc_var_ag()}
@@ -4700,12 +4706,12 @@ arma::mat calc_covar(const arma::mat& tseries,
 //'
 //' @examples
 //' \dontrun{
-//' # Calculate the log prices
+//' # Calculate the prices
 //' closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 //' closep <- log(closep)
-//' # Calculate the daily variance of percentage returns
+//' # Calculate the variance of daily returns
 //' calc_var_ag(prices, step=1)
-//' # Calculate the daily variance using R
+//' # Calculate the variance using R
 //' sapply(rutils::diffit(closep), var)
 //' # Calculate the variance of returns aggregated over 21 days
 //' calc_var_ag(prices, step=21)
@@ -4715,25 +4721,25 @@ arma::mat calc_covar(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat calc_var_ag(const arma::mat& tseries, 
+arma::mat calc_var_ag(const arma::mat& pricev, 
                       arma::uword step = 1) {
   
   if (step == 1)
     // Calculate the variance without aggregations.
-    return arma::var(diffit(tseries, 1, false));
+    return arma::var(diffit(pricev, 1, false));
   else {
     // Allocate aggregations, end points, and variance.
-    arma::uword nrows = tseries.n_rows;
+    arma::uword nrows = pricev.n_rows;
     arma::mat aggs;
     arma::uvec endd;
     // The number of rows is equal to step so that loop works for stub=0
-    arma::mat vars(step, tseries.n_cols);
+    arma::mat vars(step, pricev.n_cols);
     // Perform loop over the stubs
     for (arma::uword stub = 0; stub < step; stub++) {
       endd = calc_endpoints(nrows, step, stub, false);
       // endd = arma::regspace<uvec>(stub, step, nrows + step);
       // endd = endd.elem(find(endd < nrows));
-      aggs = tseries.rows(endd);
+      aggs = pricev.rows(endd);
       vars.row(stub) = arma::var(diffit(aggs, 1, false));
     }  // end for
     return mean(vars);
@@ -8431,7 +8437,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 //'   default is \code{1})
 //'   
-//' @param \code{spreadbo} A \emph{numeric} bid-ask spread (the default is
+//' @param \code{bidask} A \emph{numeric} bid-ask spread (the default is
 //'   \code{0})
 //'   
 //'   
@@ -8477,7 +8483,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   or a reverting strategy (if \code{coeff = -1}).
 //'   
 //'   The function \code{back_test()} calculates the transaction costs by
-//'   multiplying the bid-ask spread \code{spreadbo} times the absolute
+//'   multiplying the bid-ask spread \code{bidask} times the absolute
 //'   difference between the current weights minus the weights from the previous
 //'   period. Then it subtracts the transaction costs from the out-of-sample
 //'   strategy returns.
@@ -8523,7 +8529,7 @@ arma::mat back_test(const arma::mat& retx, // Asset excess returns
                     arma::uvec endd, // End points
                     double lambda = 0.0, // Decay factor for averaging the portfolio weights
                     double coeff = 1.0, // Multiplier of strategy returns
-                    double spreadbo = 0.0) { // The bid-ask spread
+                    double bidask = 0.0) { // The bid-ask spread
   
   double lambda1 = 1-lambda;
   arma::uword nweights = retp.n_cols;
@@ -8541,7 +8547,7 @@ arma::mat back_test(const arma::mat& retx, // Asset excess returns
     // Calculate out-of-sample returns
     pnls.rows(endd(it-1)+1, endd(it)) = retp.rows(endd(it-1)+1, endd(it))*weightv;
     // Add transaction costs
-    pnls.row(endd(it-1)+1) -= spreadbo*sum(abs(weightv - weights_past))/2;
+    pnls.row(endd(it-1)+1) -= bidask*sum(abs(weightv - weights_past))/2;
     // Copy the weights
     weights_past = weightv;
   }  // end for

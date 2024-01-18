@@ -94,6 +94,11 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [x] Rename functions: HighFreq::calcvar to HighFreq::calc_var
+
++ [ ] Fix function roll_ohlc() - when tseries has single column
+
+
 + [ ] Merge the functions calc_inv() with calc_invsvd()
 
 + [ ] Rename roll_varvec() to roll_vars() - make it work for matrices
