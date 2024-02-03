@@ -5,14 +5,7 @@
 \title{Calculate the rolling sums at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
-roll_sumep(
-  tseries,
-  startp = 0L,
-  endd = 0L,
-  step = 1L,
-  look_back = 1L,
-  stub = 0L
-)
+roll_sumep(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -26,8 +19,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points.}
@@ -55,7 +48,7 @@ retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define end points at 25 day intervals
 endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
 # Define start points as 75 day lag of end points
-startp <- HighFreq::calc_startpoints(endd, look_back=3)
+startp <- HighFreq::calc_startpoints(endd, lookb=3)
 # Calculate rolling sums using Rcpp
 sumc <- HighFreq::roll_sumep(retp, startp=startp, endd=endd)
 # Calculate rolling sums using R code

@@ -735,7 +735,7 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //'
 //' @param \code{endd} An \emph{integer} vector of end points.
 //'   
-//' @param \code{look_back} The length of the look-back interval, equal to the
+//' @param \code{lookb} The length of the look-back interval, equal to the
 //'   lag (shift) applied to the end points.
 //'   
 //' @return An \emph{integer} vector with the same number of elements as the
@@ -743,7 +743,7 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //'
 //' @details
 //'   The start points are equal to the values of the vector \code{endd} lagged
-//'   (shifted) by an amount equal to \code{look_back}.  In addition, an extra
+//'   (shifted) by an amount equal to \code{lookb}.  In addition, an extra
 //'   value of \code{1} is added to them, to avoid data overlaps.  The lag
 //'   operation requires appending a beginning warmup interval containing zeros,
 //'   so that the vector of start points has the same length as the \code{endd}.
@@ -752,7 +752,7 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //'   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
 //'   (In \code{C++} the vector indexing starts at \code{0} not \code{1}, so
 //'   it's shifted by \code{-1}.)
-//'   Then the start points for \code{look_back = 2} are equal to: \code{0, 0, 
+//'   Then the start points for \code{lookb = 2} are equal to: \code{0, 0, 
 //'   5, 10, 15}.  The differences between the end points minus the
 //'   corresponding start points are equal to \code{9}, except for the warmup
 //'   interval.
@@ -761,15 +761,15 @@ arma::uvec calc_endpoints(arma::uword length,  // The length of the sequence
 //' # Calculate end points
 //' endd <- HighFreq::calc_endpoints(length=55, step=5)
 //' # Calculate start points corresponding to the end points
-//' startp <- HighFreq::calc_startpoints(endd, look_back=5)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=5)
 //'
 //' @export
 // [[Rcpp::export]]
-arma::uvec calc_startpoints(arma::uvec endd, arma::uword look_back) {
+arma::uvec calc_startpoints(arma::uvec endd, arma::uword lookb) {
   
   arma::uword numpts = endd.n_elem;
-  arma::uvec startp = arma::join_cols(arma::zeros<uvec>(look_back), 
-                                      endd.subvec(0, numpts - look_back - 1) + 1);
+  arma::uvec startp = arma::join_cols(arma::zeros<uvec>(lookb), 
+                                      endd.subvec(0, numpts - lookb - 1) + 1);
   
   return startp;
   
@@ -2255,14 +2255,14 @@ arma::mat roll_ohlc(const arma::mat& tseries, arma::uvec endd) {
 // [[Rcpp::export]]
 arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
   
-  arma::uword look_back = weightv.n_rows-2;
+  arma::uword lookb = weightv.n_rows-2;
   arma::uword nrows = tseries.n_rows-1;
   
   // Calculate the convolutions
   arma::mat convmat = arma::conv2(tseries, weightv, "full");
   
   // Copy the warmup period
-  convmat.rows(0, look_back) = tseries.rows(0, look_back);
+  convmat.rows(0, lookb) = tseries.rows(0, lookb);
   
   return convmat.rows(0, nrows);
   
@@ -2277,9 +2277,9 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
 //' 
-//' @param \code{look_back} The length of the look-back interval, equal to the
+//' @param \code{lookb} The length of the look-back interval, equal to the
 //'   number of data points included in calculating the rolling sum (the default
-//'   is \code{look_back = 1}).
+//'   is \code{lookb = 1}).
 //'   
 //' @param \code{weightv} A single-column \emph{matrix} of weights (the default
 //'   is \code{weightv = 0}).
@@ -2330,21 +2330,21 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' # Calculate historical returns
 //' retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
-//' look_back <- 11
+//' lookb <- 11
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' sumc <- HighFreq::roll_sum(retp, look_back)
-//' sumr <- rutils::roll_sum(retp, look_back)
+//' sumc <- HighFreq::roll_sum(retp, lookb)
+//' sumr <- rutils::roll_sum(retp, lookb)
 //' all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
 //' sumr <- apply(zoo::coredata(retp), 2, cumsum)
-//' sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+//' sumlag <- rbind(matrix(numeric(2*lookb), nc=2), sumr[1:(NROW(sumr) - lookb), ])
 //' sumr <- (sumr - sumlag)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' # Calculate weights equal to the trading volumes
 //' weightv <- quantmod::Vo(rutils::etfenv$VTI)
 //' weightv <- weightv[zoo::index(retp)]
 //' # Calculate rolling weighted sums
-//' sumc <- HighFreq::roll_sum(retp, look_back, 1/weightv)
+//' sumc <- HighFreq::roll_sum(retp, lookb, 1/weightv)
 //' # Plot dygraph of the weighted sums
 //' datav <- cbind(retp$VTI, sumc[, 1])
 //' colnames(datav) <- c("VTI", "Weighted")
@@ -2357,7 +2357,7 @@ arma::mat roll_conv(const arma::mat& tseries, const arma::colvec& weightv) {
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_sum(const arma::mat& tseries, 
-                   arma::uword look_back = 1,
+                   arma::uword lookb = 1,
                    const arma::colvec& weightv = 0) {
   
   arma::uword startp;
@@ -2368,37 +2368,38 @@ arma::mat roll_sum(const arma::mat& tseries,
   if (nweights == 1) { // Calculate sums without weights
     // Warmup period
     sumr.row(0) = tseries.row(0);
-    for (arma::uword it = 1; it < look_back; it++) {
+    for (arma::uword it = 1; it < lookb; it++) {
       sumr.row(it) = sumr.row(it-1) + tseries.row(it);
     }  // end for
     // Perform loop over the remaining rows
-    for (arma::uword it = look_back; it < nrows; it++) {
-      startp = it - look_back;
+    for (arma::uword it = lookb; it < nrows; it++) {
+      startp = it - lookb;
       sumr.row(it) = sumr.row(it-1) + tseries.row(it) - tseries.row(startp);
     }  // end for
     // Old, clever code - doesn't produce correct warmup values
     // Calculate the cumulative sum
     // arma::mat cumsumv = arma::cumsum(tseries, 0);
     // Return the differences of the cumulative sum
-    // sumr = diffit(cumsumv, look_back, true);
+    // sumr = diffit(cumsumv, lookb, true);
   } else if (nweights == nrows) { // Calculate sums with weights
     // Calculate means with weights
     double weightr = weightv(0);
     double weightrr;
     sumr.row(0) = weightr*tseries.row(0);
     // Warmup period
-    for (arma::uword it = 1; it < look_back; it++) {
+    for (arma::uword it = 1; it < lookb; it++) {
       weightrr = weightr;
+      // Sum up the weighted means
       weightr = weightr + weightv(it);
       sumr.row(it) = sumr.row(it-1) + weightv(it)*tseries.row(it);
       // Divide by the mean weight
       sumr.row(it-1) = sumr.row(it-1)/weightrr;
     }  // end for
     // Perform loop over the remaining rows
-    for (arma::uword it = look_back; it < nrows; it++) {
-      startp = it - look_back;
+    for (arma::uword it = lookb; it < nrows; it++) {
+      startp = it - lookb;
       weightrr = weightr;
-      // Calculate the means using the decay factor
+      // Update the weighted means - add the new element and subtract the old one
       weightr = weightr + weightv(it) - weightv(startp);
       sumr.row(it) = sumr.row(it-1) + weightv(it)*tseries.row(it) - weightv(startp)*tseries.row(startp);
       // Divide by the mean weight
@@ -2429,8 +2430,8 @@ arma::mat roll_sum(const arma::mat& tseries,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points.
@@ -2453,7 +2454,7 @@ arma::mat roll_sum(const arma::mat& tseries,
 //' # Define end points at 25 day intervals
 //' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
 //' # Define start points as 75 day lag of end points
-//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=3)
 //' # Calculate rolling sums using Rcpp
 //' sumc <- HighFreq::roll_sumep(retp, startp=startp, endd=endd)
 //' # Calculate rolling sums using R code
@@ -2470,7 +2471,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
                      arma::uvec startp = 0, 
                      arma::uvec endd = 0, 
                      arma::uword step = 1, 
-                     arma::uword look_back = 1, 
+                     arma::uword lookb = 1, 
                      arma::uword stub = 0) {
   
   // Allocate end points
@@ -2488,13 +2489,13 @@ arma::mat roll_sumep(const arma::mat& tseries,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
     // Old code for startpts
-    // Start points equal to end points lagged by look_back - without adding +1
+    // Start points equal to end points lagged by lookb - without adding +1
     // arma::uword numpts = endpts.n_elem;
-    // arma::uvec startpts = arma::join_cols(arma::zeros<uvec>(look_back), 
-    //                                        endpts.subvec(0, numpts - look_back - 1));
+    // arma::uvec startpts = arma::join_cols(arma::zeros<uvec>(lookb), 
+    //                                        endpts.subvec(0, numpts - lookb - 1));
   } else {
     // Copy start points
     startpts = startp;
@@ -2538,9 +2539,9 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' @param \code{endd} An \emph{integer} vector of end points (the default is
 //'   \code{endd = NULL}).
 //'   
-//' @param \code{look_back} The length of the look-back interval, equal to the
+//' @param \code{lookb} The length of the look-back interval, equal to the
 //'   number of data points included in calculating the rolling sum (the default
-//'   is \code{look_back = 1}).
+//'   is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = NULL}).
@@ -2576,13 +2577,13 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //'   then the rolling sums are calculated at the end points. 
 //'   
 //'   If only the argument \code{stub} is supplied, then the end points are
-//'   calculated from the \code{stub} and \code{look_back} arguments. The first
+//'   calculated from the \code{stub} and \code{lookb} arguments. The first
 //'   end point is equal to \code{stub} and the end points are spaced
-//'   \code{look_back} periods apart.
+//'   \code{lookb} periods apart.
 //'   
 //'   If the arguments \code{weightv}, \code{endd}, and \code{stub} are
 //'   not supplied, then the sums are calculated over a number of data points
-//'   equal to \code{look_back}.
+//'   equal to \code{lookb}.
 //'   
 //'   The function \code{roll_sumw()} is also several times faster than
 //'   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
@@ -2597,21 +2598,21 @@ arma::mat roll_sumep(const arma::mat& tseries,
 //' # Calculate historical returns
 //' retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 //' # Define parameters
-//' look_back <- 11
+//' lookb <- 11
 //' # Calculate rolling sums and compare with rutils::roll_sum()
-//' sumc <- HighFreq::roll_sum(retp, look_back)
-//' sumr <- rutils::roll_sum(retp, look_back)
+//' sumc <- HighFreq::roll_sum(retp, lookb)
+//' sumr <- rutils::roll_sum(retp, lookb)
 //' all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 //' # Calculate rolling sums using R code
 //' sumr <- apply(zoo::coredata(retp), 2, cumsum)
-//' sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+//' sumlag <- rbind(matrix(numeric(2*lookb), nc=2), sumr[1:(NROW(sumr) - lookb), ])
 //' sumr <- (sumr - sumlag)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
 //' 
 //' # Calculate rolling sums at end points
 //' stubv <- 21
-//' sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
-//' endd <- (stubv + look_back*(0:(NROW(retp) %/% look_back)))
+//' sumc <- HighFreq::roll_sumw(retp, lookb, stub=stubv)
+//' endd <- (stubv + lookb*(0:(NROW(retp) %/% lookb)))
 //' endd <- endd[endd < NROW(retp)]
 //' sumr <- apply(zoo::coredata(retp), 2, cumsum)
 //' sumr <- sumr[endd+1, ]
@@ -2648,7 +2649,7 @@ arma::mat roll_sumep(const arma::mat& tseries,
 // [[Rcpp::export]]
 arma::mat roll_sumw(const arma::mat& tseries,
                     Rcpp::Nullable<Rcpp::IntegerVector> endd = R_NilValue, 
-                    arma::uword look_back = 1,
+                    arma::uword lookb = 1,
                     Rcpp::Nullable<int> stub = R_NilValue, 
                     Rcpp::Nullable<Rcpp::NumericVector> weightv = R_NilValue) {
   
@@ -2681,7 +2682,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
     endpts = Rcpp::as<uvec>(endd);
   } else if (stub.isNotNull()) {
     // Calculate end points with stub
-    endpts = arma::regspace<uvec>(Rcpp::as<uword>(stub), look_back, nrows + look_back);
+    endpts = arma::regspace<uvec>(Rcpp::as<uword>(stub), lookb, nrows + lookb);
     endpts = endpts.elem(find(endpts < nrows));
   }  // end if
   
@@ -2693,7 +2694,7 @@ arma::mat roll_sumw(const arma::mat& tseries,
     // return cumsumv;
   } else if (endpts.is_empty() && !weightv.isNotNull()) {
     // Return unweighted rolling sums at each point
-    cumsumv = diffit(cumsumv, look_back, true);
+    cumsumv = diffit(cumsumv, lookb, true);
   } else if (!endpts.is_empty() && weightv.isNotNull()) {
     // Return the weighted averages (convolutions) at end points
     cumsumv = cumsumv.rows(endpts);
@@ -2799,25 +2800,25 @@ arma::mat roll_sumw(const arma::mat& tseries,
 //' ohlc <- rutils::etfenv$VTI
 //' closep <- quantmod::Cl(ohlc)
 //' # Calculate the trailing means
-//' lambda <- 0.9
-//' meanv <- HighFreq::run_mean(closep, lambda=lambda)
+//' lambdaf <- 0.9 # Decay factor
+//' meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
 //' # Calculate the trailing means using R code
-//' pricef <- (1-lambda)*filter(closep, 
-//'   filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
+//' pricef <- (1-lambdaf)*filter(closep, 
+//'   filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), 
 //'   method="recursive")
 //' all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 //' 
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_mean(closep, lambda=lambda),
-//'   Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
+//'   Rcpp=HighFreq::run_mean(closep, lambda=lambdaf),
+//'   Rcode=filter(closep, filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //'   
 //' # Calculate weights equal to the trading volumes
 //' weightv <- quantmod::Vo(ohlc)
 //' # Calculate the exponential moving average (EMA)
-//' meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
+//' meanw <- HighFreq::run_mean(closep, lambda=lambdaf, weightv=weightv)
 //' # Plot dygraph of the EMA
 //' datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 //' colnames(datav) <- c("means trailing", "means weighted")
@@ -2919,8 +2920,8 @@ arma::mat run_mean(const arma::mat& tseries,
 //' # Calculate historical prices
 //' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the trailing maximums
-//' lambda <- 0.9
-//' pricmax <- HighFreq::run_max(closep, lambda=lambda)
+//' lambdaf <- 0.9 # Decay factor
+//' pricmax <- HighFreq::run_max(closep, lambda=lambdaf)
 //' # Plot dygraph of VTI prices and trailing maximums
 //' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 //' colnames(datav) <- c("prices", "max")
@@ -3007,8 +3008,8 @@ arma::mat run_max(const arma::mat& tseries, double lambda) {
 //' # Calculate historical prices
 //' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 //' # Calculate the trailing minimums
-//' lambda <- 0.9
-//' pricmin <- HighFreq::run_min(closep, lambda=lambda)
+//' lambdaf <- 0.9 # Decay factor
+//' pricmin <- HighFreq::run_min(closep, lambda=lambdaf)
 //' # Plot dygraph of VTI prices and trailing minimums
 //' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
 //' colnames(datav) <- c("prices", "min")
@@ -3054,18 +3055,18 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'
 //' @details
 //'   The function \code{run_var()} calculates the trailing variance of
-//'   streaming \emph{time series} of data, by recursively weighting the past
-//'   variance estimates \eqn{\sigma^2_{t-1}}, with the squared differences of
-//'   the data minus its trailing means \eqn{(r_t - \bar{r}_t)^2}, using the
-//'   decay factor \eqn{\lambda}:
+//'   streaming \emph{time series} of data \eqn{r_t}, by recursively weighting
+//'   the past variance estimates \eqn{\sigma^2_{t-1}}, with the squared
+//'   differences of the data minus its trailing means \eqn{(r_t -
+//'   \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
 //'   \deqn{
 //'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
 //'   }
 //'   \deqn{
 //'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
 //'   }
-//'   Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
-//'   \eqn{r_t} are the streaming data.
+//'   Where \eqn{r_t} are the streaming data, \eqn{\bar{r}_t} are the trailing
+//'   means, and \eqn{\sigma^2_t} are the trailing variance estimates.
 //' 
 //'   The above online recursive formulas are convenient for processing live
 //'   streaming data because they don't require maintaining a buffer of past
@@ -3098,20 +3099,20 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' # Calculate historical returns
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate the trailing variance
-//' lambda <- 0.9
-//' vars <- HighFreq::run_var(retp, lambda=lambda)
+//' lambdaf <- 0.9 # Decay factor
+//' vars <- HighFreq::run_var(retp, lambda=lambdaf)
 //' # Calculate centered returns
-//' retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
+//' retc <- (retp - HighFreq::run_mean(retp, lambda=lambdaf))
 //' # Calculate the trailing variance using R code
-//' retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
-//'   init=as.numeric(retc[1, 1])^2/(1-lambda), 
+//' retc2 <- (1-lambdaf)*filter(retc^2, filter=lambdaf, 
+//'   init=as.numeric(retc[1, 1])^2/(1-lambdaf), 
 //'   method="recursive")
 //' all.equal(vars, unclass(retc2), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_var(retp, lambda=lambda),
-//'   Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
+//'   Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
+//'   Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' 
@@ -3121,13 +3122,13 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   
   arma::uword nrows = tseries.n_rows;
   arma::uword ncols = tseries.n_cols;
-  arma::mat vars = arma::zeros(nrows, ncols);
   arma::mat meanm = arma::zeros(nrows, ncols);
+  arma::mat vars = arma::zeros(nrows, ncols);
   double lambda1 = 1-lambda;
   
   // Perform loop over the rows
   meanm.row(0) = tseries.row(0);
-  vars.row(0) = arma::square(tseries.row(0));
+  vars.row(0) = arma::square(tseries.row(1) - tseries.row(0));
   // vars.row(0) = 0;
   for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the means using the decay factor
@@ -3140,6 +3141,109 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   
 }  // end run_var
 
+
+
+////////////////////////////////////////////////////////////
+//' Calculate the trailing means, volatilities, and z-scores of a streaming
+//' \emph{time series} of data using an online recursive formula.
+//' 
+//' @param \code{tseries} A single \emph{time series} or a single column
+//'   \emph{matrix} of data.
+//' 
+//' @param \code{lambda} A decay factor which multiplies past estimates.
+//'   
+//' @return A \emph{matrix} with three columns (means, volatilities, and
+//'   z-scores) and the same number of rows as the input argument
+//'   \code{tseries}.
+//'
+//' @details
+//'   The function \code{run_zscores()} calculates the trailing means,
+//'   volatilities, and z-scores of a single streaming \emph{time series} of
+//'   data \eqn{r_t}, by recursively weighting the past variance estimates
+//'   \eqn{\sigma^2_{t-1}}, with the squared differences of the data minus its
+//'   trailing means \eqn{(r_t - \bar{r}_t)^2}, using the decay factor
+//'   \eqn{\lambda}:
+//'   \deqn{
+//'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+//'   }
+//'   \deqn{
+//'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+//'   }
+//'   \deqn{
+//'     z_t = \frac{r_t - \bar{r}_t}{\sigma_t}
+//'   }
+//'   Where \eqn{r_t} are the streaming data, \eqn{\bar{r}_t} are the trailing
+//'   means, \eqn{\sigma^2_t} are the trailing variance estimates, and \eqn{z_t}
+//'   are the z-scores.
+//'   
+//'   The above online recursive formulas are convenient for processing live
+//'   streaming data because they don't require maintaining a buffer of past
+//'   data.
+//'   The formulas are equivalent to a convolution with exponentially decaying
+//'   weights, but they're much faster to calculate.
+//'   Using exponentially decaying weights is more natural than using a sliding
+//'   look-back interval, because it gradually "forgets" about the past data.
+//' 
+//'   The value of the decay factor \eqn{\lambda} must be in the range between
+//'   \code{0} and \code{1}.  
+//'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
+//'   values have a greater weight, and the trailing variance values have a
+//'   stronger dependence on past data.  This is equivalent to a long
+//'   look-back interval.
+//'   If \eqn{\lambda} is much less than \code{1} then the decay is strong and
+//'   past values have a smaller weight, and the trailing variance values have a
+//'   weaker dependence on past data.  This is equivalent to a short look-back
+//'   interval.
+//' 
+//'   The function \code{run_zscores()} returns a \emph{matrix} with three
+//'   columns (means, volatilities, and z-scores) and the same number of rows as
+//'   the input argument \code{tseries}.
+//'   
+//' @examples
+//' \dontrun{
+//' # Calculate historical VTI log prices
+//' pricev <- log(na.omit(rutils::etfenv$prices$VTI))
+//' # Calculate the trailing variance and z-scores of prices
+//' lambdaf <- 0.9 # Decay factor
+//' zscores <- HighFreq::run_zscores(pricev, lambda=lambdaf)
+//' datav <- cbind(pricev, zscores[, 3])
+//' colnames(datav) <- c("VTI", "Z-Scores")
+//' colnamev <- colnames(datav)
+//' dygraphs::dygraph(datav, main="VTI Prices and Z-scores") %>%
+//'    dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
+//'    dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
+//'    dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
+//'    dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red") %>%
+//'    dyLegend(show="always", width=300)
+//' }
+//' 
+//' @export
+// [[Rcpp::export]]
+arma::mat run_zscores(const arma::mat& tseries, double lambda) {
+  
+  arma::uword nrows = tseries.n_rows;
+  // arma::uword ncols = tseries.n_cols;
+  arma::mat meanm = arma::zeros(nrows, 1);
+  arma::mat vars = arma::zeros(nrows, 1);
+  double lambda1 = 1-lambda;
+  
+  // Perform loop over the rows
+  meanm(0) = tseries(0);
+  vars(0) = pow(tseries(1) - tseries(0), 2);
+  // vars(0) = 0;
+  for (arma::uword it = 1; it < nrows; it++) {
+    // Calculate the means using the decay factor
+    meanm(it) = lambda*meanm(it-1) + lambda1*tseries(it);
+    // Variance is the weighted sum of the past variance and the square of the data minus its mean
+    vars(it) = lambda*vars(it-1) + lambda1*pow(tseries(it) - meanm(it), 2);
+  }  // end for
+  
+  vars = sqrt(vars);
+  arma::mat zscores = (tseries - meanm)/vars;
+  
+  return arma::join_rows(meanm, vars, zscores);
+  
+}  // end run_zscores
 
 
 
@@ -3195,7 +3299,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' # Calculate the trailing variance
 //' vart <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
 //' # Calculate the rolling variance
-//' varoll <- HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE)
+//' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
 //' datav <- cbind(vart, varoll)
 //' colnames(datav) <- c("trailing", "rolling")
 //' colnamev <- colnames(datav)
@@ -3208,7 +3312,7 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   trailing=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
-//'   rolling=HighFreq::roll_var_ohlc(ohlc, look_back=5, method="yang_zhang", scale=FALSE),
+//'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
 //'   times=10))[, c(1, 4, 5)]
 //' }
 //' @export
@@ -3752,8 +3856,8 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //' # Calculate historical returns
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' # Calculate the trailing covariance
-//' lambda <- 0.9
-//' covars <- HighFreq::run_covar(retp, lambda=lambda)
+//' lambdaf <- 0.9 # Decay factor
+//' covars <- HighFreq::run_covar(retp, lambda=lambdaf)
 //' # Calculate the trailing correlation
 //' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 //' # Calculate the trailing covariance using R code
@@ -3764,9 +3868,9 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //' covarr <- numeric(nrows)
 //' covarr[1] <- retp[1, 1]*retp[1, 2]
 //' for (it in 2:nrows) {
-//'   retm[it, ] <- lambda*retm[it-1, ] + (1-lambda)*(retp[it, ])
+//'   retm[it, ] <- lambdaf*retm[it-1, ] + (1-lambdaf)*(retp[it, ])
 //'   retd[it, ] <- retp[it, ] - retm[it, ]
-//'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it, 1]*retd[it, 2]
+//'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it, 1]*retd[it, 2]
 //' } # end for
 //' all.equal(covars[, 1], covarr, check.attributes=FALSE)
 //' }
@@ -3890,9 +3994,9 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' # Calculate historical returns
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 //' # Calculate the trailing autocovariance
-//' lambda <- 0.9
+//' lambdaf <- 0.9 # Decay factor
 //' lagg <- 3
-//' covars <- HighFreq::run_autocovar(retp, lambda=lambda, lagg=lagg)
+//' covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
 //' # Calculate the trailing autocorrelation
 //' correl <- covars[, 1]/covars[, 2]
 //' # Calculate the trailing autocovariance using R code
@@ -3903,9 +4007,9 @@ arma::mat run_covar(const arma::mat& tseries, double lambda) {
 //' covarr <- numeric(nrows)
 //' covarr[1] <- retp[1, ]^2
 //' for (it in 2:nrows) {
-//'   retm[it] <- lambda*retm[it-1] + (1-lambda)*(retp[it])
+//'   retm[it] <- lambdaf*retm[it-1] + (1-lambdaf)*(retp[it])
 //'   retd[it] <- retp[it] - retm[it]
-//'   covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it]*retd[max(it-lagg, 1)]
+//'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it]*retd[max(it-lagg, 1)]
 //' } # end for
 //' all.equal(covarr, covars[, 1])
 //' }
@@ -3958,7 +4062,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 
 
 ////////////////////////////////////////////////////////////
-//' Perform regressions on streaming \emph{time series} of response and
+//' Perform regressions on the streaming \emph{time series} of response and
 //' predictor data, and calculate the regression coefficients, the residuals,
 //' and the forecasts, using online recursive formulas.
 //' 
@@ -3978,7 +4082,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   as the predictor argument \code{predm}.
 //'
 //' @details
-//'   The function \code{run_reg()} performs regressions on streaming \emph{time
+//'   The function \code{run_reg()} performs regressions on the streaming \emph{time
 //'   series} of response \eqn{r_t} and predictor \eqn{p_t} data:
 //'   \deqn{
 //'     r_t = \beta_t p_t + \epsilon_t
@@ -4019,12 +4123,15 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
 //'   }
 //' 
-//'   It finally calculates the regression forecasts \eqn{f_t}, as equal to the
+//'   It then calculates the regression forecasts \eqn{f_t}, as equal to the
 //'   past regression coefficients \eqn{\beta_{t-1}} times the current predictor
 //'   data \eqn{p_t}:
 //'   \deqn{
 //'     f_t = \beta_{t-1} p_t
 //'   }
+//' 
+//'   It finally calculates the forecast errors as the difference between the
+//'   response minus the regression forecasts: \eqn{r_t - f_t}.
 //' 
 //'   The coefficient matrix \eqn{\beta} and the residuals \eqn{\epsilon} have
 //'   the same number of rows as the predictor argument \code{predm}.
@@ -4045,8 +4152,9 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   If \code{regmod = "least_squares"} (the default) then it performs the
 //'   standard least squares regression.  This is currently the only option.
 //' 
-//'   The \emph{residuals} may be scaled by their volatilities to obtain the
-//'   \emph{z-scores}. The default is \code{residscale = "none"} - no scaling.
+//'   The \emph{residuals} and the the \emph{forecast errors} may be scaled by
+//'   their volatilities to obtain the \emph{z-scores}. 
+//'   The default is \code{residscale = "none"} - no scaling.
 //'   If the argument \code{residscale = "scale"} then the \emph{residuals}
 //'   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma_t}
 //'   without subtracting their means:
@@ -4060,6 +4168,9 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\sigma_t}
 //'   }
 //'   Which are equal to the \emph{z-scores}.
+//'   
+//'   The \emph{forecast errors} are also scaled in the same way as the
+//'   \emph{residuals}, according to the argument\code{residscale}.
 //' 
 //'   The above online recursive formulas are convenient for processing live
 //'   streaming data because they don't require maintaining a buffer of past
@@ -4086,7 +4197,8 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   matrix with \code{n+2} columns.
 //'   The first \code{n} columns contain the regression coefficients (with the
 //'   first column equal to the alpha value \eqn{\alpha}).
-//'   The last \code{2} columns are the regression residuals and the forecasts.
+//'   The last \code{2} columns are the regression residuals and the forecast
+//'   errors.
 //' 
 //' @examples
 //' \dontrun{
@@ -4099,7 +4211,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //' # Add unit intercept column to the predictor matrix
 //' predm <- cbind(rep(1, NROW(predm)), predm)
 //' # Calculate the trailing regressions
-//' lambda <- 0.9
+//' lambdaf <- 0.9 # Decay factor
 //' # Create a list of regression parameters
 //' controlv <- HighFreq::param_reg(residscale="standardize")
 //' regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
@@ -4115,7 +4227,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   dyLegend(show="always", width=300)
 //' 
 //' # Calculate the trailing regressions using R code
-//' lambda1 <- (1-lambda)
+//' lambda1 <- (1-lambdaf)
 //' respv <- zoo::coredata(respv)
 //' predm <- zoo::coredata(predm)
 //' nrows <- NROW(predm)
@@ -4128,12 +4240,12 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //' residm <- 0
 //' residv <- 0
 //' for (it in 2:nrows) {
-//'  covrespred <- lambda*covrespred + lambda1*respv[it, ]*predm[it, ]
-//'  covpred <- lambda*covpred + lambda1*outer(predm[it, ], predm[it, ])
+//'  covrespred <- lambdaf*covrespred + lambda1*respv[it, ]*predm[it, ]
+//'  covpred <- lambdaf*covpred + lambda1*outer(predm[it, ], predm[it, ])
 //'  betas[it, ] <- covrespred %*% MASS::ginv(covpred)
 //'  resids[it] <- respv[it, ] - (betas[it, ] %*% predm[it, ])
-//'  residm <- lambda*residm + lambda1*resids[it]
-//'  residv <- lambda*residv + lambda1*(resids[it] - residm)^2
+//'  residm <- lambdaf*residm + lambda1*resids[it]
+//'  residv <- lambdaf*residv + lambda1*(resids[it] - residm)^2
 //'  resids[it] <- (resids[it] - residm)/sqrt(residv)
 //' } # end for
 //' # Compare values, excluding warmup period
@@ -4160,8 +4272,8 @@ arma::mat run_reg(const arma::mat& respv, // Response vector
   arma::mat covpred = arma::zeros(ncols, ncols); // Covariance between the predictors
   arma::mat betas = arma::ones(nrows, ncols); // Betas
   arma::mat fcasts = arma::zeros(nrows, 1); // Forecasts
-  // arma::mat fcastm = arma::zeros(nrows, 1); // Error means
-  // arma::mat fcastv = arma::ones(nrows, 1); // Error variance
+  arma::mat fcastm = arma::zeros(nrows, 1); // Forecast error means
+  arma::mat fcastv = arma::ones(nrows, 1); // Forecast error variance
   arma::mat resids = arma::zeros(nrows, 1); // Residuals
   arma::mat residm = arma::zeros(nrows, 1); // Residual means
   arma::mat residv = arma::ones(nrows, 1); // Residual variance
@@ -4197,13 +4309,14 @@ arma::mat run_reg(const arma::mat& respv, // Response vector
     // Calculate the mean and variance of the residuals
     residm.row(it) = lambda*residm.row(it-1) + lambda1*resids.row(it);
     residv.row(it) = lambda*residv.row(it-1) + lambda1*arma::square(resids.row(it) - residm.row(it));
-    // Calculate the forecasts
     // cout << "Calculating forecasts: " << it << endl;
-    // fcasts.row(it) = respv.row(it) - arma::dot(betas.row(it-1), predm.row(it));
-    fcasts.row(it) = arma::dot(betas.row(it-1), predm.row(it));
+    // Calculate the forecasts
+    // fcasts.row(it) = arma::dot(betas.row(it-1), predm.row(it));
+    // Calculate the forecast errors
+    fcasts.row(it) = respv.row(it) - arma::dot(betas.row(it-1), predm.row(it));
     // Calculate the mean and variance of the forecast errors
-    // fcastm.row(it) = lambda*fcastm.row(it-1) + lambda1*fcasts.row(it);
-    // fcastv.row(it) = lambda*fcastv.row(it-1) + lambda1*arma::square(fcasts.row(it) - fcastm.row(it));
+    fcastm.row(it) = lambda*fcastm.row(it-1) + lambda1*fcasts.row(it);
+    fcastv.row(it) = lambda*fcastv.row(it-1) + lambda1*arma::square(fcasts.row(it) - fcastm.row(it));
   }  // end for
   
   // Type of residual scaling - the default is "none"
@@ -4213,11 +4326,11 @@ arma::mat run_reg(const arma::mat& respv, // Response vector
   if (residscale == "scale") {
     // Divide the residuals by their volatility
     resids = resids/arma::sqrt(residv);
-    // fcasts = fcasts/arma::sqrt(fcastv);
+    fcasts = fcasts/arma::sqrt(fcastv);
   } else if (residscale == "standardize") {
     // Center the residuals and divide them by their volatility
     resids = (resids - residm)/arma::sqrt(residv);
-    // fcasts = (fcasts - fcastm)/arma::sqrt(fcastv);
+    fcasts = (fcasts - fcastm)/arma::sqrt(fcastv);
   }  // end if
   
   return arma::join_rows(betas, resids, fcasts);
@@ -5750,8 +5863,8 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //' look-back interval attached at the end points of a \emph{time series} or a
 //' \emph{matrix}.
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'
@@ -5781,7 +5894,7 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //'   
 //'   The function \code{roll_mean()} performs a loop over the end points, and at
 //'   each end point it subsets the time series \code{tseries} over a look-back
-//'   interval equal to \code{look_back} number of end points.
+//'   interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function \code{calc_mean()}, which
 //'   calculates the mean (location).
@@ -5795,7 +5908,7 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //' 
 //'   For example, the rolling mean at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   The function \code{roll_mean()} with the parameter \code{step = 1}
 //'   performs the same calculation as the function \code{roll_mean()} from
@@ -5816,13 +5929,13 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling means at 25 day end points, with a 75 day look-back
-//' meanv <- HighFreq::roll_mean(retp, look_back=3, step=25)
+//' meanv <- HighFreq::roll_mean(retp, lookb=3, step=25)
 //' # Compare the mean estimates over 11-period look-back intervals
-//' all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
+//' all.equal(HighFreq::roll_mean(retp, lookb=11)[-(1:10), ], 
 //'   drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 //' # Define end points and start points
 //' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=3)
 //' # Calculate the rolling means using RcppArmadillo
 //' meanv <- HighFreq::roll_mean(retp, startp=startp, endd=endd)
 //' # Calculate the rolling medians using RcppArmadillo
@@ -5842,7 +5955,7 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_mean(const arma::mat& tseries, 
-                    arma::uword look_back = 1, 
+                    arma::uword lookb = 1, 
                     arma::uvec startp = 0, 
                     arma::uvec endd = 0, 
                     arma::uword step = 1, 
@@ -5865,8 +5978,8 @@ arma::mat roll_mean(const arma::mat& tseries,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -5901,9 +6014,9 @@ arma::mat roll_mean(const arma::mat& tseries,
 //' @param \code{tseries} A single-column \emph{time series} or a single-column
 //'   \emph{matrix}.
 //' 
-//' @param \code{look_back} The length of the look-back interval, equal to the
+//' @param \code{lookb} The length of the look-back interval, equal to the
 //'   number of \emph{vector} elements used for calculating a single variance
-//'   estimate (the default is \code{look_back = 1}).
+//'   estimate (the default is \code{lookb = 1}).
 //'
 //' @return A single-column \emph{matrix} with the same number of elements as
 //'   the input argument \code{tseries}.
@@ -5929,30 +6042,30 @@ arma::mat roll_mean(const arma::mat& tseries,
 //' # Create a vector of random returns
 //' retp <- rnorm(1e6)
 //' # Compare the variance estimates over 11-period look-back intervals
-//' all.equal(drop(HighFreq::roll_varvec(retp, look_back=11))[-(1:10)], 
+//' all.equal(drop(HighFreq::roll_varvec(retp, lookb=11))[-(1:10)], 
 //'   RcppRoll::roll_var(retp, n=11))
 //' # Compare the speed of RcppArmadillo with RcppRoll
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_varvec(retp, look_back=11),
+//'   Rcpp=HighFreq::roll_varvec(retp, lookb=11),
 //'   RcppRoll=RcppRoll::roll_var(retp, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
-arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
+arma::vec roll_varvec(const arma::vec& tseries, arma::uword lookb = 1) {
   
   arma::uword length = tseries.n_elem;
   arma::vec vars = arma::zeros(length);
   
   // Warmup period
-  for (arma::uword it = 1; it < look_back; it++) {
+  for (arma::uword it = 1; it < lookb; it++) {
     vars(it) = arma::var(tseries.subvec(0, it));
   }  // end for
   
   // Remaining period
-  for (arma::uword it = look_back; it < length; it++) {
-    vars(it) = arma::var(tseries.subvec(it-look_back+1, it));
+  for (arma::uword it = lookb; it < length; it++) {
+    vars(it) = arma::var(tseries.subvec(it-lookb+1, it));
   }  // end for
   
   return vars;
@@ -5969,8 +6082,8 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //'
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{startp} An \emph{integer} vector of start points (the default
 //'   is \code{startp = 0}).
@@ -5998,7 +6111,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //'   
 //'   The function \code{roll_var()} performs a loop over the end points, and at
 //'   each end point it subsets the time series \code{tseries} over a look-back
-//'   interval equal to \code{look_back} number of end points.
+//'   interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function \code{calc_var()}, which
 //'   calculates the dispersion.
@@ -6013,7 +6126,7 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' 
 //'   For example, the rolling variance at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   The function \code{roll_var()} with the parameter \code{step = 1}
 //'   performs the same calculation as the function \code{roll_var()} from
@@ -6031,26 +6144,26 @@ arma::vec roll_varvec(const arma::vec& tseries, arma::uword look_back = 1) {
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' varv <- HighFreq::roll_var(retp, look_back=3, step=25)
+//' varv <- HighFreq::roll_var(retp, lookb=3, step=25)
 //' # Compare the variance estimates over 11-period look-back intervals
-//' all.equal(HighFreq::roll_var(retp, look_back=11)[-(1:10), ], 
+//' all.equal(HighFreq::roll_var(retp, lookb=11)[-(1:10), ], 
 //'   drop(RcppRoll::roll_var(retp, n=11)), check.attributes=FALSE)
 //' # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_var(retp, look_back=11),
+//'   Rcpp=HighFreq::roll_var(retp, lookb=11),
 //'   RcppRoll=RcppRoll::roll_var(retp, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
 //' summary(microbenchmark(
-//'     Rcpp=HighFreq::roll_var(retp, look_back=11, method="quantile"),
+//'     Rcpp=HighFreq::roll_var(retp, lookb=11, method="quantile"),
 //'     TTR=TTR::runMAD(retp, n = 11),
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 //' }
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_var(const arma::mat& tseries, 
-                   arma::uword look_back = 1, 
+                   arma::uword lookb = 1, 
                    arma::uvec startp = 0, 
                    arma::uvec endd = 0, 
                    arma::uword step = 1, 
@@ -6073,8 +6186,8 @@ arma::mat roll_var(const arma::mat& tseries,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -6119,8 +6232,8 @@ arma::mat roll_var(const arma::mat& tseries,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -6159,7 +6272,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //'   function \code{calc_var_ohlc()}.
 //' 
 //'   At each end point, the variance is calculated over a look-back interval
-//'   equal to \code{look_back} number of end points.
+//'   equal to \code{lookb} number of end points.
 //'   In the initial warmup period, the variance is calculated over an expanding
 //'   look-back interval.
 //'   
@@ -6171,12 +6284,12 @@ arma::mat roll_var(const arma::mat& tseries,
 //' 
 //'   For example, the rolling variance at daily end points with an \code{11}
 //'   day look-back, can be calculated using the parameters \code{step = 1} and
-//'   \code{look_back = 1} (Assuming the \code{ohlc} data has daily
+//'   \code{lookb = 1} (Assuming the \code{ohlc} data has daily
 //'   frequency.)
 //' 
 //'   Similarly, the rolling variance at \code{25} day end points with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
+//'   \code{step = 25} and \code{lookb = 3} (because \code{3*25 = 75}).
 //' 
 //'   The function \code{roll_var_ohlc()} calculates the variance from all the
 //'   different intra-day and day-over-day returns (defined as the differences
@@ -6215,7 +6328,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Rolling variance at minutes end points, with a 21 minute look-back
 //' varoll <- HighFreq::roll_var_ohlc(ohlc, 
-//'                               step=1, look_back=21, 
+//'                               step=1, lookb=21, 
 //'                               method="yang_zhang", 
 //'                               index=indeks, scale=TRUE)
 //' # Daily OHLC prices
@@ -6223,7 +6336,7 @@ arma::mat roll_var(const arma::mat& tseries,
 //' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
 //' varoll <- HighFreq::roll_var_ohlc(ohlc, 
-//'                               step=5, look_back=4, 
+//'                               step=5, lookb=4, 
 //'                               method="yang_zhang", 
 //'                               index=indeks, scale=TRUE)
 //' # Same calculation in R
@@ -6248,7 +6361,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
                         arma::uvec startp = 0, 
                         arma::uvec endd = 0, 
                         arma::uword step = 1, 
-                        arma::uword look_back = 1, 
+                        arma::uword lookb = 1, 
                         arma::uword stub = 0,
                         std::string method = "yang_zhang", 
                         bool scale = true, // Divide the returns by time index
@@ -6269,8 +6382,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -6308,7 +6421,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   // Old code below
   
   // Warmup period
-  // for (arma::uword it = 1; it < look_back; it++) {
+  // for (arma::uword it = 1; it < lookb; it++) {
   //   arma::mat sub_ohlc = ohlc.rows(0, it);
   //   arma::colvec sub_close = closel.rows(0, it);
   //   arma::colvec sub_index = index.subvec(0, it);
@@ -6316,10 +6429,10 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   // }  // end for
   
   // Remaining period
-  // for (arma::uword it = look_back; it < nrows; it++) {
-  //   arma::mat sub_ohlc = ohlc.rows(it-look_back+1, it);
-  //   arma::colvec sub_close = closel.rows(it-look_back+1, it);
-  //   arma::colvec sub_index = index.subvec(it-look_back+1, it);
+  // for (arma::uword it = lookb; it < nrows; it++) {
+  //   arma::mat sub_ohlc = ohlc.rows(it-lookb+1, it);
+  //   arma::colvec sub_close = closel.rows(it-lookb+1, it);
+  //   arma::colvec sub_index = index.subvec(it-lookb+1, it);
   //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
   // }  // end for
   
@@ -6346,8 +6459,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -6369,7 +6482,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //'   
 //'   The function \code{roll_skew()} performs a loop over the end points, and
 //'   at each end point it subsets the time series \code{tseries} over a
-//'   look-back interval equal to \code{look_back} number of end points.
+//'   look-back interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function \code{calc_skew()}, which
 //'   calculates the skewness.
@@ -6384,7 +6497,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' 
 //'   For example, the rolling skewness at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   The function \code{roll_skew()} is implemented in \code{RcppArmadillo}
 //'   \code{C++} code, which makes it several times faster than \code{R} code.
@@ -6395,9 +6508,9 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
 //' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=3)
 //' # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-//' skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
+//' skewv <- HighFreq::roll_skew(retp, step=25, lookb=3)
 //' # Calculate the rolling skewness using R code
 //' skewr <- sapply(1:NROW(endd), function(it) {
 //'   HighFreq::calc_skew(retp[startp[it]:endd[it], ])
@@ -6407,7 +6520,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
+//'   Rcpp=HighFreq::roll_skew(retp, step=25, lookb=3),
 //'   Rcode=sapply(1:NROW(endd), function(it) {
 //'     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 //'   }),
@@ -6419,7 +6532,7 @@ arma::mat roll_skew(const arma::mat& tseries,
                     arma::uvec startp = 0, 
                     arma::uvec endd = 0, 
                     arma::uword step = 1, 
-                    arma::uword look_back = 1, 
+                    arma::uword lookb = 1, 
                     arma::uword stub = 0,
                     std::string method = "moment", 
                     double confl = 0.75) {
@@ -6439,8 +6552,8 @@ arma::mat roll_skew(const arma::mat& tseries,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -6480,8 +6593,8 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -6503,7 +6616,7 @@ arma::mat roll_skew(const arma::mat& tseries,
 //'   
 //'   The function \code{roll_kurtosis()} performs a loop over the end points,
 //'   and at each end point it subsets the time series \code{tseries} over a
-//'   look-back interval equal to \code{look_back} number of end points.
+//'   look-back interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function \code{calc_kurtosis()},
 //'   which calculates the kurtosis. See the function \code{calc_kurtosis()} for
@@ -6517,7 +6630,7 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' 
 //'   For example, the rolling kurtosis at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   The function \code{roll_kurtosis()} is implemented in \code{RcppArmadillo}
 //'   \code{C++} code, which makes it several times faster than \code{R} code.
@@ -6528,9 +6641,9 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Define end points and start points
 //' endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=3)
 //' # Calculate the rolling kurtosis at 25 day end points, with a 75 day look-back
-//' kurtosisv <- HighFreq::roll_kurtosis(retp, step=25, look_back=3)
+//' kurtosisv <- HighFreq::roll_kurtosis(retp, step=25, lookb=3)
 //' # Calculate the rolling kurtosis using R code
 //' kurt_r <- sapply(1:NROW(endd), function(it) {
 //'   HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
@@ -6540,7 +6653,7 @@ arma::mat roll_skew(const arma::mat& tseries,
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::roll_kurtosis(retp, step=25, look_back=3),
+//'   Rcpp=HighFreq::roll_kurtosis(retp, step=25, lookb=3),
 //'   Rcode=sapply(1:NROW(endd), function(it) {
 //'     HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 //'   }),
@@ -6552,7 +6665,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
                         arma::uvec startp = 0, 
                         arma::uvec endd = 0, 
                         arma::uword step = 1, 
-                        arma::uword look_back = 1, 
+                        arma::uword lookb = 1, 
                         arma::uword stub = 0,
                         std::string method = "moment", 
                         double confl = 0.75) {
@@ -6572,8 +6685,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -6618,8 +6731,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -6636,7 +6749,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   
 //'   The function \code{roll_reg()} performs a loop over the end points, and at
 //'   each end point it subsets the time series \code{predm} over a look-back
-//'   interval equal to \code{look_back} number of end points.
+//'   interval equal to \code{lookb} number of end points.
 //'   
 //'   If the arguments \code{endd} and \code{startp} are not given then it
 //'   first calculates a vector of end points separated by \code{step} time
@@ -6646,7 +6759,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   
 //'   For example, the rolling regression at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   It passes the subset time series to the function \code{calc_reg()}, which
 //'   calculates the regression coefficients, their t-values, and the z-score.
@@ -6664,13 +6777,14 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   the predictor matrix.
 //'   If the predictor matrix contains an intercept column then the first
 //'   regression coefficient is equal to the intercept value \eqn{\alpha}.
+//'   
 //'   The number of columns of the return matrix is equal to the number of
 //'   regression coefficients, plus their t-values, plus the z-score column.
 //'   The number of t-values is equal to the number of coefficients.
-//'   For example, if the number of columns of the predictor matrix is equal to
-//'   \code{n}, then \code{roll_reg()} returns a matrix with \code{2n+1}
-//'   columns: \code{n} regression coefficients, \code{n} corresponding
-//'   t-values, and \code{1} z-score column.
+//'   If the number of columns of the predictor matrix is equal to \code{n},
+//'   then \code{roll_reg()} returns a matrix with \code{2n+1} columns: \code{n}
+//'   regression coefficients, \code{n} corresponding t-values, and \code{1}
+//'   z-score column.
 //' 
 //' @examples
 //' \dontrun{
@@ -6680,8 +6794,8 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //' predm <- cbind(rep(1, NROW(predm)), predm)
 //' # Define monthly end points and start points
 //' endd <- xts::endpoints(predm, on="months")[-1]
-//' look_back <- 12
-//' startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
+//' lookb <- 12
+//' startp <- c(rep(1, lookb), endd[1:(NROW(endd)-lookb)])
 //' # Create a default list of regression parameters
 //' controlv <- HighFreq::param_reg()
 //' # Calculate rolling betas using RcppArmadillo
@@ -6705,7 +6819,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
                    arma::uvec startp = 0, 
                    arma::uvec endd = 0, 
                    arma::uword step = 1, 
-                   arma::uword look_back = 1, 
+                   arma::uword lookb = 1, 
                    arma::uword stub = 0) {
   
   // Allocate end points
@@ -6723,8 +6837,8 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -6754,7 +6868,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
   
   // Warmup period
   // regroll.rows(0, ncols+1) = zeros(ncols+2, (ncols + 1));
-  // for (arma::uword it = (ncols+2); it < look_back; it++) {
+  // for (arma::uword it = (ncols+2); it < lookb; it++) {
   //   responsi = respv.rows(0, it);
   //   predicti = predm.rows(0, it);
   //   reg_data = calc_reg(responsi, predicti);
@@ -6762,9 +6876,9 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
   // }  // end for
   
   // Remaining periods
-  // for (arma::uword it = look_back; it < nrows; it++) {
-  //   responsi = respv.rows(it-look_back+1, it);
-  //   predicti = predm.rows(it-look_back+1, it);
+  // for (arma::uword it = lookb; it < nrows; it++) {
+  //   responsi = respv.rows(it-lookb+1, it);
+  //   predicti = predm.rows(it-lookb+1, it);
   //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alpha);
   //   regroll.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
@@ -6781,7 +6895,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //' 
 //' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
 //' 
-//' @param \code{look_back} The length of the look-back interval, equal to the
+//' @param \code{lookb} The length of the look-back interval, equal to the
 //'   number of rows of data used in the scaling.
 //'   
 //' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
@@ -6809,7 +6923,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //'   using \code{RcppArmadillo}.
 //'   The function \code{roll_scale()} performs a loop over the rows of
 //'   \code{tseries}, subsets a number of previous (past) rows equal to
-//'   \code{look_back}, and standardizes the subset matrix by calling the
+//'   \code{lookb}, and standardizes the subset matrix by calling the
 //'   function \code{calc_scale()}.  It assigns the last row of the standardized
 //'   subset \emph{matrix} to the return matrix.
 //'   
@@ -6833,9 +6947,9 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //' \dontrun{
 //' # Calculate a time series of returns
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-//' look_back <- 11
-//' rolled_scaled <- roll::roll_scale(retp, width=look_back, min_obs=1)
-//' rolled_scaled2 <- HighFreq::roll_scale(retp, look_back=look_back)
+//' lookb <- 11
+//' rolled_scaled <- roll::roll_scale(retp, width=lookb, min_obs=1)
+//' rolled_scaled2 <- HighFreq::roll_scale(retp, lookb=lookb)
 //' all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
 //'   check.attributes=FALSE)
 //' }
@@ -6843,7 +6957,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_scale(const arma::mat& matrix, 
-                     arma::uword look_back,
+                     arma::uword lookb,
                      bool center = true, 
                      bool scale = true, 
                      bool use_median = false) {
@@ -6854,15 +6968,15 @@ arma::mat roll_scale(const arma::mat& matrix,
   
   // Warmup period
   scaledmat.row(0) = matrix.row(0);
-  for (arma::uword it = 1; it < look_back; it++) {
+  for (arma::uword it = 1; it < lookb; it++) {
     sub_mat = matrix.rows(0, it);
     calc_scale(sub_mat, center, scale, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   // Perform loop over the remaining rows
-  for (arma::uword it = look_back; it < nrows; it++) {
-    sub_mat = matrix.rows(it-look_back+1, it);
+  for (arma::uword it = lookb; it < nrows; it++) {
+    sub_mat = matrix.rows(it-lookb+1, it);
     calc_scale(sub_mat, center, scale, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
@@ -6958,26 +7072,26 @@ arma::mat roll_scale(const arma::mat& matrix,
 //' # Calculate historical returns
 //' retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 //' # Calculate the trailing standardized returns using R code
-//' lambda <- 0.9
-//' lambda1 <- 1 - lambda
+//' lambdaf <- 0.9 # Decay factor
+//' lambda1 <- 1 - lambdaf
 //' scaled <- zoo::coredata(retp)
 //' meanm <- scaled[1, ];
 //' vars <- scaled[1, ]^2;
 //' for (it in 2:NROW(retp)) {
-//'   meanm <- lambda*meanm + lambda1*scaled[it, ];
-//'   vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+//'   meanm <- lambdaf*meanm + lambda1*scaled[it, ];
+//'   vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;
 //'   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 //' }  # end for
 //' # Calculate the trailing standardized returns using C++ code
-//' HighFreq::run_scale(retp, lambda=lambda)
+//' HighFreq::run_scale(retp, lambda=lambdaf)
 //' all.equal(zoo::coredata(retp), scaled, check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
-//'   Rcpp=HighFreq::run_scale(retp, lambda=lambda),
+//'   Rcpp=HighFreq::run_scale(retp, lambda=lambdaf),
 //'   Rcode={for (it in 2:NROW(retp)) {
-//'    meanm <- lambda*meanm + lambda1*scaled[it, ];
-//'    vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+//'    meanm <- lambdaf*meanm + lambda1*scaled[it, ];
+//'    vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;
 //'    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 //'   }},  # end for
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
@@ -7037,8 +7151,8 @@ void run_scale(arma::mat& tseries,
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -7053,7 +7167,7 @@ void run_scale(arma::mat& tseries,
 //'   
 //'   The function \code{roll_zscores()} performs a loop over the end points,
 //'   and at each end point it subsets the time series \code{predm} over a
-//'   look-back interval equal to \code{look_back} number of end points.
+//'   look-back interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function \code{calc_lm()}, which
 //'   calculates the regression data.
@@ -7066,7 +7180,7 @@ void run_scale(arma::mat& tseries,
 //'   
 //'   For example, the rolling variance at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //' @examples
 //' \dontrun{
@@ -7077,12 +7191,12 @@ void run_scale(arma::mat& tseries,
 //' # Predictor matrix equals VTI and IEF returns
 //' predm <- retp[, -1]
 //' # Calculate Z-scores from rolling time series regression using RcppArmadillo
-//' look_back <- 11
-//' zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, look_back)
+//' lookb <- 11
+//' zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, lookb)
 //' # Calculate z-scores in R from rolling multivariate regression using lm()
 //' zscoresr <- sapply(1:NROW(predm), function(ro_w) {
 //'   if (ro_w == 1) return(0)
-//'   startpoint <- max(1, ro_w-look_back+1)
+//'   startpoint <- max(1, ro_w-lookb+1)
 //'   responsi <- response[startpoint:ro_w]
 //'   predicti <- predictor[startpoint:ro_w, ]
 //'   regmod <- lm(responsi ~ predicti)
@@ -7090,7 +7204,7 @@ void run_scale(arma::mat& tseries,
 //'   residuals[NROW(residuals)]/sd(residuals)
 //' })  # end sapply
 //' # Compare the outputs of both functions
-//' all.equal(zscores[-(1:look_back)], zscoresr[-(1:look_back)], 
+//' all.equal(zscores[-(1:lookb)], zscoresr[-(1:lookb)], 
 //'   check.attributes=FALSE)
 //' }
 //' 
@@ -7101,7 +7215,7 @@ arma::vec roll_zscores(const arma::mat& respv, // Response vector
                        arma::uvec startp = 0, 
                        arma::uvec endd = 0, 
                        arma::uword step = 1, 
-                       arma::uword look_back = 1,
+                       arma::uword lookb = 1,
                        arma::uword stub = 0) {
   
   // Allocate end points
@@ -7119,8 +7233,8 @@ arma::vec roll_zscores(const arma::mat& respv, // Response vector
   
   // Calculate start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -7144,16 +7258,16 @@ arma::vec roll_zscores(const arma::mat& respv, // Response vector
   
   // Old code below
   // Warmup period
-  // for (arma::uword it = 1; it < look_back; it++) {
+  // for (arma::uword it = 1; it < lookb; it++) {
   //   responsi = respv.rows(0, it);
   //   predicti = predm.rows(0, it);
   //   zscores(it) = calc_lm(responsi, predicti)["zscore"];
   // }  // end for
   
   // Remaining periods
-  // for (arma::uword it = look_back; it < nrows; it++) {
-  //   responsi = respv.rows(it-look_back+1, it);
-  //   predicti = predm.rows(it-look_back+1, it);
+  // for (arma::uword it = lookb; it < nrows; it++) {
+  //   responsi = respv.rows(it-lookb+1, it);
+  //   predicti = predm.rows(it-lookb+1, it);
   //   zscores(it) = calc_lm(responsi, predicti)["zscore"];
   // }  // end for
   
@@ -7237,8 +7351,8 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' @param \code{step} The number of time periods between the end points (the
 //'   default is \code{step = 1}).
 //'
-//' @param \code{look_back} The number of end points in the look-back interval
-//'   (the default is \code{look_back = 1}).
+//' @param \code{lookb} The number of end points in the look-back interval
+//'   (the default is \code{lookb = 1}).
 //'   
 //' @param \code{stub} An \emph{integer} value equal to the first end point for
 //'   calculating the end points (the default is \code{stub = 0}).
@@ -7254,7 +7368,7 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //'   
 //'   The function \code{roll_moment()} performs a loop over the end points, and
 //'   at each end point it subsets the time series \code{tseries} over a
-//'   look-back interval equal to \code{look_back} number of end points.
+//'   look-back interval equal to \code{lookb} number of end points.
 //'   
 //'   It passes the subset time series to the function specified by the argument
 //'   \code{funame}, which calculates the statistic.
@@ -7277,7 +7391,7 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' 
 //'   For example, the rolling variance at \code{25} day end points, with a
 //'   \code{75} day look-back, can be calculated using the parameters
-//'   \code{step = 25} and \code{look_back = 3}.
+//'   \code{step = 25} and \code{lookb = 3}.
 //'
 //'   The function \code{roll_moment()} calls the function \code{calc_momptr()}
 //'   to calculate a pointer to a moment function from the function name
@@ -7293,14 +7407,14 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //' # Define time series of returns using package rutils
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-//' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", step=25, look_back=3)
+//' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", step=25, lookb=3)
 //' # Calculate the rolling variance using roll_var()
-//' var_roll <- HighFreq::roll_var(retp, step=25, look_back=3)
+//' var_roll <- HighFreq::roll_var(retp, step=25, lookb=3)
 //' # Compare the two methods
 //' all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 //' # Define end points and start points
 //' endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
-//' startp <- HighFreq::calc_startpoints(endd, look_back=3)
+//' startp <- HighFreq::calc_startpoints(endd, lookb=3)
 //' # Calculate the rolling variance using RcppArmadillo
 //' var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd)
 //' # Calculate the rolling variance using R code
@@ -7328,7 +7442,7 @@ arma::mat roll_moment(const arma::mat& tseries,
                       arma::uvec startp = 0, 
                       arma::uvec endd = 0, 
                       arma::uword step = 1, 
-                      arma::uword look_back = 1, 
+                      arma::uword lookb = 1, 
                       arma::uword stub = 0) {
   
   // Allocate end points
@@ -7346,8 +7460,8 @@ arma::mat roll_moment(const arma::mat& tseries,
   
   // Calculate the start points if missing
   if (sum(startp) == 0) {
-    // Start points equal to end points lagged by look_back
-    startpts = calc_startpoints(endpts, look_back);
+    // Start points equal to end points lagged by lookb
+    startpts = calc_startpoints(endpts, lookb);
   } else {
     // Copy start points
     startpts = startp;
@@ -8039,10 +8153,10 @@ double lik_garch(double omega,
 //' datev <- zoo::index(retp) # dates
 //' # Simulate a portfolio optimization strategy
 //' dimax <- 6
-//' lambda <- 0.978
+//' lambdaf <- 0.978 # Decay factor
 //' lambdacov <- 0.995
 //' lambdaw <- 0.9
-//' pnls <- HighFreq::sim_portfoptim(retp, dimax, lambda, lambdacov, lambdaw)
+//' pnls <- HighFreq::sim_portfoptim(retp, dimax, lambdaf, lambdacov, lambdaw)
 //' colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 //' pnls <- xts::xts(pnls, order.by=datev)
 //' # Plot dygraph of strategy
@@ -8504,8 +8618,8 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' endd <- endd[endd > 0]
 //' nrows <- NROW(endd)
 //' # Define 12-month look-back interval and start points over sliding window
-//' look_back <- 12
-//' startp <- c(rep_len(1, look_back-1), endd[1:(nrows-look_back+1)])
+//' lookb <- 12
+//' startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 //' # Define return shrinkage and dimension reduction
 //' alpha <- 0.5
 //' dimax <- 3

@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{roll_reg}
 \alias{roll_reg}
-\title{Calculate a \emph{matrix} of regression coefficients, their t-values, and
-z-scores, at the end points of the predictor matrix.}
+\title{Perform a rolling regression and calculate a matrix of regression
+coefficients, their t-values, and z-scores.}
 \usage{
 roll_reg(
   respv,
@@ -12,7 +12,7 @@ roll_reg(
   startp = 0L,
   endd = 0L,
   step = 1L,
-  look_back = 1L,
+  lookb = 1L,
   stub = 0L
 )
 }
@@ -34,8 +34,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -47,17 +47,17 @@ A \emph{matrix} with the regression coefficients, their t-values,
   columns of \code{predm}.
 }
 \description{
-Calculate a \emph{matrix} of regression coefficients, their t-values, and
-z-scores, at the end points of the predictor matrix.
+Perform a rolling regression and calculate a matrix of regression
+coefficients, their t-values, and z-scores.
 }
 \details{
-The function \code{roll_reg()} calculates a \emph{matrix} of regression
-  coefficients, their t-values, and z-scores at the end points of the
-  predictor matrix.
+The function \code{roll_reg()} performs a rolling regression over the end
+  points of the predictor matrix, and calculates a \emph{matrix} of
+  regression coefficients, their t-values, and z-scores.
   
   The function \code{roll_reg()} performs a loop over the end points, and at
   each end point it subsets the time series \code{predm} over a look-back
-  interval equal to \code{look_back} number of end points.
+  interval equal to \code{lookb} number of end points.
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
@@ -67,7 +67,7 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   
   For example, the rolling regression at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 
   It passes the subset time series to the function \code{calc_reg()}, which
   calculates the regression coefficients, their t-values, and the z-score.
@@ -85,13 +85,14 @@ The function \code{roll_reg()} calculates a \emph{matrix} of regression
   the predictor matrix.
   If the predictor matrix contains an intercept column then the first
   regression coefficient is equal to the intercept value \eqn{\alpha}.
+  
   The number of columns of the return matrix is equal to the number of
   regression coefficients, plus their t-values, plus the z-score column.
   The number of t-values is equal to the number of coefficients.
-  For example, if the number of columns of the predictor matrix is equal to
-  \code{n}, then \code{roll_reg()} returns a matrix with \code{2n+1}
-  columns: \code{n} regression coefficients, \code{n} corresponding
-  t-values, and \code{1} z-score column.
+  If the number of columns of the predictor matrix is equal to \code{n},
+  then \code{roll_reg()} returns a matrix with \code{2n+1} columns: \code{n}
+  regression coefficients, \code{n} corresponding t-values, and \code{1}
+  z-score column.
 }
 \examples{
 \dontrun{
@@ -101,8 +102,8 @@ predm <- na.omit(rutils::etfenv$returns[, c("XLP", "VTI")])
 predm <- cbind(rep(1, NROW(predm)), predm)
 # Define monthly end points and start points
 endd <- xts::endpoints(predm, on="months")[-1]
-look_back <- 12
-startp <- c(rep(1, look_back), endd[1:(NROW(endd)-look_back)])
+lookb <- 12
+startp <- c(rep(1, lookb), endd[1:(NROW(endd)-lookb)])
 # Create a default list of regression parameters
 controlv <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo

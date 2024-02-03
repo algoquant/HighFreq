@@ -62,8 +62,8 @@ The function \code{run_max()} calculates the trailing maximum values of
 # Calculate historical prices
 closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing maximums
-lambda <- 0.9
-pricmax <- HighFreq::run_max(closep, lambda=lambda)
+lambdaf <- 0.9
+pricmax <- HighFreq::run_max(closep, lambda=lambdaf)
 # Plot dygraph of VTI prices and trailing maximums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 colnames(datav) <- c("prices", "max")

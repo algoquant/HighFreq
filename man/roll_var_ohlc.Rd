@@ -11,7 +11,7 @@ roll_var_ohlc(
   startp = 0L,
   endd = 0L,
   step = 1L,
-  look_back = 1L,
+  lookb = 1L,
   stub = 0L,
   method = "yang_zhang",
   scale = TRUE,
@@ -31,8 +31,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -77,7 +77,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   function \code{calc_var_ohlc()}.
 
   At each end point, the variance is calculated over a look-back interval
-  equal to \code{look_back} number of end points.
+  equal to \code{lookb} number of end points.
   In the initial warmup period, the variance is calculated over an expanding
   look-back interval.
   
@@ -89,12 +89,12 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
 
   For example, the rolling variance at daily end points with an \code{11}
   day look-back, can be calculated using the parameters \code{step = 1} and
-  \code{look_back = 1} (Assuming the \code{ohlc} data has daily
+  \code{lookb = 1} (Assuming the \code{ohlc} data has daily
   frequency.)
 
   Similarly, the rolling variance at \code{25} day end points with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3} (because \code{3*25 = 75}).
+  \code{step = 25} and \code{lookb = 3} (because \code{3*25 = 75}).
 
   The function \code{roll_var_ohlc()} calculates the variance from all the
   different intra-day and day-over-day returns (defined as the differences
@@ -133,7 +133,7 @@ ohlc <- log(HighFreq::SPY)
 indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at minutes end points, with a 21 minute look-back
 varoll <- HighFreq::roll_var_ohlc(ohlc, 
-                              step=1, look_back=21, 
+                              step=1, lookb=21, 
                               method="yang_zhang", 
                               index=indeks, scale=TRUE)
 # Daily OHLC prices
@@ -141,7 +141,7 @@ ohlc <- rutils::etfenv$VTI
 indeks <- c(1, diff(xts::.index(ohlc)))
 # Rolling variance at 5 day end points, with a 20 day look-back (20=4*5)
 varoll <- HighFreq::roll_var_ohlc(ohlc, 
-                              step=5, look_back=4, 
+                              step=5, lookb=4, 
                               method="yang_zhang", 
                               index=indeks, scale=TRUE)
 # Same calculation in R

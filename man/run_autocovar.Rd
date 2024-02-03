@@ -73,9 +73,9 @@ The function \code{run_autocovar()} calculates the trailing
 # Calculate historical returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing autocovariance
-lambda <- 0.9
+lambdaf <- 0.9
 lagg <- 3
-covars <- HighFreq::run_autocovar(retp, lambda=lambda, lagg=lagg)
+covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
 # Calculate the trailing autocorrelation
 correl <- covars[, 1]/covars[, 2]
 # Calculate the trailing autocovariance using R code
@@ -86,9 +86,9 @@ retd <- numeric(nrows)
 covarr <- numeric(nrows)
 covarr[1] <- retp[1, ]^2
 for (it in 2:nrows) {
-  retm[it] <- lambda*retm[it-1] + (1-lambda)*(retp[it])
+  retm[it] <- lambdaf*retm[it-1] + (1-lambdaf)*(retp[it])
   retd[it] <- retp[it] - retm[it]
-  covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it]*retd[max(it-lagg, 1)]
+  covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it]*retd[max(it-lagg, 1)]
 } # end for
 all.equal(covarr, covars[, 1])
 }

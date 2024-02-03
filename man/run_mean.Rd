@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_mean}
 \alias{run_mean}
-\title{Calculate the trailing weighted means of streaming \emph{time series} data
-using an online recursive formula.}
+\title{Calculate the exponential moving average (EMA) of streaming \emph{time
+series} data using an online recursive formula.}
 \usage{
 run_mean(tseries, lambda, weightv = 0L)
 }
@@ -19,14 +19,14 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing weighted means of streaming \emph{time series} data
-using an online recursive formula.
+Calculate the exponential moving average (EMA) of streaming \emph{time
+series} data using an online recursive formula.
 }
 \details{
-The function \code{run_mean()} calculates the trailing weighted means of
-  the streaming \emph{time series} data \eqn{p_t} by recursively weighting
-  present and past values using the decay factor \eqn{\lambda}. If the
-  \code{weightv} argument is equal to zero, then the function
+The function \code{run_mean()} calculates the exponential moving average
+  (EMA) of the streaming \emph{time series} data \eqn{p_t} by recursively
+  weighting present and past values using the decay factor \eqn{\lambda}. If
+  the \code{weightv} argument is equal to zero, then the function
   \code{run_mean()} simply calculates the exponentially weighted moving
   average value of the streaming \emph{time series} data \eqn{p_t}:
   \deqn{
@@ -39,7 +39,7 @@ The function \code{run_mean()} calculates the trailing weighted means of
   
   If the argument \code{weightv} has the same number of rows as the argument
   \code{tseries}, then the function \code{run_mean()} calculates the
-  trailing weighted means in two steps.
+  exponential moving average (EMA) in two steps.
   
   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
   \deqn{
@@ -93,26 +93,26 @@ The function \code{run_mean()} calculates the trailing weighted means of
 ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
-lambda <- 0.9
-meanv <- HighFreq::run_mean(closep, lambda=lambda)
+lambdaf <- 0.9
+meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
 # Calculate the trailing means using R code
-pricef <- (1-lambda)*filter(closep, 
-  filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), 
+pricef <- (1-lambdaf)*filter(closep, 
+  filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), 
   method="recursive")
 all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(closep, lambda=lambda),
-  Rcode=filter(closep, filter=lambda, init=as.numeric(closep[1, 1])/(1-lambda), method="recursive"),
+  Rcpp=HighFreq::run_mean(closep, lambda=lambdaf),
+  Rcode=filter(closep, filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Calculate weights equal to the trading volumes
 weightv <- quantmod::Vo(ohlc)
-# Calculate the trailing weighted means
-meanw <- HighFreq::run_mean(closep, lambda=lambda, weightv=weightv)
-# Plot dygraph of the trailing weighted means
+# Calculate the exponential moving average (EMA)
+meanw <- HighFreq::run_mean(closep, lambda=lambdaf, weightv=weightv)
+# Plot dygraph of the EMA
 datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means trailing", "means weighted")
 dygraphs::dygraph(datav, main="Trailing Means") \%>\%

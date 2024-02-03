@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_reg}
 \alias{run_reg}
-\title{Perform regressions on streaming \emph{time series} of response and
+\title{Perform regressions on the streaming \emph{time series} of response and
 predictor data, and calculate the regression coefficients, the residuals,
 and the forecasts, using online recursive formulas.}
 \usage{
@@ -25,12 +25,12 @@ A \emph{matrix} with the regression coefficients, the residuals, and
   as the predictor argument \code{predm}.
 }
 \description{
-Perform regressions on streaming \emph{time series} of response and
+Perform regressions on the streaming \emph{time series} of response and
 predictor data, and calculate the regression coefficients, the residuals,
 and the forecasts, using online recursive formulas.
 }
 \details{
-The function \code{run_reg()} performs regressions on streaming \emph{time
+The function \code{run_reg()} performs regressions on the streaming \emph{time
   series} of response \eqn{r_t} and predictor \eqn{p_t} data:
   \deqn{
     r_t = \beta_t p_t + \epsilon_t
@@ -54,7 +54,7 @@ The function \code{run_reg()} performs regressions on streaming \emph{time
   \eqn{{cov}_t}, divided by the covariance matrix between the predictors
   \eqn{{cov}_{pt}}:
   \deqn{
-    \beta_t = {cov}_t {cov}^{-1}_{p t}
+    \beta_t = {cov}_t \, {cov}^{-1}_{p t}
   }
   
   It calculates the residuals \eqn{\epsilon_t} as the difference between the
@@ -71,12 +71,15 @@ The function \code{run_reg()} performs regressions on streaming \emph{time
     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
   }
 
-  It finally calculates the forecasts \eqn{f_t}, as equal to the past
-  regression coefficients \eqn{\beta_{t-1}} times the predictor data
-  \eqn{p_t}:
+  It then calculates the regression forecasts \eqn{f_t}, as equal to the
+  past regression coefficients \eqn{\beta_{t-1}} times the current predictor
+  data \eqn{p_t}:
   \deqn{
     f_t = \beta_{t-1} p_t
   }
+
+  It finally calculates the forecast errors as the difference between the
+  response minus the regression forecasts: \eqn{r_t - f_t}.
 
   The coefficient matrix \eqn{\beta} and the residuals \eqn{\epsilon} have
   the same number of rows as the predictor argument \code{predm}.
@@ -97,8 +100,9 @@ The function \code{run_reg()} performs regressions on streaming \emph{time
   If \code{regmod = "least_squares"} (the default) then it performs the
   standard least squares regression.  This is currently the only option.
 
-  The \emph{residuals} may be scaled by their volatilities to obtain the
-  \emph{z-scores}. The default is \code{residscale = "none"} - no scaling.
+  The \emph{residuals} and the the \emph{forecast errors} may be scaled by
+  their volatilities to obtain the \emph{z-scores}. 
+  The default is \code{residscale = "none"} - no scaling.
   If the argument \code{residscale = "scale"} then the \emph{residuals}
   \eqn{\epsilon_t} are divided by their volatilities \eqn{\sigma_t}
   without subtracting their means:
@@ -112,6 +116,9 @@ The function \code{run_reg()} performs regressions on streaming \emph{time
     \epsilon_t = \frac{\epsilon_t - \bar{\epsilon}}{\sigma_t}
   }
   Which are equal to the \emph{z-scores}.
+  
+  The \emph{forecast errors} are also scaled in the same way as the
+  \emph{residuals}, according to the argument\code{residscale}.
 
   The above online recursive formulas are convenient for processing live
   streaming data because they don't require maintaining a buffer of past
@@ -135,10 +142,11 @@ The function \code{run_reg()} performs regressions on streaming \emph{time
   The function \code{run_reg()} returns multiple columns of data, with the
   same number of rows as the predictor matrix \code{predm}. If the predictor
   matrix \code{predm} has \code{n} columns then \code{run_reg()} returns a
-  matrix with \code{n+1} columns.
+  matrix with \code{n+2} columns.
   The first \code{n} columns contain the regression coefficients (with the
-  first column equal to the alpha value \eqn{\alpha}) and the last
-  column contains the \emph{residuals} \eqn{\epsilon_t}.
+  first column equal to the alpha value \eqn{\alpha}).
+  The last \code{2} columns are the regression residuals and the forecast
+  errors.
 }
 \examples{
 \dontrun{
@@ -151,7 +159,7 @@ predm <- retp[, -1]
 # Add unit intercept column to the predictor matrix
 predm <- cbind(rep(1, NROW(predm)), predm)
 # Calculate the trailing regressions
-lambda <- 0.9
+lambdaf <- 0.9
 # Create a list of regression parameters
 controlv <- HighFreq::param_reg(residscale="standardize")
 regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
@@ -167,7 +175,7 @@ dygraphs::dygraph(datav["2008/2009"], main="Residuals of XLF Versus VTI and IEF"
   dyLegend(show="always", width=300)
 
 # Calculate the trailing regressions using R code
-lambda1 <- (1-lambda)
+lambda1 <- (1-lambdaf)
 respv <- zoo::coredata(respv)
 predm <- zoo::coredata(predm)
 nrows <- NROW(predm)
@@ -180,12 +188,12 @@ resids <- numeric(nrows)
 residm <- 0
 residv <- 0
 for (it in 2:nrows) {
- covrespred <- lambda*covrespred + lambda1*respv[it, ]*predm[it, ]
- covpred <- lambda*covpred + lambda1*outer(predm[it, ], predm[it, ])
+ covrespred <- lambdaf*covrespred + lambda1*respv[it, ]*predm[it, ]
+ covpred <- lambdaf*covpred + lambda1*outer(predm[it, ], predm[it, ])
  betas[it, ] <- covrespred \%*\% MASS::ginv(covpred)
  resids[it] <- respv[it, ] - (betas[it, ] \%*\% predm[it, ])
- residm <- lambda*residm + lambda1*resids[it]
- residv <- lambda*residv + lambda1*(resids[it] - residm)^2
+ residm <- lambdaf*residm + lambda1*resids[it]
+ residv <- lambdaf*residv + lambda1*(resids[it] - residm)^2
  resids[it] <- (resids[it] - residm)/sqrt(residv)
 } # end for
 # Compare values, excluding warmup period

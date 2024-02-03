@@ -36,7 +36,7 @@ The function \code{calc_inv()} calculates the \emph{reduced inverse}
   The eigen decomposition of a matrix \eqn{\strong{C}} is defined as the
   factorization:
   \deqn{
-    \strong{C} = \strong{O}  \, \Sigma  \, \strong{O}^T
+    \strong{C} = \strong{O} \, \Sigma \, \strong{O}^T
   } Where \eqn{\strong{O}} is the matrix of \emph{eigen vectors} and
   \eqn{\Sigma} is a diagonal matrix of \emph{eigen values}.
   

@@ -11,7 +11,7 @@ roll_zscores(
   startp = 0L,
   endd = 0L,
   step = 1L,
-  look_back = 1L,
+  lookb = 1L,
   stub = 0L
 )
 }
@@ -31,8 +31,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -52,7 +52,7 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   
   The function \code{roll_zscores()} performs a loop over the end points,
   and at each end point it subsets the time series \code{predm} over a
-  look-back interval equal to \code{look_back} number of end points.
+  look-back interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_lm()}, which
   calculates the regression data.
@@ -65,7 +65,7 @@ The function \code{roll_zscores()} calculates a \emph{vector} of z-scores
   
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 }
 \examples{
 \dontrun{
@@ -76,12 +76,12 @@ respv <- retp[, 1]
 # Predictor matrix equals VTI and IEF returns
 predm <- retp[, -1]
 # Calculate Z-scores from rolling time series regression using RcppArmadillo
-look_back <- 11
-zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, look_back)
+lookb <- 11
+zscores <- HighFreq::roll_zscores(respv=respv, predm=predm, lookb)
 # Calculate z-scores in R from rolling multivariate regression using lm()
 zscoresr <- sapply(1:NROW(predm), function(ro_w) {
   if (ro_w == 1) return(0)
-  startpoint <- max(1, ro_w-look_back+1)
+  startpoint <- max(1, ro_w-lookb+1)
   responsi <- response[startpoint:ro_w]
   predicti <- predictor[startpoint:ro_w, ]
   regmod <- lm(responsi ~ predicti)
@@ -89,7 +89,7 @@ zscoresr <- sapply(1:NROW(predm), function(ro_w) {
   residuals[NROW(residuals)]/sd(residuals)
 })  # end sapply
 # Compare the outputs of both functions
-all.equal(zscores[-(1:look_back)], zscoresr[-(1:look_back)], 
+all.equal(zscores[-(1:lookb)], zscoresr[-(1:lookb)], 
   check.attributes=FALSE)
 }
 

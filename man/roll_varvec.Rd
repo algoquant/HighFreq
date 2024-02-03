@@ -6,15 +6,15 @@
 interval for a single-column \emph{time series} or a single-column
 \emph{matrix}, using \code{RcppArmadillo}.}
 \usage{
-roll_varvec(tseries, look_back = 1L)
+roll_varvec(tseries, lookb = 1L)
 }
 \arguments{
 \item{\code{tseries}}{A single-column \emph{time series} or a single-column
 \emph{matrix}.}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
+\item{\code{lookb}}{The length of the look-back interval, equal to the
 number of \emph{vector} elements used for calculating a single variance
-estimate (the default is \code{look_back = 1}).}
+estimate (the default is \code{lookb = 1}).}
 }
 \value{
 A single-column \emph{matrix} with the same number of elements as
@@ -46,12 +46,12 @@ The function \code{roll_varvec()} calculates a \emph{vector} of variance
 # Create a vector of random returns
 retp <- rnorm(1e6)
 # Compare the variance estimates over 11-period look-back intervals
-all.equal(drop(HighFreq::roll_varvec(retp, look_back=11))[-(1:10)], 
+all.equal(drop(HighFreq::roll_varvec(retp, lookb=11))[-(1:10)], 
   RcppRoll::roll_var(retp, n=11))
 # Compare the speed of RcppArmadillo with RcppRoll
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_varvec(retp, look_back=11),
+  Rcpp=HighFreq::roll_varvec(retp, lookb=11),
   RcppRoll=RcppRoll::roll_var(retp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

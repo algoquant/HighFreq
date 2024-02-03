@@ -8,7 +8,7 @@ look-back interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_var(
   tseries,
-  look_back = 1L,
+  lookb = 1L,
   startp = 0L,
   endd = 0L,
   step = 1L,
@@ -20,8 +20,8 @@ roll_var(
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -55,7 +55,7 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   
   The function \code{roll_var()} performs a loop over the end points, and at
   each end point it subsets the time series \code{tseries} over a look-back
-  interval equal to \code{look_back} number of end points.
+  interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_var()}, which
   calculates the dispersion.
@@ -70,7 +70,7 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
 
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 
   The function \code{roll_var()} with the parameter \code{step = 1}
   performs the same calculation as the function \code{roll_var()} from
@@ -88,19 +88,19 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-varv <- HighFreq::roll_var(retp, look_back=3, step=25)
+varv <- HighFreq::roll_var(retp, lookb=3, step=25)
 # Compare the variance estimates over 11-period look-back intervals
-all.equal(HighFreq::roll_var(retp, look_back=11)[-(1:10), ], 
+all.equal(HighFreq::roll_var(retp, lookb=11)[-(1:10), ], 
   drop(RcppRoll::roll_var(retp, n=11)), check.attributes=FALSE)
 # Compare the speed of HighFreq::roll_var() with RcppRoll::roll_var()
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_var(retp, look_back=11),
+  Rcpp=HighFreq::roll_var(retp, lookb=11),
   RcppRoll=RcppRoll::roll_var(retp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 # Compare the speed of HighFreq::roll_var() with TTR::runMAD()
 summary(microbenchmark(
-    Rcpp=HighFreq::roll_var(retp, look_back=11, method="quantile"),
+    Rcpp=HighFreq::roll_var(retp, lookb=11, method="quantile"),
     TTR=TTR::runMAD(retp, n = 11),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

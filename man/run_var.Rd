@@ -2,13 +2,13 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var}
 \alias{run_var}
-\title{Calculate the trailing variance of streaming \emph{time series} of returns
+\title{Calculate the trailing variance of streaming \emph{time series} of data
 using an online recursive formula.}
 \usage{
 run_var(tseries, lambda)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of returns.}
+\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{lambda}}{A decay factor which multiplies past estimates.}
 }
@@ -17,23 +17,23 @@ A \emph{matrix} with the same dimensions as the input argument
   \code{tseries}.
 }
 \description{
-Calculate the trailing variance of streaming \emph{time series} of returns
+Calculate the trailing variance of streaming \emph{time series} of data
 using an online recursive formula.
 }
 \details{
 The function \code{run_var()} calculates the trailing variance of
-  streaming \emph{time series} of returns, by recursively weighting the past
-  variance estimates \eqn{\sigma^2_{t-1}}, with the squared differences of
-  the returns minus the trailing means \eqn{(r_t - \bar{r}_t)^2}, using the
-  decay factor \eqn{\lambda}:
+  streaming \emph{time series} of data \eqn{r_t}, by recursively weighting
+  the past variance estimates \eqn{\sigma^2_{t-1}}, with the squared
+  differences of the data minus its trailing means \eqn{(r_t -
+  \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
   \deqn{
     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
   }
   \deqn{
     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
   }
-  Where \eqn{\sigma^2_t} is the variance estimate at time \eqn{t}, and
-  \eqn{r_t} are the streaming returns data.
+  Where \eqn{r_t} are the streaming data, \eqn{\bar{r}_t} are the trailing
+  means, and \eqn{\sigma^2_t} are the trailing variance estimates.
 
   The above online recursive formulas are convenient for processing live
   streaming data because they don't require maintaining a buffer of past
@@ -66,20 +66,20 @@ The function \code{run_var()} calculates the trailing variance of
 # Calculate historical returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing variance
-lambda <- 0.9
-vars <- HighFreq::run_var(retp, lambda=lambda)
+lambdaf <- 0.9
+vars <- HighFreq::run_var(retp, lambda=lambdaf)
 # Calculate centered returns
-retc <- (retp - HighFreq::run_mean(retp, lambda=lambda))
+retc <- (retp - HighFreq::run_mean(retp, lambda=lambdaf))
 # Calculate the trailing variance using R code
-retc2 <- (1-lambda)*filter(retc^2, filter=lambda, 
-  init=as.numeric(retc[1, 1])^2/(1-lambda), 
+retc2 <- (1-lambdaf)*filter(retc^2, filter=lambdaf, 
+  init=as.numeric(retc[1, 1])^2/(1-lambdaf), 
   method="recursive")
 all.equal(vars, unclass(retc2), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_var(retp, lambda=lambda),
-  Rcode=filter(retc^2, filter=lambda, init=as.numeric(retc[1, 1])^2/(1-lambda), method="recursive"),
+  Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
+  Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }
 

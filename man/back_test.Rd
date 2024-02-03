@@ -13,7 +13,7 @@ back_test(
   endd,
   lambda = 0,
   coeff = 1,
-  spreadbo = 0
+  bidask = 0
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ weights.  (The default is \code{lambda = 0} - no memory.)}
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
 
-\item{\code{spreadbo}}{A \emph{numeric} bid-ask spread (the default is
+\item{\code{bidask}}{A \emph{numeric} bid-ask spread (the default is
 \code{0})}
 }
 \value{
@@ -86,7 +86,7 @@ The function \code{back_test()} performs a backtest simulation of a
   or a reverting strategy (if \code{coeff = -1}).
   
   The function \code{back_test()} calculates the transaction costs by
-  multiplying the bid-ask spread \code{spreadbo} times the absolute
+  multiplying the bid-ask spread \code{bidask} times the absolute
   difference between the current weights minus the weights from the previous
   period. Then it subtracts the transaction costs from the out-of-sample
   strategy returns.
@@ -107,8 +107,8 @@ endd <- rutils::calc_endpoints(retp, interval="months")
 endd <- endd[endd > 0]
 nrows <- NROW(endd)
 # Define 12-month look-back interval and start points over sliding window
-look_back <- 12
-startp <- c(rep_len(1, look_back-1), endd[1:(nrows-look_back+1)])
+lookb <- 12
+startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 # Define return shrinkage and dimension reduction
 alpha <- 0.5
 dimax <- 3

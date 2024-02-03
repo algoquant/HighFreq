@@ -11,7 +11,7 @@ roll_skew(
   startp = 0L,
   endd = 0L,
   step = 1L,
-  look_back = 1L,
+  lookb = 1L,
   stub = 0L,
   method = "moment",
   confl = 0.75
@@ -29,8 +29,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -58,7 +58,7 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
   
   The function \code{roll_skew()} performs a loop over the end points, and
   at each end point it subsets the time series \code{tseries} over a
-  look-back interval equal to \code{look_back} number of end points.
+  look-back interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_skew()}, which
   calculates the skewness.
@@ -73,7 +73,7 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
 
   For example, the rolling skewness at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 
   The function \code{roll_skew()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.
@@ -84,9 +84,9 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Define end points and start points
 endd <- 1 + HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endd, look_back=3)
+startp <- HighFreq::calc_startpoints(endd, lookb=3)
 # Calculate the rolling skewness at 25 day end points, with a 75 day look-back
-skewv <- HighFreq::roll_skew(retp, step=25, look_back=3)
+skewv <- HighFreq::roll_skew(retp, step=25, lookb=3)
 # Calculate the rolling skewness using R code
 skewr <- sapply(1:NROW(endd), function(it) {
   HighFreq::calc_skew(retp[startp[it]:endd[it], ])
@@ -96,7 +96,7 @@ all.equal(drop(skewv), skewr, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::roll_skew(retp, step=25, look_back=3),
+  Rcpp=HighFreq::roll_skew(retp, step=25, lookb=3),
   Rcode=sapply(1:NROW(endd), function(it) {
     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
   }),

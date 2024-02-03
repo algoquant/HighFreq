@@ -75,8 +75,8 @@ The function \code{run_covar()} calculates the trailing covariances of two
 # Calculate historical returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the trailing covariance
-lambda <- 0.9
-covars <- HighFreq::run_covar(retp, lambda=lambda)
+lambdaf <- 0.9
+covars <- HighFreq::run_covar(retp, lambda=lambdaf)
 # Calculate the trailing correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 # Calculate the trailing covariance using R code
@@ -87,9 +87,9 @@ retd <- matrix(numeric(2*nrows), nc=2)
 covarr <- numeric(nrows)
 covarr[1] <- retp[1, 1]*retp[1, 2]
 for (it in 2:nrows) {
-  retm[it, ] <- lambda*retm[it-1, ] + (1-lambda)*(retp[it, ])
+  retm[it, ] <- lambdaf*retm[it-1, ] + (1-lambdaf)*(retp[it, ])
   retd[it, ] <- retp[it, ] - retm[it, ]
-  covarr[it] <- lambda*covarr[it-1] + (1-lambda)*retd[it, 1]*retd[it, 2]
+  covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it, 1]*retd[it, 2]
 } # end for
 all.equal(covars[, 1], covarr, check.attributes=FALSE)
 }

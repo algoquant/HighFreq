@@ -132,10 +132,10 @@ retp <- na.omit(retp)
 datev <- zoo::index(retp) # dates
 # Simulate a portfolio optimization strategy
 dimax <- 6
-lambda <- 0.978
+lambdaf <- 0.978
 lambdacov <- 0.995
 lambdaw <- 0.9
-pnls <- HighFreq::sim_portfoptim(retp, dimax, lambda, lambdacov, lambdaw)
+pnls <- HighFreq::sim_portfoptim(retp, dimax, lambdaf, lambdacov, lambdaw)
 colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 pnls <- xts::xts(pnls, order.by=datev)
 # Plot dygraph of strategy

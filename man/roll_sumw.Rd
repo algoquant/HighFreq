@@ -5,7 +5,7 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_sumw(tseries, endd = NULL, look_back = 1L, stub = NULL, weightv = NULL)
+roll_sumw(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
@@ -13,9 +13,9 @@ roll_sumw(tseries, endd = NULL, look_back = 1L, stub = NULL, weightv = NULL)
 \item{\code{endd}}{An \emph{integer} vector of end points (the default is
 \code{endd = NULL}).}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
+\item{\code{lookb}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
-is \code{look_back = 1}).}
+is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = NULL}).}
@@ -56,13 +56,13 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
   then the rolling sums are calculated at the end points. 
   
   If only the argument \code{stub} is supplied, then the end points are
-  calculated from the \code{stub} and \code{look_back} arguments. The first
+  calculated from the \code{stub} and \code{lookb} arguments. The first
   end point is equal to \code{stub} and the end points are spaced
-  \code{look_back} periods apart.
+  \code{lookb} periods apart.
   
   If the arguments \code{weightv}, \code{endd}, and \code{stub} are
   not supplied, then the sums are calculated over a number of data points
-  equal to \code{look_back}.
+  equal to \code{lookb}.
   
   The function \code{roll_sumw()} is also several times faster than
   \code{rutils::roll_sum()} which uses vectorized \code{R} code.
@@ -77,21 +77,21 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
-look_back <- 11
+lookb <- 11
 # Calculate rolling sums and compare with rutils::roll_sum()
-sumc <- HighFreq::roll_sum(retp, look_back)
-sumr <- rutils::roll_sum(retp, look_back)
+sumc <- HighFreq::roll_sum(retp, lookb)
+sumr <- rutils::roll_sum(retp, lookb)
 all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
 sumr <- apply(zoo::coredata(retp), 2, cumsum)
-sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+sumlag <- rbind(matrix(numeric(2*lookb), nc=2), sumr[1:(NROW(sumr) - lookb), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 
 # Calculate rolling sums at end points
 stubv <- 21
-sumc <- HighFreq::roll_sumw(retp, look_back, stub=stubv)
-endd <- (stubv + look_back*(0:(NROW(retp) \%/\% look_back)))
+sumc <- HighFreq::roll_sumw(retp, lookb, stub=stubv)
+endd <- (stubv + lookb*(0:(NROW(retp) \%/\% lookb)))
 endd <- endd[endd < NROW(retp)]
 sumr <- apply(zoo::coredata(retp), 2, cumsum)
 sumr <- sumr[endd+1, ]

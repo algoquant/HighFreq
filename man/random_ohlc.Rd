@@ -10,7 +10,7 @@ random_ohlc(
   reducit = TRUE,
   volat = 6.5e-05,
   drift = 0,
-  indeks = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
+  datev = seq(from = as.POSIXct(paste(Sys.Date() - 3, "09:30:00")), to =
     as.POSIXct(paste(Sys.Date() - 1, "16:00:00")), by = "1 sec"),
   ...
 )
@@ -19,13 +19,13 @@ random_ohlc(
 \item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format (default is \emph{NULL}).}
 
-\item{\code{volat}}{The volatility per period of the \code{indeks} time index
+\item{\code{volat}}{The volatility per period of the \code{datev} time index
 (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{\code{drift}}{The drift per period of the \code{indeks} time index (default
+\item{\code{drift}}{The drift per period of the \code{datev} time index (default
 is 0.0).}
 
-\item{\code{indeks}}{The time index for the \emph{OHLC} time series.}
+\item{\code{datev}}{The time index for the \emph{OHLC} time series.}
 
 \item{\code{reducit}}{\emph{Boolean} argument: should \code{ohlc} time series be
 transformed to reduced form? (default is \code{TRUE})}

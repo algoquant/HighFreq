@@ -51,8 +51,8 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
 # Create local copy of SPY TAQ data
 taq <- HighFreq::SPY_TAQ
 # scrub quotes with suspect bid-ask spreads
-spreadbo <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-sus_pect <- which_extreme(spreadbo, look_back=51, vol_mult=3)
+bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
+sus_pect <- which_extreme(bidask, look_back=51, vol_mult=3)
 # Remove suspect values
 taq <- taq[!sus_pect]
 

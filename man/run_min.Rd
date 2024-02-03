@@ -62,8 +62,8 @@ The function \code{run_min()} calculates the trailing minimum values of
 # Calculate historical prices
 closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing minimums
-lambda <- 0.9
-pricmin <- HighFreq::run_min(closep, lambda=lambda)
+lambdaf <- 0.9
+pricmin <- HighFreq::run_min(closep, lambda=lambdaf)
 # Plot dygraph of VTI prices and trailing minimums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
 colnames(datav) <- c("prices", "min")

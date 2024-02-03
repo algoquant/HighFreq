@@ -5,14 +5,14 @@
 \title{Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 using \emph{Rcpp}.}
 \usage{
-roll_sum(tseries, look_back = 1L, weightv = 0L)
+roll_sum(tseries, lookb = 1L, weightv = 0L)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
+\item{\code{lookb}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
-is \code{look_back = 1}).}
+is \code{lookb = 1}).}
 
 \item{\code{weightv}}{A single-column \emph{matrix} of weights (the default
 is \code{weightv = 0}).}
@@ -68,21 +68,21 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("VTI", "IEF")])
 # Define parameters
-look_back <- 11
+lookb <- 11
 # Calculate rolling sums and compare with rutils::roll_sum()
-sumc <- HighFreq::roll_sum(retp, look_back)
-sumr <- rutils::roll_sum(retp, look_back)
+sumc <- HighFreq::roll_sum(retp, lookb)
+sumr <- rutils::roll_sum(retp, lookb)
 all.equal(sumc, coredata(sumr), check.attributes=FALSE)
 # Calculate rolling sums using R code
 sumr <- apply(zoo::coredata(retp), 2, cumsum)
-sumlag <- rbind(matrix(numeric(2*look_back), nc=2), sumr[1:(NROW(sumr) - look_back), ])
+sumlag <- rbind(matrix(numeric(2*lookb), nc=2), sumr[1:(NROW(sumr) - lookb), ])
 sumr <- (sumr - sumlag)
 all.equal(sumc, sumr, check.attributes=FALSE)
 # Calculate weights equal to the trading volumes
 weightv <- quantmod::Vo(rutils::etfenv$VTI)
 weightv <- weightv[zoo::index(retp)]
 # Calculate rolling weighted sums
-sumc <- HighFreq::roll_sum(retp, look_back, 1/weightv)
+sumc <- HighFreq::roll_sum(retp, lookb, 1/weightv)
 # Plot dygraph of the weighted sums
 datav <- cbind(retp$VTI, sumc[, 1])
 colnames(datav) <- c("VTI", "Weighted")

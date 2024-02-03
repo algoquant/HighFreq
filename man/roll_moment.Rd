@@ -14,7 +14,7 @@ roll_moment(
   startp = 0L,
   endd = 0L,
   step = 1L,
-  look_back = 1L,
+  lookb = 1L,
   stub = 0L
 )
 }
@@ -39,8 +39,8 @@ is \code{startp = 0}).}
 \item{\code{step}}{The number of time periods between the end points (the
 default is \code{step = 1}).}
 
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{stub}}{An \emph{integer} value equal to the first end point for
 calculating the end points (the default is \code{stub = 0}).}
@@ -62,7 +62,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
   
   The function \code{roll_moment()} performs a loop over the end points, and
   at each end point it subsets the time series \code{tseries} over a
-  look-back interval equal to \code{look_back} number of end points.
+  look-back interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function specified by the argument
   \code{funame}, which calculates the statistic.
@@ -85,7 +85,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
 
   For example, the rolling variance at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 
   The function \code{roll_moment()} calls the function \code{calc_momptr()}
   to calculate a pointer to a moment function from the function name
@@ -101,14 +101,14 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling variance at 25 day end points, with a 75 day look-back
-var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", step=25, look_back=3)
+var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", step=25, lookb=3)
 # Calculate the rolling variance using roll_var()
-var_roll <- HighFreq::roll_var(retp, step=25, look_back=3)
+var_roll <- HighFreq::roll_var(retp, step=25, lookb=3)
 # Compare the two methods
 all.equal(var_rollfun, var_roll, check.attributes=FALSE)
 # Define end points and start points
 endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endd, look_back=3)
+startp <- HighFreq::calc_startpoints(endd, lookb=3)
 # Calculate the rolling variance using RcppArmadillo
 var_rollfun <- HighFreq::roll_moment(retp, fun="calc_var", startp=startp, endd=endd)
 # Calculate the rolling variance using R code

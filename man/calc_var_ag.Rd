@@ -4,10 +4,10 @@
 \alias{calc_var_ag}
 \title{Calculate the variance of returns aggregated over the end points.}
 \usage{
-calc_var_ag(tseries, step = 1L)
+calc_var_ag(pricev, step = 1L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of log prices.}
+\item{\code{pricev}}{A \emph{time series} or a \emph{matrix} of prices.}
 
 \item{\code{step}}{The number of time periods in each interval between
 neighboring end points (the default is \code{step = 1}).}
@@ -24,7 +24,7 @@ The function \code{calc_var_ag()} calculates the variance of returns
 
   It first calculates the end points spaced apart by the number of periods
   equal to the argument \code{step}.  Then it calculates the aggregated
-  returns by differencing the prices \code{tseries} calculated at the end
+  returns by differencing the prices \code{pricev} calculated at the end
   points. Finally it calculates the variance of the returns.
 
   The choice of the first end point is arbitrary, so \code{calc_var_ag()}
@@ -47,12 +47,12 @@ The function \code{calc_var_ag()} calculates the variance of returns
 }
 \examples{
 \dontrun{
-# Calculate the log prices
+# Calculate the prices
 closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 closep <- log(closep)
-# Calculate the daily variance of percentage returns
+# Calculate the variance of daily returns
 calc_var_ag(prices, step=1)
-# Calculate the daily variance using R
+# Calculate the variance using R
 sapply(rutils::diffit(closep), var)
 # Calculate the variance of returns aggregated over 21 days
 calc_var_ag(prices, step=21)

@@ -37,7 +37,7 @@ The function \code{calc_invsvd()} calculates the \emph{reduced
   The \emph{SVD} of a matrix \eqn{\strong{C}} is defined as the
   factorization:
   \deqn{
-    \strong{C} = \strong{U}  \, \Sigma  \, \strong{V}^T
+    \strong{C} = \strong{U} \, \Sigma \, \strong{V}^T
   }
   Where \eqn{\strong{U}} and \eqn{\strong{V}} are the left and right
   \emph{singular matrices}, and \eqn{\Sigma} is a diagonal matrix of

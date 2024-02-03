@@ -96,26 +96,26 @@ The function \code{run_scale()} performs a trailing standardization
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 # Calculate the trailing standardized returns using R code
-lambda <- 0.9
-lambda1 <- 1 - lambda
+lambdaf <- 0.9
+lambda1 <- 1 - lambdaf
 scaled <- zoo::coredata(retp)
 meanm <- scaled[1, ];
 vars <- scaled[1, ]^2;
 for (it in 2:NROW(retp)) {
-  meanm <- lambda*meanm + lambda1*scaled[it, ];
-  vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+  meanm <- lambdaf*meanm + lambda1*scaled[it, ];
+  vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;
   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 }  # end for
 # Calculate the trailing standardized returns using C++ code
-HighFreq::run_scale(retp, lambda=lambda)
+HighFreq::run_scale(retp, lambda=lambdaf)
 all.equal(zoo::coredata(retp), scaled, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_scale(retp, lambda=lambda),
+  Rcpp=HighFreq::run_scale(retp, lambda=lambdaf),
   Rcode={for (it in 2:NROW(retp)) {
-   meanm <- lambda*meanm + lambda1*scaled[it, ];
-   vars <- lambda*vars + lambda1*(scaled[it, ] - meanm)^2;
+   meanm <- lambdaf*meanm + lambda1*scaled[it, ];
+   vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;
    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
   }},  # end for
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary

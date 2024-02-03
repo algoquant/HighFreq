@@ -5,12 +5,12 @@
 \title{Calculate a vector of start points by lagging (shifting) a vector of end
 points.}
 \usage{
-calc_startpoints(endd, look_back)
+calc_startpoints(endd, lookb)
 }
 \arguments{
 \item{\code{endd}}{An \emph{integer} vector of end points.}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
+\item{\code{lookb}}{The length of the look-back interval, equal to the
 lag (shift) applied to the end points.}
 }
 \value{
@@ -23,7 +23,7 @@ points.
 }
 \details{
 The start points are equal to the values of the vector \code{endd} lagged
-  (shifted) by an amount equal to \code{look_back}.  In addition, an extra
+  (shifted) by an amount equal to \code{lookb}.  In addition, an extra
   value of \code{1} is added to them, to avoid data overlaps.  The lag
   operation requires appending a beginning warmup interval containing zeros,
   so that the vector of start points has the same length as the \code{endd}.
@@ -32,7 +32,7 @@ The start points are equal to the values of the vector \code{endd} lagged
   divided into equal intervals of length \code{5}: \code{4, 9, 14, 19, 24}.
   (In \code{C++} the vector indexing starts at \code{0} not \code{1}, so
   it's shifted by \code{-1}.)
-  Then the start points for \code{look_back = 2} are equal to: \code{0, 0, 
+  Then the start points for \code{lookb = 2} are equal to: \code{0, 0, 
   5, 10, 15}.  The differences between the end points minus the
   corresponding start points are equal to \code{9}, except for the warmup
   interval.
@@ -41,6 +41,6 @@ The start points are equal to the values of the vector \code{endd} lagged
 # Calculate end points
 endd <- HighFreq::calc_endpoints(length=55, step=5)
 # Calculate start points corresponding to the end points
-startp <- HighFreq::calc_startpoints(endd, look_back=5)
+startp <- HighFreq::calc_startpoints(endd, lookb=5)
 
 }

@@ -4,12 +4,12 @@
 \alias{season_ality}
 \title{Perform seasonality aggregations over a single-column \emph{xts} time series.}
 \usage{
-season_ality(xtsv, indeks = format(zoo::index(xtsv), "\%H:\%M"))
+season_ality(xtsv, endp = format(zoo::index(xtsv), "\%H:\%M"))
 }
 \arguments{
 \item{\code{xtsv}}{A single-column \emph{xts} time series.}
 
-\item{\code{indeks}}{A vector of \emph{character} strings representing points in
+\item{\code{endp}}{A vector of \emph{character} strings representing points in
 time, of the same length as the argument \code{xtsv}.}
 }
 \value{
@@ -22,17 +22,17 @@ Perform seasonality aggregations over a single-column \emph{xts} time series.
 \details{
 The function \code{season_ality()} calculates the mean of values
   observed at the same points in time specified by the argument
-  \code{indeks}. An example of a daily seasonality aggregation is the average
+  \code{endp}. An example of a daily seasonality aggregation is the average
   price of a stock between 9:30AM and 10:00AM every day, over many days. The
-  argument \code{indeks} is passed into function \code{tapply()}, and must be
+  argument \code{endp} is passed into function \code{tapply()}, and must be
   the same length as the argument \code{xtsv}.
 }
 \examples{
 # Calculate running variance of each minutely OHLC bar of data
 xtsv <- ohlc_variance(HighFreq::SPY)
 # Remove overnight variance spikes at "09:31"
-indeks <- format(index(xtsv), "\%H:\%M")
-xtsv <- xtsv[!indeks=="09:31", ]
+endp <- format(index(xtsv), "\%H:\%M")
+xtsv <- xtsv[!endp=="09:31", ]
 # Calculate daily seasonality of variance
 var_seasonal <- season_ality(xtsv=xtsv)
 chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),

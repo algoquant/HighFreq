@@ -5,12 +5,12 @@
 \title{Perform a rolling standardization (centering and scaling) of the columns of
 a \emph{time series} of data using \code{RcppArmadillo}.}
 \usage{
-roll_scale(matrix, look_back, center = TRUE, scale = TRUE, use_median = FALSE)
+roll_scale(matrix, lookb, center = TRUE, scale = TRUE, use_median = FALSE)
 }
 \arguments{
 \item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
 
-\item{\code{look_back}}{The length of the look-back interval, equal to the
+\item{\code{lookb}}{The length of the look-back interval, equal to the
 number of rows of data used in the scaling.}
 
 \item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center
@@ -43,7 +43,7 @@ The function \code{roll_scale()} performs a rolling standardization
   using \code{RcppArmadillo}.
   The function \code{roll_scale()} performs a loop over the rows of
   \code{tseries}, subsets a number of previous (past) rows equal to
-  \code{look_back}, and standardizes the subset matrix by calling the
+  \code{lookb}, and standardizes the subset matrix by calling the
   function \code{calc_scale()}.  It assigns the last row of the standardized
   subset \emph{matrix} to the return matrix.
   
@@ -67,9 +67,9 @@ The function \code{roll_scale()} performs a rolling standardization
 \dontrun{
 # Calculate a time series of returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
-look_back <- 11
-rolled_scaled <- roll::roll_scale(retp, width=look_back, min_obs=1)
-rolled_scaled2 <- HighFreq::roll_scale(retp, look_back=look_back)
+lookb <- 11
+rolled_scaled <- roll::roll_scale(retp, width=lookb, min_obs=1)
+rolled_scaled2 <- HighFreq::roll_scale(retp, lookb=lookb)
 all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
   check.attributes=FALSE)
 }

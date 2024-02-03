@@ -8,7 +8,7 @@ look-back interval attached at the end points of a \emph{time series} or a
 \usage{
 roll_mean(
   tseries,
-  look_back = 1L,
+  lookb = 1L,
   startp = 0L,
   endd = 0L,
   step = 1L,
@@ -18,8 +18,8 @@ roll_mean(
 )
 }
 \arguments{
-\item{\code{look_back}}{The number of end points in the look-back interval
-(the default is \code{look_back = 1}).}
+\item{\code{lookb}}{The number of end points in the look-back interval
+(the default is \code{lookb = 1}).}
 
 \item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
 
@@ -55,7 +55,7 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
   
   The function \code{roll_mean()} performs a loop over the end points, and at
   each end point it subsets the time series \code{tseries} over a look-back
-  interval equal to \code{look_back} number of end points.
+  interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_mean()}, which
   calculates the mean (location).
@@ -69,7 +69,7 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
 
   For example, the rolling mean at \code{25} day end points, with a
   \code{75} day look-back, can be calculated using the parameters
-  \code{step = 25} and \code{look_back = 3}.
+  \code{step = 25} and \code{lookb = 3}.
 
   The function \code{roll_mean()} with the parameter \code{step = 1}
   performs the same calculation as the function \code{roll_mean()} from
@@ -90,13 +90,13 @@ The function \code{roll_mean()} calculates a \emph{matrix} of mean
 # Define time series of returns using package rutils
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the rolling means at 25 day end points, with a 75 day look-back
-meanv <- HighFreq::roll_mean(retp, look_back=3, step=25)
+meanv <- HighFreq::roll_mean(retp, lookb=3, step=25)
 # Compare the mean estimates over 11-period look-back intervals
-all.equal(HighFreq::roll_mean(retp, look_back=11)[-(1:10), ], 
+all.equal(HighFreq::roll_mean(retp, lookb=11)[-(1:10), ], 
   drop(RcppRoll::roll_mean(retp, n=11)), check.attributes=FALSE)
 # Define end points and start points
 endd <- HighFreq::calc_endpoints(NROW(retp), step=25)
-startp <- HighFreq::calc_startpoints(endd, look_back=3)
+startp <- HighFreq::calc_startpoints(endd, lookb=3)
 # Calculate the rolling means using RcppArmadillo
 meanv <- HighFreq::roll_mean(retp, startp=startp, endd=endd)
 # Calculate the rolling medians using RcppArmadillo
