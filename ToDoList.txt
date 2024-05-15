@@ -94,7 +94,17 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
++ [ ] Rename
+tseries/timeser
+lambda/lambdaf
+look_back/lookb
+
+
+
 + [x] Rename functions: HighFreq::calcvar to HighFreq::calc_var
+
++ [ ] Create function calc_nearest()
+/Users/jerzy/Develop/Rcpp/test_temp.cpp
 
 + [ ] Fix function roll_ohlc() - when tseries has single column
 
@@ -137,6 +147,20 @@ If a row is not NA, but the previous row was NA, they start the recursion from s
 + [ ] Compare the outputs of functions run_reg() versus roll_reg()
 Find the lambda parameter which produces similar values for a given look_back parameter.
 
++ [ ] Remove all parallel code and references to parallel packages from HighFreq.  Why?
+
++ [ ] Adapt from package roll the parallel rolling aggregations
+https://github.com/jjf234/roll
+
++ [ ] Make the functions roll_mean() and roll_var() parallel.
+roll::roll_median() is faster than roll_mean() because it's parallel. 
+library(microbenchmark)
+summary(microbenchmark(
+  HighFreq=HighFreq::roll_mean(pricev, lookb=lookb, method="nonparametric"),
+  roll=roll::roll_median(pricev, width=lookb),
+  times=10))[, c(1, 4, 5)]
+
+
 + [ ] Introduce partial least squares regression
 https://en.wikipedia.org/wiki/Partial_least_squares_regression
 
@@ -144,7 +168,9 @@ https://en.wikipedia.org/wiki/Partial_least_squares_regression
 Nadagouda Recursive Least Squares Regression Kalman Filter.pdf
 https://dingyan89.medium.com/least-squares-recursive-least-squares-kalman-filters-and-sensor-fusion-ed13f6242e9e
 
-+ [ ] Deprecate the function roll_zscores() and replace it with roll_reg()
++ [ ] Deprecate the function roll_zscores() and replace it with roll_reg() - no it's quite convenient
+Repurpose the function roll_zscores() to calculate the z-scores for different location and dispersion measures, similar to the functions roll_mean() and roll_var().
+
 
 + [ ] Create the function sim_pca_momentum() to simulate a running PCA momentum strategy - clone run_reg()
 Validate the principal components produced by push_eigen().
@@ -272,9 +298,6 @@ http://nextlevelanalytics.github.io/2016/05/26/Gerber/
 Gerber Statistic Portfolio Optimization.pdf
 
 + [ ] Adapt from package RiskPortfolios by Ardia - it's pure R code
-
-+ [ ] Adapt from package roll parallel rolling aggregations
-https://github.com/jjf234/roll
 
 + [ ] Add rolling rank regression from package roll:
 https://github.com/jjf234/roll
@@ -497,8 +520,6 @@ https://stackoverflow.com/questions/23849354/equivalent-of-which-function-in-rcp
 
 + [ ] Add to back_test() the simulation with limit orders
 
-+ [ ] Remove all parallel code and references to parallel packages from HighFreq  
-
 + [ ] Create function predict_lm() which calculates the predicted out-of-sample values based on the coefficients from calc_lm()
 
 + [ ] Modify functional roll_backtest() so that it performs lapply() and returns a list of trade_func() outputs, containing the xts time series of out-of-sample returns   
@@ -657,7 +678,7 @@ This is only very slightly slower than using the Kelly ratios.
 
 + [x] Fix HighFreq::calc_mean() method="quantile" - the location should be the average of the quantiles not their sum
 
-+ [x] Switch terms around in online formulas?
++ [x] Switch terms around in online formulas
 From: μt = (1 − λ)pt + λμt−1
 To: μt = λμt−1 + (1 − λ)pt
 
