@@ -85,7 +85,7 @@ Technical indicators based on past returns and trading volumes can offer clues a
 At the daily tenor horizon skew and kurtosis are small, and trending dominates mean-reversion.
 
 + Calculating returns on 1-second bars doesn't make sense for two reasons: 
-First, because the changes in price are very small, comparable to the precision of prices (number of significant digits).
+First, because the changes of the prices are very small, comparable to the precision of prices (number of significant digits).
 As a result, price changes on 1-second bars are either zero or low multiples of the precision. 
 Second, the 1-second bar prices bounce randomly between static bid and ask prices (the bid-ask bounce).  
 Therefore 1-second bar returns carry almost no information.
@@ -95,9 +95,12 @@ Therefore 1-second bar returns carry almost no information.
 ### Tasks to-do
 
 + [ ] Rename
+controlv/controll
 tseries/timeser
 lambda/lambdaf
 look_back/lookb
+prices/pricev
+//' prices <- HighFreq::sim_ou(in
 
 
 

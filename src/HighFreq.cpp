@@ -45,7 +45,7 @@ using namespace arma::newarp;
 //' @param \code{confl} The confidence level for calculating the quantiles of
 //'   returns (the default is \code{confl = 0.75}).
 //'
-//' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+//' @param \code{alphac} The shrinkage intensity of \code{returns} (with values
 //'   between \code{0} and \code{1} - the default is \code{0}).
 //'   
 //' @return A named list of model parameters that can be passed into regression
@@ -78,7 +78,7 @@ Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regressio
                      arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
                      std::string residscale = "none",  // Method for scaling the residuals
                      double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                     double alpha = 0.0) {  // Shrinkage intensity of returns
+                     double alphac = 0.0) {  // Shrinkage intensity of returns
   
   Rcpp::List controlv = Rcpp::List::create(Rcpp::Named("regmod") = regmod,
                                            Rcpp::Named("intercept") = intercept,
@@ -86,7 +86,7 @@ Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regressio
                                            Rcpp::Named("dimax") = dimax,
                                            Rcpp::Named("residscale") = residscale,
                                            Rcpp::Named("confl") = confl,
-                                           Rcpp::Named("alpha") = alpha);
+                                           Rcpp::Named("alphac") = alphac);
   
   return controlv;
   
@@ -114,7 +114,7 @@ Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regressio
 //' @param \code{confl} The confidence level for calculating the quantiles of
 //'   returns (the default is \code{confl = 0.75}).
 //'
-//' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+//' @param \code{alphac} The shrinkage intensity of \code{returns} (with values
 //'   between \code{0} and \code{1} - the default is \code{0}).
 //' 
 //' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
@@ -159,7 +159,7 @@ Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio opt
                        double singmin = 1e-5, // Threshold level for discarding small singular values
                        arma::uword dimax = 0, // Number of eigen vectors for dimension reduction
                        double confl = 0.1, // Confidence level for calculating the quantiles of returns
-                       double alpha = 0.0, // Shrinkage intensity of returns
+                       double alphac = 0.0, // Shrinkage intensity of returns
                        bool rankw = false, // Should the weights be ranked?
                        bool centerw = false, // Should the weights be centered?
                        std::string scalew = "voltarget", // Method for scaling the weights
@@ -169,7 +169,7 @@ Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio opt
                                            Rcpp::Named("singmin") = singmin,
                                            Rcpp::Named("dimax") = dimax,
                                            Rcpp::Named("confl") = confl,
-                                           Rcpp::Named("alpha") = alpha,
+                                           Rcpp::Named("alphac") = alphac,
                                            Rcpp::Named("rankw") = rankw,
                                            Rcpp::Named("centerw") = centerw,
                                            Rcpp::Named("scalew") = scalew,
@@ -4133,7 +4133,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   It finally calculates the forecast errors as the difference between the
 //'   response minus the regression forecasts: \eqn{r_t - f_t}.
 //' 
-//'   The coefficient matrix \eqn{\beta} and the residuals \eqn{\epsilon} have
+//'   The coefficient matrix \eqn{\betac} and the residuals \eqn{\epsilon} have
 //'   the same number of rows as the predictor argument \code{predm}.
 //'
 //'   The function \code{run_reg()} accepts a list of regression model
@@ -4147,7 +4147,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   The number of regression coefficients is equal to the number of columns of
 //'   the predictor matrix \code{n}.
 //'   If the predictor matrix contains a unit intercept column then the first
-//'   regression coefficient is equal to the alpha value \eqn{\alpha}.
+//'   regression coefficient is equal to the alphac value \eqn{\alphac}.
 //'
 //'   If \code{regmod = "least_squares"} (the default) then it performs the
 //'   standard least squares regression.  This is currently the only option.
@@ -4196,7 +4196,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   matrix \code{predm} has \code{n} columns then \code{run_reg()} returns a
 //'   matrix with \code{n+2} columns.
 //'   The first \code{n} columns contain the regression coefficients (with the
-//'   first column equal to the alpha value \eqn{\alpha}).
+//'   first column equal to the alphac value \eqn{\alphac}).
 //'   The last \code{2} columns are the regression residuals and the forecast
 //'   errors.
 //' 
@@ -4417,9 +4417,9 @@ methodenum calc_method(std::string method) {
 //'   If \code{method = "quantile"} then it calculates the location
 //'   \eqn{\bar{r}} as the average of the quantiles as follows:
 //'   \deqn{
-//'     \bar{r} = \frac{q_{\alpha} + q_{1-\alpha}}{2}
+//'     \bar{r} = \frac{q_{\alphac} + q_{1-\alphac}}{2}
 //'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles
+//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles
 //'   (argument \code{confl}).
 //'
 //'   If \code{method = "nonparametric"} then it calculates the location as the
@@ -4573,9 +4573,9 @@ double calc_varvec(const arma::vec& tseries) {
 //'   If \code{method = "quantile"} then it calculates the dispersion as the
 //'   difference between the quantiles as follows:
 //'   \deqn{
-//'     \sigma = q_{\alpha} - q_{1-\alpha}
+//'     \sigma = q_{\alphac} - q_{1-\alphac}
 //'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
 //'   
 //'   If \code{method = "nonparametric"} then it calculates the dispersion as the
 //'   Median Absolute Deviation (\emph{MAD}):
@@ -4694,9 +4694,9 @@ arma::mat calc_var(const arma::mat& tseries,
 //'   If \code{method = "quantile"} then it calculates the covariance as the
 //'   difference between the quantiles as follows:
 //'   \deqn{
-//'     \mu = q_{\alpha} - q_{1-\alpha}
+//'     \mu = q_{\alphac} - q_{1-\alphac}
 //'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
 //'   
 //'   If \code{method = "nonparametric"} then it calculates the covariance as the
 //'   Median Absolute Deviation (\emph{MAD}):
@@ -5174,9 +5174,9 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'   \eqn{\varsigma} from the differences between the quantiles of the data as
 //'   follows:
 //'   \deqn{
-//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2 q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
+//'     \varsigma = \frac{q_{\alphac} + q_{1-\alphac} - 2 q_{0.5}}{q_{\alphac} - q_{1-\alphac}}
 //'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
 //'
 //'   If \code{method = "nonparametric"} then it calculates the skewness as the
 //'   difference between the mean of the data minus its median, divided by the
@@ -5308,9 +5308,9 @@ arma::mat calc_skew(const arma::mat& tseries,
 //'   \eqn{\kappa} from the differences between the quantiles of the data as
 //'   follows:
 //'   \deqn{
-//'     \kappa = \frac{q_{\alpha} - q_{1-\alpha}}{q_{0.75} - q_{0.25}}
+//'     \kappa = \frac{q_{\alphac} - q_{1-\alphac}}{q_{0.75} - q_{0.25}}
 //'   }
-//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
 //'
 //'   If \code{method = "nonparametric"} then it calculates the kurtosis as the
 //'   difference between the mean of the data minus its median, divided by the
@@ -5604,7 +5604,7 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
 //'   (named \emph{"zscore"}), and a \emph{vector} with the R-squared and
 //'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
-//'   coefficients named \emph{"coefficients"} contains the alpha and beta
+//'   coefficients named \emph{"coefficients"} contains the alphac and betac
 //'   coefficients, and their \emph{t-values} and \emph{p-values}.
 //'
 //' @details
@@ -5652,7 +5652,7 @@ Rcpp::List calc_lm(const arma::vec& respv,  // Response vector
   arma::uword ncols = predm.n_cols;
   arma::uword degf = (nrows - ncols);
   
-  // Calculate alpha and beta coefficients for the model response ~ predictor
+  // Calculate alphac and betac coefficients for the model response ~ predictor
   arma::colvec coeff = arma::solve(predm, respv);
   // Calculate residuals
   arma::colvec residuals = respv - predm*coeff;
@@ -5671,9 +5671,9 @@ Rcpp::List calc_lm(const arma::vec& respv,  // Response vector
   stats(1) = fstat;
   stats.attr("names") = Rcpp::CharacterVector::create("R-squared", "F-statistic");
   
-  // Calculate standard errors of beta coefficients
+  // Calculate standard errors of betac coefficients
   arma::colvec stderrv = arma::sqrt(res_sumsq/degf*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
-  // Calculate t-values and p-values of beta coefficients
+  // Calculate t-values and p-values of betac coefficients
   arma::colvec tvals = coeff/stderrv;
   arma::colvec pvals = 2*Rcpp::pt(-Rcpp::abs(Rcpp::wrap(tvals)), degf);
   Rcpp::NumericMatrix coeffmat = Rcpp::wrap(arma::join_rows(arma::join_rows(arma::join_rows(coeff, stderrv), tvals), pvals));
@@ -5789,7 +5789,7 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
   // Confidence level for calculating the quantiles of returns
   // double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  // double alpha = Rcpp::as<double>(controlv["alpha"]);
+  // double alphac = Rcpp::as<double>(controlv["alphac"]);
   
   // Add column for intercept to the predictor matrix - no, add it in R
   arma::uword nrows = predm.n_rows;
@@ -5833,9 +5833,9 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
   double res_sumsq = arma::dot(residuals, residuals);
   // double exp_sumsq = tot_sumsq - res_sumsq;
   
-  // Calculate standard errors of the beta coefficients
+  // Calculate standard errors of the betac coefficients
   arma::mat stderrv = arma::sqrt(res_sumsq/degf*arma::diagvec(arma::pinv(arma::trans(predm)*predm)));
-  // Calculate t-values of the beta coefficients
+  // Calculate t-values of the betac coefficients
   tvals = coeff/stderrv;
   
   // Calculate z-score
@@ -6776,7 +6776,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   The number of regression coefficients is equal to the number of columns of
 //'   the predictor matrix.
 //'   If the predictor matrix contains an intercept column then the first
-//'   regression coefficient is equal to the intercept value \eqn{\alpha}.
+//'   regression coefficient is equal to the intercept value \eqn{\alphac}.
 //'   
 //'   The number of columns of the return matrix is equal to the number of
 //'   regression coefficients, plus their t-values, plus the z-score column.
@@ -6879,7 +6879,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
   // for (arma::uword it = lookb; it < nrows; it++) {
   //   responsi = respv.rows(it-lookb+1, it);
   //   predicti = predm.rows(it-lookb+1, it);
-  //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alpha);
+  //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alphac);
   //   regroll.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -7500,13 +7500,13 @@ arma::mat roll_moment(const arma::mat& tseries,
 //' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
 //' using \emph{Rcpp}.
 //' 
-//' @param \code{omega} Parameter proportional to the long-term average level
+//' @param \code{omegac} Parameter proportional to the long-term average level
 //'   of variance.
 //' 
-//' @param \code{alpha} The weight associated with recent realized variance
+//' @param \code{alphac} The weight associated with recent realized variance
 //'   updates.
 //' 
-//' @param \code{beta} The weight associated with the past variance estimates.
+//' @param \code{betac} The weight associated with the past variance estimates.
 //' 
 //' @param \code{innov} A single-column \emph{matrix} of innovations.
 //' 
@@ -7528,19 +7528,19 @@ arma::mat roll_moment(const arma::mat& tseries,
 //'     r_i = \sigma_{i-1} \xi_i
 //'   }
 //'   \deqn{
-//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
-//'   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
+//'   variance, and \eqn{\omegac}, \eqn{\alphac}, and \eqn{\betac} are the
 //'   \emph{GARCH} parameters, and \eqn{\xi_i} are standard normal
 //'   \emph{innovations}.
 //'
 //'   The long-term equilibrium level of the simulated variance is proportional
-//'   to the parameter \eqn{\omega}:
+//'   to the parameter \eqn{\omegac}:
 //'   \deqn{
-//'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
+//'     \sigma^2 = \frac{\omegac}{1 - \alphac - \betac}
 //'   }
-//'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
+//'   So the sum of \eqn{\alphac} plus \eqn{\betac} should be less than \eqn{1},
 //'   otherwise the volatility becomes explosive.
 //'   
 //'   If \code{is_random = FALSE} then the function \code{sim_garch()}
@@ -7548,14 +7548,14 @@ arma::mat roll_moment(const arma::mat& tseries,
 //'   innovations \code{innov} are equal to the historical returns \eqn{r_i} and
 //'   the \emph{GARCH(1,1)} process is simply:
 //'   \deqn{
-//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{\sigma^2_i} is the rolling variance.
 //'   
 //'   The above should be viewed as a formula for \emph{estimating} the rolling
 //'   variance from the historical returns, rather than simulating them. It
 //'   represents exponential smoothing of the squared returns with a decay
-//'   factor equal to \eqn{\beta}.
+//'   factor equal to \eqn{\betac}.
 //'
 //'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 //'   fast \emph{Rcpp} \code{C++} code.
@@ -7563,20 +7563,20 @@ arma::mat roll_moment(const arma::mat& tseries,
 //' @examples
 //' \dontrun{
 //' # Define the GARCH model parameters
-//' alpha <- 0.79
-//' betav <- 0.2
-//' om_ega <- 1e-4*(1-alpha-betav)
+//' alphac <- 0.79
+//' betac <- 0.2
+//' omegac <- 1e-4*(1-alphac-betac)
 //' # Calculate matrix of standard normal innovations
 //' innov <- matrix(rnorm(1e3))
 //' # Simulate the GARCH process using Rcpp
-//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, innov=innov)
+//' garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, innov=innov)
 //' # Plot the GARCH rolling volatility and cumulative returns
 //' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 //' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 //' # Calculate historical VTI returns
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Estimate the GARCH volatility of VTI returns
-//' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, 
+//' garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, 
 //'   innov=retp, is_random=FALSE)
 //' # Plot dygraph of the estimated GARCH volatility
 //' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 
@@ -7585,9 +7585,9 @@ arma::mat roll_moment(const arma::mat& tseries,
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_garch(double omega, 
-                    double alpha, 
-                    double beta, 
+arma::mat sim_garch(double omegac, 
+                    double alphac, 
+                    double betac, 
                     arma::mat& innov,
                     bool is_random = true) {
   
@@ -7596,21 +7596,21 @@ arma::mat sim_garch(double omega,
   if (is_random) {
     // The innovations are random numbers
     arma::mat varm(nrows, 1);
-    varm(0) = omega/(1-alpha-beta);
+    varm(0) = omegac/(1-alphac-betac);
     arma::mat returns(nrows, 1);
     returns(0) = std::sqrt(varm(0))*innov(0);
     
     for (arma::uword it = 1; it < nrows; it++) {
       returns(it) = std::sqrt(varm(it-1))*innov(it);
-      varm(it) = omega + alpha*pow(returns(it), 2) + beta*varm(it-1);
+      varm(it) = omegac + alphac*pow(returns(it), 2) + betac*varm(it-1);
     }  // end for
     return arma::join_rows(returns, varm);
   } else {
     // The innovations are historical returns
     arma::mat varm = arma::square(innov);
-    varm(0) = omega/(1-alpha-beta);
+    varm(0) = omegac/(1-alphac-betac);
     for (arma::uword it = 1; it < nrows; it++) {
-      varm(it) = omega + alpha*varm(it) + beta*varm(it-1);
+      varm(it) = omegac + alphac*varm(it) + betac*varm(it-1);
     }  // end for
     return arma::join_rows(innov, varm);
   }  // end if
@@ -7622,9 +7622,9 @@ arma::mat sim_garch(double omega,
 ////////////////////////////////////////////////////////////
 //' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 //' 
-//' @param \code{init_price} The initial price. 
+//' @param \code{prici} The initial price. 
 //' 
-//' @param \code{eq_price} The equilibrium price. 
+//' @param \code{priceq} The equilibrium price. 
 //' 
 //' @param \code{theta} The strength of mean reversion.
 //' 
@@ -7664,20 +7664,20 @@ arma::mat sim_garch(double omega,
 //' @examples
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
-//' init_price <- 0.0
-//' eq_price <- 1.0
+//' prici <- 0.0
+//' priceq <- 1.0
 //' sigmav <- 0.01
 //' thetav <- 0.01
 //' innov <- matrix(rnorm(1e3))
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
-//' prices <- HighFreq::sim_ou(init_price=init_price, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
+//' prices <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 //' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_ou(double init_price, 
-                 double eq_price,
+arma::mat sim_ou(double prici, 
+                 double priceq,
                  double theta, 
                  arma::mat& innov) {
   
@@ -7686,9 +7686,9 @@ arma::mat sim_ou(double init_price,
   arma::mat retv = arma::zeros(nrows, 1);
   
   retv.row(0) = innov.row(0);
-  pricev.row(0) = init_price;
+  pricev.row(0) = prici;
   for (arma::uword it = 1; it < nrows; it++) {
-    retv.row(it) = theta*(eq_price - pricev.row(it-1)) + innov.row(it);
+    retv.row(it) = theta*(priceq - pricev.row(it-1)) + innov.row(it);
     pricev.row(it) = pricev.row(it-1) + retv.row(it);
   }  // end for
   
@@ -7701,9 +7701,9 @@ arma::mat sim_ou(double init_price,
 ////////////////////////////////////////////////////////////
 //' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 //' 
-//' @param \code{init_price} The initial price. 
+//' @param \code{prici} The initial price. 
 //' 
-//' @param \code{eq_price} The equilibrium price. 
+//' @param \code{priceq} The equilibrium price. 
 //' 
 //' @param \code{theta} The strength of mean reversion.
 //' 
@@ -7734,19 +7734,19 @@ arma::mat sim_ou(double init_price,
 //' @examples
 //' \dontrun{
 //' # Define the Schwartz model parameters
-//' init_price <- 1.0
-//' eq_price <- 2.0
+//' prici <- 1.0
+//' priceq <- 2.0
 //' thetav <- 0.01
 //' innov <- matrix(rnorm(1e3, sd=0.01))
 //' # Simulate Schwartz process using Rcpp
-//' prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+//' prices <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
 //' plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_schwartz(double init_price, 
-                       double eq_price, 
+arma::mat sim_schwartz(double prici, 
+                       double priceq, 
                        double theta, 
                        arma::mat& innov) {
   
@@ -7755,9 +7755,9 @@ arma::mat sim_schwartz(double init_price,
   arma::mat returns = arma::zeros(nrows, 1);
   
   returns.row(0) = innov.row(0);
-  prices.row(0) = init_price;
+  prices.row(0) = prici;
   for (arma::uword it = 1; it < nrows; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + innov.row(it);
+    returns.row(it) = theta*(priceq - prices.row(it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) * exp(returns.row(it));
   }  // end for
   
@@ -7853,9 +7853,9 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 ////////////////////////////////////////////////////////////
 //' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 //' 
-//' @param \code{init_price} The initial price. 
+//' @param \code{prici} The initial price. 
 //' 
-//' @param \code{eq_price} The equilibrium price. 
+//' @param \code{priceq} The equilibrium price. 
 //' 
 //' @param \code{theta} The strength of mean reversion.
 //' 
@@ -7898,22 +7898,22 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //' @examples
 //' \dontrun{
 //' # Define the Ornstein-Uhlenbeck model parameters
-//' init_price <- 1.0
-//' eq_price <- 2.0
+//' prici <- 1.0
+//' priceq <- 2.0
 //' thetav <- 0.01
 //' # Define AR coefficients
 //' coeff <- matrix(c(0.1, 0.3, 0.5))
 //' # Calculate matrix of standard normal innovations
 //' innov <- matrix(rnorm(1e3, sd=0.01))
 //' # Simulate Dickey-Fuller process using Rcpp
-//' prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+//' prices <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 //' plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat sim_df(double init_price, 
-                 double eq_price, 
+arma::mat sim_df(double prici, 
+                 double priceq, 
                  double theta, 
                  arma::mat& coeff, 
                  arma::mat& innov) {
@@ -7926,17 +7926,17 @@ arma::mat sim_df(double init_price,
 
   // Warmup period
   returns.row(0) = innov.row(0);
-  prices.row(0) = init_price;
-  returns.row(1) = theta*(eq_price - prices.row(0)) + coeffr.row(ncoeff-1) * returns.row(0) + innov.row(1);
+  prices.row(0) = prici;
+  returns.row(1) = theta*(priceq - prices.row(0)) + coeffr.row(ncoeff-1) * returns.row(0) + innov.row(1);
   prices.row(1) = prices.row(0) + returns.row(1);
   for (arma::uword it = 2; it < ncoeff; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr.rows(ncoeff-it, ncoeff-1), returns.rows(0, it-1)) + innov.row(it);
+    returns.row(it) = theta*(priceq - prices.row(it-1)) + arma::dot(coeffr.rows(ncoeff-it, ncoeff-1), returns.rows(0, it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
   // Perform loop over the remaining rows
   for (arma::uword it = ncoeff; it < nrows; it++) {
-    returns.row(it) = theta*(eq_price - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1)) + innov.row(it);
+    returns.row(it) = theta*(priceq - prices.row(it-1)) + arma::dot(coeffr, returns.rows(it-ncoeff, it-1)) + innov.row(it);
     prices.row(it) = prices.row(it-1) + returns.row(it);
   }  // end for
   
@@ -7950,13 +7950,13 @@ arma::mat sim_df(double init_price,
 //' Calculate the log-likelihood of a time series of returns assuming a
 //' \emph{GARCH(1,1)} process.
 //' 
-//' @param \code{omega} Parameter proportional to the long-term average level
+//' @param \code{omegac} Parameter proportional to the long-term average level
 //'   of variance.
 //' 
-//' @param \code{alpha} The weight associated with recent realized variance
+//' @param \code{alphac} The weight associated with recent realized variance
 //'   updates.
 //' 
-//' @param \code{beta} The weight associated with the past variance estimates.
+//' @param \code{betac} The weight associated with the past variance estimates.
 //' 
 //' @param \code{returns} A single-column \emph{matrix} of returns.
 //' 
@@ -7972,11 +7972,11 @@ arma::mat sim_df(double init_price,
 //'   It first estimates the rolling variance of the \code{returns} argument
 //'   using function \code{sim_garch()}:
 //'   \deqn{
-//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
+//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{r_i} is the time series of returns, and \eqn{\sigma^2_i} is the
 //'   estimated rolling variance.
-//'   And \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
+//'   And \eqn{\omegac}, \eqn{\alphac}, and \eqn{\betac} are the \emph{GARCH}
 //'   parameters.
 //'   It applies the floor value \code{minval} to the variance, to avoid zero
 //'   values.  So the minimum value of the variance is equal to \code{minval}.
@@ -7991,25 +7991,25 @@ arma::mat sim_df(double init_price,
 //' @examples
 //' \dontrun{
 //' # Define the GARCH model parameters
-//' alpha <- 0.79
-//' betav <- 0.2
-//' om_ega <- 1e-4*(1-alpha-betav)
+//' alphac <- 0.79
+//' betac <- 0.2
+//' omegac <- 1e-4*(1-alphac-betac)
 //' # Calculate historical VTI returns
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-//' HighFreq::lik_garch(omega=om_ega, alpha=alpha,  beta=betav, returns=retp)
+//' HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
 //' }
 //' 
 //' @export
 // [[Rcpp::export]]
-double lik_garch(double omega, 
-                 double alpha, 
-                 double beta,
+double lik_garch(double omegac, 
+                 double alphac, 
+                 double betac,
                  arma::mat& returns, 
                  double minval = 0.000001) {
   
   // Calculate the rolling variance of returns using function sim_garch()
-  arma::mat garch_data = sim_garch(omega, alpha,  beta, returns, false);
+  arma::mat garch_data = sim_garch(omegac, alphac,  betac, returns, false);
   // Select the second column containing the variance of returns
   arma::mat varm = garch_data.col(1);
   // Apply floor to variance
@@ -8308,13 +8308,13 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 //'   \code{returns}, by shrinking their means to their common mean value:
 //'   \deqn{
-//'     r^{\prime}_i = (1 - \alpha) \, \bar{r}_i + \alpha \, \mu
+//'     r^{\prime}_i = (1 - \alphac) \, \bar{r}_i + \alphac \, \mu
 //'   }
 //'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
 //'   average of all the column means.
-//'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
-//'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
-//'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
+//'   The shrinkage intensity \code{alphac} determines the amount of shrinkage
+//'   that is applied, with \code{alphac = 0} representing no shrinkage (with the
+//'   column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
 //'   complete shrinkage (with the column means all equal to the single mean of
 //'   all the columns: \eqn{\bar{r}_i = \mu}).
 //'
@@ -8355,9 +8355,9 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' eigenval <- eigend$values[1:dimax]
 //' invmat <- eigenvec %*% (t(eigenvec) / eigenval)
 //' # Define shrinkage intensity and apply shrinkage to the mean returns
-//' alpha <- 0.5
+//' alphac <- 0.5
 //' colmeans <- colMeans(retp)
-//' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
+//' colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
 //' # Calculate weights using R
 //' weightr <- drop(invmat %*% colmeans)
 //' # Apply weights scaling
@@ -8365,7 +8365,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' weightr <- 0.01*weightr/sd(retp %*% weightr)
 //' weightr <- weightr/sqrt(sum(weightr^2))
 //' # Create a list of portfolio optimization parameters
-//' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+//' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 //' # Calculate weights using RcppArmadillo
 //' weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
 //' all.equal(weightcpp, weightr)
@@ -8386,7 +8386,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
   // Confidence level for calculating the quantiles of returns
   double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  double alpha = Rcpp::as<double>(controlv["alpha"]);
+  double alphac = Rcpp::as<double>(controlv["alphac"]);
   // Should the weights be ranked?
   bool rankw = Rcpp::as<int>(controlv["rankw"]);
   // Should the weights be centered?
@@ -8410,7 +8410,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Mean returns of columns
     arma::vec colmeans = arma::trans(arma::mean(returns, 0));
     // Shrink colmeans to the mean of returns
-    colmeans = ((1-alpha)*colmeans + alpha*arma::mean(colmeans));
+    colmeans = ((1-alphac)*colmeans + alphac*arma::mean(colmeans));
     // Calculate weights using reduced inverse
     weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
@@ -8419,7 +8419,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     // Median returns of columns
     arma::vec colmeans = arma::trans(arma::median(returns, 0));
     // Shrink colmeans to the median of returns
-    colmeans = ((1-alpha)*colmeans + alpha*arma::median(colmeans));
+    colmeans = ((1-alphac)*colmeans + alphac*arma::median(colmeans));
     // Calculate weights using reduced inverse
     weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
@@ -8621,10 +8621,10 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' lookb <- 12
 //' startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 //' # Define return shrinkage and dimension reduction
-//' alpha <- 0.5
+//' alphac <- 0.5
 //' dimax <- 3
 //' # Create a list of portfolio optimization parameters
-//' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+//' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 //' # Simulate a monthly rolling portfolio optimization strategy
 //' pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 //' pnls <- xts::xts(pnls, index(retp))
