@@ -54,7 +54,7 @@ NULL
 #' @param \code{confl} The confidence level for calculating the quantiles of
 #'   returns (the default is \code{confl = 0.75}).
 #'
-#' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+#' @param \code{alphac} The shrinkage intensity of \code{returns} (with values
 #'   between \code{0} and \code{1} - the default is \code{0}).
 #'   
 #' @return A named list of model parameters that can be passed into regression
@@ -80,8 +80,8 @@ NULL
 #' }
 #' 
 #' @export
-param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alpha = 0.0) {
-    .Call(`_HighFreq_param_reg`, regmod, intercept, singmin, dimax, residscale, confl, alpha)
+param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alphac = 0.0) {
+    .Call(`_HighFreq_param_reg`, regmod, intercept, singmin, dimax, residscale, confl, alphac)
 }
 
 #' Create a named list of model parameters that can be passed into portfolio
@@ -104,7 +104,7 @@ param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5
 #' @param \code{confl} The confidence level for calculating the quantiles of
 #'   returns (the default is \code{confl = 0.75}).
 #'
-#' @param \code{alpha} The shrinkage intensity of \code{returns} (with values
+#' @param \code{alphac} The shrinkage intensity of \code{returns} (with values
 #'   between \code{0} and \code{1} - the default is \code{0}).
 #' 
 #' @param \code{rankw} A \emph{Boolean} specifying whether the weights should
@@ -144,8 +144,8 @@ param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5
 #' }
 #' 
 #' @export
-param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 0.1, alpha = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", voltarget = 0.01) {
-    .Call(`_HighFreq_param_portf`, method, singmin, dimax, confl, alpha, rankw, centerw, scalew, voltarget)
+param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 0.1, alphac = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", voltarget = 0.01) {
+    .Call(`_HighFreq_param_portf`, method, singmin, dimax, confl, alphac, rankw, centerw, scalew, voltarget)
 }
 
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
@@ -1888,7 +1888,7 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #' ohlc <- rutils::etfenv$VTI
 #' closep <- quantmod::Cl(ohlc)
 #' # Calculate the trailing means
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
 #' # Calculate the trailing means using R code
 #' pricef <- (1-lambdaf)*filter(closep, 
@@ -1972,7 +1972,7 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' # Calculate historical prices
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing maximums
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' pricmax <- HighFreq::run_max(closep, lambda=lambdaf)
 #' # Plot dygraph of VTI prices and trailing maximums
 #' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
@@ -2040,7 +2040,7 @@ run_max <- function(tseries, lambda) {
 #' # Calculate historical prices
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing minimums
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' pricmin <- HighFreq::run_min(closep, lambda=lambdaf)
 #' # Plot dygraph of VTI prices and trailing minimums
 #' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
@@ -2056,21 +2056,22 @@ run_min <- function(tseries, lambda) {
     .Call(`_HighFreq_run_min`, tseries, lambda)
 }
 
-#' Calculate the trailing variance of streaming \emph{time series} of data
-#' using an online recursive formula.
+#' Calculate the trailing mean and variance of streaming \emph{time series} of
+#' data using an online recursive formula.
 #' 
 #' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 #' 
 #' @param \code{lambda} A decay factor which multiplies past estimates.
 #'   
-#' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#' @return A \emph{matrix} with two columns and the same number of rows as the
+#'   input argument \code{tseries}.  The first column contains the trailing
+#'   means and the second contains the variance.
 #'
 #' @details
-#'   The function \code{run_var()} calculates the trailing variance of
-#'   streaming \emph{time series} of data \eqn{r_t}, by recursively weighting
-#'   the past variance estimates \eqn{\sigma^2_{t-1}}, with the squared
-#'   differences of the data minus its trailing means \eqn{(r_t -
+#'   The function \code{run_var()} calculates the trailing mean and variance
+#'   of streaming \emph{time series} of data \eqn{r_t}, by recursively
+#'   weighting the past variance estimates \eqn{\sigma^2_{t-1}}, with the
+#'   squared differences of the data minus its trailing means \eqn{(r_t -
 #'   \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
 #'   \deqn{
 #'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
@@ -2104,30 +2105,32 @@ run_min <- function(tseries, lambda) {
 #'   standard \code{R} function\cr\code{stats::filter(x=series,
 #'   filter=weightv, method="recursive")}, but it's several times faster.
 #' 
-#'   The function \code{run_var()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   The function \code{run_var()} returns a \emph{matrix} with two columns and
+#'   the same number of rows as the input argument \code{tseries}.
+#'   The first column contains the trailing means and the second contains the
+#'   variance.
 #'   
 #' @examples
 #' \dontrun{
 #' # Calculate historical returns
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate the trailing variance
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' vars <- HighFreq::run_var(retp, lambda=lambdaf)
 #' # Calculate centered returns
-#' retc <- (retp - HighFreq::run_mean(retp, lambda=lambdaf))
+#' retc <- (retp - vars[, 1])
 #' # Calculate the trailing variance using R code
 #' retc2 <- (1-lambdaf)*filter(retc^2, filter=lambdaf, 
 #'   init=as.numeric(retc[1, 1])^2/(1-lambdaf), 
 #'   method="recursive")
-#' all.equal(vars, unclass(retc2), check.attributes=FALSE)
+#' # Small difference due to the initial warmup period
+#' all.equal(vars[, 2], drop(unclass(retc2)), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
 #'   Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
 #' 
 #' @export
 run_var <- function(tseries, lambda) {
@@ -2197,7 +2200,7 @@ run_var <- function(tseries, lambda) {
 #' lambdaf <- 0.9 # Decay factor
 #' zscores <- HighFreq::run_zscores(pricev, lambda=lambdaf)
 #' datav <- cbind(pricev, zscores[, 3])
-#' colnames(datav) <- c("VTI", "Zscores")
+#' colnames(datav) <- c("VTI", "Z-Scores")
 #' colnamev <- colnames(datav)
 #' dygraphs::dygraph(datav, main="VTI Prices and Z-scores") %>%
 #'    dyAxis("y", label=colnamev[1], independentTicks=TRUE) %>%
@@ -2684,7 +2687,7 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' # Calculate historical returns
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 #' # Calculate the trailing covariance
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' covars <- HighFreq::run_covar(retp, lambda=lambdaf)
 #' # Calculate the trailing correlation
 #' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
@@ -2771,7 +2774,7 @@ run_covar <- function(tseries, lambda) {
 #' # Calculate historical returns
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate the trailing autocovariance
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' lagg <- 3
 #' covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
 #' # Calculate the trailing autocorrelation
@@ -2945,7 +2948,7 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' # Add unit intercept column to the predictor matrix
 #' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Calculate the trailing regressions
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' # Create a list of regression parameters
 #' controlv <- HighFreq::param_reg(residscale="standardize")
 #' regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
@@ -4786,7 +4789,7 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #' # Calculate historical returns
 #' retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 #' # Calculate the trailing standardized returns using R code
-#' lambdaf <- 0.9
+#' lambdaf <- 0.9 # Decay factor
 #' lambda1 <- 1 - lambdaf
 #' scaled <- zoo::coredata(retp)
 #' meanm <- scaled[1, ];
@@ -5010,13 +5013,13 @@ roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
 #' using \emph{Rcpp}.
 #' 
-#' @param \code{omega} Parameter proportional to the long-term average level
+#' @param \code{omegac} Parameter proportional to the long-term average level
 #'   of variance.
 #' 
-#' @param \code{alpha} The weight associated with recent realized variance
+#' @param \code{alphac} The weight associated with recent realized variance
 #'   updates.
 #' 
-#' @param \code{beta} The weight associated with the past variance estimates.
+#' @param \code{betac} The weight associated with the past variance estimates.
 #' 
 #' @param \code{innov} A single-column \emph{matrix} of innovations.
 #' 
@@ -5073,20 +5076,20 @@ roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl 
 #' @examples
 #' \dontrun{
 #' # Define the GARCH model parameters
-#' alpha <- 0.79
-#' betav <- 0.2
-#' om_ega <- 1e-4*(1-alpha-betav)
+#' alphac <- 0.79
+#' betac <- 0.2
+#' omegac <- 1e-4*(1-alphac-betac)
 #' # Calculate matrix of standard normal innovations
 #' innov <- matrix(rnorm(1e3))
 #' # Simulate the GARCH process using Rcpp
-#' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, innov=innov)
+#' garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, innov=innov)
 #' # Plot the GARCH rolling volatility and cumulative returns
 #' plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 #' plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 #' # Calculate historical VTI returns
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Estimate the GARCH volatility of VTI returns
-#' garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, 
+#' garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, 
 #'   innov=retp, is_random=FALSE)
 #' # Plot dygraph of the estimated GARCH volatility
 #' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 
@@ -5094,15 +5097,15 @@ roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl 
 #' }
 #' 
 #' @export
-sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
-    .Call(`_HighFreq_sim_garch`, omega, alpha, beta, innov, is_random)
+sim_garch <- function(omegac, alphac, betac, innov, is_random = TRUE) {
+    .Call(`_HighFreq_sim_garch`, omegac, alphac, betac, innov, is_random)
 }
 
 #' Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.
 #' 
-#' @param \code{init_price} The initial price. 
+#' @param \code{prici} The initial price. 
 #' 
-#' @param \code{eq_price} The equilibrium price. 
+#' @param \code{priceq} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
 #' 
@@ -5142,26 +5145,26 @@ sim_garch <- function(omega, alpha, beta, innov, is_random = TRUE) {
 #' @examples
 #' \dontrun{
 #' # Define the Ornstein-Uhlenbeck model parameters
-#' init_price <- 0.0
-#' eq_price <- 1.0
+#' prici <- 0.0
+#' priceq <- 1.0
 #' sigmav <- 0.01
 #' thetav <- 0.01
 #' innov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' prices <- HighFreq::sim_ou(init_price=init_price, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
+#' prices <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 #' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
-sim_ou <- function(init_price, eq_price, theta, innov) {
-    .Call(`_HighFreq_sim_ou`, init_price, eq_price, theta, innov)
+sim_ou <- function(prici, priceq, theta, innov) {
+    .Call(`_HighFreq_sim_ou`, prici, priceq, theta, innov)
 }
 
 #' Simulate a \emph{Schwartz} process using \emph{Rcpp}.
 #' 
-#' @param \code{init_price} The initial price. 
+#' @param \code{prici} The initial price. 
 #' 
-#' @param \code{eq_price} The equilibrium price. 
+#' @param \code{priceq} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
 #' 
@@ -5192,18 +5195,18 @@ sim_ou <- function(init_price, eq_price, theta, innov) {
 #' @examples
 #' \dontrun{
 #' # Define the Schwartz model parameters
-#' init_price <- 1.0
-#' eq_price <- 2.0
+#' prici <- 1.0
+#' priceq <- 2.0
 #' thetav <- 0.01
 #' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Schwartz process using Rcpp
-#' prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+#' prices <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
 #' plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
 #' @export
-sim_schwartz <- function(init_price, eq_price, theta, innov) {
-    .Call(`_HighFreq_sim_schwartz`, init_price, eq_price, theta, innov)
+sim_schwartz <- function(prici, priceq, theta, innov) {
+    .Call(`_HighFreq_sim_schwartz`, prici, priceq, theta, innov)
 }
 
 #' Simulate \emph{autoregressive} returns by recursively filtering a
@@ -5268,9 +5271,9 @@ sim_ar <- function(coeff, innov) {
 
 #' Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.
 #' 
-#' @param \code{init_price} The initial price. 
+#' @param \code{prici} The initial price. 
 #' 
-#' @param \code{eq_price} The equilibrium price. 
+#' @param \code{priceq} The equilibrium price. 
 #' 
 #' @param \code{theta} The strength of mean reversion.
 #' 
@@ -5313,33 +5316,33 @@ sim_ar <- function(coeff, innov) {
 #' @examples
 #' \dontrun{
 #' # Define the Ornstein-Uhlenbeck model parameters
-#' init_price <- 1.0
-#' eq_price <- 2.0
+#' prici <- 1.0
+#' priceq <- 2.0
 #' thetav <- 0.01
 #' # Define AR coefficients
 #' coeff <- matrix(c(0.1, 0.3, 0.5))
 #' # Calculate matrix of standard normal innovations
 #' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Dickey-Fuller process using Rcpp
-#' prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+#' prices <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 #' plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 #' }
 #' 
 #' @export
-sim_df <- function(init_price, eq_price, theta, coeff, innov) {
-    .Call(`_HighFreq_sim_df`, init_price, eq_price, theta, coeff, innov)
+sim_df <- function(prici, priceq, theta, coeff, innov) {
+    .Call(`_HighFreq_sim_df`, prici, priceq, theta, coeff, innov)
 }
 
 #' Calculate the log-likelihood of a time series of returns assuming a
 #' \emph{GARCH(1,1)} process.
 #' 
-#' @param \code{omega} Parameter proportional to the long-term average level
+#' @param \code{omegac} Parameter proportional to the long-term average level
 #'   of variance.
 #' 
-#' @param \code{alpha} The weight associated with recent realized variance
+#' @param \code{alphac} The weight associated with recent realized variance
 #'   updates.
 #' 
-#' @param \code{beta} The weight associated with the past variance estimates.
+#' @param \code{betac} The weight associated with the past variance estimates.
 #' 
 #' @param \code{returns} A single-column \emph{matrix} of returns.
 #' 
@@ -5374,18 +5377,18 @@ sim_df <- function(init_price, eq_price, theta, coeff, innov) {
 #' @examples
 #' \dontrun{
 #' # Define the GARCH model parameters
-#' alpha <- 0.79
-#' betav <- 0.2
-#' om_ega <- 1e-4*(1-alpha-betav)
+#' alphac <- 0.79
+#' betac <- 0.2
+#' omegac <- 1e-4*(1-alphac-betac)
 #' # Calculate historical VTI returns
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-#' HighFreq::lik_garch(omega=om_ega, alpha=alpha,  beta=betav, returns=retp)
+#' HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
 #' }
 #' 
 #' @export
-lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
-    .Call(`_HighFreq_lik_garch`, omega, alpha, beta, returns, minval)
+lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
+    .Call(`_HighFreq_lik_garch`, omegac, alphac, betac, returns, minval)
 }
 
 #' Simulate a portfolio optimization strategy using online (recursive) updating
@@ -5510,7 +5513,7 @@ lik_garch <- function(omega, alpha, beta, returns, minval = 0.000001) {
 #' datev <- zoo::index(retp) # dates
 #' # Simulate a portfolio optimization strategy
 #' dimax <- 6
-#' lambdaf <- 0.978
+#' lambdaf <- 0.978 # Decay factor
 #' lambdacov <- 0.995
 #' lambdaw <- 0.9
 #' pnls <- HighFreq::sim_portfoptim(retp, dimax, lambdaf, lambdacov, lambdaw)
@@ -5612,9 +5615,9 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   }
 #'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
 #'   average of all the column means.
-#'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
-#'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
-#'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
+#'   The shrinkage intensity \code{alphac} determines the amount of shrinkage
+#'   that is applied, with \code{alphac = 0} representing no shrinkage (with the
+#'   column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
 #'   complete shrinkage (with the column means all equal to the single mean of
 #'   all the columns: \eqn{\bar{r}_i = \mu}).
 #'
@@ -5655,9 +5658,9 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' eigenval <- eigend$values[1:dimax]
 #' invmat <- eigenvec %*% (t(eigenvec) / eigenval)
 #' # Define shrinkage intensity and apply shrinkage to the mean returns
-#' alpha <- 0.5
+#' alphac <- 0.5
 #' colmeans <- colMeans(retp)
-#' colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
+#' colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
 #' # Calculate weights using R
 #' weightr <- drop(invmat %*% colmeans)
 #' # Apply weights scaling
@@ -5665,7 +5668,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' weightr <- 0.01*weightr/sd(retp %*% weightr)
 #' weightr <- weightr/sqrt(sum(weightr^2))
 #' # Create a list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 #' # Calculate weights using RcppArmadillo
 #' weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
 #' all.equal(weightcpp, weightr)
@@ -5768,10 +5771,10 @@ calc_weights <- function(returns, controlv) {
 #' lookb <- 12
 #' startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 #' # Define return shrinkage and dimension reduction
-#' alpha <- 0.5
+#' alphac <- 0.5
 #' dimax <- 3
 #' # Create a list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 #' # Simulate a monthly rolling portfolio optimization strategy
 #' pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 #' pnls <- xts::xts(pnls, index(retp))

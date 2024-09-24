@@ -80,9 +80,9 @@ The function \code{calc_weights()} calculates the optimal portfolio
   }
   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
   average of all the column means.
-  The shrinkage intensity \code{alpha} determines the amount of shrinkage
-  that is applied, with \code{alpha = 0} representing no shrinkage (with the
-  column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
+  The shrinkage intensity \code{alphac} determines the amount of shrinkage
+  that is applied, with \code{alphac = 0} representing no shrinkage (with the
+  column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
   complete shrinkage (with the column means all equal to the single mean of
   all the columns: \eqn{\bar{r}_i = \mu}).
 
@@ -123,9 +123,9 @@ eigenvec <- eigend$vectors[, 1:dimax]
 eigenval <- eigend$values[1:dimax]
 invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 # Define shrinkage intensity and apply shrinkage to the mean returns
-alpha <- 0.5
+alphac <- 0.5
 colmeans <- colMeans(retp)
-colmeans <- ((1-alpha)*colmeans + alpha*mean(colmeans))
+colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
 # Calculate weights using R
 weightr <- drop(invmat \%*\% colmeans)
 # Apply weights scaling
@@ -133,7 +133,7 @@ weightr <- weightr*sd(rowMeans(retp))/sd(retp \%*\% weightr)
 weightr <- 0.01*weightr/sd(retp \%*\% weightr)
 weightr <- weightr/sqrt(sum(weightr^2))
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 # Calculate weights using RcppArmadillo
 weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
 all.equal(weightcpp, weightr)

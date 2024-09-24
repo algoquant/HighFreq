@@ -73,7 +73,7 @@ pricev <- log(na.omit(rutils::etfenv$prices$VTI))
 lambdaf <- 0.9 # Decay factor
 zscores <- HighFreq::run_zscores(pricev, lambda=lambdaf)
 datav <- cbind(pricev, zscores[, 3])
-colnames(datav) <- c("VTI", "Zscores")
+colnames(datav) <- c("VTI", "Z-Scores")
 colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="VTI Prices and Z-scores") \%>\%
    dyAxis("y", label=colnamev[1], independentTicks=TRUE) \%>\%

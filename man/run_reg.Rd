@@ -159,7 +159,7 @@ predm <- retp[, -1]
 # Add unit intercept column to the predictor matrix
 predm <- cbind(rep(1, NROW(predm)), predm)
 # Calculate the trailing regressions
-lambdaf <- 0.9
+lambdaf <- 0.9 # Decay factor
 # Create a list of regression parameters
 controlv <- HighFreq::param_reg(residscale="standardize")
 regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)

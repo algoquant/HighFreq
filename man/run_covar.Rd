@@ -75,7 +75,7 @@ The function \code{run_covar()} calculates the trailing covariances of two
 # Calculate historical returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the trailing covariance
-lambdaf <- 0.9
+lambdaf <- 0.9 # Decay factor
 covars <- HighFreq::run_covar(retp, lambda=lambdaf)
 # Calculate the trailing correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])

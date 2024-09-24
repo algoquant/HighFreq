@@ -73,7 +73,7 @@ The function \code{run_autocovar()} calculates the trailing
 # Calculate historical returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing autocovariance
-lambdaf <- 0.9
+lambdaf <- 0.9 # Decay factor
 lagg <- 3
 covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
 # Calculate the trailing autocorrelation

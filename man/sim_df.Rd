@@ -4,12 +4,12 @@
 \alias{sim_df}
 \title{Simulate a \emph{Dickey-Fuller} process using \emph{Rcpp}.}
 \usage{
-sim_df(init_price, eq_price, theta, coeff, innov)
+sim_df(prici, priceq, theta, coeff, innov)
 }
 \arguments{
-\item{\code{init_price}}{The initial price.}
+\item{\code{prici}}{The initial price.}
 
-\item{\code{eq_price}}{The equilibrium price.}
+\item{\code{priceq}}{The equilibrium price.}
 
 \item{\code{theta}}{The strength of mean reversion.}
 
@@ -56,15 +56,15 @@ The function \code{sim_df()} simulates the following \emph{Dickey-Fuller}
 \examples{
 \dontrun{
 # Define the Ornstein-Uhlenbeck model parameters
-init_price <- 1.0
-eq_price <- 2.0
+prici <- 1.0
+priceq <- 2.0
 thetav <- 0.01
 # Define AR coefficients
 coeff <- matrix(c(0.1, 0.3, 0.5))
 # Calculate matrix of standard normal innovations
 innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Dickey-Fuller process using Rcpp
-prices <- HighFreq::sim_df(init_price=init_price, eq_price=eq_price, theta=thetav, coeff=coeff, innov=innov)
+prices <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
 }
 

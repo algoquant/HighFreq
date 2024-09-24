@@ -5,16 +5,16 @@
 \title{Calculate the log-likelihood of a time series of returns assuming a
 \emph{GARCH(1,1)} process.}
 \usage{
-lik_garch(omega, alpha, beta, returns, minval = 1e-06)
+lik_garch(omegac, alphac, betac, returns, minval = 1e-06)
 }
 \arguments{
-\item{\code{omega}}{Parameter proportional to the long-term average level
+\item{\code{omegac}}{Parameter proportional to the long-term average level
 of variance.}
 
-\item{\code{alpha}}{The weight associated with recent realized variance
+\item{\code{alphac}}{The weight associated with recent realized variance
 updates.}
 
-\item{\code{beta}}{The weight associated with the past variance estimates.}
+\item{\code{betac}}{The weight associated with the past variance estimates.}
 
 \item{\code{returns}}{A single-column \emph{matrix} of returns.}
 
@@ -54,13 +54,13 @@ The function \code{lik_garch()} calculates the log-likelihood of a time
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-alpha <- 0.79
-betav <- 0.2
-om_ega <- 1e-4*(1-alpha-betav)
+alphac <- 0.79
+betac <- 0.2
+omegac <- 1e-4*(1-alphac-betac)
 # Calculate historical VTI returns
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
-HighFreq::lik_garch(omega=om_ega, alpha=alpha,  beta=betav, returns=retp)
+HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
 }
 
 }

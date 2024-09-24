@@ -4,12 +4,12 @@
 \alias{sim_ou}
 \title{Simulate an \emph{Ornstein-Uhlenbeck} process using \emph{Rcpp}.}
 \usage{
-sim_ou(init_price, eq_price, theta, innov)
+sim_ou(prici, priceq, theta, innov)
 }
 \arguments{
-\item{\code{init_price}}{The initial price.}
+\item{\code{prici}}{The initial price.}
 
-\item{\code{eq_price}}{The equilibrium price.}
+\item{\code{priceq}}{The equilibrium price.}
 
 \item{\code{theta}}{The strength of mean reversion.}
 
@@ -53,13 +53,13 @@ The function \code{sim_ou()} simulates the following
 \examples{
 \dontrun{
 # Define the Ornstein-Uhlenbeck model parameters
-init_price <- 0.0
-eq_price <- 1.0
+prici <- 0.0
+priceq <- 1.0
 sigmav <- 0.01
 thetav <- 0.01
 innov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-prices <- HighFreq::sim_ou(init_price=init_price, eq_price=eq_price, volat=sigmav, theta=thetav, innov=innov)
+prices <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 }
 

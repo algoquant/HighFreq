@@ -12,7 +12,7 @@ param_reg(
   dimax = 0L,
   residscale = "none",
   confl = 0.1,
-  alpha = 0
+  alphac = 0
 )
 }
 \arguments{
@@ -35,7 +35,7 @@ inverse using all the \emph{singular values}).}
 \item{\code{confl}}{The confidence level for calculating the quantiles of
 returns (the default is \code{confl = 0.75}).}
 
-\item{\code{alpha}}{The shrinkage intensity of \code{returns} (with values
+\item{\code{alphac}}{The shrinkage intensity of \code{returns} (with values
 between \code{0} and \code{1} - the default is \code{0}).}
 }
 \value{

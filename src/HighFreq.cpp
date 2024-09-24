@@ -3043,21 +3043,22 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 
 
 ////////////////////////////////////////////////////////////
-//' Calculate the trailing variance of streaming \emph{time series} of data
-//' using an online recursive formula.
+//' Calculate the trailing mean and variance of streaming \emph{time series} of
+//' data using an online recursive formula.
 //' 
 //' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
 //' 
 //' @param \code{lambda} A decay factor which multiplies past estimates.
 //'   
-//' @return A \emph{matrix} with the same dimensions as the input argument
-//'   \code{tseries}.
+//' @return A \emph{matrix} with two columns and the same number of rows as the
+//'   input argument \code{tseries}.  The first column contains the trailing
+//'   means and the second contains the variance.
 //'
 //' @details
-//'   The function \code{run_var()} calculates the trailing variance of
-//'   streaming \emph{time series} of data \eqn{r_t}, by recursively weighting
-//'   the past variance estimates \eqn{\sigma^2_{t-1}}, with the squared
-//'   differences of the data minus its trailing means \eqn{(r_t -
+//'   The function \code{run_var()} calculates the trailing mean and variance
+//'   of streaming \emph{time series} of data \eqn{r_t}, by recursively
+//'   weighting the past variance estimates \eqn{\sigma^2_{t-1}}, with the
+//'   squared differences of the data minus its trailing means \eqn{(r_t -
 //'   \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
 //'   \deqn{
 //'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
@@ -3091,8 +3092,10 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //'   standard \code{R} function\cr\code{stats::filter(x=series,
 //'   filter=weightv, method="recursive")}, but it's several times faster.
 //' 
-//'   The function \code{run_var()} returns a \emph{matrix} with the same
-//'   dimensions as the input argument \code{tseries}.
+//'   The function \code{run_var()} returns a \emph{matrix} with two columns and
+//'   the same number of rows as the input argument \code{tseries}.
+//'   The first column contains the trailing means and the second contains the
+//'   variance.
 //'   
 //' @examples
 //' \dontrun{
@@ -3102,19 +3105,19 @@ arma::mat run_min(const arma::mat& tseries, double lambda) {
 //' lambdaf <- 0.9 # Decay factor
 //' vars <- HighFreq::run_var(retp, lambda=lambdaf)
 //' # Calculate centered returns
-//' retc <- (retp - HighFreq::run_mean(retp, lambda=lambdaf))
+//' retc <- (retp - vars[, 1])
 //' # Calculate the trailing variance using R code
 //' retc2 <- (1-lambdaf)*filter(retc^2, filter=lambdaf, 
 //'   init=as.numeric(retc[1, 1])^2/(1-lambdaf), 
 //'   method="recursive")
-//' all.equal(vars, unclass(retc2), check.attributes=FALSE)
+//' # Small difference due to the initial warmup period
+//' all.equal(vars[, 2], drop(unclass(retc2)), check.attributes=FALSE)
 //' # Compare the speed of RcppArmadillo with R code
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
 //'   Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3137,7 +3140,8 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(tseries.row(it) - meanm.row(it));
   }  // end for
   
-  return vars;
+  return arma::join_rows(meanm, vars);
+  // return vars;
   
 }  // end run_var
 
@@ -4133,7 +4137,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   It finally calculates the forecast errors as the difference between the
 //'   response minus the regression forecasts: \eqn{r_t - f_t}.
 //' 
-//'   The coefficient matrix \eqn{\betac} and the residuals \eqn{\epsilon} have
+//'   The coefficient matrix \eqn{\beta} and the residuals \eqn{\epsilon} have
 //'   the same number of rows as the predictor argument \code{predm}.
 //'
 //'   The function \code{run_reg()} accepts a list of regression model
@@ -4147,7 +4151,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   The number of regression coefficients is equal to the number of columns of
 //'   the predictor matrix \code{n}.
 //'   If the predictor matrix contains a unit intercept column then the first
-//'   regression coefficient is equal to the alphac value \eqn{\alphac}.
+//'   regression coefficient is equal to the alpha value \eqn{\alpha}.
 //'
 //'   If \code{regmod = "least_squares"} (the default) then it performs the
 //'   standard least squares regression.  This is currently the only option.
@@ -4196,7 +4200,7 @@ arma::mat run_autocovar(const arma::mat& tseries,
 //'   matrix \code{predm} has \code{n} columns then \code{run_reg()} returns a
 //'   matrix with \code{n+2} columns.
 //'   The first \code{n} columns contain the regression coefficients (with the
-//'   first column equal to the alphac value \eqn{\alphac}).
+//'   first column equal to the alpha value \eqn{\alpha}).
 //'   The last \code{2} columns are the regression residuals and the forecast
 //'   errors.
 //' 
@@ -4417,9 +4421,9 @@ methodenum calc_method(std::string method) {
 //'   If \code{method = "quantile"} then it calculates the location
 //'   \eqn{\bar{r}} as the average of the quantiles as follows:
 //'   \deqn{
-//'     \bar{r} = \frac{q_{\alphac} + q_{1-\alphac}}{2}
+//'     \bar{r} = \frac{q_{\alpha} + q_{1-\alpha}}{2}
 //'   }
-//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles
 //'   (argument \code{confl}).
 //'
 //'   If \code{method = "nonparametric"} then it calculates the location as the
@@ -4573,9 +4577,9 @@ double calc_varvec(const arma::vec& tseries) {
 //'   If \code{method = "quantile"} then it calculates the dispersion as the
 //'   difference between the quantiles as follows:
 //'   \deqn{
-//'     \sigma = q_{\alphac} - q_{1-\alphac}
+//'     \sigma = q_{\alpha} - q_{1-\alpha}
 //'   }
-//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 //'   
 //'   If \code{method = "nonparametric"} then it calculates the dispersion as the
 //'   Median Absolute Deviation (\emph{MAD}):
@@ -4694,9 +4698,9 @@ arma::mat calc_var(const arma::mat& tseries,
 //'   If \code{method = "quantile"} then it calculates the covariance as the
 //'   difference between the quantiles as follows:
 //'   \deqn{
-//'     \mu = q_{\alphac} - q_{1-\alphac}
+//'     \mu = q_{\alpha} - q_{1-\alpha}
 //'   }
-//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 //'   
 //'   If \code{method = "nonparametric"} then it calculates the covariance as the
 //'   Median Absolute Deviation (\emph{MAD}):
@@ -5174,9 +5178,9 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'   \eqn{\varsigma} from the differences between the quantiles of the data as
 //'   follows:
 //'   \deqn{
-//'     \varsigma = \frac{q_{\alphac} + q_{1-\alphac} - 2 q_{0.5}}{q_{\alphac} - q_{1-\alphac}}
+//'     \varsigma = \frac{q_{\alpha} + q_{1-\alpha} - 2 q_{0.5}}{q_{\alpha} - q_{1-\alpha}}
 //'   }
-//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 //'
 //'   If \code{method = "nonparametric"} then it calculates the skewness as the
 //'   difference between the mean of the data minus its median, divided by the
@@ -5308,9 +5312,9 @@ arma::mat calc_skew(const arma::mat& tseries,
 //'   \eqn{\kappa} from the differences between the quantiles of the data as
 //'   follows:
 //'   \deqn{
-//'     \kappa = \frac{q_{\alphac} - q_{1-\alphac}}{q_{0.75} - q_{0.25}}
+//'     \kappa = \frac{q_{\alpha} - q_{1-\alpha}}{q_{0.75} - q_{0.25}}
 //'   }
-//'   Where \eqn{\alphac} is the confidence level for calculating the quantiles.
+//'   Where \eqn{\alpha} is the confidence level for calculating the quantiles.
 //'
 //'   If \code{method = "nonparametric"} then it calculates the kurtosis as the
 //'   difference between the mean of the data minus its median, divided by the
@@ -5604,7 +5608,7 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //'   (named \emph{"coefficients"}), the \emph{z-score} of the last residual
 //'   (named \emph{"zscore"}), and a \emph{vector} with the R-squared and
 //'   F-statistic (named \emph{"stats"}). The numeric \emph{matrix} of
-//'   coefficients named \emph{"coefficients"} contains the alphac and betac
+//'   coefficients named \emph{"coefficients"} contains the alpha and beta
 //'   coefficients, and their \emph{t-values} and \emph{p-values}.
 //'
 //' @details
@@ -5652,7 +5656,7 @@ Rcpp::List calc_lm(const arma::vec& respv,  // Response vector
   arma::uword ncols = predm.n_cols;
   arma::uword degf = (nrows - ncols);
   
-  // Calculate alphac and betac coefficients for the model response ~ predictor
+  // Calculate alpha and beta coefficients for the model response ~ predictor
   arma::colvec coeff = arma::solve(predm, respv);
   // Calculate residuals
   arma::colvec residuals = respv - predm*coeff;
@@ -5789,7 +5793,7 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
   // Confidence level for calculating the quantiles of returns
   // double confl = Rcpp::as<double>(controlv["confl"]);
   // Shrinkage intensity of returns
-  // double alphac = Rcpp::as<double>(controlv["alphac"]);
+  // double alphac = Rcpp::as<double>(controlv["alpha"]);
   
   // Add column for intercept to the predictor matrix - no, add it in R
   arma::uword nrows = predm.n_rows;
@@ -6776,7 +6780,7 @@ arma::mat roll_kurtosis(const arma::mat& tseries,
 //'   The number of regression coefficients is equal to the number of columns of
 //'   the predictor matrix.
 //'   If the predictor matrix contains an intercept column then the first
-//'   regression coefficient is equal to the intercept value \eqn{\alphac}.
+//'   regression coefficient is equal to the intercept value \eqn{\alpha}.
 //'   
 //'   The number of columns of the return matrix is equal to the number of
 //'   regression coefficients, plus their t-values, plus the z-score column.
@@ -6879,7 +6883,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
   // for (arma::uword it = lookb; it < nrows; it++) {
   //   responsi = respv.rows(it-lookb+1, it);
   //   predicti = predm.rows(it-lookb+1, it);
-  //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alphac);
+  //   reg_data = calc_reg(responsi, predicti, method, singmin, dimax, confl, alpha);
   //   regroll.row(it) = arma::conv_to<rowvec>::from(reg_data);
   // }  // end for
   
@@ -7528,19 +7532,19 @@ arma::mat roll_moment(const arma::mat& tseries,
 //'     r_i = \sigma_{i-1} \xi_i
 //'   }
 //'   \deqn{
-//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{r_i} and \eqn{\sigma^2_i} are the simulated returns and
-//'   variance, and \eqn{\omegac}, \eqn{\alphac}, and \eqn{\betac} are the
+//'   variance, and \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the
 //'   \emph{GARCH} parameters, and \eqn{\xi_i} are standard normal
 //'   \emph{innovations}.
 //'
 //'   The long-term equilibrium level of the simulated variance is proportional
-//'   to the parameter \eqn{\omegac}:
+//'   to the parameter \eqn{\omega}:
 //'   \deqn{
-//'     \sigma^2 = \frac{\omegac}{1 - \alphac - \betac}
+//'     \sigma^2 = \frac{\omega}{1 - \alpha - \beta}
 //'   }
-//'   So the sum of \eqn{\alphac} plus \eqn{\betac} should be less than \eqn{1},
+//'   So the sum of \eqn{\alpha} plus \eqn{\beta} should be less than \eqn{1},
 //'   otherwise the volatility becomes explosive.
 //'   
 //'   If \code{is_random = FALSE} then the function \code{sim_garch()}
@@ -7548,14 +7552,14 @@ arma::mat roll_moment(const arma::mat& tseries,
 //'   innovations \code{innov} are equal to the historical returns \eqn{r_i} and
 //'   the \emph{GARCH(1,1)} process is simply:
 //'   \deqn{
-//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{\sigma^2_i} is the rolling variance.
 //'   
 //'   The above should be viewed as a formula for \emph{estimating} the rolling
 //'   variance from the historical returns, rather than simulating them. It
 //'   represents exponential smoothing of the squared returns with a decay
-//'   factor equal to \eqn{\betac}.
+//'   factor equal to \eqn{\beta}.
 //'
 //'   The function \code{sim_garch()} simulates the \emph{GARCH} process using
 //'   fast \emph{Rcpp} \code{C++} code.
@@ -7972,11 +7976,11 @@ arma::mat sim_df(double prici,
 //'   It first estimates the rolling variance of the \code{returns} argument
 //'   using function \code{sim_garch()}:
 //'   \deqn{
-//'     \sigma^2_i = \omegac + \alphac r^2_i + \betac \sigma_{i-1}^2
+//'     \sigma^2_i = \omega + \alpha r^2_i + \beta \sigma_{i-1}^2
 //'   }
 //'   Where \eqn{r_i} is the time series of returns, and \eqn{\sigma^2_i} is the
 //'   estimated rolling variance.
-//'   And \eqn{\omegac}, \eqn{\alphac}, and \eqn{\betac} are the \emph{GARCH}
+//'   And \eqn{\omega}, \eqn{\alpha}, and \eqn{\beta} are the \emph{GARCH}
 //'   parameters.
 //'   It applies the floor value \code{minval} to the variance, to avoid zero
 //'   values.  So the minimum value of the variance is equal to \code{minval}.
@@ -8308,7 +8312,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   In addition, \code{calc_weights()} applies shrinkage to the columns of
 //'   \code{returns}, by shrinking their means to their common mean value:
 //'   \deqn{
-//'     r^{\prime}_i = (1 - \alphac) \, \bar{r}_i + \alphac \, \mu
+//'     r^{\prime}_i = (1 - \alpha) \, \bar{r}_i + \alpha \, \mu
 //'   }
 //'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
 //'   average of all the column means.

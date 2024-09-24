@@ -132,7 +132,7 @@ retp <- na.omit(retp)
 datev <- zoo::index(retp) # dates
 # Simulate a portfolio optimization strategy
 dimax <- 6
-lambdaf <- 0.978
+lambdaf <- 0.978 # Decay factor
 lambdacov <- 0.995
 lambdaw <- 0.9
 pnls <- HighFreq::sim_portfoptim(retp, dimax, lambdaf, lambdacov, lambdaw)

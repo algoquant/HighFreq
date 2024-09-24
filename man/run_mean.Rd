@@ -93,7 +93,7 @@ The function \code{run_mean()} calculates the exponential moving average
 ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
-lambdaf <- 0.9
+lambdaf <- 0.9 # Decay factor
 meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
 # Calculate the trailing means using R code
 pricef <- (1-lambdaf)*filter(closep, 

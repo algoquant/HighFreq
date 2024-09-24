@@ -106,11 +106,16 @@ prices/pricev
 
 + [x] Rename functions: HighFreq::calcvar to HighFreq::calc_var
 
++ [x] Modify run_var() - return the trailing mean values.
+
++ [ ] Modify run_var() - add weights - adapt run_mean() ?
+Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
+
+
 + [ ] Create function calc_nearest()
 /Users/jerzy/Develop/Rcpp/test_temp.cpp
 
 + [ ] Fix function roll_ohlc() - when tseries has single column
-
 
 + [ ] Merge the functions calc_inv() with calc_invsvd()
 
@@ -203,9 +208,6 @@ The H statistic is reminiscent of the difference between the mean asset returns 
 + [ ] Create the function run_pca() to perform loop over push_eigen(), push_sga(), and push_cci() - clone run_covar()
 
 + [ ] In the function param_reg() add an argument called "scaleres" for scaling the residuals - apply in calc_reg() and roll_reg() 
-
-+ [ ] Modify run_var() - add weights - adapt run_mean() ?
-Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
 
 + [ ] Modify push_sga() 
 Rename existing push_sga() to push_sgao(). 

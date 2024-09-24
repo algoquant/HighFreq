@@ -4,12 +4,12 @@
 \alias{sim_schwartz}
 \title{Simulate a \emph{Schwartz} process using \emph{Rcpp}.}
 \usage{
-sim_schwartz(init_price, eq_price, theta, innov)
+sim_schwartz(prici, priceq, theta, innov)
 }
 \arguments{
-\item{\code{init_price}}{The initial price.}
+\item{\code{prici}}{The initial price.}
 
-\item{\code{eq_price}}{The equilibrium price.}
+\item{\code{priceq}}{The equilibrium price.}
 
 \item{\code{theta}}{The strength of mean reversion.}
 
@@ -44,12 +44,12 @@ The function \code{sim_schwartz()} simulates a \emph{Schwartz} process
 \examples{
 \dontrun{
 # Define the Schwartz model parameters
-init_price <- 1.0
-eq_price <- 2.0
+prici <- 1.0
+priceq <- 2.0
 thetav <- 0.01
 innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Schwartz process using Rcpp
-prices <- HighFreq::sim_schwartz(init_price=init_price, eq_price=eq_price, theta=thetav, innov=innov)
+prices <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
 plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 

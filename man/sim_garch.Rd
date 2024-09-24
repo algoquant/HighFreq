@@ -5,16 +5,16 @@
 \title{Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
 using \emph{Rcpp}.}
 \usage{
-sim_garch(omega, alpha, beta, innov, is_random = TRUE)
+sim_garch(omegac, alphac, betac, innov, is_random = TRUE)
 }
 \arguments{
-\item{\code{omega}}{Parameter proportional to the long-term average level
+\item{\code{omegac}}{Parameter proportional to the long-term average level
 of variance.}
 
-\item{\code{alpha}}{The weight associated with recent realized variance
+\item{\code{alphac}}{The weight associated with recent realized variance
 updates.}
 
-\item{\code{beta}}{The weight associated with the past variance estimates.}
+\item{\code{betac}}{The weight associated with the past variance estimates.}
 
 \item{\code{innov}}{A single-column \emph{matrix} of innovations.}
 
@@ -76,20 +76,20 @@ The function \code{sim_garch()} simulates or estimates the rolling variance
 \examples{
 \dontrun{
 # Define the GARCH model parameters
-alpha <- 0.79
-betav <- 0.2
-om_ega <- 1e-4*(1-alpha-betav)
+alphac <- 0.79
+betac <- 0.2
+omegac <- 1e-4*(1-alphac-betac)
 # Calculate matrix of standard normal innovations
 innov <- matrix(rnorm(1e3))
 # Simulate the GARCH process using Rcpp
-garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, innov=innov)
+garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, innov=innov)
 # Plot the GARCH rolling volatility and cumulative returns
 plot(sqrt(garch_data[, 2]), t="l", main="Simulated GARCH Volatility", ylab="volatility")
 plot(cumsum(garch_data[, 1]), t="l", main="Simulated GARCH Cumulative Returns", ylab="cumulative returns")
 # Calculate historical VTI returns
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Estimate the GARCH volatility of VTI returns
-garch_data <- HighFreq::sim_garch(omega=om_ega, alpha=alpha,  beta=betav, 
+garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac, 
   innov=retp, is_random=FALSE)
 # Plot dygraph of the estimated GARCH volatility
 dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 

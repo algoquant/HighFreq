@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // param_reg
-Rcpp::List param_reg(std::string regmod, bool intercept, double singmin, arma::uword dimax, std::string residscale, double confl, double alpha);
-RcppExport SEXP _HighFreq_param_reg(SEXP regmodSEXP, SEXP interceptSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP residscaleSEXP, SEXP conflSEXP, SEXP alphaSEXP) {
+Rcpp::List param_reg(std::string regmod, bool intercept, double singmin, arma::uword dimax, std::string residscale, double confl, double alphac);
+RcppExport SEXP _HighFreq_param_reg(SEXP regmodSEXP, SEXP interceptSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP residscaleSEXP, SEXP conflSEXP, SEXP alphacSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,14 +23,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< std::string >::type residscale(residscaleSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(param_reg(regmod, intercept, singmin, dimax, residscale, confl, alpha));
+    Rcpp::traits::input_parameter< double >::type alphac(alphacSEXP);
+    rcpp_result_gen = Rcpp::wrap(param_reg(regmod, intercept, singmin, dimax, residscale, confl, alphac));
     return rcpp_result_gen;
 END_RCPP
 }
 // param_portf
-Rcpp::List param_portf(std::string method, double singmin, arma::uword dimax, double confl, double alpha, bool rankw, bool centerw, std::string scalew, double voltarget);
-RcppExport SEXP _HighFreq_param_portf(SEXP methodSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphaSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP voltargetSEXP) {
+Rcpp::List param_portf(std::string method, double singmin, arma::uword dimax, double confl, double alphac, bool rankw, bool centerw, std::string scalew, double voltarget);
+RcppExport SEXP _HighFreq_param_portf(SEXP methodSEXP, SEXP singminSEXP, SEXP dimaxSEXP, SEXP conflSEXP, SEXP alphacSEXP, SEXP rankwSEXP, SEXP centerwSEXP, SEXP scalewSEXP, SEXP voltargetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,12 +38,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type singmin(singminSEXP);
     Rcpp::traits::input_parameter< arma::uword >::type dimax(dimaxSEXP);
     Rcpp::traits::input_parameter< double >::type confl(conflSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type alphac(alphacSEXP);
     Rcpp::traits::input_parameter< bool >::type rankw(rankwSEXP);
     Rcpp::traits::input_parameter< bool >::type centerw(centerwSEXP);
     Rcpp::traits::input_parameter< std::string >::type scalew(scalewSEXP);
     Rcpp::traits::input_parameter< double >::type voltarget(voltargetSEXP);
-    rcpp_result_gen = Rcpp::wrap(param_portf(method, singmin, dimax, confl, alpha, rankw, centerw, scalew, voltarget));
+    rcpp_result_gen = Rcpp::wrap(param_portf(method, singmin, dimax, confl, alphac, rankw, centerw, scalew, voltarget));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -906,45 +906,45 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_garch
-arma::mat sim_garch(double omega, double alpha, double beta, arma::mat& innov, bool is_random);
-RcppExport SEXP _HighFreq_sim_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP innovSEXP, SEXP is_randomSEXP) {
+arma::mat sim_garch(double omegac, double alphac, double betac, arma::mat& innov, bool is_random);
+RcppExport SEXP _HighFreq_sim_garch(SEXP omegacSEXP, SEXP alphacSEXP, SEXP betacSEXP, SEXP innovSEXP, SEXP is_randomSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type omegac(omegacSEXP);
+    Rcpp::traits::input_parameter< double >::type alphac(alphacSEXP);
+    Rcpp::traits::input_parameter< double >::type betac(betacSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
     Rcpp::traits::input_parameter< bool >::type is_random(is_randomSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_garch(omega, alpha, beta, innov, is_random));
+    rcpp_result_gen = Rcpp::wrap(sim_garch(omegac, alphac, betac, innov, is_random));
     return rcpp_result_gen;
 END_RCPP
 }
 // sim_ou
-arma::mat sim_ou(double init_price, double eq_price, double theta, arma::mat& innov);
-RcppExport SEXP _HighFreq_sim_ou(SEXP init_priceSEXP, SEXP eq_priceSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
+arma::mat sim_ou(double prici, double priceq, double theta, arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_ou(SEXP priciSEXP, SEXP priceqSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type init_price(init_priceSEXP);
-    Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
+    Rcpp::traits::input_parameter< double >::type prici(priciSEXP);
+    Rcpp::traits::input_parameter< double >::type priceq(priceqSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_ou(init_price, eq_price, theta, innov));
+    rcpp_result_gen = Rcpp::wrap(sim_ou(prici, priceq, theta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
 // sim_schwartz
-arma::mat sim_schwartz(double init_price, double eq_price, double theta, arma::mat& innov);
-RcppExport SEXP _HighFreq_sim_schwartz(SEXP init_priceSEXP, SEXP eq_priceSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
+arma::mat sim_schwartz(double prici, double priceq, double theta, arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_schwartz(SEXP priciSEXP, SEXP priceqSEXP, SEXP thetaSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type init_price(init_priceSEXP);
-    Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
+    Rcpp::traits::input_parameter< double >::type prici(priciSEXP);
+    Rcpp::traits::input_parameter< double >::type priceq(priceqSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_schwartz(init_price, eq_price, theta, innov));
+    rcpp_result_gen = Rcpp::wrap(sim_schwartz(prici, priceq, theta, innov));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -961,32 +961,32 @@ BEGIN_RCPP
 END_RCPP
 }
 // sim_df
-arma::mat sim_df(double init_price, double eq_price, double theta, arma::mat& coeff, arma::mat& innov);
-RcppExport SEXP _HighFreq_sim_df(SEXP init_priceSEXP, SEXP eq_priceSEXP, SEXP thetaSEXP, SEXP coeffSEXP, SEXP innovSEXP) {
+arma::mat sim_df(double prici, double priceq, double theta, arma::mat& coeff, arma::mat& innov);
+RcppExport SEXP _HighFreq_sim_df(SEXP priciSEXP, SEXP priceqSEXP, SEXP thetaSEXP, SEXP coeffSEXP, SEXP innovSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type init_price(init_priceSEXP);
-    Rcpp::traits::input_parameter< double >::type eq_price(eq_priceSEXP);
+    Rcpp::traits::input_parameter< double >::type prici(priciSEXP);
+    Rcpp::traits::input_parameter< double >::type priceq(priceqSEXP);
     Rcpp::traits::input_parameter< double >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type innov(innovSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_df(init_price, eq_price, theta, coeff, innov));
+    rcpp_result_gen = Rcpp::wrap(sim_df(prici, priceq, theta, coeff, innov));
     return rcpp_result_gen;
 END_RCPP
 }
 // lik_garch
-double lik_garch(double omega, double alpha, double beta, arma::mat& returns, double minval);
-RcppExport SEXP _HighFreq_lik_garch(SEXP omegaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP returnsSEXP, SEXP minvalSEXP) {
+double lik_garch(double omegac, double alphac, double betac, arma::mat& returns, double minval);
+RcppExport SEXP _HighFreq_lik_garch(SEXP omegacSEXP, SEXP alphacSEXP, SEXP betacSEXP, SEXP returnsSEXP, SEXP minvalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type omega(omegaSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type omegac(omegacSEXP);
+    Rcpp::traits::input_parameter< double >::type alphac(alphacSEXP);
+    Rcpp::traits::input_parameter< double >::type betac(betacSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type returns(returnsSEXP);
     Rcpp::traits::input_parameter< double >::type minval(minvalSEXP);
-    rcpp_result_gen = Rcpp::wrap(lik_garch(omega, alpha, beta, returns, minval));
+    rcpp_result_gen = Rcpp::wrap(lik_garch(omegac, alphac, betac, returns, minval));
     return rcpp_result_gen;
 END_RCPP
 }

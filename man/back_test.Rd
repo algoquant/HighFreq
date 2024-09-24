@@ -110,10 +110,10 @@ nrows <- NROW(endd)
 lookb <- 12
 startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 # Define return shrinkage and dimension reduction
-alpha <- 0.5
+alphac <- 0.5
 dimax <- 3
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alpha=alpha, scalew="sumsq")
+controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
 pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
 pnls <- xts::xts(pnls, index(retp))

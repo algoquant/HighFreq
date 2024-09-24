@@ -96,7 +96,7 @@ The function \code{run_scale()} performs a trailing standardization
 # Calculate historical returns
 retp <- na.omit(rutils::etfenv$returns[, c("XLF", "VTI")])
 # Calculate the trailing standardized returns using R code
-lambdaf <- 0.9
+lambdaf <- 0.9 # Decay factor
 lambda1 <- 1 - lambdaf
 scaled <- zoo::coredata(retp)
 meanm <- scaled[1, ];

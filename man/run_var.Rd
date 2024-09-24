@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{run_var}
 \alias{run_var}
-\title{Calculate the trailing variance of streaming \emph{time series} of data
-using an online recursive formula.}
+\title{Calculate the trailing mean and variance of streaming \emph{time series} of
+data using an online recursive formula.}
 \usage{
 run_var(tseries, lambda)
 }
@@ -13,18 +13,19 @@ run_var(tseries, lambda)
 \item{\code{lambda}}{A decay factor which multiplies past estimates.}
 }
 \value{
-A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+A \emph{matrix} with two columns and the same number of rows as the
+  input argument \code{tseries}.  The first column contains the trailing
+  means and the second contains the variance.
 }
 \description{
-Calculate the trailing variance of streaming \emph{time series} of data
-using an online recursive formula.
+Calculate the trailing mean and variance of streaming \emph{time series} of
+data using an online recursive formula.
 }
 \details{
-The function \code{run_var()} calculates the trailing variance of
-  streaming \emph{time series} of data \eqn{r_t}, by recursively weighting
-  the past variance estimates \eqn{\sigma^2_{t-1}}, with the squared
-  differences of the data minus its trailing means \eqn{(r_t -
+The function \code{run_var()} calculates the trailing mean and variance
+  of streaming \emph{time series} of data \eqn{r_t}, by recursively
+  weighting the past variance estimates \eqn{\sigma^2_{t-1}}, with the
+  squared differences of the data minus its trailing means \eqn{(r_t -
   \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
   \deqn{
     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
@@ -58,29 +59,8 @@ The function \code{run_var()} calculates the trailing variance of
   standard \code{R} function\cr\code{stats::filter(x=series,
   filter=weightv, method="recursive")}, but it's several times faster.
 
-  The function \code{run_var()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{tseries}.
-}
-\examples{
-\dontrun{
-# Calculate historical returns
-retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
-# Calculate the trailing variance
-lambdaf <- 0.9
-vars <- HighFreq::run_var(retp, lambda=lambdaf)
-# Calculate centered returns
-retc <- (retp - HighFreq::run_mean(retp, lambda=lambdaf))
-# Calculate the trailing variance using R code
-retc2 <- (1-lambdaf)*filter(retc^2, filter=lambdaf, 
-  init=as.numeric(retc[1, 1])^2/(1-lambdaf), 
-  method="recursive")
-all.equal(vars, unclass(retc2), check.attributes=FALSE)
-# Compare the speed of RcppArmadillo with R code
-library(microbenchmark)
-summary(microbenchmark(
-  Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
-  Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
-  times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
-
+  The function \code{run_var()} returns a \emph{matrix} with two columns and
+  the same number of rows as the input argument \code{tseries}.
+  The first column contains the trailing means and the second contains the
+  variance.
 }
