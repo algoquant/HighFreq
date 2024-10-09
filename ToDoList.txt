@@ -103,14 +103,31 @@ prices/pricev
 //' prices <- HighFreq::sim_ou(in
 
 
++ [ ] Explain, warn that the run_*() functions propagate the leading NA and Inf values.
+If there's an NA or Inf value at some point, then all the following values are NA or Inf.
 
-+ [x] Rename functions: HighFreq::calcvar to HighFreq::calc_var
++ [x] Rename functions: HighFreq::calcvar() to HighFreq::calc_var()
+
++ [ ] Create a function which calculates the running downside variance. 
+
++ [ ] Modify all the run_*() functions - prevent NA or Inf values from propagating forever.  
+It's not simple if you have multiple columns - you have to loop over the columns.
+Check for NA or Inf values: if the previous average was NA or Inf then use the current value.
+Perform while loop over the columms of data, and check if any of the columms has NA or Inf values.
+Add a Boolean argument check_NA, to check for NA or Inf values.
+If check_NA=TRUE, then perform two loops.  First loop over rows then over columms.
+In the loop over rows.  
+If the current value is NA or Inf, then assign NA to the running value (mean or variance).
+Else if the running value is NA or Inf, then assign the current value to the running value (mean or variance).
+Else update the running value with the current value.
+
+
++ [ ] Modify run_var() again - return the trailing mean values only for a single column of data?
 
 + [x] Modify run_var() - return the trailing mean values.
 
 + [ ] Modify run_var() - add weights - adapt run_mean() ?
 Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
-
 
 + [ ] Create function calc_nearest()
 /Users/jerzy/Develop/Rcpp/test_temp.cpp

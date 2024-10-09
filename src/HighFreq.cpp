@@ -2834,31 +2834,52 @@ arma::mat run_mean(const arma::mat& tseries,
                    const arma::colvec& weightv = 0) {
   
   arma::uword nrows = tseries.n_rows;
+  arma::uword ncols = tseries.n_cols;
   arma::uword nweights = weightv.n_elem;
-  arma::mat meanm(nrows, tseries.n_cols);
+  arma::mat meanm(nrows, ncols);
   double lambda1 = 1-lambda;
   
-  if (nweights == 1) {
+  if (!(tseries.has_nan() || tseries.has_inf())) {
+    // No NA or Inf values
+    if (nweights == 1) {
+      // Calculate means without weights
+      meanm.row(0) = tseries.row(0);
+      for (arma::uword it = 1; it < nrows; it++) {
+        // Calculate the means using the decay factor
+        meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
+      }  // end for
+    } else if (nweights == nrows) {
+      // Calculate means with weights
+      double meanw = weightv(0);
+      double meanww;
+      meanm.row(0) = meanw*tseries.row(0);
+      for (arma::uword it = 1; it < nrows; it++) {
+        // Calculate the means using the decay factor
+        meanww = meanw;
+        meanw = lambda*meanw + lambda1*weightv(it);
+        meanm.row(it) = lambda*meanm.row(it-1) + lambda1*weightv(it)*tseries.row(it);
+        // Divide by the mean weight
+        meanm.row(it-1) = meanm.row(it-1)/meanww;
+      }  // end for
+      meanm.row(nrows-1) = meanm.row(nrows-1)/meanw;
+    }  // end if
+  } else {
+    // Calculate means with NA or Inf values
+    double valuc = tseries(0, 0);
     meanm.row(0) = tseries.row(0);
-    // Calculate means without weights
-    for (arma::uword it = 1; it < nrows; it++) {
-      // Calculate the means using the decay factor
-      meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
-    }  // end for
-  } else if (nweights == nrows) {
-    // Calculate means with weights
-    double meanw = weightv(0);
-    double meanww;
-    meanm.row(0) = meanw*tseries.row(0);
-    for (arma::uword it = 1; it < nrows; it++) {
-      // Calculate the means using the decay factor
-      meanww = meanw;
-      meanw = lambda*meanw + lambda1*weightv(it);
-      meanm.row(it) = lambda*meanm.row(it-1) + lambda1*weightv(it)*tseries.row(it);
-      // Divide by the mean weight
-      meanm.row(it-1) = meanm.row(it-1)/meanww;
-    }  // end for
-    meanm.row(nrows-1) = meanm.row(nrows-1)/meanw;
+    for (arma::uword rn = 1; rn < nrows; rn++) {
+      for (arma::uword cn = 0; cn < ncols; cn++) {
+        valuc = tseries(rn, cn);
+        if (std::isnan(meanm(rn-1, cn)) || std::isinf(meanm(rn-1, cn)) || std::isnan(valuc) || std::isinf(valuc)) {
+          // Set the mean equal to the current value
+          meanm(rn, cn) = valuc;
+        } else {
+          // Calculate the mean using the decay factor
+          meanm(rn, cn) = lambda*meanm(rn-1, cn) + lambda1*valuc;
+        }  // end if
+      }  // end column for
+    }  // end row for
+    // meanm = tseries;
   }  // end if
   
   return meanm;
@@ -3133,12 +3154,36 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
   meanm.row(0) = tseries.row(0);
   vars.row(0) = arma::square(tseries.row(1) - tseries.row(0));
   // vars.row(0) = 0;
-  for (arma::uword it = 1; it < nrows; it++) {
+  if (!(tseries.has_nan() || tseries.has_inf())) {
+    // No NA or Inf values
+    for (arma::uword it = 1; it < nrows; it++) {
     // Calculate the means using the decay factor
     meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
     // Variance is the weighted sum of the past variance and the square of the data minus its mean
     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(tseries.row(it) - meanm.row(it));
   }  // end for
+  } else {
+    // Calculate variance with NA or Inf values
+    double valuc = tseries(0, 0);
+    meanm.row(0) = tseries.row(0);
+    for (arma::uword rn = 1; rn < nrows; rn++) {
+      for (arma::uword cn = 0; cn < ncols; cn++) {
+        valuc = tseries(rn, cn);
+        if (std::isnan(meanm(rn-1, cn)) || std::isinf(meanm(rn-1, cn)) || std::isnan(valuc) || std::isinf(valuc)) {
+          // Set the mean and variance equal to the current value
+          meanm(rn, cn) = valuc;
+          vars(rn, cn) = pow(valuc, 2);
+        } else {
+          // Calculate the mean using the decay factor
+          meanm(rn, cn) = lambda*meanm(rn-1, cn) + lambda1*valuc;
+          // Variance is the weighted sum of the past variance and the square of the data minus its mean
+          vars(rn, cn) = lambda*vars(rn-1, cn) + lambda1*pow(valuc - meanm(rn, cn), 2);
+        }  // end if
+      }  // end column for
+    }  // end row for
+    // meanm = tseries;
+  }  // end if
+  
   
   return arma::join_rows(meanm, vars);
   // return vars;
