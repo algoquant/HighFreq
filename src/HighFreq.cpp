@@ -2864,6 +2864,7 @@ arma::mat run_mean(const arma::mat& tseries,
       meanm.row(nrows-1) = meanm.row(nrows-1)/meanw;
     }  // end if
   } else {
+    // Loop over the columns because of the NA or Inf values.
     // Calculate means with NA or Inf values
     double valuc = tseries(0, 0);
     meanm.row(0) = tseries.row(0);
@@ -3161,8 +3162,9 @@ arma::mat run_var(const arma::mat& tseries, double lambda) {
     meanm.row(it) = lambda*meanm.row(it-1) + lambda1*tseries.row(it);
     // Variance is the weighted sum of the past variance and the square of the data minus its mean
     vars.row(it) = lambda*vars.row(it-1) + lambda1*arma::square(tseries.row(it) - meanm.row(it));
-  }  // end for
+    }  // end for
   } else {
+    // Loop over the columns because of the NA or Inf values.
     // Calculate variance with NA or Inf values
     double valuc = tseries(0, 0);
     meanm.row(0) = tseries.row(0);
@@ -5518,10 +5520,10 @@ arma::mat calc_kurtosis(const arma::mat& tseries,
 //' closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 //' closep <- log(closep)
 //' # Calculate the Hurst exponents for a 21 day aggregation interval
-//' HighFreq::calc_hurst(prices, aggv=21)
+//' HighFreq::calc_hurst(closep, aggv=21)
 //' # Calculate the Hurst exponents for a vector of aggregation intervals
 //' aggv <- seq.int(from=3, to=35, length.out=9)^2
-//' HighFreq::calc_hurst(prices, aggv=aggv)
+//' HighFreq::calc_hurst(closep, aggv=aggv)
 //' }
 //' 
 //' @export
@@ -5545,10 +5547,10 @@ arma::mat calc_hurst(const arma::mat& tseries,
   
   // Calculate the log of the agg points
   arma::mat agglog = arma::log(aggv);
-  
+
   // Calculate the Hurst exponent from the regression slopes
   arma::mat varagg = arma::var(agglog);
-  return (arma::cov(volv, agglog).t())/varagg(0);
+  return (arma::cov(volv, agglog))/varagg(0);
   
 }  // end calc_hurst
 
@@ -8361,9 +8363,9 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   }
 //'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
 //'   average of all the column means.
-//'   The shrinkage intensity \code{alphac} determines the amount of shrinkage
-//'   that is applied, with \code{alphac = 0} representing no shrinkage (with the
-//'   column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
+//'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
+//'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
+//'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
 //'   complete shrinkage (with the column means all equal to the single mean of
 //'   all the columns: \eqn{\bar{r}_i = \mu}).
 //'
@@ -8385,8 +8387,10 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //'   
 //'   If \code{scalew = "sumone"} then the weights are scaled so that their
 //'   sum is equal to \code{1}.
+//'   
 //'   If \code{scalew = "sumsq"} then the weights are scaled so that their
 //'   sum of squares is equal to \code{1}.
+//'   
 //'   If \code{scalew = "none"} then the weights are not scaled.
 //' 
 //'   The function \code{calc_weights()} is written in \code{C++}
@@ -8556,7 +8560,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     break;
   }  // end voleqw
   case methodenum::sumone: {
-    // Scale the weights so their sum of squares is equal to one
+    // Scale the weights so their sum is equal to one
     weightv = weightv/arma::sum(weightv*arma::ones(ncols));
     break;
   }  // end sumone
@@ -8697,7 +8701,7 @@ arma::mat back_test(const arma::mat& retx, // Asset excess returns
   double lambda1 = 1-lambda;
   arma::uword nweights = retp.n_cols;
   arma::vec weightv(nweights, fill::zeros);
-  arma::vec weights_past = arma::ones(nweights)/std::sqrt(nweights);
+  arma::vec weightp = arma::ones(nweights)/std::sqrt(nweights); // Past weights
   arma::mat pnls = arma::zeros(retp.n_rows, 1);
 
   // Perform loop over the end points
@@ -8705,14 +8709,16 @@ arma::mat back_test(const arma::mat& retx, // Asset excess returns
     // cout << "it: " << it << endl;
     // Calculate the portfolio weights
     weightv = coeff*calc_weights(retx.rows(startp(it-1), endd(it-1)), controlv);
+    // cout << "calc_weights done" << endl;
     // Calculate the weights as the weighted sum with past weights
-    weightv = lambda1*weightv + lambda*weights_past;
+    weightv = lambda1*weightv + lambda*weightp;
     // Calculate out-of-sample returns
     pnls.rows(endd(it-1)+1, endd(it)) = retp.rows(endd(it-1)+1, endd(it))*weightv;
+    // cout << "Out-of-sample returns done" << endl;
     // Add transaction costs
-    pnls.row(endd(it-1)+1) -= bidask*sum(abs(weightv - weights_past))/2;
-    // Copy the weights
-    weights_past = weightv;
+    pnls.row(endd(it-1)+1) -= bidask*sum(abs(weightv - weightp))/2;
+    // Copy to the past weights
+    weightp = weightv;
   }  // end for
   
   // Return the strategy pnls

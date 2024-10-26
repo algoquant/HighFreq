@@ -3752,10 +3752,10 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 #' closep <- log(closep)
 #' # Calculate the Hurst exponents for a 21 day aggregation interval
-#' HighFreq::calc_hurst(prices, aggv=21)
+#' HighFreq::calc_hurst(closep, aggv=21)
 #' # Calculate the Hurst exponents for a vector of aggregation intervals
 #' aggv <- seq.int(from=3, to=35, length.out=9)^2
-#' HighFreq::calc_hurst(prices, aggv=aggv)
+#' HighFreq::calc_hurst(closep, aggv=aggv)
 #' }
 #' 
 #' @export
@@ -5615,9 +5615,9 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   }
 #'   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
 #'   average of all the column means.
-#'   The shrinkage intensity \code{alphac} determines the amount of shrinkage
-#'   that is applied, with \code{alphac = 0} representing no shrinkage (with the
-#'   column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
+#'   The shrinkage intensity \code{alpha} determines the amount of shrinkage
+#'   that is applied, with \code{alpha = 0} representing no shrinkage (with the
+#'   column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
 #'   complete shrinkage (with the column means all equal to the single mean of
 #'   all the columns: \eqn{\bar{r}_i = \mu}).
 #'
@@ -5639,8 +5639,10 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   
 #'   If \code{scalew = "sumone"} then the weights are scaled so that their
 #'   sum is equal to \code{1}.
+#'   
 #'   If \code{scalew = "sumsq"} then the weights are scaled so that their
 #'   sum of squares is equal to \code{1}.
+#'   
 #'   If \code{scalew = "none"} then the weights are not scaled.
 #' 
 #'   The function \code{calc_weights()} is written in \code{C++}
