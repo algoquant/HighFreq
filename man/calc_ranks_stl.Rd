@@ -5,15 +5,15 @@
 \title{Calculate the ranks of the elements of a single-column \emph{time series},
 \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.}
 \usage{
-calc_ranks_stl(tseries)
+calc_ranks_stl(timeser)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series}, \emph{matrix}, or
+\item{\code{timeser}}{A single-column \emph{time series}, \emph{matrix}, or
 a \emph{vector}.}
 }
 \value{
 An \emph{integer vector} with the ranks of the elements of
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the ranks of the elements of a single-column \emph{time series},
@@ -44,10 +44,10 @@ The function \code{calc_ranks_stl()} calculates the ranks of the elements
   The function \code{calc_ranks_stl()} calls the function \code{std::sort()}
   twice:
   First, it calculates the permutation index which sorts the vector
-  \code{tseries} into ascending order.
+  \code{timeser} into ascending order.
   Second, it calculates the permutation index of the permutation index,
   which are the ranks (the \emph{reverse} permutation index) of the vector
-  \code{tseries}.
+  \code{timeser}.
 }
 \examples{
 \dontrun{

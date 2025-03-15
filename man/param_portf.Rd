@@ -71,11 +71,11 @@ The function \code{param_portf()} creates a named list of model parameters
 \examples{
 \dontrun{
 # Create a default list of portfolio optimization parameters
-controlv <- HighFreq::param_portf()
-unlist(controlv)
+controll <- HighFreq::param_portf()
+unlist(controll)
 # Create a custom list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(method="regular", dimax=4)
-unlist(controlv)
+controll <- HighFreq::param_portf(method="regular", dimax=4)
+unlist(controll)
 }
 
 }

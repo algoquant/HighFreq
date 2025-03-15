@@ -251,7 +251,7 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #'
 #' @param \code{xtsv} A single-column \emph{xts} time series, or a \emph{numeric} or
 #'   \emph{Boolean} vector.
-#' @param \code{look_back} The number of data points in rolling look-back interval for 
+#' @param \code{lookb} The number of data points in rolling look-back interval for 
 #'   estimating rolling quantile.
 #' @param \code{vol_mult} The quantile multiplier.
 #'
@@ -283,15 +283,15 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' taq <- HighFreq::SPY_TAQ
 #' # scrub quotes with suspect bid-ask spreads
 #' bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-#' sus_pect <- which_extreme(bidask, look_back=51, vol_mult=3)
+#' sus_pect <- which_extreme(bidask, lookb=51, vol_mult=3)
 #' # Remove suspect values
 #' taq <- taq[!sus_pect]
 #' 
 #' @export
 
-which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
+which_extreme <- function(xtsv, lookb=51, vol_mult=2) {
 # Calculate volatility as rolling quantile
-  quantilev <- caTools::runquantile(x=abs(as.numeric(xtsv)), k=look_back,
+  quantilev <- caTools::runquantile(x=abs(as.numeric(xtsv)), k=lookb,
                         probs=0.9, endrule="constant", align="center")
 #  quantilev <- xts(quantilev, order.by=index(xtsv))
 #  colnames(quantilev) <- "volat"
@@ -353,12 +353,12 @@ which_extreme <- function(xtsv, look_back=51, vol_mult=2) {
 #' # Calculate mid prices
 #' mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
 #' # Replace whole rows containing suspect price jumps with NA, and perform locf()
-#' taq[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
+#' taq[which_jumps(mid_prices, lookb=31, vol_mult=1.0), ] <- NA
 #' taq <- xts:::na.locf.xts(taq)
 #' 
 #' @export
 
-which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
+which_jumps <- function(xtsv, lookb=51, vol_mult=2) {
 # Calculate simple returns
   returns <- rutils::diffit(as.numeric(xtsv))
 #  returns[1] <- 0
@@ -368,7 +368,7 @@ which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 #  colnames(rets_advanced) <- "rets_advanced"
 
 # Calculate volatility as the rolling quantile of returns
-  quantilev <- caTools::runquantile(x=abs(returns), k=look_back,
+  quantilev <- caTools::runquantile(x=abs(returns), k=lookb,
                         probs=0.9, endrule="constant", align="center")
 #  quantilev <- xts(quantilev, order.by=index(returns))
 #  colnames(quantilev) <- "volat"
@@ -412,15 +412,15 @@ which_jumps <- function(xtsv, look_back=51, vol_mult=2) {
 #'
 #' @examples
 # scrub a single day of TAQ data without aggregating it
-#' taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, look_back=11, vol_mult=1)
+#' taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, lookb=11, vol_mult=1)
 #' # Create random TAQ prices and scrub them
 #' taq <- HighFreq::random_taq()
 #' taq <- HighFreq::scrub_taq(taq=taq)
-#' taq <- HighFreq::scrub_taq(taq=taq, look_back=11, vol_mult=1)
+#' taq <- HighFreq::scrub_taq(taq=taq, lookb=11, vol_mult=1)
 #' 
 #' @export
 
-scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
+scrub_taq <- function(taq, lookb=51, vol_mult=2, tzone="America/New_York") {
 # Convert timezone of index to New_York
   index(taq) <- lubridate::with_tz(time=index(taq), tzone=tzone)
 # subset data to NYSE trading hours
@@ -435,7 +435,7 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 # scrub quotes with suspect bid-ask spreads
   bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
 #  bidask <- na.omit(bidask)
-  sus_pect <- which_extreme(bidask, look_back=look_back, vol_mult=vol_mult)
+  sus_pect <- which_extreme(bidask, lookb=lookb, vol_mult=vol_mult)
 # Remove suspect values
   taq <- taq[!sus_pect]
 # Replace suspect values
@@ -450,7 +450,7 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 # Replace NA volumes with zero
   taq[is.na(taq[, "Volume"]), "Volume"] <- 0
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
-  taq[which_jumps(mid_prices, look_back=look_back, vol_mult=vol_mult), ] <- NA
+  taq[which_jumps(mid_prices, lookb=lookb, vol_mult=vol_mult), ] <- NA
   rutils::na_locf(taq)
 }  # end scrub_taq
 
@@ -492,7 +492,7 @@ scrub_taq <- function(taq, look_back=51, vol_mult=2, tzone="America/New_York") {
 #' 
 #' @export
 
-scrub_agg <- function(taq, look_back=51, vol_mult=2,
+scrub_agg <- function(taq, lookb=51, vol_mult=2,
                       period="minutes", tzone="America/New_York") {
 # Convert timezone of index to New_York
   index(taq) <- lubridate::with_tz(time=index(taq), tzone=tzone)
@@ -508,7 +508,7 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 # scrub quotes with suspect bid-ask spreads
   bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
 #  bidask <- na.omit(bidask)
-  sus_pect <- which_extreme(bidask, look_back=look_back, vol_mult=vol_mult)
+  sus_pect <- which_extreme(bidask, lookb=lookb, vol_mult=vol_mult)
 # Remove suspect values
   taq <- taq[!sus_pect]
 # Replace suspect values
@@ -521,7 +521,7 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 #  mid_prices <- na.omit(mid_prices)
   colnames(mid_prices) <- "Mid.Price"
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
-  mid_prices[which_jumps(mid_prices, look_back=look_back, vol_mult=vol_mult)] <- NA
+  mid_prices[which_jumps(mid_prices, lookb=lookb, vol_mult=vol_mult)] <- NA
   mid_prices <- rutils::na_locf(mid_prices)
 #  mid_prices <- rutils::na_locf(mid_prices, fromLast=TRUE)
 # Cbind mid_prices with volume data, and replace NA volumes with zero
@@ -587,7 +587,7 @@ scrub_agg <- function(taq, look_back=51, vol_mult=2,
 save_scrub_agg <- function(symbol,
                       data_dir="E:/mktdata/sec/",
                       output_dir="E:/output/data/",
-                      look_back=51,
+                      lookb=51,
                       vol_mult=2,
                       period="minutes",
                       tzone="America/New_York") {
@@ -603,7 +603,7 @@ datav <- lapply(file_names, function(file_name) {
   cat("loading", symbol, "from file: ", file_name, "\n")
   symbol <- load(file_name)
   scrub_agg(get(symbol),
-            look_back=look_back,
+            lookb=lookb,
             vol_mult=vol_mult,
             period=period, tzone=tzone)
 })  # end sapply
@@ -655,7 +655,7 @@ datav <- lapply(file_names, function(file_name) {
 save_taq <- function(symbol,
                       data_dir="E:/mktdata/sec/",
                       output_dir="E:/output/data/",
-                      look_back=51,
+                      lookb=51,
                       vol_mult=2,
                       tzone="America/New_York") {
 # Create path to directory containing *.RData files
@@ -672,7 +672,7 @@ save_taq <- function(symbol,
     symbol <- load(file_name_in)
     file_name_out <- file.path(output_dir, file_name)
 # save the xts data to a file in the output_dir
-    taq <- scrub_taq(get(symbol), look_back=look_back, vol_mult=vol_mult, tzone=tzone)
+    taq <- scrub_taq(get(symbol), lookb=lookb, vol_mult=vol_mult, tzone=tzone)
     if (!is.null(taq)) {
       assign(symbol, taq)
       save(list=symbol, file=file_name_out)
@@ -719,7 +719,7 @@ save_taq <- function(symbol,
 save_rets <- function(symbol,
                       data_dir="E:/mktdata/sec/",
                       output_dir="E:/output/data/",
-                      look_back=51,
+                      lookb=51,
                       vol_mult=2,
                       period="minutes",
                       tzone="America/New_York") {
@@ -739,7 +739,7 @@ save_rets <- function(symbol,
 
 # scrub and aggregate the TAQ data
   ohlc <- lapply(taq, scrub_agg,
-                      look_back=look_back,
+                      lookb=lookb,
                       vol_mult=vol_mult,
                       period=period,
                       tzone=tzone)
@@ -819,7 +819,7 @@ save_rets_ohlc <- function(symbol,
 #' (\emph{CVaR}) of an \emph{xts} \emph{time series} of returns, using \code{R}
 #' code.
 #' 
-#' @param \code{tseries} An \emph{xts} \emph{time series} of returns with
+#' @param \code{timeser} An \emph{xts} \emph{time series} of returns with
 #'   multiple columns.
 #'   
 #' @param \code{method} A \emph{string} specifying the type of risk measure
@@ -829,7 +829,7 @@ save_rets_ohlc <- function(symbol,
 #'   quantile (the default is \code{confi = pnorm(-2) = 0.02275}).
 #'
 #' @return A vector with the risk measures of the columns of the input
-#'   \emph{time series} \code{tseries}.
+#'   \emph{time series} \code{timeser}.
 #'
 #' @details 
 #'   The function \code{calc_cvar()} calculates the Value at Risk (\emph{VaR})
@@ -872,16 +872,15 @@ save_rets_ohlc <- function(symbol,
 #' 
 #' @export
 
-calc_cvar <- function(tseries, method = "var", confi = pnorm(-2)) {
+calc_cvar <- function(timeser, method = "var", confi = pnorm(-2)) {
 
   # Switch for the different risk methods
-  risk <- switch(method,
-                 "var"={sapply(tseries, quantile, probs=confi)},
+  riskv <- switch(method, "var"={sapply(timeser, quantile, probs=confi)},
                  # Calculate CVaR as expected loss
-                 "cvar"={sapply(tseries, function(x) mean(x[x < quantile(x, confi)]))}
+                 "cvar"={sapply(timeser, function(x) mean(x[x < quantile(x, confi)]))}
   )  # end switch
   
-  risk
+  riskv
   
 }  # end calc_cvar
 
@@ -1181,7 +1180,7 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' 
 #' @param \code{close} A time series of close prices.
 #' 
-#' @param \code{look_back} The size of the look-back interval, equal to the number of 
+#' @param \code{lookb} The size of the look-back interval, equal to the number of 
 #'   rows of data used for calculating the average price.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1195,7 +1194,7 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #'
 #' @examples
 #' # Calculate and plot rolling volume-weighted average closing prices (VWAP)
-#' prices_rolling <- roll_vwap(ohlc=HighFreq::SPY["2013-11"], look_back=11)
+#' prices_rolling <- roll_vwap(ohlc=HighFreq::SPY["2013-11"], lookb=11)
 #' chart_Series(HighFreq::SPY["2013-11-12"], name="SPY prices")
 #' add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
 #' legend("top", legend=c("SPY prices", "VWAP prices"),
@@ -1204,15 +1203,15 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' # Calculate running returns
 #' returns_running <- ohlc_returns(xtsv=HighFreq::SPY)
 #' # Calculate the rolling volume-weighted average returns
-#' roll_vwap(ohlc=HighFreq::SPY, close=returns_running, look_back=11)
+#' roll_vwap(ohlc=HighFreq::SPY, close=returns_running, lookb=11)
 #' 
 #' @export
 
-roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
-  roll_vwap <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], look_back=look_back)
-  volume_rolling <- rutils::roll_sum(xtsv=ohlc[, 5, drop=FALSE], look_back=look_back)
-  # roll_vwap <- HighFreq::roll_sum(tseries=close*ohlc[, 5, drop=FALSE], look_back=look_back)
-  # volume_rolling <- HighFreq::roll_sum(tseries=ohlc[, 5, drop=FALSE], look_back=look_back)
+roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], lookb) {
+  roll_vwap <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], lookb=lookb)
+  volume_rolling <- rutils::roll_sum(xtsv=ohlc[, 5, drop=FALSE], lookb=lookb)
+  # roll_vwap <- HighFreq::roll_sum(timeser=close*ohlc[, 5, drop=FALSE], lookb=lookb)
+  # volume_rolling <- HighFreq::roll_sum(timeser=ohlc[, 5, drop=FALSE], lookb=lookb)
   roll_vwap <- ifelse(volume_rolling > 0, roll_vwap/volume_rolling, 0)
   # roll_vwap[is.na(roll_vwap)] <- 0
   # Colnames(roll_vwap) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".VWAP")
@@ -1233,7 +1232,7 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #' @param \code{calc_stats} The name of the function for estimating statistics of a single
 #'   row of \emph{OHLC} data, such as volatility, skew, and higher moments.
 #'   
-#' @param \code{look_back} The size of the look-back interval, equal to the number of
+#' @param \code{lookb} The size of the look-back interval, equal to the number of
 #'   rows of data used for calculating the rolling mean.
 #'   
 #' @param \code{weighted} \emph{Boolean} argument: should statistic be weighted by
@@ -1255,15 +1254,15 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], look_back) {
 #'
 #' @examples
 #' # Calculate time series of rolling variance and skew estimates
-#' var_rolling <- roll_stats(ohlc=HighFreq::SPY, look_back=21)
-#' skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
+#' var_rolling <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
+#' skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
 #' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 #' skew_rolling[1, ] <- 0
 #' skew_rolling <- rutils::na_locf(skew_rolling)
 #' 
 #' @export
 
-roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=TRUE, ...) {
+roll_stats <- function(ohlc, calc_stats="ohlc_variance", lookb=11, weighted=TRUE, ...) {
   
 # Match "calc_stats" with moment function
   calc_stats <- match.fun(calc_stats)
@@ -1272,11 +1271,11 @@ roll_stats <- function(ohlc, calc_stats="ohlc_variance", look_back=11, weighted=
 # Weight by volume
   if (weighted) {
     agg_regations <- ohlc[, 5]*agg_regations
-    volume_rolling <- rutils::roll_sum(ohlc[, 5], look_back=look_back)
-    agg_regations <- rutils::roll_sum(agg_regations, look_back=look_back)/volume_rolling
+    volume_rolling <- rutils::roll_sum(ohlc[, 5], lookb=lookb)
+    agg_regations <- rutils::roll_sum(agg_regations, lookb=lookb)/volume_rolling
     agg_regations[is.na(agg_regations)] <- 0
   } else
-    agg_regations <- rutils::roll_sum(agg_regations, look_back=look_back)/look_back
+    agg_regations <- rutils::roll_sum(agg_regations, lookb=lookb)/lookb
   # Colnames(agg_regations) <- paste(rutils::get_name(colnames(ohlc)[1]), "Vol", sep=".")
   
   agg_regations
@@ -1386,7 +1385,7 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #'
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{look_back} The size of the look-back interval, equal to the number of
+#' @param \code{lookb} The size of the look-back interval, equal to the number of
 #'   rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1398,13 +1397,13 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #'
 #' @examples
 #' # Calculate rolling Sharpe ratio over SPY
-#' sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, look_back=11)
+#' sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, lookb=11)
 #' 
 #' @export
 
-roll_sharpe <- function(ohlc, look_back=11) {
-  returns <- ohlc_returns(ohlc, lag=look_back, scalit=FALSE)
-  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, look_back=look_back, scalit=FALSE))
+roll_sharpe <- function(ohlc, lookb=11) {
+  returns <- ohlc_returns(ohlc, lag=lookb, scalit=FALSE)
+  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
   sharpe_rolling <- ifelse(var_rolling==0,
                            1.0,
                            returns/var_rolling)
@@ -1421,7 +1420,7 @@ roll_sharpe <- function(ohlc, look_back=11) {
 #'
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{look_back} The size of the look-back interval, equal to the number of 
+#' @param \code{lookb} The size of the look-back interval, equal to the number of 
 #'   rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
@@ -1450,18 +1449,18 @@ roll_sharpe <- function(ohlc, look_back=11) {
 #'
 #' @examples
 #' # Calculate rolling Hurst for SPY in March 2009
-#' hurst_rolling <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], look_back=11)
+#' hurst_rolling <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], lookb=11)
 #' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
 #' 
 #' @export
 
-roll_hurst <- function(ohlc, look_back=11) {
-  rangev <- c(rep(0, look_back-1), (RcppRoll::roll_max(x=ohlc[, 2], n=look_back) +
-               RcppRoll::roll_max(x=-ohlc[, 3], n=look_back)))
-  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, look_back=look_back, scalit=FALSE))
+roll_hurst <- function(ohlc, lookb=11) {
+  rangev <- c(rep(0, lookb-1), (RcppRoll::roll_max(x=ohlc[, 2], n=lookb) +
+               RcppRoll::roll_max(x=-ohlc[, 3], n=lookb)))
+  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
   hurst_rolling <- ifelse((var_rolling==0) | (rangev==0),
                           0.5,
-                          log(rangev/var_rolling)/log(look_back))
+                          log(rangev/var_rolling)/log(lookb))
   # Colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Hurst")
   rutils::na_locf(hurst_rolling)
 }  # end roll_hurst
@@ -1479,7 +1478,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' @param \code{agg_fun} The name of the aggregation function to be applied over a
 #'   rolling look-back interval.
 #'   
-#' @param \code{look_back} The number of end points in the look-back interval used for
+#' @param \code{lookb} The number of end points in the look-back interval used for
 #'   applying the aggregation function (including the current row).
 #'   
 #' @param \code{by_columns} \emph{Boolean} argument: should the function
@@ -1525,7 +1524,7 @@ roll_hurst <- function(ohlc, look_back=11) {
 #'   
 #'   If the argument \code{endpoints} is explicitly passed to 
 #'   \code{roll_apply()}, then \code{roll_apply()} performs aggregations over 
-#'   intervals attached at the endpoints.  If look_back=2 then the aggregations
+#'   intervals attached at the endpoints.  If lookb=2 then the aggregations
 #'   are performed over non-overlapping intervals, otherwise they are performed
 #'   over overlapping intervals.
 #'
@@ -1546,12 +1545,12 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' # extract a single day of SPY data
 #' ohlc <- HighFreq::SPY["2012-02-13"]
 #' interval <- 11  # number of data points between end points
-#' look_back <- 4  # number of end points in look-back interval
+#' lookb <- 4  # number of end points in look-back interval
 #' # Calculate the rolling sums of ohlc columns over a rolling look-back interval
-#' agg_regations <- roll_apply(ohlc, agg_fun=sum, look_back=look_back, by_columns=TRUE)
+#' agg_regations <- roll_apply(ohlc, agg_fun=sum, lookb=lookb, by_columns=TRUE)
 #' # Apply a vector-valued aggregation function over a rolling look-back interval
 #' agg_function <- function(ohlc)  c(max(ohlc[, 2]), min(ohlc[, 3]))
-#' agg_regations <- roll_apply(ohlc, agg_fun=agg_function, look_back=look_back)
+#' agg_regations <- roll_apply(ohlc, agg_fun=agg_function, lookb=lookb)
 #' # Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 #' endpoints <- rutils::endpoints(ohlc, interval=interval)
 #' # Calculate the sums of ohlc columns over endpoints using non-overlapping intervals
@@ -1559,19 +1558,19 @@ roll_hurst <- function(ohlc, look_back=11) {
 #' # Apply a vector-valued aggregation function over the endpoints of ohlc
 #' # using overlapping intervals
 #' agg_regations <- roll_apply(ohlc, agg_fun=agg_function,
-#'                             look_back=5, endpoints=endpoints)
+#'                             lookb=5, endpoints=endpoints)
 #'                             
 #' @export
 
-roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv), 
+roll_apply <- function(xtsv, agg_fun, lookb=2, endpoints=seq_along(xtsv), 
                        by_columns=FALSE, out_xts=TRUE, ...) {
   # Match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
   nrows <- NROW(endpoints)
   # Define startpoints as lag of endpoints
-  startpoints <- c(rep_len(1, look_back-1), endpoints[1:(nrows-look_back+1)])
+  startpoints <- c(rep_len(1, lookb-1), endpoints[1:(nrows-lookb+1)])
   # Define list of look-back intervals for aggregations over past
-  look_backs <- lapply(seq_along(endpoints), 
+  lookbs <- lapply(seq_along(endpoints), 
                        function(endp) {
                          startpoints[endp]:endpoints[endp]
                        })  # end lapply
@@ -1579,12 +1578,12 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
   if (by_columns) {
     # Perform individual aggregations by columns
     agg_regations <- lapply(xtsv, function(colnum)
-      lapply(look_backs, function(look_back)
-        agg_fun(xtsv[look_back], ...)
+      lapply(lookbs, function(lookb)
+        agg_fun(xtsv[lookb], ...)
       ))  # end lapply
   } else {  # not by_columns
-    agg_regations <- lapply(look_backs, function(look_back)
-      agg_fun(xtsv[look_back], ...)
+    agg_regations <- lapply(lookbs, function(lookb)
+      agg_fun(xtsv[lookb], ...)
     )  # end lapply
   }  # end if
   
@@ -1616,7 +1615,7 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
 #' @param \code{trade_func} The name of the trading model function, to be applied over
 #'   a rolling look-forward interval.
 #'   
-#' @param \code{look_back} The size of the look-back interval, equal to the number of
+#' @param \code{lookb} The size of the look-back interval, equal to the number of
 #'   rows of data used for training the forecasting model.
 #'   
 #' @param \code{look_forward} The size of the look-forward interval, equal to the number
@@ -1655,14 +1654,14 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
 #' \dontrun{
 #' # Combine two time series of prices
 #' prices <- cbind(rutils::etfenv$XLU, rutils::etfenv$XLP)
-#' look_back <- 252
+#' lookb <- 252
 #' look_forward <- 22
 #' # Define end points
 #' endpoints <- rutils::calc_endpoints(prices, look_forward)
 #' # Perform back-test
 #' back_test <- roll_backtest(endpoints=endpoints,
 #'     look_forward=look_forward,
-#'     look_back=look_back,
+#'     lookb=lookb,
 #'     train_func = train_model,
 #'     trade_func = trade_model,
 #'     model_params = model_params,
@@ -1674,7 +1673,7 @@ roll_apply <- function(xtsv, agg_fun, look_back=2, endpoints=seq_along(xtsv),
 
 roll_backtest <- function(xtsv,
                           train_func, trade_func,
-                          look_back=look_forward,
+                          lookb=look_forward,
                           look_forward,
                           endpoints=rutils::calc_endpoints(xtsv, look_forward),
                           ...) {
@@ -1691,7 +1690,7 @@ roll_backtest <- function(xtsv,
   }  # end if
 
   # Define integer back_points and fwd_points from integer endpoints
-  back_points <- endpoints - look_back + 1
+  back_points <- endpoints - lookb + 1
   back_points[back_points < 1] <- 1
   
   fwd_points <- endpoints + look_forward

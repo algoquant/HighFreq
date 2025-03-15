@@ -5,18 +5,18 @@
 \title{Calculate the exponential moving average (EMA) of streaming \emph{time
 series} data using an online recursive formula.}
 \usage{
-run_mean(tseries, lambda, weightv = 0L)
+run_mean(timeser, lambdaf, weightv = 0L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 
 \item{\code{weightv}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the exponential moving average (EMA) of streaming \emph{time
@@ -30,7 +30,7 @@ The function \code{run_mean()} calculates the exponential moving average
   \code{run_mean()} simply calculates the exponentially weighted moving
   average value of the streaming \emph{time series} data \eqn{p_t}:
   \deqn{
-    \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+    \bar{p}_t = \lambda \bar{p}_{t-1} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
   }
   
   Some applications require applying additional weight factors, like for
@@ -38,18 +38,18 @@ The function \code{run_mean()} calculates the exponential moving average
   streaming prices can be multiplied by the streaming trading volumes.
   
   If the argument \code{weightv} has the same number of rows as the argument
-  \code{tseries}, then the function \code{run_mean()} calculates the
+  \code{timeser}, then the function \code{run_mean()} calculates the
   exponential moving average (EMA) in two steps.
   
   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
   \deqn{
-    \bar{w}_t = \lambda \bar{w}_{t-1} + (1-\lambda) w_t
+    \bar{w}_t = \lambda \bar{w}_{t-1} + (1 - \lambda) w_t
   }
   
   Second it calculates the trailing mean products \eqn{\bar{w p}_t} of the
   weights \eqn{w_t} and the data \eqn{p_t}:
   \deqn{
-    \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1-\lambda) w_t p_t
+    \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1 - \lambda) w_t p_t
   }
   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
   weights, \eqn{\bar{w}_t} are the trailing mean weights, and \eqn{\bar{w p}_t}
@@ -81,11 +81,11 @@ The function \code{run_mean()} calculates the exponential moving average
   interval.
 
   The function \code{run_mean()} performs the same calculation as the
-  standard \code{R} function\cr\code{stats::filter(x=series, filter=lambda,
+  standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdaf,
   method="recursive")}, but it's several times faster.
 
   The function \code{run_mean()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{tseries}.
+  dimensions as the input argument \code{timeser}.
 }
 \examples{
 \dontrun{
@@ -94,7 +94,7 @@ ohlc <- rutils::etfenv$VTI
 closep <- quantmod::Cl(ohlc)
 # Calculate the trailing means
 lambdaf <- 0.9 # Decay factor
-meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
+meanv <- HighFreq::run_mean(closep, lambdaf=lambdaf)
 # Calculate the trailing means using R code
 pricef <- (1-lambdaf)*filter(closep, 
   filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), 
@@ -104,14 +104,14 @@ all.equal(drop(meanv), unclass(pricef), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_mean(closep, lambda=lambdaf),
+  Rcpp=HighFreq::run_mean(closep, lambdaf=lambdaf),
   Rcode=filter(closep, filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
   
 # Calculate weights equal to the trading volumes
 weightv <- quantmod::Vo(ohlc)
 # Calculate the exponential moving average (EMA)
-meanw <- HighFreq::run_mean(closep, lambda=lambdaf, weightv=weightv)
+meanw <- HighFreq::run_mean(closep, lambdaf=lambdaf, weightv=weightv)
 # Plot dygraph of the EMA
 datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 colnames(datav) <- c("means trailing", "means weighted")

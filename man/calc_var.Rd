@@ -5,10 +5,10 @@
 \title{Calculate the dispersion (variance) of the columns of a \emph{time series}
 or a \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_var(tseries, method = "moment", confl = 0.75)
+calc_var(timeser, method = "moment", confl = 0.75)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{method}}{A \emph{character string} specifying the type of the
 dispersion model (the default is \code{method = "moment"} - see Details).}
@@ -18,7 +18,7 @@ returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A row vector equal to the dispersion of the columns of the matrix
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the dispersion (variance) of the columns of a \emph{time series}
@@ -58,7 +58,7 @@ The function \code{calc_var()} calculates the dispersion of the
   same calculation as the function \code{stats::mad()}, but it's much faster
   because it uses \code{RcppArmadillo} \code{C++} code.
 
-  If the number of rows of \code{tseries} is less than \code{3} then it
+  If the number of rows of \code{timeser} is less than \code{3} then it
   returns zeros.
 }
 \examples{

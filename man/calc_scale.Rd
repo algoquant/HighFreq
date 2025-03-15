@@ -5,10 +5,10 @@
 \title{Standardize (center and scale) the columns of a \emph{time series} of data
 in place, without copying the data in memory, using \code{RcppArmadillo}.}
 \usage{
-calc_scale(tseries, center = TRUE, scale = TRUE, use_median = FALSE)
+calc_scale(timeser, center = TRUE, scale = TRUE, use_median = FALSE)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
 
 \item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center
 the columns so that they have zero mean or median (the default is
@@ -55,11 +55,11 @@ The function \code{calc_scale()} standardizes (centers and scales) the
   centrality as the \emph{median} and the dispersion as the \emph{median
   absolute deviation} (\emph{MAD}).
 
-  If the number of rows of \code{tseries} is less than \code{3} then it
-  does nothing and \code{tseries} is not scaled.
+  If the number of rows of \code{timeser} is less than \code{3} then it
+  does nothing and \code{timeser} is not scaled.
   
   The function \code{calc_scale()} accepts a \emph{pointer} to the argument
-  \code{tseries}, and it overwrites the old data with the standardized data.
+  \code{timeser}, and it overwrites the old data with the standardized data.
   It performs the calculation in place, without copying the data in memory,
   which can significantly increase the computation speed for large time
   series.

@@ -5,16 +5,16 @@
 \title{Calculate the trailing maximum values of streaming \emph{time series} data
 using an online recursive formula.}
 \usage{
-run_max(tseries, lambda)
+run_max(timeser, lambdaf)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the trailing maximum values of streaming \emph{time series} data
@@ -28,7 +28,7 @@ The function \code{run_max()} calculates the trailing maximum values of
   It calculates the trailing maximum values \eqn{p^{max}_t} of the streaming
   data \eqn{p_t} as follows:
   \deqn{
-    p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
+    p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1 - \lambda) p_t)
   }
   The first term in the sum is the maximum value multiplied by the decay
   factor \eqn{\lambda}, so that the past maximum value is gradually
@@ -45,7 +45,7 @@ The function \code{run_max()} calculates the trailing maximum values of
 
   The above formula can also be expressed as:
   \deqn{
-    p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1-\lambda) p_t
+    p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1 - \lambda) p_t
   }
   The first term is the maximum value multiplied by the decay factor
   \eqn{\lambda}, so that the past maximum value is gradually "forgotten".
@@ -55,7 +55,7 @@ The function \code{run_max()} calculates the trailing maximum values of
   data because it doesn't require maintaining a buffer of past data.
 
   The function \code{run_max()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{tseries}.
+  dimensions as the input argument \code{timeser}.
 }
 \examples{
 \dontrun{
@@ -63,7 +63,7 @@ The function \code{run_max()} calculates the trailing maximum values of
 closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 # Calculate the trailing maximums
 lambdaf <- 0.9 # Decay factor
-pricmax <- HighFreq::run_max(closep, lambda=lambdaf)
+pricmax <- HighFreq::run_max(closep, lambdaf=lambdaf)
 # Plot dygraph of VTI prices and trailing maximums
 datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 colnames(datav) <- c("prices", "max")

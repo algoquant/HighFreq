@@ -5,7 +5,7 @@
 \title{Update the trailing eigen values and eigen vectors of streaming asset return
 data, with a row of new returns, using the \emph{SGA} algorithm.}
 \usage{
-push_sga(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
+push_sga(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambdaf, gamma)
 }
 \arguments{
 \item{\code{retsn}}{A \emph{vector} of new asset returns.}
@@ -20,7 +20,7 @@ push_sga(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma)
 
 \item{\code{varv}}{A \emph{vector} of the trailing asset variances.}
 
-\item{\code{lambda}}{A decay factor which multiplies the past mean and
+\item{\code{lambdaf}}{A decay factor which multiplies the past mean and
 variance.}
 
 \item{\code{gamma}}{A \emph{numeric} gain factor which multiplies the past
@@ -57,10 +57,10 @@ The function \code{push_sga()} updates the trailing eigen values, eigen
   returns \eqn{r_t} by recursively weighting present and past values
   using the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+    \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
   }
   The past values \eqn{\bar{r}_{t-1}} and \eqn{\sigma^2_{t-1}} are passed in
   by reference through the variables \code{meanv} and \code{varv}. The
@@ -135,7 +135,7 @@ HighFreq::calc_eigen(covmat, eigenval, eigenvec)
 eigenret <- numeric(NCOL(retp))
 HighFreq::push_sga(retsn=retp[nrows], 
   eigenval=eigenval, eigenvec=eigenvec, 
-  eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+  eigenret=eigenret, meanv=meanv, varv=varv, lambdaf=0.9, gamma=0.1)
 }
 
 }

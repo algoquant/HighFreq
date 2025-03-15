@@ -6,12 +6,12 @@
 over time and in place, without copying the data in memory, using
 \code{RcppArmadillo}.}
 \usage{
-run_scale(tseries, lambda, center = TRUE, scale = TRUE)
+run_scale(timeser, lambdaf, center = TRUE, scale = TRUE)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 
 \item{\code{center}}{A \emph{Boolean} argument: if \code{TRUE} then center
 the columns so that they have zero mean or median (the default is
@@ -31,27 +31,27 @@ over time and in place, without copying the data in memory, using
 }
 \details{
 The function \code{run_scale()} performs a trailing standardization
-  (centering and scaling) of the columns of the \code{tseries} argument
+  (centering and scaling) of the columns of the \code{timeser} argument
   using \code{RcppArmadillo}.
 
   The function \code{run_scale()} accepts a \emph{pointer} to the argument
-  \code{tseries}, and it overwrites the old data with the standardized
+  \code{timeser}, and it overwrites the old data with the standardized
   data. It performs the calculation in place, without copying the data in
   memory, which can significantly increase the computation speed for large
   time series.
 
   The function \code{run_scale()} performs a loop over the rows of
-  \code{tseries}, and standardizes the data using its trailing means and
+  \code{timeser}, and standardizes the data using its trailing means and
   standard deviations.
 
   The function \code{run_scale()} calculates the trailing mean and variance
   of streaming \emph{time series} data \eqn{r_t}, by recursively weighting
   the past estimates with the new data, using the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+    \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
   }
   Where \eqn{\bar{r}_t} is the trailing mean and \eqn{\sigma^2_t} is the
   trailing variance.
@@ -107,12 +107,12 @@ for (it in 2:NROW(retp)) {
   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 }  # end for
 # Calculate the trailing standardized returns using C++ code
-HighFreq::run_scale(retp, lambda=lambdaf)
+HighFreq::run_scale(retp, lambdaf=lambdaf)
 all.equal(zoo::coredata(retp), scaled, check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::run_scale(retp, lambda=lambdaf),
+  Rcpp=HighFreq::run_scale(retp, lambdaf=lambdaf),
   Rcode={for (it in 2:NROW(retp)) {
    meanm <- lambdaf*meanm + lambda1*scaled[it, ];
    vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;

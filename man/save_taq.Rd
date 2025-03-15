@@ -9,7 +9,7 @@ save_taq(
   symbol,
   data_dir = "E:/mktdata/sec/",
   output_dir = "E:/output/data/",
-  look_back = 51,
+  lookb = 51,
   vol_mult = 2,
   tzone = "America/New_York"
 )

@@ -5,10 +5,10 @@
 \title{Calculate the skewness of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_skew(tseries, method = "moment", confl = 0.75)
+calc_skew(timeser, method = "moment", confl = 0.75)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{method}}{A \emph{character string} specifying the type of the
 skewness model (the default is \code{method = "moment"} - see Details).}
@@ -18,7 +18,7 @@ returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the skewness of the columns of
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the skewness of the columns of a \emph{time series} or a
@@ -44,7 +44,7 @@ The function \code{calc_skew()} calculates the skewness of the columns of
   difference between the mean of the data minus its median, divided by the
   standard deviation.
   
-  If the number of rows of \code{tseries} is less than \code{3} then it
+  If the number of rows of \code{timeser} is less than \code{3} then it
   returns zeros.
   
   The code examples below compare the function \code{calc_skew()} with the

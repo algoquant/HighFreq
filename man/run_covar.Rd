@@ -5,18 +5,18 @@
 \title{Calculate the trailing covariances of two streaming \emph{time series} of
 returns using an online recursive formula.}
 \usage{
-run_covar(tseries, lambda)
+run_covar(timeser, lambdaf)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with two
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} with two
 columns of returns data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A \emph{matrix} with five columns of data: the trailing covariances,
   the variances, and the mean values of the two columns of the argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the trailing covariances of two streaming \emph{time series} of
@@ -28,25 +28,29 @@ The function \code{run_covar()} calculates the trailing covariances of two
   covariance estimates \eqn{{cov}_{t-1}}, with the products of their
   returns minus their means, using the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+    \bar{x}_t = \lambda \bar{x}_{t-1} + (1 - \lambda) x_t
   }
   \deqn{
-    \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+    \bar{y}_t = \lambda \bar{y}_{t-1} + (1 - \lambda) y_t
   }
   \deqn{
-    \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+    \sigma^2_{x t} = \lambda^2 \sigma^2_{x t-1} + (1 - \lambda^2) (x_t - \bar{x}_t)^2
   }
   \deqn{
-    \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+    \sigma^2_{y t} = \lambda^2 \sigma^2_{y t-1} + (1 - \lambda^2) (y_t - \bar{y}_t)^2
   }
   \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
+    {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
   }
   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
 
+  Note that the variance and covariance decay as the square of
+  \eqn{\lambda}, while the mean returns decay as \eqn{\lambda}.
+  This is because the variance is proportional to the square of the returns.
+  
   The above online recursive formulas are convenient for processing live
   streaming data because they don't require maintaining a buffer of past
   data. The formulas are equivalent to a convolution with exponentially
@@ -67,7 +71,7 @@ The function \code{run_covar()} calculates the trailing covariances of two
 
   The function \code{run_covar()} returns five columns of data: the trailing 
   covariances, the variances, and the mean values of the two columns of the
-  argument \code{tseries}.  This allows calculating the trailing
+  argument \code{timeser}.  This allows calculating the trailing
   correlations, betas, and alphas.
 }
 \examples{
@@ -76,7 +80,7 @@ The function \code{run_covar()} calculates the trailing covariances of two
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Calculate the trailing covariance
 lambdaf <- 0.9 # Decay factor
-covars <- HighFreq::run_covar(retp, lambda=lambdaf)
+covars <- HighFreq::run_covar(retp, lambdaf=lambdaf)
 # Calculate the trailing correlation
 correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 # Calculate the trailing covariance using R code

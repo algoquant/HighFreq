@@ -51,13 +51,13 @@ The function \code{calc_var_ag()} calculates the variance of returns
 closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 closep <- log(closep)
 # Calculate the variance of daily returns
-calc_var_ag(prices, step=1)
+calc_var_ag(closep, step=1)
 # Calculate the variance using R
 sapply(rutils::diffit(closep), var)
 # Calculate the variance of returns aggregated over 21 days
-calc_var_ag(prices, step=21)
+calc_var_ag(closep, step=21)
 # The variance over 21 days is approximately 21 times the daily variance
-21*calc_var_ag(prices, step=1)
+21*calc_var_ag(closep, step=1)
 }
 
 }

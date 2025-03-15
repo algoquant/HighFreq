@@ -5,13 +5,13 @@
 \title{Calculate the trailing variance of streaming \emph{OHLC} price data using an
 online recursive formula.}
 \usage{
-run_var_ohlc(ohlc, lambda)
+run_var_ohlc(ohlc, lambdaf)
 }
 \arguments{
 \item{\code{ohlc}}{A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 price data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A single-column \emph{matrix} of variance estimates, with the same
@@ -30,7 +30,7 @@ The function \code{run_var_ohlc()} calculates a single-column
   \emph{Close} prices, using the \emph{Yang-Zhang} range volatility
   estimator:
   \deqn{
-    \sigma^2_t = (1-\lambda) ((O_t - C_{t-1})^2 + 0.134 (C_t - O_t)^2 + 
+    \sigma^2_t = (1 - \lambda) ((O_t - C_{t-1})^2 + 0.134 (C_t - O_t)^2 + 
     0.866 ((H_i - O_i) (H_i - C_i) + (L_i - O_i) (L_i - C_i))) + 
     \lambda \sigma^2_{t-1}
   }
@@ -59,7 +59,7 @@ The function \code{run_var_ohlc()} calculates a single-column
 # Extract the log OHLC prices of VTI
 ohlc <- log(rutils::etfenv$VTI)
 # Calculate the trailing variance
-vart <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
+vart <- HighFreq::run_var_ohlc(ohlc, lambdaf=0.8)
 # Calculate the rolling variance
 varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
 datav <- cbind(vart, varoll)
@@ -73,7 +73,7 @@ dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility
 # Compare the speed of trailing versus rolling volatility
 library(microbenchmark)
 summary(microbenchmark(
-  trailing=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+  trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
   times=10))[, c(1, 4, 5)]
 }

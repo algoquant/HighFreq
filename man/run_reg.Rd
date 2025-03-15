@@ -6,7 +6,7 @@
 predictor data, and calculate the regression coefficients, the residuals,
 and the forecasts, using online recursive formulas.}
 \usage{
-run_reg(respv, predm, lambda, controlv)
+run_reg(respv, predm, lambdaf, controll)
 }
 \arguments{
 \item{\code{respv}}{A single-column \emph{time series} or a single-column
@@ -15,9 +15,9 @@ run_reg(respv, predm, lambda, controlv)
 \item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 
-\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
+\item{\code{controll}}{A \emph{list} of model parameters (see Details).}
 }
 \value{
 A \emph{matrix} with the regression coefficients, the residuals, and
@@ -43,10 +43,10 @@ The function \code{run_reg()} performs regressions on the streaming \emph{time
   \eqn{{cov}_{pt}} between the predictors, using the decay factor
   \eqn{\lambda}:
   \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
+    {cov}_t = \lambda {cov}_{t-1} + (1 - \lambda) r^T_t p_t
   }
   \deqn{
-    {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
+    {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1 - \lambda) p^T_t p_t
   }
   
   It calculates the regression coefficients \eqn{\beta_t} as equal to the
@@ -65,12 +65,16 @@ The function \code{run_reg()} performs regressions on the streaming \emph{time
   
   And the residual variance \eqn{\sigma^2_t} as:
   \deqn{
-    \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
+    \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1 - \lambda) \epsilon_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
+    \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (\epsilon_t - \bar{\epsilon}_t)^2
   }
 
+  Note that the variance decays as the square of \eqn{\lambda}, while the
+  mean residuals decay as \eqn{\lambda}.
+  This is because the variance is proportional to the square of the residuals.
+  
   It then calculates the regression forecasts \eqn{f_t}, as equal to the
   past regression coefficients \eqn{\beta_{t-1}} times the current predictor
   data \eqn{p_t}:
@@ -85,8 +89,8 @@ The function \code{run_reg()} performs regressions on the streaming \emph{time
   the same number of rows as the predictor argument \code{predm}.
 
   The function \code{run_reg()} accepts a list of regression model
-  parameters through the argument \code{controlv}.
-  The argument \code{controlv} contains the parameters \code{regmod} and
+  parameters through the argument \code{controll}.
+  The argument \code{controll} contains the parameters \code{regmod} and
   \code{residscale}.
   Below is a description of how these parameters work.
   The list of model parameters can be created using the function
@@ -161,8 +165,8 @@ predm <- cbind(rep(1, NROW(predm)), predm)
 # Calculate the trailing regressions
 lambdaf <- 0.9 # Decay factor
 # Create a list of regression parameters
-controlv <- HighFreq::param_reg(residscale="standardize")
-regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
+controll <- HighFreq::param_reg(residscale="standardize")
+regs <- HighFreq::run_reg(respv=respv, predm=predm, lambdaf=lambdaf, controll=controll)
 # Plot the trailing residuals
 datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 colnames(datav) <- c("XLF", "residuals")

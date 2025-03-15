@@ -5,10 +5,10 @@
 \title{Calculate the row differences of a \emph{time series} or a \emph{matrix}
 using \emph{RcppArmadillo}.}
 \usage{
-diffit(tseries, lagg = 1L, pad_zeros = TRUE)
+diffit(timeser, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of rows (time
 periods) to lag when calculating the differences (the default is
@@ -21,7 +21,7 @@ periods) to lag when calculating the differences (the default is
 }
 \value{
 A \emph{matrix} containing the differences between the rows of the
-  input \emph{matrix} \code{tseries}.
+  input \emph{matrix} \code{timeser}.
 }
 \description{
 Calculate the row differences of a \emph{time series} or a \emph{matrix}
@@ -29,14 +29,14 @@ using \emph{RcppArmadillo}.
 }
 \details{
 The function \code{diffit()} calculates the differences between the rows
-  of the input \emph{matrix} \code{tseries} and its lagged version.
+  of the input \emph{matrix} \code{timeser} and its lagged version.
   
   The argument \code{lagg} specifies the number of lags applied to the rows
-  of the lagged version of \code{tseries}. 
-  For positive \code{lagg} values, the lagged version of \code{tseries} has
+  of the lagged version of \code{timeser}. 
+  For positive \code{lagg} values, the lagged version of \code{timeser} has
   its rows shifted \emph{forward} (down) by the number equal to \code{lagg}
   rows. For negative \code{lagg} values, the lagged version of
-  \code{tseries} has its rows shifted \emph{backward} (up) by the number
+  \code{timeser} has its rows shifted \emph{backward} (up) by the number
   equal to \code{-lagg} rows.
   For example, if \code{lagg=3} then the lagged version will have its rows
   shifted down by \code{3} rows, and the differences will be taken between
@@ -45,10 +45,10 @@ The function \code{diffit()} calculates the differences between the rows
 
   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
   should be padded (extended) with zero values in order to return a
-  \emph{matrix} with the same number of rows as the input \code{tseries}.
+  \emph{matrix} with the same number of rows as the input \code{timeser}.
   The default is \code{pad_zeros = TRUE}. If \code{pad_zeros = FALSE} then
   the return \emph{matrix} has a smaller number of rows than the input
-  \code{tseries}. The padding operation can be time-consuming, because it
+  \code{timeser}. The padding operation can be time-consuming, because it
   requires the copying the data in memory.
   
   The function \code{diffit()} is implemented in \code{RcppArmadillo}

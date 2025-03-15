@@ -5,16 +5,16 @@
 \title{Calculate the rolling convolutions (weighted sums) of a \emph{time series}
 with a single-column \emph{matrix} of weights.}
 \usage{
-roll_conv(tseries, weightv)
+roll_conv(timeser, weightv)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{weightv}}{A single-column \emph{matrix} of weights.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the rolling convolutions (weighted sums) of a \emph{time series}
@@ -29,7 +29,7 @@ The function \code{roll_conv()} calculates the convolutions of the
   
   The function \code{roll_conv()} uses the \code{Armadillo} function
   \code{arma::conv2()}. It performs a similar calculation to the standard
-  \code{R} function \cr\code{filter(x=tseries, filter=weightv,
+  \code{R} function \cr\code{filter(x=timeser, filter=weightv,
   method="convolution", sides=1)}, but it's over \code{6} times faster, and
   it doesn't produce any leading \code{NA} values.
 }

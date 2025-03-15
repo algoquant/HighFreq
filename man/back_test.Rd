@@ -8,10 +8,10 @@
 back_test(
   retx,
   retp,
-  controlv,
+  controll,
   startp,
   endd,
-  lambda = 0,
+  lambdaf = 0,
   coeff = 1,
   bidask = 0
 )
@@ -23,15 +23,15 @@ returns data.}
 \item{\code{retx}}{A \emph{time series} or a \emph{matrix} of excess
 returns data (the returns in excess of the risk-free rate).}
 
-\item{\code{controlv}}{A \emph{list} of portfolio optimization model
+\item{\code{controll}}{A \emph{list} of portfolio optimization model
 parameters (see Details).}
 
 \item{\code{startp}}{An \emph{integer vector} of start points.}
 
 \item{\code{endd}}{An \emph{integer vector} of end points.}
 
-\item{\code{lambda}}{A decay factor which multiplies the past portfolio
-weights.  (The default is \code{lambda = 0} - no memory.)}
+\item{\code{lambdaf}}{A decay factor which multiplies the past portfolio
+weights.  (The default is \code{lambdaf = 0} - no memory.)}
 
 \item{\code{coeff}}{A \emph{numeric} multiplier of the weights.  (The
 default is \code{1})}
@@ -59,7 +59,7 @@ The function \code{back_test()} performs a backtest simulation of a
   The function \code{back_test()} passes the subset matrix of excess returns
   into the function \code{calc_weights()}, which calculates the optimal
   portfolio weights at each \emph{end point}.
-  It also passes to \code{calc_weights()} the argument \code{controlv},
+  It also passes to \code{calc_weights()} the argument \code{controll},
   which is the list of portfolio optimization parameters.
   See the function \code{calc_weights()} for more details.
   The list of portfolio optimization parameters can be created using the
@@ -67,10 +67,10 @@ The function \code{back_test()} performs a backtest simulation of a
   
   The function \code{back_test()} then recursively averages the weights
   \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
-  the previous \emph{end point = (i-1)}, using the decay factor \code{lambda
+  the previous \emph{end point = (i-1)}, using the decay factor \code{lambdaf
   = \eqn{\lambda}}:
   \deqn{
-    w_i = (1-\lambda) w_i + \lambda w_{i-1}
+    w_i = (1 - \lambda) w_i + \lambda w_{i-1}
   }
   The purpose of averaging the weights is to reduce their variance, and
   improve their out-of-sample performance.  It is equivalent to extending
@@ -113,9 +113,9 @@ startp <- c(rep_len(1, lookb-1), endd[1:(nrows-lookb+1)])
 alphac <- 0.5
 dimax <- 3
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
+controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 # Simulate a monthly rolling portfolio optimization strategy
-pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
+pnls <- HighFreq::back_test(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
 pnls <- xts::xts(pnls, index(retp))
 colnames(pnls) <- "strategy"
 # Plot dygraph of strategy

@@ -5,7 +5,7 @@
 \title{Simulate a portfolio optimization strategy using online (recursive) updating
 of the covariance matrix.}
 \usage{
-sim_portfoptim(rets, dimax, lambda, lambdacov, lambdaw)
+sim_portfoptim(rets, dimax, lambdaf, lambdacov, lambdaw)
 }
 \arguments{
 \item{\code{rets}}{A \emph{time series} or \emph{matrix} of asset returns.}
@@ -15,7 +15,7 @@ values} used for calculating the reduced inverse of the covariance
 matrix (the default is \code{dimax = 0} - standard matrix inverse using
 all the \emph{eigen values}).}
 
-\item{\code{lambda}}{A decay factor which multiplies the past asset returns.}
+\item{\code{lambdaf}}{A decay factor which multiplies the past asset returns.}
 
 \item{\code{lambdacov}}{A decay factor which multiplies the past covariance.}
 
@@ -51,13 +51,13 @@ The function \code{sim_portfoptim()} simulates a portfolio optimization
   the function \code{HighFreq::push_covar()} to update the trailing
   covariance matrix of the returns:
   \deqn{
-    \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
+    \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1 - \lambda_c) r^s_t
   }
   \deqn{
     \hat{r}_t = r^s_t - \bar{r}_t
   }
   \deqn{
-    {cov}_t = \lambda_c {cov}_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
+    {cov}_t = \lambda_c {cov}_{t-1} + (1 - \lambda^2_c) \hat{r}^T_t \hat{r}_t
   }
   Where \eqn{\lambda_c} is the decay factor which multiplies the past mean
   and covariance.
@@ -74,7 +74,7 @@ The function \code{sim_portfoptim()} simulates a portfolio optimization
   portfolio, by multiplying the inverse covariance matrix times the trailing
   means of the asset returns:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r^s_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r^s_t
   }
   \deqn{
     \strong{w}_t = \strong{C}^{-1} \bar{r}_t
@@ -90,7 +90,7 @@ The function \code{sim_portfoptim()} simulates a portfolio optimization
   
   It then calculates the trailing mean of the weights:
   \deqn{
-    \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1-\lambda_w) \strong{w}_t
+    \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1 - \lambda_w) \strong{w}_t
   }
   Note that the decay factor \eqn{\lambda_w} is different from the decay
   factor \eqn{\lambda} used for updating the trailing means.

@@ -5,10 +5,10 @@
 \title{Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 using \code{RcppArmadillo}.}
 \usage{
-lag_vec(tseries, lagg = 1L, pad_zeros = TRUE)
+lag_vec(timeser, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a
+\item{\code{timeser}}{A single-column \emph{time series} or a
 \emph{vector}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag.
@@ -27,22 +27,22 @@ using \code{RcppArmadillo}.
 }
 \details{
 The function \code{lag_vec()} applies a lag to the input \emph{time
-  series} \code{tseries} by shifting its elements by the number equal to the
+  series} \code{timeser} by shifting its elements by the number equal to the
   argument \code{lagg}.  For positive \code{lagg} values, the elements are
   shifted forward in time (down), and for negative \code{lagg} values they
   are shifted backward (up).
   
   The output \emph{vector} is padded with either zeros (the default), or
-  with data from \code{tseries}, so that it has the same number of element
-  as \code{tseries}.
+  with data from \code{timeser}, so that it has the same number of element
+  as \code{timeser}.
   If the \code{lagg} is positive, then the first element is copied and added
   upfront.
   If the \code{lagg} is negative, then the last element is copied and added
   to the end.
   
-  As a rule, if \code{tseries} contains returns data, then the output
+  As a rule, if \code{timeser} contains returns data, then the output
   \emph{matrix} should be padded with zeros, to avoid data snooping.
-  If \code{tseries} contains prices, then the output \emph{matrix} should
+  If \code{timeser} contains prices, then the output \emph{matrix} should
   be padded with the prices.
 }
 \examples{

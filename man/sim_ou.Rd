@@ -59,8 +59,8 @@ sigmav <- 0.01
 thetav <- 0.01
 innov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
-prices <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
-plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+pricev <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
+plot(pricev, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 }
 
 }

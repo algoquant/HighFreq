@@ -7,7 +7,7 @@ look-back interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
 roll_var(
-  tseries,
+  timeser,
   lookb = 1L,
   startp = 0L,
   endd = 0L,
@@ -18,7 +18,7 @@ roll_var(
 )
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{lookb}}{The number of end points in the look-back interval
 (the default is \code{lookb = 1}).}
@@ -40,7 +40,7 @@ measure of dispersion (the default is \code{method = "moment"}).}
 }
 \value{
 A \emph{matrix} dispersion (variance) estimates with the same number
-  of columns as the input time series \code{tseries}, and the number of rows
+  of columns as the input time series \code{timeser}, and the number of rows
   equal to the number of end points.
 }
 \description{
@@ -51,10 +51,10 @@ look-back interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   (variance) estimates over rolling look-back intervals attached at the end
-  points of the \emph{time series} \code{tseries}.
+  points of the \emph{time series} \code{timeser}.
   
   The function \code{roll_var()} performs a loop over the end points, and at
-  each end point it subsets the time series \code{tseries} over a look-back
+  each end point it subsets the time series \code{timeser} over a look-back
   interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_var()}, which
@@ -64,7 +64,7 @@ The function \code{roll_var()} calculates a \emph{matrix} of dispersion
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{tseries}
+  periods. It calculates the end points along the rows of \code{timeser}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
 

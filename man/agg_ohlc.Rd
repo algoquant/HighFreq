@@ -4,17 +4,17 @@
 \alias{agg_ohlc}
 \title{Aggregate a time series of data into a single bar of \emph{OHLC} data.}
 \usage{
-agg_ohlc(tseries)
+agg_ohlc(timeser)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with multiple
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} with multiple
 columns of data.}
 }
 \value{
 A \emph{matrix} containing a single row, with the \emph{open},
   \emph{high}, \emph{low}, and \emph{close} values, and also the total
   \emph{volume} (if provided as either the second or fifth column of
-  \code{tseries}).
+  \code{timeser}).
 }
 \description{
 Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -26,15 +26,15 @@ The function \code{agg_ohlc()} aggregates a time series of data into a
   It can also accept an additional column containing the trading volume.
   
 The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
-the \emph{open} value of the first row of \code{tseries}.
+the \emph{open} value of the first row of \code{timeser}.
   The \emph{high} value as the maximum of the \emph{high} column of
-  \code{tseries}.
+  \code{timeser}.
   The \emph{low} value as the minimum of the \emph{low} column of
-  \code{tseries}.
+  \code{timeser}.
   The \emph{close} value as the \emph{close} of the last row of
-  \code{tseries}.
+  \code{timeser}.
   The \emph{volume} value as the sum of the \emph{volume} column of
-  \code{tseries}.
+  \code{timeser}.
 
   For a single column of data, the \emph{open}, \emph{high}, \emph{low}, and
   \emph{close} values are all the same.

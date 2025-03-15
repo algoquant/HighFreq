@@ -49,8 +49,8 @@ priceq <- 2.0
 thetav <- 0.01
 innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Schwartz process using Rcpp
-prices <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
-plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
+pricev <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
+plot(pricev, t="l", main="Simulated Schwartz Prices", ylab="prices")
 }
 
 }

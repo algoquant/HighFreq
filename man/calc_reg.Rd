@@ -5,7 +5,7 @@
 \title{Perform multivariate regression using different methods, and return a vector
 of regression coefficients, their t-values, and the last residual z-score.}
 \usage{
-calc_reg(respv, predm, controlv)
+calc_reg(respv, predm, controll)
 }
 \arguments{
 \item{\code{respv}}{A single-column \emph{time series} or a \emph{vector}
@@ -14,7 +14,7 @@ of response data.}
 \item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
+\item{\code{controll}}{A \emph{list} of model parameters (see Details).}
 }
 \value{
 A single-row matrix with the regression coefficients, their
@@ -30,7 +30,7 @@ The function \code{calc_reg()} performs multivariate regression using
   t-values, and the last residual z-score.
   
   The function \code{calc_reg()} accepts a list of regression model
-  parameters through the argument \code{controlv}.
+  parameters through the argument \code{controll}.
   The list of model parameters can be created using the function
   \code{param_reg()}.  Below is a description of the model parameters.
 
@@ -76,18 +76,18 @@ regmod <- lm(respv ~ predm)
 regsum <- summary(regmod)
 coeff <- regsum$coefficients
 # Create a default list of regression parameters
-controlv <- HighFreq::param_reg()
+controll <- HighFreq::param_reg()
 # Add unit intercept column to the predictor matrix
 predm <- cbind(rep(1, NROW(predm)), predm)
 # Perform multivariate regression using calc_reg()
-regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv))
+regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controll=controll))
 # Compare the outputs of both functions
 all.equal(regarma[1:(2*NCOL(predm))], 
   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 # Compare the speed of RcppArmadillo with R code
 library(microbenchmark)
 summary(microbenchmark(
-  Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv),
+  Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controll=controll),
   Rcode=lm(respv ~ predm),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 }

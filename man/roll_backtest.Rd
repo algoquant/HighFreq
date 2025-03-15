@@ -9,7 +9,7 @@ roll_backtest(
   xtsv,
   train_func,
   trade_func,
-  look_back = look_forward,
+  lookb = look_forward,
   look_forward,
   endpoints = rutils::calc_endpoints(xtsv, look_forward),
   ...
@@ -28,7 +28,7 @@ forecasting model, to be applied over a rolling look-back interval.}
 \item{\code{trade_func}}{The name of the trading model function, to be applied over
 a rolling look-forward interval.}
 
-\item{\code{look_back}}{The size of the look-back interval, equal to the number of
+\item{\code{lookb}}{The size of the look-back interval, equal to the number of
 rows of data used for training the forecasting model.}
 
 \item{\code{look_forward}}{The size of the look-forward interval, equal to the number
@@ -70,14 +70,14 @@ The function \code{roll_backtest()} performs a rolling backtest
 \dontrun{
 # Combine two time series of prices
 prices <- cbind(rutils::etfenv$XLU, rutils::etfenv$XLP)
-look_back <- 252
+lookb <- 252
 look_forward <- 22
 # Define end points
 endpoints <- rutils::calc_endpoints(prices, look_forward)
 # Perform back-test
 back_test <- roll_backtest(endpoints=endpoints,
     look_forward=look_forward,
-    look_back=look_back,
+    lookb=lookb,
     train_func = train_model,
     trade_func = trade_model,
     model_params = model_params,

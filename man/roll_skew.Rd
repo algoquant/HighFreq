@@ -7,7 +7,7 @@ interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
 roll_skew(
-  tseries,
+  timeser,
   startp = 0L,
   endd = 0L,
   step = 1L,
@@ -18,7 +18,7 @@ roll_skew(
 )
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -43,7 +43,7 @@ returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A \emph{matrix} of skewness estimates with the same number of
-  columns as the input time series \code{tseries}, and the number of rows
+  columns as the input time series \code{timeser}, and the number of rows
   equal to the number of end points.
 }
 \description{
@@ -54,10 +54,10 @@ interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_skew()} calculates a \emph{matrix} of skewness
   estimates over rolling look-back intervals attached at the end points of
-  the \emph{time series} \code{tseries}.
+  the \emph{time series} \code{timeser}.
   
   The function \code{roll_skew()} performs a loop over the end points, and
-  at each end point it subsets the time series \code{tseries} over a
+  at each end point it subsets the time series \code{timeser} over a
   look-back interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function \code{calc_skew()}, which
@@ -67,7 +67,7 @@ The function \code{roll_skew()} calculates a \emph{matrix} of skewness
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{tseries}
+  periods. It calculates the end points along the rows of \code{timeser}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
 

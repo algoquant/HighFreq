@@ -5,13 +5,13 @@
 \title{Calculate the trailing autocovariance of a \emph{time series} of returns
 using an online recursive formula.}
 \usage{
-run_autocovar(tseries, lambda, lagg = 1L)
+run_autocovar(timeser, lambdaf, lagg = 1L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} with a single
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} with a single
 column of returns data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag.
 (The default is \code{lagg = 1}.)}
@@ -19,7 +19,7 @@ column of returns data.}
 \value{
 A \emph{matrix} with three columns of data: the trailing
   autocovariances, the variances, and the mean values of the argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the trailing autocovariance of a \emph{time series} of returns
@@ -32,13 +32,13 @@ The function \code{run_autocovar()} calculates the trailing
   with the products of their returns minus their means, using the decay
   factor \eqn{\lambda}:
   \deqn{
-    \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+    \bar{x}_t = \lambda \bar{x}_{t-1} + (1 - \lambda) x_t
   }
   \deqn{
-    \sigma^2_{t} = \lambda \sigma^2_{t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+    \sigma^2_{t} = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t)^2
   }
   \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
+    {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
   }
   Where \eqn{{cov}_t} is the trailing autocovariance estimate at time
   \eqn{t}, with \code{lagg=l}.
@@ -52,6 +52,10 @@ The function \code{run_autocovar()} calculates the trailing
   Using exponentially decaying weights is more natural than using a sliding
   look-back interval, because it gradually "forgets" about the past data.
 
+  Note that the variance and covariance decay as the square of
+  \eqn{\lambda}, while the mean returns decay as \eqn{\lambda}.
+  This is because the variance is proportional to the square of the returns.
+  
   The value of the decay factor \eqn{\lambda} must be in the range between
   \code{0} and \code{1}.  
   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -65,7 +69,7 @@ The function \code{run_autocovar()} calculates the trailing
 
   The function \code{run_autocovar()} returns three columns of data: the
   trailing autocovariances, the variances, and the mean values of the
-  argument \code{tseries}.  This allows calculating the trailing
+  argument \code{timeser}.  This allows calculating the trailing
   autocorrelations.
 }
 \examples{
@@ -75,7 +79,7 @@ retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 # Calculate the trailing autocovariance
 lambdaf <- 0.9 # Decay factor
 lagg <- 3
-covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
+covars <- HighFreq::run_autocovar(retp, lambdaf=lambdaf, lagg=lagg)
 # Calculate the trailing autocorrelation
 correl <- covars[, 1]/covars[, 2]
 # Calculate the trailing autocovariance using R code

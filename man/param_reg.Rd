@@ -58,11 +58,11 @@ The function \code{param_reg()} creates a named list of model parameters
 \examples{
 \dontrun{
 # Create a default list of regression parameters
-controlv <- HighFreq::param_reg()
-unlist(controlv)
+controll <- HighFreq::param_reg()
+unlist(controll)
 # Create a custom list of regression parameters
-controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
-unlist(controlv)
+controll <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+unlist(controll)
 }
 
 }

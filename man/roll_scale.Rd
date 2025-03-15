@@ -8,7 +8,7 @@ a \emph{time series} of data using \code{RcppArmadillo}.}
 roll_scale(matrix, lookb, center = TRUE, scale = TRUE, use_median = FALSE)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
 
 \item{\code{lookb}}{The length of the look-back interval, equal to the
 number of rows of data used in the scaling.}
@@ -31,7 +31,7 @@ deviation}.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Perform a rolling standardization (centering and scaling) of the columns of
@@ -39,10 +39,10 @@ a \emph{time series} of data using \code{RcppArmadillo}.
 }
 \details{
 The function \code{roll_scale()} performs a rolling standardization
-  (centering and scaling) of the columns of the \code{tseries} argument
+  (centering and scaling) of the columns of the \code{timeser} argument
   using \code{RcppArmadillo}.
   The function \code{roll_scale()} performs a loop over the rows of
-  \code{tseries}, subsets a number of previous (past) rows equal to
+  \code{timeser}, subsets a number of previous (past) rows equal to
   \code{lookb}, and standardizes the subset matrix by calling the
   function \code{calc_scale()}.  It assigns the last row of the standardized
   subset \emph{matrix} to the return matrix.

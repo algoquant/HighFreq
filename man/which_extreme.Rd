@@ -6,13 +6,13 @@
 single-column \emph{xts} time series or vector, over a rolling look-back
 interval.}
 \usage{
-which_extreme(xtsv, look_back = 51, vol_mult = 2)
+which_extreme(xtsv, lookb = 51, vol_mult = 2)
 }
 \arguments{
 \item{\code{xtsv}}{A single-column \emph{xts} time series, or a \emph{numeric} or
 \emph{Boolean} vector.}
 
-\item{\code{look_back}}{The number of data points in rolling look-back interval for 
+\item{\code{lookb}}{The number of data points in rolling look-back interval for 
 estimating rolling quantile.}
 
 \item{\code{vol_mult}}{The quantile multiplier.}
@@ -52,7 +52,7 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
 taq <- HighFreq::SPY_TAQ
 # scrub quotes with suspect bid-ask spreads
 bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-sus_pect <- which_extreme(bidask, look_back=51, vol_mult=3)
+sus_pect <- which_extreme(bidask, lookb=51, vol_mult=3)
 # Remove suspect values
 taq <- taq[!sus_pect]
 

@@ -5,14 +5,14 @@
 \title{Count the number of consecutive \code{TRUE} elements in a Boolean vector,
 and reset the count to zero after every \code{FALSE} element.}
 \usage{
-roll_count(tseries)
+roll_count(timeser)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{Boolean vector} of data.}
+\item{\code{timeser}}{A \emph{Boolean vector} of data.}
 }
 \value{
 An \emph{integer vector} of the same length as the argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Count the number of consecutive \code{TRUE} elements in a Boolean vector,

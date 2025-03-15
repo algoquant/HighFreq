@@ -7,7 +7,7 @@ interval attached at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
 roll_moment(
-  tseries,
+  timeser,
   funame = "calc_mean",
   method = "moment",
   confl = 0.75,
@@ -19,7 +19,7 @@ roll_moment(
 )
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{funame}}{A \emph{character string} specifying the moment
 function (the default is \code{funame = "calc_mean"}).}
@@ -47,7 +47,7 @@ calculating the end points (the default is \code{stub = 0}).}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
-  series \code{tseries}, and the number of rows equal to the number of end
+  series \code{timeser}, and the number of rows equal to the number of end
   points.
 }
 \description{
@@ -58,10 +58,10 @@ interval attached at the end points of a \emph{time series} or a
 \details{
 The function \code{roll_moment()} calculates a \emph{matrix} of moment
   values, over rolling look-back intervals attached at the end points of the
-  \emph{time series} \code{tseries}.
+  \emph{time series} \code{timeser}.
   
   The function \code{roll_moment()} performs a loop over the end points, and
-  at each end point it subsets the time series \code{tseries} over a
+  at each end point it subsets the time series \code{timeser} over a
   look-back interval equal to \code{lookb} number of end points.
   
   It passes the subset time series to the function specified by the argument
@@ -79,7 +79,7 @@ The function \code{roll_moment()} calculates a \emph{matrix} of moment
   
   If the arguments \code{endd} and \code{startp} are not given then it
   first calculates a vector of end points separated by \code{step} time
-  periods. It calculates the end points along the rows of \code{tseries}
+  periods. It calculates the end points along the rows of \code{timeser}
   using the function \code{calc_endpoints()}, with the number of time
   periods between the end points equal to \code{step} time periods.
 

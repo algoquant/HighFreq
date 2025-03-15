@@ -5,10 +5,10 @@
 \title{Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 \code{RcppArmadillo}.}
 \usage{
-lagit(tseries, lagg = 1L, pad_zeros = TRUE)
+lagit(timeser, lagg = 1L, pad_zeros = TRUE)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lagg}}{An \emph{integer} equal to the number of periods to lag
 (the default is \code{lagg = 1}).}
@@ -18,7 +18,7 @@ with zeros? (The default is \code{pad_zeros = TRUE}.)}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
@@ -31,16 +31,16 @@ The function \code{lagit()} applies a lag to the input \emph{matrix} by
   and for negative \code{lagg} values they are shifted \emph{backward} (up).
   
   The output \emph{matrix} is padded with either zeros (the default), or
-  with rows of data from \code{tseries}, so that it has the same dimensions
-  as \code{tseries}.
+  with rows of data from \code{timeser}, so that it has the same dimensions
+  as \code{timeser}.
   If the \code{lagg} is positive, then the first row is copied and added
   upfront.
   If the \code{lagg} is negative, then the last row is copied and added
   to the end.
   
-  As a rule, if \code{tseries} contains returns data, then the output
+  As a rule, if \code{timeser} contains returns data, then the output
   \emph{matrix} should be padded with zeros, to avoid data snooping.
-  If \code{tseries} contains prices, then the output \emph{matrix} should
+  If \code{timeser} contains prices, then the output \emph{matrix} should
   be padded with the prices.
 }
 \examples{

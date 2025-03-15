@@ -5,10 +5,10 @@
 \title{Calculate the kurtosis of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_kurtosis(tseries, method = "moment", confl = 0.75)
+calc_kurtosis(timeser, method = "moment", confl = 0.75)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{method}}{A \emph{character string} specifying the type of the
 kurtosis model (the default is \code{method = "moment"} - see Details).}
@@ -18,7 +18,7 @@ returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the kurtosis of the columns of
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the kurtosis of the columns of a \emph{time series} or a
@@ -26,13 +26,13 @@ Calculate the kurtosis of the columns of a \emph{time series} or a
 }
 \details{
 The function \code{calc_kurtosis()} calculates the kurtosis of the columns
-  of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
+  of the \emph{matrix} \code{timeser} using \code{RcppArmadillo} \code{C++}
   code.
 
   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
   calculates the fourth moment of the data.
-  But it doesn't center the columns of \code{tseries} because that requires
-  copying the matrix \code{tseries} in memory, so it's time-consuming.
+  But it doesn't center the columns of \code{timeser} because that requires
+  copying the matrix \code{timeser} in memory, so it's time-consuming.
 
   If \code{method = "quantile"} then it calculates the skewness
   \eqn{\kappa} from the differences between the quantiles of the data as
@@ -46,7 +46,7 @@ The function \code{calc_kurtosis()} calculates the kurtosis of the columns
   difference between the mean of the data minus its median, divided by the
   standard deviation.
   
-  If the number of rows of \code{tseries} is less than \code{3} then it
+  If the number of rows of \code{timeser} is less than \code{3} then it
   returns zeros.
   
   The code examples below compare the function \code{calc_kurtosis()} with the

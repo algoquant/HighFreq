@@ -64,8 +64,8 @@ coeff <- matrix(c(0.1, 0.3, 0.5))
 # Calculate matrix of standard normal innovations
 innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Dickey-Fuller process using Rcpp
-prices <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
-plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
+pricev <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
+plot(pricev, t="l", main="Simulated Dickey-Fuller Prices")
 }
 
 }

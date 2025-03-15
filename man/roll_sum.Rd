@@ -5,10 +5,10 @@
 \title{Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 using \emph{Rcpp}.}
 \usage{
-roll_sum(tseries, lookb = 1L, weightv = 0L)
+roll_sum(timeser, lookb = 1L, weightv = 0L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{lookb}}{The length of the look-back interval, equal to the
 number of data points included in calculating the rolling sum (the default
@@ -19,7 +19,7 @@ is \code{weightv = 0}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
@@ -27,7 +27,7 @@ using \emph{Rcpp}.
 }
 \details{
 The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
-  over the columns of the data \code{tseries}.
+  over the columns of the data \code{timeser}.
   
   If the argument \code{weightv} is equal to zero (the default), then the
   function \code{roll_sum()} calculates the simple rolling sums of the 
@@ -37,7 +37,7 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
   }
   
   If the \code{weightv} argument has the same number of rows as the argument
-  \code{tseries}, then the function \code{roll_sum()} calculates rolling 
+  \code{timeser}, then the function \code{roll_sum()} calculates rolling 
   \emph{weighted} sums of the \emph{time series} data \eqn{p_t} in two steps.
   
   It first calculates the rolling sums of the products of the weights
@@ -58,7 +58,7 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
   }
   
   The function \code{roll_sum()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{tseries}.
+  dimensions as the input argument \code{timeser}.
 
   The function \code{roll_sum()} is written in \code{C++} \code{Armadillo}
   code, so it's much faster than equivalent \code{R} code.

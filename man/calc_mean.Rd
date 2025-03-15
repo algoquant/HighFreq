@@ -5,10 +5,10 @@
 \title{Calculate the mean (location) of the columns of a \emph{time series} or a
 \emph{matrix} using \code{RcppArmadillo}.}
 \usage{
-calc_mean(tseries, method = "moment", confl = 0.75)
+calc_mean(timeser, method = "moment", confl = 0.75)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of data.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of data.}
 
 \item{\code{method}}{A \emph{character string} specifying the type of the
 mean (location) model (the default is \code{method = "moment"} - see
@@ -19,7 +19,7 @@ returns (the default is \code{confl = 0.75}).}
 }
 \value{
 A single-row matrix with the mean (location) of the columns of
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the mean (location) of the columns of a \emph{time series} or a
@@ -27,7 +27,7 @@ Calculate the mean (location) of the columns of a \emph{time series} or a
 }
 \details{
 The function \code{calc_mean()} calculates the mean (location) values of
-  the columns of the \emph{time series} \code{tseries} using \code{C++}
+  the columns of the \emph{time series} \code{timeser} using \code{C++}
   \code{RcppArmadillo} code.
 
   If \code{method = "moment"} (the default) then \code{calc_mean()}

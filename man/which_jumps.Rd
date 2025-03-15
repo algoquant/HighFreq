@@ -5,7 +5,7 @@
 \title{Calculate a \emph{Boolean} vector that identifies isolated jumps (spikes) in
 a single-column \emph{xts} time series or vector, over a rolling interval.}
 \usage{
-which_jumps(xtsv, look_back = 51, vol_mult = 2)
+which_jumps(xtsv, lookb = 51, vol_mult = 2)
 }
 \value{
 A \emph{Boolean} vector with the same number of rows as the input
@@ -47,7 +47,7 @@ taq <- SPY_TAQ
 # Calculate mid prices
 mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
-taq[which_jumps(mid_prices, look_back=31, vol_mult=1.0), ] <- NA
+taq[which_jumps(mid_prices, lookb=31, vol_mult=1.0), ] <- NA
 taq <- xts:::na.locf.xts(taq)
 
 }

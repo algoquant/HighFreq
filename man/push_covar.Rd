@@ -44,7 +44,7 @@ The function \code{push_covar()} updates the trailing covariance matrix of
   \eqn{\bar{r}_t} of the streaming asset returns \eqn{r_t} by recursively
   weighting present and past values using the decay factor \eqn{\lambda}:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
   }
   This recursive formula is equivalent to the exponentially weighted moving
   average of the streaming asset returns \eqn{r_t}.
@@ -56,7 +56,7 @@ The function \code{push_covar()} updates the trailing covariance matrix of
   
   Finally, it updates the trailing covariance matrix of the returns:
   \deqn{
-    {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) \hat{r}^T_t \hat{r}_t
+    {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) \hat{r}^T_t \hat{r}_t
   }
   
   The decay factor \eqn{\lambda} determines the strength of the updates,

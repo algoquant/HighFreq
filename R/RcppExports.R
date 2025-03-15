@@ -72,11 +72,11 @@ NULL
 #' @examples
 #' \dontrun{
 #' # Create a default list of regression parameters
-#' controlv <- HighFreq::param_reg()
-#' unlist(controlv)
+#' controll <- HighFreq::param_reg()
+#' unlist(controll)
 #' # Create a custom list of regression parameters
-#' controlv <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
-#' unlist(controlv)
+#' controll <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
+#' unlist(controll)
 #' }
 #' 
 #' @export
@@ -136,11 +136,11 @@ param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5
 #' @examples
 #' \dontrun{
 #' # Create a default list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf()
-#' unlist(controlv)
+#' controll <- HighFreq::param_portf()
+#' unlist(controll)
 #' # Create a custom list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf(method="regular", dimax=4)
-#' unlist(controlv)
+#' controll <- HighFreq::param_portf(method="regular", dimax=4)
+#' unlist(controll)
 #' }
 #' 
 #' @export
@@ -151,7 +151,7 @@ param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 
 #' Apply a lag to a single-column \emph{time series} or a \emph{vector} 
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series} or a
+#' @param \code{timeser} A single-column \emph{time series} or a
 #'   \emph{vector}.
 #'
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
@@ -165,22 +165,22 @@ param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 
 #'
 #' @details
 #'   The function \code{lag_vec()} applies a lag to the input \emph{time
-#'   series} \code{tseries} by shifting its elements by the number equal to the
+#'   series} \code{timeser} by shifting its elements by the number equal to the
 #'   argument \code{lagg}.  For positive \code{lagg} values, the elements are
 #'   shifted forward in time (down), and for negative \code{lagg} values they
 #'   are shifted backward (up).
 #'   
 #'   The output \emph{vector} is padded with either zeros (the default), or
-#'   with data from \code{tseries}, so that it has the same number of element
-#'   as \code{tseries}.
+#'   with data from \code{timeser}, so that it has the same number of element
+#'   as \code{timeser}.
 #'   If the \code{lagg} is positive, then the first element is copied and added
 #'   upfront.
 #'   If the \code{lagg} is negative, then the last element is copied and added
 #'   to the end.
 #'   
-#'   As a rule, if \code{tseries} contains returns data, then the output
+#'   As a rule, if \code{timeser} contains returns data, then the output
 #'   \emph{matrix} should be padded with zeros, to avoid data snooping.
-#'   If \code{tseries} contains prices, then the output \emph{matrix} should
+#'   If \code{timeser} contains prices, then the output \emph{matrix} should
 #'   be padded with the prices.
 #'
 #' @examples
@@ -199,14 +199,14 @@ param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 
 #' }
 #' 
 #' @export
-lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_lag_vec`, tseries, lagg, pad_zeros)
+lag_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
+    .Call(`_HighFreq_lag_vec`, timeser, lagg, pad_zeros)
 }
 
 #' Apply a lag to the rows of a \emph{time series} or a \emph{matrix} using
 #' \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag
 #'   (the default is \code{lagg = 1}).
@@ -215,7 +215,7 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   with zeros? (The default is \code{pad_zeros = TRUE}.)
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{lagit()} applies a lag to the input \emph{matrix} by
@@ -224,16 +224,16 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   and for negative \code{lagg} values they are shifted \emph{backward} (up).
 #'   
 #'   The output \emph{matrix} is padded with either zeros (the default), or
-#'   with rows of data from \code{tseries}, so that it has the same dimensions
-#'   as \code{tseries}.
+#'   with rows of data from \code{timeser}, so that it has the same dimensions
+#'   as \code{timeser}.
 #'   If the \code{lagg} is positive, then the first row is copied and added
 #'   upfront.
 #'   If the \code{lagg} is negative, then the last row is copied and added
 #'   to the end.
 #'   
-#'   As a rule, if \code{tseries} contains returns data, then the output
+#'   As a rule, if \code{timeser} contains returns data, then the output
 #'   \emph{matrix} should be padded with zeros, to avoid data snooping.
-#'   If \code{tseries} contains prices, then the output \emph{matrix} should
+#'   If \code{timeser} contains prices, then the output \emph{matrix} should
 #'   be padded with the prices.
 #'
 #' @examples
@@ -251,14 +251,14 @@ lag_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' }
 #' 
 #' @export
-lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_lagit`, tseries, lagg, pad_zeros)
+lagit <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
+    .Call(`_HighFreq_lagit`, timeser, lagg, pad_zeros)
 }
 
 #' Calculate the differences between the neighboring elements of a
 #' single-column \emph{time series} or a \emph{vector}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{timeser} A single-column \emph{time series} or a \emph{vector}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of time periods to
 #'   lag when calculating the differences (the default is \code{lagg = 1}).
@@ -305,14 +305,14 @@ lagit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' }
 #' 
 #' @export
-diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_diff_vec`, tseries, lagg, pad_zeros)
+diff_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
+    .Call(`_HighFreq_diff_vec`, timeser, lagg, pad_zeros)
 }
 
 #' Calculate the row differences of a \emph{time series} or a \emph{matrix}
 #' using \emph{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lagg} An \emph{integer} equal to the number of rows (time
 #'   periods) to lag when calculating the differences (the default is
@@ -324,18 +324,18 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #'   \code{pad_zeros = TRUE})
 #'
 #' @return A \emph{matrix} containing the differences between the rows of the
-#'   input \emph{matrix} \code{tseries}.
+#'   input \emph{matrix} \code{timeser}.
 #'
 #' @details
 #'   The function \code{diffit()} calculates the differences between the rows
-#'   of the input \emph{matrix} \code{tseries} and its lagged version.
+#'   of the input \emph{matrix} \code{timeser} and its lagged version.
 #'   
 #'   The argument \code{lagg} specifies the number of lags applied to the rows
-#'   of the lagged version of \code{tseries}. 
-#'   For positive \code{lagg} values, the lagged version of \code{tseries} has
+#'   of the lagged version of \code{timeser}. 
+#'   For positive \code{lagg} values, the lagged version of \code{timeser} has
 #'   its rows shifted \emph{forward} (down) by the number equal to \code{lagg}
 #'   rows. For negative \code{lagg} values, the lagged version of
-#'   \code{tseries} has its rows shifted \emph{backward} (up) by the number
+#'   \code{timeser} has its rows shifted \emph{backward} (up) by the number
 #'   equal to \code{-lagg} rows.
 #'   For example, if \code{lagg=3} then the lagged version will have its rows
 #'   shifted down by \code{3} rows, and the differences will be taken between
@@ -344,10 +344,10 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' 
 #'   The argument \code{pad_zeros} specifies whether the output \emph{matrix}
 #'   should be padded (extended) with zero values in order to return a
-#'   \emph{matrix} with the same number of rows as the input \code{tseries}.
+#'   \emph{matrix} with the same number of rows as the input \code{timeser}.
 #'   The default is \code{pad_zeros = TRUE}. If \code{pad_zeros = FALSE} then
 #'   the return \emph{matrix} has a smaller number of rows than the input
-#'   \code{tseries}. The padding operation can be time-consuming, because it
+#'   \code{timeser}. The padding operation can be time-consuming, because it
 #'   requires the copying the data in memory.
 #'   
 #'   The function \code{diffit()} is implemented in \code{RcppArmadillo}
@@ -374,8 +374,8 @@ diff_vec <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
 #' }
 #' 
 #' @export
-diffit <- function(tseries, lagg = 1L, pad_zeros = TRUE) {
-    .Call(`_HighFreq_diffit`, tseries, lagg, pad_zeros)
+diffit <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
+    .Call(`_HighFreq_diffit`, timeser, lagg, pad_zeros)
 }
 
 #' Calculate a vector of end points that divides an integer time sequence of
@@ -525,10 +525,10 @@ calc_startpoints <- function(endd, lookb) {
 #' Count the number of consecutive \code{TRUE} elements in a Boolean vector,
 #' and reset the count to zero after every \code{FALSE} element.
 #' 
-#' @param \code{tseries} A \emph{Boolean vector} of data.
+#' @param \code{timeser} A \emph{Boolean vector} of data.
 #'
 #' @return An \emph{integer vector} of the same length as the argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_count()} calculates the number of consecutive
@@ -547,14 +547,14 @@ calc_startpoints <- function(endd, lookb) {
 #' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
 #' }
 #' @export
-roll_count <- function(tseries) {
-    .Call(`_HighFreq_roll_count`, tseries)
+roll_count <- function(timeser) {
+    .Call(`_HighFreq_roll_count`, timeser)
 }
 
 #' Calculate the run length encoding of a single-column \emph{time series},
 #' \emph{matrix}, or a \emph{vector}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#' @param \code{timeser} A single-column \emph{time series}, \emph{matrix}, or
 #'   a \emph{vector}.
 #'
 #' @return A \emph{list} with two \emph{vectors}: a \emph{vector} of encoded
@@ -585,8 +585,8 @@ roll_count <- function(tseries) {
 #' }
 #' 
 #' @export
-encode_it <- function(tseries) {
-    .Call(`_HighFreq_encode_it`, tseries)
+encode_it <- function(timeser) {
+    .Call(`_HighFreq_encode_it`, timeser)
 }
 
 #' Calculate the \emph{vector} of data from its run length encoding.
@@ -632,11 +632,11 @@ decode_it <- function(encodel) {
 #' Calculate the ranks of the elements of a single-column \emph{time series},
 #' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#' @param \code{timeser} A single-column \emph{time series}, \emph{matrix}, or
 #'   a \emph{vector}.
 #'
 #' @return An \emph{integer vector} with the ranks of the elements of the
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_ranks()} calculates the ranks of the elements of a
@@ -681,18 +681,18 @@ decode_it <- function(encodel) {
 #' }
 #' 
 #' @export
-calc_ranks <- function(tseries) {
-    .Call(`_HighFreq_calc_ranks`, tseries)
+calc_ranks <- function(timeser) {
+    .Call(`_HighFreq_calc_ranks`, timeser)
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
 #' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series}, \emph{matrix}, or
+#' @param \code{timeser} A single-column \emph{time series}, \emph{matrix}, or
 #'   a \emph{vector}.
 #'
 #' @return An \emph{integer vector} with the ranks of the elements of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_ranks_stl()} calculates the ranks of the elements
@@ -719,10 +719,10 @@ calc_ranks <- function(tseries) {
 #'   The function \code{calc_ranks_stl()} calls the function \code{std::sort()}
 #'   twice:
 #'   First, it calculates the permutation index which sorts the vector
-#'   \code{tseries} into ascending order.
+#'   \code{timeser} into ascending order.
 #'   Second, it calculates the permutation index of the permutation index,
 #'   which are the ranks (the \emph{reverse} permutation index) of the vector
-#'   \code{tseries}.
+#'   \code{timeser}.
 #' 
 #' @examples
 #' \dontrun{
@@ -739,8 +739,8 @@ calc_ranks <- function(tseries) {
 #' }
 #' 
 #' @export
-calc_ranks_stl <- function(tseries) {
-    .Call(`_HighFreq_calc_ranks_stl`, tseries)
+calc_ranks_stl <- function(timeser) {
+    .Call(`_HighFreq_calc_ranks_stl`, timeser)
 }
 
 remove_dup <- function(stringv) {
@@ -1317,7 +1317,7 @@ calc_invref <- function(matrixv) {
 #' Standardize (center and scale) the columns of a \emph{time series} of data
 #' in place, without copying the data in memory, using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or \emph{matrix} of data.
 #' 
 #' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
 #'   the columns so that they have zero mean or median (the default is
@@ -1359,11 +1359,11 @@ calc_invref <- function(matrixv) {
 #'   centrality as the \emph{median} and the dispersion as the \emph{median
 #'   absolute deviation} (\emph{MAD}).
 #'
-#'   If the number of rows of \code{tseries} is less than \code{3} then it
-#'   does nothing and \code{tseries} is not scaled.
+#'   If the number of rows of \code{timeser} is less than \code{3} then it
+#'   does nothing and \code{timeser} is not scaled.
 #'   
 #'   The function \code{calc_scale()} accepts a \emph{pointer} to the argument
-#'   \code{tseries}, and it overwrites the old data with the standardized data.
+#'   \code{timeser}, and it overwrites the old data with the standardized data.
 #'   It performs the calculation in place, without copying the data in memory,
 #'   which can significantly increase the computation speed for large time
 #'   series.
@@ -1395,19 +1395,19 @@ calc_invref <- function(matrixv) {
 #' }
 #' 
 #' @export
-calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE) {
-    invisible(.Call(`_HighFreq_calc_scale`, tseries, center, scale, use_median))
+calc_scale <- function(timeser, center = TRUE, scale = TRUE, use_median = FALSE) {
+    invisible(.Call(`_HighFreq_calc_scale`, timeser, center, scale, use_median))
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'
 #' @return A \emph{matrix} containing a single row, with the \emph{open},
 #'   \emph{high}, \emph{low}, and \emph{close} values, and also the total
 #'   \emph{volume} (if provided as either the second or fifth column of
-#'   \code{tseries}).
+#'   \code{timeser}).
 #'
 #' @details
 #'   The function \code{agg_ohlc()} aggregates a time series of data into a
@@ -1416,15 +1416,15 @@ calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE)
 #'   It can also accept an additional column containing the trading volume.
 #'   
 #' The function \code{agg_ohlc()} calculates the \emph{open} value as equal to
-#' the \emph{open} value of the first row of \code{tseries}.
+#' the \emph{open} value of the first row of \code{timeser}.
 #'   The \emph{high} value as the maximum of the \emph{high} column of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'   The \emph{low} value as the minimum of the \emph{low} column of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'   The \emph{close} value as the \emph{close} of the last row of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'   The \emph{volume} value as the sum of the \emph{volume} column of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #'   For a single column of data, the \emph{open}, \emph{high}, \emph{low}, and
 #'   \emph{close} values are all the same.
@@ -1442,8 +1442,8 @@ calc_scale <- function(tseries, center = TRUE, scale = TRUE, use_median = FALSE)
 #' }
 #' 
 #' @export
-agg_ohlc <- function(tseries) {
-    .Call(`_HighFreq_agg_ohlc`, tseries)
+agg_ohlc <- function(timeser) {
+    .Call(`_HighFreq_agg_ohlc`, timeser)
 }
 
 #' Aggregate a time series to an \emph{OHLC} time series with lower
@@ -1452,7 +1452,7 @@ agg_ohlc <- function(tseries) {
 #' Given a time series of prices at a higher periodicity (say seconds), it
 #' calculates the \emph{OHLC} prices at a lower periodicity (say minutes).
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with multiple
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} with multiple
 #'   columns of data.
 #'   
 #' @param \emph{endd} An \emph{integer vector} of end points.
@@ -1462,10 +1462,10 @@ agg_ohlc <- function(tseries) {
 #'   
 #' @details
 #'   The function \code{roll_ohlc()} performs a loop over the end points
-#'   \emph{endd}, along the rows of the data \code{tseries}. At each end point,
-#'   it selects the past rows of the data \code{tseries}, starting at the first
+#'   \emph{endd}, along the rows of the data \code{timeser}. At each end point,
+#'   it selects the past rows of the data \code{timeser}, starting at the first
 #'   bar after the previous end point, and then calls the function
-#'   \code{agg_ohlc()} on the selected data \code{tseries} to calculate the
+#'   \code{agg_ohlc()} on the selected data \code{timeser} to calculate the
 #'   aggregations.
 #'   
 #'   The function \code{roll_ohlc()} can accept either a single column of data
@@ -1483,26 +1483,26 @@ agg_ohlc <- function(tseries) {
 #' # Define end points at 25 day intervals
 #' endd <- HighFreq::calc_endpoints(NROW(ohlc), step=25)
 #' # Aggregate over endd:
-#' ohlcagg <- HighFreq::roll_ohlc(tseries=ohlc, endd=endd)
+#' ohlcagg <- HighFreq::roll_ohlc(timeser=ohlc, endd=endd)
 #' # Compare with xts::to.period()
 #' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 #' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
 #' }
 #' 
 #' @export
-roll_ohlc <- function(tseries, endd) {
-    .Call(`_HighFreq_roll_ohlc`, tseries, endd)
+roll_ohlc <- function(timeser, endd) {
+    .Call(`_HighFreq_roll_ohlc`, timeser, endd)
 }
 
 #' Calculate the rolling convolutions (weighted sums) of a \emph{time series}
 #' with a single-column \emph{matrix} of weights.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #' 
 #' @param \code{weightv} A single-column \emph{matrix} of weights.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_conv()} calculates the convolutions of the
@@ -1513,7 +1513,7 @@ roll_ohlc <- function(tseries, endd) {
 #'   
 #'   The function \code{roll_conv()} uses the \code{Armadillo} function
 #'   \code{arma::conv2()}. It performs a similar calculation to the standard
-#'   \code{R} function \cr\code{filter(x=tseries, filter=weightv,
+#'   \code{R} function \cr\code{filter(x=timeser, filter=weightv,
 #'   method="convolution", sides=1)}, but it's over \code{6} times faster, and
 #'   it doesn't produce any leading \code{NA} values.
 #'   
@@ -1541,14 +1541,14 @@ roll_ohlc <- function(tseries, endd) {
 #' }
 #' 
 #' @export
-roll_conv <- function(tseries, weightv) {
-    .Call(`_HighFreq_roll_conv`, tseries, weightv)
+roll_conv <- function(timeser, weightv) {
+    .Call(`_HighFreq_roll_conv`, timeser, weightv)
 }
 
 #' Calculate the rolling sums over a \emph{time series} or a \emph{matrix}
 #' using \emph{Rcpp}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{lookb} The length of the look-back interval, equal to the
 #'   number of data points included in calculating the rolling sum (the default
@@ -1558,11 +1558,11 @@ roll_conv <- function(tseries, weightv) {
 #'   is \code{weightv = 0}).
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
-#'   over the columns of the data \code{tseries}.
+#'   over the columns of the data \code{timeser}.
 #'   
 #'   If the argument \code{weightv} is equal to zero (the default), then the
 #'   function \code{roll_sum()} calculates the simple rolling sums of the 
@@ -1572,7 +1572,7 @@ roll_conv <- function(tseries, weightv) {
 #'   }
 #'   
 #'   If the \code{weightv} argument has the same number of rows as the argument
-#'   \code{tseries}, then the function \code{roll_sum()} calculates rolling 
+#'   \code{timeser}, then the function \code{roll_sum()} calculates rolling 
 #'   \emph{weighted} sums of the \emph{time series} data \eqn{p_t} in two steps.
 #'   
 #'   It first calculates the rolling sums of the products of the weights
@@ -1593,7 +1593,7 @@ roll_conv <- function(tseries, weightv) {
 #'   }
 #'   
 #'   The function \code{roll_sum()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   dimensions as the input argument \code{timeser}.
 #' 
 #'   The function \code{roll_sum()} is written in \code{C++} \code{Armadillo}
 #'   code, so it's much faster than equivalent \code{R} code.
@@ -1628,14 +1628,14 @@ roll_conv <- function(tseries, weightv) {
 #' }
 #' 
 #' @export
-roll_sum <- function(tseries, lookb = 1L, weightv = 0L) {
-    .Call(`_HighFreq_roll_sum`, tseries, lookb, weightv)
+roll_sum <- function(timeser, lookb = 1L, weightv = 0L) {
+    .Call(`_HighFreq_roll_sum`, timeser, lookb, weightv)
 }
 
 #' Calculate the rolling sums at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
@@ -1653,12 +1653,12 @@ roll_sum <- function(tseries, lookb = 1L, weightv = 0L) {
 #'   calculating the end points.
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
-#'   series \code{tseries}, and the number of rows equal to the number of end
+#'   series \code{timeser}, and the number of rows equal to the number of end
 #'   points.
 #'   
 #' @details
 #'   The function \code{roll_sumep()} calculates the rolling sums at the end
-#'   points of the \emph{time series} \code{tseries}.
+#'   points of the \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_sumep()} is implemented in \code{RcppArmadillo}
 #'   \code{C++} code, which makes it several times faster than \code{R} code.
@@ -1682,14 +1682,14 @@ roll_sum <- function(tseries, lookb = 1L, weightv = 0L) {
 #' }
 #' 
 #' @export
-roll_sumep <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_sumep`, tseries, startp, endd, step, lookb, stub)
+roll_sumep <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_sumep`, timeser, startp, endd, step, lookb, stub)
 }
 
 #' Calculate the rolling weighted sums over a \emph{time series} or a
 #' \emph{matrix} using \emph{Rcpp}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
 #' @param \code{endd} An \emph{integer} vector of end points (the default is
 #'   \code{endd = NULL}).
@@ -1705,14 +1705,14 @@ roll_sumep <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'   is \code{weightv = NULL}).
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_sumw()} calculates the rolling weighted sums over
-#'   the columns of the data \code{tseries}.
+#'   the columns of the data \code{timeser}.
 #' 
 #'   The function \code{roll_sumw()} calculates the rolling weighted sums as
-#'   convolutions of the columns of \code{tseries} with the \emph{column
+#'   convolutions of the columns of \code{timeser} with the \emph{column
 #'   vector} of weights using the \code{Armadillo} function
 #'   \code{arma::conv2()}.  It performs a similar calculation to the standard
 #'   \code{R} function \cr\code{stats::filter(x=retp, filter=weightv,
@@ -1720,7 +1720,7 @@ roll_sumep <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'   doesn't produce any leading \code{NA} values.
 #'   
 #'   The function \code{roll_sumw()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   dimensions as the input argument \code{timeser}.
 #' 
 #'   The arguments \code{weightv}, \code{endd}, and \code{stub} are
 #'   optional.
@@ -1801,21 +1801,21 @@ roll_sumep <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #' }
 #' 
 #' @export
-roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL) {
-    .Call(`_HighFreq_roll_sumw`, tseries, endd, lookb, stub, weightv)
+roll_sumw <- function(timeser, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL) {
+    .Call(`_HighFreq_roll_sumw`, timeser, endd, lookb, stub, weightv)
 }
 
 #' Calculate the exponential moving average (EMA) of streaming \emph{time
 #' series} data using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @param \code{weightv} A single-column \emph{matrix} of weights.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_mean()} calculates the exponential moving average
@@ -1825,7 +1825,7 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #'   \code{run_mean()} simply calculates the exponentially weighted moving
 #'   average value of the streaming \emph{time series} data \eqn{p_t}:
 #'   \deqn{
-#'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1-\lambda) p_t = (1-\lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+#'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
 #'   }
 #'   
 #'   Some applications require applying additional weight factors, like for
@@ -1833,18 +1833,18 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #'   streaming prices can be multiplied by the streaming trading volumes.
 #'   
 #'   If the argument \code{weightv} has the same number of rows as the argument
-#'   \code{tseries}, then the function \code{run_mean()} calculates the
+#'   \code{timeser}, then the function \code{run_mean()} calculates the
 #'   exponential moving average (EMA) in two steps.
 #'   
 #'   First it calculates the trailing mean weights \eqn{\bar{w}_t}:
 #'   \deqn{
-#'     \bar{w}_t = \lambda \bar{w}_{t-1} + (1-\lambda) w_t
+#'     \bar{w}_t = \lambda \bar{w}_{t-1} + (1 - \lambda) w_t
 #'   }
 #'   
 #'   Second it calculates the trailing mean products \eqn{\bar{w p}_t} of the
 #'   weights \eqn{w_t} and the data \eqn{p_t}:
 #'   \deqn{
-#'     \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1-\lambda) w_t p_t
+#'     \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1 - \lambda) w_t p_t
 #'   }
 #'   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
 #'   weights, \eqn{\bar{w}_t} are the trailing mean weights, and \eqn{\bar{w p}_t}
@@ -1876,11 +1876,11 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #'   interval.
 #' 
 #'   The function \code{run_mean()} performs the same calculation as the
-#'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambda,
+#'   standard \code{R} function\cr\code{stats::filter(x=series, filter=lambdaf,
 #'   method="recursive")}, but it's several times faster.
 #' 
 #'   The function \code{run_mean()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   dimensions as the input argument \code{timeser}.
 #'   
 #' @examples
 #' \dontrun{
@@ -1889,7 +1889,7 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #' closep <- quantmod::Cl(ohlc)
 #' # Calculate the trailing means
 #' lambdaf <- 0.9 # Decay factor
-#' meanv <- HighFreq::run_mean(closep, lambda=lambdaf)
+#' meanv <- HighFreq::run_mean(closep, lambdaf=lambdaf)
 #' # Calculate the trailing means using R code
 #' pricef <- (1-lambdaf)*filter(closep, 
 #'   filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), 
@@ -1899,14 +1899,14 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_mean(closep, lambda=lambdaf),
+#'   Rcpp=HighFreq::run_mean(closep, lambdaf=lambdaf),
 #'   Rcode=filter(closep, filter=lambdaf, init=as.numeric(closep[1, 1])/(1-lambdaf), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #'   
 #' # Calculate weights equal to the trading volumes
 #' weightv <- quantmod::Vo(ohlc)
 #' # Calculate the exponential moving average (EMA)
-#' meanw <- HighFreq::run_mean(closep, lambda=lambdaf, weightv=weightv)
+#' meanw <- HighFreq::run_mean(closep, lambdaf=lambdaf, weightv=weightv)
 #' # Plot dygraph of the EMA
 #' datav <- xts(cbind(meanv, meanw), zoo::index(ohlc))
 #' colnames(datav) <- c("means trailing", "means weighted")
@@ -1916,19 +1916,19 @@ roll_sumw <- function(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #' }
 #' 
 #' @export
-run_mean <- function(tseries, lambda, weightv = 0L) {
-    .Call(`_HighFreq_run_mean`, tseries, lambda, weightv)
+run_mean <- function(timeser, lambdaf, weightv = 0L) {
+    .Call(`_HighFreq_run_mean`, timeser, lambdaf, weightv)
 }
 
 #' Calculate the trailing maximum values of streaming \emph{time series} data
 #' using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_max()} calculates the trailing maximum values of
@@ -1938,7 +1938,7 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #'   It calculates the trailing maximum values \eqn{p^{max}_t} of the streaming
 #'   data \eqn{p_t} as follows:
 #'   \deqn{
-#'     p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1-\lambda) p_t)
+#'     p^{max}_t = max(p_t, \lambda p^{max}_{t-1} + (1 - \lambda) p_t)
 #'   }
 #'   The first term in the sum is the maximum value multiplied by the decay
 #'   factor \eqn{\lambda}, so that the past maximum value is gradually
@@ -1955,7 +1955,7 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' 
 #'   The above formula can also be expressed as:
 #'   \deqn{
-#'     p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1-\lambda) p_t
+#'     p^{max}_t = \lambda max(p_t, p^{max}_{t-1}) + (1 - \lambda) p_t
 #'   }
 #'   The first term is the maximum value multiplied by the decay factor
 #'   \eqn{\lambda}, so that the past maximum value is gradually "forgotten".
@@ -1965,7 +1965,7 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_max()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   dimensions as the input argument \code{timeser}.
 #'   
 #' @examples
 #' \dontrun{
@@ -1973,7 +1973,7 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing maximums
 #' lambdaf <- 0.9 # Decay factor
-#' pricmax <- HighFreq::run_max(closep, lambda=lambdaf)
+#' pricmax <- HighFreq::run_max(closep, lambdaf=lambdaf)
 #' # Plot dygraph of VTI prices and trailing maximums
 #' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmax)
 #' colnames(datav) <- c("prices", "max")
@@ -1984,19 +1984,19 @@ run_mean <- function(tseries, lambda, weightv = 0L) {
 #' }
 #' 
 #' @export
-run_max <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_max`, tseries, lambda)
+run_max <- function(timeser, lambdaf) {
+    .Call(`_HighFreq_run_max`, timeser, lambdaf)
 }
 
 #' Calculate the trailing minimum values of streaming \emph{time series} data
 #' using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix}.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix}.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_min()} calculates the trailing minimum values of
@@ -2006,7 +2006,7 @@ run_max <- function(tseries, lambda) {
 #'   It calculates the trailing minimum values \eqn{p^{min}_t} of the streaming
 #'   data \eqn{p_t} as follows:
 #'   \deqn{
-#'     p^{min}_t = min(p_t, \lambda p^{min}_{t-1} + (1-\lambda) p_t)
+#'     p^{min}_t = min(p_t, \lambda p^{min}_{t-1} + (1 - \lambda) p_t)
 #'   }
 #'   The first term in the sum is the minimum value multiplied by the decay
 #'   factor \eqn{\lambda}, so that the past minimum value is gradually
@@ -2023,7 +2023,7 @@ run_max <- function(tseries, lambda) {
 #' 
 #'   The above formula can also be expressed as:
 #'   \deqn{
-#'     p^{min}_t = \lambda min(p_t, p^{min}_{t-1}) + (1-\lambda) p_t
+#'     p^{min}_t = \lambda min(p_t, p^{min}_{t-1}) + (1 - \lambda) p_t
 #'   }
 #'   The first term is the minimum value multiplied by the decay factor
 #'   \eqn{\lambda}, so that the past minimum value is gradually "forgotten".
@@ -2033,7 +2033,7 @@ run_max <- function(tseries, lambda) {
 #'   data because it doesn't require maintaining a buffer of past data.
 #' 
 #'   The function \code{run_min()} returns a \emph{matrix} with the same
-#'   dimensions as the input argument \code{tseries}.
+#'   dimensions as the input argument \code{timeser}.
 #'   
 #' @examples
 #' \dontrun{
@@ -2041,7 +2041,7 @@ run_max <- function(tseries, lambda) {
 #' closep <- zoo::coredata(quantmod::Cl(rutils::etfenv$VTI))
 #' # Calculate the trailing minimums
 #' lambdaf <- 0.9 # Decay factor
-#' pricmin <- HighFreq::run_min(closep, lambda=lambdaf)
+#' pricmin <- HighFreq::run_min(closep, lambdaf=lambdaf)
 #' # Plot dygraph of VTI prices and trailing minimums
 #' datav <- cbind(quantmod::Cl(rutils::etfenv$VTI), pricmin)
 #' colnames(datav) <- c("prices", "min")
@@ -2052,19 +2052,19 @@ run_max <- function(tseries, lambda) {
 #' }
 #' 
 #' @export
-run_min <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_min`, tseries, lambda)
+run_min <- function(timeser, lambdaf) {
+    .Call(`_HighFreq_run_min`, timeser, lambdaf)
 }
 
 #' Calculate the trailing mean and variance of streaming \emph{time series} of
 #' data using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with two columns and the same number of rows as the
-#'   input argument \code{tseries}.  The first column contains the trailing
+#'   input argument \code{timeser}.  The first column contains the trailing
 #'   means and the second contains the variance.
 #'
 #' @details
@@ -2072,16 +2072,20 @@ run_min <- function(tseries, lambda) {
 #'   of streaming \emph{time series} of data \eqn{r_t}, by recursively
 #'   weighting the past variance estimates \eqn{\sigma^2_{t-1}}, with the
 #'   squared differences of the data minus its trailing means \eqn{(r_t -
-#'   \bar{r}_t)^2}, using the decay factor \eqn{\lambda}:
+#'   \bar{r}_t)^2}, using the decay factor \eqn{\lambda^2}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+#'     \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
 #'   }
 #'   Where \eqn{r_t} are the streaming data, \eqn{\bar{r}_t} are the trailing
 #'   means, and \eqn{\sigma^2_t} are the trailing variance estimates.
-#' 
+#'   
+#'   Note that the variance decays as the square of \eqn{\lambda}, while the
+#'   mean returns decay as \eqn{\lambda}.
+#'   This is because the variance is proportional to the square of the returns.
+#'   
 #'   The above online recursive formulas are convenient for processing live
 #'   streaming data because they don't require maintaining a buffer of past
 #'   data.
@@ -2106,7 +2110,7 @@ run_min <- function(tseries, lambda) {
 #'   filter=weightv, method="recursive")}, but it's several times faster.
 #' 
 #'   The function \code{run_var()} returns a \emph{matrix} with two columns and
-#'   the same number of rows as the input argument \code{tseries}.
+#'   the same number of rows as the input argument \code{timeser}.
 #'   The first column contains the trailing means and the second contains the
 #'   variance.
 #'   
@@ -2116,7 +2120,7 @@ run_min <- function(tseries, lambda) {
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns$VTI))
 #' # Calculate the trailing variance
 #' lambdaf <- 0.9 # Decay factor
-#' vars <- HighFreq::run_var(retp, lambda=lambdaf)
+#' vars <- HighFreq::run_var(retp, lambdaf=lambdaf)
 #' # Calculate centered returns
 #' retc <- (retp - vars[, 1])
 #' # Calculate the trailing variance using R code
@@ -2128,26 +2132,26 @@ run_min <- function(tseries, lambda) {
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_var(retp, lambda=lambdaf),
+#'   Rcpp=HighFreq::run_var(retp, lambdaf=lambdaf),
 #'   Rcode=filter(retc^2, filter=lambdaf, init=as.numeric(retc[1, 1])^2/(1-lambdaf), method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' 
 #' @export
-run_var <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_var`, tseries, lambda)
+run_var <- function(timeser, lambdaf) {
+    .Call(`_HighFreq_run_var`, timeser, lambdaf)
 }
 
 #' Calculate the trailing means, volatilities, and z-scores of a streaming
 #' \emph{time series} of data using an online recursive formula.
 #' 
-#' @param \code{tseries} A single \emph{time series} or a single column
+#' @param \code{timeser} A single \emph{time series} or a single column
 #'   \emph{matrix} of data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with three columns (means, volatilities, and
 #'   z-scores) and the same number of rows as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_zscores()} calculates the trailing means,
@@ -2157,10 +2161,10 @@ run_var <- function(tseries, lambda) {
 #'   trailing means \eqn{(r_t - \bar{r}_t)^2}, using the decay factor
 #'   \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+#'     \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
 #'   }
 #'   \deqn{
 #'     z_t = \frac{r_t - \bar{r}_t}{\sigma_t}
@@ -2190,7 +2194,7 @@ run_var <- function(tseries, lambda) {
 #' 
 #'   The function \code{run_zscores()} returns a \emph{matrix} with three
 #'   columns (means, volatilities, and z-scores) and the same number of rows as
-#'   the input argument \code{tseries}.
+#'   the input argument \code{timeser}.
 #'   
 #' @examples
 #' \dontrun{
@@ -2198,7 +2202,7 @@ run_var <- function(tseries, lambda) {
 #' pricev <- log(na.omit(rutils::etfenv$prices$VTI))
 #' # Calculate the trailing variance and z-scores of prices
 #' lambdaf <- 0.9 # Decay factor
-#' zscores <- HighFreq::run_zscores(pricev, lambda=lambdaf)
+#' zscores <- HighFreq::run_zscores(pricev, lambdaf=lambdaf)
 #' datav <- cbind(pricev, zscores[, 3])
 #' colnames(datav) <- c("VTI", "Z-Scores")
 #' colnamev <- colnames(datav)
@@ -2211,8 +2215,8 @@ run_var <- function(tseries, lambda) {
 #' }
 #' 
 #' @export
-run_zscores <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_zscores`, tseries, lambda)
+run_zscores <- function(timeser, lambdaf) {
+    .Call(`_HighFreq_run_zscores`, timeser, lambdaf)
 }
 
 #' Calculate the trailing variance of streaming \emph{OHLC} price data using an
@@ -2221,7 +2225,7 @@ run_zscores <- function(tseries, lambda) {
 #' @param \code{ohlc} A \emph{time series} or a \emph{matrix} with \emph{OHLC}
 #'   price data.
 #'   
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'
 #' @return A single-column \emph{matrix} of variance estimates, with the same
 #'   number of rows as the input \code{ohlc} price data.
@@ -2235,7 +2239,7 @@ run_zscores <- function(tseries, lambda) {
 #'   \emph{Close} prices, using the \emph{Yang-Zhang} range volatility
 #'   estimator:
 #'   \deqn{
-#'     \sigma^2_t = (1-\lambda) ((O_t - C_{t-1})^2 + 0.134 (C_t - O_t)^2 + 
+#'     \sigma^2_t = (1 - \lambda) ((O_t - C_{t-1})^2 + 0.134 (C_t - O_t)^2 + 
 #'     0.866 ((H_i - O_i) (H_i - C_i) + (L_i - O_i) (L_i - C_i))) + 
 #'     \lambda \sigma^2_{t-1}
 #'   }
@@ -2264,7 +2268,7 @@ run_zscores <- function(tseries, lambda) {
 #' # Extract the log OHLC prices of VTI
 #' ohlc <- log(rutils::etfenv$VTI)
 #' # Calculate the trailing variance
-#' vart <- HighFreq::run_var_ohlc(ohlc, lambda=0.8)
+#' vart <- HighFreq::run_var_ohlc(ohlc, lambdaf=0.8)
 #' # Calculate the rolling variance
 #' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
 #' datav <- cbind(vart, varoll)
@@ -2278,13 +2282,13 @@ run_zscores <- function(tseries, lambda) {
 #' # Compare the speed of trailing versus rolling volatility
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   trailing=HighFreq::run_var_ohlc(ohlc, lambda=0.8),
+#'   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
 #'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
-run_var_ohlc <- function(ohlc, lambda) {
-    .Call(`_HighFreq_run_var_ohlc`, ohlc, lambda)
+run_var_ohlc <- function(ohlc, lambdaf) {
+    .Call(`_HighFreq_run_var_ohlc`, ohlc, lambdaf)
 }
 
 #' Calculate the correlation matrix from the covariance matrix.
@@ -2353,7 +2357,7 @@ push_cov2cor <- function(covmat) {
 #'   \eqn{\bar{r}_t} of the streaming asset returns \eqn{r_t} by recursively
 #'   weighting present and past values using the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
 #'   }
 #'   This recursive formula is equivalent to the exponentially weighted moving
 #'   average of the streaming asset returns \eqn{r_t}.
@@ -2365,7 +2369,7 @@ push_cov2cor <- function(covmat) {
 #'   
 #'   Finally, it updates the trailing covariance matrix of the returns:
 #'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) \hat{r}^T_t \hat{r}_t
+#'     {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) \hat{r}^T_t \hat{r}_t
 #'   }
 #'   
 #'   The decay factor \eqn{\lambda} determines the strength of the updates,
@@ -2504,7 +2508,7 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #' 
 #' @param \code{varv} A \emph{vector} of the trailing asset variances.
 #' 
-#' @param \code{lambda} A decay factor which multiplies the past mean and
+#' @param \code{lambdaf} A decay factor which multiplies the past mean and
 #'   variance.
 #' 
 #' @param \code{gamma} A \emph{numeric} gain factor which multiplies the past
@@ -2536,10 +2540,10 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #'   returns \eqn{r_t} by recursively weighting present and past values
 #'   using the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+#'     \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
 #'   }
 #'   The past values \eqn{\bar{r}_{t-1}} and \eqn{\sigma^2_{t-1}} are passed in
 #'   by reference through the variables \code{meanv} and \code{varv}. The
@@ -2614,25 +2618,25 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #' eigenret <- numeric(NCOL(retp))
 #' HighFreq::push_sga(retsn=retp[nrows], 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
-#'   eigenret=eigenret, meanv=meanv, varv=varv, lambda=0.9, gamma=0.1)
+#'   eigenret=eigenret, meanv=meanv, varv=varv, lambdaf=0.9, gamma=0.1)
 #' }
 #' 
 #' @export
-push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma) {
-    invisible(.Call(`_HighFreq_push_sga`, retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, gamma))
+push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambdaf, gamma) {
+    invisible(.Call(`_HighFreq_push_sga`, retsn, eigenval, eigenvec, eigenret, meanv, varv, lambdaf, gamma))
 }
 
 #' Calculate the trailing covariances of two streaming \emph{time series} of
 #' returns using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with two
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} with two
 #'   columns of returns data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @return A \emph{matrix} with five columns of data: the trailing covariances,
 #'   the variances, and the mean values of the two columns of the argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_covar()} calculates the trailing covariances of two
@@ -2640,25 +2644,29 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #'   covariance estimates \eqn{{cov}_{t-1}}, with the products of their
 #'   returns minus their means, using the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+#'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1 - \lambda) x_t
 #'   }
 #'   \deqn{
-#'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1-\lambda) y_t
+#'     \bar{y}_t = \lambda \bar{y}_{t-1} + (1 - \lambda) y_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_{x t} = \lambda \sigma^2_{x t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+#'     \sigma^2_{x t} = \lambda^2 \sigma^2_{x t-1} + (1 - \lambda^2) (x_t - \bar{x}_t)^2
 #'   }
 #'   \deqn{
-#'     \sigma^2_{y t} = \lambda \sigma^2_{y t-1} + (1-\lambda) (y_t - \bar{y}_t)^2
+#'     \sigma^2_{y t} = \lambda^2 \sigma^2_{y t-1} + (1 - \lambda^2) (y_t - \bar{y}_t)^2
 #'   }
 #'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
+#'     {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t) (y_t - \bar{y}_t)
 #'   }
 #'   Where \eqn{{cov}_t} is the trailing covariance estimate at time \eqn{t},
 #'   \eqn{\sigma^2_{x t}}, \eqn{\sigma^2_{y t}}, \eqn{\bar{x}_t} and
 #'   \eqn{\bar{x}_t} are the trailing variances and means of the returns, and
 #'   \eqn{x_t} and \eqn{y_t} are the two streaming returns data.
 #' 
+#'   Note that the variance and covariance decay as the square of
+#'   \eqn{\lambda}, while the mean returns decay as \eqn{\lambda}.
+#'   This is because the variance is proportional to the square of the returns.
+#'   
 #'   The above online recursive formulas are convenient for processing live
 #'   streaming data because they don't require maintaining a buffer of past
 #'   data. The formulas are equivalent to a convolution with exponentially
@@ -2679,7 +2687,7 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' 
 #'   The function \code{run_covar()} returns five columns of data: the trailing 
 #'   covariances, the variances, and the mean values of the two columns of the
-#'   argument \code{tseries}.  This allows calculating the trailing
+#'   argument \code{timeser}.  This allows calculating the trailing
 #'   correlations, betas, and alphas.
 #' 
 #' @examples
@@ -2688,7 +2696,7 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 #' # Calculate the trailing covariance
 #' lambdaf <- 0.9 # Decay factor
-#' covars <- HighFreq::run_covar(retp, lambda=lambdaf)
+#' covars <- HighFreq::run_covar(retp, lambdaf=lambdaf)
 #' # Calculate the trailing correlation
 #' correl <- covars[, 1]/sqrt(covars[, 2]*covars[, 3])
 #' # Calculate the trailing covariance using R code
@@ -2707,24 +2715,24 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambda, g
 #' }
 #' 
 #' @export
-run_covar <- function(tseries, lambda) {
-    .Call(`_HighFreq_run_covar`, tseries, lambda)
+run_covar <- function(timeser, lambdaf) {
+    .Call(`_HighFreq_run_covar`, timeser, lambdaf)
 }
 
 #' Calculate the trailing autocovariance of a \emph{time series} of returns
 #' using an online recursive formula.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} with a single
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} with a single
 #'   column of returns data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
 #' @param \code{lagg} An \emph{integer} equal to the number of periods to lag.
 #'   (The default is \code{lagg = 1}.)
 #'
 #' @return A \emph{matrix} with three columns of data: the trailing
 #'   autocovariances, the variances, and the mean values of the argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{run_autocovar()} calculates the trailing
@@ -2733,13 +2741,13 @@ run_covar <- function(tseries, lambda) {
 #'   with the products of their returns minus their means, using the decay
 #'   factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1-\lambda) x_t
+#'     \bar{x}_t = \lambda \bar{x}_{t-1} + (1 - \lambda) x_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_{t} = \lambda \sigma^2_{t-1} + (1-\lambda) (x_t - \bar{x}_t)^2
+#'     \sigma^2_{t} = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t)^2
 #'   }
 #'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
+#'     {cov}_t = \lambda^2 {cov}_{t-1} + (1 - \lambda^2) (x_t - \bar{x}_t) (x_{t-l} - \bar{x}_{t-l})
 #'   }
 #'   Where \eqn{{cov}_t} is the trailing autocovariance estimate at time
 #'   \eqn{t}, with \code{lagg=l}.
@@ -2753,6 +2761,10 @@ run_covar <- function(tseries, lambda) {
 #'   Using exponentially decaying weights is more natural than using a sliding
 #'   look-back interval, because it gradually "forgets" about the past data.
 #' 
+#'   Note that the variance and covariance decay as the square of
+#'   \eqn{\lambda}, while the mean returns decay as \eqn{\lambda}.
+#'   This is because the variance is proportional to the square of the returns.
+#'   
 #'   The value of the decay factor \eqn{\lambda} must be in the range between
 #'   \code{0} and \code{1}.  
 #'   If \eqn{\lambda} is close to \code{1} then the decay is weak and past
@@ -2766,7 +2778,7 @@ run_covar <- function(tseries, lambda) {
 #' 
 #'   The function \code{run_autocovar()} returns three columns of data: the
 #'   trailing autocovariances, the variances, and the mean values of the
-#'   argument \code{tseries}.  This allows calculating the trailing
+#'   argument \code{timeser}.  This allows calculating the trailing
 #'   autocorrelations.
 #' 
 #' @examples
@@ -2776,7 +2788,7 @@ run_covar <- function(tseries, lambda) {
 #' # Calculate the trailing autocovariance
 #' lambdaf <- 0.9 # Decay factor
 #' lagg <- 3
-#' covars <- HighFreq::run_autocovar(retp, lambda=lambdaf, lagg=lagg)
+#' covars <- HighFreq::run_autocovar(retp, lambdaf=lambdaf, lagg=lagg)
 #' # Calculate the trailing autocorrelation
 #' correl <- covars[, 1]/covars[, 2]
 #' # Calculate the trailing autocovariance using R code
@@ -2795,8 +2807,8 @@ run_covar <- function(tseries, lambda) {
 #' }
 #' 
 #' @export
-run_autocovar <- function(tseries, lambda, lagg = 1L) {
-    .Call(`_HighFreq_run_autocovar`, tseries, lambda, lagg)
+run_autocovar <- function(timeser, lambdaf, lagg = 1L) {
+    .Call(`_HighFreq_run_autocovar`, timeser, lambdaf, lagg)
 }
 
 #' Perform regressions on the streaming \emph{time series} of response and
@@ -2809,9 +2821,9 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #'   
-#' @param \code{controlv} A \emph{list} of model parameters (see Details).
+#' @param \code{controll} A \emph{list} of model parameters (see Details).
 #'
 #'   
 #' @return A \emph{matrix} with the regression coefficients, the residuals, and
@@ -2832,10 +2844,10 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #'   \eqn{{cov}_{pt}} between the predictors, using the decay factor
 #'   \eqn{\lambda}:
 #'   \deqn{
-#'     {cov}_t = \lambda {cov}_{t-1} + (1-\lambda) r^T_t p_t
+#'     {cov}_t = \lambda {cov}_{t-1} + (1 - \lambda) r^T_t p_t
 #'   }
 #'   \deqn{
-#'     {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1-\lambda) p^T_t p_t
+#'     {cov}_{p t} = \lambda {cov}_{p (t-1)} + (1 - \lambda) p^T_t p_t
 #'   }
 #'   
 #'   It calculates the regression coefficients \eqn{\beta_t} as equal to the
@@ -2854,12 +2866,16 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #'   
 #'   And the residual variance \eqn{\sigma^2_t} as:
 #'   \deqn{
-#'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1-\lambda) \epsilon_t
+#'     \bar{\epsilon}_t = \lambda \bar{\epsilon}_{t-1} + (1 - \lambda) \epsilon_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (\epsilon_t - \bar{\epsilon}_t)^2
+#'     \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (\epsilon_t - \bar{\epsilon}_t)^2
 #'   }
 #' 
+#'   Note that the variance decays as the square of \eqn{\lambda}, while the
+#'   mean residuals decay as \eqn{\lambda}.
+#'   This is because the variance is proportional to the square of the residuals.
+#'   
 #'   It then calculates the regression forecasts \eqn{f_t}, as equal to the
 #'   past regression coefficients \eqn{\beta_{t-1}} times the current predictor
 #'   data \eqn{p_t}:
@@ -2874,8 +2890,8 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #'   the same number of rows as the predictor argument \code{predm}.
 #'
 #'   The function \code{run_reg()} accepts a list of regression model
-#'   parameters through the argument \code{controlv}.
-#'   The argument \code{controlv} contains the parameters \code{regmod} and
+#'   parameters through the argument \code{controll}.
+#'   The argument \code{controll} contains the parameters \code{regmod} and
 #'   \code{residscale}.
 #'   Below is a description of how these parameters work.
 #'   The list of model parameters can be created using the function
@@ -2950,8 +2966,8 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' # Calculate the trailing regressions
 #' lambdaf <- 0.9 # Decay factor
 #' # Create a list of regression parameters
-#' controlv <- HighFreq::param_reg(residscale="standardize")
-#' regs <- HighFreq::run_reg(respv=respv, predm=predm, lambda=lambda, controlv=controlv)
+#' controll <- HighFreq::param_reg(residscale="standardize")
+#' regs <- HighFreq::run_reg(respv=respv, predm=predm, lambdaf=lambdaf, controll=controll)
 #' # Plot the trailing residuals
 #' datav <- cbind(cumsum(respv), regs[, NCOL(regs)])
 #' colnames(datav) <- c("XLF", "residuals")
@@ -2991,14 +3007,14 @@ run_autocovar <- function(tseries, lambda, lagg = 1L) {
 #' }
 #' 
 #' @export
-run_reg <- function(respv, predm, lambda, controlv) {
-    .Call(`_HighFreq_run_reg`, respv, predm, lambda, controlv)
+run_reg <- function(respv, predm, lambdaf, controll) {
+    .Call(`_HighFreq_run_reg`, respv, predm, lambdaf, controll)
 }
 
 #' Calculate the mean (location) of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   mean (location) model (the default is \code{method = "moment"} - see
@@ -3008,11 +3024,11 @@ run_reg <- function(respv, predm, lambda, controlv) {
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the mean (location) of the columns of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_mean()} calculates the mean (location) values of
-#'   the columns of the \emph{time series} \code{tseries} using \code{C++}
+#'   the columns of the \emph{time series} \code{timeser} using \code{C++}
 #'   \code{RcppArmadillo} code.
 #'
 #'   If \code{method = "moment"} (the default) then \code{calc_mean()}
@@ -3077,14 +3093,14 @@ run_reg <- function(respv, predm, lambda, controlv) {
 #' }
 #' 
 #' @export
-calc_mean <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_mean`, tseries, method, confl)
+calc_mean <- function(timeser, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_calc_mean`, timeser, method, confl)
 }
 
 #' Calculate the variance of a single-column \emph{time series} or a
 #' \emph{vector} using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A single-column \emph{time series} or a \emph{vector}.
+#' @param \code{timeser} A single-column \emph{time series} or a \emph{vector}.
 #'
 #' @return A \emph{numeric} value equal to the variance of the \emph{vector}.
 #'
@@ -3108,14 +3124,14 @@ calc_mean <- function(tseries, method = "moment", confl = 0.75) {
 #' }
 #' 
 #' @export
-calc_varvec <- function(tseries) {
-    .Call(`_HighFreq_calc_varvec`, tseries)
+calc_varvec <- function(timeser) {
+    .Call(`_HighFreq_calc_varvec`, timeser)
 }
 
 #' Calculate the dispersion (variance) of the columns of a \emph{time series}
 #' or a \emph{matrix} using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'   
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   dispersion model (the default is \code{method = "moment"} - see Details).
@@ -3124,7 +3140,7 @@ calc_varvec <- function(tseries) {
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A row vector equal to the dispersion of the columns of the matrix
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_var()} calculates the dispersion of the
@@ -3160,7 +3176,7 @@ calc_varvec <- function(tseries) {
 #'   same calculation as the function \code{stats::mad()}, but it's much faster
 #'   because it uses \code{RcppArmadillo} \code{C++} code.
 #'
-#'   If the number of rows of \code{tseries} is less than \code{3} then it
+#'   If the number of rows of \code{timeser} is less than \code{3} then it
 #'   returns zeros.
 #'   
 #' @examples
@@ -3191,14 +3207,14 @@ calc_varvec <- function(tseries) {
 #' }
 #' 
 #' @export
-calc_var <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_var`, tseries, method, confl)
+calc_var <- function(timeser, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_calc_var`, timeser, method, confl)
 }
 
 #' Calculate the covariance matrix of the columns of a \emph{time series}
 #' using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'   
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   covariance model (the default is \code{method = "moment"} - see Details).
@@ -3207,7 +3223,7 @@ calc_var <- function(tseries, method = "moment", confl = 0.75) {
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A square matrix with the covariance coefficients of the columns of
-#'   the \emph{time series} \code{tseries}.
+#'   the \emph{time series} \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_covar()} calculates the covariance matrix of the
@@ -3242,7 +3258,7 @@ calc_var <- function(tseries, method = "moment", confl = 0.75) {
 #'   same calculation as the function \code{stats::mad()}, but it's much faster
 #'   because it uses \code{RcppArmadillo} \code{C++} code.
 #'
-#'   If the number of rows of \code{tseries} is less than \code{3} then it
+#'   If the number of rows of \code{timeser} is less than \code{3} then it
 #'   returns zeros.
 #'   
 #' @examples
@@ -3269,8 +3285,8 @@ calc_var <- function(tseries, method = "moment", confl = 0.75) {
 #' }
 #' 
 #' @export
-calc_covar <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_covar`, tseries, method, confl)
+calc_covar <- function(timeser, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_calc_covar`, timeser, method, confl)
 }
 
 #' Calculate the variance of returns aggregated over the end points. 
@@ -3315,13 +3331,13 @@ calc_covar <- function(tseries, method = "moment", confl = 0.75) {
 #' closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 #' closep <- log(closep)
 #' # Calculate the variance of daily returns
-#' calc_var_ag(prices, step=1)
+#' calc_var_ag(closep, step=1)
 #' # Calculate the variance using R
 #' sapply(rutils::diffit(closep), var)
 #' # Calculate the variance of returns aggregated over 21 days
-#' calc_var_ag(prices, step=21)
+#' calc_var_ag(closep, step=21)
 #' # The variance over 21 days is approximately 21 times the daily variance
-#' 21*calc_var_ag(prices, step=1)
+#' 21*calc_var_ag(closep, step=1)
 #' }
 #' 
 #' @export
@@ -3518,7 +3534,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #' Calculate the skewness of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   skewness model (the default is \code{method = "moment"} - see Details).
@@ -3527,7 +3543,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the skewness of the columns of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_skew()} calculates the skewness of the columns of
@@ -3549,7 +3565,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #'   difference between the mean of the data minus its median, divided by the
 #'   standard deviation.
 #'   
-#'   If the number of rows of \code{tseries} is less than \code{3} then it
+#'   If the number of rows of \code{timeser} is less than \code{3} then it
 #'   returns zeros.
 #'   
 #'   The code examples below compare the function \code{calc_skew()} with the
@@ -3602,14 +3618,14 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #' }
 #' 
 #' @export
-calc_skew <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_skew`, tseries, method, confl)
+calc_skew <- function(timeser, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_calc_skew`, timeser, method, confl)
 }
 
 #' Calculate the kurtosis of the columns of a \emph{time series} or a
 #' \emph{matrix} using \code{RcppArmadillo}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{method} A \emph{character string} specifying the type of the
 #'   kurtosis model (the default is \code{method = "moment"} - see Details).
@@ -3618,17 +3634,17 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A single-row matrix with the kurtosis of the columns of
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{calc_kurtosis()} calculates the kurtosis of the columns
-#'   of the \emph{matrix} \code{tseries} using \code{RcppArmadillo} \code{C++}
+#'   of the \emph{matrix} \code{timeser} using \code{RcppArmadillo} \code{C++}
 #'   code.
 #'
 #'   If \code{method = "moment"} (the default) then \code{calc_kurtosis()}
 #'   calculates the fourth moment of the data.
-#'   But it doesn't center the columns of \code{tseries} because that requires
-#'   copying the matrix \code{tseries} in memory, so it's time-consuming.
+#'   But it doesn't center the columns of \code{timeser} because that requires
+#'   copying the matrix \code{timeser} in memory, so it's time-consuming.
 #'
 #'   If \code{method = "quantile"} then it calculates the skewness
 #'   \eqn{\kappa} from the differences between the quantiles of the data as
@@ -3642,7 +3658,7 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #'   difference between the mean of the data minus its median, divided by the
 #'   standard deviation.
 #'   
-#'   If the number of rows of \code{tseries} is less than \code{3} then it
+#'   If the number of rows of \code{timeser} is less than \code{3} then it
 #'   returns zeros.
 #'   
 #'   The code examples below compare the function \code{calc_kurtosis()} with the
@@ -3695,18 +3711,18 @@ calc_skew <- function(tseries, method = "moment", confl = 0.75) {
 #' }
 #' 
 #' @export
-calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_calc_kurtosis`, tseries, method, confl)
+calc_kurtosis <- function(timeser, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_calc_kurtosis`, timeser, method, confl)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated returns.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of log prices.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of log prices.
 #'
 #' @param \code{aggv} A \emph{vector} of aggregation intervals.
 #' 
 #' @return The Hurst exponent calculated from the volatility ratio of
-#'   aggregated returns.  If \code{tseries} contains multiple columns, then the
+#'   aggregated returns.  If \code{timeser} contains multiple columns, then the
 #'   function \code{calc_hurst()} returns a single-row matrix of Hurst
 #'   exponents.
 #'
@@ -3759,8 +3775,8 @@ calc_kurtosis <- function(tseries, method = "moment", confl = 0.75) {
 #' }
 #' 
 #' @export
-calc_hurst <- function(tseries, aggv) {
-    .Call(`_HighFreq_calc_hurst`, tseries, aggv)
+calc_hurst <- function(timeser, aggv) {
+    .Call(`_HighFreq_calc_hurst`, timeser, aggv)
 }
 
 #' Calculate the Hurst exponent from the volatility ratio of aggregated
@@ -3899,7 +3915,7 @@ calc_lm <- function(respv, predm) {
 #' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #' 
-#' @param \code{controlv} A \emph{list} of model parameters (see Details).
+#' @param \code{controll} A \emph{list} of model parameters (see Details).
 #'
 #' @return A single-row matrix with the regression coefficients, their
 #'   t-values, and the last residual z-score.
@@ -3910,7 +3926,7 @@ calc_lm <- function(respv, predm) {
 #'   t-values, and the last residual z-score.
 #'   
 #'   The function \code{calc_reg()} accepts a list of regression model
-#'   parameters through the argument \code{controlv}.
+#'   parameters through the argument \code{controll}.
 #'   The list of model parameters can be created using the function
 #'   \code{param_reg()}.  Below is a description of the model parameters.
 #'
@@ -3956,25 +3972,25 @@ calc_lm <- function(respv, predm) {
 #' regsum <- summary(regmod)
 #' coeff <- regsum$coefficients
 #' # Create a default list of regression parameters
-#' controlv <- HighFreq::param_reg()
+#' controll <- HighFreq::param_reg()
 #' # Add unit intercept column to the predictor matrix
 #' predm <- cbind(rep(1, NROW(predm)), predm)
 #' # Perform multivariate regression using calc_reg()
-#' regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv))
+#' regarma <- drop(HighFreq::calc_reg(respv=respv, predm=predm, controll=controll))
 #' # Compare the outputs of both functions
 #' all.equal(regarma[1:(2*NCOL(predm))], 
 #'   c(coeff[, "Estimate"], coeff[, "t value"]), check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controlv=controlv),
+#'   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controll=controll),
 #'   Rcode=lm(respv ~ predm),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' 
 #' @export
-calc_reg <- function(respv, predm, controlv) {
-    .Call(`_HighFreq_calc_reg`, respv, predm, controlv)
+calc_reg <- function(respv, predm, controll) {
+    .Call(`_HighFreq_calc_reg`, respv, predm, controll)
 }
 
 #' Calculate a \emph{matrix} of mean (location) estimates over a rolling
@@ -3984,7 +4000,7 @@ calc_reg <- function(respv, predm, controlv) {
 #' @param \code{lookb} The number of end points in the look-back interval
 #'   (the default is \code{lookb = 1}).
 #'   
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
@@ -4002,16 +4018,16 @@ calc_reg <- function(respv, predm, controlv) {
 #'   measure of (the default is \code{method = "moment"}).
 #'
 #' @return A \emph{matrix} of mean (location) estimates with the same number of
-#'   columns as the input time series \code{tseries}, and the number of rows
+#'   columns as the input time series \code{timeser}, and the number of rows
 #'   equal to the number of end points.
 #'   
 #' @details
 #'   The function \code{roll_mean()} calculates a \emph{matrix} of mean
 #'   (location) estimates over rolling look-back intervals attached at the end
-#'   points of the \emph{time series} \code{tseries}.
+#'   points of the \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_mean()} performs a loop over the end points, and at
-#'   each end point it subsets the time series \code{tseries} over a look-back
+#'   each end point it subsets the time series \code{timeser} over a look-back
 #'   interval equal to \code{lookb} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_mean()}, which
@@ -4020,7 +4036,7 @@ calc_reg <- function(respv, predm, controlv) {
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   periods. It calculates the end points along the rows of \code{timeser}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
@@ -4071,15 +4087,15 @@ calc_reg <- function(respv, predm, controlv) {
 #'   times=10))[, c(1, 4, 5)]
 #' }
 #' @export
-roll_mean <- function(tseries, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_mean`, tseries, lookb, startp, endd, step, stub, method, confl)
+roll_mean <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_mean`, timeser, lookb, startp, endd, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
 #' interval for a single-column \emph{time series} or a single-column
 #' \emph{matrix}, using \code{RcppArmadillo}.
 #'
-#' @param \code{tseries} A single-column \emph{time series} or a single-column
+#' @param \code{timeser} A single-column \emph{time series} or a single-column
 #'   \emph{matrix}.
 #' 
 #' @param \code{lookb} The length of the look-back interval, equal to the
@@ -4087,7 +4103,7 @@ roll_mean <- function(tseries, lookb = 1L, startp = 0L, endd = 0L, step = 1L, st
 #'   estimate (the default is \code{lookb = 1}).
 #'
 #' @return A single-column \emph{matrix} with the same number of elements as
-#'   the input argument \code{tseries}.
+#'   the input argument \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_varvec()} calculates a \emph{vector} of variance
@@ -4097,7 +4113,7 @@ roll_mean <- function(tseries, lookb = 1L, startp = 0L, endd = 0L, step = 1L, st
 #'   
 #'   The function \code{roll_varvec()} uses an expanding look-back interval in
 #'   the initial warmup period, to calculate the same number of elements as the
-#'   input argument \code{tseries}.
+#'   input argument \code{timeser}.
 #'
 #'   The function \code{roll_varvec()} performs the same calculation as the
 #'   function \code{roll_var()} from package
@@ -4120,15 +4136,15 @@ roll_mean <- function(tseries, lookb = 1L, startp = 0L, endd = 0L, step = 1L, st
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_varvec <- function(tseries, lookb = 1L) {
-    .Call(`_HighFreq_roll_varvec`, tseries, lookb)
+roll_varvec <- function(timeser, lookb = 1L) {
+    .Call(`_HighFreq_roll_varvec`, timeser, lookb)
 }
 
 #' Calculate a \emph{matrix} of dispersion (variance) estimates over a rolling
 #' look-back interval attached at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'
 #' @param \code{lookb} The number of end points in the look-back interval
 #'   (the default is \code{lookb = 1}).
@@ -4149,16 +4165,16 @@ roll_varvec <- function(tseries, lookb = 1L) {
 #'   measure of dispersion (the default is \code{method = "moment"}).
 #'
 #' @return A \emph{matrix} dispersion (variance) estimates with the same number
-#'   of columns as the input time series \code{tseries}, and the number of rows
+#'   of columns as the input time series \code{timeser}, and the number of rows
 #'   equal to the number of end points.
 #'   
 #' @details
 #'   The function \code{roll_var()} calculates a \emph{matrix} of dispersion
 #'   (variance) estimates over rolling look-back intervals attached at the end
-#'   points of the \emph{time series} \code{tseries}.
+#'   points of the \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_var()} performs a loop over the end points, and at
-#'   each end point it subsets the time series \code{tseries} over a look-back
+#'   each end point it subsets the time series \code{timeser} over a look-back
 #'   interval equal to \code{lookb} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_var()}, which
@@ -4168,7 +4184,7 @@ roll_varvec <- function(tseries, lookb = 1L) {
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   periods. It calculates the end points along the rows of \code{timeser}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
@@ -4209,8 +4225,8 @@ roll_varvec <- function(tseries, lookb = 1L) {
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_var <- function(tseries, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_var`, tseries, lookb, startp, endd, step, stub, method, confl)
+roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_var`, timeser, lookb, startp, endd, step, stub, method, confl)
 }
 
 #' Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -4361,7 +4377,7 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #' interval attached at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'    
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
@@ -4385,16 +4401,16 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A \emph{matrix} of skewness estimates with the same number of
-#'   columns as the input time series \code{tseries}, and the number of rows
+#'   columns as the input time series \code{timeser}, and the number of rows
 #'   equal to the number of end points.
 #'   
 #' @details
 #'   The function \code{roll_skew()} calculates a \emph{matrix} of skewness
 #'   estimates over rolling look-back intervals attached at the end points of
-#'   the \emph{time series} \code{tseries}.
+#'   the \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_skew()} performs a loop over the end points, and
-#'   at each end point it subsets the time series \code{tseries} over a
+#'   at each end point it subsets the time series \code{timeser} over a
 #'   look-back interval equal to \code{lookb} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_skew()}, which
@@ -4404,7 +4420,7 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   periods. It calculates the end points along the rows of \code{timeser}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
@@ -4440,15 +4456,15 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_skew <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_skew`, tseries, startp, endd, step, lookb, stub, method, confl)
+roll_skew <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_skew`, timeser, startp, endd, step, lookb, stub, method, confl)
 }
 
 #' Calculate a \emph{matrix} of kurtosis estimates over a rolling look-back
 #' interval attached at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'    
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
@@ -4472,16 +4488,16 @@ roll_skew <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, st
 #'   returns (the default is \code{confl = 0.75}).
 #'
 #' @return A \emph{matrix} of kurtosis estimates with the same number of
-#'   columns as the input time series \code{tseries}, and the number of rows
+#'   columns as the input time series \code{timeser}, and the number of rows
 #'   equal to the number of end points.
 #'   
 #' @details
 #'   The function \code{roll_kurtosis()} calculates a \emph{matrix} of kurtosis
 #'   estimates over rolling look-back intervals attached at the end points of
-#'   the \emph{time series} \code{tseries}.
+#'   the \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_kurtosis()} performs a loop over the end points,
-#'   and at each end point it subsets the time series \code{tseries} over a
+#'   and at each end point it subsets the time series \code{timeser} over a
 #'   look-back interval equal to \code{lookb} number of end points.
 #'   
 #'   It passes the subset time series to the function \code{calc_kurtosis()},
@@ -4490,7 +4506,7 @@ roll_skew <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, st
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   periods. It calculates the end points along the rows of \code{timeser}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
@@ -4526,8 +4542,8 @@ roll_skew <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, st
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
-    .Call(`_HighFreq_roll_kurtosis`, tseries, startp, endd, step, lookb, stub, method, confl)
+roll_kurtosis <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
+    .Call(`_HighFreq_roll_kurtosis`, timeser, startp, endd, step, lookb, stub, method, confl)
 }
 
 #' Perform a rolling regression and calculate a matrix of regression
@@ -4539,7 +4555,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L
 #' @param \code{predm} A \emph{time series} or a \emph{matrix} of predictor
 #'   data.
 #'   
-#' @param \code{controlv} A \emph{list} of model parameters (see Details).
+#' @param \code{controll} A \emph{list} of model parameters (see Details).
 #'
 #' @param \code{startp} An \emph{integer} vector of start points (the default
 #'   is \code{startp = 0}).
@@ -4583,7 +4599,7 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L
 #'   It passes the subset time series to the function \code{calc_reg()}, which
 #'   calculates the regression coefficients, their t-values, and the z-score.
 #'   The function \code{roll_reg()} accepts a list of model parameters
-#'   through the argument \code{controlv}, and passes it to the function
+#'   through the argument \code{controll}, and passes it to the function
 #'   \code{calc_reg()}.
 #'   The list of model parameters can be created using the function
 #'   \code{param_reg()}.  See the function \code{param_reg()} for a
@@ -4616,14 +4632,14 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L
 #' lookb <- 12
 #' startp <- c(rep(1, lookb), endd[1:(NROW(endd)-lookb)])
 #' # Create a default list of regression parameters
-#' controlv <- HighFreq::param_reg()
+#' controll <- HighFreq::param_reg()
 #' # Calculate rolling betas using RcppArmadillo
-#' regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controlv=controlv)
+#' regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controll=controll)
 #' betas <- regroll[, 2]
 #' # Calculate rolling betas in R
 #' betar <- sapply(1:NROW(endd), FUN=function(ep) {
 #'   datav <- predm[startp[ep]:endd[ep], ]
-#'   # HighFreq::calc_reg(datav[, 2], datav[, -2], controlv)
+#'   # HighFreq::calc_reg(datav[, 2], datav[, -2], controll)
 #'   drop(cov(datav[, 2], datav[, 3])/var(datav[, 3]))
 #' })  # end sapply
 #' # Compare the outputs of both functions
@@ -4631,14 +4647,14 @@ roll_kurtosis <- function(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L
 #' }
 #' 
 #' @export
-roll_reg <- function(respv, predm, controlv, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_reg`, respv, predm, controlv, startp, endd, step, lookb, stub)
+roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_reg`, respv, predm, controll, startp, endd, step, lookb, stub)
 }
 
 #' Perform a rolling standardization (centering and scaling) of the columns of
 #' a \emph{time series} of data using \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or \emph{matrix} of data.
 #' 
 #' @param \code{lookb} The length of the look-back interval, equal to the
 #'   number of rows of data used in the scaling.
@@ -4660,14 +4676,14 @@ roll_reg <- function(respv, predm, controlv, startp = 0L, endd = 0L, step = 1L, 
 #'   deviation}.
 #'
 #' @return A \emph{matrix} with the same dimensions as the input argument
-#'   \code{tseries}.
+#'   \code{timeser}.
 #'
 #' @details
 #'   The function \code{roll_scale()} performs a rolling standardization
-#'   (centering and scaling) of the columns of the \code{tseries} argument
+#'   (centering and scaling) of the columns of the \code{timeser} argument
 #'   using \code{RcppArmadillo}.
 #'   The function \code{roll_scale()} performs a loop over the rows of
-#'   \code{tseries}, subsets a number of previous (past) rows equal to
+#'   \code{timeser}, subsets a number of previous (past) rows equal to
 #'   \code{lookb}, and standardizes the subset matrix by calling the
 #'   function \code{calc_scale()}.  It assigns the last row of the standardized
 #'   subset \emph{matrix} to the return matrix.
@@ -4708,9 +4724,9 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #' over time and in place, without copying the data in memory, using
 #' \code{RcppArmadillo}.
 #' 
-#' @param \code{tseries} A \emph{time series} or \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or \emph{matrix} of data.
 #' 
-#' @param \code{lambda} A decay factor which multiplies past estimates.
+#' @param \code{lambdaf} A decay factor which multiplies past estimates.
 #' 
 #' @param \code{center} A \emph{Boolean} argument: if \code{TRUE} then center
 #'   the columns so that they have zero mean or median (the default is
@@ -4724,27 +4740,27 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #'
 #' @details
 #'   The function \code{run_scale()} performs a trailing standardization
-#'   (centering and scaling) of the columns of the \code{tseries} argument
+#'   (centering and scaling) of the columns of the \code{timeser} argument
 #'   using \code{RcppArmadillo}.
 #' 
 #'   The function \code{run_scale()} accepts a \emph{pointer} to the argument
-#'   \code{tseries}, and it overwrites the old data with the standardized
+#'   \code{timeser}, and it overwrites the old data with the standardized
 #'   data. It performs the calculation in place, without copying the data in
 #'   memory, which can significantly increase the computation speed for large
 #'   time series.
 #'
 #'   The function \code{run_scale()} performs a loop over the rows of
-#'   \code{tseries}, and standardizes the data using its trailing means and
+#'   \code{timeser}, and standardizes the data using its trailing means and
 #'   standard deviations.
 #'
 #'   The function \code{run_scale()} calculates the trailing mean and variance
 #'   of streaming \emph{time series} data \eqn{r_t}, by recursively weighting
 #'   the past estimates with the new data, using the decay factor \eqn{\lambda}:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
 #'   }
 #'   \deqn{
-#'     \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+#'     \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
 #'   }
 #'   Where \eqn{\bar{r}_t} is the trailing mean and \eqn{\sigma^2_t} is the
 #'   trailing variance.
@@ -4800,12 +4816,12 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #'   scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 #' }  # end for
 #' # Calculate the trailing standardized returns using C++ code
-#' HighFreq::run_scale(retp, lambda=lambdaf)
+#' HighFreq::run_scale(retp, lambdaf=lambdaf)
 #' all.equal(zoo::coredata(retp), scaled, check.attributes=FALSE)
 #' # Compare the speed of RcppArmadillo with R code
 #' library(microbenchmark)
 #' summary(microbenchmark(
-#'   Rcpp=HighFreq::run_scale(retp, lambda=lambdaf),
+#'   Rcpp=HighFreq::run_scale(retp, lambdaf=lambdaf),
 #'   Rcode={for (it in 2:NROW(retp)) {
 #'    meanm <- lambdaf*meanm + lambda1*scaled[it, ];
 #'    vars <- lambdaf*vars + lambda1*(scaled[it, ] - meanm)^2;
@@ -4815,8 +4831,8 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #' }
 #' 
 #' @export
-run_scale <- function(tseries, lambda, center = TRUE, scale = TRUE) {
-    invisible(.Call(`_HighFreq_run_scale`, tseries, lambda, center, scale))
+run_scale <- function(timeser, lambdaf, center = TRUE, scale = TRUE) {
+    invisible(.Call(`_HighFreq_run_scale`, timeser, lambdaf, center, scale))
 }
 
 #' Calculate a \emph{vector} of z-scores of the residuals of rolling
@@ -4903,7 +4919,7 @@ roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb 
 #' interval attached at the end points of a \emph{time series} or a
 #' \emph{matrix}.
 #'
-#' @param \code{tseries} A \emph{time series} or a \emph{matrix} of data.
+#' @param \code{timeser} A \emph{time series} or a \emph{matrix} of data.
 #'    
 #' @param \code{funame} A \emph{character string} specifying the moment
 #'   function (the default is \code{funame = "calc_mean"}).
@@ -4930,16 +4946,16 @@ roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb 
 #'   calculating the end points (the default is \code{stub = 0}).
 #'
 #' @return A \emph{matrix} with the same number of columns as the input time
-#'   series \code{tseries}, and the number of rows equal to the number of end
+#'   series \code{timeser}, and the number of rows equal to the number of end
 #'   points.
 #'   
 #' @details
 #'   The function \code{roll_moment()} calculates a \emph{matrix} of moment
 #'   values, over rolling look-back intervals attached at the end points of the
-#'   \emph{time series} \code{tseries}.
+#'   \emph{time series} \code{timeser}.
 #'   
 #'   The function \code{roll_moment()} performs a loop over the end points, and
-#'   at each end point it subsets the time series \code{tseries} over a
+#'   at each end point it subsets the time series \code{timeser} over a
 #'   look-back interval equal to \code{lookb} number of end points.
 #'   
 #'   It passes the subset time series to the function specified by the argument
@@ -4957,7 +4973,7 @@ roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb 
 #'   
 #'   If the arguments \code{endd} and \code{startp} are not given then it
 #'   first calculates a vector of end points separated by \code{step} time
-#'   periods. It calculates the end points along the rows of \code{tseries}
+#'   periods. It calculates the end points along the rows of \code{timeser}
 #'   using the function \code{calc_endpoints()}, with the number of time
 #'   periods between the end points equal to \code{step} time periods.
 #' 
@@ -5006,8 +5022,8 @@ roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb 
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }
 #' @export
-roll_moment <- function(tseries, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
-    .Call(`_HighFreq_roll_moment`, tseries, funame, method, confl, startp, endd, step, lookb, stub)
+roll_moment <- function(timeser, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
+    .Call(`_HighFreq_roll_moment`, timeser, funame, method, confl, startp, endd, step, lookb, stub)
 }
 
 #' Simulate or estimate the rolling variance under a \emph{GARCH(1,1)} process
@@ -5151,8 +5167,8 @@ sim_garch <- function(omegac, alphac, betac, innov, is_random = TRUE) {
 #' thetav <- 0.01
 #' innov <- matrix(rnorm(1e3))
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
-#' prices <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
-#' plot(prices, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
+#' pricev <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
+#' plot(pricev, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -5200,8 +5216,8 @@ sim_ou <- function(prici, priceq, theta, innov) {
 #' thetav <- 0.01
 #' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Schwartz process using Rcpp
-#' prices <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
-#' plot(prices, t="l", main="Simulated Schwartz Prices", ylab="prices")
+#' pricev <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
+#' plot(pricev, t="l", main="Simulated Schwartz Prices", ylab="prices")
 #' }
 #' 
 #' @export
@@ -5324,8 +5340,8 @@ sim_ar <- function(coeff, innov) {
 #' # Calculate matrix of standard normal innovations
 #' innov <- matrix(rnorm(1e3, sd=0.01))
 #' # Simulate Dickey-Fuller process using Rcpp
-#' prices <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
-#' plot(prices, t="l", main="Simulated Dickey-Fuller Prices")
+#' pricev <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
+#' plot(pricev, t="l", main="Simulated Dickey-Fuller Prices")
 #' }
 #' 
 #' @export
@@ -5401,7 +5417,7 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #'   matrix (the default is \code{dimax = 0} - standard matrix inverse using
 #'   all the \emph{eigen values}).
 #'   
-#' @param \code{lambda} A decay factor which multiplies the past asset returns.
+#' @param \code{lambdaf} A decay factor which multiplies the past asset returns.
 #'   
 #' @param \code{lambdacov} A decay factor which multiplies the past covariance.
 #'   
@@ -5432,13 +5448,13 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #'   the function \code{HighFreq::push_covar()} to update the trailing
 #'   covariance matrix of the returns:
 #'   \deqn{
-#'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1-\lambda_c) r^s_t
+#'     \bar{r}_t = \lambda_c \bar{r}_{t-1} + (1 - \lambda_c) r^s_t
 #'   }
 #'   \deqn{
 #'     \hat{r}_t = r^s_t - \bar{r}_t
 #'   }
 #'   \deqn{
-#'     {cov}_t = \lambda_c {cov}_{t-1} + (1-\lambda_c) \hat{r}^T_t \hat{r}_t
+#'     {cov}_t = \lambda_c {cov}_{t-1} + (1 - \lambda^2_c) \hat{r}^T_t \hat{r}_t
 #'   }
 #'   Where \eqn{\lambda_c} is the decay factor which multiplies the past mean
 #'   and covariance.
@@ -5455,7 +5471,7 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #'   portfolio, by multiplying the inverse covariance matrix times the trailing
 #'   means of the asset returns:
 #'   \deqn{
-#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r^s_t
+#'     \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r^s_t
 #'   }
 #'   \deqn{
 #'     \strong{w}_t = \strong{C}^{-1} \bar{r}_t
@@ -5471,7 +5487,7 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #'   
 #'   It then calculates the trailing mean of the weights:
 #'   \deqn{
-#'     \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1-\lambda_w) \strong{w}_t
+#'     \bar{\strong{w}}_t = \lambda_w \bar{\strong{w}}_{t-1} + (1 - \lambda_w) \strong{w}_t
 #'   }
 #'   Note that the decay factor \eqn{\lambda_w} is different from the decay
 #'   factor \eqn{\lambda} used for updating the trailing means.
@@ -5540,8 +5556,8 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #' }
 #' 
 #' @export
-sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
-    .Call(`_HighFreq_sim_portfoptim`, rets, dimax, lambda, lambdacov, lambdaw)
+sim_portfoptim <- function(rets, dimax, lambdaf, lambdacov, lambdaw) {
+    .Call(`_HighFreq_sim_portfoptim`, rets, dimax, lambdaf, lambdacov, lambdaw)
 }
 
 #' Calculate the optimal portfolio weights using a variety of different
@@ -5550,7 +5566,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' @param \code{returns} A \emph{time series} or a \emph{matrix} of returns
 #'   data (the returns in excess of the risk-free rate).
 #'   
-#' @param \code{controlv} A \emph{list} of portfolio optimization model
+#' @param \code{controll} A \emph{list} of portfolio optimization model
 #'   parameters (see Details).
 #'
 #'   
@@ -5562,7 +5578,7 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #'   weights using a variety of different objective functions.
 #' 
 #'   The function \code{calc_weights()} accepts a list of portfolio
-#'   optimization parameters through the argument \code{controlv}.
+#'   optimization parameters through the argument \code{controll}.
 #'   The list of portfolio optimization parameters can be created using
 #'   the function \code{param_portf()}.  Below is a description of the
 #'   parameters.
@@ -5670,15 +5686,15 @@ sim_portfoptim <- function(rets, dimax, lambda, lambdacov, lambdaw) {
 #' weightr <- 0.01*weightr/sd(retp %*% weightr)
 #' weightr <- weightr/sqrt(sum(weightr^2))
 #' # Create a list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
+#' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 #' # Calculate weights using RcppArmadillo
-#' weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
+#' weightcpp <- drop(HighFreq::calc_weights(retp, controll=controll))
 #' all.equal(weightcpp, weightr)
 #' }
 #' 
 #' @export
-calc_weights <- function(returns, controlv) {
-    .Call(`_HighFreq_calc_weights`, returns, controlv)
+calc_weights <- function(returns, controll) {
+    .Call(`_HighFreq_calc_weights`, returns, controll)
 }
 
 #' Simulate (backtest) a rolling portfolio optimization strategy, using
@@ -5690,15 +5706,15 @@ calc_weights <- function(returns, controlv) {
 #' @param \code{retx} A \emph{time series} or a \emph{matrix} of excess
 #'   returns data (the returns in excess of the risk-free rate).
 #'   
-#' @param \code{controlv} A \emph{list} of portfolio optimization model
+#' @param \code{controll} A \emph{list} of portfolio optimization model
 #'   parameters (see Details).
 #'
 #' @param \code{startp} An \emph{integer vector} of start points.
 #' 
 #' @param \code{endd} An \emph{integer vector} of end points.
 #' 
-#' @param \code{lambda} A decay factor which multiplies the past portfolio
-#'   weights.  (The default is \code{lambda = 0} - no memory.)
+#' @param \code{lambdaf} A decay factor which multiplies the past portfolio
+#'   weights.  (The default is \code{lambdaf = 0} - no memory.)
 #'   
 #' @param \code{coeff} A \emph{numeric} multiplier of the weights.  (The
 #'   default is \code{1})
@@ -5722,7 +5738,7 @@ calc_weights <- function(returns, controlv) {
 #'   The function \code{back_test()} passes the subset matrix of excess returns
 #'   into the function \code{calc_weights()}, which calculates the optimal
 #'   portfolio weights at each \emph{end point}.
-#'   It also passes to \code{calc_weights()} the argument \code{controlv},
+#'   It also passes to \code{calc_weights()} the argument \code{controll},
 #'   which is the list of portfolio optimization parameters.
 #'   See the function \code{calc_weights()} for more details.
 #'   The list of portfolio optimization parameters can be created using the
@@ -5730,10 +5746,10 @@ calc_weights <- function(returns, controlv) {
 #'   
 #'   The function \code{back_test()} then recursively averages the weights
 #'   \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
-#'   the previous \emph{end point = (i-1)}, using the decay factor \code{lambda
+#'   the previous \emph{end point = (i-1)}, using the decay factor \code{lambdaf
 #'   = \eqn{\lambda}}:
 #'   \deqn{
-#'     w_i = (1-\lambda) w_i + \lambda w_{i-1}
+#'     w_i = (1 - \lambda) w_i + \lambda w_{i-1}
 #'   }
 #'   The purpose of averaging the weights is to reduce their variance, and
 #'   improve their out-of-sample performance.  It is equivalent to extending
@@ -5776,9 +5792,9 @@ calc_weights <- function(returns, controlv) {
 #' alphac <- 0.5
 #' dimax <- 3
 #' # Create a list of portfolio optimization parameters
-#' controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
+#' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 #' # Simulate a monthly rolling portfolio optimization strategy
-#' pnls <- HighFreq::back_test(retx, retp, controlv=controlv, startp=(startp-1), endd=(endd-1))
+#' pnls <- HighFreq::back_test(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
 #' pnls <- xts::xts(pnls, index(retp))
 #' colnames(pnls) <- "strategy"
 #' # Plot dygraph of strategy
@@ -5787,7 +5803,7 @@ calc_weights <- function(returns, controlv) {
 #' }
 #' 
 #' @export
-back_test <- function(retx, retp, controlv, startp, endd, lambda = 0.0, coeff = 1.0, bidask = 0.0) {
-    .Call(`_HighFreq_back_test`, retx, retp, controlv, startp, endd, lambda, coeff, bidask)
+back_test <- function(retx, retp, controll, startp, endd, lambdaf = 0.0, coeff = 1.0, bidask = 0.0) {
+    .Call(`_HighFreq_back_test`, retx, retp, controll, startp, endd, lambdaf, coeff, bidask)
 }
 

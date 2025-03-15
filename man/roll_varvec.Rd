@@ -6,10 +6,10 @@
 interval for a single-column \emph{time series} or a single-column
 \emph{matrix}, using \code{RcppArmadillo}.}
 \usage{
-roll_varvec(tseries, lookb = 1L)
+roll_varvec(timeser, lookb = 1L)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series} or a single-column
+\item{\code{timeser}}{A single-column \emph{time series} or a single-column
 \emph{matrix}.}
 
 \item{\code{lookb}}{The length of the look-back interval, equal to the
@@ -18,7 +18,7 @@ estimate (the default is \code{lookb = 1}).}
 }
 \value{
 A single-column \emph{matrix} with the same number of elements as
-  the input argument \code{tseries}.
+  the input argument \code{timeser}.
 }
 \description{
 Calculate a \emph{vector} of variance estimates over a rolling look-back
@@ -33,7 +33,7 @@ The function \code{roll_varvec()} calculates a \emph{vector} of variance
   
   The function \code{roll_varvec()} uses an expanding look-back interval in
   the initial warmup period, to calculate the same number of elements as the
-  input argument \code{tseries}.
+  input argument \code{timeser}.
 
   The function \code{roll_varvec()} performs the same calculation as the
   function \code{roll_var()} from package

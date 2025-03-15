@@ -6,10 +6,10 @@
 (\emph{CVaR}) of an \emph{xts} \emph{time series} of returns, using \code{R}
 code.}
 \usage{
-calc_cvar(tseries, method = "var", confi = pnorm(-2))
+calc_cvar(timeser, method = "var", confi = pnorm(-2))
 }
 \arguments{
-\item{\code{tseries}}{An \emph{xts} \emph{time series} of returns with
+\item{\code{timeser}}{An \emph{xts} \emph{time series} of returns with
 multiple columns.}
 
 \item{\code{method}}{A \emph{string} specifying the type of risk measure
@@ -20,7 +20,7 @@ quantile (the default is \code{confi = pnorm(-2) = 0.02275}).}
 }
 \value{
 A vector with the risk measures of the columns of the input
-  \emph{time series} \code{tseries}.
+  \emph{time series} \code{timeser}.
 }
 \description{
 Calculate the Value at Risk (\emph{VaR}) or the Conditional Value at Risk

@@ -8,7 +8,7 @@ calculate a rolling mean over the statistics.}
 roll_stats(
   ohlc,
   calc_stats = "ohlc_variance",
-  look_back = 11,
+  lookb = 11,
   weighted = TRUE,
   ...
 )
@@ -22,7 +22,7 @@ roll_stats(
 \item{\code{calc_stats}}{The name of the function for estimating statistics of a single
 row of \emph{OHLC} data, such as volatility, skew, and higher moments.}
 
-\item{\code{look_back}}{The size of the look-back interval, equal to the number of
+\item{\code{lookb}}{The size of the look-back interval, equal to the number of
 rows of data used for calculating the rolling mean.}
 
 \item{\code{weighted}}{\emph{Boolean} argument: should statistic be weighted by
@@ -48,8 +48,8 @@ The function \code{roll_stats()} calculates a vector of statistics
 }
 \examples{
 # Calculate time series of rolling variance and skew estimates
-var_rolling <- roll_stats(ohlc=HighFreq::SPY, look_back=21)
-skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", look_back=21)
+var_rolling <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
+skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
 skew_rolling <- skew_rolling/(var_rolling)^(1.5)
 skew_rolling[1, ] <- 0
 skew_rolling <- rutils::na_locf(skew_rolling)

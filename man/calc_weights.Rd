@@ -5,13 +5,13 @@
 \title{Calculate the optimal portfolio weights using a variety of different
 objective functions.}
 \usage{
-calc_weights(returns, controlv)
+calc_weights(returns, controll)
 }
 \arguments{
 \item{\code{returns}}{A \emph{time series} or a \emph{matrix} of returns
 data (the returns in excess of the risk-free rate).}
 
-\item{\code{controlv}}{A \emph{list} of portfolio optimization model
+\item{\code{controll}}{A \emph{list} of portfolio optimization model
 parameters (see Details).}
 }
 \value{
@@ -27,7 +27,7 @@ The function \code{calc_weights()} calculates the optimal portfolio
   weights using a variety of different objective functions.
 
   The function \code{calc_weights()} accepts a list of portfolio
-  optimization parameters through the argument \code{controlv}.
+  optimization parameters through the argument \code{controll}.
   The list of portfolio optimization parameters can be created using
   the function \code{param_portf()}.  Below is a description of the
   parameters.
@@ -80,9 +80,9 @@ The function \code{calc_weights()} calculates the optimal portfolio
   }
   Where \eqn{\bar{r}_i} is the mean of column \eqn{i} and \eqn{\mu} is the
   average of all the column means.
-  The shrinkage intensity \code{alphac} determines the amount of shrinkage
-  that is applied, with \code{alphac = 0} representing no shrinkage (with the
-  column means \eqn{\bar{r}_i} unchanged), and \code{alphac = 1} representing
+  The shrinkage intensity \code{alpha} determines the amount of shrinkage
+  that is applied, with \code{alpha = 0} representing no shrinkage (with the
+  column means \eqn{\bar{r}_i} unchanged), and \code{alpha = 1} representing
   complete shrinkage (with the column means all equal to the single mean of
   all the columns: \eqn{\bar{r}_i = \mu}).
 
@@ -104,8 +104,10 @@ The function \code{calc_weights()} calculates the optimal portfolio
   
   If \code{scalew = "sumone"} then the weights are scaled so that their
   sum is equal to \code{1}.
+  
   If \code{scalew = "sumsq"} then the weights are scaled so that their
   sum of squares is equal to \code{1}.
+  
   If \code{scalew = "none"} then the weights are not scaled.
 
   The function \code{calc_weights()} is written in \code{C++}
@@ -133,9 +135,9 @@ weightr <- weightr*sd(rowMeans(retp))/sd(retp \%*\% weightr)
 weightr <- 0.01*weightr/sd(retp \%*\% weightr)
 weightr <- weightr/sqrt(sum(weightr^2))
 # Create a list of portfolio optimization parameters
-controlv <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
+controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 # Calculate weights using RcppArmadillo
-weightcpp <- drop(HighFreq::calc_weights(retp, controlv=controlv))
+weightcpp <- drop(HighFreq::calc_weights(retp, controll=controll))
 all.equal(weightcpp, weightr)
 }
 

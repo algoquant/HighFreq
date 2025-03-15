@@ -5,10 +5,10 @@
 \title{Calculate the rolling sums at the end points of a \emph{time series} or a
 \emph{matrix}.}
 \usage{
-roll_sumep(tseries, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L)
+roll_sumep(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -27,7 +27,7 @@ calculating the end points.}
 }
 \value{
 A \emph{matrix} with the same number of columns as the input time
-  series \code{tseries}, and the number of rows equal to the number of end
+  series \code{timeser}, and the number of rows equal to the number of end
   points.
 }
 \description{
@@ -36,7 +36,7 @@ Calculate the rolling sums at the end points of a \emph{time series} or a
 }
 \details{
 The function \code{roll_sumep()} calculates the rolling sums at the end
-  points of the \emph{time series} \code{tseries}.
+  points of the \emph{time series} \code{timeser}.
   
   The function \code{roll_sumep()} is implemented in \code{RcppArmadillo}
   \code{C++} code, which makes it several times faster than \code{R} code.

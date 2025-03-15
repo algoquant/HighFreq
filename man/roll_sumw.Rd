@@ -5,10 +5,10 @@
 \title{Calculate the rolling weighted sums over a \emph{time series} or a
 \emph{matrix} using \emph{Rcpp}.}
 \usage{
-roll_sumw(tseries, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL)
+roll_sumw(timeser, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix}.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix}.}
 
 \item{\code{endd}}{An \emph{integer} vector of end points (the default is
 \code{endd = NULL}).}
@@ -25,7 +25,7 @@ is \code{weightv = NULL}).}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the rolling weighted sums over a \emph{time series} or a
@@ -33,10 +33,10 @@ Calculate the rolling weighted sums over a \emph{time series} or a
 }
 \details{
 The function \code{roll_sumw()} calculates the rolling weighted sums over
-  the columns of the data \code{tseries}.
+  the columns of the data \code{timeser}.
 
   The function \code{roll_sumw()} calculates the rolling weighted sums as
-  convolutions of the columns of \code{tseries} with the \emph{column
+  convolutions of the columns of \code{timeser} with the \emph{column
   vector} of weights using the \code{Armadillo} function
   \code{arma::conv2()}.  It performs a similar calculation to the standard
   \code{R} function \cr\code{stats::filter(x=retp, filter=weightv,
@@ -44,7 +44,7 @@ The function \code{roll_sumw()} calculates the rolling weighted sums over
   doesn't produce any leading \code{NA} values.
   
   The function \code{roll_sumw()} returns a \emph{matrix} with the same
-  dimensions as the input argument \code{tseries}.
+  dimensions as the input argument \code{timeser}.
 
   The arguments \code{weightv}, \code{endd}, and \code{stub} are
   optional.

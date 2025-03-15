@@ -8,7 +8,7 @@ coefficients, their t-values, and z-scores.}
 roll_reg(
   respv,
   predm,
-  controlv,
+  controll,
   startp = 0L,
   endd = 0L,
   step = 1L,
@@ -23,7 +23,7 @@ of response data.}
 \item{\code{predm}}{A \emph{time series} or a \emph{matrix} of predictor
 data.}
 
-\item{\code{controlv}}{A \emph{list} of model parameters (see Details).}
+\item{\code{controll}}{A \emph{list} of model parameters (see Details).}
 
 \item{\code{startp}}{An \emph{integer} vector of start points (the default
 is \code{startp = 0}).}
@@ -72,7 +72,7 @@ The function \code{roll_reg()} performs a rolling regression over the end
   It passes the subset time series to the function \code{calc_reg()}, which
   calculates the regression coefficients, their t-values, and the z-score.
   The function \code{roll_reg()} accepts a list of model parameters
-  through the argument \code{controlv}, and passes it to the function
+  through the argument \code{controll}, and passes it to the function
   \code{calc_reg()}.
   The list of model parameters can be created using the function
   \code{param_reg()}.  See the function \code{param_reg()} for a
@@ -105,14 +105,14 @@ endd <- xts::endpoints(predm, on="months")[-1]
 lookb <- 12
 startp <- c(rep(1, lookb), endd[1:(NROW(endd)-lookb)])
 # Create a default list of regression parameters
-controlv <- HighFreq::param_reg()
+controll <- HighFreq::param_reg()
 # Calculate rolling betas using RcppArmadillo
-regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controlv=controlv)
+regroll <- HighFreq::roll_reg(respv=predm[, 2], predm=predm[, -2], endd=(endd-1), startp=(startp-1), controll=controll)
 betas <- regroll[, 2]
 # Calculate rolling betas in R
 betar <- sapply(1:NROW(endd), FUN=function(ep) {
   datav <- predm[startp[ep]:endd[ep], ]
-  # HighFreq::calc_reg(datav[, 2], datav[, -2], controlv)
+  # HighFreq::calc_reg(datav[, 2], datav[, -2], controll)
   drop(cov(datav[, 2], datav[, 3])/var(datav[, 3]))
 })  # end sapply
 # Compare the outputs of both functions

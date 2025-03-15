@@ -5,18 +5,18 @@
 \title{Calculate the trailing means, volatilities, and z-scores of a streaming
 \emph{time series} of data using an online recursive formula.}
 \usage{
-run_zscores(tseries, lambda)
+run_zscores(timeser, lambdaf)
 }
 \arguments{
-\item{\code{tseries}}{A single \emph{time series} or a single column
+\item{\code{timeser}}{A single \emph{time series} or a single column
 \emph{matrix} of data.}
 
-\item{\code{lambda}}{A decay factor which multiplies past estimates.}
+\item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 }
 \value{
 A \emph{matrix} with three columns (means, volatilities, and
   z-scores) and the same number of rows as the input argument
-  \code{tseries}.
+  \code{timeser}.
 }
 \description{
 Calculate the trailing means, volatilities, and z-scores of a streaming
@@ -30,10 +30,10 @@ The function \code{run_zscores()} calculates the trailing means,
   trailing means \eqn{(r_t - \bar{r}_t)^2}, using the decay factor
   \eqn{\lambda}:
   \deqn{
-    \bar{r}_t = \lambda \bar{r}_{t-1} + (1-\lambda) r_t
+    \bar{r}_t = \lambda \bar{r}_{t-1} + (1 - \lambda) r_t
   }
   \deqn{
-    \sigma^2_t = \lambda \sigma^2_{t-1} + (1-\lambda) (r_t - \bar{r}_t)^2
+    \sigma^2_t = \lambda^2 \sigma^2_{t-1} + (1 - \lambda^2) (r_t - \bar{r}_t)^2
   }
   \deqn{
     z_t = \frac{r_t - \bar{r}_t}{\sigma_t}
@@ -63,7 +63,7 @@ The function \code{run_zscores()} calculates the trailing means,
 
   The function \code{run_zscores()} returns a \emph{matrix} with three
   columns (means, volatilities, and z-scores) and the same number of rows as
-  the input argument \code{tseries}.
+  the input argument \code{timeser}.
 }
 \examples{
 \dontrun{
@@ -71,7 +71,7 @@ The function \code{run_zscores()} calculates the trailing means,
 pricev <- log(na.omit(rutils::etfenv$prices$VTI))
 # Calculate the trailing variance and z-scores of prices
 lambdaf <- 0.9 # Decay factor
-zscores <- HighFreq::run_zscores(pricev, lambda=lambdaf)
+zscores <- HighFreq::run_zscores(pricev, lambdaf=lambdaf)
 datav <- cbind(pricev, zscores[, 3])
 colnames(datav) <- c("VTI", "Z-Scores")
 colnamev <- colnames(datav)

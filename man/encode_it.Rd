@@ -5,10 +5,10 @@
 \title{Calculate the run length encoding of a single-column \emph{time series},
 \emph{matrix}, or a \emph{vector}.}
 \usage{
-encode_it(tseries)
+encode_it(timeser)
 }
 \arguments{
-\item{\code{tseries}}{A single-column \emph{time series}, \emph{matrix}, or
+\item{\code{timeser}}{A single-column \emph{time series}, \emph{matrix}, or
 a \emph{vector}.}
 }
 \value{

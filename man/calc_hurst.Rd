@@ -4,16 +4,16 @@
 \alias{calc_hurst}
 \title{Calculate the Hurst exponent from the volatility ratio of aggregated returns.}
 \usage{
-calc_hurst(tseries, aggv)
+calc_hurst(timeser, aggv)
 }
 \arguments{
-\item{\code{tseries}}{A \emph{time series} or a \emph{matrix} of log prices.}
+\item{\code{timeser}}{A \emph{time series} or a \emph{matrix} of log prices.}
 
 \item{\code{aggv}}{A \emph{vector} of aggregation intervals.}
 }
 \value{
 The Hurst exponent calculated from the volatility ratio of
-  aggregated returns.  If \code{tseries} contains multiple columns, then the
+  aggregated returns.  If \code{timeser} contains multiple columns, then the
   function \code{calc_hurst()} returns a single-row matrix of Hurst
   exponents.
 }
@@ -62,10 +62,10 @@ The function \code{calc_hurst()} calculates the Hurst exponent from the
 closep <- na.omit(rutils::etfenv$prices[, c("XLP", "VTI")])
 closep <- log(closep)
 # Calculate the Hurst exponents for a 21 day aggregation interval
-HighFreq::calc_hurst(prices, aggv=21)
+HighFreq::calc_hurst(closep, aggv=21)
 # Calculate the Hurst exponents for a vector of aggregation intervals
 aggv <- seq.int(from=3, to=35, length.out=9)^2
-HighFreq::calc_hurst(prices, aggv=aggv)
+HighFreq::calc_hurst(closep, aggv=aggv)
 }
 
 }
