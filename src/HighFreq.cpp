@@ -3164,10 +3164,10 @@ arma::mat run_var(const arma::mat& timeser, double lambdaf) {
   if (!(timeser.has_nan() || timeser.has_inf())) {
     // No NA or Inf values
     for (arma::uword it = 1; it < nrows; it++) {
-    // Calculate the means using the decay factor
-    meanm.row(it) = lambdaf*meanm.row(it-1) + lambda1*timeser.row(it);
-    // Variance is the weighted sum of the past variance and the square of the data minus its mean
-    vars.row(it) = lambda2*vars.row(it-1) + lambda21*arma::square(timeser.row(it) - meanm.row(it));
+      // Calculate the means using the decay factor
+      meanm.row(it) = lambdaf*meanm.row(it-1) + lambda1*timeser.row(it);
+      // Variance is the weighted sum of the past variance and the square of the data minus its mean
+      vars.row(it) = lambda2*vars.row(it-1) + lambda21*arma::square(timeser.row(it) - meanm.row(it));
     }  // end for
   } else {
     // Loop over the columns because of the NA or Inf values.
