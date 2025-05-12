@@ -101,5 +101,6 @@ summary(microbenchmark(
     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
+
 }

@@ -118,6 +118,6 @@ colnames(datav) <- c("means trailing", "means weighted")
 dygraphs::dygraph(datav, main="Trailing Means") \%>\%
   dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\%
   dyLegend(show="always", width=300)
-}
+}  # end dontrun
 
 }

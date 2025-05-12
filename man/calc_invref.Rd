@@ -53,6 +53,6 @@ summary(microbenchmark(
    rcode=solve(matrixv),
    cppcode=calc_invref(matrixv),
    times=10))[, c(1, 4, 5)]
-}
+}  # end dontrun
 
 }

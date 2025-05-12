@@ -54,5 +54,5 @@ summary(microbenchmark(
   Rcpp=HighFreq::roll_varvec(retp, lookb=11),
   RcppRoll=RcppRoll::roll_var(retp, n=11),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 }

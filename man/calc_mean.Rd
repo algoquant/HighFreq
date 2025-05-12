@@ -89,6 +89,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::calc_mean(retp, method="nonparametric"),
   Rcode=sapply(retp, median),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

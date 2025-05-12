@@ -41,6 +41,6 @@ The function \code{encode_it()} calculates the run length encoding of a
 datav <- sample(5, 31, replace=TRUE)
 # Calculate the run length encoding of datav
 HighFreq::encode_it(datav)
-}
+}  # end dontrun
 
 }

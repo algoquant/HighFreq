@@ -71,6 +71,6 @@ colnamev <- colnames(datav)
 dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") \%>\%
   dySeries(label=colnamev[1], strokeWidth=2, col="blue") \%>\%
   dySeries(label=colnamev[2], strokeWidth=2, col="red")
-}
+}  # end dontrun
 
 }

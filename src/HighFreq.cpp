@@ -68,7 +68,7 @@ using namespace arma::newarp;
 //' # Create a custom list of regression parameters
 //' controll <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
 //' unlist(controll)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -136,7 +136,7 @@ Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regressio
 //' @details
 //'   The function \code{param_portf()} creates a named list of model parameters
 //'   that can be passed into portfolio optimization functions.  For example
-//'   into the functions \code{calc_weights()} and \code{back_test()}.
+//'   into the functions \code{calc_weights()} and \code{roll_portf()}.
 //'   See the function \code{calc_weights()} for more details.
 //'   
 //'   The function \code{param_portf()} simplifies the creation of portfolio
@@ -151,7 +151,7 @@ Rcpp::List param_reg(std::string regmod = "least_squares",  // Type of regressio
 //' # Create a custom list of portfolio optimization parameters
 //' controll <- HighFreq::param_portf(method="regular", dimax=4)
 //' unlist(controll)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -230,7 +230,7 @@ Rcpp::List param_portf(std::string method = "sharpem",  // Type of portfolio opt
 //'   Rcpp=HighFreq::lag_vec(retp),
 //'   Rcode=rutils::lagit(retp),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -313,7 +313,7 @@ arma::vec lag_vec(const arma::vec& timeser,
 //'   Rcpp=HighFreq::lagit(retp),
 //'   Rcode=rutils::lagit(retp),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -411,7 +411,7 @@ arma::mat lagit(const arma::mat& timeser,
 //'   Rcpp=HighFreq::diff_vec(retp, lagg=3, pad=TRUE),
 //'   Rcode=rutils::diffit(retp, lagg=3),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -495,7 +495,7 @@ arma::vec diff_vec(const arma::vec& timeser, arma::uword lagg = 1, bool pad_zero
 //'   Rcpp=HighFreq::diffit(datav, lagg=2),
 //'   Rcode=rutils::diffit(datav, lagg=2),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -801,7 +801,8 @@ arma::uvec calc_startpoints(arma::uvec endd, arma::uword lookb) {
 //' \dontrun{
 //' # Calculate the number of consecutive TRUE elements
 //' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::uvec roll_count(const arma::uvec& timeser) {
@@ -859,7 +860,7 @@ arma::uvec roll_count(const arma::uvec& timeser) {
 //' datav <- sample(5, 31, replace=TRUE)
 //' # Calculate the run length encoding of datav
 //' HighFreq::encode_it(datav)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -954,7 +955,7 @@ Rcpp::List encode_it(arma::vec timeser) {
 //' # Decode the data from its run length encoding
 //' decodev <- HighFreq::decode_it(rle)
 //' all.equal(datav, decodev)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1031,7 +1032,7 @@ std::vector<double> decode_it(Rcpp::List encodel) {
 //'   Rcode=rank(datav),
 //'   Rcpp=calc_ranks(datav),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1095,7 +1096,7 @@ arma::uvec calc_ranks(arma::vec timeser) {
 //'   Rcode=rank(datav),
 //'   Rcpp=HighFreq::calc_ranks_stl(datav),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1237,7 +1238,7 @@ std::vector<std::string> remove_dup(std::vector<std::string> stringv) {
 //'     Rcpp=HighFreq::mult_mat(vectorv, matrixv, byrow=FALSE),
 //'     Rcode=vectorv*matrixv,
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1340,7 +1341,7 @@ arma::mat mult_mat(arma::vec vectorv,
 //'     Rcpp=HighFreq::mult_mat_ref(vectorv, matrixv, byrow=FALSE),
 //'     Rcode=vectorv*matrixv,
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1413,7 +1414,7 @@ void mult_mat_ref(arma::vec vectorv,
 //'   Rcpp=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
 //'   Rcode=eigen(matrixv),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1490,7 +1491,7 @@ void calc_eigen(const arma::mat& matrixv,
 //'   partial=HighFreq::calc_eigenp(matrixv, neigen),
 //'   full=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1602,15 +1603,15 @@ Rcpp::List calc_eigenp(arma::mat& matrixv, const arma::uword& neigen) {
 //' # Calculate matrix inverse in R
 //' invr <- solve(covmat)
 //' all.equal(invmat, invr, check.attributes=FALSE)
-//' # Calculate reduced inverse using RcppArmadillo
+//' # Calculate the reduced inverse using RcppArmadillo
 //' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-//' # Calculate reduced inverse using eigen decomposition in R
+//' # Calculate the reduced inverse using eigen decomposition in R
 //' eigend <- eigen(covmat)
 //' dimax <- 1:3
 //' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
 //' # Compare RcppArmadillo with R
 //' all.equal(invmat, invr)
-//' }
+//' }  # end dontrun
 //' 
 //' @examples
 // [[Rcpp::export]]
@@ -1728,15 +1729,15 @@ arma::mat calc_inv(const arma::mat& matrixv,
 //' # Calculate matrix inverse in R
 //' invr <- solve(covmat)
 //' all.equal(invmat, invr, check.attributes=FALSE)
-//' # Calculate reduced inverse using RcppArmadillo
+//' # Calculate the reduced inverse using RcppArmadillo
 //' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
-//' # Calculate reduced inverse from SVD in R
+//' # Calculate the reduced inverse from SVD in R
 //' svdec <- svd(covmat)
 //' dimax <- 1:3
 //' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
 //' # Compare RcppArmadillo with R
 //' all.equal(invmat, invr)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1833,7 +1834,7 @@ arma::mat calc_invsvd(const arma::mat& matrixv,
 //'    rcode=solve(matrixv),
 //'    cppcode=HighFreq::calc_invrec(matrixv, invmat, 3),
 //'    times=10))[, c(1, 4, 5)]
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1894,7 +1895,7 @@ void calc_invrec(const arma::mat& matrixv,
 //'    rcode=solve(matrixv),
 //'    cppcode=calc_invref(matrixv),
 //'    times=10))[, c(1, 4, 5)]
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -1985,7 +1986,7 @@ void calc_invref(arma::mat& matrixv) {
 //'   Rcode=scale(retp),
 //'   Rcpp=HighFreq::calc_scale(retp),
 //'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2085,7 +2086,7 @@ void calc_scale(arma::mat& timeser,
 //' all.equal(drop(ohlcagg),
 //'   c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
 //'   check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2173,7 +2174,7 @@ arma::mat agg_ohlc(const arma::mat& timeser) {
 //' # Compare with xts::to.period()
 //' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 //' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2249,7 +2250,7 @@ arma::mat roll_ohlc(const arma::mat& timeser, arma::uvec endd) {
 //' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 //' # Compare both methods
 //' all.equal(retc[-(1:11), ], retf[-(1:11), ], check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2352,7 +2353,7 @@ arma::mat roll_conv(const arma::mat& timeser, const arma::colvec& weightv) {
 //' dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) %>% 
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 //'   dyLegend(width=300)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2463,7 +2464,7 @@ arma::mat roll_sum(const arma::mat& timeser,
 //'   })  # end sapply
 //' sumr <- t(sumr)
 //' all.equal(sumc, sumr, check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2643,7 +2644,7 @@ arma::mat roll_sumep(const arma::mat& timeser,
 //' weighted <- HighFreq::roll_sumw(retp, weightv=weightv)
 //' # Compare with original
 //' all.equal(coredata(retp), weighted, check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2825,7 +2826,7 @@ arma::mat roll_sumw(const arma::mat& timeser,
 //' dygraphs::dygraph(datav, main="Trailing Means") %>%
 //'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
 //'   dyLegend(show="always", width=300)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -2951,7 +2952,7 @@ arma::mat run_mean(const arma::mat& timeser,
 //' dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") %>%
 //'   dySeries(label=colnamev[1], strokeWidth=2, col="blue") %>%
 //'   dySeries(label=colnamev[2], strokeWidth=2, col="red")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3039,7 +3040,7 @@ arma::mat run_max(const arma::mat& timeser, double lambdaf) {
 //' dygraphs::dygraph(datav, main="VTI Prices and Trailing Minimums") %>%
 //'   dySeries(label=colnamev[1], strokeWidth=1, col="blue") %>%
 //'   dySeries(label=colnamev[2], strokeWidth=1, col="red")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3272,7 +3273,7 @@ arma::mat run_var(const arma::mat& timeser, double lambdaf) {
 //'    dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
 //'    dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red") %>%
 //'    dyLegend(show="always", width=300)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3371,7 +3372,8 @@ arma::mat run_zscores(const arma::mat& timeser, double lambdaf) {
 //'   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
 //'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
 //'   times=10))[, c(1, 4, 5)]
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::mat run_var_ohlc(const arma::mat& ohlc, 
@@ -3439,7 +3441,7 @@ arma::mat run_var_ohlc(const arma::mat& ohlc,
 //' # Calculate the correlation matrix of returns
 //' push_cov2cor(covmat)
 //' all.equal(covmat, cor(retp))
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3524,7 +3526,7 @@ void push_cov2cor(arma::mat& covmat) {
 //' covmat <- cov(retss)
 //' # Update the covariance of returns
 //' HighFreq::push_covar(retsn=retp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3633,7 +3635,7 @@ void push_covar(const arma::rowvec& retsn, // Row of new asset returns
 //' HighFreq::push_eigen(retsn=retp[nrows], covmat=covmat, 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
 //'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3787,7 +3789,7 @@ void push_eigen(const arma::rowvec& retsn, // Row of new asset returns
 //' HighFreq::push_sga(retsn=retp[nrows], 
 //'   eigenval=eigenval, eigenvec=eigenvec, 
 //'   eigenret=eigenret, meanv=meanv, varv=varv, lambdaf=0.9, gamma=0.1)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -3934,7 +3936,7 @@ void push_sga(const arma::rowvec& retsn, // Row of new asset returns
 //'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it, 1]*retd[it, 2]
 //' } # end for
 //' all.equal(covars[, 1], covarr, check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4079,7 +4081,7 @@ arma::mat run_covar(const arma::mat& timeser, double lambdaf) {
 //'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it]*retd[max(it-lagg, 1)]
 //' } # end for
 //' all.equal(covarr, covars[, 1])
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4324,7 +4326,7 @@ arma::mat run_autocovar(const arma::mat& timeser,
 //' # Compare values, excluding warmup period
 //' all.equal(regs[-(1:1e3), ], cbind(betas, resids)[-(1:1e3), ], check.attributes=FALSE)
 //'  
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4545,7 +4547,7 @@ methodenum calc_method(std::string method) {
 //'   Rcpp=HighFreq::calc_mean(retp, method="nonparametric"),
 //'   Rcode=sapply(retp, median),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4602,7 +4604,7 @@ arma::mat calc_mean(const arma::mat& timeser,
 //'   Rcpp=HighFreq::calc_varvec(retp),
 //'   Rcode=var(retp),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4692,7 +4694,7 @@ double calc_varvec(const arma::vec& timeser) {
 //'   Rcpp=HighFreq::calc_var(retp, method="nonparametric"),
 //'   Rcode=sapply(retp, mad),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4809,7 +4811,7 @@ arma::mat calc_var(const arma::mat& timeser,
 //'   Rcpp=HighFreq::calc_covar(retp, method="nonparametric"),
 //'   Rcode=sapply(retp, mad),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -4905,7 +4907,7 @@ arma::mat calc_covar(const arma::mat& timeser,
 //' calc_var_ag(closep, step=21)
 //' # The variance over 21 days is approximately 21 times the daily variance
 //' 21*calc_var_ag(closep, step=1)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5042,7 +5044,7 @@ arma::mat calc_var_ag(const arma::mat& pricev,
 //'   Rcpp=HighFreq::calc_var_ohlc(ohlc),
 //'   Rcode=HighFreq::calc_var_ohlc_r(ohlc),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' @export
 // [[Rcpp::export]]
 double calc_var_ohlc(const arma::mat& ohlc, 
@@ -5189,7 +5191,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //' calc_var_ohlc_ag(ohlc, step=21)
 //' # The variance over 21 days is approximately 21 times the daily variance
 //' 21*calc_var_ohlc_ag(ohlc, step=1)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5307,7 +5309,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
 //'   Rcpp=HighFreq::calc_skew(retp, method="nonparametric"),
 //'   Rcode=(mean(retp)-median(retp))/sd(retp),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5441,7 +5443,7 @@ arma::mat calc_skew(const arma::mat& timeser,
 //'   Rcpp=HighFreq::calc_kurtosis(retp, method="nonparametric"),
 //'   Rcode=(mean(retp)-median(retp))/sd(retp),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5548,7 +5550,7 @@ arma::mat calc_kurtosis(const arma::mat& timeser,
 //' # Calculate the Hurst exponents for a vector of aggregation intervals
 //' aggv <- seq.int(from=3, to=35, length.out=9)^2
 //' HighFreq::calc_hurst(closep, aggv=aggv)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5646,7 +5648,7 @@ arma::mat calc_hurst(const arma::mat& timeser,
 //' ohlc <- log(rutils::etfenv$VTI)
 //' # Calculate the Hurst exponent from 21 day aggregations
 //' calc_hurst_ohlc(ohlc, step=21)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5714,7 +5716,7 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
 //'   Rcpp=HighFreq::calc_lm(respv=respv, predm=predm),
 //'   Rcode=lm(respv ~ predm),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -5844,7 +5846,7 @@ Rcpp::List calc_lm(const arma::vec& respv,  // Response vector
 //'   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controll=controll),
 //'   Rcode=lm(respv ~ predm),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -6026,7 +6028,8 @@ arma::mat calc_reg(const arma::mat& respv,  // Response vector
 //'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
 //'   Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
 //'   times=10))[, c(1, 4, 5)]
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_mean(const arma::mat& timeser, 
@@ -6125,7 +6128,7 @@ arma::mat roll_mean(const arma::mat& timeser,
 //'   Rcpp=HighFreq::roll_varvec(retp, lookb=11),
 //'   RcppRoll=RcppRoll::roll_var(retp, n=11),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' @export
 // [[Rcpp::export]]
 arma::vec roll_varvec(const arma::vec& timeser, arma::uword lookb = 1) {
@@ -6234,7 +6237,7 @@ arma::vec roll_varvec(const arma::vec& timeser, arma::uword lookb = 1) {
 //'     Rcpp=HighFreq::roll_var(retp, lookb=11, method="quantile"),
 //'     TTR=TTR::runMAD(retp, n = 11),
 //'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_var(const arma::mat& timeser, 
@@ -6429,7 +6432,8 @@ arma::mat roll_var(const arma::mat& timeser,
 //' })  # end sapply
 //' varollr <- c(0, varollr)
 //' all.equal(drop(var_rolling), varollr)
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::vec roll_var_ohlc(const arma::mat& ohlc, 
@@ -6600,7 +6604,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
 //'     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_skew(const arma::mat& timeser, 
@@ -6733,7 +6738,8 @@ arma::mat roll_skew(const arma::mat& timeser,
 //'     HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
+//' 
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_kurtosis(const arma::mat& timeser, 
@@ -6884,7 +6890,7 @@ arma::mat roll_kurtosis(const arma::mat& timeser,
 //' })  # end sapply
 //' # Compare the outputs of both functions
 //' all.equal(betas, betar, check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7027,7 +7033,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //' rolled_scaled2 <- HighFreq::roll_scale(retp, lookb=lookb)
 //' all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
 //'   check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7170,7 +7176,7 @@ arma::mat roll_scale(const arma::mat& matrix,
 //'    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 //'   }},  # end for
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7281,7 +7287,7 @@ void run_scale(arma::mat& timeser,
 //' # Compare the outputs of both functions
 //' all.equal(zscores[-(1:lookb)], zscoresr[-(1:lookb)], 
 //'   check.attributes=FALSE)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7507,7 +7513,7 @@ momptr calc_momptr(std::string funame = "calc_mean") {
 //'     var(retp[startp[it]:endd[it]+1, ])
 //'   }),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' @export
 // [[Rcpp::export]]
 arma::mat roll_moment(const arma::mat& timeser, 
@@ -7656,7 +7662,7 @@ arma::mat roll_moment(const arma::mat& timeser,
 //' # Plot dygraph of the estimated GARCH volatility
 //' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 
 //'   main="Estimated GARCH Volatility of VTI")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7747,7 +7753,7 @@ arma::mat sim_garch(double omegac,
 //' # Simulate Ornstein-Uhlenbeck process using Rcpp
 //' pricev <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 //' plot(pricev, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7816,7 +7822,7 @@ arma::mat sim_ou(double prici,
 //' # Simulate Schwartz process using Rcpp
 //' pricev <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
 //' plot(pricev, t="l", main="Simulated Schwartz Prices", ylab="prices")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7896,7 +7902,7 @@ arma::mat sim_schwartz(double prici,
 //'   Rcpp=HighFreq::sim_ar(coeff, innov),
 //'   Rcode=filter(innov, filter=coeff, method="recursive"),
 //'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -7983,7 +7989,7 @@ arma::mat sim_ar(arma::mat& coeff, const arma::mat& innov) {
 //' # Simulate Dickey-Fuller process using Rcpp
 //' pricev <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 //' plot(pricev, t="l", main="Simulated Dickey-Fuller Prices")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -8073,7 +8079,7 @@ arma::mat sim_df(double prici,
 //' retp <- na.omit(rutils::etfenv$returns$VTI)
 //' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
 //' HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -8252,7 +8258,7 @@ double lik_garch(double omegac,
 //'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
 //'   dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
 //'   dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -8295,9 +8301,9 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
     // }  // end if
     // Calculate the trailing mean of asset returns
     retm = lambdaf*retm + lambda1*rets.row(it);
-    // Calculate weights using reduced inverse
+    // Calculate the weights using reduced inverse
     invmat = calc_inv(covmat, dimax);
-    // Calculate weights using recursive inverse
+    // Calculate the weights using recursive inverse
     // calc_invrec(covmat, invmat);
     // weightv.row(it) = retm*invmat;
     weightv.row(it) = lambdaw*weightv.row(it-1) + lambdaw1*retm*invmat;
@@ -8426,7 +8432,8 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 //' ncols <- NCOL(retp)
 //' eigend <- eigen(cov(retp))
-//' # Calculate reduced inverse of covariance matrix
+//' 
+//' # Calculate the reduced inverse of covariance matrix
 //' dimax <- 3
 //' eigenvec <- eigend$vectors[, 1:dimax]
 //' eigenval <- eigend$values[1:dimax]
@@ -8435,7 +8442,7 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' alphac <- 0.5
 //' colmeans <- colMeans(retp)
 //' colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
-//' # Calculate weights using R
+//' # Calculate the weights using R
 //' weightr <- drop(invmat %*% colmeans)
 //' # Apply weights scaling
 //' weightr <- weightr*sd(rowMeans(retp))/sd(retp %*% weightr)
@@ -8443,10 +8450,18 @@ arma::mat sim_portfoptim(const arma::mat& rets, // Asset returns
 //' weightr <- weightr/sqrt(sum(weightr^2))
 //' # Create a list of portfolio optimization parameters
 //' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
-//' # Calculate weights using RcppArmadillo
+//' # Calculate the weights using RcppArmadillo
 //' weightcpp <- drop(HighFreq::calc_weights(retp, controll=controll))
 //' all.equal(weightcpp, weightr)
-//' }
+//' 
+//' # Calculate the max Sharpe weights and scale them to the target volatility
+//' voltarget <- 0.015
+//' controll <- HighFreq::param_portf(method="maxsharpe", scalew="voltarget", voltarget=voltarget)
+//' weightcpp <- HighFreq::calc_weights(retp, controll=controll)
+//' # The portfolio volatility matches the target volatility
+//' all.equal(sd(retp %*% weightcpp), voltarget)
+//' 
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
@@ -8488,7 +8503,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colmeans = arma::trans(arma::mean(returns, 0));
     // Shrink colmeans to the mean of returns
     colmeans = ((1-alphac)*colmeans + alphac*arma::mean(colmeans));
-    // Calculate weights using reduced inverse
+    // Calculate the weights using reduced inverse
     weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
   }  // end maxsharpe
@@ -8497,7 +8512,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
     arma::vec colmeans = arma::trans(arma::median(returns, 0));
     // Shrink colmeans to the median of returns
     colmeans = ((1-alphac)*colmeans + alphac*arma::median(colmeans));
-    // Calculate weights using reduced inverse
+    // Calculate the weights using reduced inverse
     weightv = calc_inv(covmat, dimax, singmin)*colmeans;
     break;
   }  // end maxsharpemed
@@ -8636,7 +8651,7 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   the number of rows of \code{retp}.
 //'
 //' @details
-//'   The function \code{back_test()} performs a backtest simulation of a
+//'   The function \code{roll_portf()} performs a backtest simulation of a
 //'   rolling portfolio optimization strategy over a \emph{vector} of the end
 //'   points \code{endd}.
 //'   
@@ -8644,16 +8659,16 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   \emph{matrix} of the excess asset returns \code{retx} along its rows,
 //'   between the corresponding \emph{start point} and the \emph{end point}. 
 //'   
-//'   The function \code{back_test()} passes the subset matrix of excess returns
-//'   into the function \code{calc_weights()}, which calculates the optimal
-//'   portfolio weights at each \emph{end point}.
+//'   The function \code{roll_portf()} passes the subset matrix of excess
+//'   returns into the function \code{calc_weights()}, which calculates the
+//'   optimal portfolio weights at each \emph{end point}.
 //'   It also passes to \code{calc_weights()} the argument \code{controll},
 //'   which is the list of portfolio optimization parameters.
 //'   See the function \code{calc_weights()} for more details.
 //'   The list of portfolio optimization parameters can be created using the
 //'   function \code{param_portf()}.
 //'   
-//'   The function \code{back_test()} then recursively averages the weights
+//'   The function \code{roll_portf()} then recursively averages the weights
 //'   \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
 //'   the previous \emph{end point = (i-1)}, using the decay factor \code{lambdaf
 //'   = \eqn{\lambda}}:
@@ -8665,21 +8680,21 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //'   the portfolio holding period beyond the time interval between neighboring
 //'   \emph{end points}.
 //'   
-//'   The function \code{back_test()} then calculates the out-of-sample strategy
+//'   The function \code{roll_portf()} then calculates the out-of-sample strategy
 //'   returns by multiplying the average weights times the future asset returns.
 //'   
-//'   The function \code{back_test()} multiplies the out-of-sample strategy
+//'   The function \code{roll_portf()} multiplies the out-of-sample strategy
 //'   returns by the coefficient \code{coeff} (with default equal to \code{1}),
 //'   which allows simulating either a trending strategy (if \code{coeff = 1}),
 //'   or a reverting strategy (if \code{coeff = -1}).
 //'   
-//'   The function \code{back_test()} calculates the transaction costs by
+//'   The function \code{roll_portf()} calculates the transaction costs by
 //'   multiplying the bid-ask spread \code{bidask} times the absolute
 //'   difference between the current weights minus the weights from the previous
 //'   period. Then it subtracts the transaction costs from the out-of-sample
 //'   strategy returns.
 //'   
-//'   The function \code{back_test()} returns a \emph{time series} (column
+//'   The function \code{roll_portf()} returns a \emph{time series} (column
 //'   \emph{vector}) of strategy returns, of the same length as the number of
 //'   rows of \code{retp}.
 //'
@@ -8703,17 +8718,17 @@ arma::vec calc_weights(const arma::mat& returns, // Asset returns
 //' # Create a list of portfolio optimization parameters
 //' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 //' # Simulate a monthly rolling portfolio optimization strategy
-//' pnls <- HighFreq::back_test(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
+//' pnls <- HighFreq::roll_portf(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
 //' pnls <- xts::xts(pnls, index(retp))
 //' colnames(pnls) <- "strategy"
 //' # Plot dygraph of strategy
 //' dygraphs::dygraph(cumsum(pnls), 
 //'   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
-//' }
+//' }  # end dontrun
 //' 
 //' @export
 // [[Rcpp::export]]
-arma::mat back_test(const arma::mat& retx, // Asset excess returns
+arma::mat roll_portf(const arma::mat& retx, // Asset excess returns
                     const arma::mat& retp, // Asset returns
                     Rcpp::List controll, // List of portfolio optimization model parameters
                     arma::uvec startp, // Start points
@@ -8748,5 +8763,5 @@ arma::mat back_test(const arma::mat& retx, // Asset excess returns
   // Return the strategy pnls
   return pnls;
   
-}  // end back_test
+}  // end roll_portf
 

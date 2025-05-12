@@ -136,6 +136,6 @@ eigenret <- numeric(NCOL(retp))
 HighFreq::push_sga(retsn=retp[nrows], 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, varv=varv, lambdaf=0.9, gamma=0.1)
-}
+}  # end dontrun
 
 }

@@ -72,6 +72,6 @@ rolled_scaled <- roll::roll_scale(retp, width=lookb, min_obs=1)
 rolled_scaled2 <- HighFreq::roll_scale(retp, lookb=lookb)
 all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
   check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

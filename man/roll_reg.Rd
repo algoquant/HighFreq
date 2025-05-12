@@ -117,6 +117,6 @@ betar <- sapply(1:NROW(endd), FUN=function(ep) {
 })  # end sapply
 # Compare the outputs of both functions
 all.equal(betas, betar, check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

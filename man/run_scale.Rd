@@ -119,6 +119,6 @@ summary(microbenchmark(
    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
   }},  # end for
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

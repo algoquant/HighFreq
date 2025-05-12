@@ -33,5 +33,6 @@ The function \code{roll_count()} calculates the number of consecutive
 \dontrun{
 # Calculate the number of consecutive TRUE elements
 drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
-}
+}  # end dontrun
+
 }

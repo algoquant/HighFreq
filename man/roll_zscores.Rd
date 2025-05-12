@@ -91,6 +91,6 @@ zscoresr <- sapply(1:NROW(predm), function(ro_w) {
 # Compare the outputs of both functions
 all.equal(zscores[-(1:lookb)], zscoresr[-(1:lookb)], 
   check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

@@ -95,6 +95,6 @@ eigenret <- numeric(NCOL(retp))
 HighFreq::push_eigen(retsn=retp[nrows], covmat=covmat, 
   eigenval=eigenval, eigenvec=eigenvec, 
   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
-}
+}  # end dontrun
 
 }

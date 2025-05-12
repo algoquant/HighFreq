@@ -61,6 +61,6 @@ summary(microbenchmark(
   Rcode=rank(datav),
   Rcpp=HighFreq::calc_ranks_stl(datav),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

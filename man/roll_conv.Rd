@@ -54,6 +54,6 @@ retf <- HighFreq::roll_conv(retp, weightv)
 retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 # Compare both methods
 all.equal(retc[-(1:11), ], retf[-(1:11), ], check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

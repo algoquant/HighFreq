@@ -94,13 +94,17 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] If lambda=1 then use expanding window since inception, instead of EMA.
++ [ ] In HighFreq::roll_var(), return the rolling mean, similar to HighFreq::run_var()
+
++ [ ] If lambdaf=1 then use expanding window since inception, instead of EMA.
 
 + [ ] In run_mean() calculate the downside variance.
 
 + [ ] Create a function which calculates the running downside variance. 
 
 + [ ] Create the function run_macd() for the MACD indicator. 
+
++ [ ] Handle NA or Inf values in the function calc_inv()?  Don't create covariance matrices with NA or Inf values.
 
 + [ ] Modify all the run_*() functions - prevent NA or Inf values from propagating forever.  
 Looping over the columns is implemented in run_mean() and run_var() - Finish documenting the changes.
@@ -119,11 +123,6 @@ Else update the running value with the current value.
 
 + [ ] Modify run_var() - add weights - adapt run_mean() ?
 Calculate the trailing weighted variance if the weight vector is passed as an argument - similar to run_mean()
-
-+ [ ] Rename back_test() back to roll_portf()?
-
-+ [ ] Handle NA or Inf values in the function calc_inv()?  Don't create covariance matrices with NA or Inf values.
-
 
 
 + [ ] Create function calc_nearest()
@@ -281,28 +280,6 @@ https://stackoverflow.com/questions/50413660/linking-to-another-package-undefine
 
 + [ ] Update function roll_stats() to use function pointers
 
-+ [ ] Pass model function and its parameters into back_test() as a vector or a list
-http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
-https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
-https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
-https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
-https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
-
-+ [ ] Pass parameters to function back_test() using parameter pack and dots or va_list argument to C++ functions - not easy or possible - use Rcpp::List instead
-https://stackoverflow.com/questions/3530771/passing-variable-arguments-to-another-function-that-accepts-a-variable-argument
-https://stackoverflow.com/questions/20901811/function-with-three-dots-argument
-https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
-https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
-https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
-https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
-https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
-https://en.cppreference.com/w/cpp/language/parameter_pack
-https://stackoverflow.com/questions/3351056/create-va-list-dynamically
-
-+ [ ] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer)  
-https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
-http://bytes.com/forum/thread656124.html
-
 + [ ] Create a function called calc_regptr() for calculating a pointer to a regression function from a function name (string)
 It should accept a string with a function name and return a pointer to the function with that name.
 It should return a pointer to one of the regression functions: calc_reg(), calc_var(), calc_skew() or calc_kurtosis().
@@ -424,8 +401,6 @@ weightcpp <- drop(HighFreq::calc_weights(returns, eigen_max=eigen_max, alpha=alp
 all.equal(weightcpp, weightsr)
 
 + [ ] In the function calc_mean() add shrinkage of returns?
-
-+ [ ] In the function back_test(), scale the weights to match the volatility of the equally weighted portfolio?  No - that belongs to calc_weights()
 
 + [ ] In the function calc_weights(), make the weights scaling separate from the weight calculations.
 
@@ -612,8 +587,37 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 
-
 ### Tasks finished
+
++ [x] Rename back_test() back to roll_portf()
+
++ [x] Pass model function and its parameters into back_test() as a vector or a list.
+http://gallery.rcpp.org/articles/passing-cpp-function-pointers/
+https://stackoverflow.com/questions/43616778/passing-user-created-c-functions-in-rcpp-as-arguments
+https://stackoverflow.com/questions/51274385/calling-rcpp-function-with-xptr-and-function-only-xptr-case-works
+https://stackoverflow.com/questions/50548060/generating-xptr-from-rcpp-function
+https://stackoverflow.com/questions/49539341/rcpp-lost-on-how-to-utilize-rcppxptr-to-wrap-a-pointer
+
++ [x] Pass parameters to function back_test() using parameter pack and dots or va_list argument to C++ functions - not easy or possible - use Rcpp::List instead.
+https://stackoverflow.com/questions/3530771/passing-variable-arguments-to-another-function-that-accepts-a-variable-argument
+https://stackoverflow.com/questions/20901811/function-with-three-dots-argument
+https://codesteps.com/2014/05/16/how-to-pass-variable-number-of-arguments-to-c-cpp-functions/
+https://kevinushey.github.io/blog/2016/01/27/introduction-to-c++-variadic-templates/
+https://stackoverflow.com/questions/39792417/what-does-this-three-dots-means-in-c
+https://vcpptips.wordpress.com/tag/three-dots-as-parameter/
+https://xenakios.wordpress.com/2014/01/16/c11-the-three-dots-that-is-variadic-templates-part/
+https://en.cppreference.com/w/cpp/language/parameter_pack
+https://stackoverflow.com/questions/3351056/create-va-list-dynamically
+
++ [x] Modify function back_test() so it accepts a C++ prediction/forecasting function (functor, function pointer) - too complicated - use Rcpp::List instead.
+https://stackoverflow.com/questions/7143120/convert-string-to-variable-name-or-variable-type
+http://bytes.com/forum/thread656124.html
+
++ [x] In the function back_test(), scale the weights to match the volatility of the equally weighted portfolio?  No - that belongs to calc_weights().
+
++ [x] Run calc_weights() with the parameter voltarget.  It looks wrong, so how can it work?
+It works fine if you pass into param_portf() both scalew and voltarget, for example: scalew="voltarget", voltarget=0.015
+Added the example to the documentation.
 
 + [x] Use lambda squared for calculating the EMA variance and covariance in run_var(), run_covar(), run_autocovar(), and run_reg().
 

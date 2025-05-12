@@ -57,6 +57,6 @@ colSums(retp[(startp[ep]+1):(endd[ep]+1), ])
   })  # end sapply
 sumr <- t(sumr)
 all.equal(sumc, sumr, check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

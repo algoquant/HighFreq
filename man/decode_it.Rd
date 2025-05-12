@@ -42,6 +42,6 @@ rle <- HighFreq::encode_it(datav)
 # Decode the data from its run length encoding
 decodev <- HighFreq::decode_it(rle)
 all.equal(datav, decodev)
-}
+}  # end dontrun
 
 }

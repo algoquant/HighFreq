@@ -88,6 +88,6 @@ summary(microbenchmark(
   Rcode=scale(retp),
   Rcpp=HighFreq::calc_scale(retp),
   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

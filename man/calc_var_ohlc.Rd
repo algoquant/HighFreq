@@ -119,5 +119,5 @@ summary(microbenchmark(
   Rcpp=HighFreq::calc_var_ohlc(ohlc),
   Rcode=HighFreq::calc_var_ohlc_r(ohlc),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 }

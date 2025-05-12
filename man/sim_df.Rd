@@ -66,6 +66,6 @@ innov <- matrix(rnorm(1e3, sd=0.01))
 # Simulate Dickey-Fuller process using Rcpp
 pricev <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 plot(pricev, t="l", main="Simulated Dickey-Fuller Prices")
-}
+}  # end dontrun
 
 }

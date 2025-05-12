@@ -34,6 +34,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::calc_varvec(retp),
   Rcode=var(retp),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

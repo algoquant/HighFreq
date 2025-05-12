@@ -82,6 +82,6 @@ ratios of the variances of aggregated \emph{OHLC} prices.
 ohlc <- log(rutils::etfenv$VTI)
 # Calculate the Hurst exponent from 21 day aggregations
 calc_hurst_ohlc(ohlc, step=21)
-}
+}  # end dontrun
 
 }

@@ -94,6 +94,6 @@ garch_data <- HighFreq::sim_garch(omegac=omegac, alphac=alphac,  betac=betac,
 # Plot dygraph of the estimated GARCH volatility
 dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 
   main="Estimated GARCH Volatility of VTI")
-}
+}  # end dontrun
 
 }

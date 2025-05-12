@@ -159,5 +159,6 @@ varollr <- sapply(2:npts, function(it) {
 })  # end sapply
 varollr <- c(0, varollr)
 all.equal(drop(var_rolling), varollr)
-}
+}  # end dontrun
+
 }

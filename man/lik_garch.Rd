@@ -61,6 +61,6 @@ omegac <- 1e-4*(1-alphac-betac)
 retp <- na.omit(rutils::etfenv$returns$VTI)
 # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
 HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
-}
+}  # end dontrun
 
 }

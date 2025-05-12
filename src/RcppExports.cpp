@@ -1017,9 +1017,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// back_test
-arma::mat back_test(const arma::mat& retx, const arma::mat& retp, Rcpp::List controll, arma::uvec startp, arma::uvec endd, double lambdaf, double coeff, double bidask);
-RcppExport SEXP _HighFreq_back_test(SEXP retxSEXP, SEXP retpSEXP, SEXP controllSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdafSEXP, SEXP coeffSEXP, SEXP bidaskSEXP) {
+// roll_portf
+arma::mat roll_portf(const arma::mat& retx, const arma::mat& retp, Rcpp::List controll, arma::uvec startp, arma::uvec endd, double lambdaf, double coeff, double bidask);
+RcppExport SEXP _HighFreq_roll_portf(SEXP retxSEXP, SEXP retpSEXP, SEXP controllSEXP, SEXP startpSEXP, SEXP enddSEXP, SEXP lambdafSEXP, SEXP coeffSEXP, SEXP bidaskSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1031,7 +1031,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambdaf(lambdafSEXP);
     Rcpp::traits::input_parameter< double >::type coeff(coeffSEXP);
     Rcpp::traits::input_parameter< double >::type bidask(bidaskSEXP);
-    rcpp_result_gen = Rcpp::wrap(back_test(retx, retp, controll, startp, endd, lambdaf, coeff, bidask));
+    rcpp_result_gen = Rcpp::wrap(roll_portf(retx, retp, controll, startp, endd, lambdaf, coeff, bidask));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1111,7 +1111,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HighFreq_lik_garch", (DL_FUNC) &_HighFreq_lik_garch, 5},
     {"_HighFreq_sim_portfoptim", (DL_FUNC) &_HighFreq_sim_portfoptim, 5},
     {"_HighFreq_calc_weights", (DL_FUNC) &_HighFreq_calc_weights, 2},
-    {"_HighFreq_back_test", (DL_FUNC) &_HighFreq_back_test, 8},
+    {"_HighFreq_roll_portf", (DL_FUNC) &_HighFreq_roll_portf, 8},
     {NULL, NULL, 0}
 };
 

@@ -81,6 +81,6 @@ meanv <- colMeans(retss)
 covmat <- cov(retss)
 # Update the covariance of returns
 HighFreq::push_covar(retsn=retp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
-}
+}  # end dontrun
 
 }

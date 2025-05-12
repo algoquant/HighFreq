@@ -58,6 +58,6 @@ sapply(rutils::diffit(closep), var)
 calc_var_ag(closep, step=21)
 # The variance over 21 days is approximately 21 times the daily variance
 21*calc_var_ag(closep, step=1)
-}
+}  # end dontrun
 
 }

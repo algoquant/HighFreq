@@ -86,14 +86,14 @@ invmat <- HighFreq::calc_inv(covmat)
 # Calculate matrix inverse in R
 invr <- solve(covmat)
 all.equal(invmat, invr, check.attributes=FALSE)
-# Calculate reduced inverse using RcppArmadillo
+# Calculate the reduced inverse using RcppArmadillo
 invmat <- HighFreq::calc_inv(covmat, dimax=3)
-# Calculate reduced inverse using eigen decomposition in R
+# Calculate the reduced inverse using eigen decomposition in R
 eigend <- eigen(covmat)
 dimax <- 1:3
 invr <- eigend$vectors[, dimax] \%*\% (t(eigend$vectors[, dimax])/eigend$values[dimax])
 # Compare RcppArmadillo with R
 all.equal(invmat, invr)
-}
+}  # end dontrun
 
 }

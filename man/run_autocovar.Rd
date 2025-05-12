@@ -95,6 +95,6 @@ for (it in 2:nrows) {
   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it]*retd[max(it-lagg, 1)]
 } # end for
 all.equal(covarr, covars[, 1])
-}
+}  # end dontrun
 
 }

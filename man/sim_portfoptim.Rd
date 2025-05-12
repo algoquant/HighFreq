@@ -156,6 +156,6 @@ dygraphs::dygraph(stockweights[endd], main="Returns and Weight") \%>\%
   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) \%>\%
   dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") \%>\%
   dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red")
-}
+}  # end dontrun
 
 }

@@ -119,7 +119,8 @@ The function \code{calc_weights()} calculates the optimal portfolio
 retp <- na.omit(rutils::etfenv$returns[, 1:16])
 ncols <- NCOL(retp)
 eigend <- eigen(cov(retp))
-# Calculate reduced inverse of covariance matrix
+
+# Calculate the reduced inverse of covariance matrix
 dimax <- 3
 eigenvec <- eigend$vectors[, 1:dimax]
 eigenval <- eigend$values[1:dimax]
@@ -128,7 +129,7 @@ invmat <- eigenvec \%*\% (t(eigenvec) / eigenval)
 alphac <- 0.5
 colmeans <- colMeans(retp)
 colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
-# Calculate weights using R
+# Calculate the weights using R
 weightr <- drop(invmat \%*\% colmeans)
 # Apply weights scaling
 weightr <- weightr*sd(rowMeans(retp))/sd(retp \%*\% weightr)
@@ -136,9 +137,17 @@ weightr <- 0.01*weightr/sd(retp \%*\% weightr)
 weightr <- weightr/sqrt(sum(weightr^2))
 # Create a list of portfolio optimization parameters
 controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
-# Calculate weights using RcppArmadillo
+# Calculate the weights using RcppArmadillo
 weightcpp <- drop(HighFreq::calc_weights(retp, controll=controll))
 all.equal(weightcpp, weightr)
-}
+
+# Calculate the max Sharpe weights and scale them to the target volatility
+voltarget <- 0.015
+controll <- HighFreq::param_portf(method="maxsharpe", scalew="voltarget", voltarget=voltarget)
+weightcpp <- HighFreq::calc_weights(retp, controll=controll)
+# The portfolio volatility matches the target volatility
+all.equal(sd(retp \%*\% weightcpp), voltarget)
+
+}  # end dontrun
 
 }

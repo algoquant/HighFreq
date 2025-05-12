@@ -112,5 +112,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
   Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
   times=10))[, c(1, 4, 5)]
-}
+}  # end dontrun
+
 }

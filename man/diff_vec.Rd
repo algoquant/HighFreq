@@ -57,6 +57,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::diff_vec(retp, lagg=3, pad=TRUE),
   Rcode=rutils::diffit(retp, lagg=3),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

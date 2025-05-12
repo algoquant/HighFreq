@@ -48,6 +48,6 @@ ohlcagg <- HighFreq::roll_ohlc(timeser=ohlc, endd=endd)
 # Compare with xts::to.period()
 ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

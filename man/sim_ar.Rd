@@ -64,6 +64,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::sim_ar(coeff, innov),
   Rcode=filter(innov, filter=coeff, method="recursive"),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

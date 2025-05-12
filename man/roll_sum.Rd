@@ -90,6 +90,6 @@ endd <- rutils::calc_endpoints(datav, interval="weeks")
 dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) \%>\% 
   dyOptions(colors=c("blue", "red"), strokeWidth=2) \%>\% 
   dyLegend(width=300)
-}
+}  # end dontrun
 
 }

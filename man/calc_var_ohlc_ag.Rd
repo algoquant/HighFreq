@@ -87,6 +87,6 @@ calc_var_ohlc_ag(ohlc, step=1)
 calc_var_ohlc_ag(ohlc, step=21)
 # The variance over 21 days is approximately 21 times the daily variance
 21*calc_var_ohlc_ag(ohlc, step=1)
-}
+}  # end dontrun
 
 }

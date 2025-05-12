@@ -59,6 +59,6 @@ summary(microbenchmark(
   Rcode=rank(datav),
   Rcpp=calc_ranks(datav),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

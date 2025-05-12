@@ -81,6 +81,6 @@ dygraphs::dygraph(datav, main="VTI Prices and Z-scores") \%>\%
    dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") \%>\%
    dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red") \%>\%
    dyLegend(show="always", width=300)
-}
+}  # end dontrun
 
 }

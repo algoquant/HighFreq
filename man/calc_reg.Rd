@@ -90,6 +90,6 @@ summary(microbenchmark(
   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controll=controll),
   Rcode=lm(respv ~ predm),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

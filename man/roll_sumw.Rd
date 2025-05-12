@@ -122,6 +122,6 @@ weightv <- matrix(c(1, rep(0, 10)), nc=1)
 weighted <- HighFreq::roll_sumw(retp, weightv=weightv)
 # Compare with original
 all.equal(coredata(retp), weighted, check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

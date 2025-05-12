@@ -34,6 +34,6 @@ covmat <- cov(retp)
 # Calculate the correlation matrix of returns
 push_cov2cor(covmat)
 all.equal(covmat, cor(retp))
-}
+}  # end dontrun
 
 }

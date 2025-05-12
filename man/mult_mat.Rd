@@ -79,6 +79,6 @@ summary(microbenchmark(
     Rcpp=HighFreq::mult_mat(vectorv, matrixv, byrow=FALSE),
     Rcode=vectorv*matrixv,
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 
 }

@@ -66,6 +66,6 @@ HighFreq::calc_hurst(closep, aggv=21)
 # Calculate the Hurst exponents for a vector of aggregation intervals
 aggv <- seq.int(from=3, to=35, length.out=9)^2
 HighFreq::calc_hurst(closep, aggv=aggv)
-}
+}  # end dontrun
 
 }

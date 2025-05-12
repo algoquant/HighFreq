@@ -77,7 +77,7 @@ NULL
 #' # Create a custom list of regression parameters
 #' controll <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
 #' unlist(controll)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5, dimax = 0L, residscale = "none", confl = 0.1, alphac = 0.0) {
@@ -126,7 +126,7 @@ param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5
 #' @details
 #'   The function \code{param_portf()} creates a named list of model parameters
 #'   that can be passed into portfolio optimization functions.  For example
-#'   into the functions \code{calc_weights()} and \code{back_test()}.
+#'   into the functions \code{calc_weights()} and \code{roll_portf()}.
 #'   See the function \code{calc_weights()} for more details.
 #'   
 #'   The function \code{param_portf()} simplifies the creation of portfolio
@@ -141,7 +141,7 @@ param_reg <- function(regmod = "least_squares", intercept = TRUE, singmin = 1e-5
 #' # Create a custom list of portfolio optimization parameters
 #' controll <- HighFreq::param_portf(method="regular", dimax=4)
 #' unlist(controll)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 0.1, alphac = 0.0, rankw = FALSE, centerw = FALSE, scalew = "voltarget", voltarget = 0.01) {
@@ -196,7 +196,7 @@ param_portf <- function(method = "sharpem", singmin = 1e-5, dimax = 0L, confl = 
 #'   Rcpp=HighFreq::lag_vec(retp),
 #'   Rcode=rutils::lagit(retp),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 lag_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
@@ -248,7 +248,7 @@ lag_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
 #'   Rcpp=HighFreq::lagit(retp),
 #'   Rcode=rutils::lagit(retp),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 lagit <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
@@ -302,7 +302,7 @@ lagit <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
 #'   Rcpp=HighFreq::diff_vec(retp, lagg=3, pad=TRUE),
 #'   Rcode=rutils::diffit(retp, lagg=3),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 diff_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
@@ -371,7 +371,7 @@ diff_vec <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
 #'   Rcpp=HighFreq::diffit(datav, lagg=2),
 #'   Rcode=rutils::diffit(datav, lagg=2),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 diffit <- function(timeser, lagg = 1L, pad_zeros = TRUE) {
@@ -545,7 +545,8 @@ calc_startpoints <- function(endd, lookb) {
 #' \dontrun{
 #' # Calculate the number of consecutive TRUE elements
 #' drop(HighFreq::roll_count(c(FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE)))
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 roll_count <- function(timeser) {
     .Call(`_HighFreq_roll_count`, timeser)
@@ -582,7 +583,7 @@ roll_count <- function(timeser) {
 #' datav <- sample(5, 31, replace=TRUE)
 #' # Calculate the run length encoding of datav
 #' HighFreq::encode_it(datav)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 encode_it <- function(timeser) {
@@ -622,7 +623,7 @@ encode_it <- function(timeser) {
 #' # Decode the data from its run length encoding
 #' decodev <- HighFreq::decode_it(rle)
 #' all.equal(datav, decodev)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 decode_it <- function(encodel) {
@@ -678,7 +679,7 @@ decode_it <- function(encodel) {
 #'   Rcode=rank(datav),
 #'   Rcpp=calc_ranks(datav),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_ranks <- function(timeser) {
@@ -736,7 +737,7 @@ calc_ranks <- function(timeser) {
 #'   Rcode=rank(datav),
 #'   Rcpp=HighFreq::calc_ranks_stl(datav),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_ranks_stl <- function(timeser) {
@@ -816,7 +817,7 @@ remove_dup <- function(stringv) {
 #'     Rcpp=HighFreq::mult_mat(vectorv, matrixv, byrow=FALSE),
 #'     Rcode=vectorv*matrixv,
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 mult_mat <- function(vectorv, matrixv, byrow = TRUE) {
@@ -896,7 +897,7 @@ mult_mat <- function(vectorv, matrixv, byrow = TRUE) {
 #'     Rcpp=HighFreq::mult_mat_ref(vectorv, matrixv, byrow=FALSE),
 #'     Rcode=vectorv*matrixv,
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
@@ -945,7 +946,7 @@ mult_mat_ref <- function(vectorv, matrixv, byrow = TRUE) {
 #'   Rcpp=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
 #'   Rcode=eigen(matrixv),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_eigen <- function(matrixv, eigenval, eigenvec) {
@@ -1005,7 +1006,7 @@ calc_eigen <- function(matrixv, eigenval, eigenvec) {
 #'   partial=HighFreq::calc_eigenp(matrixv, neigen),
 #'   full=HighFreq::calc_eigen(matrixv, eigenval, eigenvec),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_eigenp <- function(matrixv, neigen) {
@@ -1088,15 +1089,15 @@ calc_eigenp <- function(matrixv, neigen) {
 #' # Calculate matrix inverse in R
 #' invr <- solve(covmat)
 #' all.equal(invmat, invr, check.attributes=FALSE)
-#' # Calculate reduced inverse using RcppArmadillo
+#' # Calculate the reduced inverse using RcppArmadillo
 #' invmat <- HighFreq::calc_inv(covmat, dimax=3)
-#' # Calculate reduced inverse using eigen decomposition in R
+#' # Calculate the reduced inverse using eigen decomposition in R
 #' eigend <- eigen(covmat)
 #' dimax <- 1:3
 #' invr <- eigend$vectors[, dimax] %*% (t(eigend$vectors[, dimax])/eigend$values[dimax])
 #' # Compare RcppArmadillo with R
 #' all.equal(invmat, invr)
-#' }
+#' }  # end dontrun
 #' 
 #' @examples
 calc_inv <- function(matrixv, dimax = 0L, singmin = 0.0) {
@@ -1183,15 +1184,15 @@ calc_inv <- function(matrixv, dimax = 0L, singmin = 0.0) {
 #' # Calculate matrix inverse in R
 #' invr <- solve(covmat)
 #' all.equal(invmat, invr, check.attributes=FALSE)
-#' # Calculate reduced inverse using RcppArmadillo
+#' # Calculate the reduced inverse using RcppArmadillo
 #' invmat <- HighFreq::calc_invsvd(covmat, dimax=3)
-#' # Calculate reduced inverse from SVD in R
+#' # Calculate the reduced inverse from SVD in R
 #' svdec <- svd(covmat)
 #' dimax <- 1:3
 #' invr <- svdec$v[, dimax] %*% (t(svdec$u[, dimax])/svdec$d[dimax])
 #' # Compare RcppArmadillo with R
 #' all.equal(invmat, invr)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_invsvd <- function(matrixv, dimax = 0L, singmin = 0.0) {
@@ -1257,7 +1258,7 @@ calc_invsvd <- function(matrixv, dimax = 0L, singmin = 0.0) {
 #'    rcode=solve(matrixv),
 #'    cppcode=HighFreq::calc_invrec(matrixv, invmat, 3),
 #'    times=10))[, c(1, 4, 5)]
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_invrec <- function(matrixv, invmat, niter = 1L) {
@@ -1307,7 +1308,7 @@ calc_invrec <- function(matrixv, invmat, niter = 1L) {
 #'    rcode=solve(matrixv),
 #'    cppcode=calc_invref(matrixv),
 #'    times=10))[, c(1, 4, 5)]
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_invref <- function(matrixv) {
@@ -1392,7 +1393,7 @@ calc_invref <- function(matrixv) {
 #'   Rcode=scale(retp),
 #'   Rcpp=HighFreq::calc_scale(retp),
 #'   times=100))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_scale <- function(timeser, center = TRUE, scale = TRUE, use_median = FALSE) {
@@ -1439,7 +1440,7 @@ calc_scale <- function(timeser, center = TRUE, scale = TRUE, use_median = FALSE)
 #' all.equal(drop(ohlcagg),
 #'   c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
 #'   check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 agg_ohlc <- function(timeser) {
@@ -1487,7 +1488,7 @@ agg_ohlc <- function(timeser) {
 #' # Compare with xts::to.period()
 #' ohlcagg_xts <- .Call("toPeriod", ohlc, as.integer(endd+1), TRUE, NCOL(ohlc), FALSE, FALSE, colnames(ohlc), PACKAGE="xts")
 #' all.equal(ohlcagg, coredata(ohlcagg_xts), check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_ohlc <- function(timeser, endd) {
@@ -1538,7 +1539,7 @@ roll_ohlc <- function(timeser, endd) {
 #' retc <- filter(x=retp, filter=weightv, method="convolution", sides=1)
 #' # Compare both methods
 #' all.equal(retc[-(1:11), ], retf[-(1:11), ], check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_conv <- function(timeser, weightv) {
@@ -1625,7 +1626,7 @@ roll_conv <- function(timeser, weightv) {
 #' dygraphs::dygraph(cumsum(datav)[endd], main=colnames(datav)) %>% 
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>% 
 #'   dyLegend(width=300)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_sum <- function(timeser, lookb = 1L, weightv = 0L) {
@@ -1679,7 +1680,7 @@ roll_sum <- function(timeser, lookb = 1L, weightv = 0L) {
 #'   })  # end sapply
 #' sumr <- t(sumr)
 #' all.equal(sumc, sumr, check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_sumep <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
@@ -1798,7 +1799,7 @@ roll_sumep <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #' weighted <- HighFreq::roll_sumw(retp, weightv=weightv)
 #' # Compare with original
 #' all.equal(coredata(retp), weighted, check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_sumw <- function(timeser, endd = NULL, lookb = 1L, stub = NULL, weightv = NULL) {
@@ -1913,7 +1914,7 @@ roll_sumw <- function(timeser, endd = NULL, lookb = 1L, stub = NULL, weightv = N
 #' dygraphs::dygraph(datav, main="Trailing Means") %>%
 #'   dyOptions(colors=c("blue", "red"), strokeWidth=2) %>%
 #'   dyLegend(show="always", width=300)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_mean <- function(timeser, lambdaf, weightv = 0L) {
@@ -1981,7 +1982,7 @@ run_mean <- function(timeser, lambdaf, weightv = 0L) {
 #' dygraphs::dygraph(datav, main="VTI Prices and Trailing Maximums") %>%
 #'   dySeries(label=colnamev[1], strokeWidth=2, col="blue") %>%
 #'   dySeries(label=colnamev[2], strokeWidth=2, col="red")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_max <- function(timeser, lambdaf) {
@@ -2049,7 +2050,7 @@ run_max <- function(timeser, lambdaf) {
 #' dygraphs::dygraph(datav, main="VTI Prices and Trailing Minimums") %>%
 #'   dySeries(label=colnamev[1], strokeWidth=1, col="blue") %>%
 #'   dySeries(label=colnamev[2], strokeWidth=1, col="red")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_min <- function(timeser, lambdaf) {
@@ -2212,7 +2213,7 @@ run_var <- function(timeser, lambdaf) {
 #'    dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
 #'    dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red") %>%
 #'    dyLegend(show="always", width=300)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_zscores <- function(timeser, lambdaf) {
@@ -2285,7 +2286,8 @@ run_zscores <- function(timeser, lambdaf) {
 #'   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
 #'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
 #'   times=10))[, c(1, 4, 5)]
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 run_var_ohlc <- function(ohlc, lambdaf) {
     .Call(`_HighFreq_run_var_ohlc`, ohlc, lambdaf)
@@ -2316,7 +2318,7 @@ run_var_ohlc <- function(ohlc, lambdaf) {
 #' # Calculate the correlation matrix of returns
 #' push_cov2cor(covmat)
 #' all.equal(covmat, cor(retp))
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 push_cov2cor <- function(covmat) {
@@ -2394,7 +2396,7 @@ push_cov2cor <- function(covmat) {
 #' covmat <- cov(retss)
 #' # Update the covariance of returns
 #' HighFreq::push_covar(retsn=retp[nrows], covmat=covmat, meanv=meanv, lambdacov=0.9)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 push_covar <- function(retsn, covmat, meanv, lambdacov) {
@@ -2486,7 +2488,7 @@ push_covar <- function(retsn, covmat, meanv, lambdacov) {
 #' HighFreq::push_eigen(retsn=retp[nrows], covmat=covmat, 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
 #'   eigenret=eigenret, meanv=meanv, lambdacov=0.9)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambdacov) {
@@ -2619,7 +2621,7 @@ push_eigen <- function(retsn, covmat, eigenval, eigenvec, eigenret, meanv, lambd
 #' HighFreq::push_sga(retsn=retp[nrows], 
 #'   eigenval=eigenval, eigenvec=eigenvec, 
 #'   eigenret=eigenret, meanv=meanv, varv=varv, lambdaf=0.9, gamma=0.1)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambdaf, gamma) {
@@ -2712,7 +2714,7 @@ push_sga <- function(retsn, eigenval, eigenvec, eigenret, meanv, varv, lambdaf, 
 #'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it, 1]*retd[it, 2]
 #' } # end for
 #' all.equal(covars[, 1], covarr, check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_covar <- function(timeser, lambdaf) {
@@ -2804,7 +2806,7 @@ run_covar <- function(timeser, lambdaf) {
 #'   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it]*retd[max(it-lagg, 1)]
 #' } # end for
 #' all.equal(covarr, covars[, 1])
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_autocovar <- function(timeser, lambdaf, lagg = 1L) {
@@ -3004,7 +3006,7 @@ run_autocovar <- function(timeser, lambdaf, lagg = 1L) {
 #' # Compare values, excluding warmup period
 #' all.equal(regs[-(1:1e3), ], cbind(betas, resids)[-(1:1e3), ], check.attributes=FALSE)
 #'  
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_reg <- function(respv, predm, lambdaf, controll) {
@@ -3090,7 +3092,7 @@ run_reg <- function(respv, predm, lambdaf, controll) {
 #'   Rcpp=HighFreq::calc_mean(retp, method="nonparametric"),
 #'   Rcode=sapply(retp, median),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_mean <- function(timeser, method = "moment", confl = 0.75) {
@@ -3121,7 +3123,7 @@ calc_mean <- function(timeser, method = "moment", confl = 0.75) {
 #'   Rcpp=HighFreq::calc_varvec(retp),
 #'   Rcode=var(retp),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_varvec <- function(timeser) {
@@ -3204,7 +3206,7 @@ calc_varvec <- function(timeser) {
 #'   Rcpp=HighFreq::calc_var(retp, method="nonparametric"),
 #'   Rcode=sapply(retp, mad),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_var <- function(timeser, method = "moment", confl = 0.75) {
@@ -3282,7 +3284,7 @@ calc_var <- function(timeser, method = "moment", confl = 0.75) {
 #'   Rcpp=HighFreq::calc_covar(retp, method="nonparametric"),
 #'   Rcode=sapply(retp, mad),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_covar <- function(timeser, method = "moment", confl = 0.75) {
@@ -3338,7 +3340,7 @@ calc_covar <- function(timeser, method = "moment", confl = 0.75) {
 #' calc_var_ag(closep, step=21)
 #' # The variance over 21 days is approximately 21 times the daily variance
 #' 21*calc_var_ag(closep, step=1)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_var_ag <- function(pricev, step = 1L) {
@@ -3448,7 +3450,7 @@ calc_var_ag <- function(pricev, step = 1L) {
 #'   Rcpp=HighFreq::calc_var_ohlc(ohlc),
 #'   Rcode=HighFreq::calc_var_ohlc_r(ohlc),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' @export
 calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
     .Call(`_HighFreq_calc_var_ohlc`, ohlc, method, closel, scale, index)
@@ -3524,7 +3526,7 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE
 #' calc_var_ohlc_ag(ohlc, step=21)
 #' # The variance over 21 days is approximately 21 times the daily variance
 #' 21*calc_var_ohlc_ag(ohlc, step=1)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
@@ -3615,7 +3617,7 @@ calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, sca
 #'   Rcpp=HighFreq::calc_skew(retp, method="nonparametric"),
 #'   Rcode=(mean(retp)-median(retp))/sd(retp),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_skew <- function(timeser, method = "moment", confl = 0.75) {
@@ -3708,7 +3710,7 @@ calc_skew <- function(timeser, method = "moment", confl = 0.75) {
 #'   Rcpp=HighFreq::calc_kurtosis(retp, method="nonparametric"),
 #'   Rcode=(mean(retp)-median(retp))/sd(retp),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_kurtosis <- function(timeser, method = "moment", confl = 0.75) {
@@ -3772,7 +3774,7 @@ calc_kurtosis <- function(timeser, method = "moment", confl = 0.75) {
 #' # Calculate the Hurst exponents for a vector of aggregation intervals
 #' aggv <- seq.int(from=3, to=35, length.out=9)^2
 #' HighFreq::calc_hurst(closep, aggv=aggv)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_hurst <- function(timeser, aggv) {
@@ -3844,7 +3846,7 @@ calc_hurst <- function(timeser, aggv) {
 #' ohlc <- log(rutils::etfenv$VTI)
 #' # Calculate the Hurst exponent from 21 day aggregations
 #' calc_hurst_ohlc(ohlc, step=21)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
@@ -3899,7 +3901,7 @@ calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scal
 #'   Rcpp=HighFreq::calc_lm(respv=respv, predm=predm),
 #'   Rcode=lm(respv ~ predm),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_lm <- function(respv, predm) {
@@ -3986,7 +3988,7 @@ calc_lm <- function(respv, predm) {
 #'   Rcpp=HighFreq::calc_reg(respv=respv, predm=predm, controll=controll),
 #'   Rcode=lm(respv ~ predm),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 calc_reg <- function(respv, predm, controll) {
@@ -4085,7 +4087,8 @@ calc_reg <- function(respv, predm, controll) {
 #'   Rcpp=HighFreq::roll_mean(retp, startp=startp, endd=endd, method="nonparametric"),
 #'   Rcode=sapply(1:NROW(endd), function(i) {median(retp[startp[i]:endd[i] + 1])}),
 #'   times=10))[, c(1, 4, 5)]
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 roll_mean <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
     .Call(`_HighFreq_roll_mean`, timeser, lookb, startp, endd, step, stub, method, confl)
@@ -4134,7 +4137,7 @@ roll_mean <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, st
 #'   Rcpp=HighFreq::roll_varvec(retp, lookb=11),
 #'   RcppRoll=RcppRoll::roll_var(retp, n=11),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' @export
 roll_varvec <- function(timeser, lookb = 1L) {
     .Call(`_HighFreq_roll_varvec`, timeser, lookb)
@@ -4223,7 +4226,7 @@ roll_varvec <- function(timeser, lookb = 1L) {
 #'     Rcpp=HighFreq::roll_var(retp, lookb=11, method="quantile"),
 #'     TTR=TTR::runMAD(retp, n = 11),
 #'     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' @export
 roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stub = 0L, method = "moment", confl = 0.75) {
     .Call(`_HighFreq_roll_var`, timeser, lookb, startp, endd, step, stub, method, confl)
@@ -4367,7 +4370,8 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #' })  # end sapply
 #' varollr <- c(0, varollr)
 #' all.equal(drop(var_rolling), varollr)
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
     .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endd, step, lookb, stub, method, scale, index)
@@ -4454,7 +4458,8 @@ roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, s
 #'     HighFreq::calc_skew(retp[startp[it]:endd[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 roll_skew <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
     .Call(`_HighFreq_roll_skew`, timeser, startp, endd, step, lookb, stub, method, confl)
@@ -4540,7 +4545,8 @@ roll_skew <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, st
 #'     HighFreq::calc_kurtosis(retp[startp[it]:endd[it], ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
+#' 
 #' @export
 roll_kurtosis <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "moment", confl = 0.75) {
     .Call(`_HighFreq_roll_kurtosis`, timeser, startp, endd, step, lookb, stub, method, confl)
@@ -4644,7 +4650,7 @@ roll_kurtosis <- function(timeser, startp = 0L, endd = 0L, step = 1L, lookb = 1L
 #' })  # end sapply
 #' # Compare the outputs of both functions
 #' all.equal(betas, betar, check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
@@ -4713,7 +4719,7 @@ roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, 
 #' rolled_scaled2 <- HighFreq::roll_scale(retp, lookb=lookb)
 #' all.equal(rolled_scaled[-(1:2), ], rolled_scaled2[-(1:2), ],
 #'   check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = FALSE) {
@@ -4828,7 +4834,7 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #'    scaled[it, ] <- (scaled[it, ] - meanm)/sqrt(vars)
 #'   }},  # end for
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 run_scale <- function(timeser, lambdaf, center = TRUE, scale = TRUE) {
@@ -4908,7 +4914,7 @@ run_scale <- function(timeser, lambdaf, center = TRUE, scale = TRUE) {
 #' # Compare the outputs of both functions
 #' all.equal(zscores[-(1:lookb)], zscoresr[-(1:lookb)], 
 #'   check.attributes=FALSE)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
@@ -5020,7 +5026,7 @@ roll_zscores <- function(respv, predm, startp = 0L, endd = 0L, step = 1L, lookb 
 #'     var(retp[startp[it]:endd[it]+1, ])
 #'   }),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' @export
 roll_moment <- function(timeser, funame = "calc_mean", method = "moment", confl = 0.75, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L) {
     .Call(`_HighFreq_roll_moment`, timeser, funame, method, confl, startp, endd, step, lookb, stub)
@@ -5110,7 +5116,7 @@ roll_moment <- function(timeser, funame = "calc_mean", method = "moment", confl 
 #' # Plot dygraph of the estimated GARCH volatility
 #' dygraphs::dygraph(xts::xts(sqrt(garch_data[, 2]), index(retp)), 
 #'   main="Estimated GARCH Volatility of VTI")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_garch <- function(omegac, alphac, betac, innov, is_random = TRUE) {
@@ -5169,7 +5175,7 @@ sim_garch <- function(omegac, alphac, betac, innov, is_random = TRUE) {
 #' # Simulate Ornstein-Uhlenbeck process using Rcpp
 #' pricev <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 #' plot(pricev, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_ou <- function(prici, priceq, theta, innov) {
@@ -5218,7 +5224,7 @@ sim_ou <- function(prici, priceq, theta, innov) {
 #' # Simulate Schwartz process using Rcpp
 #' pricev <- HighFreq::sim_schwartz(prici=prici, priceq=priceq, theta=thetav, innov=innov)
 #' plot(pricev, t="l", main="Simulated Schwartz Prices", ylab="prices")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_schwartz <- function(prici, priceq, theta, innov) {
@@ -5278,7 +5284,7 @@ sim_schwartz <- function(prici, priceq, theta, innov) {
 #'   Rcpp=HighFreq::sim_ar(coeff, innov),
 #'   Rcode=filter(innov, filter=coeff, method="recursive"),
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_ar <- function(coeff, innov) {
@@ -5342,7 +5348,7 @@ sim_ar <- function(coeff, innov) {
 #' # Simulate Dickey-Fuller process using Rcpp
 #' pricev <- HighFreq::sim_df(prici=prici, priceq=priceq, theta=thetav, coeff=coeff, innov=innov)
 #' plot(pricev, t="l", main="Simulated Dickey-Fuller Prices")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_df <- function(prici, priceq, theta, coeff, innov) {
@@ -5400,7 +5406,7 @@ sim_df <- function(prici, priceq, theta, coeff, innov) {
 #' retp <- na.omit(rutils::etfenv$returns$VTI)
 #' # Calculate the log-likelihood of VTI returns assuming GARCH(1,1)
 #' HighFreq::lik_garch(omegac=omegac, alphac=alphac,  betac=betac, returns=retp)
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
@@ -5553,7 +5559,7 @@ lik_garch <- function(omegac, alphac, betac, returns, minval = 0.000001) {
 #'   dyAxis("y2", label=colnamev[2], independentTicks=TRUE) %>%
 #'   dySeries(axis="y", label=colnamev[1], strokeWidth=2, col="blue") %>%
 #'   dySeries(axis="y2", label=colnamev[2], strokeWidth=2, col="red")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
 sim_portfoptim <- function(rets, dimax, lambdaf, lambdacov, lambdaw) {
@@ -5670,7 +5676,8 @@ sim_portfoptim <- function(rets, dimax, lambdaf, lambdacov, lambdaw) {
 #' retp <- na.omit(rutils::etfenv$returns[, 1:16])
 #' ncols <- NCOL(retp)
 #' eigend <- eigen(cov(retp))
-#' # Calculate reduced inverse of covariance matrix
+#' 
+#' # Calculate the reduced inverse of covariance matrix
 #' dimax <- 3
 #' eigenvec <- eigend$vectors[, 1:dimax]
 #' eigenval <- eigend$values[1:dimax]
@@ -5679,7 +5686,7 @@ sim_portfoptim <- function(rets, dimax, lambdaf, lambdacov, lambdaw) {
 #' alphac <- 0.5
 #' colmeans <- colMeans(retp)
 #' colmeans <- ((1-alphac)*colmeans + alphac*mean(colmeans))
-#' # Calculate weights using R
+#' # Calculate the weights using R
 #' weightr <- drop(invmat %*% colmeans)
 #' # Apply weights scaling
 #' weightr <- weightr*sd(rowMeans(retp))/sd(retp %*% weightr)
@@ -5687,10 +5694,18 @@ sim_portfoptim <- function(rets, dimax, lambdaf, lambdacov, lambdaw) {
 #' weightr <- weightr/sqrt(sum(weightr^2))
 #' # Create a list of portfolio optimization parameters
 #' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
-#' # Calculate weights using RcppArmadillo
+#' # Calculate the weights using RcppArmadillo
 #' weightcpp <- drop(HighFreq::calc_weights(retp, controll=controll))
 #' all.equal(weightcpp, weightr)
-#' }
+#' 
+#' # Calculate the max Sharpe weights and scale them to the target volatility
+#' voltarget <- 0.015
+#' controll <- HighFreq::param_portf(method="maxsharpe", scalew="voltarget", voltarget=voltarget)
+#' weightcpp <- HighFreq::calc_weights(retp, controll=controll)
+#' # The portfolio volatility matches the target volatility
+#' all.equal(sd(retp %*% weightcpp), voltarget)
+#' 
+#' }  # end dontrun
 #' 
 #' @export
 calc_weights <- function(returns, controll) {
@@ -5727,7 +5742,7 @@ calc_weights <- function(returns, controll) {
 #'   the number of rows of \code{retp}.
 #'
 #' @details
-#'   The function \code{back_test()} performs a backtest simulation of a
+#'   The function \code{roll_portf()} performs a backtest simulation of a
 #'   rolling portfolio optimization strategy over a \emph{vector} of the end
 #'   points \code{endd}.
 #'   
@@ -5735,16 +5750,16 @@ calc_weights <- function(returns, controll) {
 #'   \emph{matrix} of the excess asset returns \code{retx} along its rows,
 #'   between the corresponding \emph{start point} and the \emph{end point}. 
 #'   
-#'   The function \code{back_test()} passes the subset matrix of excess returns
-#'   into the function \code{calc_weights()}, which calculates the optimal
-#'   portfolio weights at each \emph{end point}.
+#'   The function \code{roll_portf()} passes the subset matrix of excess
+#'   returns into the function \code{calc_weights()}, which calculates the
+#'   optimal portfolio weights at each \emph{end point}.
 #'   It also passes to \code{calc_weights()} the argument \code{controll},
 #'   which is the list of portfolio optimization parameters.
 #'   See the function \code{calc_weights()} for more details.
 #'   The list of portfolio optimization parameters can be created using the
 #'   function \code{param_portf()}.
 #'   
-#'   The function \code{back_test()} then recursively averages the weights
+#'   The function \code{roll_portf()} then recursively averages the weights
 #'   \eqn{w_i} at the \emph{end point = i} with the weights \eqn{w_{i-1}} from
 #'   the previous \emph{end point = (i-1)}, using the decay factor \code{lambdaf
 #'   = \eqn{\lambda}}:
@@ -5756,21 +5771,21 @@ calc_weights <- function(returns, controll) {
 #'   the portfolio holding period beyond the time interval between neighboring
 #'   \emph{end points}.
 #'   
-#'   The function \code{back_test()} then calculates the out-of-sample strategy
+#'   The function \code{roll_portf()} then calculates the out-of-sample strategy
 #'   returns by multiplying the average weights times the future asset returns.
 #'   
-#'   The function \code{back_test()} multiplies the out-of-sample strategy
+#'   The function \code{roll_portf()} multiplies the out-of-sample strategy
 #'   returns by the coefficient \code{coeff} (with default equal to \code{1}),
 #'   which allows simulating either a trending strategy (if \code{coeff = 1}),
 #'   or a reverting strategy (if \code{coeff = -1}).
 #'   
-#'   The function \code{back_test()} calculates the transaction costs by
+#'   The function \code{roll_portf()} calculates the transaction costs by
 #'   multiplying the bid-ask spread \code{bidask} times the absolute
 #'   difference between the current weights minus the weights from the previous
 #'   period. Then it subtracts the transaction costs from the out-of-sample
 #'   strategy returns.
 #'   
-#'   The function \code{back_test()} returns a \emph{time series} (column
+#'   The function \code{roll_portf()} returns a \emph{time series} (column
 #'   \emph{vector}) of strategy returns, of the same length as the number of
 #'   rows of \code{retp}.
 #'
@@ -5794,16 +5809,16 @@ calc_weights <- function(returns, controll) {
 #' # Create a list of portfolio optimization parameters
 #' controll <- HighFreq::param_portf(method="maxsharpe", dimax=dimax, alphac=alphac, scalew="sumsq")
 #' # Simulate a monthly rolling portfolio optimization strategy
-#' pnls <- HighFreq::back_test(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
+#' pnls <- HighFreq::roll_portf(retx, retp, controll=controll, startp=(startp-1), endd=(endd-1))
 #' pnls <- xts::xts(pnls, index(retp))
 #' colnames(pnls) <- "strategy"
 #' # Plot dygraph of strategy
 #' dygraphs::dygraph(cumsum(pnls), 
 #'   main="Cumulative Returns of Max Sharpe Portfolio Strategy")
-#' }
+#' }  # end dontrun
 #' 
 #' @export
-back_test <- function(retx, retp, controll, startp, endd, lambdaf = 0.0, coeff = 1.0, bidask = 0.0) {
-    .Call(`_HighFreq_back_test`, retx, retp, controll, startp, endd, lambdaf, coeff, bidask)
+roll_portf <- function(retx, retp, controll, startp, endd, lambdaf = 0.0, coeff = 1.0, bidask = 0.0) {
+    .Call(`_HighFreq_roll_portf`, retx, retp, controll, startp, endd, lambdaf, coeff, bidask)
 }
 

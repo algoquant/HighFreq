@@ -96,6 +96,6 @@ for (it in 2:nrows) {
   covarr[it] <- lambdaf*covarr[it-1] + (1-lambdaf)*retd[it, 1]*retd[it, 2]
 } # end for
 all.equal(covars[, 1], covarr, check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

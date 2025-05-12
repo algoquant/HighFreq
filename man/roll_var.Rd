@@ -103,5 +103,5 @@ summary(microbenchmark(
     Rcpp=HighFreq::roll_var(retp, lookb=11, method="quantile"),
     TTR=TTR::runMAD(retp, n = 11),
     times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 }

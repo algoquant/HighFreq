@@ -203,6 +203,6 @@ for (it in 2:nrows) {
 # Compare values, excluding warmup period
 all.equal(regs[-(1:1e3), ], cbind(betas, resids)[-(1:1e3), ], check.attributes=FALSE)
  
-}
+}  # end dontrun
 
 }

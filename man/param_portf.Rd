@@ -61,7 +61,7 @@ optimization functions.
 \details{
 The function \code{param_portf()} creates a named list of model parameters
   that can be passed into portfolio optimization functions.  For example
-  into the functions \code{calc_weights()} and \code{back_test()}.
+  into the functions \code{calc_weights()} and \code{roll_portf()}.
   See the function \code{calc_weights()} for more details.
   
   The function \code{param_portf()} simplifies the creation of portfolio
@@ -76,6 +76,6 @@ unlist(controll)
 # Create a custom list of portfolio optimization parameters
 controll <- HighFreq::param_portf(method="regular", dimax=4)
 unlist(controll)
-}
+}  # end dontrun
 
 }

@@ -126,5 +126,5 @@ summary(microbenchmark(
     var(retp[startp[it]:endd[it]+1, ])
   }),
   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
-}
+}  # end dontrun
 }

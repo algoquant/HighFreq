@@ -49,6 +49,6 @@ ohlcagg <- HighFreq::agg_ohlc(ohlc)
 all.equal(drop(ohlcagg),
   c(ohlc[1, 1], max(ohlc[, 2]), min(ohlc[, 3]), ohlc[NROW(ohlc), 4], sum(ohlc[, 5])), 
   check.attributes=FALSE)
-}
+}  # end dontrun
 
 }

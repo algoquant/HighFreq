@@ -63,6 +63,6 @@ unlist(controll)
 # Create a custom list of regression parameters
 controll <- HighFreq::param_reg(intercept=FALSE, method="regular", dimax=4)
 unlist(controll)
-}
+}  # end dontrun
 
 }

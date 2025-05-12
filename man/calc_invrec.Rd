@@ -69,6 +69,6 @@ summary(microbenchmark(
    rcode=solve(matrixv),
    cppcode=HighFreq::calc_invrec(matrixv, invmat, 3),
    times=10))[, c(1, 4, 5)]
-}
+}  # end dontrun
 
 }

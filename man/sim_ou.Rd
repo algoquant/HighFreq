@@ -61,6 +61,6 @@ innov <- matrix(rnorm(1e3))
 # Simulate Ornstein-Uhlenbeck process using Rcpp
 pricev <- HighFreq::sim_ou(prici=prici, priceq=priceq, volat=sigmav, theta=thetav, innov=innov)
 plot(pricev, t="l", main="Simulated Ornstein-Uhlenbeck Prices", ylab="prices")
-}
+}  # end dontrun
 
 }
