@@ -687,7 +687,7 @@ calc_ranks <- function(timeser) {
 }
 
 #' Calculate the ranks of the elements of a single-column \emph{time series},
-#' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+#' \emph{matrix}, or a \emph{vector} using the \code{STL}.
 #' 
 #' @param \code{timeser} A single-column \emph{time series}, \emph{matrix}, or
 #'   a \emph{vector}.
@@ -1324,7 +1324,7 @@ calc_invref <- function(matrixv) {
 #'   the columns so that they have zero mean or median (the default is
 #'   \code{TRUE}).
 #' 
-#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+#' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale the
 #'   columns so that they have unit standard deviation or MAD (the default is
 #'   \code{TRUE}).
 #' 
@@ -1343,17 +1343,17 @@ calc_invref <- function(matrixv) {
 #'   columns of a \emph{time series} of data in place, without copying the data
 #'   in memory, using \code{RcppArmadillo}.
 #'
-#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+#'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
 #'   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
 #'   performs the same calculation as the standard \code{R} function
 #'   \code{scale()}, and it calculates the centrality (central tendency) as the
 #'   \emph{mean} and the dispersion as the \emph{standard deviation}.
 #'
-#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 #'   defaults), then \code{calc_scale()} standardizes the data.
 #'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 #'   only scales the data (divides it by the standard deviations).
-#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 #'   only demeans the data (subtracts the means).
 #'   
 #'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
@@ -1379,7 +1379,7 @@ calc_invref <- function(matrixv) {
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 #' # Demean the returns
 #' demeaned <- apply(retp, 2, function(x) (x-mean(x)))
-#' HighFreq::calc_scale(retp, scale=FALSE)
+#' HighFreq::calc_scale(retp, scalit=FALSE)
 #' all.equal(demeaned, retp, check.attributes=FALSE)
 #' # Calculate a time series of returns
 #' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
@@ -1396,8 +1396,8 @@ calc_invref <- function(matrixv) {
 #' }  # end dontrun
 #' 
 #' @export
-calc_scale <- function(timeser, center = TRUE, scale = TRUE, use_median = FALSE) {
-    invisible(.Call(`_HighFreq_calc_scale`, timeser, center, scale, use_median))
+calc_scale <- function(timeser, center = TRUE, scalit = TRUE, use_median = FALSE) {
+    invisible(.Call(`_HighFreq_calc_scale`, timeser, center, scalit, use_median))
 }
 
 #' Aggregate a time series of data into a single bar of \emph{OHLC} data.
@@ -2271,7 +2271,7 @@ run_zscores <- function(timeser, lambdaf) {
 #' # Calculate the trailing variance
 #' vart <- HighFreq::run_var_ohlc(ohlc, lambdaf=0.8)
 #' # Calculate the rolling variance
-#' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
+#' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE)
 #' datav <- cbind(vart, varoll)
 #' colnames(datav) <- c("trailing", "rolling")
 #' colnamev <- colnames(datav)
@@ -2284,7 +2284,7 @@ run_zscores <- function(timeser, lambdaf) {
 #' library(microbenchmark)
 #' summary(microbenchmark(
 #'   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
-#'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
+#'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE),
 #'   times=10))[, c(1, 4, 5)]
 #' }  # end dontrun
 #' 
@@ -3368,9 +3368,9 @@ calc_var_ag <- function(pricev, step = 1L) {
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
 #'   default is \code{closel = 0}).
 #'   
-#' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+#' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
-#'   \code{scale = TRUE}).
+#'   \code{scalit = TRUE}).
 #'
 #' @param \code{index} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -3398,7 +3398,7 @@ calc_var_ag <- function(pricev, step = 1L) {
 #'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 #'   account for \emph{close-to-open} price jumps.
 #'
-#'   If \code{scale} is \code{TRUE} (the default), then the returns are
+#'   If \code{scalit} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
 #'   the units of variance per second squared). This is useful when calculating
 #'   the variance from minutes bar data, because dividing returns by the
@@ -3431,12 +3431,12 @@ calc_var_ag <- function(pricev, step = 1L) {
 #' indeks <- c(1, diff(xts::.index(ohlc)))
 #' # Calculate the variance of SPY returns, with scaling of the returns
 #' HighFreq::calc_var_ohlc(ohlc, 
-#'  method="yang_zhang", scale=TRUE, index=indeks)
+#'  method="yang_zhang", scalit=TRUE, index=indeks)
 #' # Calculate variance without accounting for overnight jumps
 #' HighFreq::calc_var_ohlc(ohlc, 
-#'  method="rogers_satchell", scale=TRUE, index=indeks)
+#'  method="rogers_satchell", scalit=TRUE, index=indeks)
 #' # Calculate the variance without scaling the returns
-#' HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
+#' HighFreq::calc_var_ohlc(ohlc, scalit=FALSE)
 #' # Calculate the variance by passing in the lagged close prices
 #' closel <- HighFreq::lagit(ohlc[, 4])
 #' all.equal(HighFreq::calc_var_ohlc(ohlc), 
@@ -3452,8 +3452,8 @@ calc_var_ag <- function(pricev, step = 1L) {
 #'   times=10))[, c(1, 4, 5)]  # end microbenchmark summary
 #' }  # end dontrun
 #' @export
-calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_var_ohlc`, ohlc, method, closel, scale, index)
+calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scalit = TRUE, index = 0L) {
+    .Call(`_HighFreq_calc_var_ohlc`, ohlc, method, closel, scalit, index)
 }
 
 #' Calculate the variance of aggregated \emph{OHLC} prices using different
@@ -3480,9 +3480,9 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
 #'   default is \code{closel = 0}).
 #'   
-#' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+#' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
-#'   \code{scale = TRUE}).
+#'   \code{scalit = TRUE}).
 #'
 #' @param \code{index} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -3529,8 +3529,8 @@ calc_var_ohlc <- function(ohlc, method = "yang_zhang", closel = 0L, scale = TRUE
 #' }  # end dontrun
 #' 
 #' @export
-calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_var_ohlc_ag`, ohlc, step, method, closel, scale, index)
+calc_var_ohlc_ag <- function(ohlc, step, method = "yang_zhang", closel = 0L, scalit = TRUE, index = 0L) {
+    .Call(`_HighFreq_calc_var_ohlc_ag`, ohlc, step, method, closel, scalit, index)
 }
 
 #' Calculate the skewness of the columns of a \emph{time series} or a
@@ -3805,9 +3805,9 @@ calc_hurst <- function(timeser, aggv) {
 #'   of the \emph{OHLC time series}.  This is an optional argument. (The
 #'   default is \code{closel = 0}).
 #'   
-#' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+#' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period? (The default is
-#'   \code{scale = TRUE}).
+#'   \code{scalit = TRUE}).
 #'
 #' @param \code{index} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -3849,8 +3849,8 @@ calc_hurst <- function(timeser, aggv) {
 #' }  # end dontrun
 #' 
 #' @export
-calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_calc_hurst_ohlc`, ohlc, step, method, closel, scale, index)
+calc_hurst_ohlc <- function(ohlc, step, method = "yang_zhang", closel = 0L, scalit = TRUE, index = 0L) {
+    .Call(`_HighFreq_calc_hurst_ohlc`, ohlc, step, method, closel, scalit, index)
 }
 
 #' Perform multivariate linear regression using least squares and return a
@@ -4265,9 +4265,9 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #'    }
 #'    (The default is the \emph{"yang_zhang"} estimator.)
 #'    
-#' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+#' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 #'   by the time index, the number of seconds in each period?  (The default is
-#'   \code{scale = TRUE}.)
+#'   \code{scalit = TRUE}.)
 #'   
 #' @param \code{index} A \emph{vector} with the time index of the \emph{time
 #'   series}.  This is an optional argument (the default is \code{index=0}).
@@ -4319,7 +4319,7 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 #'   account for \emph{close-to-open} price jumps.
 #'
-#'   If \code{scale} is \code{TRUE} (the default), then the returns are
+#'   If \code{scalit} is \code{TRUE} (the default), then the returns are
 #'   divided by the differences of the time index (which scales the variance to
 #'   the units of variance per second squared.) This is useful when calculating
 #'   the variance from minutes bar data, because dividing returns by the
@@ -4346,7 +4346,7 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #' varoll <- HighFreq::roll_var_ohlc(ohlc, 
 #'                               step=1, lookb=21, 
 #'                               method="yang_zhang", 
-#'                               index=indeks, scale=TRUE)
+#'                               index=indeks, scalit=TRUE)
 #' # Daily OHLC prices
 #' ohlc <- rutils::etfenv$VTI
 #' indeks <- c(1, diff(xts::.index(ohlc)))
@@ -4354,7 +4354,7 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #' varoll <- HighFreq::roll_var_ohlc(ohlc, 
 #'                               step=5, lookb=4, 
 #'                               method="yang_zhang", 
-#'                               index=indeks, scale=TRUE)
+#'                               index=indeks, scalit=TRUE)
 #' # Same calculation in R
 #' nrows <- NROW(ohlc)
 #' closel = HighFreq::lagit(ohlc[, 4])
@@ -4366,15 +4366,15 @@ roll_var <- function(timeser, lookb = 1L, startp = 0L, endd = 0L, step = 1L, stu
 #'   sub_ohlc = ohlc[rangev, ]
 #'   sub_close = closel[rangev]
 #'   sub_index = indeks[rangev]
-#'   HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scale=TRUE, index=sub_index)
+#'   HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scalit=TRUE, index=sub_index)
 #' })  # end sapply
 #' varollr <- c(0, varollr)
 #' all.equal(drop(var_rolling), varollr)
 #' }  # end dontrun
 #' 
 #' @export
-roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "yang_zhang", scale = TRUE, index = 0L) {
-    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endd, step, lookb, stub, method, scale, index)
+roll_var_ohlc <- function(ohlc, startp = 0L, endd = 0L, step = 1L, lookb = 1L, stub = 0L, method = "yang_zhang", scalit = TRUE, index = 0L) {
+    .Call(`_HighFreq_roll_var_ohlc`, ohlc, startp, endd, step, lookb, stub, method, scalit, index)
 }
 
 #' Calculate a \emph{matrix} of skewness estimates over a rolling look-back
@@ -4669,7 +4669,7 @@ roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, 
 #'   the columns so that they have zero mean or median (the default is
 #'   \code{TRUE}).
 #' 
-#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+#' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale the
 #'   columns so that they have unit standard deviation or MAD (the default is
 #'   \code{TRUE}).
 #' 
@@ -4694,16 +4694,16 @@ roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, 
 #'   function \code{calc_scale()}.  It assigns the last row of the standardized
 #'   subset \emph{matrix} to the return matrix.
 #'   
-#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+#'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
 #'   \code{use_median} is \code{FALSE} (the defaults), then
 #'   \code{calc_scale()} performs the same calculation as the function
 #'   \code{roll::roll_scale()}.
 #'   
-#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 #'   defaults), then \code{calc_scale()} standardizes the data.
 #'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 #'   only scales the data (divides it by the standard deviations).
-#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 #'   only demeans the data (subtracts the means).
 #'   
 #'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
@@ -4722,8 +4722,8 @@ roll_reg <- function(respv, predm, controll, startp = 0L, endd = 0L, step = 1L, 
 #' }  # end dontrun
 #' 
 #' @export
-roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = FALSE) {
-    .Call(`_HighFreq_roll_scale`, matrix, lookb, center, scale, use_median)
+roll_scale <- function(matrix, lookb, center = TRUE, scalit = TRUE, use_median = FALSE) {
+    .Call(`_HighFreq_roll_scale`, matrix, lookb, center, scalit, use_median)
 }
 
 #' Standardize (center and scale) the columns of a \emph{time series} of data
@@ -4738,9 +4738,9 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #'   the columns so that they have zero mean or median (the default is
 #'   \code{TRUE}).
 #' 
-#' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
-#'   columns so that they have unit standard deviation or MAD (the default is
-#'   \code{TRUE}).
+#' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale
+#'   the columns so that they have unit standard deviation or MAD (the default
+#'   is \code{TRUE}).
 #' 
 #' @return Void (no return value - modifies the data in place).
 #'
@@ -4776,11 +4776,11 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #'     r^{\prime}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
 #'   }
 #'
-#'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+#'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 #'   defaults), then \code{calc_scale()} standardizes the data.
 #'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 #'   only scales the data (divides it by the standard deviations).
-#'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+#'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 #'   only demeans the data (subtracts the means).
 #'   
 #'   The value of the decay factor \eqn{\lambda} must be in the range between
@@ -4837,8 +4837,8 @@ roll_scale <- function(matrix, lookb, center = TRUE, scale = TRUE, use_median = 
 #' }  # end dontrun
 #' 
 #' @export
-run_scale <- function(timeser, lambdaf, center = TRUE, scale = TRUE) {
-    invisible(.Call(`_HighFreq_run_scale`, timeser, lambdaf, center, scale))
+run_scale <- function(timeser, lambdaf, center = TRUE, scalit = TRUE) {
+    invisible(.Call(`_HighFreq_run_scale`, timeser, lambdaf, center, scalit))
 }
 
 #' Calculate a \emph{vector} of z-scores of the residuals of rolling

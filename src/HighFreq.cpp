@@ -1046,7 +1046,7 @@ arma::uvec calc_ranks(arma::vec timeser) {
 
 ////////////////////////////////////////////////////////////
 //' Calculate the ranks of the elements of a single-column \emph{time series},
-//' \emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+//' \emph{matrix}, or a \emph{vector} using the \code{STL}.
 //' 
 //' @param \code{timeser} A single-column \emph{time series}, \emph{matrix}, or
 //'   a \emph{vector}.
@@ -1102,7 +1102,7 @@ arma::uvec calc_ranks(arma::vec timeser) {
 // [[Rcpp::export]]
 arma::uvec calc_ranks_stl(arma::vec timeser) {
   
-  size_t ndata = timeser.size();
+  std::size_t ndata = timeser.size();
   // size_t ndata = sizeof(timeser);
   
   // Define index of integers along timeser
@@ -1917,7 +1917,7 @@ void calc_invref(arma::mat& matrixv) {
 //'   the columns so that they have zero mean or median (the default is
 //'   \code{TRUE}).
 //' 
-//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+//' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale the
 //'   columns so that they have unit standard deviation or MAD (the default is
 //'   \code{TRUE}).
 //' 
@@ -1936,17 +1936,17 @@ void calc_invref(arma::mat& matrixv) {
 //'   columns of a \emph{time series} of data in place, without copying the data
 //'   in memory, using \code{RcppArmadillo}.
 //'
-//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+//'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
 //'   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
 //'   performs the same calculation as the standard \code{R} function
 //'   \code{scale()}, and it calculates the centrality (central tendency) as the
 //'   \emph{mean} and the dispersion as the \emph{standard deviation}.
 //'
-//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 //'   defaults), then \code{calc_scale()} standardizes the data.
 //'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 //'   only scales the data (divides it by the standard deviations).
-//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 //'   only demeans the data (subtracts the means).
 //'   
 //'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
@@ -1972,7 +1972,7 @@ void calc_invref(arma::mat& matrixv) {
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 //' # Demean the returns
 //' demeaned <- apply(retp, 2, function(x) (x-mean(x)))
-//' HighFreq::calc_scale(retp, scale=FALSE)
+//' HighFreq::calc_scale(retp, scalit=FALSE)
 //' all.equal(demeaned, retp, check.attributes=FALSE)
 //' # Calculate a time series of returns
 //' retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
@@ -1992,7 +1992,7 @@ void calc_invref(arma::mat& matrixv) {
 // [[Rcpp::export]]
 void calc_scale(arma::mat& timeser, 
                 bool center = true, 
-                bool scale = true, 
+                bool scalit = true, 
                 bool use_median = false) {
   
   arma::uword nrows = timeser.n_rows;
@@ -2000,7 +2000,7 @@ void calc_scale(arma::mat& timeser,
   
   // Perform a loop over the columns
   if (nrows > 2) {
-    if (scale and center) {
+    if (scalit and center) {
       if (use_median) {
         for (arma::uword it = 0; it < ncols; it++) {
           timeser.col(it) = (timeser.col(it) - center*arma::median(timeser.col(it)));
@@ -2012,7 +2012,7 @@ void calc_scale(arma::mat& timeser,
           timeser.col(it) = timeser.col(it)/arma::stddev(timeser.col(it));
         }  // end for
       }  // end if
-    } else if (scale and (not center)) {
+    } else if (scalit and (not center)) {
       if (use_median) {
         for (arma::uword it = 0; it < ncols; it++) {
           timeser.col(it) = timeser.col(it)/arma::median(arma::abs(timeser.col(it)));
@@ -2022,7 +2022,7 @@ void calc_scale(arma::mat& timeser,
           timeser.col(it) = timeser.col(it)/arma::stddev(timeser.col(it));
         }  // end for
       }  // end if
-    } else if ((not scale) and center) {
+    } else if ((not scalit) and center) {
       if (use_median) {
         for (arma::uword it = 0; it < ncols; it++) {
           timeser.col(it) = (timeser.col(it) - center*arma::median(timeser.col(it)));
@@ -2831,7 +2831,7 @@ arma::mat roll_sumw(const arma::mat& timeser,
 //' @export
 // [[Rcpp::export]]
 arma::mat run_mean(const arma::mat& timeser, 
-                   double lambdaf, // Decay factor which multiplies the past values 
+                   double lambdaf, // Decay factor which multiplies the past values
                    const arma::colvec& weightv = 0) {
   
   arma::uword nrows = timeser.n_rows;
@@ -2839,6 +2839,9 @@ arma::mat run_mean(const arma::mat& timeser,
   arma::uword nweights = weightv.n_elem;
   arma::mat meanm(nrows, ncols);
   double lambda1 = 1-lambdaf;
+  
+  // Copy the first row of the time series to the mean matrix
+  meanm.row(0) = timeser.row(0);
   
   if (!(timeser.has_nan() || timeser.has_inf())) {
     // No NA or Inf values
@@ -2865,7 +2868,7 @@ arma::mat run_mean(const arma::mat& timeser,
       meanm.row(nrows-1) = meanm.row(nrows-1)/meanw;
     }  // end if
   } else {
-    // Loop over the columns because of the NA or Inf values.
+    // Loop over the columns and check for any NA or Inf values
     // Calculate means with NA or Inf values
     double valuc = timeser(0, 0);
     meanm.row(0) = timeser.row(0);
@@ -3357,7 +3360,7 @@ arma::mat run_zscores(const arma::mat& timeser, double lambdaf) {
 //' # Calculate the trailing variance
 //' vart <- HighFreq::run_var_ohlc(ohlc, lambdaf=0.8)
 //' # Calculate the rolling variance
-//' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
+//' varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE)
 //' datav <- cbind(vart, varoll)
 //' colnames(datav) <- c("trailing", "rolling")
 //' colnamev <- colnames(datav)
@@ -3370,7 +3373,7 @@ arma::mat run_zscores(const arma::mat& timeser, double lambdaf) {
 //' library(microbenchmark)
 //' summary(microbenchmark(
 //'   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
-//'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
+//'   rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE),
 //'   times=10))[, c(1, 4, 5)]
 //' }  # end dontrun
 //' 
@@ -4962,9 +4965,9 @@ arma::mat calc_var_ag(const arma::mat& pricev,
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
 //'   default is \code{closel = 0}).
 //'   
-//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
-//'   \code{scale = TRUE}).
+//'   \code{scalit = TRUE}).
 //'
 //' @param \code{index} A \emph{vector} with the time index of the \emph{time
 //'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -4992,7 +4995,7 @@ arma::mat calc_var_ag(const arma::mat& pricev,
 //'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 //'   account for \emph{close-to-open} price jumps.
 //'
-//'   If \code{scale} is \code{TRUE} (the default), then the returns are
+//'   If \code{scalit} is \code{TRUE} (the default), then the returns are
 //'   divided by the differences of the time index (which scales the variance to
 //'   the units of variance per second squared). This is useful when calculating
 //'   the variance from minutes bar data, because dividing returns by the
@@ -5025,12 +5028,12 @@ arma::mat calc_var_ag(const arma::mat& pricev,
 //' indeks <- c(1, diff(xts::.index(ohlc)))
 //' # Calculate the variance of SPY returns, with scaling of the returns
 //' HighFreq::calc_var_ohlc(ohlc, 
-//'  method="yang_zhang", scale=TRUE, index=indeks)
+//'  method="yang_zhang", scalit=TRUE, index=indeks)
 //' # Calculate variance without accounting for overnight jumps
 //' HighFreq::calc_var_ohlc(ohlc, 
-//'  method="rogers_satchell", scale=TRUE, index=indeks)
+//'  method="rogers_satchell", scalit=TRUE, index=indeks)
 //' # Calculate the variance without scaling the returns
-//' HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
+//' HighFreq::calc_var_ohlc(ohlc, scalit=FALSE)
 //' # Calculate the variance by passing in the lagged close prices
 //' closel <- HighFreq::lagit(ohlc[, 4])
 //' all.equal(HighFreq::calc_var_ohlc(ohlc), 
@@ -5050,7 +5053,7 @@ arma::mat calc_var_ag(const arma::mat& pricev,
 double calc_var_ohlc(const arma::mat& ohlc, 
                      std::string method = "yang_zhang", 
                      arma::colvec closel = 0, 
-                     bool scale = true, // Divide the returns by time index
+                     bool scalit = true, // Divide the returns by time index
                      arma::colvec index = 0) {
   
   arma::uword nrows = ohlc.n_rows;
@@ -5061,7 +5064,7 @@ double calc_var_ohlc(const arma::mat& ohlc,
     return 0;
   }  // end if
   
-  if (!scale || (index.n_rows == 1)) {
+  if (!scalit || (index.n_rows == 1)) {
     index = arma::ones(nrows);
     // cout << "ohlc.n_rows = " << nrows << endl;
     // cout << "index.n_rows = " << index.n_rows << endl;
@@ -5145,9 +5148,9 @@ double calc_var_ohlc(const arma::mat& ohlc,
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
 //'   default is \code{closel = 0}).
 //'   
-//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
-//'   \code{scale = TRUE}).
+//'   \code{scalit = TRUE}).
 //'
 //' @param \code{index} A \emph{vector} with the time index of the \emph{time
 //'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -5199,12 +5202,12 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
                         arma::uword step, 
                         std::string method = "yang_zhang", 
                         arma::colvec closel = 0, 
-                        bool scale = true, // Divide the returns by time index
+                        bool scalit = true, // Divide the returns by time index
                         arma::colvec index = 0) {
   
   if (step == 1)
     // Calculate the variance without aggregations.
-    return calc_var_ohlc(ohlc, method, closel, scale, index);
+    return calc_var_ohlc(ohlc, method, closel, scalit, index);
   else {
     // Allocate aggregations, end points, and variance.
     arma::uword nrows = ohlc.n_rows;
@@ -5215,7 +5218,7 @@ double calc_var_ohlc_ag(const arma::mat& ohlc,
     for (arma::uword stub = 0; stub < step; stub++) {
       endd = calc_endpoints(nrows, step, stub, false);
       aggs = roll_ohlc(ohlc, endd);
-      vars.row(stub) = calc_var_ohlc(aggs, method, closel, scale, index);
+      vars.row(stub) = calc_var_ohlc(aggs, method, closel, scalit, index);
     }  // end for
     return arma::as_scalar(mean(vars));
   }  // end if
@@ -5607,9 +5610,9 @@ arma::mat calc_hurst(const arma::mat& timeser,
 //'   of the \emph{OHLC time series}.  This is an optional argument. (The
 //'   default is \code{closel = 0}).
 //'   
-//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period? (The default is
-//'   \code{scale = TRUE}).
+//'   \code{scalit = TRUE}).
 //'
 //' @param \code{index} A \emph{vector} with the time index of the \emph{time
 //'   series}.  This is an optional argument (the default is \code{index = 0}).
@@ -5656,11 +5659,11 @@ double calc_hurst_ohlc(const arma::mat& ohlc,
                        arma::uword step, 
                        std::string method = "yang_zhang", 
                        arma::colvec closel = 0, 
-                       bool scale = true, // Divide the returns by time index
+                       bool scalit = true, // Divide the returns by time index
                        arma::colvec index = 0) {
   
-  return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, closel, scale, index)/
-                 calc_var_ohlc_ag(ohlc, 1, method, closel, scale, index))/log(step);
+  return 0.5*log(calc_var_ohlc_ag(ohlc, step, method, closel, scalit, index)/
+                 calc_var_ohlc_ag(ohlc, 1, method, closel, scalit, index))/log(step);
   
 }  // end calc_hurst_ohlc
 
@@ -6327,9 +6330,9 @@ arma::mat roll_var(const arma::mat& timeser,
 //'    }
 //'    (The default is the \emph{"yang_zhang"} estimator.)
 //'    
-//' @param \code{scale} \emph{Boolean} argument: Should the returns be divided
+//' @param \code{scalit} \emph{Boolean} argument: Should the returns be divided
 //'   by the time index, the number of seconds in each period?  (The default is
-//'   \code{scale = TRUE}.)
+//'   \code{scalit = TRUE}.)
 //'   
 //' @param \code{index} A \emph{vector} with the time index of the \emph{time
 //'   series}.  This is an optional argument (the default is \code{index=0}).
@@ -6381,7 +6384,7 @@ arma::mat roll_var(const arma::mat& timeser,
 //'   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
 //'   account for \emph{close-to-open} price jumps.
 //'
-//'   If \code{scale} is \code{TRUE} (the default), then the returns are
+//'   If \code{scalit} is \code{TRUE} (the default), then the returns are
 //'   divided by the differences of the time index (which scales the variance to
 //'   the units of variance per second squared.) This is useful when calculating
 //'   the variance from minutes bar data, because dividing returns by the
@@ -6408,7 +6411,7 @@ arma::mat roll_var(const arma::mat& timeser,
 //' varoll <- HighFreq::roll_var_ohlc(ohlc, 
 //'                               step=1, lookb=21, 
 //'                               method="yang_zhang", 
-//'                               index=indeks, scale=TRUE)
+//'                               index=indeks, scalit=TRUE)
 //' # Daily OHLC prices
 //' ohlc <- rutils::etfenv$VTI
 //' indeks <- c(1, diff(xts::.index(ohlc)))
@@ -6416,7 +6419,7 @@ arma::mat roll_var(const arma::mat& timeser,
 //' varoll <- HighFreq::roll_var_ohlc(ohlc, 
 //'                               step=5, lookb=4, 
 //'                               method="yang_zhang", 
-//'                               index=indeks, scale=TRUE)
+//'                               index=indeks, scalit=TRUE)
 //' # Same calculation in R
 //' nrows <- NROW(ohlc)
 //' closel = HighFreq::lagit(ohlc[, 4])
@@ -6428,7 +6431,7 @@ arma::mat roll_var(const arma::mat& timeser,
 //'   sub_ohlc = ohlc[rangev, ]
 //'   sub_close = closel[rangev]
 //'   sub_index = indeks[rangev]
-//'   HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scale=TRUE, index=sub_index)
+//'   HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scalit=TRUE, index=sub_index)
 //' })  # end sapply
 //' varollr <- c(0, varollr)
 //' all.equal(drop(var_rolling), varollr)
@@ -6443,7 +6446,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
                         arma::uword lookb = 1, 
                         arma::uword stub = 0,
                         std::string method = "yang_zhang", 
-                        bool scale = true, // Divide the returns by time index
+                        bool scalit = true, // Divide the returns by time index
                         arma::colvec index = 0) {
   
   // Allocate end points
@@ -6476,8 +6479,8 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   arma::colvec closep = ohlc.col(3);
   arma::colvec closel = lagit(closep, 1, false);
   
-  // Set the time index to 1 if scale = FALSE
-  if (!scale || (index.n_rows == 1)) {
+  // Set the time index to 1 if scalit = FALSE
+  if (!scalit || (index.n_rows == 1)) {
     index = arma::ones(nrows);
   }  // end if
   
@@ -6493,7 +6496,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
       sub_close = closel.rows(startpts(ep), endpts(ep));
       sub_index = index.subvec(startpts(ep), endpts(ep));
       // Calculate variance
-      varm.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
+      varm.row(ep) = calc_var_ohlc(sub_ohlc, method, sub_close, scalit, sub_index);
     }  // end if
   }  // end for
   
@@ -6504,7 +6507,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   //   arma::mat sub_ohlc = ohlc.rows(0, it);
   //   arma::colvec sub_close = closel.rows(0, it);
   //   arma::colvec sub_index = index.subvec(0, it);
-  //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
+  //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scalit, sub_index);
   // }  // end for
   
   // Remaining period
@@ -6512,7 +6515,7 @@ arma::vec roll_var_ohlc(const arma::mat& ohlc,
   //   arma::mat sub_ohlc = ohlc.rows(it-lookb+1, it);
   //   arma::colvec sub_close = closel.rows(it-lookb+1, it);
   //   arma::colvec sub_index = index.subvec(it-lookb+1, it);
-  //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scale, sub_index);
+  //   variance(it) = calc_var_ohlc(sub_ohlc, method, sub_close, scalit, sub_index);
   // }  // end for
   
   return varm;
@@ -6983,7 +6986,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //'   the columns so that they have zero mean or median (the default is
 //'   \code{TRUE}).
 //' 
-//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
+//' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale the
 //'   columns so that they have unit standard deviation or MAD (the default is
 //'   \code{TRUE}).
 //' 
@@ -7008,16 +7011,16 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 //'   function \code{calc_scale()}.  It assigns the last row of the standardized
 //'   subset \emph{matrix} to the return matrix.
 //'   
-//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+//'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
 //'   \code{use_median} is \code{FALSE} (the defaults), then
 //'   \code{calc_scale()} performs the same calculation as the function
 //'   \code{roll::roll_scale()}.
 //'   
-//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 //'   defaults), then \code{calc_scale()} standardizes the data.
 //'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 //'   only scales the data (divides it by the standard deviations).
-//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 //'   only demeans the data (subtracts the means).
 //'   
 //'   If the argument \code{use_median} is \code{TRUE}, then it calculates the
@@ -7040,7 +7043,7 @@ arma::mat roll_reg(const arma::mat& respv, // Response vector
 arma::mat roll_scale(const arma::mat& matrix, 
                      arma::uword lookb,
                      bool center = true, 
-                     bool scale = true, 
+                     bool scalit = true, 
                      bool use_median = false) {
   
   arma::uword nrows = matrix.n_rows;
@@ -7051,18 +7054,19 @@ arma::mat roll_scale(const arma::mat& matrix,
   scaledmat.row(0) = matrix.row(0);
   for (arma::uword it = 1; it < lookb; it++) {
     sub_mat = matrix.rows(0, it);
-    calc_scale(sub_mat, center, scale, use_median);
+    calc_scale(sub_mat, center, scalit, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   // Perform loop over the remaining rows
   for (arma::uword it = lookb; it < nrows; it++) {
     sub_mat = matrix.rows(it-lookb+1, it);
-    calc_scale(sub_mat, center, scale, use_median);
+    calc_scale(sub_mat, center, scalit, use_median);
     scaledmat.row(it) = sub_mat.row(sub_mat.n_rows-1);
   }  // end for
   
   return scaledmat;
+  
 }  // end roll_scale
 
 
@@ -7080,9 +7084,9 @@ arma::mat roll_scale(const arma::mat& matrix,
 //'   the columns so that they have zero mean or median (the default is
 //'   \code{TRUE}).
 //' 
-//' @param \code{scale} A \emph{Boolean} argument: if \code{TRUE} then scale the
-//'   columns so that they have unit standard deviation or MAD (the default is
-//'   \code{TRUE}).
+//' @param \code{scalit} A \emph{Boolean} argument: if \code{TRUE} then scale
+//'   the columns so that they have unit standard deviation or MAD (the default
+//'   is \code{TRUE}).
 //' 
 //' @return Void (no return value - modifies the data in place).
 //'
@@ -7118,11 +7122,11 @@ arma::mat roll_scale(const arma::mat& matrix,
 //'     r^{\prime}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
 //'   }
 //'
-//'   If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+//'   If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
 //'   defaults), then \code{calc_scale()} standardizes the data.
 //'   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
 //'   only scales the data (divides it by the standard deviations).
-//'   If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+//'   If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
 //'   only demeans the data (subtracts the means).
 //'   
 //'   The value of the decay factor \eqn{\lambda} must be in the range between
@@ -7183,26 +7187,26 @@ arma::mat roll_scale(const arma::mat& matrix,
 void run_scale(arma::mat& timeser, 
                double lambdaf, // Decay factor which multiplies the past values
                bool center = true, 
-               bool scale = true) {
+               bool scalit = true) {
   
   arma::uword nrows = timeser.n_rows;
   double lambda1 = 1-lambdaf;
   arma::mat meanm = timeser.row(0);
   arma::mat vars = arma::square(timeser.row(0));
   
-  if (scale and center) {
+  if (scalit and center) {
     for (arma::uword it = 1; it < nrows; it++) {
       meanm = lambdaf*meanm + lambda1*timeser.row(it);
       vars = lambdaf*vars + lambda1*arma::square(timeser.row(it) - meanm);
       timeser.row(it) = (timeser.row(it) - meanm)/arma::sqrt(vars);
     }  // end for
-  } else if (scale and (not center)) {
+  } else if (scalit and (not center)) {
     for (arma::uword it = 1; it < nrows; it++) {
       meanm = lambdaf*meanm + lambda1*timeser.row(it);
       vars = lambdaf*vars + lambda1*arma::square(timeser.row(it) - meanm);
       timeser.row(it) = timeser.row(it)/arma::sqrt(vars);
     }  // end for
-  } else if ((not scale) and center) {
+  } else if ((not scalit) and center) {
     for (arma::uword it = 1; it < nrows; it++) {
       meanm = lambdaf*meanm + lambda1*timeser.row(it);
       timeser.row(it) = (timeser.row(it) - meanm);

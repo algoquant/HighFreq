@@ -10,8 +10,8 @@ roll_hurst(ohlc, lookb = 11)
 \arguments{
 \item{\code{ohlc}}{An \emph{OHLC} time series of prices in \emph{xts} format.}
 
-\item{\code{lookb}}{The size of the look-back interval, equal to the number of 
-rows of data used for aggregating the \emph{OHLC} prices.}
+\item{\code{lookb}}{The size of the look-back interval, equal to the number
+of rows of data used for aggregating the \emph{OHLC} prices.}
 }
 \value{
 An \emph{xts} time series with a single column and the same number of
@@ -45,7 +45,7 @@ The function \code{roll_hurst()} calculates a time series of
 }
 \examples{
 # Calculate rolling Hurst for SPY in March 2009
-hurst_rolling <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], lookb=11)
-chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
+hurstr <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], lookb=11)
+chart_Series(hurstr["2009-03-10/2009-03-12"], name="SPY hurstr")
 
 }

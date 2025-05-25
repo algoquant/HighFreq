@@ -5,7 +5,7 @@
 \title{Scrub a single day of \emph{TAQ} data in \emph{xts} format, without
 aggregation.}
 \usage{
-scrub_taq(taq, lookb = 51, vol_mult = 2, tzone = "America/New_York")
+scrub_taq(taq, lookb = 51, volm = 2, tzone = "America/New_York")
 }
 \arguments{
 \item{\code{taq}}{\emph{TAQ} A time series in \emph{xts} format.}
@@ -25,10 +25,10 @@ The function \code{scrub_taq()} performs the same scrubbing
   the \emph{TAQ} data in \emph{xts} format.
 }
 \examples{
-taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, lookb=11, vol_mult=1)
+taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, lookb=11, volm=1)
 # Create random TAQ prices and scrub them
 taq <- HighFreq::random_taq()
 taq <- HighFreq::scrub_taq(taq=taq)
-taq <- HighFreq::scrub_taq(taq=taq, lookb=11, vol_mult=1)
+taq <- HighFreq::scrub_taq(taq=taq, lookb=11, volm=1)
 
 }

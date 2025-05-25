@@ -8,7 +8,7 @@
 scrub_agg(
   taq,
   lookb = 51,
-  vol_mult = 2,
+  volm = 2,
   period = "minutes",
   tzone = "America/New_York"
 )

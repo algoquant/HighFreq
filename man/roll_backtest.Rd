@@ -19,23 +19,23 @@ roll_backtest(
 \item{...}{additional parameters to the functions \code{train_func()} and
 \code{trade_func()}.}
 
-\item{\code{xtsv}}{A time series of prices, asset returns, trading volumes, and
-other data, in \emph{xts} format.}
+\item{\code{xtsv}}{A time series of prices, asset returns, trading volumes,
+and other data, in \emph{xts} format.}
 
-\item{\code{train_func}}{The name of the function for training (calibrating) a
-forecasting model, to be applied over a rolling look-back interval.}
+\item{\code{train_func}}{The name of the function for training (calibrating)
+a forecasting model, to be applied over a rolling look-back interval.}
 
-\item{\code{trade_func}}{The name of the trading model function, to be applied over
-a rolling look-forward interval.}
+\item{\code{trade_func}}{The name of the trading model function, to be
+applied over a rolling look-forward interval.}
 
-\item{\code{lookb}}{The size of the look-back interval, equal to the number of
-rows of data used for training the forecasting model.}
+\item{\code{lookb}}{The size of the look-back interval, equal to the number
+of rows of data used for training the forecasting model.}
 
-\item{\code{look_forward}}{The size of the look-forward interval, equal to the number
-of rows of data used for trading the strategy.}
+\item{\code{look_forward}}{The size of the look-forward interval, equal to
+the number of rows of data used for trading the strategy.}
 
-\item{\code{endpoints}}{A vector of end points along the rows of the \code{xtsv}
-time series, given as either integers or dates.}
+\item{\code{endpoints}}{A vector of end points along the rows of the
+\code{xtsv} time series, given as either integers or dates.}
 }
 \value{
 An \emph{xts} time series with the number of rows equal to the number

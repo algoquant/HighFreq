@@ -94,7 +94,11 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] In HighFreq::roll_var(), return the rolling mean, similar to HighFreq::run_var()
++ [ ] Update sim_portfoptim() to run_portf().
+
++ [ ] Add the function run_vard() for the downside deviation.
+
++ [ ] In HighFreq::roll_var(), return the rolling mean, similar to HighFreq::run_var().
 
 + [ ] If lambdaf=1 then use expanding window since inception, instead of EMA.
 
@@ -588,6 +592,10 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] In the C++ functions, change the argument scale, to scalit.  To be consistent with the R functions.
+
++ [x] Rename season_ality() to calc_season().
 
 + [x] Rename back_test() back to roll_portf()
 

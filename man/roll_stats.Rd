@@ -48,10 +48,10 @@ The function \code{roll_stats()} calculates a vector of statistics
 }
 \examples{
 # Calculate time series of rolling variance and skew estimates
-var_rolling <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
-skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
-skew_rolling <- skew_rolling/(var_rolling)^(1.5)
-skew_rolling[1, ] <- 0
-skew_rolling <- rutils::na_locf(skew_rolling)
+varoll <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
+skewroll <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
+skewroll <- skewroll/(varoll)^(1.5)
+skewroll[1, ] <- 0
+skewroll <- rutils::na_locf(skewroll)
 
 }

@@ -6,16 +6,16 @@
 single-column \emph{xts} time series or vector, over a rolling look-back
 interval.}
 \usage{
-which_extreme(xtsv, lookb = 51, vol_mult = 2)
+which_extreme(xtsv, lookb = 51, volm = 2)
 }
 \arguments{
-\item{\code{xtsv}}{A single-column \emph{xts} time series, or a \emph{numeric} or
-\emph{Boolean} vector.}
+\item{\code{xtsv}}{A single-column \emph{xts} time series, or a
+\emph{numeric} or \emph{Boolean} vector.}
 
-\item{\code{lookb}}{The number of data points in rolling look-back interval for 
-estimating rolling quantile.}
+\item{\code{lookb}}{The number of data points in rolling look-back interval
+for estimating rolling quantile.}
 
-\item{\code{vol_mult}}{The quantile multiplier.}
+\item{\code{volm}}{The quantile multiplier.}
 }
 \value{
 A \emph{Boolean} vector with the same number of rows as the input
@@ -43,7 +43,7 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
   trailing distribution of values is closer to normal (without fat tails),
   then there are no extreme values.
 
-  The quantile multiplier \code{vol_mult} controls the threshold at which
+  The quantile multiplier \code{volm} controls the threshold at which
   values are identified as extreme. Smaller quantile multiplier values will
   cause more values to be identified as extreme.
 }
@@ -52,8 +52,8 @@ The function \code{which_extreme()} calculates a \emph{Boolean}
 taq <- HighFreq::SPY_TAQ
 # scrub quotes with suspect bid-ask spreads
 bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-sus_pect <- which_extreme(bidask, lookb=51, vol_mult=3)
+jumpv <- which_extreme(bidask, lookb=51, volm=3)
 # Remove suspect values
-taq <- taq[!sus_pect]
+taq <- taq[!jumpv]
 
 }

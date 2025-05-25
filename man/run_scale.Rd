@@ -6,7 +6,7 @@
 over time and in place, without copying the data in memory, using
 \code{RcppArmadillo}.}
 \usage{
-run_scale(timeser, lambdaf, center = TRUE, scale = TRUE)
+run_scale(timeser, lambdaf, center = TRUE, scalit = TRUE)
 }
 \arguments{
 \item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
@@ -17,9 +17,9 @@ run_scale(timeser, lambdaf, center = TRUE, scale = TRUE)
 the columns so that they have zero mean or median (the default is
 \code{TRUE}).}
 
-\item{\code{scale}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
-columns so that they have unit standard deviation or MAD (the default is
-\code{TRUE}).}
+\item{\code{scalit}}{A \emph{Boolean} argument: if \code{TRUE} then scale
+the columns so that they have unit standard deviation or MAD (the default
+is \code{TRUE}).}
 }
 \value{
 Void (no return value - modifies the data in place).
@@ -61,11 +61,11 @@ The function \code{run_scale()} performs a trailing standardization
     r^{\prime}_t = \frac{r_t - \bar{r}_t}{\sigma_t}
   }
 
-  If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+  If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
   defaults), then \code{calc_scale()} standardizes the data.
   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
   only scales the data (divides it by the standard deviations).
-  If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+  If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
   only demeans the data (subtracts the means).
   
   The value of the decay factor \eqn{\lambda} must be in the range between

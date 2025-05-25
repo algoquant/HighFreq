@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_taq}
 \alias{random_taq}
-\title{Calculate a random \emph{TAQ} time series of prices and trading volumes, in
+\title{Simulate a random \emph{TAQ} time series of prices and trading volumes, in
 \emph{xts} format.}
 \usage{
 random_taq(
@@ -32,7 +32,7 @@ An \emph{xts} time series, with time index equal to the input
   and trade prices, and the trade volume.
 }
 \description{
-Calculate a \emph{TAQ} time series of random prices following geometric
+Simulate a \emph{TAQ} time series of random prices following geometric
 Brownian motion, combined with random trading volumes.
 }
 \details{

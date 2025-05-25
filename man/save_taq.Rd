@@ -7,10 +7,10 @@ it to multiple \sQuote{\code{*.RData}} files.}
 \usage{
 save_taq(
   symbol,
-  data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/",
+  dirin = "E:/mktdata/sec/",
+  dirout = "E:/output/data/",
   lookb = 51,
-  vol_mult = 2,
+  volm = 2,
   tzone = "America/New_York"
 )
 }
@@ -28,7 +28,7 @@ The function \code{save_taq()} loads multiple days of \emph{TAQ}
   the input file names. The \emph{TAQ} data files are assumed to be stored in
   separate directories for each \sQuote{\code{symbol}}. Each
   \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
-  in the \sQuote{\code{data_dir}} directory.
+  in the \sQuote{\code{dirin}} directory.
   Each \sQuote{\code{symbol}} directory contains multiple daily
   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
   data.

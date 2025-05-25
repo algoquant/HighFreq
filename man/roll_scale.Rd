@@ -5,7 +5,7 @@
 \title{Perform a rolling standardization (centering and scaling) of the columns of
 a \emph{time series} of data using \code{RcppArmadillo}.}
 \usage{
-roll_scale(matrix, lookb, center = TRUE, scale = TRUE, use_median = FALSE)
+roll_scale(matrix, lookb, center = TRUE, scalit = TRUE, use_median = FALSE)
 }
 \arguments{
 \item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
@@ -17,7 +17,7 @@ number of rows of data used in the scaling.}
 the columns so that they have zero mean or median (the default is
 \code{TRUE}).}
 
-\item{\code{scale}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
+\item{\code{scalit}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
 columns so that they have unit standard deviation or MAD (the default is
 \code{TRUE}).}
 
@@ -47,16 +47,16 @@ The function \code{roll_scale()} performs a rolling standardization
   function \code{calc_scale()}.  It assigns the last row of the standardized
   subset \emph{matrix} to the return matrix.
   
-  If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+  If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
   \code{use_median} is \code{FALSE} (the defaults), then
   \code{calc_scale()} performs the same calculation as the function
   \code{roll::roll_scale()}.
   
-  If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+  If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
   defaults), then \code{calc_scale()} standardizes the data.
   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
   only scales the data (divides it by the standard deviations).
-  If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+  If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
   only demeans the data (subtracts the means).
   
   If the argument \code{use_median} is \code{TRUE}, then it calculates the

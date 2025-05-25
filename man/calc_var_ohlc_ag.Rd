@@ -10,7 +10,7 @@ calc_var_ohlc_ag(
   step,
   method = "yang_zhang",
   closel = 0L,
-  scale = TRUE,
+  scalit = TRUE,
   index = 0L
 )
 }
@@ -36,9 +36,9 @@ estimator for calculating the variance.  The estimators include:
 of the \emph{OHLC time series}.  This is an optional argument. (The
 default is \code{closel = 0}).}
 
-\item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
+\item{\code{scalit}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
-\code{scale = TRUE}).}
+\code{scalit = TRUE}).}
 
 \item{\code{index}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument (the default is \code{index = 0}).}

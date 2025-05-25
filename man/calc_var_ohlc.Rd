@@ -9,7 +9,7 @@ calc_var_ohlc(
   ohlc,
   method = "yang_zhang",
   closel = 0L,
-  scale = TRUE,
+  scalit = TRUE,
   index = 0L
 )
 }
@@ -32,9 +32,9 @@ estimator for calculating the variance.  The estimators include:
 of the \emph{OHLC time series}.  This is an optional argument. (The
 default is \code{closel = 0}).}
 
-\item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
+\item{\code{scalit}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period? (The default is
-\code{scale = TRUE}).}
+\code{scalit = TRUE}).}
 
 \item{\code{index}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument (the default is \code{index = 0}).}
@@ -67,7 +67,7 @@ The function \code{calc_var_ohlc()} calculates the variance from all the
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  If \code{scale} is \code{TRUE} (the default), then the returns are
+  If \code{scalit} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared). This is useful when calculating
   the variance from minutes bar data, because dividing returns by the
@@ -100,12 +100,12 @@ ohlc <- log(HighFreq::SPY)
 indeks <- c(1, diff(xts::.index(ohlc)))
 # Calculate the variance of SPY returns, with scaling of the returns
 HighFreq::calc_var_ohlc(ohlc, 
- method="yang_zhang", scale=TRUE, index=indeks)
+ method="yang_zhang", scalit=TRUE, index=indeks)
 # Calculate variance without accounting for overnight jumps
 HighFreq::calc_var_ohlc(ohlc, 
- method="rogers_satchell", scale=TRUE, index=indeks)
+ method="rogers_satchell", scalit=TRUE, index=indeks)
 # Calculate the variance without scaling the returns
-HighFreq::calc_var_ohlc(ohlc, scale=FALSE)
+HighFreq::calc_var_ohlc(ohlc, scalit=FALSE)
 # Calculate the variance by passing in the lagged close prices
 closel <- HighFreq::lagit(ohlc[, 4])
 all.equal(HighFreq::calc_var_ohlc(ohlc), 

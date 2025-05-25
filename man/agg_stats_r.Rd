@@ -44,7 +44,7 @@ The function \code{agg_stats_r()} calculates a single number
 }
 \examples{
 # Calculate weighted average variance for SPY (single number)
-variance <- agg_stats_r(ohlc=HighFreq::SPY, calc_bars="ohlc_variance")
+varv <- agg_stats_r(ohlc=HighFreq::SPY, calc_bars="ohlc_variance")
 # Calculate time series of daily skew estimates for SPY
 skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
 

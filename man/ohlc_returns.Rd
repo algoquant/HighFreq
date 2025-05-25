@@ -8,16 +8,17 @@
 ohlc_returns(xtsv, lagg = 1, colnum = 4, scalit = TRUE)
 }
 \arguments{
-\item{\code{xtsv}}{An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.}
+\item{\code{xtsv}}{An \emph{xts} time series of either \emph{TAQ} or
+\emph{OHLC} data.}
 
-\item{\code{lagg}}{An integer equal to the number of time periods of lag. (default
-is 1)}
+\item{\code{lagg}}{An integer equal to the number of time periods of lag
+(default is 1).}
 
-\item{\code{colnum}}{The column number to extract from the \emph{OHLC} data.
-(default is \code{4}, or the \emph{Close} prices column)}
+\item{\code{colnum}}{The column number to extract from the \emph{OHLC} data
+(default is \code{4}, or the \emph{Close} prices column).}
 
-\item{\code{scalit}}{\emph{Boolean} argument: should the returns be divided by the
-number of seconds in each period? (default is \code{TRUE})}
+\item{\code{scalit}}{\emph{Boolean} argument: should the returns be divided
+by the number of seconds in each period? (default is \code{TRUE})}
 }
 \value{
 A single-column \emph{xts} time series of returns.

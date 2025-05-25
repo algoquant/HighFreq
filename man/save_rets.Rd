@@ -3,15 +3,15 @@
 \name{save_rets}
 \alias{save_rets}
 \title{Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
-single symbol. Calculate returns and save them to a single
+single symbol. Calculate the returns and save them to a single
 \sQuote{\code{*.RData}} file.}
 \usage{
 save_rets(
   symbol,
-  data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/",
+  dirin = "E:/mktdata/sec/",
+  dirout = "E:/output/data/",
   lookb = 51,
-  vol_mult = 2,
+  volm = 2,
   period = "minutes",
   tzone = "America/New_York"
 )
@@ -21,7 +21,7 @@ A time series of returns and volume in \emph{xts} format.
 }
 \description{
 Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
-single symbol. Calculate returns and save them to a single
+single symbol. Calculate the returns and save them to a single
 \sQuote{\code{*.RData}} file.
 }
 \details{
@@ -32,7 +32,7 @@ The function \code{save_rets} loads multiple days of \emph{TAQ}
   to a file called \sQuote{\code{symbol.rets.RData}}.
   The \emph{TAQ} data files are assumed to be stored in separate directories
   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{dirin}}
   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
   data.

@@ -1,8 +1,8 @@
 ##########################################################################
-#' Calculate a random \emph{TAQ} time series of prices and trading volumes, in
+#' Simulate a random \emph{TAQ} time series of prices and trading volumes, in
 #' \emph{xts} format.
 #'
-#' Calculate a \emph{TAQ} time series of random prices following geometric
+#' Simulate a \emph{TAQ} time series of random prices following geometric
 #' Brownian motion, combined with random trading volumes.
 #'
 #' @param \code{volat} The volatility per period of the \code{datev} time index
@@ -36,6 +36,7 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
   datev=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
              to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"),
   bidask=0.001, ...) {
+  
   nrows <- NROW(datev)
   # Create xts of random prices following geometric Brownian motion
   taq <- xts(exp(cumsum(volat*rnorm(nrows) + drift - volat^2/2)),
@@ -45,34 +46,39 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
   # Create TAQ data from bid and offer prices
   taq <- merge(taq*(1-bidask), taq*(1+bidask))
   # Add traded price to TAQ data
-  r_unif <- runif(nrows)
-  taq <- merge(taq, r_unif*taq[, 1] + (1-r_unif)*taq[, 2])
+  pricer <- runif(nrows)
+  taq <- merge(taq, pricer*taq[, 1] + (1-pricer)*taq[, 2])
   # Add trade volume column
   taq <- merge(taq, sample(x=10*(2:18), size=nrows, replace=TRUE))
   colnames(taq) <- c("Bid.Price", "Ask.Price", "Trade.Price", "Volume")
-  taq
+  return(taq)
+  
 }  # end random_taq
 
 
 
 
 ##########################################################################
-#' Calculate a random \emph{OHLC} time series of prices and trading volumes, in
+#' Simulate a random \emph{OHLC} time series of prices and trading volumes, in
 #' \emph{xts} format.
 #'
-#' Calculate a random \emph{OHLC} time series either by simulating random prices
+#' Simulate a random \emph{OHLC} time series either by simulating random prices
 #' following geometric Brownian motion, or by randomly sampling from an input
 #' time series.
 #'
-#' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes, in
-#'   \emph{xts} format (default is \emph{NULL}).
+#' @param \code{ohlc} An \emph{OHLC} time series of prices and trading volumes,
+#'   in \emph{xts} format (default is \emph{NULL}).
+#'   
 #' @param \code{volat} The volatility per period of the \code{datev} time index
 #'   (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).
-#' @param \code{drift} The drift per period of the \code{datev} time index (default
-#'   is 0.0).
+#'   
+#' @param \code{drift} The drift per period of the \code{datev} time index
+#'   (default is 0.0).
+#'   
 #' @param \code{datev} The time index for the \emph{OHLC} time series.
-#' @param \code{reducit} \emph{Boolean} argument: should \code{ohlc} time series be
-#'   transformed to reduced form? (default is \code{TRUE})
+#' 
+#' @param \code{reducit} \emph{Boolean} argument: should \code{ohlc} time series
+#'   be transformed to reduced form? (default is \code{TRUE})
 #'
 #' @return An \emph{xts} time series with the same dimensions and the same time
 #'   index as the input \code{ohlc} time series.
@@ -105,6 +111,7 @@ random_taq <- function(volat=6.5e-5, drift=0.0,
 random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
     datev=seq(from=as.POSIXct(paste(Sys.Date()-3, "09:30:00")),
       to=as.POSIXct(paste(Sys.Date()-1, "16:00:00")), by="1 sec"), ...) {
+  
   if (is.null(ohlc)) {
     nrows <- NROW(datev)
     # Create xts of random prices following geometric Brownian motion
@@ -112,7 +119,7 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
     # Add trade volume column
     xtsv <- merge(xtsv, volume=sample(x=10*(2:18), size=nrows, replace=TRUE))
     # Aggregate to minutes OHLC data
-    to.period(x=xtsv, period="minutes")
+    return(to.period(x=xtsv, period="minutes"))
   } else {
     ohlc <- log(ohlc)  # transform to normal
     if (reducit)  # Calculate reduced form of ohlc
@@ -120,8 +127,9 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
     # randomly sample from the rows of ohlc
     ohlc <- xts(coredata(ohlc)[c(1, sample(x=2:NROW(ohlc), replace=TRUE)), ], order.by=index(ohlc))
     # Return standard form of randomized ohlc
-    exp(rutils::diffohlc(ohlc, reducit=FALSE))
-  }
+    return(exp(rutils::diffohlc(ohlc, reducit=FALSE)))
+  } # end if
+  
 }  # end random_ohlc
 
 
@@ -161,15 +169,17 @@ random_ohlc <- function(ohlc=NULL, reducit=TRUE, volat=6.5e-5, drift=0.0,
 #' @export
 
 remove_jumps <- function(ohlc) {
-  # find time index of the periods greater than 60 seconds
-  which_periods <- which(c(1, diff(xts::.index(ohlc))) > 60)
+  
+  # Find time index of the periods greater than 60 seconds
+  timev <- which(c(1, diff(xts::.index(ohlc))) > 60)
   # Calculate cumulative sum of overnight price jumps
-  jump_s <- numeric(NROW(ohlc))
-  jump_s[which_periods] <- as.numeric(ohlc[which_periods, 1]) - as.numeric(ohlc[which_periods-1, 4])
-  jump_s <- cumsum(jump_s)
+  jumpv <- numeric(NROW(ohlc))
+  jumpv[timev] <- as.numeric(ohlc[timev, 1]) - as.numeric(ohlc[timev-1, 4])
+  jumpv <- cumsum(jumpv)
   # subtract overnight price jumps from OHLC
-  ohlc[, 1:4] <- coredata(ohlc[, 1:4]) - jump_s
-  ohlc
+  ohlc[, 1:4] <- coredata(ohlc[, 1:4]) - jumpv
+  return(ohlc)
+  
 }  # end remove_jumps
 
 
@@ -179,13 +189,17 @@ remove_jumps <- function(ohlc) {
 #' Calculate single period percentage returns from either \emph{TAQ} or
 #' \emph{OHLC} prices.
 #'
-#' @param \code{xtsv} An \emph{xts} time series of either \emph{TAQ} or \emph{OHLC} data.
-#' @param \code{lagg} An integer equal to the number of time periods of lag. (default
-#'   is 1)
-#' @param \code{colnum} The column number to extract from the \emph{OHLC} data.
-#'   (default is \code{4}, or the \emph{Close} prices column)
-#' @param \code{scalit} \emph{Boolean} argument: should the returns be divided by the
-#'   number of seconds in each period? (default is \code{TRUE})
+#' @param \code{xtsv} An \emph{xts} time series of either \emph{TAQ} or
+#'   \emph{OHLC} data.
+#' 
+#' @param \code{lagg} An integer equal to the number of time periods of lag
+#'   (default is 1).
+#'   
+#' @param \code{colnum} The column number to extract from the \emph{OHLC} data
+#'   (default is \code{4}, or the \emph{Close} prices column).
+#'   
+#' @param \code{scalit} \emph{Boolean} argument: should the returns be divided
+#'   by the number of seconds in each period? (default is \code{TRUE})
 #'
 #' @return A single-column \emph{xts} time series of returns.
 #'
@@ -225,20 +239,22 @@ remove_jumps <- function(ohlc) {
 #' @export
 
 ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
+  
   # Return NULL if no data
   if (is.null(xtsv))  return(NULL)
   # Calculate mid prices
   if (NCOL(xtsv)==6)  # TAQ data has 6 columns
-    returns <- 0.5 * (xtsv[, "Bid.Price"] + xtsv[, "Ask.Price"])
+    retp <- 0.5 * (xtsv[, "Bid.Price"] + xtsv[, "Ask.Price"])
   else
-    returns <- xtsv[, colnum]  # OHLC data
-  # Calculate returns
-  returns <- rutils::diffit(log(returns), lagg=lagg)
+    retp <- xtsv[, colnum]  # OHLC data
+  # Calculate log returns
+  retp <- rutils::diffit(log(retp), lagg=lagg)
   if (scalit)
-    returns <- returns / c(rep(1, lagg), diff(xts::.index(returns), lagg=lagg))
-  returns[1:lagg, ] <- 0
-  # Colnames(returns) <- paste0(rutils::get_name(colnames(xtsv)[1]), ".returns")
-  returns
+    retp <- retp / c(rep(1, lagg), diff(xts::.index(retp), lagg=lagg))
+  retp[1:lagg, ] <- 0
+  # Colnames(retp) <- paste0(rutils::get_name(colnames(xtsv)[1]), ".retp")
+  return(retp)
+  
 }  # end ohlc_returns
 
 
@@ -249,11 +265,13 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' single-column \emph{xts} time series or vector, over a rolling look-back
 #' interval.
 #'
-#' @param \code{xtsv} A single-column \emph{xts} time series, or a \emph{numeric} or
-#'   \emph{Boolean} vector.
-#' @param \code{lookb} The number of data points in rolling look-back interval for 
-#'   estimating rolling quantile.
-#' @param \code{vol_mult} The quantile multiplier.
+#' @param \code{xtsv} A single-column \emph{xts} time series, or a
+#'   \emph{numeric} or \emph{Boolean} vector.
+#'   
+#' @param \code{lookb} The number of data points in rolling look-back interval
+#'   for estimating rolling quantile.
+#'   
+#' @param \code{volm} The quantile multiplier.
 #'
 #' @return A \emph{Boolean} vector with the same number of rows as the input
 #'   time series or vector.
@@ -274,7 +292,7 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #'   trailing distribution of values is closer to normal (without fat tails),
 #'   then there are no extreme values.
 #'
-#'   The quantile multiplier \code{vol_mult} controls the threshold at which
+#'   The quantile multiplier \code{volm} controls the threshold at which
 #'   values are identified as extreme. Smaller quantile multiplier values will
 #'   cause more values to be identified as extreme.
 #'
@@ -283,31 +301,33 @@ ohlc_returns <- function(xtsv, lagg=1, colnum=4, scalit=TRUE) {
 #' taq <- HighFreq::SPY_TAQ
 #' # scrub quotes with suspect bid-ask spreads
 #' bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
-#' sus_pect <- which_extreme(bidask, lookb=51, vol_mult=3)
+#' jumpv <- which_extreme(bidask, lookb=51, volm=3)
 #' # Remove suspect values
-#' taq <- taq[!sus_pect]
+#' taq <- taq[!jumpv]
 #' 
 #' @export
 
-which_extreme <- function(xtsv, lookb=51, vol_mult=2) {
+which_extreme <- function(xtsv, lookb=51, volm=2) {
+  
 # Calculate volatility as rolling quantile
-  quantilev <- caTools::runquantile(x=abs(as.numeric(xtsv)), k=lookb,
+  quantv <- caTools::runquantile(x=abs(as.numeric(xtsv)), k=lookb,
                         probs=0.9, endrule="constant", align="center")
-#  quantilev <- xts(quantilev, order.by=index(xtsv))
-#  colnames(quantilev) <- "volat"
+#  quantv <- xts(quantv, order.by=index(xtsv))
+#  colnames(quantv) <- "volat"
 # Carry forward non-zero volatility values
-  quantilev[quantilev==0] <- NA
-  quantilev[1] <- 1
-  quantilev <- rutils::na_locf(quantilev)
-#  quantilev <- rutils::na_locf(quantilev, fromLast=TRUE)
+  quantv[quantv==0] <- NA
+  quantv[1] <- 1
+  quantv <- rutils::na_locf(quantv)
+#  quantv <- rutils::na_locf(quantv, fromLast=TRUE)
 
 # extreme value if xtsv greater than scaled volatility
-  ex_treme <- (abs(xtsv) > 2*vol_mult*quantilev)
-  ex_treme[1] <- FALSE
-#  colnames(ex_treme) <- "suspect"
+  exv <- (abs(xtsv) > 2*volm*quantv)
+  exv[1] <- FALSE
+#  colnames(exv) <- "suspect"
 
-  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(ex_treme), "extreme values\n")
-  ex_treme
+  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(exv), "extreme values\n")
+  return(exv)
+  
 }  # end which_extreme
 
 
@@ -343,7 +363,7 @@ which_extreme <- function(xtsv, lookb=51, vol_mult=2) {
 #'     \item The sum of neighboring returns doesn't exceed that multiple.
 #'   }
 #'
-#'   The quantile multiplier \code{vol_mult} controls the threshold at which
+#'   The quantile multiplier \code{volm} controls the threshold at which
 #'   values are identified as jumps. Smaller quantile multiplier values will
 #'   cause more values to be identified as jumps.
 #'
@@ -351,44 +371,46 @@ which_extreme <- function(xtsv, lookb=51, vol_mult=2) {
 #' # Create local copy of SPY TAQ data
 #' taq <- SPY_TAQ
 #' # Calculate mid prices
-#' mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
+#' pricem <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
 #' # Replace whole rows containing suspect price jumps with NA, and perform locf()
-#' taq[which_jumps(mid_prices, lookb=31, vol_mult=1.0), ] <- NA
+#' taq[which_jumps(pricem, lookb=31, volm=1.0), ] <- NA
 #' taq <- xts:::na.locf.xts(taq)
 #' 
 #' @export
 
-which_jumps <- function(xtsv, lookb=51, vol_mult=2) {
+which_jumps <- function(xtsv, lookb=51, volm=2) {
+  
 # Calculate simple returns
-  returns <- rutils::diffit(as.numeric(xtsv))
-#  returns[1] <- 0
-#  colnames(returns) <- "diffs"
-  rets_advanced <- rutils::lagit(returns, -1)
-#  rets_advanced[NROW(rets_advanced)] <- 0
-#  colnames(rets_advanced) <- "rets_advanced"
+  rets <- rutils::diffit(as.numeric(xtsv))
+#  rets[1] <- 0
+#  colnames(rets) <- "diffs"
+  retadv <- rutils::lagit(rets, -1)
+#  retadv[NROW(retadv)] <- 0
+#  colnames(retadv) <- "retadv"
 
 # Calculate volatility as the rolling quantile of returns
-  quantilev <- caTools::runquantile(x=abs(returns), k=lookb,
+  quantv <- caTools::runquantile(x=abs(rets), k=lookb,
                         probs=0.9, endrule="constant", align="center")
-#  quantilev <- xts(quantilev, order.by=index(returns))
-#  colnames(quantilev) <- "volat"
-# Carry forward non-zero quantilev values
-  quantilev[quantilev==0] <- NA
-  quantilev[1] <- 1
-  quantilev <- rutils::na_locf(quantilev)
-#  quantilev <- rutils::na_locf(quantilev, fromLast=TRUE)
+#  quantv <- xts(quantv, order.by=index(rets))
+#  colnames(quantv) <- "volat"
+# Carry forward non-zero quantv values
+  quantv[quantv==0] <- NA
+  quantv[1] <- 1
+  quantv <- rutils::na_locf(quantv)
+#  quantv <- rutils::na_locf(quantv, fromLast=TRUE)
 
-# value is suspect if abs returns greater than quantilev,
-# and if abs sum of returns less than quantilev
-  sus_pect <- ((abs(returns) > vol_mult*quantilev) &
-      (abs(rets_advanced) > vol_mult*quantilev) &
-      (abs(returns+rets_advanced) < 2*vol_mult*quantilev))
-  sus_pect[1] <- FALSE
-#  colnames(sus_pect) <- "suspect"
+# value is suspect if abs returns greater than quantv,
+# and if abs sum of returns less than quantv
+  jumpv <- ((abs(rets) > volm*quantv) &
+      (abs(retadv) > volm*quantv) &
+      (abs(rets+retadv) < 2*volm*quantv))
+  jumpv[1] <- FALSE
+#  colnames(jumpv) <- "suspect"
 # Cat("Parsing", deparse(substitute(taq)), "\n")
-# Cat("Parsing", strsplit(deparse(substitute(taq)), split="[.]")[[1]][4], "on date:", format(todayd), "\tfound", sum(sus_pect), "suspect prices\n")
-  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(sus_pect), "jump prices\n")
-  sus_pect
+# Cat("Parsing", strsplit(deparse(substitute(taq)), split="[.]")[[1]][4], "on date:", format(todayd), "\tfound", sum(jumpv), "suspect prices\n")
+  cat("date:", format(as.Date(index(first(xtsv)))), "\tfound", sum(jumpv), "jump prices\n")
+  return(jumpv)
+  
 }  # end which_jumps
 
 
@@ -412,15 +434,16 @@ which_jumps <- function(xtsv, lookb=51, vol_mult=2) {
 #'
 #' @examples
 # scrub a single day of TAQ data without aggregating it
-#' taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, lookb=11, vol_mult=1)
+#' taq <- HighFreq::scrub_taq(taq=HighFreq::SPY_TAQ, lookb=11, volm=1)
 #' # Create random TAQ prices and scrub them
 #' taq <- HighFreq::random_taq()
 #' taq <- HighFreq::scrub_taq(taq=taq)
-#' taq <- HighFreq::scrub_taq(taq=taq, lookb=11, vol_mult=1)
+#' taq <- HighFreq::scrub_taq(taq=taq, lookb=11, volm=1)
 #' 
 #' @export
 
-scrub_taq <- function(taq, lookb=51, vol_mult=2, tzone="America/New_York") {
+scrub_taq <- function(taq, lookb=51, volm=2, tzone="America/New_York") {
+  
 # Convert timezone of index to New_York
   index(taq) <- lubridate::with_tz(time=index(taq), tzone=tzone)
 # subset data to NYSE trading hours
@@ -435,23 +458,24 @@ scrub_taq <- function(taq, lookb=51, vol_mult=2, tzone="America/New_York") {
 # scrub quotes with suspect bid-ask spreads
   bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
 #  bidask <- na.omit(bidask)
-  sus_pect <- which_extreme(bidask, lookb=lookb, vol_mult=vol_mult)
+  jumpv <- which_extreme(bidask, lookb=lookb, volm=volm)
 # Remove suspect values
-  taq <- taq[!sus_pect]
+  taq <- taq[!jumpv]
 # Replace suspect values
-# taq[sus_pect, "Bid.Price"] <- taq[sus_pect, "Trade.Price"]
-# taq[sus_pect, "Ask.Price"] <- taq[sus_pect, "Trade.Price"]
+# taq[jumpv, "Bid.Price"] <- taq[jumpv, "Trade.Price"]
+# taq[jumpv, "Ask.Price"] <- taq[jumpv, "Trade.Price"]
 
 # scrub quotes with suspect price jumps
 # Calculate mid prices
-  mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
-#  mid_prices <- na.omit(mid_prices)
-#  colnames(mid_prices) <- "Mid.Price"
+  pricem <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
+#  pricem <- na.omit(pricem)
+#  colnames(pricem) <- "Mid.Price"
 # Replace NA volumes with zero
   taq[is.na(taq[, "Volume"]), "Volume"] <- 0
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
-  taq[which_jumps(mid_prices, lookb=lookb, vol_mult=vol_mult), ] <- NA
-  rutils::na_locf(taq)
+  taq[which_jumps(pricem, lookb=lookb, volm=volm), ] <- NA
+  return(rutils::na_locf(taq))
+  
 }  # end scrub_taq
 
 
@@ -492,7 +516,7 @@ scrub_taq <- function(taq, lookb=51, vol_mult=2, tzone="America/New_York") {
 #' 
 #' @export
 
-scrub_agg <- function(taq, lookb=51, vol_mult=2,
+scrub_agg <- function(taq, lookb=51, volm=2,
                       period="minutes", tzone="America/New_York") {
 # Convert timezone of index to New_York
   index(taq) <- lubridate::with_tz(time=index(taq), tzone=tzone)
@@ -508,39 +532,40 @@ scrub_agg <- function(taq, lookb=51, vol_mult=2,
 # scrub quotes with suspect bid-ask spreads
   bidask <- taq[, "Ask.Price"] - taq[, "Bid.Price"]
 #  bidask <- na.omit(bidask)
-  sus_pect <- which_extreme(bidask, lookb=lookb, vol_mult=vol_mult)
+  jumpv <- which_extreme(bidask, lookb=lookb, volm=volm)
 # Remove suspect values
-  taq <- taq[!sus_pect]
+  taq <- taq[!jumpv]
 # Replace suspect values
-# taq[sus_pect, "Bid.Price"] <- taq[sus_pect, "Trade.Price"]
-# taq[sus_pect, "Ask.Price"] <- taq[sus_pect, "Trade.Price"]
+# taq[jumpv, "Bid.Price"] <- taq[jumpv, "Trade.Price"]
+# taq[jumpv, "Ask.Price"] <- taq[jumpv, "Trade.Price"]
 
 # scrub quotes with suspect price jumps
 # Calculate mid prices
-  mid_prices <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
-#  mid_prices <- na.omit(mid_prices)
-  colnames(mid_prices) <- "Mid.Price"
+  pricem <- 0.5 * (taq[, "Bid.Price"] + taq[, "Ask.Price"])
+#  pricem <- na.omit(pricem)
+  colnames(pricem) <- "Mid.Price"
 # Replace whole rows containing suspect price jumps with NA, and perform locf()
-  mid_prices[which_jumps(mid_prices, lookb=lookb, vol_mult=vol_mult)] <- NA
-  mid_prices <- rutils::na_locf(mid_prices)
-#  mid_prices <- rutils::na_locf(mid_prices, fromLast=TRUE)
-# Cbind mid_prices with volume data, and replace NA volumes with zero
-  mid_prices <- cbind(mid_prices, taq[index(mid_prices), "Volume"])
-  mid_prices[is.na(mid_prices[, "Volume"]), "Volume"] <- 0
+  pricem[which_jumps(pricem, lookb=lookb, volm=volm)] <- NA
+  pricem <- rutils::na_locf(pricem)
+#  pricem <- rutils::na_locf(pricem, fromLast=TRUE)
+# Cbind pricem with volume data, and replace NA volumes with zero
+  pricem <- cbind(pricem, taq[index(pricem), "Volume"])
+  pricem[is.na(pricem[, "Volume"]), "Volume"] <- 0
 
 # Aggregate to OHLC and cumulative volume data
-  mid_prices <- switch(period,
-                       "minutes"={numsec <- 60; to.period(x=mid_prices, period=period)},
-                       "3 min"={numsec <- 3*60; to.minutes3(x=mid_prices)},
-                       "5 min"={numsec <- 5*60; to.minutes5(x=mid_prices)},
-                       "10 min"={numsec <- 10*60; to.minutes10(x=mid_prices)},
-                       "15 min"={numsec <- 15*60; to.minutes15(x=mid_prices)},
-                       "30 min"={numsec <- 30*60; to.minutes30(x=mid_prices)},
-                       "hours"={numsec <- 60*60; to.period(x=mid_prices, period=period)}
-                       )  # end switch
-# round up times to next period
-  index(mid_prices) <- align.time(x=index(mid_prices), n=numsec)
-  mid_prices
+  pricem <- switch(period,
+                   "minutes"={numsec <- 60; to.period(x=pricem, period=period)},
+                   "3 min"={numsec <- 3*60; to.minutes3(x=pricem)},
+                   "5 min"={numsec <- 5*60; to.minutes5(x=pricem)},
+                   "10 min"={numsec <- 10*60; to.minutes10(x=pricem)},
+                   "15 min"={numsec <- 15*60; to.minutes15(x=pricem)},
+                   "30 min"={numsec <- 30*60; to.minutes30(x=pricem)},
+                   "hours"={numsec <- 60*60; to.period(x=pricem, period=period)}
+  )  # end switch
+  # round up times to next period
+  index(pricem) <- align.time(x=index(pricem), n=numsec)
+  return(pricem)
+  
 }  # end scrub_agg
 
 
@@ -552,10 +577,13 @@ scrub_agg <- function(taq, lookb=51, vol_mult=2,
 #' \sQuote{\code{*.RData}} file.
 #'
 #' @param \code{symbol} A \emph{character} string representing symbol or ticker.
-#' @param \code{data_dir} A \emph{character} string representing directory containing
-#'   input \sQuote{\code{*.RData}} files.
-#' @param \code{output_dir} A \emph{character} string representing directory containing
-#'   output \sQuote{\code{*.RData}} files.
+#' 
+#' @param \code{dirin} A \emph{character} string representing directory
+#'   containing input \sQuote{\code{*.RData}} files.
+#'   
+#' @param \code{dirout} A \emph{character} string representing directory
+#'   containing output \sQuote{\code{*.RData}} files.
+#'   
 #' @inheritParams scrub_agg
 #'
 #' @return An \emph{OHLC} time series in \emph{xts} format.
@@ -565,47 +593,49 @@ scrub_agg <- function(taq, lookb=51, vol_mult=2,
 #'   \emph{OHLC} time series, and finally saves it to a single
 #'   \sQuote{\code{*.RData}} file. The \emph{OHLC} time series is stored in a
 #'   variable named \sQuote{\code{symbol}}, and then it's saved to a file named
-#'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
+#'   \sQuote{\code{symbol.RData}} in the \sQuote{\code{dirout}} directory.
 #'   The \emph{TAQ} data files are assumed to be stored in separate directories
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{dirin}}
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
 #' @examples
 #' \dontrun{
 #' # set data directories
-#' data_dir <- "C:/Develop/data/hfreq/src/"
-#' output_dir <- "C:/Develop/data/hfreq/scrub/"
+#' dirin <- "C:/Develop/data/hfreq/src/"
+#' dirout <- "C:/Develop/data/hfreq/scrub/"
 #' symbol <- "SPY"
 #' # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
-#' save_scrub_agg(symbol=symbol, data_dir=data_dir, output_dir=output_dir, period="15 min")
+#' save_scrub_agg(symbol=symbol, dirin=dirin, dirout=dirout, period="15 min")
 #' }
 #' 
 #' @export
 
 save_scrub_agg <- function(symbol,
-                      data_dir="E:/mktdata/sec/",
-                      output_dir="E:/output/data/",
+                      dirin="E:/mktdata/sec/",
+                      dirout="E:/output/data/",
                       lookb=51,
-                      vol_mult=2,
+                      volm=2,
                       period="minutes",
                       tzone="America/New_York") {
+  
 # Create path to directory containing *.RData files
-  file_dir <- file.path(data_dir, symbol)
-# get list of *.RData files
-  file_list <- list.files(file_dir)
+  pathin <- file.path(dirin, symbol)
+# Get list of *.RData files
+  filelist <- list.files(pathin)
 # Create paths to *.RData files
-  file_names <- file.path(file_dir, file_list)
+  filell <- file.path(pathin, filelist)
 
 # load TAQ data one by one, scrub and aggregate it, return list of xts
-datav <- lapply(file_names, function(file_name) {
-  cat("loading", symbol, "from file: ", file_name, "\n")
-  symbol <- load(file_name)
+datav <- lapply(filell, function(filen) {
+  cat("loading", symbol, "from file: ", filen, "\n")
+  symbol <- load(filen)
   scrub_agg(get(symbol),
             lookb=lookb,
-            vol_mult=vol_mult,
-            period=period, tzone=tzone)
+            volm=volm,
+            period=period, 
+            tzone=tzone)
 })  # end sapply
 
 # Recursively "rbind" the list into a single xts
@@ -617,8 +647,8 @@ datav <- lapply(file_names, function(file_name) {
 # Copy the xts data to a variable with the name 'symbol'
   assign(symbol, datav)
 
-# save the xts data to a file in the output_dir
-  save(list=symbol, file=file.path(output_dir, paste0(symbol, ".RData")))
+# save the xts data to a file in the dirout
+  save(list=symbol, file=file.path(dirout, paste0(symbol, ".RData")))
   invisible(symbol)
 
 }  # end save_scrub_agg
@@ -640,7 +670,7 @@ datav <- lapply(file_names, function(file_name) {
 #'   the input file names. The \emph{TAQ} data files are assumed to be stored in
 #'   separate directories for each \sQuote{\code{symbol}}. Each
 #'   \sQuote{\code{symbol}} has its own directory (named \sQuote{\code{symbol}})
-#'   in the \sQuote{\code{data_dir}} directory.
+#'   in the \sQuote{\code{dirin}} directory.
 #'   Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
@@ -653,32 +683,33 @@ datav <- lapply(file_names, function(file_name) {
 #' @export
 
 save_taq <- function(symbol,
-                      data_dir="E:/mktdata/sec/",
-                      output_dir="E:/output/data/",
-                      lookb=51,
-                      vol_mult=2,
-                      tzone="America/New_York") {
+                     dirin="E:/mktdata/sec/",
+                     dirout="E:/output/data/",
+                     lookb=51,
+                     volm=2,
+                     tzone="America/New_York") {
+  
 # Create path to directory containing *.RData files
-  data_dir <- file.path(data_dir, symbol)
-# get list of *.RData files
-  file_names <- list.files(data_dir)
-# Create path to directory for writing *.RData files
-  output_dir <- file.path(output_dir, symbol)
+  dirin <- file.path(dirin, symbol)
+  # Create path to directory for writing *.RData files
+  dirout <- file.path(dirout, symbol)
+  # Get list of *.RData files
+  filell <- list.files(dirin)
 
 # load TAQ data one-by-one, scrub, and save
-  dummy_data <- sapply(file_names, function(file_name) {
-    cat("loading", symbol, "from file: ", file_name, "\n")
-    file_name_in <- file.path(data_dir, file_name)
-    symbol <- load(file_name_in)
-    file_name_out <- file.path(output_dir, file_name)
-# save the xts data to a file in the output_dir
-    taq <- scrub_taq(get(symbol), lookb=lookb, vol_mult=vol_mult, tzone=tzone)
+  outputs <- sapply(filell, function(filen) {
+    cat("loading", symbol, "from file: ", filen, "\n")
+    filin <- file.path(dirin, filen)
+    symbol <- load(filin)
+    filout <- file.path(dirout, filen)
+# save the xts data to a file in the dirout
+    taq <- scrub_taq(get(symbol), lookb=lookb, volm=volm, tzone=tzone)
     if (!is.null(taq)) {
       assign(symbol, taq)
-      save(list=symbol, file=file_name_out)
-      cat("finished saving", symbol, "to file: ", file_name, "\n")
-    }
-    file_name
+      save(list=symbol, file=filout)
+      cat("finished saving", symbol, "to file: ", filen, "\n")
+    } # end if
+    filen
   })  # end sapply
 
   invisible(symbol)
@@ -690,7 +721,7 @@ save_taq <- function(symbol,
 
 ##########################################################################
 #' Load, scrub, aggregate, and rbind multiple days of \emph{TAQ} data for a
-#' single symbol. Calculate returns and save them to a single
+#' single symbol. Calculate the returns and save them to a single
 #' \sQuote{\code{*.RData}} file.
 #'
 #' @inheritParams save_scrub_agg
@@ -704,7 +735,7 @@ save_taq <- function(symbol,
 #'   to a file called \sQuote{\code{symbol.rets.RData}}.
 #'   The \emph{TAQ} data files are assumed to be stored in separate directories
 #'   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+#'   directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{dirin}}
 #'   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
 #'   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
 #'   data.
@@ -717,32 +748,33 @@ save_taq <- function(symbol,
 #' @export
 
 save_rets <- function(symbol,
-                      data_dir="E:/mktdata/sec/",
-                      output_dir="E:/output/data/",
+                      dirin="E:/mktdata/sec/",
+                      dirout="E:/output/data/",
                       lookb=51,
-                      vol_mult=2,
+                      volm=2,
                       period="minutes",
                       tzone="America/New_York") {
+  
 # Create path to directory containing *.RData files
-  file_dir <- file.path(data_dir, symbol)
-# get list of *.RData files
-  file_list <- list.files(file_dir)
+  pathin <- file.path(dirin, symbol)
+# Get list of *.RData files
+  filelist <- list.files(pathin)
 # Create paths to *.RData files
-  file_names <- file.path(file_dir, file_list)
+  filell <- file.path(pathin, filelist)
 
 # load TAQ data into list
-  taq <- sapply(file_names, function(file_name) {
-    cat("loading", symbol, "from file: ", file_name, "\n")
-    symbol <- load(file_name)
+  taq <- sapply(filell, function(filen) {
+    cat("loading", symbol, "from file: ", filen, "\n")
+    symbol <- load(filen)
     get(symbol)
   })
 
 # scrub and aggregate the TAQ data
   ohlc <- lapply(taq, scrub_agg,
-                      lookb=lookb,
-                      vol_mult=vol_mult,
-                      period=period,
-                      tzone=tzone)
+                 lookb=lookb,
+                 volm=volm,
+                 period=period,
+                 tzone=tzone)
 
 # Calculate returns
   ohlc <- lapply(ohlc, ohlc_returns)
@@ -750,17 +782,17 @@ save_rets <- function(symbol,
 # Recursively "rbind" the list into a single xts
   ohlc <- rutils::do_call_rbind(ohlc)
 # assign column names, i.e. "symbol.rets"
-  colnames(ohlc) <-
-    c(paste(symbol, "rets", sep="."), paste(symbol, "vol", sep="."))
+  colnames(ohlc) <- c(paste(symbol, "rets", sep="."), paste(symbol, "vol", sep="."))
 
 # Copy the xts data to a variable with the name 'symbol'
-  symbol_rets <- paste(symbol, "rets", sep=".")
-  assign(symbol_rets, ohlc)
+  symbolr <- paste(symbol, "rets", sep=".")
+  assign(symbolr, ohlc)
 
-# save the xts data to a file in the output_dir
-  save(list=eval(symbol_rets),
-       file=file.path(output_dir, paste0(symbol_rets, ".RData")))
-  invisible(symbol_rets)
+# save the xts data to a file in the dirout
+  save(list=eval(symbolr),
+       file=file.path(dirout, paste0(symbolr, ".RData")))
+  
+  invisible(symbolr)
 
 }  # end save_rets
 
@@ -789,25 +821,26 @@ save_rets <- function(symbol,
 #' @export
 
 save_rets_ohlc <- function(symbol,
-                      data_dir="E:/output/data/",
-                      output_dir="E:/output/data/") {
+                      dirin="E:/output/data/",
+                      dirout="E:/output/data/") {
+  
 # Create path to directory containing symbol.RData file
-  file_name <- file.path(data_dir, paste0(symbol, ".RData"))
+  filen <- file.path(dirin, paste0(symbol, ".RData"))
 # load OHLC data
-  cat("loading", symbol, "from file: ", file_name, "\n")
-  symbol <- load(file_name)
+  cat("loading", symbol, "from file: ", filen, "\n")
+  symbol <- load(filen)
 
 # Calculate returns
   datav <- ohlc_returns(get(symbol))
 
 # Copy the xts data to a variable with the name 'symbol'
-  symbol_rets <- paste(symbol, "rets", sep=".")
-  assign(symbol_rets, datav)
+  symbolr <- paste(symbol, "rets", sep=".")
+  assign(symbolr, datav)
 
-# save the xts data to a file in the output_dir
-  cat("saving", symbol, "to file: ", paste0(symbol_rets, ".RData"), "\n")
-  save(list=eval(symbol_rets), file=file.path(output_dir, paste0(symbol_rets, ".RData")))
-  invisible(symbol_rets)
+# save the xts data to a file in the dirout
+  cat("saving", symbol, "to file: ", paste0(symbolr, ".RData"), "\n")
+  save(list=eval(symbolr), file=file.path(dirout, paste0(symbolr, ".RData")))
+  invisible(symbolr)
 
 }  # end save_rets_ohlc
 
@@ -880,7 +913,7 @@ calc_cvar <- function(timeser, method = "var", confi = pnorm(-2)) {
                  "cvar"={sapply(timeser, function(x) mean(x[x < quantile(x, confi)]))}
   )  # end switch
   
-  riskv
+  return(riskv)
   
 }  # end calc_cvar
 
@@ -907,6 +940,7 @@ calc_cvar <- function(timeser, method = "var", confi = pnorm(-2)) {
 #'     \item "yang_zhang" Yang-Zhang,
 #'    }
 #'    (default is \code{"yang_zhang"})
+#'    
 #' @param \code{scalit} \emph{Boolean} argument: should the returns be divided by the
 #'   number of seconds in each period? (default is \code{TRUE})
 #'
@@ -978,29 +1012,31 @@ calc_cvar <- function(timeser, method = "var", confi = pnorm(-2)) {
 #' @export
 
 ohlc_variance <- function(ohlc, method="yang_zhang", scalit=TRUE) {
+  
   symbol <- rutils::get_name(colnames(ohlc)[1])
   # ohlc <- log(ohlc[, 1:4])
-  variance <- switch(method,
-         "close"={rutils::diffit(ohlc[, 4])^2},
-         "garman_klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 -
-                         (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-         "rogers_satchell"={(ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
-                            (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])},
-         "garman_klass_yz"={(ohlc[, 1]-rutils::lagit(ohlc[, 4]))^2 +
-                            0.5*(ohlc[, 2]-ohlc[, 3])^2 -
-                            (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
-         "yang_zhang"={coeff <- 0.34/2.34
-                            (ohlc[, 1]-rutils::lagit(ohlc[, 4]))^2 +
-                            coeff*(ohlc[, 1]-ohlc[, 4])^2 +
-                            (1-coeff)*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
-                               (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
+  varv <- switch(method,
+     "close"={rutils::diffit(ohlc[, 4])^2},
+     "garman_klass"={0.5*(ohlc[, 2]-ohlc[, 3])^2 -
+         (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
+     "rogers_satchell"={(ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
+         (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])},
+     "garman_klass_yz"={(ohlc[, 1]-rutils::lagit(ohlc[, 4]))^2 +
+         0.5*(ohlc[, 2]-ohlc[, 3])^2 -
+         (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^2},
+     "yang_zhang"={coeff <- 0.34/2.34
+     (ohlc[, 1]-rutils::lagit(ohlc[, 4]))^2 +
+       coeff*(ohlc[, 1]-ohlc[, 4])^2 +
+       (1-coeff)*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
+                    (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
   )  # end switch
   if (scalit)
-    variance <- variance/c(1, diff(xts::.index(ohlc)))^2
-  variance[1, ] <- 0
-  variance <- rutils::na_locf(variance)
-  # Colnames(variance) <- paste0(symbol, ".Variance")
-  variance
+    varv <- varv/c(1, diff(xts::.index(ohlc)))^2
+  varv[1, ] <- 0
+  varv <- rutils::na_locf(varv)
+  # Colnames(varv) <- paste0(symbol, ".varv")
+  return(varv)
+  
 }  # end ohlc_variance
 
 
@@ -1037,30 +1073,33 @@ ohlc_variance <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #' @export
 
 ohlc_skew <- function(ohlc, method="rogers_satchell") {
+  
   symbol <- rutils::get_name(colnames(ohlc)[1])
   # ohlc <- log(ohlc[, 1:4])
-  skew <- switch(method,
-                  "close"={rutils::diffit(ohlc[, 4])^3},
-                  "garman_klass"={0.5*(ohlc[, 2]-ohlc[, 3])^3 -
-                      (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^3},
-                  "rogers_satchell"={
-                    (ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1])*(ohlc[, 2]-0.5*(ohlc[, 4] + ohlc[, 1])) +
-                      (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])*(ohlc[, 3]-0.5*(ohlc[, 4] + ohlc[, 1]))},
-                  "garman_klass_yz"={(ohlc[, 1]-rutils::lagit(ohlc[, 4]))^3 +
-                      0.5*(ohlc[, 2]-ohlc[, 3])^3 -
-                      (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^3},
-                  "yang_zhang"={c_o <- ohlc[, 1]-rutils::lagit(ohlc[, 4]);
-                  o_c <- ohlc[, 1]-ohlc[, 4];
-                  (c_o-sum(c_o)/NROW(c_o))^3 +
-                    0.67*(o_c-sum(o_c)/NROW(o_c))^3 +
-                    0.33*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
-                            (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
+  skewv <- switch(method,
+    "close"={rutils::diffit(ohlc[, 4])^3},
+    "garman_klass"={0.5*(ohlc[, 2]-ohlc[, 3])^3 -
+        (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^3},
+    "rogers_satchell"={
+      (ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1])*(ohlc[, 2]-0.5*(ohlc[, 4] + ohlc[, 1])) +
+        (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1])*(ohlc[, 3]-0.5*(ohlc[, 4] + ohlc[, 1]))},
+    "garman_klass_yz"={(ohlc[, 1]-rutils::lagit(ohlc[, 4]))^3 +
+        0.5*(ohlc[, 2]-ohlc[, 3])^3 -
+        (2*log(2)-1)*(ohlc[, 4]-ohlc[, 1])^3},
+    "yang_zhang"={c_o <- ohlc[, 1]-rutils::lagit(ohlc[, 4]);
+    o_c <- ohlc[, 1]-ohlc[, 4];
+    (c_o-sum(c_o)/NROW(c_o))^3 +
+      0.67*(o_c-sum(o_c)/NROW(o_c))^3 +
+      0.33*((ohlc[, 2]-ohlc[, 4])*(ohlc[, 2]-ohlc[, 1]) +
+              (ohlc[, 3]-ohlc[, 4])*(ohlc[, 3]-ohlc[, 1]))}
   )  # end switch
-  skew <- skew/c(1, diff(xts::.index(ohlc)))^3
-  skew[1, ] <- 0
-  skew <- rutils::na_locf(skew)
-  # Colnames(skew) <- paste0(symbol, ".Skew")
-  skew
+  
+  skewv <- skewv/c(1, diff(xts::.index(ohlc)))^3
+  skewv[1, ] <- 0
+  skewv <- rutils::na_locf(skewv)
+  # Colnames(skewv) <- paste0(symbol, ".Skew")
+  return(skewv)
+  
 }  # end ohlc_skew
 
 
@@ -1096,13 +1135,15 @@ ohlc_skew <- function(ohlc, method="rogers_satchell") {
 #' @export
 
 ohlc_sharpe <- function(ohlc, method="close") {
-  sharpe_ratio <- switch(method,
-                   "close"={(ohlc[, 4]-ohlc[, 1])/(ohlc[, 2]-ohlc[, 3])},
-                   "method2"={(ohlc[, 4]-ohlc[, 1])/(ohlc[, 2]-ohlc[, 3])}
+  
+  sharper <- switch(method,
+   "close"={(ohlc[, 4]-ohlc[, 1])/(ohlc[, 2]-ohlc[, 3])},
+   "method2"={(ohlc[, 4]-ohlc[, 1])/(ohlc[, 2]-ohlc[, 3])}
   )  # end switch
-  sharpe_ratio <- ifelse(ohlc[, 2]==ohlc[, 3], 0, sharpe_ratio)
-  # Colnames(sharpe_ratio) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Sharpe")
-  sharpe_ratio
+  sharper <- ifelse(ohlc[, 2]==ohlc[, 3], 0, sharper)
+  # Colnames(sharper) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Sharpe")
+  return(sharper)
+  
 }  # end ohlc_sharpe
 
 
@@ -1142,7 +1183,7 @@ ohlc_sharpe <- function(ohlc, method="close") {
 #'
 #' @examples
 #' # Calculate weighted average variance for SPY (single number)
-#' variance <- agg_stats_r(ohlc=HighFreq::SPY, calc_bars="ohlc_variance")
+#' varv <- agg_stats_r(ohlc=HighFreq::SPY, calc_bars="ohlc_variance")
 #' # Calculate time series of daily skew estimates for SPY
 #' skew_daily <- apply.daily(x=HighFreq::SPY, FUN=agg_stats_r, calc_bars="ohlc_skew")
 #' 
@@ -1152,16 +1193,16 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
   
 # Match "calc_bars" with moment function
   calc_bars <- match.fun(calc_bars)
-  agg_regations <- calc_bars(ohlc, ...)
+  aggvar <- calc_bars(ohlc, ...)
   
 # Weight the estimates by volume
   if (weighted) {
-    agg_regations <- ohlc[, 5]*agg_regations
-    agg_regations <- sum(agg_regations)/sum(ohlc[, 5])
+    aggvar <- ohlc[, 5]*aggvar
+    aggvar <- sum(aggvar)/sum(ohlc[, 5])
   } else
-    agg_regations <- sum(agg_regations)/NROW(agg_regations)
+    aggvar <- sum(aggvar)/NROW(aggvar)
   
-  agg_regations
+  return(aggvar)
   
 }  # end agg_stats_r
 
@@ -1194,9 +1235,9 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #'
 #' @examples
 #' # Calculate and plot rolling volume-weighted average closing prices (VWAP)
-#' prices_rolling <- roll_vwap(ohlc=HighFreq::SPY["2013-11"], lookb=11)
+#' priceroll <- roll_vwap(ohlc=HighFreq::SPY["2013-11"], lookb=11)
 #' chart_Series(HighFreq::SPY["2013-11-12"], name="SPY prices")
-#' add_TA(prices_rolling["2013-11-12"], on=1, col="red", lwd=2)
+#' add_TA(priceroll["2013-11-12"], on=1, col="red", lwd=2)
 #' legend("top", legend=c("SPY prices", "VWAP prices"),
 #' bg="white", lty=c(1, 1), lwd=c(2, 2),
 #' col=c("black", "red"), bty="n")
@@ -1208,15 +1249,17 @@ agg_stats_r <- function(ohlc, calc_bars="ohlc_variance", weighted=TRUE, ...) {
 #' @export
 
 roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], lookb) {
-  roll_vwap <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], lookb=lookb)
+  
+  vwapr <- rutils::roll_sum(xtsv=close*ohlc[, 5, drop=FALSE], lookb=lookb)
   volume_rolling <- rutils::roll_sum(xtsv=ohlc[, 5, drop=FALSE], lookb=lookb)
-  # roll_vwap <- HighFreq::roll_sum(timeser=close*ohlc[, 5, drop=FALSE], lookb=lookb)
+  # vwapr <- HighFreq::roll_sum(timeser=close*ohlc[, 5, drop=FALSE], lookb=lookb)
   # volume_rolling <- HighFreq::roll_sum(timeser=ohlc[, 5, drop=FALSE], lookb=lookb)
-  roll_vwap <- ifelse(volume_rolling > 0, roll_vwap/volume_rolling, 0)
-  # roll_vwap[is.na(roll_vwap)] <- 0
-  # Colnames(roll_vwap) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".VWAP")
-  # Colnames(roll_vwap) <- colnames(ohlc)
-  roll_vwap
+  vwapr <- ifelse(volume_rolling > 0, vwapr/volume_rolling, 0)
+  # vwapr[is.na(vwapr)] <- 0
+  # Colnames(vwapr) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".VWAP")
+  # Colnames(vwapr) <- colnames(ohlc)
+  return(vwapr)
+  
 }  # end roll_vwap
 
 
@@ -1254,11 +1297,11 @@ roll_vwap <- function(ohlc, close=ohlc[, 4, drop=FALSE], lookb) {
 #'
 #' @examples
 #' # Calculate time series of rolling variance and skew estimates
-#' var_rolling <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
-#' skew_rolling <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
-#' skew_rolling <- skew_rolling/(var_rolling)^(1.5)
-#' skew_rolling[1, ] <- 0
-#' skew_rolling <- rutils::na_locf(skew_rolling)
+#' varoll <- roll_stats(ohlc=HighFreq::SPY, lookb=21)
+#' skewroll <- roll_stats(ohlc=HighFreq::SPY, calc_stats="ohlc_skew", lookb=21)
+#' skewroll <- skewroll/(varoll)^(1.5)
+#' skewroll[1, ] <- 0
+#' skewroll <- rutils::na_locf(skewroll)
 #' 
 #' @export
 
@@ -1266,19 +1309,19 @@ roll_stats <- function(ohlc, calc_stats="ohlc_variance", lookb=11, weighted=TRUE
   
 # Match "calc_stats" with moment function
   calc_stats <- match.fun(calc_stats)
-  agg_regations <- calc_stats(ohlc, ...)
+  aggvar <- calc_stats(ohlc, ...)
   
 # Weight by volume
   if (weighted) {
-    agg_regations <- ohlc[, 5]*agg_regations
+    aggvar <- ohlc[, 5]*aggvar
     volume_rolling <- rutils::roll_sum(ohlc[, 5], lookb=lookb)
-    agg_regations <- rutils::roll_sum(agg_regations, lookb=lookb)/volume_rolling
-    agg_regations[is.na(agg_regations)] <- 0
+    aggvar <- rutils::roll_sum(aggvar, lookb=lookb)/volume_rolling
+    aggvar[is.na(aggvar)] <- 0
   } else
-    agg_regations <- rutils::roll_sum(agg_regations, lookb=lookb)/lookb
-  # Colnames(agg_regations) <- paste(rutils::get_name(colnames(ohlc)[1]), "Vol", sep=".")
+    aggvar <- rutils::roll_sum(aggvar, lookb=lookb)/lookb
+  # Colnames(aggvar) <- paste(rutils::get_name(colnames(ohlc)[1]), "Vol", sep=".")
   
-  agg_regations
+  return(aggvar)
   
 }  # end roll_stats
 
@@ -1355,25 +1398,26 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
   
   # Calculate all the different intra-day and day-over-day returns 
   # (differences of OHLC prices)
-  close_close <- rutils::diffit(ohlc[, 4])/timed
-  open_close <- (ohlc[, 1]-rutils::lagit(ohlc[, 4]))/timed
-  close_open <- (ohlc[, 4]-ohlc[, 1])/timed
-  close_high <- (ohlc[, 4]-ohlc[, 2])/timed
-  close_low <- (ohlc[, 4]-ohlc[, 3])/timed
-  high_low <- (ohlc[, 2]-ohlc[, 3])/timed
-  high_open <- (ohlc[, 2]-ohlc[, 1])/timed
-  low_open <- (ohlc[, 3]-ohlc[, 1])/timed
+  retc <- rutils::diffit(ohlc[, 4])/timed
+  reton <- (ohlc[, 1]-rutils::lagit(ohlc[, 4]))/timed
+  retd <- (ohlc[, 4]-ohlc[, 1])/timed
+  closhi <- (ohlc[, 4]-ohlc[, 2])/timed
+  closlo <- (ohlc[, 4]-ohlc[, 3])/timed
+  hilo <- (ohlc[, 2]-ohlc[, 3])/timed
+  hiop <- (ohlc[, 2]-ohlc[, 1])/timed
+  lowop <- (ohlc[, 3]-ohlc[, 1])/timed
   
   switch(method,
-         "close"={var(close_close)},
-         "rogers_satchell"={-sum(close_high*high_open + close_low*low_open)/nrows},
-         "garman_klass"={sum(0.5*high_low^2 - (2*log(2)-1)*close_open^2)/nrows},
-         "garman_klass_yz"={sum(0.5*high_low^2 - (2*log(2)-1)*close_open^2)/nrows + 
-             var(open_close)},
+         "close"={var(retc)},
+         "rogers_satchell"={-sum(closhi*hiop + closlo*lowop)/nrows},
+         "garman_klass"={sum(0.5*hilo^2 - (2*log(2)-1)*retd^2)/nrows},
+         "garman_klass_yz"={sum(0.5*hilo^2 - (2*log(2)-1)*retd^2)/nrows + 
+             var(reton)},
          "yang_zhang"={coeff <- 0.34/(1.34 + (nrows+1)/(nrows-1))
-         var(open_close) + coeff*var(close_open) +
-           (coeff-1)*sum(close_high*high_open + close_low*low_open)/nrows}
+         var(reton) + coeff*var(retd) +
+           (coeff-1)*sum(closhi*hiop + closlo*lowop)/nrows}
   )  # end switch
+  
 }  # end calc_var_ohlc_r
 
 
@@ -1397,18 +1441,18 @@ calc_var_ohlc_r <- function(ohlc, method="yang_zhang", scalit=TRUE) {
 #'
 #' @examples
 #' # Calculate rolling Sharpe ratio over SPY
-#' sharpe_rolling <- roll_sharpe(ohlc=HighFreq::SPY, lookb=11)
+#' sharper <- roll_sharpe(ohlc=HighFreq::SPY, lookb=11)
 #' 
 #' @export
 
 roll_sharpe <- function(ohlc, lookb=11) {
-  returns <- ohlc_returns(ohlc, lag=lookb, scalit=FALSE)
-  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
-  sharpe_rolling <- ifelse(var_rolling==0,
-                           1.0,
-                           returns/var_rolling)
-  # Colnames(sharpe_rolling) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Sharpe")
-  rutils::na_locf(sharpe_rolling)
+  
+  retp <- ohlc_returns(ohlc, lag=lookb, scalit=FALSE)
+  varoll <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
+  sharper <- ifelse(varoll == 0, 1.0, retp/varoll)
+  # colnames(sharper) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Sharpe")
+  return(rutils::na_locf(sharper))
+  
 }  # end roll_sharpe
 
 
@@ -1420,8 +1464,8 @@ roll_sharpe <- function(ohlc, lookb=11) {
 #'
 #' @param \code{ohlc} An \emph{OHLC} time series of prices in \emph{xts} format.
 #' 
-#' @param \code{lookb} The size of the look-back interval, equal to the number of 
-#'   rows of data used for aggregating the \emph{OHLC} prices.
+#' @param \code{lookb} The size of the look-back interval, equal to the number
+#'   of rows of data used for aggregating the \emph{OHLC} prices.
 #'
 #' @return An \emph{xts} time series with a single column and the same number of
 #'   rows as the argument \code{ohlc}.
@@ -1449,20 +1493,20 @@ roll_sharpe <- function(ohlc, lookb=11) {
 #'
 #' @examples
 #' # Calculate rolling Hurst for SPY in March 2009
-#' hurst_rolling <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], lookb=11)
-#' chart_Series(hurst_rolling["2009-03-10/2009-03-12"], name="SPY hurst_rolling")
+#' hurstr <- roll_hurst(ohlc=HighFreq::SPY["2009-03"], lookb=11)
+#' chart_Series(hurstr["2009-03-10/2009-03-12"], name="SPY hurstr")
 #' 
 #' @export
 
 roll_hurst <- function(ohlc, lookb=11) {
+  
   rangev <- c(rep(0, lookb-1), (RcppRoll::roll_max(x=ohlc[, 2], n=lookb) +
                RcppRoll::roll_max(x=-ohlc[, 3], n=lookb)))
-  var_rolling <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
-  hurst_rolling <- ifelse((var_rolling==0) | (rangev==0),
-                          0.5,
-                          log(rangev/var_rolling)/log(lookb))
-  # Colnames(hurst_rolling) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Hurst")
-  rutils::na_locf(hurst_rolling)
+  varoll <- sqrt(HighFreq::roll_var_ohlc(ohlc, lookb=lookb, scalit=FALSE))
+  hurstr <- ifelse((varoll==0) | (rangev==0), 0.5, log(rangev/varoll)/log(lookb))
+  # Colnames(hurstr) <- paste0(rutils::get_name(colnames(ohlc)[1]), ".Hurst")
+  return(rutils::na_locf(hurstr))
+  
 }  # end roll_hurst
 
 
@@ -1472,21 +1516,21 @@ roll_hurst <- function(ohlc, lookb=11) {
 #' Apply an aggregation function over a rolling look-back interval and the end
 #' points of an \emph{OHLC} time series, using \code{R} code.
 #'
-#' @param \code{xtsv} An \emph{OHLC} time series of prices and trading volumes, in
-#'   \emph{xts} format.
+#' @param \code{xtsv} An \emph{OHLC} time series of prices and trading volumes,
+#'   in \emph{xts} format.
 #'   
-#' @param \code{agg_fun} The name of the aggregation function to be applied over a
-#'   rolling look-back interval.
+#' @param \code{agg_fun} The name of the aggregation function to be applied over
+#'   a rolling look-back interval.
 #'   
-#' @param \code{lookb} The number of end points in the look-back interval used for
-#'   applying the aggregation function (including the current row).
+#' @param \code{lookb} The number of end points in the look-back interval used
+#'   for applying the aggregation function (including the current row).
 #'   
 #' @param \code{by_columns} \emph{Boolean} argument: should the function
 #'   \code{agg_fun()} be applied column-wise (individually), or should it be
 #'   applied to all the columns combined? (default is \code{FALSE})
 #'   
-#' @param \code{out_xts} \emph{Boolean} argument: should the output be coerced into an
-#'   \emph{xts} series? (default is \code{TRUE})
+#' @param \code{out_xts} \emph{Boolean} argument: should the output be coerced
+#'   into an \emph{xts} series? (default is \code{TRUE})
 #'   
 #' @param \code{endpoints} An integer vector of end points.
 #' 
@@ -1547,55 +1591,55 @@ roll_hurst <- function(ohlc, lookb=11) {
 #' interval <- 11  # number of data points between end points
 #' lookb <- 4  # number of end points in look-back interval
 #' # Calculate the rolling sums of ohlc columns over a rolling look-back interval
-#' agg_regations <- roll_apply(ohlc, agg_fun=sum, lookb=lookb, by_columns=TRUE)
+#' aggvar <- roll_apply(ohlc, agg_fun=sum, lookb=lookb, by_columns=TRUE)
 #' # Apply a vector-valued aggregation function over a rolling look-back interval
 #' agg_function <- function(ohlc)  c(max(ohlc[, 2]), min(ohlc[, 3]))
-#' agg_regations <- roll_apply(ohlc, agg_fun=agg_function, lookb=lookb)
+#' aggvar <- roll_apply(ohlc, agg_fun=agg_function, lookb=lookb)
 #' # Define end points at 11-minute intervals (HighFreq::SPY is minutely bars)
 #' endpoints <- rutils::endpoints(ohlc, interval=interval)
 #' # Calculate the sums of ohlc columns over endpoints using non-overlapping intervals
-#' agg_regations <- roll_apply(ohlc, agg_fun=sum, endpoints=endpoints, by_columns=TRUE)
+#' aggvar <- roll_apply(ohlc, agg_fun=sum, endpoints=endpoints, by_columns=TRUE)
 #' # Apply a vector-valued aggregation function over the endpoints of ohlc
 #' # using overlapping intervals
-#' agg_regations <- roll_apply(ohlc, agg_fun=agg_function,
+#' aggvar <- roll_apply(ohlc, agg_fun=agg_function,
 #'                             lookb=5, endpoints=endpoints)
 #'                             
 #' @export
 
 roll_apply <- function(xtsv, agg_fun, lookb=2, endpoints=seq_along(xtsv), 
                        by_columns=FALSE, out_xts=TRUE, ...) {
+  
   # Match "agg_fun" with some aggregation function
   agg_fun <- match.fun(agg_fun)
   nrows <- NROW(endpoints)
-  # Define startpoints as lag of endpoints
-  startpoints <- c(rep_len(1, lookb-1), endpoints[1:(nrows-lookb+1)])
+  # Define startp as lag of endpoints
+  startp <- c(rep_len(1, lookb-1), endpoints[1:(nrows-lookb+1)])
   # Define list of look-back intervals for aggregations over past
-  lookbs <- lapply(seq_along(endpoints), 
-                       function(endp) {
-                         startpoints[endp]:endpoints[endp]
-                       })  # end lapply
+  lookbs <- lapply(seq_along(endpoints), function(endp) {
+    startp[endp]:endpoints[endp]
+  })  # end lapply
   # Perform aggregations over length of endpoints
   if (by_columns) {
     # Perform individual aggregations by columns
-    agg_regations <- lapply(xtsv, function(colnum)
+    aggvar <- lapply(xtsv, function(colnum)
       lapply(lookbs, function(lookb)
         agg_fun(xtsv[lookb], ...)
       ))  # end lapply
   } else {  # not by_columns
-    agg_regations <- lapply(lookbs, function(lookb)
+    aggvar <- lapply(lookbs, function(lookb)
       agg_fun(xtsv[lookb], ...)
     )  # end lapply
   }  # end if
   
   if (out_xts) {
-    # Coerce agg_regations into matrix and transpose it
-    if (is.null(dim(agg_regations)))
-      agg_regations <- t(agg_regations)
-    agg_regations <- t(agg_regations)
-    # Coerce agg_regations into xts series
-    xts(agg_regations, order.by=index(xtsv[endpoints]))
+    # Coerce aggvar into matrix and transpose it
+    if (is.null(dim(aggvar)))
+      aggvar <- t(aggvar)
+    aggvar <- t(aggvar)
+    # Coerce aggvar into xts series
+    xts(aggvar, order.by=index(xtsv[endpoints]))
   } else
-    agg_regations
+    aggvar
   
 }  # end roll_apply
 
@@ -1606,23 +1650,23 @@ roll_apply <- function(xtsv, agg_fun, lookb=2, endpoints=seq_along(xtsv),
 #' Perform a backtest simulation of a trading strategy (model) over a vector of
 #' end points along a time series of prices.
 #'
-#' @param \code{xtsv} A time series of prices, asset returns, trading volumes, and
-#'   other data, in \emph{xts} format.
+#' @param \code{xtsv} A time series of prices, asset returns, trading volumes,
+#'   and other data, in \emph{xts} format.
 #'   
-#' @param \code{train_func} The name of the function for training (calibrating) a
-#'   forecasting model, to be applied over a rolling look-back interval.
+#' @param \code{train_func} The name of the function for training (calibrating)
+#'   a forecasting model, to be applied over a rolling look-back interval.
 #'   
-#' @param \code{trade_func} The name of the trading model function, to be applied over
-#'   a rolling look-forward interval.
+#' @param \code{trade_func} The name of the trading model function, to be
+#'   applied over a rolling look-forward interval.
 #'   
-#' @param \code{lookb} The size of the look-back interval, equal to the number of
-#'   rows of data used for training the forecasting model.
+#' @param \code{lookb} The size of the look-back interval, equal to the number
+#'   of rows of data used for training the forecasting model.
 #'   
-#' @param \code{look_forward} The size of the look-forward interval, equal to the number
-#'   of rows of data used for trading the strategy.
+#' @param \code{look_forward} The size of the look-forward interval, equal to
+#'   the number of rows of data used for trading the strategy.
 #'   
-#' @param \code{endpoints} A vector of end points along the rows of the \code{xtsv}
-#'   time series, given as either integers or dates.
+#' @param \code{endpoints} A vector of end points along the rows of the
+#'   \code{xtsv} time series, given as either integers or dates.
 #'   
 #' @param ... additional parameters to the functions \code{train_func()} and
 #'   \code{trade_func()}.
@@ -1689,37 +1733,37 @@ roll_backtest <- function(xtsv,
     endds <- index(xtsv[endpoints])
   }  # end if
 
-  # Define integer back_points and fwd_points from integer endpoints
-  back_points <- endpoints - lookb + 1
-  back_points[back_points < 1] <- 1
+  # Define integer backp and fwdp from integer endpoints
+  backp <- endpoints - lookb + 1
+  backp[backp < 1] <- 1
   
-  fwd_points <- endpoints + look_forward
-  fwd_points[fwd_points > NROW(xtsv)] <- NROW(xtsv)
+  fwdp <- endpoints + look_forward
+  fwdp[fwdp > NROW(xtsv)] <- NROW(xtsv)
 
   # Perform backtest over length of endpoints
   backtest_range <- 2:(NROW(endpoints)-1)
   back_test <- lapply(backtest_range, function(endp) {
-    trained_model <- 
-      train_func(xtsv[back_points[endp]:endpoints[endp]], ...)
-    trade_func(xtsv[(endpoints[endp]+1):fwd_points[endp]],
-               trained_model, ...)
+    trained_model <- train_func(xtsv[backp[endp]:endpoints[endp]], ...)
+    trade_func(xtsv[(endpoints[endp]+1):fwdp[endp]], trained_model, ...)
   })  # end lapply
 
   names(back_test) <- endds[backtest_range]
-  back_test
+  return(back_test)
   # Coerce back_test into matrix and transpose it
   # if (is.null(dim(back_test)))
   #   back_test <- t(back_test)
   # back_test <- t(back_test)
   # Coerce back_test into xts series
   # xts(back_test, order.by=index(xtsv[endpoints[backtest_range]]))
+  
 }  # end roll_backtest
 
 
 
 
 ##########################################################################
-#' Perform seasonality aggregations over a single-column \emph{xts} time series.
+#' Calculate the intraday seasonality aggregations over a single-column
+#' \emph{xts} time series.
 #'
 #' @param \code{xtsv} A single-column \emph{xts} time series.
 #' 
@@ -1729,12 +1773,13 @@ roll_backtest <- function(xtsv,
 #' @return An \emph{xts} time series with mean aggregations over the seasonality
 #'   interval.
 #'
-#' @details The function \code{season_ality()} calculates the mean of values
+#' @details The function \code{calc_season()} calculates the mean of values
 #'   observed at the same points in time specified by the argument
-#'   \code{endp}. An example of a daily seasonality aggregation is the average
-#'   price of a stock between 9:30AM and 10:00AM every day, over many days. The
-#'   argument \code{endp} is passed into function \code{tapply()}, and must be
-#'   the same length as the argument \code{xtsv}.
+#'   \code{endp}. 
+#'   An example of a daily seasonality aggregation is the average price of a
+#'   stock between 9:30AM and 10:00AM every day, over many days. The argument
+#'   \code{endp} is passed into function \code{tapply()}, and must be the same
+#'   length as the argument \code{xtsv}.
 #'
 #' @examples
 #' # Calculate running variance of each minutely OHLC bar of data
@@ -1743,22 +1788,23 @@ roll_backtest <- function(xtsv,
 #' endp <- format(index(xtsv), "%H:%M")
 #' xtsv <- xtsv[!endp=="09:31", ]
 #' # Calculate daily seasonality of variance
-#' var_seasonal <- season_ality(xtsv=xtsv)
+#' var_seasonal <- calc_season(xtsv=xtsv)
 #' chart_Series(x=var_seasonal, name=paste(colnames(var_seasonal),
 #'   "daily seasonality of variance"))
 #'   
 #' @export
 
-season_ality <- function(xtsv, endp=format(zoo::index(xtsv), "%H:%M")) {
+calc_season <- function(xtsv, endp=format(zoo::index(xtsv), "%H:%M")) {
+  
 # Aggregate the mean
-  agg_regation <- tapply(X=xtsv, INDEX=endp, FUN=mean)
+  aggv <- tapply(X=xtsv, INDEX=endp, FUN=mean)
 # Coerce from array to named vector
-  agg_regation <- structure(as.vector(agg_regation), names=names(agg_regation))
+  aggv <- structure(as.vector(aggv), names=names(aggv))
 # Coerce to xts
-  agg_regation <- xts(x=agg_regation,
-      order.by=as.POSIXct(paste(Sys.Date(), names(agg_regation))))
-  colnames(agg_regation) <- colnames(xtsv)
-  agg_regation
-}  # end season_ality
+  aggv <- xts(x=aggv, order.by=as.POSIXct(paste(Sys.Date(), names(aggv))))
+  colnames(aggv) <- colnames(xtsv)
+  aggv
+  
+}  # end calc_season
 
 

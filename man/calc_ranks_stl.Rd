@@ -3,7 +3,7 @@
 \name{calc_ranks_stl}
 \alias{calc_ranks_stl}
 \title{Calculate the ranks of the elements of a single-column \emph{time series},
-\emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.}
+\emph{matrix}, or a \emph{vector} using the \code{STL}.}
 \usage{
 calc_ranks_stl(timeser)
 }
@@ -17,7 +17,7 @@ An \emph{integer vector} with the ranks of the elements of
 }
 \description{
 Calculate the ranks of the elements of a single-column \emph{time series},
-\emph{matrix}, or a \emph{vector} using \code{RcppArmadillo}.
+\emph{matrix}, or a \emph{vector} using the \code{STL}.
 }
 \details{
 The function \code{calc_ranks_stl()} calculates the ranks of the elements

@@ -14,7 +14,7 @@ roll_var_ohlc(
   lookb = 1L,
   stub = 0L,
   method = "yang_zhang",
-  scale = TRUE,
+  scalit = TRUE,
   index = 0L
 )
 }
@@ -48,9 +48,9 @@ estimator for calculating the variance.  The estimators include:
  }
  (The default is the \emph{"yang_zhang"} estimator.)}
 
-\item{\code{scale}}{\emph{Boolean} argument: Should the returns be divided
+\item{\code{scalit}}{\emph{Boolean} argument: Should the returns be divided
 by the time index, the number of seconds in each period?  (The default is
-\code{scale = TRUE}.)}
+\code{scalit = TRUE}.)}
 
 \item{\code{index}}{A \emph{vector} with the time index of the \emph{time
 series}.  This is an optional argument (the default is \code{index=0}).}
@@ -108,7 +108,7 @@ The function \code{roll_var_ohlc()} calculates a \emph{vector} of variance
   the methods \emph{"garman_klass"} and \emph{"rogers_satchell"} do not
   account for \emph{close-to-open} price jumps.
 
-  If \code{scale} is \code{TRUE} (the default), then the returns are
+  If \code{scalit} is \code{TRUE} (the default), then the returns are
   divided by the differences of the time index (which scales the variance to
   the units of variance per second squared.) This is useful when calculating
   the variance from minutes bar data, because dividing returns by the
@@ -135,7 +135,7 @@ indeks <- c(1, diff(xts::.index(ohlc)))
 varoll <- HighFreq::roll_var_ohlc(ohlc, 
                               step=1, lookb=21, 
                               method="yang_zhang", 
-                              index=indeks, scale=TRUE)
+                              index=indeks, scalit=TRUE)
 # Daily OHLC prices
 ohlc <- rutils::etfenv$VTI
 indeks <- c(1, diff(xts::.index(ohlc)))
@@ -143,7 +143,7 @@ indeks <- c(1, diff(xts::.index(ohlc)))
 varoll <- HighFreq::roll_var_ohlc(ohlc, 
                               step=5, lookb=4, 
                               method="yang_zhang", 
-                              index=indeks, scale=TRUE)
+                              index=indeks, scalit=TRUE)
 # Same calculation in R
 nrows <- NROW(ohlc)
 closel = HighFreq::lagit(ohlc[, 4])
@@ -155,7 +155,7 @@ varollr <- sapply(2:npts, function(it) {
   sub_ohlc = ohlc[rangev, ]
   sub_close = closel[rangev]
   sub_index = indeks[rangev]
-  HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scale=TRUE, index=sub_index)
+  HighFreq::calc_var_ohlc(sub_ohlc, closel=sub_close, scalit=TRUE, index=sub_index)
 })  # end sapply
 varollr <- c(0, varollr)
 all.equal(drop(var_rolling), varollr)

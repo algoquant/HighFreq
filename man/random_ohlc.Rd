@@ -2,7 +2,7 @@
 % Please edit documentation in R/HighFreq.R
 \name{random_ohlc}
 \alias{random_ohlc}
-\title{Calculate a random \emph{OHLC} time series of prices and trading volumes, in
+\title{Simulate a random \emph{OHLC} time series of prices and trading volumes, in
 \emph{xts} format.}
 \usage{
 random_ohlc(
@@ -16,26 +16,26 @@ random_ohlc(
 )
 }
 \arguments{
-\item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes, in
-\emph{xts} format (default is \emph{NULL}).}
+\item{\code{ohlc}}{An \emph{OHLC} time series of prices and trading volumes,
+in \emph{xts} format (default is \emph{NULL}).}
 
 \item{\code{volat}}{The volatility per period of the \code{datev} time index
 (default is \code{6.5e-05} per second, or about \code{0.01=1.0\%} per day).}
 
-\item{\code{drift}}{The drift per period of the \code{datev} time index (default
-is 0.0).}
+\item{\code{drift}}{The drift per period of the \code{datev} time index
+(default is 0.0).}
 
 \item{\code{datev}}{The time index for the \emph{OHLC} time series.}
 
-\item{\code{reducit}}{\emph{Boolean} argument: should \code{ohlc} time series be
-transformed to reduced form? (default is \code{TRUE})}
+\item{\code{reducit}}{\emph{Boolean} argument: should \code{ohlc} time series
+be transformed to reduced form? (default is \code{TRUE})}
 }
 \value{
 An \emph{xts} time series with the same dimensions and the same time
   index as the input \code{ohlc} time series.
 }
 \description{
-Calculate a random \emph{OHLC} time series either by simulating random prices
+Simulate a random \emph{OHLC} time series either by simulating random prices
 following geometric Brownian motion, or by randomly sampling from an input
 time series.
 }

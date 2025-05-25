@@ -8,10 +8,10 @@ single symbol, and save the \emph{OHLC} time series to a single
 \usage{
 save_scrub_agg(
   symbol,
-  data_dir = "E:/mktdata/sec/",
-  output_dir = "E:/output/data/",
+  dirin = "E:/mktdata/sec/",
+  dirout = "E:/output/data/",
   lookb = 51,
-  vol_mult = 2,
+  volm = 2,
   period = "minutes",
   tzone = "America/New_York"
 )
@@ -19,11 +19,11 @@ save_scrub_agg(
 \arguments{
 \item{\code{symbol}}{A \emph{character} string representing symbol or ticker.}
 
-\item{\code{data_dir}}{A \emph{character} string representing directory containing
-input \sQuote{\code{*.RData}} files.}
+\item{\code{dirin}}{A \emph{character} string representing directory
+containing input \sQuote{\code{*.RData}} files.}
 
-\item{\code{output_dir}}{A \emph{character} string representing directory containing
-output \sQuote{\code{*.RData}} files.}
+\item{\code{dirout}}{A \emph{character} string representing directory
+containing output \sQuote{\code{*.RData}} files.}
 }
 \value{
 An \emph{OHLC} time series in \emph{xts} format.
@@ -39,10 +39,10 @@ The function \code{save_scrub_agg()} loads multiple days of
   \emph{OHLC} time series, and finally saves it to a single
   \sQuote{\code{*.RData}} file. The \emph{OHLC} time series is stored in a
   variable named \sQuote{\code{symbol}}, and then it's saved to a file named
-  \sQuote{\code{symbol.RData}} in the \sQuote{\code{output_dir}} directory.
+  \sQuote{\code{symbol.RData}} in the \sQuote{\code{dirout}} directory.
   The \emph{TAQ} data files are assumed to be stored in separate directories
   for each \sQuote{\code{symbol}}. Each \sQuote{\code{symbol}} has its own
-  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{data_dir}}
+  directory (named \sQuote{\code{symbol}}) in the \sQuote{\code{dirin}}
   directory. Each \sQuote{\code{symbol}} directory contains multiple daily
   \sQuote{\code{*.RData}} files, each file containing one day of \emph{TAQ}
   data.
@@ -50,11 +50,11 @@ The function \code{save_scrub_agg()} loads multiple days of
 \examples{
 \dontrun{
 # set data directories
-data_dir <- "C:/Develop/data/hfreq/src/"
-output_dir <- "C:/Develop/data/hfreq/scrub/"
+dirin <- "C:/Develop/data/hfreq/src/"
+dirout <- "C:/Develop/data/hfreq/scrub/"
 symbol <- "SPY"
 # Aggregate SPY TAQ data to 15-min OHLC bar data, and save the data to a file
-save_scrub_agg(symbol=symbol, data_dir=data_dir, output_dir=output_dir, period="15 min")
+save_scrub_agg(symbol=symbol, dirin=dirin, dirout=dirout, period="15 min")
 }
 
 }

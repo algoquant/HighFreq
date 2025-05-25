@@ -61,7 +61,7 @@ ohlc <- log(rutils::etfenv$VTI)
 # Calculate the trailing variance
 vart <- HighFreq::run_var_ohlc(ohlc, lambdaf=0.8)
 # Calculate the rolling variance
-varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE)
+varoll <- HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE)
 datav <- cbind(vart, varoll)
 colnames(datav) <- c("trailing", "rolling")
 colnamev <- colnames(datav)
@@ -74,7 +74,7 @@ dygraphs::dygraph(sqrt(datav[-(1:111), ]), main="Trailing and Rolling Volatility
 library(microbenchmark)
 summary(microbenchmark(
   trailing=HighFreq::run_var_ohlc(ohlc, lambdaf=0.8),
-  rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scale=FALSE),
+  rolling=HighFreq::roll_var_ohlc(ohlc, lookb=5, method="yang_zhang", scalit=FALSE),
   times=10))[, c(1, 4, 5)]
 }  # end dontrun
 

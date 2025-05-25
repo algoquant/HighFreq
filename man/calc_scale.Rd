@@ -5,7 +5,7 @@
 \title{Standardize (center and scale) the columns of a \emph{time series} of data
 in place, without copying the data in memory, using \code{RcppArmadillo}.}
 \usage{
-calc_scale(timeser, center = TRUE, scale = TRUE, use_median = FALSE)
+calc_scale(timeser, center = TRUE, scalit = TRUE, use_median = FALSE)
 }
 \arguments{
 \item{\code{timeser}}{A \emph{time series} or \emph{matrix} of data.}
@@ -14,7 +14,7 @@ calc_scale(timeser, center = TRUE, scale = TRUE, use_median = FALSE)
 the columns so that they have zero mean or median (the default is
 \code{TRUE}).}
 
-\item{\code{scale}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
+\item{\code{scalit}}{A \emph{Boolean} argument: if \code{TRUE} then scale the
 columns so that they have unit standard deviation or MAD (the default is
 \code{TRUE}).}
 
@@ -38,17 +38,17 @@ The function \code{calc_scale()} standardizes (centers and scales) the
   columns of a \emph{time series} of data in place, without copying the data
   in memory, using \code{RcppArmadillo}.
 
-  If the arguments \code{center} and \code{scale} are both \code{TRUE} and
+  If the arguments \code{center} and \code{scalit} are both \code{TRUE} and
   \code{use_median} is \code{FALSE} (the defaults), then \code{calc_scale()}
   performs the same calculation as the standard \code{R} function
   \code{scale()}, and it calculates the centrality (central tendency) as the
   \emph{mean} and the dispersion as the \emph{standard deviation}.
 
-  If the arguments \code{center} and \code{scale} are both \code{TRUE} (the
+  If the arguments \code{center} and \code{scalit} are both \code{TRUE} (the
   defaults), then \code{calc_scale()} standardizes the data.
   If the argument \code{center} is \code{FALSE} then \code{calc_scale()}
   only scales the data (divides it by the standard deviations).
-  If the argument \code{scale} is \code{FALSE} then \code{calc_scale()}
+  If the argument \code{scalit} is \code{FALSE} then \code{calc_scale()}
   only demeans the data (subtracts the means).
   
   If the argument \code{use_median} is \code{TRUE}, then it calculates the
@@ -74,7 +74,7 @@ The function \code{calc_scale()} standardizes (centers and scales) the
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))
 # Demean the returns
 demeaned <- apply(retp, 2, function(x) (x-mean(x)))
-HighFreq::calc_scale(retp, scale=FALSE)
+HighFreq::calc_scale(retp, scalit=FALSE)
 all.equal(demeaned, retp, check.attributes=FALSE)
 # Calculate a time series of returns
 retp <- zoo::coredata(na.omit(rutils::etfenv$returns[, c("IEF", "VTI")]))

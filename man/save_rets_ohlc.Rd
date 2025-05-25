@@ -5,11 +5,7 @@
 \title{Load \emph{OHLC} time series data for a single symbol, calculate its returns,
 and save them to a single \sQuote{\code{*.RData}} file, without aggregation.}
 \usage{
-save_rets_ohlc(
-  symbol,
-  data_dir = "E:/output/data/",
-  output_dir = "E:/output/data/"
-)
+save_rets_ohlc(symbol, dirin = "E:/output/data/", dirout = "E:/output/data/")
 }
 \value{
 A time series of returns and volume in \emph{xts} format.
