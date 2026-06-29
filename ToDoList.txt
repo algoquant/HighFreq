@@ -94,7 +94,9 @@ Therefore 1-second bar returns carry almost no information.
 
 ### Tasks to-do
 
-+ [ ] Find out why HighFreq::roll_portf() gives the same PnLs for 
++ [ ] Create function calc_alpha() for calculating the alpha and beta, and their t-values and p-values, in R code.
+
++ [ ] Explain why HighFreq::roll_portf() gives the same PnLs for 
   controll <- HighFreq::param_portf(method="minvarlin", scalew="sumone")
 and for
   controll <- HighFreq::param_portf(method="minvarlin")
@@ -105,11 +107,8 @@ The default is scaling to volatility target, but it doesn't work.
 
 + [ ] Create function run_kelly().  Clone run_var().
 
-+ [ ] Rename sim_portfoptim() back to sim_momentum_portf()
-
 + [ ] Create function sim_momentum() to simulate a running momentum strategy.  Adapt from run_var() and sim_portfoptim()
 Calculate the portfolio variance and scale the weights
-
 Create an Rcpp function called sim_momentum() in the file: 
 /Users/jerzy/Develop/Presentations/strat_momentum.R
 Clone the R code from the file:
@@ -117,6 +116,7 @@ Clone the R code from the file:
 Adapt the Rcpp code from the functions run_var() and sim_portfoptim() in the file:
 /Users/jerzy/Develop/HighFreq/src/HighFreq.cpp
 
++ [ ] Rename sim_portfoptim() back to sim_momentum_portf()
 
 + [ ] Modify the function mult_mat() so that it can also perform inner multiplication, like the %*% operator.  Ignore NA values.
 /Users/jerzy/Develop/Rcpp/mult_mat.cpp
@@ -428,10 +428,6 @@ Worker agg_ohlc()
 
 + [ ] Create function calc_drawd() for calculating the drawdown in R code
 
-+ [ ] Create function calc_alpha() for calculating the alpha and beta, and their t-values and p-values
-
-+ [ ] Create function calc_sharpe() for calculating the Sharpe, Sortino, Calmar, and ratios in R code
-
 + [ ] Create function fit_ar() to fit an AR process using matrix algebra
 
 + [ ] Create function fit_ou() to fit an OU process using matrix algebra
@@ -646,6 +642,8 @@ Show that idiosyncratic volatility is a strong predictor of idiosyncratic skewne
 
 
 ### Tasks finished
+
++ [x] Create function calc_sharpe() for calculating the Sharpe, Sortino, and Calmar ratios, in R code.
 
 + [x] Rename calc_inv() to calc_invred() 
 
