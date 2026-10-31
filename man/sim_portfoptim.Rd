@@ -5,7 +5,7 @@
 \title{Simulate a portfolio optimization strategy using online (recursive) updating
 of the covariance matrix.}
 \usage{
-sim_portfoptim(rets, dimax, lambdaf, lambdacov, lambdaw)
+sim_portfoptim(rets, dimax, lambdaf, lambdacov, lambdaw, volt = 0.01)
 }
 \arguments{
 \item{\code{rets}}{A \emph{time series} or \emph{matrix} of asset returns.}
@@ -139,7 +139,7 @@ pnls <- HighFreq::sim_portfoptim(retp, dimax, lambdaf, lambdacov, lambdaw)
 colnames(pnls) <- c("pnls", "VTI", "TLT", "DBC", "USO", "XLF", "XLK")
 pnls <- xts::xts(pnls, order.by=datev)
 # Plot dygraph of strategy
-wealthv <- cbind(retp$VTI, pnls$pnls*sd(retp$VTI)/sd(pnls$pnls))
+wealthv <- cbind(retp$VTI, pnls$pnls)
 colnames(wealthv) <- c("VTI", "Strategy")
 endd <- rutils::calc_endpoints(wealthv, interval="weeks")
 dygraphs::dygraph(cumsum(wealthv)[endd], main="Portfolio Optimization Strategy PnLs") \%>\%

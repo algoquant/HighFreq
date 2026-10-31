@@ -33,7 +33,7 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
   function \code{roll_sum()} calculates the simple rolling sums of the 
   \emph{time series} data \eqn{p_t} over the look-back interval \eqn{\Delta}:
   \deqn{
-    \bar{p}_t = \sum_{j=(t-\Delta+1)}^{t} p_j
+    \overline{p_t} = \sum_{j=(t-\Delta+1)}^{t} p_j
   }
   
   If the \code{weightv} argument has the same number of rows as the argument
@@ -44,17 +44,17 @@ The function \code{roll_sum()} calculates the rolling \emph{weighted} sums
   \eqn{w_t} times the \emph{time series} data \eqn{p_t} over the look-back
   interval \eqn{\Delta}:
   \deqn{
-    \bar{w}_t = \sum_{j=(t-\Delta+1)}^{t} w_j
+    \overline{w_t} = \sum_{j=(t-\Delta+1)}^{t} w_j
   }
   \deqn{
-    \bar{p}^w_t = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
+    \overline{p^w_t} = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
   }
   
-  It then calculates the rolling \emph{weighted} sums \eqn{\bar{p}_t} as the
+  It then calculates the rolling \emph{weighted} sums \eqn{\overline{p_t}} as the
   ratio of the sum products of the weights and the data, divided by the sums
   of the weights:
   \deqn{
-    \bar{p}_t = \frac{\bar{p}^w_t}{\bar{w}_t}
+    \overline{p_t} = \frac{\overline{p^w_t}}{\overline{w_t}}
   }
   
   The function \code{roll_sum()} returns a \emph{matrix} with the same

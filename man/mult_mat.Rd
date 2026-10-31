@@ -8,18 +8,18 @@
 mult_mat(vectorv, matrixv, byrow = TRUE)
 }
 \arguments{
-\item{\code{vector}}{A \emph{numeric} \emph{vector}.}
+\item{\code{vectorv}}{A \emph{numeric} \emph{vector}.}
 
-\item{\code{matrix}}{A \emph{numeric} \emph{matrix}.}
+\item{\code{matrixv}}{A \emph{numeric} \emph{matrix}.}
 
 \item{\code{byrow}}{A \emph{Boolean} argument: if \code{TRUE} then multiply
-the rows of \code{matrix} by \code{vector}, otherwise multiply the columns
+the rows of \code{matrixv} by \code{vectorv}, otherwise multiply the columns
 (the default is \code{byrow = TRUE}.)}
 }
 \value{
 A \emph{matrix} equal to the product of the elements of
-  \code{matrix} times \code{vector}, with the same dimensions as the
-  argument \code{matrix}.
+  \code{matrixv} times \code{vectorv}, with the same dimensions as the
+  argument \code{matrixv}.
 }
 \description{
 Multiply element-wise the rows or columns of a \emph{matrix} times a
@@ -30,9 +30,9 @@ The function \code{mult_mat()} multiplies element-wise the rows or columns
   of a \emph{matrix} times a \emph{vector}.
 
   If \code{byrow = TRUE} (the default), then function \code{mult_mat()}
-  multiplies the rows of the argument \code{matrix} times the argument
-  \code{vector}.
-  Otherwise it multiplies the columns of \code{matrix}.
+  multiplies the rows of the argument \code{matrixv} times the argument
+  \code{vectorv}.
+  Otherwise it multiplies the columns of \code{matrixv}.
 
   In \code{R}, \emph{matrix} multiplication is performed by columns.
   Performing multiplication by rows is often required, for example when

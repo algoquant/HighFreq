@@ -2440,7 +2440,7 @@ arma::mat roll_conv(const arma::mat& timeser, const arma::colvec& weightv) {
 //'   function \code{roll_sum()} calculates the simple rolling sums of the 
 //'   \emph{time series} data \eqn{p_t} over the look-back interval \eqn{\Delta}:
 //'   \deqn{
-//'     \bar{p}_t = \sum_{j=(t-\Delta+1)}^{t} p_j
+//'     \overline{p_t} = \sum_{j=(t-\Delta+1)}^{t} p_j
 //'   }
 //'   
 //'   If the \code{weightv} argument has the same number of rows as the argument
@@ -2451,17 +2451,17 @@ arma::mat roll_conv(const arma::mat& timeser, const arma::colvec& weightv) {
 //'   \eqn{w_t} times the \emph{time series} data \eqn{p_t} over the look-back
 //'   interval \eqn{\Delta}:
 //'   \deqn{
-//'     \bar{w}_t = \sum_{j=(t-\Delta+1)}^{t} w_j
+//'     \overline{w_t} = \sum_{j=(t-\Delta+1)}^{t} w_j
 //'   }
 //'   \deqn{
-//'     \bar{p}^w_t = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
+//'     \overline{p^w_t} = \sum_{j=(t-\Delta+1)}^{t} w_j p_j
 //'   }
 //'   
-//'   It then calculates the rolling \emph{weighted} sums \eqn{\bar{p}_t} as the
+//'   It then calculates the rolling \emph{weighted} sums \eqn{\overline{p_t}} as the
 //'   ratio of the sum products of the weights and the data, divided by the sums
 //'   of the weights:
 //'   \deqn{
-//'     \bar{p}_t = \frac{\bar{p}^w_t}{\bar{w}_t}
+//'     \overline{p_t} = \frac{\overline{p^w_t}}{\overline{w_t}}
 //'   }
 //'   
 //'   The function \code{roll_sum()} returns a \emph{matrix} with the same
@@ -2881,7 +2881,7 @@ arma::mat roll_sumw(const arma::mat& timeser,
 //'   recursively weighting present and past values using the decay factor
 //'   \eqn{\lambda}:
 //'   \deqn{
-//'     \bar{p}_t = \lambda \bar{p}_{t-1} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+//'     \overline{p_t} = \lambda \overline{p_{t-1}} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
 //'   }
 //'   
 //'   It handles \code{NA} and \emph{infinite} values in the streaming data by
@@ -2903,24 +2903,24 @@ arma::mat roll_sumw(const arma::mat& timeser,
 //'   \code{timeser}, then the function \code{run_mean()} calculates the
 //'   weighted \emph{EMA} in two steps.
 //'   
-//'   First it calculates the \emph{EMA} weights \eqn{\bar{w}_t}:
+//'   First it calculates the \emph{EMA} weights \eqn{\overline{w_t}}:
 //'   \deqn{
-//'     \bar{w}_t = \lambda \bar{w}_{t-1} + (1 - \lambda) w_t
+//'     \overline{w_t} = \lambda \overline{w_{t-1}} + (1 - \lambda) w_t
 //'   }
 //'   
-//'   Second it calculates the \emph{EMA} products \eqn{\bar{w p}_t} of the
+//'   Second it calculates the \emph{EMA} products \eqn{\overline{p^w_t}} of the
 //'   weights \eqn{w_t} and the data \eqn{p_t}:
 //'   \deqn{
-//'     \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1 - \lambda) w_t p_t
+//'     \overline{p^w_t} = \lambda \overline{p^w_{t-1}} + (1 - \lambda) w_t p_t
 //'   }
 //'   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
-//'   weights, \eqn{\bar{w}_t} are the \emph{EMA} weights, and \eqn{\bar{w p}_t}
+//'   weights, \eqn{\overline{w_t}} are the \emph{EMA} weights, and \eqn{\overline{p^w_t}}
 //'   are the \emph{EMA} products of the data and the weights.
 //'   
-//'   The weighted \emph{EMA} values \eqn{\bar{p}_t} are equal to the ratio of
+//'   The weighted \emph{EMA} values \eqn{\overline{p_t}} are equal to the ratio of
 //'   the \emph{EMA} products divided by the \emph{EMA} weights:
 //'   \deqn{
-//'     \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
+//'     \overline{p_t} = \frac{\overline{p^w_t}}{\overline{w_t}}
 //'   }
 //' 
 //'   The above online recursive formulas are convenient for processing live

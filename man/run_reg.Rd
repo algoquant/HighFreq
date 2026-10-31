@@ -30,8 +30,8 @@ predictor data, and calculate the regression coefficients, the residuals,
 and the forecasts, using online recursive formulas.
 }
 \details{
-The function \code{run_reg()} performs regressions on the streaming \emph{time
-  series} of response \eqn{r_t} and predictor \eqn{p_t} data:
+The function \code{run_reg()} performs regressions on the streaming
+  \emph{time series} of response \eqn{r_t} and predictor \eqn{p_t} data:
   \deqn{
     r_t = \beta_t p_t + \epsilon_t
   }

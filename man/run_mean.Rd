@@ -12,7 +12,8 @@ run_mean(timeser, lambdaf, weightv = 0L)
 
 \item{\code{lambdaf}}{A decay factor which multiplies past estimates.}
 
-\item{\code{weightv}}{A single-column \emph{matrix} of weights.}
+\item{\code{weightv}}{A single-column \emph{matrix} of weights, with the
+default value equal to zero.}
 }
 \value{
 A \emph{matrix} with the same dimensions as the input argument
@@ -24,41 +25,50 @@ series} data using an online recursive formula.
 }
 \details{
 The function \code{run_mean()} calculates the exponential moving average
-  (EMA) of the streaming \emph{time series} data \eqn{p_t} by recursively
-  weighting present and past values using the decay factor \eqn{\lambda}. If
-  the \code{weightv} argument is equal to zero, then the function
-  \code{run_mean()} simply calculates the exponentially weighted moving
-  average value of the streaming \emph{time series} data \eqn{p_t}:
+  (\emph{EMA}) of the streaming \emph{time series} data \eqn{p_t} by
+  recursively weighting present and past values using the decay factor
+  \eqn{\lambda}:
   \deqn{
-    \bar{p}_t = \lambda \bar{p}_{t-1} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
+    \overline{p_t} = \lambda \overline{p}_{t-1} + (1 - \lambda) p_t = (1 - \lambda) \sum_{j=0}^{n} \lambda^j p_{t-j}
   }
   
-  Some applications require applying additional weight factors, like for
-  example the volume-weighted average price indicator (VWAP).  Then the
-  streaming prices can be multiplied by the streaming trading volumes.
+  It handles \code{NA} and \emph{infinite} values in the streaming data by
+  skipping them and using the last non-\code{NA} value as the current value.
+  This is equivalent to treating the \code{NA} values as missing data and
+  not updating the trailing mean until a new non-\code{NA} value is
+  encountered. This way the function can process streaming data with
+  occasional \code{NA} values without producing \code{NA} values in the
+  output.
   
+  Additional weights can be applied to the streaming data by using the
+  \code{weightv} argument.  For example, in the volume-weighted average
+  price indicator (VWAP), the streaming prices are multiplied by the trading
+  volumes.
+  
+  If the \code{weightv} argument is equal to zero (the default), then the
+  function \code{run_mean()} simply calculates the \emph{EMA}.
   If the argument \code{weightv} has the same number of rows as the argument
   \code{timeser}, then the function \code{run_mean()} calculates the
-  exponential moving average (EMA) in two steps.
+  weighted \emph{EMA} in two steps.
   
-  First it calculates the trailing mean weights \eqn{\bar{w}_t}:
+  First it calculates the \emph{EMA} weights \eqn{\overline{w_t}}:
   \deqn{
-    \bar{w}_t = \lambda \bar{w}_{t-1} + (1 - \lambda) w_t
+    \overline{w_t} = \lambda \overline{w_{t-1}} + (1 - \lambda) w_t
   }
   
-  Second it calculates the trailing mean products \eqn{\bar{w p}_t} of the
+  Second it calculates the \emph{EMA} products \eqn{\overline{p^w_t}} of the
   weights \eqn{w_t} and the data \eqn{p_t}:
   \deqn{
-    \bar{w p}_t = \lambda \bar{w p}_{t-1} + (1 - \lambda) w_t p_t
+    \overline{p^w_t} = \lambda \overline{p^w_{t-1}} + (1 - \lambda) w_t p_t
   }
   Where \eqn{p_t} is the streaming data, \eqn{w_t} are the streaming
-  weights, \eqn{\bar{w}_t} are the trailing mean weights, and \eqn{\bar{w p}_t}
-  are the trailing mean products of the data and the weights.
+  weights, \eqn{\overline{w_t}} are the \emph{EMA} weights, and \eqn{\overline{p^w_t}}
+  are the \emph{EMA} products of the data and the weights.
   
-  The trailing mean weighted value \eqn{\bar{p}_t} is equal to the ratio of the
-  data and weights products, divided by the mean weights:
+  The weighted \emph{EMA} values \eqn{\overline{p_t}} are equal to the ratio of
+  the \emph{EMA} products divided by the \emph{EMA} weights:
   \deqn{
-    \bar{p}_t = \frac{\bar{w p}_t}{\bar{w}_t}
+    \overline{p_t} = \frac{\overline{p^w_t}}{\overline{w_t}}
   }
 
   The above online recursive formulas are convenient for processing live

@@ -29,7 +29,7 @@ The function \code{mult_mat_ref()} multiplies the rows or columns of a
   copying the data in memory.
 
   It accepts a \emph{pointer} to the argument \code{matrixv}, and it
-  overwrites the old \code{matrix} values with the new values. It performs
+  overwrites the old \code{matrixv} values with the new values. It performs
   the calculation in place, without copying the \emph{matrix} in memory,
   which can significantly increase the computation speed for large matrices.
 
